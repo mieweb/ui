@@ -21,6 +21,8 @@ interface DropdownProps {
     placement?: DropdownPlacement;
     /** Additional class name for the dropdown menu */
     className?: string;
+    /** Width of the dropdown menu */
+    width?: 'auto' | 'trigger' | number;
     /** Whether the dropdown is disabled */
     disabled?: boolean;
 }
@@ -37,7 +39,7 @@ interface DropdownProps {
  * </Dropdown>
  * ```
  */
-declare function Dropdown({ trigger, children, open: controlledOpen, onOpenChange, placement, className, disabled, }: DropdownProps): react_jsx_runtime.JSX.Element;
+declare function Dropdown({ trigger, children, open: controlledOpen, onOpenChange, placement, className, width, disabled, }: DropdownProps): react_jsx_runtime.JSX.Element;
 declare namespace Dropdown {
     var displayName: string;
 }

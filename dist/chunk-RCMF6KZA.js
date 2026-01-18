@@ -67,11 +67,9 @@ var Text = React.forwardRef(
   }
 );
 Text.displayName = "Text";
-var SmallMuted = React.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsx(Text, { ref, variant: "muted", size: "sm", className, ...props })
-);
+var SmallMuted = React.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsx(Text, { ref, variant: "muted", size: "sm", className, ...props }));
 SmallMuted.displayName = "SmallMuted";
 
 export { SmallMuted, Text, textVariants };
-//# sourceMappingURL=chunk-4DZBLEOX.js.map
-//# sourceMappingURL=chunk-4DZBLEOX.js.map
+//# sourceMappingURL=chunk-RCMF6KZA.js.map
+//# sourceMappingURL=chunk-RCMF6KZA.js.map

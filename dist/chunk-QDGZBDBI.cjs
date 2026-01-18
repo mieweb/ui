@@ -89,13 +89,11 @@ var Text = React__namespace.forwardRef(
   }
 );
 Text.displayName = "Text";
-var SmallMuted = React__namespace.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(Text, { ref, variant: "muted", size: "sm", className, ...props })
-);
+var SmallMuted = React__namespace.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(Text, { ref, variant: "muted", size: "sm", className, ...props }));
 SmallMuted.displayName = "SmallMuted";
 
 exports.SmallMuted = SmallMuted;
 exports.Text = Text;
 exports.textVariants = textVariants;
-//# sourceMappingURL=chunk-APLAYL6D.cjs.map
-//# sourceMappingURL=chunk-APLAYL6D.cjs.map
+//# sourceMappingURL=chunk-QDGZBDBI.cjs.map
+//# sourceMappingURL=chunk-QDGZBDBI.cjs.map

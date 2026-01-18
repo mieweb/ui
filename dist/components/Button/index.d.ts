@@ -3,7 +3,7 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const buttonVariants: (props?: ({
-    variant?: "primary" | "secondary" | "ghost" | "outline" | "danger" | "link" | null | undefined;
+    variant?: "link" | "primary" | "secondary" | "ghost" | "outline" | "danger" | null | undefined;
     size?: "sm" | "md" | "lg" | "icon" | null | undefined;
     fullWidth?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;

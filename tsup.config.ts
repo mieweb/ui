@@ -19,6 +19,12 @@ export default defineConfig({
     'components/Alert/index': 'src/components/Alert/index.ts',
     'components/VisuallyHidden/index': 'src/components/VisuallyHidden/index.ts',
     'components/ThemeProvider/index': 'src/components/ThemeProvider/index.ts',
+    'components/Avatar/index': 'src/components/Avatar/index.ts',
+    'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
+    // Brand system entries for tree-shaking
+    'brands/index': 'src/brands/index.ts',
+    'brands/types': 'src/brands/types.ts',
+    'brands/bluehive': 'src/brands/bluehive.ts',
   },
   format: ['esm', 'cjs'],
   dts: true,

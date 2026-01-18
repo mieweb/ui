@@ -24,14 +24,16 @@ export interface DropdownProps {
   placement?: DropdownPlacement;
   /** Additional class name for the dropdown menu */
   className?: string;
+  /** Width of the dropdown menu */
+  width?: 'auto' | 'trigger' | number;
   /** Whether the dropdown is disabled */
   disabled?: boolean;
 }
 
 const placementStyles: Record<DropdownPlacement, string> = {
-  'bottom-start': 'top-full left-0 mt-1',
-  'bottom-end': 'top-full right-0 mt-1',
-  bottom: 'top-full left-1/2 -translate-x-1/2 mt-1',
+  'bottom-start': 'top-full left-0 mt-2',
+  'bottom-end': 'top-full right-0 mt-2',
+  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
 };
 
 /**
@@ -54,6 +56,7 @@ function Dropdown({
   onOpenChange,
   placement = 'bottom-start',
   className,
+  width = 'auto',
   disabled = false,
 }: DropdownProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
@@ -95,6 +98,13 @@ function Dropdown({
     disabled: disabled || trigger.props.disabled,
   });
 
+  const widthStyle =
+    typeof width === 'number'
+      ? { width: `${width}px` }
+      : width === 'trigger'
+        ? { minWidth: '100%' }
+        : {};
+
   return (
     <div ref={containerRef} className="relative inline-flex">
       {triggerElement}
@@ -102,10 +112,12 @@ function Dropdown({
         <div
           id={menuId}
           role="menu"
+          style={widthStyle}
           className={cn(
-            'absolute z-50 min-w-[8rem] py-1',
-            'bg-card border-border rounded-lg border shadow-lg',
-            'animate-scale-in',
+            'absolute z-50 min-w-[12rem]',
+            'rounded-xl border border-neutral-200 bg-white shadow-lg',
+            'dark:border-neutral-700 dark:bg-neutral-800',
+            'animate-in fade-in zoom-in-95 duration-100',
             placementStyles[placement],
             className
           )}
@@ -118,6 +130,87 @@ function Dropdown({
 }
 
 Dropdown.displayName = 'Dropdown';
+
+// ============================================================================
+// Dropdown Header Component
+// ============================================================================
+
+export interface DropdownHeaderProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'title'
+> {
+  /** Avatar element or image */
+  avatar?: React.ReactNode;
+  /** Primary text (e.g., user name) */
+  title: React.ReactNode;
+  /** Secondary text (e.g., email) */
+  subtitle?: React.ReactNode;
+}
+
+/**
+ * A header section for dropdown menus, typically used for user info.
+ *
+ * @example
+ * ```tsx
+ * <DropdownHeader
+ *   avatar={<Avatar name="John Doe" />}
+ *   title="John Doe"
+ *   subtitle="john@example.com"
+ * />
+ * ```
+ */
+const DropdownHeader = React.forwardRef<HTMLDivElement, DropdownHeaderProps>(
+  ({ className, avatar, title, subtitle, children, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'border-b border-neutral-200 p-4 dark:border-neutral-700',
+          className
+        )}
+        {...props}
+      >
+        <div className="flex items-center gap-3">
+          {avatar}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-neutral-900 dark:text-white">
+              {title}
+            </p>
+            {subtitle && (
+              <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        {children}
+      </div>
+    );
+  }
+);
+
+DropdownHeader.displayName = 'DropdownHeader';
+
+// ============================================================================
+// Dropdown Content Component
+// ============================================================================
+
+export type DropdownContentProps = React.HTMLAttributes<HTMLDivElement>;
+
+/**
+ * A container for dropdown menu items with proper padding.
+ */
+const DropdownContent = React.forwardRef<HTMLDivElement, DropdownContentProps>(
+  ({ className, ...props }, ref) => {
+    return <div ref={ref} className={cn('p-2', className)} {...props} />;
+  }
+);
+
+DropdownContent.displayName = 'DropdownContent';
+
+// ============================================================================
+// Dropdown Item Component
+// ============================================================================
 
 export interface DropdownItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Icon to display before the label */
@@ -136,20 +229,25 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
         ref={ref}
         role="menuitem"
         className={cn(
-          'flex w-full items-center gap-2 px-3 py-2 text-left text-sm',
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
           'transition-colors duration-150',
-          'focus:bg-muted focus:outline-none',
-          variant === 'default' && ['text-foreground', 'hover:bg-muted'],
+          'focus:outline-none',
+          variant === 'default' && [
+            'text-neutral-700 dark:text-neutral-300',
+            'hover:bg-neutral-100 dark:hover:bg-neutral-700',
+            'focus:bg-neutral-100 dark:focus:bg-neutral-700',
+          ],
           variant === 'danger' && [
-            'text-destructive',
-            'hover:bg-destructive/10',
+            'text-red-600 dark:text-red-400',
+            'hover:bg-red-50 dark:hover:bg-red-900/20',
+            'focus:bg-red-50 dark:focus:bg-red-900/20',
           ],
           className
         )}
         {...props}
       >
         {icon && <span className="h-4 w-4 shrink-0">{icon}</span>}
-        {children}
+        <span className="font-medium">{children}</span>
       </button>
     );
   }
@@ -157,14 +255,29 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
 
 DropdownItem.displayName = 'DropdownItem';
 
+// ============================================================================
+// Dropdown Separator Component
+// ============================================================================
+
 /**
  * A separator between dropdown items.
  */
 function DropdownSeparator({ className }: { className?: string }) {
-  return <hr className={cn('border-border my-1 border-t', className)} />;
+  return (
+    <hr
+      className={cn(
+        'border-t border-neutral-200 dark:border-neutral-700',
+        className
+      )}
+    />
+  );
 }
 
 DropdownSeparator.displayName = 'DropdownSeparator';
+
+// ============================================================================
+// Dropdown Label Component
+// ============================================================================
 
 /**
  * A label/header for a group of dropdown items.
@@ -179,7 +292,8 @@ function DropdownLabel({
   return (
     <div
       className={cn(
-        'text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase',
+        'px-3 py-1.5 text-xs font-semibold tracking-wider uppercase',
+        'text-neutral-500 dark:text-neutral-400',
         className
       )}
     >
@@ -190,4 +304,11 @@ function DropdownLabel({
 
 DropdownLabel.displayName = 'DropdownLabel';
 
-export { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel };
+export {
+  Dropdown,
+  DropdownHeader,
+  DropdownContent,
+  DropdownItem,
+  DropdownSeparator,
+  DropdownLabel,
+};

@@ -78,6 +78,27 @@
         "default": "./dist/tailwind-preset.cjs"
       }
     },
+    "./brands": {
+      "import": {
+        "types": "./dist/brands/index.d.ts",
+        "default": "./dist/brands/index.js"
+      },
+      "require": {
+        "types": "./dist/brands/index.d.cts",
+        "default": "./dist/brands/index.cjs"
+      }
+    },
+    "./brands/*": {
+      "import": {
+        "types": "./dist/brands/*.d.ts",
+        "default": "./dist/brands/*.js"
+      },
+      "require": {
+        "types": "./dist/brands/*.d.cts",
+        "default": "./dist/brands/*.cjs"
+      }
+    },
+    "./brands/bluehive.css": "./src/brands/bluehive.css",
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css"
   },

@@ -54,8 +54,7 @@ type TextElement =
   | 'h6';
 
 export interface TextProps
-  extends React.HTMLAttributes<HTMLElement>,
-    VariantProps<typeof textVariants> {
+  extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof textVariants> {
   /** HTML element to render as */
   as?: TextElement;
   /** Truncate text with ellipsis */
@@ -107,11 +106,12 @@ Text.displayName = 'Text';
  * Small muted text, useful for helper text and descriptions.
  * This is a convenience component equivalent to <Text variant="muted" size="sm">
  */
-const SmallMuted = React.forwardRef<HTMLElement, Omit<TextProps, 'variant' | 'size'>>(
-  ({ className, ...props }, ref) => (
-    <Text ref={ref} variant="muted" size="sm" className={className} {...props} />
-  )
-);
+const SmallMuted = React.forwardRef<
+  HTMLElement,
+  Omit<TextProps, 'variant' | 'size'>
+>(({ className, ...props }, ref) => (
+  <Text ref={ref} variant="muted" size="sm" className={className} {...props} />
+));
 
 SmallMuted.displayName = 'SmallMuted';
 
