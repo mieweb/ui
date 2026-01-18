@@ -1,117 +1,163 @@
+@import 'tailwindcss';
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /**
- * @mieweb/ui Base Styles
+ * BlueHive Brand Theme
+ * Primary color: #27aae1 (BlueHive Blue)
  *
- * Import this file in your project to get the base CSS variables and styles.
- * You can override these variables to customize the theme.
- *
- * Usage:
- * ```css
- * @import '@mieweb/ui/styles.css';
- * ```
- *
- * Or in JavaScript:
- * ```js
- * import '@mieweb/ui/styles.css';
- * ```
+ * For Tailwind CSS 4, brand tokens are defined in the @theme block below.
+ * For standalone CSS usage, import: @mieweb/ui/brands/bluehive.css
  */
 
-@import 'tailwindcss';
+/* BlueHive brand colors - exposed as Tailwind utilities */
+@theme {
+  /* Primary Color Scale */
+  --color-primary-50: #e6f7fc;
+  --color-primary-100: #b3e6f6;
+  --color-primary-200: #80d5f0;
+  --color-primary-300: #4dc4ea;
+  --color-primary-400: #27aae1;
+  --color-primary-500: #27aae1;
+  --color-primary-600: #1f98ca;
+  --color-primary-700: #1786b3;
+  --color-primary-800: #0f749c;
+  --color-primary-900: #086285;
+  --color-primary-950: #00506e;
+
+  /* Semantic colors exposed to Tailwind utilities */
+  --color-border: var(--mieweb-border, #e5e7eb);
+  --color-input: var(--mieweb-input, #e5e7eb);
+  --color-ring: var(--mieweb-ring, #27aae1);
+  --color-background: var(--mieweb-background, #ffffff);
+  --color-foreground: var(--mieweb-foreground, #171717);
+  --color-card: var(--mieweb-card, #ffffff);
+  --color-card-foreground: var(--mieweb-card-foreground, #171717);
+  --color-muted: var(--mieweb-muted, #f5f5f5);
+  --color-muted-foreground: var(--mieweb-muted-foreground, #737373);
+  --color-destructive: var(--mieweb-destructive, #ef4444);
+  --color-destructive-foreground: var(--mieweb-destructive-foreground, #ffffff);
+  --color-success: var(--mieweb-success, #22c55e);
+  --color-success-foreground: var(--mieweb-success-foreground, #ffffff);
+  --color-warning: var(--mieweb-warning, #f59e0b);
+  --color-warning-foreground: var(--mieweb-warning-foreground, #ffffff);
+}
 
 /* ============================================
-   CSS Custom Properties (Design Tokens)
-   Override these to customize the theme
+   BlueHive Design System Tokens
    ============================================ */
 
 :root {
-  /* Primary color scale */
-  --mieweb-primary-50: #f0f9ff;
-  --mieweb-primary-100: #e0f4fe;
-  --mieweb-primary-200: #b9eafd;
-  --mieweb-primary-300: #7cdbfc;
-  --mieweb-primary-400: #36c9f8;
+  /* Primary Color Scale */
+  --mieweb-primary-50: #e6f7fc;
+  --mieweb-primary-100: #b3e6f6;
+  --mieweb-primary-200: #80d5f0;
+  --mieweb-primary-300: #4dc4ea;
+  --mieweb-primary-400: #27aae1;
   --mieweb-primary-500: #27aae1;
-  --mieweb-primary-600: #0c90c9;
-  --mieweb-primary-700: #0b73a3;
-  --mieweb-primary-800: #0f6086;
-  --mieweb-primary-900: #124f6f;
-  --mieweb-primary-950: #0c334a;
+  --mieweb-primary-600: #1f98ca;
+  --mieweb-primary-700: #1786b3;
+  --mieweb-primary-800: #0f749c;
+  --mieweb-primary-900: #086285;
+  --mieweb-primary-950: #00506e;
 
-  /* Semantic colors - Light mode */
-  --mieweb-background: hsl(0 0% 100%);
-  --mieweb-foreground: hsl(222.2 84% 4.9%);
-  --mieweb-card: hsl(0 0% 100%);
-  --mieweb-card-foreground: hsl(222.2 84% 4.9%);
-  --mieweb-muted: hsl(210 40% 96.1%);
-  --mieweb-muted-foreground: hsl(215.4 16.3% 46.9%);
-  --mieweb-border: hsl(214.3 31.8% 91.4%);
-  --mieweb-input: hsl(214.3 31.8% 91.4%);
-  --mieweb-ring: hsl(221.2 83.2% 53.3%);
-
-  /* Status colors */
-  --mieweb-destructive: hsl(0 84.2% 60.2%);
-  --mieweb-destructive-foreground: hsl(210 40% 98%);
-  --mieweb-success: hsl(142.1 76.2% 36.3%);
-  --mieweb-success-foreground: hsl(355.7 100% 97.3%);
-  --mieweb-warning: hsl(45.4 93.4% 47.5%);
-  --mieweb-warning-foreground: hsl(26 83.3% 14.1%);
+  /* Light Mode Semantic Colors */
+  --mieweb-background: #ffffff;
+  --mieweb-foreground: #171717;
+  --mieweb-card: #ffffff;
+  --mieweb-card-foreground: #171717;
+  --mieweb-muted: #f5f5f5;
+  --mieweb-muted-foreground: #737373;
+  --mieweb-border: #e5e7eb;
+  --mieweb-input: #e5e7eb;
+  --mieweb-ring: #27aae1;
+  --mieweb-destructive: #ef4444;
+  --mieweb-destructive-foreground: #ffffff;
+  --mieweb-success: #22c55e;
+  --mieweb-success-foreground: #ffffff;
+  --mieweb-warning: #f59e0b;
+  --mieweb-warning-foreground: #ffffff;
 
   /* Typography */
-  --mieweb-font-sans: ui-sans-serif, system-ui, sans-serif;
+  --mieweb-font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  --mieweb-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Border radius */
+  /* Border Radius */
+  --mieweb-radius-none: 0;
   --mieweb-radius-sm: 0.25rem;
   --mieweb-radius-md: 0.5rem;
   --mieweb-radius-lg: 0.75rem;
   --mieweb-radius-xl: 1rem;
+  --mieweb-radius-2xl: 1.5rem;
+  --mieweb-radius-full: 9999px;
 
   /* Shadows */
   --mieweb-shadow-card:
     0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-dropdown:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-modal:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-/* Dark mode overrides */
-.dark,
+/* Dark Mode */
 [data-theme='dark'] {
-  --mieweb-background: hsl(222.2 84% 4.9%);
-  --mieweb-foreground: hsl(210 40% 98%);
-  --mieweb-card: hsl(222.2 84% 4.9%);
-  --mieweb-card-foreground: hsl(210 40% 98%);
-  --mieweb-muted: hsl(217.2 32.6% 17.5%);
-  --mieweb-muted-foreground: hsl(215 20.2% 65.1%);
-  --mieweb-border: hsl(217.2 32.6% 17.5%);
-  --mieweb-input: hsl(217.2 32.6% 17.5%);
-  --mieweb-ring: hsl(224.3 76.3% 48%);
-
-  --mieweb-destructive: hsl(0 62.8% 30.6%);
-  --mieweb-destructive-foreground: hsl(210 40% 98%);
-  --mieweb-success: hsl(142.1 70.6% 45.3%);
-  --mieweb-success-foreground: hsl(144.9 80.4% 10%);
-  --mieweb-warning: hsl(48 96.5% 53.3%);
-  --mieweb-warning-foreground: hsl(26 83.3% 14.1%);
+  --mieweb-background: #171717;
+  --mieweb-foreground: #fafafa;
+  --mieweb-card: #262626;
+  --mieweb-card-foreground: #fafafa;
+  --mieweb-muted: #404040;
+  --mieweb-muted-foreground: #a1a1aa;
+  --mieweb-border: #404040;
+  --mieweb-input: #404040;
+  --mieweb-ring: #27aae1;
+  --mieweb-destructive: #dc2626;
+  --mieweb-destructive-foreground: #fafafa;
+  --mieweb-success: #16a34a;
+  --mieweb-success-foreground: #fafafa;
+  --mieweb-warning: #d97706;
+  --mieweb-warning-foreground: #fafafa;
 }
 
 /* ============================================
-   Base Styles
+   Base Typography & Resets
    ============================================ */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
 
 body {
   font-family: var(--mieweb-font-sans);
   background-color: var(--mieweb-background);
   color: var(--mieweb-foreground);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--mieweb-font-mono);
 }
 
 /* Focus visible styles for accessibility */
 :focus-visible {
   outline: 2px solid var(--mieweb-ring);
   outline-offset: 2px;
+}
+
+/* Also support .dark class for Storybook compatibility */
+.dark {
+  --mieweb-background: #171717;
+  --mieweb-foreground: #fafafa;
+  --mieweb-card: #262626;
+  --mieweb-card-foreground: #fafafa;
+  --mieweb-muted: #404040;
+  --mieweb-muted-foreground: #a1a1aa;
+  --mieweb-border: #404040;
+  --mieweb-input: #404040;
+  --mieweb-ring: #27aae1;
+  --mieweb-destructive: #dc2626;
+  --mieweb-destructive-foreground: #fafafa;
+  --mieweb-success: #16a34a;
+  --mieweb-success-foreground: #fafafa;
+  --mieweb-warning: #d97706;
+  --mieweb-warning-foreground: #fafafa;
 }
 
 /* Reduce motion for users who prefer it */
@@ -123,40 +169,4 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* ============================================
-   Utility Classes
-   ============================================ */
-
-/* Visually hidden but accessible to screen readers */
-.mieweb-sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* Skip to content link */
-.mieweb-skip-link {
-  position: absolute;
-  left: -9999px;
-  z-index: 999;
-  padding: 0.5rem 1rem;
-  background-color: var(--mieweb-background);
-  color: var(--mieweb-foreground);
-  border: 1px solid var(--mieweb-border);
-  border-radius: var(--mieweb-radius-md);
-  text-decoration: none;
-}
-
-.mieweb-skip-link:focus {
-  left: 50%;
-  transform: translateX(-50%);
-  top: 0.5rem;
 }

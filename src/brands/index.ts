@@ -23,3 +23,10 @@ export {
 
 // Brand configurations
 export { bluehiveBrand } from './bluehive';
+export { defaultBrand } from './default';
+
+// All brands for iteration
+export const brands = {
+  bluehive: () => import('./bluehive').then((m) => m.bluehiveBrand),
+  default: () => import('./default').then((m) => m.defaultBrand),
+} as const;

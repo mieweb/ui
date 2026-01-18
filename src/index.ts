@@ -13,6 +13,7 @@ export * from './components/Alert';
 export * from './components/VisuallyHidden';
 export * from './components/ThemeProvider';
 export * from './components/SchedulePicker';
+export * from './components/QuickAction';
 
 // Hooks
 export * from './hooks';

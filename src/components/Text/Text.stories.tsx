@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text, SmallMuted } from './Text';
 
 const meta: Meta<typeof Text> = {
