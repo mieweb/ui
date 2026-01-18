@@ -273,9 +273,9 @@ function DashboardStory() {
                   placeholder="Confirm new password"
                 />
                 <CheckboxGroup label="Two-Factor Authentication">
-                  <Checkbox value="sms">SMS</Checkbox>
-                  <Checkbox value="authenticator">Authenticator App</Checkbox>
-                  <Checkbox value="email">Email</Checkbox>
+                  <Checkbox value="sms" label="SMS" />
+                  <Checkbox value="authenticator" label="Authenticator App" />
+                  <Checkbox value="email" label="Email" />
                 </CheckboxGroup>
               </TabsContent>
             </Tabs>
@@ -616,14 +616,14 @@ export const AllComponents: StoryObj = {
         </Text>
         <div className="grid gap-6 md:grid-cols-2">
           <CheckboxGroup label="Interests">
-            <Checkbox value="sports">Sports</Checkbox>
-            <Checkbox value="music">Music</Checkbox>
-            <Checkbox value="art">Art</Checkbox>
+            <Checkbox value="sports" label="Sports" />
+            <Checkbox value="music" label="Music" />
+            <Checkbox value="art" label="Art" />
           </CheckboxGroup>
           <RadioGroup label="Size" defaultValue="md">
-            <Radio value="sm">Small</Radio>
-            <Radio value="md">Medium</Radio>
-            <Radio value="lg">Large</Radio>
+            <Radio value="sm" label="Small" />
+            <Radio value="md" label="Medium" />
+            <Radio value="lg" label="Large" />
           </RadioGroup>
         </div>
       </section>
@@ -701,6 +701,599 @@ export const AllComponents: StoryObj = {
           <SimplePagination page={1} totalPages={10} onPageChange={() => {}} />
         </div>
       </section>
+
+      {/* ============================================================ */}
+      {/* TYPOGRAPHY SECTION */}
+      {/* ============================================================ */}
+      <div className="border-border mb-8 border-t pt-8">
+        <Text as="h1" size="3xl" weight="bold" className="mb-2">
+          Typography
+        </Text>
+        <Text variant="muted" className="mb-8">
+          A comprehensive typography system using the Text component with
+          flexible sizing, weights, and semantic variants.
+        </Text>
+      </div>
+
+      {/* Headings Hierarchy */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Heading Hierarchy
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Use semantic heading elements (h1-h6) with appropriate sizing for
+          document structure.
+        </Text>
+        <div className="bg-muted/30 space-y-4 rounded-lg p-6">
+          <Text as="h1" size="3xl" weight="bold">
+            Heading 1 — Main Page Title
+          </Text>
+          <Text as="h2" size="2xl" weight="bold">
+            Heading 2 — Section Title
+          </Text>
+          <Text as="h3" size="xl" weight="semibold">
+            Heading 3 — Subsection Title
+          </Text>
+          <Text as="h4" size="lg" weight="semibold">
+            Heading 4 — Card or Panel Title
+          </Text>
+          <Text as="h5" size="base" weight="semibold">
+            Heading 5 — Minor Section
+          </Text>
+          <Text as="h6" size="sm" weight="semibold">
+            Heading 6 — Small Label
+          </Text>
+        </div>
+      </section>
+
+      {/* Font Sizes */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Font Sizes
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Seven size options from xs (12px) to 3xl (30px).
+        </Text>
+        <div className="bg-muted/30 space-y-3 rounded-lg p-6">
+          <div className="border-border flex items-baseline justify-between border-b pb-2">
+            <Text size="xs">Extra Small (xs)</Text>
+            <Text variant="muted" size="xs">
+              text-xs · 12px
+            </Text>
+          </div>
+          <div className="border-border flex items-baseline justify-between border-b pb-2">
+            <Text size="sm">Small (sm)</Text>
+            <Text variant="muted" size="xs">
+              text-sm · 14px
+            </Text>
+          </div>
+          <div className="border-border flex items-baseline justify-between border-b pb-2">
+            <Text size="base">Base (base)</Text>
+            <Text variant="muted" size="xs">
+              text-base · 16px
+            </Text>
+          </div>
+          <div className="border-border flex items-baseline justify-between border-b pb-2">
+            <Text size="lg">Large (lg)</Text>
+            <Text variant="muted" size="xs">
+              text-lg · 18px
+            </Text>
+          </div>
+          <div className="border-border flex items-baseline justify-between border-b pb-2">
+            <Text size="xl">Extra Large (xl)</Text>
+            <Text variant="muted" size="xs">
+              text-xl · 20px
+            </Text>
+          </div>
+          <div className="border-border flex items-baseline justify-between border-b pb-2">
+            <Text size="2xl">2X Large (2xl)</Text>
+            <Text variant="muted" size="xs">
+              text-2xl · 24px
+            </Text>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <Text size="3xl">3X Large (3xl)</Text>
+            <Text variant="muted" size="xs">
+              text-3xl · 30px
+            </Text>
+          </div>
+        </div>
+      </section>
+
+      {/* Font Weights */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Font Weights
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Four weight options for visual emphasis and hierarchy.
+        </Text>
+        <div className="bg-muted/30 rounded-lg p-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2 text-center">
+              <Text size="xl" weight="normal">
+                Normal
+              </Text>
+              <Text variant="muted" size="xs">
+                font-normal · 400
+              </Text>
+            </div>
+            <div className="space-y-2 text-center">
+              <Text size="xl" weight="medium">
+                Medium
+              </Text>
+              <Text variant="muted" size="xs">
+                font-medium · 500
+              </Text>
+            </div>
+            <div className="space-y-2 text-center">
+              <Text size="xl" weight="semibold">
+                Semibold
+              </Text>
+              <Text variant="muted" size="xs">
+                font-semibold · 600
+              </Text>
+            </div>
+            <div className="space-y-2 text-center">
+              <Text size="xl" weight="bold">
+                Bold
+              </Text>
+              <Text variant="muted" size="xs">
+                font-bold · 700
+              </Text>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Text Variants */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Semantic Variants
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Color variants that convey meaning and adapt to the theme.
+        </Text>
+        <div className="bg-muted/30 grid gap-4 rounded-lg p-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardContent className="pt-4">
+              <Text variant="default" weight="medium">
+                Default
+              </Text>
+              <Text variant="muted" size="sm">
+                Standard foreground text color for body content.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <Text variant="muted" weight="medium">
+                Muted
+              </Text>
+              <Text variant="muted" size="sm">
+                Secondary text, descriptions, and captions.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <Text variant="primary" weight="medium">
+                Primary
+              </Text>
+              <Text variant="muted" size="sm">
+                Brand color for emphasis and links.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <Text variant="success" weight="medium">
+                Success
+              </Text>
+              <Text variant="muted" size="sm">
+                Positive states, confirmations, and completed items.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <Text variant="warning" weight="medium">
+                Warning
+              </Text>
+              <Text variant="muted" size="sm">
+                Cautionary messages and pending states.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <Text variant="destructive" weight="medium">
+                Destructive
+              </Text>
+              <Text variant="muted" size="sm">
+                Errors, deletions, and critical actions.
+              </Text>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Text Alignment */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Text Alignment
+        </Text>
+        <div className="bg-muted/30 grid gap-4 rounded-lg p-6 md:grid-cols-3">
+          <div className="border-border rounded border p-4">
+            <Text align="left" weight="medium">
+              Left Aligned
+            </Text>
+            <Text variant="muted" size="sm" align="left">
+              Default alignment for LTR languages. Used for body text and form
+              labels.
+            </Text>
+          </div>
+          <div className="border-border rounded border p-4">
+            <Text align="center" weight="medium">
+              Center Aligned
+            </Text>
+            <Text variant="muted" size="sm" align="center">
+              Hero sections, headings, and empty states.
+            </Text>
+          </div>
+          <div className="border-border rounded border p-4">
+            <Text align="right" weight="medium">
+              Right Aligned
+            </Text>
+            <Text variant="muted" size="sm" align="right">
+              Numeric data, prices, and table columns.
+            </Text>
+          </div>
+        </div>
+      </section>
+
+      {/* Body Text Examples */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Body Text Examples
+        </Text>
+        <div className="bg-muted/30 max-w-2xl space-y-4 rounded-lg p-6">
+          <Text>
+            This is a paragraph of regular body text. It uses the default
+            foreground color and base font size. The line height is optimized
+            for readability in longer passages.
+          </Text>
+          <Text variant="muted">
+            This muted paragraph provides secondary information. It&apos;s
+            useful for descriptions, helper text, and supplementary content that
+            shouldn&apos;t compete with primary content.
+          </Text>
+          <Text size="sm">
+            Smaller text can be used for captions, footnotes, and fine print. It
+            maintains readability while taking up less visual space.
+          </Text>
+          <Text size="lg" weight="medium">
+            Larger text with medium weight works well for lead paragraphs or
+            introductory content that needs to stand out.
+          </Text>
+        </div>
+      </section>
+
+      {/* Truncation */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Text Truncation
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Use the truncate prop to clip overflowing text with an ellipsis.
+        </Text>
+        <div className="max-w-sm space-y-4">
+          <Card>
+            <CardContent className="pt-4">
+              <Text weight="medium" truncate>
+                This is a very long title that will be truncated when it exceeds
+                the container width
+              </Text>
+              <Text variant="muted" size="sm" truncate>
+                And this description will also truncate gracefully without
+                breaking the layout
+              </Text>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* BRANDING & COLORS SECTION */}
+      {/* ============================================================ */}
+      <div className="border-border mb-8 border-t pt-8">
+        <Text as="h1" size="3xl" weight="bold" className="mb-2">
+          Branding & Colors
+        </Text>
+        <Text variant="muted" className="mb-8">
+          The @mieweb/ui design system supports multiple brand themes. Each
+          brand defines its own color palette, typography, and design tokens.
+        </Text>
+      </div>
+
+      {/* Current Brand Colors */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Primary Color Scale
+        </Text>
+        <Text variant="muted" className="mb-6">
+          The current brand&apos;s primary color with 50-950 shades.
+        </Text>
+        <div className="grid grid-cols-5 gap-2 sm:grid-cols-11">
+          <div className="text-center">
+            <div className="bg-primary-50 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              50
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-100 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              100
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-200 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              200
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-300 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              300
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-400 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              400
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-500 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              500
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-600 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              600
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-700 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              700
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-800 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              800
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-900 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              900
+            </Text>
+          </div>
+          <div className="text-center">
+            <div className="bg-primary-950 mb-1 h-12 w-full rounded-lg" />
+            <Text size="xs" variant="muted">
+              950
+            </Text>
+          </div>
+        </div>
+      </section>
+
+      {/* Semantic Colors */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Semantic Colors
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Colors that adapt based on context and theme.
+        </Text>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="bg-background border-border mb-2 h-16 rounded border" />
+              <Text weight="medium">Background</Text>
+              <Text variant="muted" size="xs">
+                Page background
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="bg-muted mb-2 h-16 rounded" />
+              <Text weight="medium">Muted</Text>
+              <Text variant="muted" size="xs">
+                Subtle backgrounds
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="bg-card border-border mb-2 h-16 rounded border" />
+              <Text weight="medium">Card</Text>
+              <Text variant="muted" size="xs">
+                Card backgrounds
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="bg-border mb-2 h-16 rounded" />
+              <Text weight="medium">Border</Text>
+              <Text variant="muted" size="xs">
+                Borders & dividers
+              </Text>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Status Colors */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Status Colors
+        </Text>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="bg-primary-500 text-primary-foreground flex h-24 items-center justify-center rounded-lg">
+            <Text weight="semibold" className="text-white">
+              Primary
+            </Text>
+          </div>
+          <div className="bg-success text-success-foreground flex h-24 items-center justify-center rounded-lg">
+            <Text weight="semibold" className="text-white">
+              Success
+            </Text>
+          </div>
+          <div className="bg-warning text-warning-foreground flex h-24 items-center justify-center rounded-lg">
+            <Text weight="semibold" className="text-white">
+              Warning
+            </Text>
+          </div>
+          <div className="bg-destructive text-destructive-foreground flex h-24 items-center justify-center rounded-lg">
+            <Text weight="semibold" className="text-white">
+              Destructive
+            </Text>
+          </div>
+        </div>
+      </section>
+
+      {/* Available Brands */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Available Brands
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Use the brand switcher in the Storybook toolbar to preview components
+          with different brands.
+        </Text>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-[#27aae1]" />
+                <div>
+                  <Text weight="semibold">BlueHive</Text>
+                  <Text variant="muted" size="xs">
+                    #27aae1 · Nunito
+                  </Text>
+                </div>
+              </div>
+              <Text variant="muted" size="sm">
+                DOT Physical scheduling and healthcare compliance platform.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-[#27ae60]" />
+                <div>
+                  <Text weight="semibold">MieWeb</Text>
+                  <Text variant="muted" size="xs">
+                    #27ae60 · Inter
+                  </Text>
+                </div>
+              </div>
+              <Text variant="muted" size="sm">
+                Healthcare software and services company.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-[#6E2B68]" />
+                <div>
+                  <Text weight="semibold">Enterprise Health</Text>
+                  <Text variant="muted" size="xs">
+                    #6E2B68 · Jost
+                  </Text>
+                </div>
+              </div>
+              <Text variant="muted" size="sm">
+                Employee health and occupational medicine platform.
+              </Text>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-[#f5841f]" />
+                <div>
+                  <Text weight="semibold">WebChart</Text>
+                  <Text variant="muted" size="xs">
+                    #f5841f · Inter
+                  </Text>
+                </div>
+              </div>
+              <Text variant="muted" size="sm">
+                Future-ready electronic health record system.
+              </Text>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Font Families */}
+      <section className="mb-12">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Typography Families
+        </Text>
+        <Text variant="muted" className="mb-6">
+          Each brand can define custom font families.
+        </Text>
+        <div className="bg-muted/30 grid gap-6 rounded-lg p-6 md:grid-cols-2">
+          <div>
+            <Text weight="semibold" className="mb-2">
+              Sans Serif (Default)
+            </Text>
+            <Text
+              className="font-sans"
+              size="lg"
+              style={{
+                fontFamily:
+                  'var(--mieweb-font-sans, Inter, ui-sans-serif, system-ui, sans-serif)',
+              }}
+            >
+              The quick brown fox jumps over the lazy dog. 0123456789
+            </Text>
+            <Text variant="muted" size="xs" className="mt-1">
+              Used for headings, body text, and UI elements.
+            </Text>
+          </div>
+          <div>
+            <Text weight="semibold" className="mb-2">
+              Monospace
+            </Text>
+            <Text
+              size="lg"
+              style={{
+                fontFamily:
+                  'var(--mieweb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)',
+              }}
+            >
+              const message = &quot;Hello, World!&quot;;
+            </Text>
+            <Text variant="muted" size="xs" className="mt-1">
+              Used for code, technical data, and tabular numbers.
+            </Text>
+          </div>
+        </div>
+      </section>
     </div>
   ),
 };
@@ -711,18 +1304,80 @@ export const AllComponents: StoryObj = {
 
 export const AllComponentsDark: StoryObj = {
   render: () => (
-    <ThemeProvider
-      defaultTheme="dark"
-      storageKey="storybook-all-components-dark"
-    >
-      <div className="bg-background min-h-screen p-8">
-        <Text as="h1" size="3xl" weight="bold" className="mb-8">
-          Component Showcase (Dark)
+    <div className="dark bg-background min-h-screen p-8">
+      <Text as="h1" size="3xl" weight="bold" className="mb-2">
+        Component Showcase (Dark Mode)
+      </Text>
+      <Text variant="muted" className="mb-8">
+        All components automatically adapt to the dark theme. Use the theme
+        toggle in the toolbar to switch themes, or view the AllComponents story
+        for the full showcase in light mode.
+      </Text>
+
+      {/* Sample Components in Dark Mode */}
+      <section className="mb-8">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Sample Components
         </Text>
-        <Text className="text-muted-foreground">
-          View the AllComponents story for the full showcase.
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dark Mode Card</CardTitle>
+              <CardDescription>
+                Cards and other components automatically adapt their colors.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                <Button>Primary</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="outline">Outline</Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Form Elements</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Input label="Input" placeholder="Enter text..." />
+              <Select
+                label="Select"
+                placeholder="Choose..."
+                options={[{ value: '1', label: 'Option 1' }]}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Alerts in Dark Mode */}
+      <section className="mb-8">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Alerts
         </Text>
-      </div>
-    </ThemeProvider>
+        <div className="space-y-2">
+          <Alert variant="info">Info alert in dark mode.</Alert>
+          <Alert variant="success">Success alert in dark mode.</Alert>
+          <Alert variant="warning">Warning alert in dark mode.</Alert>
+          <Alert variant="danger">Danger alert in dark mode.</Alert>
+        </div>
+      </section>
+
+      {/* Typography in Dark Mode */}
+      <section className="mb-8">
+        <Text as="h2" size="2xl" weight="bold" className="mb-4">
+          Typography
+        </Text>
+        <div className="space-y-3">
+          <Text>Default foreground text adapts to dark theme.</Text>
+          <Text variant="muted">Muted text remains readable.</Text>
+          <Text variant="primary">Primary text uses brand colors.</Text>
+          <Text variant="success">Success text stays green.</Text>
+          <Text variant="warning">Warning text stays amber.</Text>
+          <Text variant="destructive">Destructive text stays red.</Text>
+        </div>
+      </section>
+    </div>
   ),
 };
