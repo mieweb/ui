@@ -3,12 +3,18 @@ import { useEffect, useMemo } from 'react';
 import '../src/styles/base.css';
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { defaultBrand } from '../src/brands/default';
+import { enterpriseHealthBrand } from '../src/brands/enterprise-health';
+import { miewebBrand } from '../src/brands/mieweb';
+import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
   bluehive: bluehiveBrand,
   default: defaultBrand,
+  'enterprise-health': enterpriseHealthBrand,
+  mieweb: miewebBrand,
+  webchart: webchartBrand,
 };
 
 // Function to apply brand CSS variables to document
@@ -134,6 +140,9 @@ const preview: Preview = {
         items: [
           { value: 'bluehive', title: '🐝 BlueHive' },
           { value: 'default', title: '⚪ Default' },
+          { value: 'enterprise-health', title: '🏥 Enterprise Health' },
+          { value: 'mieweb', title: '🟢 MIE Web' },
+          { value: 'webchart', title: '🟠 WebChart' },
         ],
         showName: true,
         dynamicTitle: true,
