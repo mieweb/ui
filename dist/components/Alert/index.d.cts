@@ -3,7 +3,7 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const alertVariants: (props?: ({
-    variant?: "danger" | "default" | "success" | "warning" | "info" | null | undefined;
+    variant?: "default" | "info" | "success" | "warning" | "danger" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface AlertProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {
     /** Icon to display in the alert */

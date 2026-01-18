@@ -26,10 +26,7 @@ function _interopNamespace(e) {
 var React__namespace = /*#__PURE__*/_interopNamespace(React);
 
 var quickActionIconVariants = classVarianceAuthority.cva(
-  [
-    "flex items-center justify-center rounded-xl",
-    "h-10 w-10"
-  ],
+  ["flex items-center justify-center rounded-xl", "h-10 w-10"],
   {
     variants: {
       color: {
@@ -325,5 +322,5 @@ exports.QuickActionGroup = QuickActionGroup;
 exports.QuickActionIcons = QuickActionIcons;
 exports.quickActionIconVariants = quickActionIconVariants;
 exports.quickActionVariants = quickActionVariants;
-//# sourceMappingURL=chunk-JW4BTNWB.cjs.map
-//# sourceMappingURL=chunk-JW4BTNWB.cjs.map
+//# sourceMappingURL=chunk-2QX46LFO.cjs.map
+//# sourceMappingURL=chunk-2QX46LFO.cjs.map

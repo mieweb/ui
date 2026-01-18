@@ -5,12 +5,27 @@ A themeable, accessible React component library built with Tailwind CSS 4.
 ## Features
 
 - 🎨 **Fully Themeable** - Customize colors, fonts, border radius, and more using CSS variables
+- 🏢 **Multi-Brand Support** - Pre-configured themes for BlueHive, Enterprise Health, WebChart, and MIE
 - ♿ **Accessible** - Built with WCAG guidelines in mind, including proper ARIA attributes and keyboard navigation
 - 🌳 **Tree-Shakeable** - Import only the components you need
 - 🌙 **Dark Mode** - Built-in dark mode support with system preference detection
 - 📦 **Dual Format** - ESM and CommonJS support
 - 🎯 **TypeScript** - Full TypeScript support with comprehensive type definitions
 - 📚 **Storybook** - Interactive documentation and component playground
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Development](#development)
+- [Storybook](#storybook)
+- [Using in Other Projects](#using-in-other-projects)
+- [Brand System](#brand-system)
+- [Theming](#theming)
+- [Components](#components)
+- [Hooks](#hooks)
+- [Utilities](#utilities)
+- [Contributing](#contributing)
 
 ## Installation
 
@@ -83,6 +98,366 @@ import '@mieweb/ui/styles.css';
 import { Button } from '@mieweb/ui';
 ```
 
+## Development
+
+### Getting Started
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/mieweb/ui.git
+cd ui
+```
+
+2. **Install dependencies:**
+
+```bash
+npm install
+```
+
+3. **Start development mode:**
+
+```bash
+npm run dev
+```
+
+This will watch for changes and rebuild the library automatically.
+
+### Available Scripts
+
+| Script                    | Description                         |
+| ------------------------- | ----------------------------------- |
+| `npm run dev`             | Start development mode with watch   |
+| `npm run build`           | Build the library for production    |
+| `npm run storybook`       | Start Storybook development server  |
+| `npm run build-storybook` | Build Storybook for static hosting  |
+| `npm run typecheck`       | Run TypeScript type checking        |
+| `npm run lint`            | Run ESLint                          |
+| `npm run lint:fix`        | Run ESLint with auto-fix            |
+| `npm run format`          | Check code formatting with Prettier |
+| `npm run format:fix`      | Fix code formatting with Prettier   |
+| `npm run test`            | Run tests                           |
+| `npm run test:watch`      | Run tests in watch mode             |
+
+## Storybook
+
+Storybook provides interactive documentation and a component playground where you can explore all components with different props and themes.
+
+### Running Storybook
+
+```bash
+npm run storybook
+```
+
+This starts the Storybook development server at [http://localhost:6006](http://localhost:6006).
+
+### Features in Storybook
+
+- **Component Explorer**: Browse all components with live examples
+- **Props Documentation**: See all available props for each component
+- **Theme Switcher**: Toggle between light and dark modes
+- **Brand Switcher**: Preview components with different brand themes (BlueHive, Enterprise Health, WebChart, MIE)
+- **Accessibility Panel**: Check accessibility compliance for each component
+- **Controls**: Interactively modify component props
+
+### Building Storybook
+
+To build a static version of Storybook for deployment:
+
+```bash
+npm run build-storybook
+```
+
+The output will be in the `storybook-static` directory.
+
+## Using in Other Projects
+
+### Method 1: NPM Package (Recommended)
+
+Once published, install the package in your project:
+
+```bash
+npm install @mieweb/ui
+```
+
+Then import components:
+
+```tsx
+import { Button, Card, Input, ThemeProvider } from '@mieweb/ui';
+import '@mieweb/ui/styles.css'; // or use a brand CSS file
+
+function App() {
+  return (
+    <ThemeProvider>
+      <Card>
+        <Card.Header>
+          <Card.Title>Welcome</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          <Input label="Email" type="email" placeholder="you@example.com" />
+          <Button className="mt-4">Submit</Button>
+        </Card.Content>
+      </Card>
+    </ThemeProvider>
+  );
+}
+```
+
+### Method 2: Local Development (npm link)
+
+For local development across projects:
+
+1. **In the @mieweb/ui directory:**
+
+```bash
+cd /path/to/mieweb-ui
+npm run build
+npm link
+```
+
+2. **In your consuming project:**
+
+```bash
+cd /path/to/your-project
+npm link @mieweb/ui
+```
+
+3. **Import and use components:**
+
+```tsx
+import { Button } from '@mieweb/ui';
+import '@mieweb/ui/dist/styles.css';
+```
+
+### Method 3: Direct Path Import
+
+For monorepo setups or when you want to reference the source directly:
+
+```tsx
+// In your consuming project's package.json
+{
+  "dependencies": {
+    "@mieweb/ui": "file:../mieweb-ui"
+  }
+}
+```
+
+Then run `npm install` and import as usual.
+
+### Using with Different Frameworks
+
+#### Next.js
+
+```tsx
+// app/layout.tsx or pages/_app.tsx
+import '@mieweb/ui/brands/bluehive.css';
+import { ThemeProvider } from '@mieweb/ui';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+#### Vite
+
+```tsx
+// main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import '@mieweb/ui/brands/enterprise-health.css';
+import { ThemeProvider } from '@mieweb/ui';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>
+);
+```
+
+#### Meteor
+
+```tsx
+// client/main.tsx
+import { Meteor } from 'meteor/meteor';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import '@mieweb/ui/brands/bluehive.css';
+import { ThemeProvider } from '@mieweb/ui';
+import App from '/imports/ui/App';
+
+Meteor.startup(() => {
+  const container = document.getElementById('react-target');
+  const root = createRoot(container!);
+  root.render(
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  );
+});
+```
+
+## Brand System
+
+The library includes pre-configured themes for multiple brands. Each brand has its own design system with unique colors, typography, border radius, and shadows.
+
+### Available Brands
+
+| Brand                 | Primary Color        | Font   | Description                                       |
+| --------------------- | -------------------- | ------ | ------------------------------------------------- |
+| **BlueHive**          | `#27AAE1` (Blue)     | Nunito | DOT Physical scheduling and healthcare compliance |
+| **Enterprise Health** | `#6E2B68` (Burgundy) | Jost   | Employee health and occupational medicine         |
+| **WebChart**          | `#F5841F` (Orange)   | Inter  | Future-ready electronic health record system      |
+| **MIE**               | `#27AE60` (Green)    | Inter  | Healthcare software and services                  |
+
+### Using a Brand Theme
+
+#### Method 1: Import the brand CSS file
+
+```tsx
+// Import the brand's CSS file
+import '@mieweb/ui/brands/enterprise-health.css';
+
+import { Button, Card } from '@mieweb/ui';
+```
+
+#### Method 2: Use the ThemeProvider with brand
+
+```tsx
+import { ThemeProvider } from '@mieweb/ui';
+import { enterpriseHealthBrand } from '@mieweb/ui/brands';
+
+function App() {
+  return (
+    <ThemeProvider brand={enterpriseHealthBrand}>
+      <YourApp />
+    </ThemeProvider>
+  );
+}
+```
+
+#### Method 3: Tailwind CSS preset
+
+```js
+// tailwind.config.js
+const { enterpriseHealthBrand } = require('@mieweb/ui/brands');
+const { createBrandPreset } = require('@mieweb/ui/brands/types');
+
+module.exports = {
+  presets: [createBrandPreset(enterpriseHealthBrand)],
+  // ...
+};
+```
+
+### Brand Design Tokens
+
+Each brand defines the following design tokens:
+
+#### Enterprise Health
+
+Extracted from [enterprisehealth.com](https://enterprisehealth.com):
+
+```css
+/* Primary: Burgundy/Purple */
+--mieweb-primary-600: #6e2b68;
+
+/* Secondary: Deep Teal Blue (for gradients) */
+--mieweb-secondary: #00497a;
+
+/* Accent: Gold/Yellow (logo) */
+--mieweb-accent: #f8b700;
+
+/* Brand Gradient */
+--mieweb-gradient: linear-gradient(111.02deg, #00497a, #6e2b68);
+
+/* Typography */
+--mieweb-font-sans: 'Jost', ui-sans-serif, system-ui, sans-serif;
+
+/* Border Radius (larger, more rounded) */
+--mieweb-radius-sm: 0.375rem; /* 6px - badges */
+--mieweb-radius-md: 0.625rem; /* 10px - buttons */
+--mieweb-radius-lg: 0.75rem; /* 12px - inputs */
+--mieweb-radius-2xl: 1.5rem; /* 24px - cards */
+
+/* Shadows (subtle, layered) */
+--mieweb-shadow-card:
+  0 16px 32px 0 rgba(34, 35, 38, 0.05), 0 8px 16px 0 rgba(34, 35, 38, 0.05);
+```
+
+#### BlueHive
+
+```css
+/* Primary: Blue */
+--mieweb-primary-500: #27aae1;
+
+/* Typography */
+--mieweb-font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+```
+
+### Creating a Custom Brand
+
+You can create your own brand configuration:
+
+```ts
+import type { BrandConfig } from '@mieweb/ui/brands/types';
+
+export const myBrand: BrandConfig = {
+  name: 'my-brand',
+  displayName: 'My Brand',
+  description: 'Custom brand for my application',
+
+  colors: {
+    primary: {
+      50: '#f0f9ff',
+      // ... full color scale 50-950
+      600: '#0284c7', // Main brand color
+      // ...
+    },
+    light: {
+      background: '#ffffff',
+      foreground: '#171717',
+      // ... semantic colors
+    },
+    dark: {
+      background: '#171717',
+      foreground: '#fafafa',
+      // ... semantic colors
+    },
+  },
+
+  typography: {
+    fontFamily: {
+      sans: ['Your Font', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+    },
+  },
+
+  borderRadius: {
+    none: '0',
+    sm: '0.25rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
+    '2xl': '1.5rem',
+    full: '9999px',
+  },
+
+  boxShadow: {
+    card: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+    dropdown: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+    modal: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+  },
+};
+```
+
 ## Theming
 
 The library uses CSS custom properties for theming. Override these variables to customize the appearance:
@@ -91,14 +466,14 @@ The library uses CSS custom properties for theming. Override these variables to 
 :root {
   /* Primary color scale */
   --mieweb-primary-500: #27aae1;
-  
+
   /* Semantic colors */
   --mieweb-background: hsl(0 0% 100%);
   --mieweb-foreground: hsl(222.2 84% 4.9%);
-  
+
   /* Border radius */
   --mieweb-radius-md: 0.5rem;
-  
+
   /* Font */
   --mieweb-font-sans: 'Your Font', sans-serif;
 }
@@ -114,7 +489,9 @@ import { ThemeProvider, useThemeContext, Button } from '@mieweb/ui';
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useThemeContext();
   return (
-    <Button onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
+    <Button
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+    >
       Toggle Theme
     </Button>
   );
@@ -132,6 +509,7 @@ function App() {
 ## Components
 
 ### Primitives
+
 - `Button` - Multi-variant button with loading state
 - `Input` - Text input with label, error, and helper text
 - `Card` - Container component with header, content, and footer
@@ -140,14 +518,17 @@ function App() {
 - `Alert` - Feedback messages
 
 ### Specialized Inputs
+
 - `PhoneInput` - US phone number formatting
 - `DateInput` - Date input with validation modes (DOB, expiration, etc.)
 
 ### Overlays
+
 - `Tooltip` - Accessible tooltip with multiple placements
 - `Dropdown` - Dropdown menu with items, separators, and labels
 
 ### Utilities
+
 - `VisuallyHidden` - Screen reader only content
 - `ThemeProvider` - Theme context provider
 
@@ -210,7 +591,40 @@ import type { ButtonProps, InputProps, Theme } from '@mieweb/ui';
 
 ## Contributing
 
-Contributions are welcome! Please read our contributing guide for details.
+We welcome contributions! Here's how to get started:
+
+### Development Workflow
+
+1. **Fork and clone the repository**
+2. **Install dependencies:** `npm install`
+3. **Create a branch:** `git checkout -b feature/your-feature`
+4. **Start Storybook:** `npm run storybook`
+5. **Make your changes**
+6. **Run checks:**
+   ```bash
+   npm run typecheck  # TypeScript
+   npm run lint       # ESLint
+   npm run format     # Prettier
+   npm run test       # Tests
+   ```
+7. **Commit your changes** following [Conventional Commits](https://www.conventionalcommits.org/)
+8. **Push and create a Pull Request**
+
+### Adding a New Component
+
+1. Create a new directory in `src/components/YourComponent/`
+2. Add the component file: `YourComponent.tsx`
+3. Add the index export: `index.ts`
+4. Add Storybook stories: `YourComponent.stories.tsx`
+5. Export from `src/components/index.ts`
+6. Add to the README components list
+
+### Adding a New Brand
+
+1. Create `src/brands/your-brand.ts` with the `BrandConfig`
+2. Create `src/brands/your-brand.css` with CSS variables
+3. Export from `src/brands/index.ts`
+4. Add to the README brands table
 
 ## License
 

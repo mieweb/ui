@@ -3,7 +3,7 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const textVariants: (props?: ({
-    variant?: "primary" | "default" | "muted" | "destructive" | "success" | "warning" | null | undefined;
+    variant?: "default" | "success" | "warning" | "primary" | "muted" | "destructive" | null | undefined;
     size?: "xs" | "sm" | "lg" | "xl" | "base" | "2xl" | "3xl" | null | undefined;
     weight?: "bold" | "normal" | "medium" | "semibold" | null | undefined;
     align?: "center" | "left" | "right" | null | undefined;
@@ -30,6 +30,6 @@ declare const Text: React.ForwardRefExoticComponent<TextProps & React.RefAttribu
  * Small muted text, useful for helper text and descriptions.
  * This is a convenience component equivalent to <Text variant="muted" size="sm">
  */
-declare const SmallMuted: React.ForwardRefExoticComponent<Omit<TextProps, "size" | "variant"> & React.RefAttributes<HTMLElement>>;
+declare const SmallMuted: React.ForwardRefExoticComponent<Omit<TextProps, "variant" | "size"> & React.RefAttributes<HTMLElement>>;
 
 export { SmallMuted, Text, type TextProps, textVariants };

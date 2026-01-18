@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
+  <defs>
+    <linearGradient id="mieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#27ae60"/>
+      <stop offset="100%" style="stop-color:#219c55"/>
+    </linearGradient>
+  </defs>
+  <!-- MIE Letters -->
+  <text x="10" y="35" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="700" fill="url(#mieGradient)">MIE</text>
+  <!-- Web UI Text -->
+  <text x="75" y="35" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="400" fill="#525252">Web UI</text>
+</svg>

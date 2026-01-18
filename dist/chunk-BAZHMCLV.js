@@ -4,10 +4,7 @@ import { cva } from 'class-variance-authority';
 import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
 
 var quickActionIconVariants = cva(
-  [
-    "flex items-center justify-center rounded-xl",
-    "h-10 w-10"
-  ],
+  ["flex items-center justify-center rounded-xl", "h-10 w-10"],
   {
     variants: {
       color: {
@@ -299,5 +296,5 @@ var QuickActionGroup = React.forwardRef(
 QuickActionGroup.displayName = "QuickActionGroup";
 
 export { QuickAction, QuickActionGroup, QuickActionIcons, quickActionIconVariants, quickActionVariants };
-//# sourceMappingURL=chunk-PYCFL2MF.js.map
-//# sourceMappingURL=chunk-PYCFL2MF.js.map
+//# sourceMappingURL=chunk-BAZHMCLV.js.map
+//# sourceMappingURL=chunk-BAZHMCLV.js.map

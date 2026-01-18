@@ -11,18 +11,18 @@
 
 /* BlueHive brand colors - exposed as Tailwind utilities */
 @theme {
-  /* Primary Color Scale */
-  --color-primary-50: #e6f7fc;
-  --color-primary-100: #b3e6f6;
-  --color-primary-200: #80d5f0;
-  --color-primary-300: #4dc4ea;
-  --color-primary-400: #27aae1;
-  --color-primary-500: #27aae1;
-  --color-primary-600: #1f98ca;
-  --color-primary-700: #1786b3;
-  --color-primary-800: #0f749c;
-  --color-primary-900: #086285;
-  --color-primary-950: #00506e;
+  /* Primary Color Scale - Reference CSS custom properties for dynamic theming */
+  --color-primary-50: var(--mieweb-primary-50);
+  --color-primary-100: var(--mieweb-primary-100);
+  --color-primary-200: var(--mieweb-primary-200);
+  --color-primary-300: var(--mieweb-primary-300);
+  --color-primary-400: var(--mieweb-primary-400);
+  --color-primary-500: var(--mieweb-primary-500);
+  --color-primary-600: var(--mieweb-primary-600);
+  --color-primary-700: var(--mieweb-primary-700);
+  --color-primary-800: var(--mieweb-primary-800);
+  --color-primary-900: var(--mieweb-primary-900);
+  --color-primary-950: var(--mieweb-primary-950);
 
   /* Semantic colors exposed to Tailwind utilities */
   --color-border: var(--mieweb-border, #e5e7eb);

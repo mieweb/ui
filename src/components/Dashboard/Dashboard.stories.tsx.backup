@@ -1,0 +1,972 @@
+import * as React from 'react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+// Import all components
+import { Alert } from '../Alert';
+import { Avatar } from '../Avatar';
+import { Badge } from '../Badge';
+import { Button } from '../Button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '../Card';
+import { DateInput } from '../DateInput';
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownSeparator,
+} from '../Dropdown';
+import { Input } from '../Input';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalClose,
+  ModalBody,
+  ModalFooter,
+} from '../Modal';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../Tabs';
+import { Select, SelectOption, SelectGroup } from '../Select';
+import { Checkbox, CheckboxGroup } from '../Checkbox';
+import { RadioGroup, Radio } from '../Radio';
+import { Switch } from '../Switch';
+import { Textarea } from '../Textarea';
+import { Progress, CircularProgress } from '../Progress';
+import { Skeleton, SkeletonText, SkeletonCard } from '../Skeleton';
+import { Spinner, SpinnerWithLabel } from '../Spinner';
+import { Breadcrumb, BreadcrumbItem } from '../Breadcrumb';
+import { Pagination, SimplePagination } from '../Pagination';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../Table';
+import { Text } from '../Text';
+import { Tooltip } from '../Tooltip';
+import { ThemeProvider, useThemeContext } from '../ThemeProvider';
+
+const meta: Meta = {
+  title: 'Examples/Dashboard',
+  parameters: {
+    layout: 'fullscreen',
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+// ============================================================================
+// Dashboard Header
+// ============================================================================
+
+function DashboardHeader() {
+  const { theme, setTheme } = useTheme();
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
+
+  return (
+    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
+      <div className="flex h-16 items-center justify-between px-6">
+        {/* Logo & Nav */}
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
+              <span className="text-primary-foreground text-lg font-bold">
+                M
+              </span>
+            </div>
+            <span className="text-lg font-semibold">MieWeb UI</span>
+          </div>
+
+          <nav className="hidden items-center gap-6 md:flex">
+            <button
+              type="button"
+              className="text-foreground text-sm font-medium"
+            >
+              Dashboard
+            </button>
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium"
+            >
+              Users
+            </button>
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium"
+            >
+              Analytics
+            </button>
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium"
+            >
+              Settings
+            </button>
+          </nav>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-4">
+          <Tooltip
+            content={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </Button>
+          </Tooltip>
+
+          <Dropdown
+            open={isNotificationsOpen}
+            onOpenChange={setIsNotificationsOpen}
+          >
+            <DropdownTrigger asChild>
+              <Button variant="ghost" size="sm" className="relative">
+                🔔
+                <span className="bg-destructive absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-white">
+                  3
+                </span>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu>
+              <DropdownItem>New user registered</DropdownItem>
+              <DropdownItem>Server update complete</DropdownItem>
+              <DropdownItem>New comment on post</DropdownItem>
+              <DropdownDivider />
+              <DropdownItem>View all notifications</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+
+          <Dropdown open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+            <DropdownTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Avatar name="John Doe" size="sm" />
+                <span className="hidden md:inline">John Doe</span>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu>
+              <DropdownItem>Profile</DropdownItem>
+              <DropdownItem>Settings</DropdownItem>
+              <DropdownDivider />
+              <DropdownItem>Sign out</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ============================================================================
+// Stats Cards
+// ============================================================================
+
+function StatsCards() {
+  const stats = [
+    { label: 'Total Users', value: '2,543', change: '+12.5%', positive: true },
+    {
+      label: 'Active Sessions',
+      value: '1,234',
+      change: '+5.2%',
+      positive: true,
+    },
+    { label: 'Revenue', value: '$45,231', change: '+8.1%', positive: true },
+    { label: 'Bounce Rate', value: '23.5%', change: '-2.3%', positive: false },
+  ];
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat) => (
+        <Card key={stat.label}>
+          <CardHeader className="pb-2">
+            <CardDescription>{stat.label}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold">{stat.value}</span>
+              <Badge variant={stat.positive ? 'success' : 'danger'} size="sm">
+                {stat.change}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// Recent Users Table
+// ============================================================================
+
+function RecentUsersTable() {
+  const users = [
+    {
+      id: 1,
+      name: 'Alice Johnson',
+      email: 'alice@example.com',
+      role: 'Admin',
+      status: 'Active',
+      joined: '2024-01-15',
+    },
+    {
+      id: 2,
+      name: 'Bob Smith',
+      email: 'bob@example.com',
+      role: 'User',
+      status: 'Active',
+      joined: '2024-01-14',
+    },
+    {
+      id: 3,
+      name: 'Carol Williams',
+      email: 'carol@example.com',
+      role: 'Moderator',
+      status: 'Pending',
+      joined: '2024-01-13',
+    },
+    {
+      id: 4,
+      name: 'David Brown',
+      email: 'david@example.com',
+      role: 'User',
+      status: 'Inactive',
+      joined: '2024-01-12',
+    },
+    {
+      id: 5,
+      name: 'Eva Martinez',
+      email: 'eva@example.com',
+      role: 'User',
+      status: 'Active',
+      joined: '2024-01-11',
+    },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Recent Users</CardTitle>
+            <CardDescription>
+              A list of recently registered users
+            </CardDescription>
+          </div>
+          <Button size="sm">View All</Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Joined</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar name={user.name} size="sm" />
+                    <div>
+                      <div className="font-medium">{user.name}</div>
+                      <div className="text-muted-foreground text-sm">
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      user.status === 'Active'
+                        ? 'success'
+                        : user.status === 'Pending'
+                          ? 'warning'
+                          : 'secondary'
+                    }
+                    size="sm"
+                  >
+                    {user.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {user.joined}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+      <CardFooter className="border-t pt-4">
+        <SimplePagination
+          currentPage={1}
+          totalPages={5}
+          onPageChange={() => {}}
+        />
+      </CardFooter>
+    </Card>
+  );
+}
+
+// ============================================================================
+// Activity Panel
+// ============================================================================
+
+function ActivityPanel() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Recent Activity</CardTitle>
+        <CardDescription>Activity in your workspace</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {[
+          {
+            user: 'Alice',
+            action: 'created a new project',
+            time: '2 minutes ago',
+          },
+          {
+            user: 'Bob',
+            action: 'uploaded a document',
+            time: '15 minutes ago',
+          },
+          { user: 'Carol', action: 'commented on a task', time: '1 hour ago' },
+          { user: 'David', action: 'completed milestone', time: '2 hours ago' },
+        ].map((activity, index) => (
+          <div key={index} className="flex items-start gap-3">
+            <Avatar name={activity.user} size="sm" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm">
+                <span className="font-medium">{activity.user}</span>{' '}
+                <span className="text-muted-foreground">{activity.action}</span>
+              </p>
+              <p className="text-muted-foreground text-xs">{activity.time}</p>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ============================================================================
+// Progress Overview
+// ============================================================================
+
+function ProgressOverview() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Project Progress</CardTitle>
+        <CardDescription>Current project completion status</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Website Redesign</span>
+            <span className="text-muted-foreground">75%</span>
+          </div>
+          <Progress value={75} size="md" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Mobile App</span>
+            <span className="text-muted-foreground">45%</span>
+          </div>
+          <Progress value={45} size="md" variant="warning" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>API Integration</span>
+            <span className="text-muted-foreground">90%</span>
+          </div>
+          <Progress value={90} size="md" variant="success" />
+        </div>
+        <div className="flex justify-center gap-8 pt-4">
+          <div className="text-center">
+            <CircularProgress value={68} size="lg" showValue />
+            <p className="text-muted-foreground mt-2 text-sm">Overall</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ============================================================================
+// Form Demo Panel
+// ============================================================================
+
+function FormDemoPanel() {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    name: '',
+    email: '',
+    role: '',
+    department: '',
+    startDate: '',
+    bio: '',
+    notifications: true,
+    newsletter: false,
+    theme: 'system',
+    permissions: [] as string[],
+  });
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Common tasks and form controls</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="user">
+            <TabsList className="w-full">
+              <TabsTrigger value="user">Add User</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="loading">Loading</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="user" className="space-y-4 pt-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input
+                  label="Full Name"
+                  placeholder="Enter name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+                <Input
+                  label="Email"
+                  type="email"
+                  placeholder="Enter email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Select
+                  label="Role"
+                  placeholder="Select role"
+                  value={formData.role}
+                  onChange={(value) =>
+                    setFormData({ ...formData, role: value })
+                  }
+                >
+                  <SelectOption value="admin">Admin</SelectOption>
+                  <SelectOption value="moderator">Moderator</SelectOption>
+                  <SelectOption value="user">User</SelectOption>
+                </Select>
+
+                <Select
+                  label="Department"
+                  placeholder="Select department"
+                  value={formData.department}
+                  onChange={(value) =>
+                    setFormData({ ...formData, department: value })
+                  }
+                  searchable
+                >
+                  <SelectGroup label="Engineering">
+                    <SelectOption value="frontend">Frontend</SelectOption>
+                    <SelectOption value="backend">Backend</SelectOption>
+                    <SelectOption value="devops">DevOps</SelectOption>
+                  </SelectGroup>
+                  <SelectGroup label="Design">
+                    <SelectOption value="ui">UI Design</SelectOption>
+                    <SelectOption value="ux">UX Design</SelectOption>
+                  </SelectGroup>
+                </Select>
+              </div>
+
+              <DateInput
+                label="Start Date"
+                value={formData.startDate}
+                onChange={(e) =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
+              />
+
+              <Textarea
+                label="Bio"
+                placeholder="Tell us about yourself..."
+                value={formData.bio}
+                onChange={(e) =>
+                  setFormData({ ...formData, bio: e.target.value })
+                }
+                maxLength={200}
+                showCharacterCount
+              />
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline">Cancel</Button>
+                <Button onClick={() => setIsModalOpen(true)}>Save User</Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6 pt-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Email Notifications</p>
+                    <p className="text-muted-foreground text-sm">
+                      Receive email updates
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formData.notifications}
+                    onChange={(checked) =>
+                      setFormData({ ...formData, notifications: checked })
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Newsletter</p>
+                    <p className="text-muted-foreground text-sm">
+                      Weekly digest emails
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formData.newsletter}
+                    onChange={(checked) =>
+                      setFormData({ ...formData, newsletter: checked })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="font-medium">Theme Preference</p>
+                <RadioGroup
+                  value={formData.theme}
+                  onChange={(value) =>
+                    setFormData({ ...formData, theme: value })
+                  }
+                >
+                  <Radio value="light" label="Light" />
+                  <Radio value="dark" label="Dark" />
+                  <Radio value="system" label="System" />
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-3">
+                <p className="font-medium">Permissions</p>
+                <CheckboxGroup
+                  value={formData.permissions}
+                  onChange={(values) =>
+                    setFormData({ ...formData, permissions: values })
+                  }
+                >
+                  <Checkbox value="read" label="Read access" />
+                  <Checkbox value="write" label="Write access" />
+                  <Checkbox value="delete" label="Delete access" />
+                  <Checkbox value="admin" label="Admin access" />
+                </CheckboxGroup>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="loading" className="space-y-6 pt-4">
+              <div className="space-y-4">
+                <p className="text-sm font-medium">Skeleton Loading</p>
+                <SkeletonCard />
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-sm font-medium">Text Loading</p>
+                <SkeletonText lines={3} />
+              </div>
+
+              <div className="flex items-center gap-8">
+                <div className="text-center">
+                  <Spinner size="lg" />
+                  <p className="text-muted-foreground mt-2 text-sm">Spinner</p>
+                </div>
+                <div className="text-center">
+                  <Progress
+                    value={65}
+                    indeterminate
+                    size="lg"
+                    className="w-32"
+                  />
+                  <p className="text-muted-foreground mt-2 text-sm">Progress</p>
+                </div>
+                <SpinnerWithLabel label="Loading data..." />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <Modal open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <ModalHeader>
+          <ModalTitle>Confirm Action</ModalTitle>
+          <ModalClose />
+        </ModalHeader>
+        <ModalBody>
+          <Alert variant="info" title="Review Details">
+            Please review the user details before saving.
+          </Alert>
+          <div className="mt-4 space-y-2">
+            <p>
+              <strong>Name:</strong> {formData.name || 'Not specified'}
+            </p>
+            <p>
+              <strong>Email:</strong> {formData.email || 'Not specified'}
+            </p>
+            <p>
+              <strong>Role:</strong> {formData.role || 'Not specified'}
+            </p>
+            <p>
+              <strong>Department:</strong>{' '}
+              {formData.department || 'Not specified'}
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={() => setIsModalOpen(false)}>Confirm</Button>
+        </ModalFooter>
+      </Modal>
+    </>
+  );
+}
+
+// ============================================================================
+// Alerts Section
+// ============================================================================
+
+function AlertsSection() {
+  return (
+    <div className="space-y-4">
+      <Alert variant="info" title="System Update">
+        A new version is available. Please update to get the latest features.
+      </Alert>
+      <Alert variant="success" title="Payment Successful">
+        Your payment has been processed successfully.
+      </Alert>
+      <Alert variant="warning" title="Storage Warning">
+        You are using 85% of your storage quota.
+      </Alert>
+    </div>
+  );
+}
+
+// ============================================================================
+// Main Dashboard
+// ============================================================================
+
+function DashboardContent() {
+  const breadcrumbItems: BreadcrumbItem[] = [
+    { label: 'Home', href: '#' },
+    { label: 'Dashboard', href: '#' },
+    { label: 'Overview' },
+  ];
+
+  return (
+    <div className="bg-background min-h-screen">
+      <DashboardHeader />
+
+      <main className="container mx-auto space-y-8 p-6">
+        {/* Breadcrumb */}
+        <Breadcrumb items={breadcrumbItems} />
+
+        {/* Page Header */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <Text as="h1" size="3xl" weight="bold">
+              Dashboard
+            </Text>
+            <Text size="lg" className="text-muted-foreground">
+              Welcome back! Here is what is happening.
+            </Text>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline">Export</Button>
+            <Button>New Report</Button>
+          </div>
+        </div>
+
+        {/* Alerts */}
+        <AlertsSection />
+
+        {/* Stats */}
+        <StatsCards />
+
+        {/* Main Content Grid */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <RecentUsersTable />
+          </div>
+          <div className="space-y-6">
+            <ActivityPanel />
+            <ProgressOverview />
+          </div>
+        </div>
+
+        {/* Form Demo */}
+        <FormDemoPanel />
+
+        {/* Footer Pagination */}
+        <div className="flex justify-center pt-4">
+          <Pagination currentPage={1} totalPages={10} onPageChange={() => {}} />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export const Dashboard: Story = {
+  render: () => (
+    <ThemeProvider defaultTheme="light">
+      <DashboardContent />
+    </ThemeProvider>
+  ),
+};
+
+export const DashboardDark: Story = {
+  render: () => (
+    <ThemeProvider defaultTheme="dark">
+      <DashboardContent />
+    </ThemeProvider>
+  ),
+};
+
+// ============================================================================
+// Component Showcase
+// ============================================================================
+
+function ComponentShowcase() {
+  return (
+    <div className="space-y-12 p-8">
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Buttons
+        </Text>
+        <div className="flex flex-wrap gap-4">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="outline">Outline</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="danger">Danger</Button>
+          <Button variant="link">Link</Button>
+          <Button disabled>Disabled</Button>
+          <Button loading>Loading</Button>
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Badges
+        </Text>
+        <div className="flex flex-wrap gap-4">
+          <Badge>Default</Badge>
+          <Badge variant="secondary">Secondary</Badge>
+          <Badge variant="success">Success</Badge>
+          <Badge variant="warning">Warning</Badge>
+          <Badge variant="danger">Danger</Badge>
+          <Badge variant="outline">Outline</Badge>
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Avatars
+        </Text>
+        <div className="flex flex-wrap items-center gap-4">
+          <Avatar name="Alice Johnson" size="xs" />
+          <Avatar name="Bob Smith" size="sm" />
+          <Avatar name="Carol Williams" size="md" />
+          <Avatar name="David Brown" size="lg" />
+          <Avatar name="Eva Martinez" size="xl" />
+          <Avatar src="https://i.pravatar.cc/150" name="User" size="lg" />
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Form Controls
+        </Text>
+        <div className="grid max-w-md gap-6">
+          <Input label="Text Input" placeholder="Enter text..." />
+          <Input label="With Error" error="This field is required" />
+          <Textarea label="Textarea" placeholder="Enter description..." />
+          <DateInput label="Date Input" />
+          <Select label="Select" placeholder="Choose an option">
+            <SelectOption value="1">Option 1</SelectOption>
+            <SelectOption value="2">Option 2</SelectOption>
+            <SelectOption value="3">Option 3</SelectOption>
+          </Select>
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Checkboxes & Radios
+        </Text>
+        <div className="grid max-w-2xl gap-6 md:grid-cols-2">
+          <div className="space-y-4">
+            <Checkbox label="Checkbox 1" />
+            <Checkbox label="Checkbox 2" defaultChecked />
+            <Checkbox label="Checkbox 3" disabled />
+          </div>
+          <RadioGroup defaultValue="option1">
+            <Radio value="option1" label="Radio 1" />
+            <Radio value="option2" label="Radio 2" />
+            <Radio value="option3" label="Radio 3" disabled />
+          </RadioGroup>
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Switches
+        </Text>
+        <div className="flex flex-wrap gap-8">
+          <Switch label="Small" size="sm" />
+          <Switch label="Medium" size="md" defaultChecked />
+          <Switch label="Large" size="lg" />
+          <Switch label="Disabled" disabled />
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Progress Indicators
+        </Text>
+        <div className="max-w-md space-y-6">
+          <Progress value={25} label="25% Complete" />
+          <Progress value={50} variant="warning" label="50% Complete" />
+          <Progress value={75} variant="success" label="75% Complete" />
+          <Progress indeterminate label="Loading..." />
+          <div className="flex gap-8">
+            <CircularProgress value={33} size="md" showValue />
+            <CircularProgress value={66} size="lg" showValue />
+            <CircularProgress indeterminate size="md" />
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Alerts
+        </Text>
+        <div className="max-w-xl space-y-4">
+          <Alert variant="info" title="Information">
+            This is an informational message.
+          </Alert>
+          <Alert variant="success" title="Success">
+            Operation completed successfully!
+          </Alert>
+          <Alert variant="warning" title="Warning">
+            Please review before continuing.
+          </Alert>
+          <Alert variant="danger" title="Error">
+            Something went wrong.
+          </Alert>
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Loading States
+        </Text>
+        <div className="flex flex-wrap items-center gap-8">
+          <Spinner size="sm" />
+          <Spinner size="md" />
+          <Spinner size="lg" />
+          <SpinnerWithLabel label="Loading..." />
+          <div className="w-48 space-y-2">
+            <Skeleton className="h-4" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Navigation
+        </Text>
+        <div className="space-y-6">
+          <Breadcrumb
+            items={[
+              { label: 'Home', href: '#' },
+              { label: 'Products', href: '#' },
+              { label: 'Category', href: '#' },
+              { label: 'Item' },
+            ]}
+          />
+          <Pagination currentPage={3} totalPages={10} onPageChange={() => {}} />
+          <SimplePagination
+            currentPage={1}
+            totalPages={5}
+            onPageChange={() => {}}
+          />
+        </div>
+      </section>
+
+      <section>
+        <Text as="h2" size="2xl" weight="bold" className="mb-6">
+          Tooltips
+        </Text>
+        <div className="flex flex-wrap gap-4">
+          <Tooltip content="Top tooltip" position="top">
+            <Button variant="outline">Top</Button>
+          </Tooltip>
+          <Tooltip content="Right tooltip" position="right">
+            <Button variant="outline">Right</Button>
+          </Tooltip>
+          <Tooltip content="Bottom tooltip" position="bottom">
+            <Button variant="outline">Bottom</Button>
+          </Tooltip>
+          <Tooltip content="Left tooltip" position="left">
+            <Button variant="outline">Left</Button>
+          </Tooltip>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export const AllComponents: Story = {
+  render: () => (
+    <ThemeProvider defaultTheme="light">
+      <ComponentShowcase />
+    </ThemeProvider>
+  ),
+};
+
+export const AllComponentsDark: Story = {
+  render: () => (
+    <ThemeProvider defaultTheme="dark">
+      <ComponentShowcase />
+    </ThemeProvider>
+  ),
+};

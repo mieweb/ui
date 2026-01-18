@@ -3,7 +3,7 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const cardVariants: (props?: ({
-    padding?: "sm" | "md" | "lg" | "xl" | "none" | null | undefined;
+    padding?: "none" | "sm" | "md" | "lg" | "xl" | null | undefined;
     interactive?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface CardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {

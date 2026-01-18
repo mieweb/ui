@@ -2,8 +2,18 @@
  * Enterprise Health Brand Configuration
  *
  * The official brand theme for Enterprise Health.
- * Primary color: #7b2d8e (Enterprise Health Purple)
- * Accent color: #f5a623 (Enterprise Health Gold)
+ * Extracted from enterprisehealth.com on January 2026.
+ *
+ * Brand Colors:
+ * - Primary: #6E2B68 (Burgundy/Purple) - Used for accents, links, icons
+ * - Secondary: #00497A (Deep Teal Blue) - Used in gradients
+ * - Accent: #F8B700 (Gold/Yellow) - Logo sun color
+ * - Gradient: linear-gradient(111.02deg, #00497A, #6E2B68)
+ *
+ * Typography: Jost (Google Font)
+ * Card Radius: 24px (very rounded)
+ * Button Radius: 10px
+ * Input Radius: 12px
  */
 
 import type { BrandConfig } from './types';
@@ -18,82 +28,87 @@ export const enterpriseHealthBrand: BrandConfig = {
   description: 'Employee health and occupational medicine platform',
 
   colors: {
-    // Primary color scale - Enterprise Health Purple (#7b2d8e)
+    // Primary color scale - Enterprise Health Burgundy/Purple (#6E2B68)
+    // Derived from rgb(110, 43, 104) found on their website
     primary: {
-      50: '#faf5fc',
-      100: '#f4eaf8',
-      200: '#ead5f1',
-      300: '#dab3e6',
-      400: '#c487d5',
-      500: '#a85cc0',
-      600: '#7b2d8e',
-      700: '#6c2880',
-      800: '#5a236b',
-      900: '#4b1f59',
-      950: '#2f0a3b',
+      50: '#fdf5fc',
+      100: '#faeaf8',
+      200: '#f5d4f0',
+      300: '#edb3e4',
+      400: '#e086d2',
+      500: '#c95ab8',
+      600: '#6e2b68', // Main brand color
+      700: '#5e2559',
+      800: '#4e1f4a',
+      900: '#42193d',
+      950: '#280e25',
     },
 
     // Light mode semantic colors
+    // Based on actual Enterprise Health website styles
     light: {
       background: '#ffffff',
-      foreground: '#171717',
+      foreground: '#222326', // rgb(34, 35, 38) - their main text color
       card: '#ffffff',
-      cardForeground: '#171717',
-      muted: '#f5f5f5',
-      mutedForeground: '#737373',
-      border: '#e5e7eb',
-      input: '#e5e7eb',
-      ring: '#7b2d8e',
-      destructive: '#ef4444',
+      cardForeground: '#222326',
+      muted: '#f8f9fb', // rgb(248, 249, 251) - their section backgrounds
+      mutedForeground: '#6a6d77', // rgb(106, 109, 119) - their secondary text
+      border: '#e3e6ec', // rgb(227, 230, 236) - their border color
+      input: '#e3e6ec',
+      ring: '#6e2b68',
+      destructive: '#dc2626',
       destructiveForeground: '#ffffff',
       success: '#22c55e',
       successForeground: '#ffffff',
-      warning: '#f5a623',
-      warningForeground: '#171717',
+      warning: '#f8b700', // Gold/yellow accent from logo
+      warningForeground: '#222326',
     },
 
     // Dark mode semantic colors
     dark: {
-      background: '#171717',
+      background: '#1a1a1d',
       foreground: '#fafafa',
-      card: '#262626',
+      card: '#27272a',
       cardForeground: '#fafafa',
-      muted: '#404040',
+      muted: '#3f3f46',
       mutedForeground: '#a1a1aa',
-      border: '#404040',
-      input: '#404040',
-      ring: '#a85cc0',
+      border: '#3f3f46',
+      input: '#3f3f46',
+      ring: '#c95ab8', // Lighter primary for dark mode
       destructive: '#dc2626',
       destructiveForeground: '#fafafa',
       success: '#16a34a',
       successForeground: '#fafafa',
-      warning: '#f5a623',
-      warningForeground: '#171717',
+      warning: '#f8b700',
+      warningForeground: '#222326',
     },
   },
 
   typography: {
     fontFamily: {
-      sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      // Jost is the font used on enterprisehealth.com
+      sans: ['Jost', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
     },
   },
 
+  // Enterprise Health uses larger, more rounded corners
   borderRadius: {
     none: '0',
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-    '2xl': '1.5rem',
+    sm: '0.375rem', // 6px - used for small badges
+    md: '0.625rem', // 10px - used for buttons
+    lg: '0.75rem', // 12px - used for inputs
+    xl: '1rem', // 16px
+    '2xl': '1.5rem', // 24px - used for cards
     full: '9999px',
   },
 
+  // Enterprise Health card shadows are subtle and layered
   boxShadow: {
-    card: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-    dropdown:
-      '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-    modal: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+    card: '0 16px 32px 0 rgba(34, 35, 38, 0.05), 0 8px 16px 0 rgba(34, 35, 38, 0.05)',
+    dropdown: '0 8px 16px 0 rgba(34, 35, 38, 0.08)',
+    modal:
+      '0 24px 48px 0 rgba(34, 35, 38, 0.12), 0 12px 24px 0 rgba(34, 35, 38, 0.08)',
   },
 };
 

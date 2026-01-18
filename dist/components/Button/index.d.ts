@@ -3,8 +3,8 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const buttonVariants: (props?: ({
-    variant?: "link" | "primary" | "secondary" | "ghost" | "outline" | "danger" | null | undefined;
-    size?: "sm" | "md" | "lg" | "icon" | null | undefined;
+    variant?: "danger" | "link" | "secondary" | "outline" | "primary" | "ghost" | null | undefined;
+    size?: "icon" | "sm" | "md" | "lg" | null | undefined;
     fullWidth?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
