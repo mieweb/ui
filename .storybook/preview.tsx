@@ -5,6 +5,7 @@ import { bluehiveBrand } from '../src/brands/bluehive';
 import { defaultBrand } from '../src/brands/default';
 import { enterpriseHealthBrand } from '../src/brands/enterprise-health';
 import { miewebBrand } from '../src/brands/mieweb';
+import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
 
@@ -14,6 +15,7 @@ const brands: Record<string, BrandConfig> = {
   default: defaultBrand,
   'enterprise-health': enterpriseHealthBrand,
   mieweb: miewebBrand,
+  waggleline: wagglelineBrand,
   webchart: webchartBrand,
 };
 
@@ -145,6 +147,7 @@ const preview: Preview = {
           { value: 'default', title: '⚪ Default' },
           { value: 'enterprise-health', title: '🏥 Enterprise Health' },
           { value: 'mieweb', title: '🟢 MIE Web' },
+          { value: 'waggleline', title: '🍯 Waggleline' },
           { value: 'webchart', title: '🟠 WebChart' },
         ],
         showName: true,

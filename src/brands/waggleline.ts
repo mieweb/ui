@@ -25,7 +25,7 @@ import type { BrandConfig } from './types';
  * Note: Dark mode uses charcoal tones (gray-900 based), not pure black,
  * following Waggleline's design philosophy.
  */
-export const wagglinelineBrand: BrandConfig = {
+export const wagglelineBrand: BrandConfig = {
   name: 'waggleline',
   displayName: 'Waggleline',
   description:
@@ -112,4 +112,4 @@ export const wagglinelineBrand: BrandConfig = {
   },
 };
 
-export { wagglinelineBrand as default };
+export { wagglelineBrand as default };

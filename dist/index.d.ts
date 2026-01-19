@@ -30,7 +30,7 @@ export { R as ResolvedTheme, T as Theme, u as useTheme } from './useTheme-B9SWu6
 export { useClickOutside, useEscapeKey, useFocusTrap, usePrefersReducedMotion } from './hooks/index.js';
 export { calculateAge, cn, formatDateValue, formatPhoneNumber, isDateEmpty, isDateInFuture, isDateInPast, isPhoneNumberEmpty, isValidDate, isValidDrivingAge, isValidPhoneNumber, parseDateValue, unformatPhoneNumber } from './utils/index.js';
 export { default as miewebUIPreset, miewebUISafelist } from './tailwind-preset.js';
-export { brands, defaultBrand, enterpriseHealthBrand, miewebBrand, wagglinelineBrand, webchartBrand } from './brands/index.js';
+export { brands, defaultBrand, enterpriseHealthBrand, miewebBrand, wagglelineBrand, webchartBrand } from './brands/index.js';
 export { BrandBorderRadius, BrandBoxShadow, BrandColors, BrandConfig, BrandTypography, ColorScale, SemanticColors, createBrandPreset, generateBrandCSS, generateTailwindTheme } from './brands/types.js';
 export { default as bluehiveBrand } from './brands/bluehive.js';
 import 'class-variance-authority/types';

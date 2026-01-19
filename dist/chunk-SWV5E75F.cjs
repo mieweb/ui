@@ -1,5 +1,7 @@
+'use strict';
+
 // src/brands/waggleline.ts
-var wagglinelineBrand = {
+var wagglelineBrand = {
   name: "waggleline",
   displayName: "Waggleline",
   description: "Experience visualization and orchestration platform for customer journeys",
@@ -87,6 +89,6 @@ var wagglinelineBrand = {
   }
 };
 
-export { wagglinelineBrand };
-//# sourceMappingURL=chunk-AIFKBA4U.js.map
-//# sourceMappingURL=chunk-AIFKBA4U.js.map
+exports.wagglelineBrand = wagglelineBrand;
+//# sourceMappingURL=chunk-SWV5E75F.cjs.map
+//# sourceMappingURL=chunk-SWV5E75F.cjs.map

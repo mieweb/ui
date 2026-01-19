@@ -73,7 +73,7 @@ declare const miewebBrand: BrandConfig;
  * Note: Dark mode uses charcoal tones (gray-900 based), not pure black,
  * following Waggleline's design philosophy.
  */
-declare const wagglinelineBrand: BrandConfig;
+declare const wagglelineBrand: BrandConfig;
 
 /**
  * WebChart Brand Configuration
@@ -97,4 +97,4 @@ declare const brands: {
     readonly webchart: () => Promise<BrandConfig>;
 };
 
-export { BrandConfig, brands, defaultBrand, enterpriseHealthBrand, miewebBrand, wagglinelineBrand, webchartBrand };
+export { BrandConfig, brands, defaultBrand, enterpriseHealthBrand, miewebBrand, wagglelineBrand, webchartBrand };
