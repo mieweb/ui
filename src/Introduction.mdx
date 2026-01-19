@@ -1,0 +1,167 @@
+{/* @jsxImportSource react */}
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction" />
+
+# MIE Web UI
+
+<div className="sb-unstyled" style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
+  <img src="https://img.shields.io/npm/v/@mieweb/ui?style=flat-square&color=27aae1" alt="npm version" />
+  <img src="https://img.shields.io/badge/React-18%2B-61dafb?style=flat-square" alt="React 18+" />
+  <img src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square" alt="Tailwind CSS 4" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square" alt="TypeScript" />
+</div>
+
+A **themeable, accessible React component library** built with Tailwind CSS 4. Designed for MIE's suite of healthcare applications including BlueHive, Enterprise Health, and WebChart.
+
+---
+
+## ✨ Features
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginTop: '16px' }}>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>🎨 Fully Themeable</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Customize colors, fonts, border radius, and more using CSS variables
+    </p>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>🏢 Multi-Brand Support</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Pre-configured themes for BlueHive, Enterprise Health, WebChart, and MIE
+    </p>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>♿ Accessible</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Built with WCAG guidelines, proper ARIA attributes, and keyboard navigation
+    </p>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>🌙 Dark Mode</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Built-in dark mode support with system preference detection
+    </p>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>🌳 Tree-Shakeable</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Import only the components you need for optimal bundle size
+    </p>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>📦 TypeScript</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Full TypeScript support with comprehensive type definitions
+    </p>
+  </div>
+</div>
+
+---
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+npm install @mieweb/ui
+# or
+yarn add @mieweb/ui
+# or
+pnpm add @mieweb/ui
+```
+
+### Basic Usage
+
+```tsx
+import { Button, Card, Input, ThemeProvider } from '@mieweb/ui';
+import '@mieweb/ui/styles.css';
+
+function App() {
+  return (
+    <ThemeProvider>
+      <Card>
+        <Card.Header>
+          <Card.Title>Welcome</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          <Input label="Email" type="email" placeholder="you@example.com" />
+          <Button className="mt-4">Submit</Button>
+        </Card.Content>
+      </Card>
+    </ThemeProvider>
+  );
+}
+```
+
+### With Tailwind CSS (Recommended)
+
+If your project uses Tailwind CSS 4, add the library's preset:
+
+```js
+// tailwind.config.js
+module.exports = {
+  presets: [require('@mieweb/ui/tailwind-preset')],
+  content: [
+    // ... your content
+    './node_modules/@mieweb/ui/dist/**/*.js',
+  ],
+};
+```
+
+---
+
+## 🎨 Brand Themes
+
+This library includes pre-built themes for MIE's product suite. Use the **Brand** selector in the toolbar above to preview components with different brand styles.
+
+| Brand | Primary Color | Description |
+|-------|--------------|-------------|
+| **BlueHive** | `#27aae1` | DOT Physical scheduling platform |
+| **Enterprise Health** | `#2563eb` | Occupational health management |
+| **WebChart** | `#16a34a` | Electronic health records |
+| **MIE** | `#6366f1` | Medical Informatics Engineering |
+
+### Using a Brand Theme
+
+```tsx
+// Import the brand CSS
+import '@mieweb/ui/brands/bluehive.css';
+
+// Or apply programmatically
+import { bluehiveBrand } from '@mieweb/ui/brands/bluehive';
+```
+
+---
+
+## 📖 Exploring Components
+
+Use the sidebar to browse available components. Each component page includes:
+
+- **Interactive examples** with live code
+- **Props documentation** with types and defaults  
+- **Accessibility notes** and keyboard shortcuts
+- **Usage guidelines** and best practices
+
+### Component Categories
+
+- **Forms** — Input, Select, Checkbox, Radio, Switch, Textarea, DateInput, PhoneInput
+- **Buttons** — Button, Dropdown
+- **Layout** — Card, Modal, Tabs
+- **Feedback** — Alert, Progress, Spinner, Skeleton, Tooltip
+- **Navigation** — Breadcrumb, Pagination
+- **Data Display** — Table, Badge, Avatar, Text
+
+---
+
+## 🔗 Resources
+
+- [GitHub Repository](https://github.com/mieweb/ui) — Source code and issue tracker
+- [NPM Package](https://www.npmjs.com/package/@mieweb/ui) — Package registry
+- [Changelog](https://github.com/mieweb/ui/releases) — Version history
+
+---
+
+<div style={{ marginTop: '32px', padding: '16px', borderRadius: '8px', backgroundColor: 'var(--mieweb-muted, #f5f5f5)' }}>
+  <strong>💡 Tip:</strong> Use the toolbar above to toggle dark mode and switch between brand themes while browsing components.
+</div>
