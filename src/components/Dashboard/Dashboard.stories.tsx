@@ -15,17 +15,14 @@ import {
   CardFooter,
 } from '../Card';
 import { DateInput } from '../DateInput';
-import { Dropdown, DropdownItem } from '../Dropdown';
-import { Input } from '../Input';
 import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalClose,
-  ModalBody,
-  ModalFooter,
-} from '../Modal';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../Tabs';
+  Dropdown,
+  DropdownHeader,
+  DropdownContent,
+  DropdownItem,
+  DropdownSeparator,
+} from '../Dropdown';
+import { Input } from '../Input';
 import { Select } from '../Select';
 import { Checkbox, CheckboxGroup } from '../Checkbox';
 import { RadioGroup, Radio } from '../Radio';
@@ -48,7 +45,7 @@ import { Text } from '../Text';
 import { Tooltip } from '../Tooltip';
 import { QuickAction, QuickActionGroup } from '../QuickAction';
 import { PhoneInput } from '../PhoneInput';
-import { ThemeProvider } from '../ThemeProvider';
+import { ThemeProvider, useThemeContext } from '../ThemeProvider';
 
 // ============================================================================
 // Meta
@@ -64,66 +61,738 @@ const meta: Meta = {
 export default meta;
 
 // ============================================================================
-// Dashboard Story Component
+// Icons
 // ============================================================================
 
-function DashboardStory() {
-  const [modalOpen, setModalOpen] = React.useState(false);
+const Icons = {
+  Home: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+      />
+    </svg>
+  ),
+  Users: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+      />
+    </svg>
+  ),
+  Settings: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  ),
+  Bell: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+      />
+    </svg>
+  ),
+  Chart: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+      />
+    </svg>
+  ),
+  Orders: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+      />
+    </svg>
+  ),
+  Profile: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      />
+    </svg>
+  ),
+  Help: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  ),
+  Logout: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+      />
+    </svg>
+  ),
+  Menu: () => (
+    <svg
+      className="h-6 w-6"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 6h16M4 12h16M4 18h16"
+      />
+    </svg>
+  ),
+  Close: () => (
+    <svg
+      className="h-6 w-6"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  ),
+  ChevronDown: () => (
+    <svg
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  ),
+  Sun: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+      />
+    </svg>
+  ),
+  Moon: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+      />
+    </svg>
+  ),
+  Calendar: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      />
+    </svg>
+  ),
+  Shield: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+      />
+    </svg>
+  ),
+  Palette: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+      />
+    </svg>
+  ),
+};
+
+// ============================================================================
+// Types
+// ============================================================================
+
+type Page =
+  | 'dashboard'
+  | 'users'
+  | 'analytics'
+  | 'orders'
+  | 'profile'
+  | 'settings';
+
+interface UserData {
+  name: string;
+  email: string;
+  avatarUrl: string;
+  role: string;
+}
+
+// ============================================================================
+// Mock Data
+// ============================================================================
+
+const mockUser: UserData = {
+  name: 'John Doe',
+  email: 'john@example.com',
+  avatarUrl:
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
+  role: 'Admin',
+};
+
+const mockNotifications = [
+  { id: 1, title: 'New order received', time: '2 min ago', unread: true },
+  { id: 2, title: 'User Jane signed up', time: '10 min ago', unread: true },
+  { id: 3, title: 'Monthly report ready', time: '1 hour ago', unread: false },
+];
+
+const mockActivity = [
+  { user: 'John Doe', action: 'updated profile', time: '2 minutes ago' },
+  { user: 'Jane Smith', action: 'added new project', time: '1 hour ago' },
+  { user: 'Bob Johnson', action: 'completed task', time: '3 hours ago' },
+  { user: 'Alice Brown', action: 'left a comment', time: '5 hours ago' },
+];
+
+const mockOrders = [
+  {
+    id: 'ORD-001',
+    customer: 'John Doe',
+    status: 'completed',
+    amount: '$250.00',
+    date: '2024-01-15',
+  },
+  {
+    id: 'ORD-002',
+    customer: 'Jane Smith',
+    status: 'pending',
+    amount: '$150.00',
+    date: '2024-01-14',
+  },
+  {
+    id: 'ORD-003',
+    customer: 'Bob Johnson',
+    status: 'cancelled',
+    amount: '$75.00',
+    date: '2024-01-13',
+  },
+  {
+    id: 'ORD-004',
+    customer: 'Alice Brown',
+    status: 'completed',
+    amount: '$320.00',
+    date: '2024-01-12',
+  },
+  {
+    id: 'ORD-005',
+    customer: 'Charlie Wilson',
+    status: 'processing',
+    amount: '$180.00',
+    date: '2024-01-11',
+  },
+];
+
+const mockUsers = [
+  {
+    id: 1,
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'Admin',
+    status: 'active',
+    avatar:
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop',
+  },
+  {
+    id: 2,
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    role: 'Editor',
+    status: 'active',
+    avatar: null,
+  },
+  {
+    id: 3,
+    name: 'Bob Johnson',
+    email: 'bob@example.com',
+    role: 'Viewer',
+    status: 'inactive',
+    avatar: null,
+  },
+  {
+    id: 4,
+    name: 'Alice Brown',
+    email: 'alice@example.com',
+    role: 'Admin',
+    status: 'active',
+    avatar: null,
+  },
+  {
+    id: 5,
+    name: 'Charlie Wilson',
+    email: 'charlie@example.com',
+    role: 'Editor',
+    status: 'active',
+    avatar: null,
+  },
+];
+
+// ============================================================================
+// User Menu Component
+// ============================================================================
+
+interface UserMenuProps {
+  user: UserData;
+  onProfile: () => void;
+  onSettings: () => void;
+  onLogout: () => void;
+}
+
+function UserMenu({ user, onProfile, onSettings, onLogout }: UserMenuProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div className="bg-background min-h-screen p-6">
-      {/* Header */}
-      <header className="mb-8 flex items-center justify-between">
-        <div>
-          <Text as="h1" size="3xl" weight="bold">
-            Dashboard
-          </Text>
-          <Breadcrumb
-            items={[
-              { label: 'Home', href: '#' },
-              { label: 'Admin', href: '#' },
-              { label: 'Dashboard' },
-            ]}
-          />
-        </div>
-        <div className="flex items-center gap-4">
-          <Dropdown
-            trigger={
-              <Button variant="ghost" size="icon">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-              </Button>
-            }
-          >
-            <DropdownItem>New notification</DropdownItem>
-            <DropdownItem>View all notifications</DropdownItem>
-          </Dropdown>
-          <Avatar
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop"
-            alt="User avatar"
-            size="md"
-          />
-        </div>
-      </header>
+    <Dropdown
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      placement="bottom-end"
+      width={256}
+      trigger={
+        <button
+          className="focus:ring-primary-500/40 flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+          aria-label="User menu"
+        >
+          <Avatar src={user.avatarUrl} name={user.name} size="sm" ring />
+          <span className="hidden text-sm font-medium text-neutral-700 md:block dark:text-neutral-300">
+            {user.name}
+          </span>
+          <Icons.ChevronDown />
+        </button>
+      }
+    >
+      <DropdownHeader
+        avatar={<Avatar src={user.avatarUrl} name={user.name} size="md" />}
+        title={user.name}
+        subtitle={user.email}
+      />
+      <DropdownContent>
+        <DropdownItem
+          icon={<Icons.Profile />}
+          onClick={() => {
+            onProfile();
+            setIsOpen(false);
+          }}
+        >
+          Profile
+        </DropdownItem>
+        <DropdownItem
+          icon={<Icons.Settings />}
+          onClick={() => {
+            onSettings();
+            setIsOpen(false);
+          }}
+        >
+          Settings
+        </DropdownItem>
+        <DropdownItem icon={<Icons.Help />} onClick={() => setIsOpen(false)}>
+          Help & Support
+        </DropdownItem>
+      </DropdownContent>
+      <DropdownSeparator />
+      <DropdownContent>
+        <DropdownItem
+          icon={<Icons.Logout />}
+          onClick={() => {
+            onLogout();
+            setIsOpen(false);
+          }}
+          variant="danger"
+        >
+          Sign Out
+        </DropdownItem>
+      </DropdownContent>
+    </Dropdown>
+  );
+}
 
-      {/* Alert */}
-      <Alert variant="info" className="mb-6">
-        <strong>Welcome back!</strong> You have 3 new notifications.
-      </Alert>
+// ============================================================================
+// Notifications Dropdown
+// ============================================================================
+
+function NotificationsDropdown() {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const unreadCount = mockNotifications.filter((n) => n.unread).length;
+
+  return (
+    <Dropdown
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      placement="bottom-end"
+      width={320}
+      trigger={
+        <button
+          className="focus:ring-primary-500/40 relative rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+          aria-label="Notifications"
+        >
+          <Icons.Bell />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+      }
+    >
+      <div className="border-b border-neutral-200 p-4 dark:border-neutral-700">
+        <Text weight="semibold">Notifications</Text>
+      </div>
+      <div className="max-h-80 overflow-y-auto">
+        {mockNotifications.map((notification) => (
+          <button
+            key={notification.id}
+            className="flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-700/50"
+          >
+            <div
+              className={`mt-1 h-2 w-2 rounded-full ${notification.unread ? 'bg-primary-500' : 'bg-transparent'}`}
+            />
+            <div className="min-w-0 flex-1">
+              <Text
+                size="sm"
+                weight={notification.unread ? 'medium' : 'normal'}
+              >
+                {notification.title}
+              </Text>
+              <Text size="xs" variant="muted">
+                {notification.time}
+              </Text>
+            </div>
+          </button>
+        ))}
+      </div>
+      <div className="border-t border-neutral-200 p-3 dark:border-neutral-700">
+        <Button variant="ghost" size="sm" className="w-full">
+          View all notifications
+        </Button>
+      </div>
+    </Dropdown>
+  );
+}
+
+// ============================================================================
+// Theme Toggle Component
+// ============================================================================
+
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useThemeContext();
+
+  return (
+    <Tooltip
+      content={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
+    >
+      <button
+        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+        className="focus:ring-primary-500/40 rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+        aria-label="Toggle theme"
+      >
+        {resolvedTheme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
+      </button>
+    </Tooltip>
+  );
+}
+
+// ============================================================================
+// Sidebar Component
+// ============================================================================
+
+interface SidebarProps {
+  currentPage: Page;
+  onNavigate: (page: Page) => void;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
+  const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
+    { id: 'dashboard', label: 'Dashboard', icon: <Icons.Home /> },
+    { id: 'users', label: 'Users', icon: <Icons.Users /> },
+    { id: 'analytics', label: 'Analytics', icon: <Icons.Chart /> },
+    { id: 'orders', label: 'Orders', icon: <Icons.Orders /> },
+  ];
+
+  const handleNavigate = (page: Page) => {
+    onNavigate(page);
+    onClose();
+  };
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onClose}
+          onKeyDown={(e) => e.key === 'Escape' && onClose()}
+          role="button"
+          tabIndex={0}
+          aria-label="Close sidebar"
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:border-r lg:border-neutral-200 lg:shadow-none dark:bg-neutral-800 dark:lg:border-neutral-700 ${isOpen ? 'translate-x-0' : '-translate-x-full'} `}
+      >
+        {/* Logo */}
+        <div className="flex h-16 items-center justify-between border-b border-neutral-200 px-4 dark:border-neutral-700">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+              M
+            </div>
+            <Text weight="bold" size="lg">
+              MieWeb UI
+            </Text>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-700"
+            aria-label="Close sidebar"
+          >
+            <Icons.Close />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 p-4">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleNavigate(item.id)}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+                currentPage === item.id
+                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                  : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
+              } `}
+            >
+              {item.icon}
+              <Text
+                size="sm"
+                weight={currentPage === item.id ? 'semibold' : 'medium'}
+              >
+                {item.label}
+              </Text>
+            </button>
+          ))}
+        </nav>
+
+        {/* Bottom section */}
+        <div className="border-t border-neutral-200 p-4 dark:border-neutral-700">
+          <button
+            onClick={() => handleNavigate('settings')}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+              currentPage === 'settings'
+                ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
+            } `}
+          >
+            <Icons.Settings />
+            <Text
+              size="sm"
+              weight={currentPage === 'settings' ? 'semibold' : 'medium'}
+            >
+              Settings
+            </Text>
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+// ============================================================================
+// Header Component
+// ============================================================================
+
+interface HeaderProps {
+  user: UserData;
+  onMenuToggle: () => void;
+  onProfile: () => void;
+  onSettings: () => void;
+  onLogout: () => void;
+}
+
+function Header({
+  user,
+  onMenuToggle,
+  onProfile,
+  onSettings,
+  onLogout,
+}: HeaderProps) {
+  return (
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:px-6 dark:border-neutral-700 dark:bg-neutral-800">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onMenuToggle}
+          className="rounded-lg p-2 hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-700"
+          aria-label="Toggle menu"
+        >
+          <Icons.Menu />
+        </button>
+
+        {/* Search */}
+        <div className="hidden md:block">
+          <Input placeholder="Search..." className="w-64" />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <NotificationsDropdown />
+        <UserMenu
+          user={user}
+          onProfile={onProfile}
+          onSettings={onSettings}
+          onLogout={onLogout}
+        />
+      </div>
+    </header>
+  );
+}
+
+// ============================================================================
+// Dashboard Page
+// ============================================================================
+
+function DashboardPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Text as="h1" size="2xl" weight="bold">
+          Dashboard
+        </Text>
+        <Text variant="muted">
+          Welcome back! Here&apos;s what&apos;s happening.
+        </Text>
+      </div>
 
       {/* Stats Cards */}
-      <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Revenue</CardDescription>
@@ -183,148 +852,75 @@ function DashboardStory() {
 
       {/* Main Content */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left Column - Form */}
+        {/* Recent Orders */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>User Settings</CardTitle>
-            <CardDescription>
-              Update your account settings and preferences.
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Recent Orders</CardTitle>
+                <CardDescription>Latest customer orders</CardDescription>
+              </div>
+              <Button variant="outline" size="sm">
+                View All
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="profile">
-              <TabsList>
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                <TabsTrigger value="security">Security</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="profile" className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Input label="First Name" placeholder="John" />
-                  <Input label="Last Name" placeholder="Doe" />
-                </div>
-                <Input
-                  label="Email"
-                  type="email"
-                  placeholder="john@example.com"
-                />
-                <Select
-                  label="Role"
-                  placeholder="Select role"
-                  options={[
-                    { value: 'admin', label: 'Admin' },
-                    { value: 'moderator', label: 'Moderator' },
-                    { value: 'user', label: 'User' },
-                  ]}
-                />
-                <DateInput label="Date of Birth" />
-                <Textarea
-                  label="Bio"
-                  placeholder="Tell us about yourself..."
-                  maxLength={200}
-                />
-              </TabsContent>
-
-              <TabsContent value="notifications" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Text weight="medium">Email Notifications</Text>
-                    <Text size="sm" className="text-muted-foreground">
-                      Receive email updates
-                    </Text>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Text weight="medium">Push Notifications</Text>
-                    <Text size="sm" className="text-muted-foreground">
-                      Receive push updates
-                    </Text>
-                  </div>
-                  <Switch />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Text weight="medium">SMS Notifications</Text>
-                    <Text size="sm" className="text-muted-foreground">
-                      Receive text messages
-                    </Text>
-                  </div>
-                  <Switch />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="security" className="space-y-4">
-                <Input
-                  label="Current Password"
-                  type="password"
-                  placeholder="Enter current password"
-                />
-                <Input
-                  label="New Password"
-                  type="password"
-                  placeholder="Enter new password"
-                />
-                <Input
-                  label="Confirm Password"
-                  type="password"
-                  placeholder="Confirm new password"
-                />
-                <CheckboxGroup label="Two-Factor Authentication">
-                  <Checkbox value="sms" label="SMS" />
-                  <Checkbox value="authenticator" label="Authenticator App" />
-                  <Checkbox value="email" label="Email" />
-                </CheckboxGroup>
-              </TabsContent>
-            </Tabs>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockOrders.slice(0, 4).map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell>{order.customer}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          order.status === 'completed'
+                            ? 'success'
+                            : order.status === 'pending'
+                              ? 'warning'
+                              : order.status === 'processing'
+                                ? 'secondary'
+                                : 'danger'
+                        }
+                      >
+                        {order.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{order.amount}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
-          <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline">Cancel</Button>
-            <Button>Save Changes</Button>
-          </CardFooter>
         </Card>
 
-        {/* Right Column - Activity */}
+        {/* Recent Activity */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {[
-              {
-                user: 'John Doe',
-                action: 'updated profile',
-                time: '2 minutes ago',
-              },
-              {
-                user: 'Jane Smith',
-                action: 'added new project',
-                time: '1 hour ago',
-              },
-              {
-                user: 'Bob Johnson',
-                action: 'completed task',
-                time: '3 hours ago',
-              },
-              {
-                user: 'Alice Brown',
-                action: 'left a comment',
-                time: '5 hours ago',
-              },
-            ].map((item, i) => (
+            {mockActivity.map((item, i) => (
               <div key={i} className="flex items-center gap-3">
                 <Avatar name={item.user} size="sm" />
-                <div className="flex-1">
-                  <Text size="sm" weight="medium">
+                <div className="min-w-0 flex-1">
+                  <Text size="sm" weight="medium" truncate>
                     {item.user}
                   </Text>
-                  <Text size="xs" className="text-muted-foreground">
+                  <Text size="xs" variant="muted">
                     {item.action}
                   </Text>
                 </div>
-                <Text size="xs" className="text-muted-foreground">
+                <Text size="xs" variant="muted" className="shrink-0">
                   {item.time}
                 </Text>
               </div>
@@ -333,11 +929,278 @@ function DashboardStory() {
         </Card>
       </div>
 
-      {/* Table Section */}
-      <Card className="mt-6">
+      {/* Quick Actions */}
+      <Card>
         <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
-          <CardDescription>A list of recent orders</CardDescription>
+          <CardTitle>Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <QuickActionGroup>
+            <QuickAction
+              title="Add User"
+              subtitle="Create new team member"
+              icon={<Icons.Users />}
+              color="blue"
+            />
+            <QuickAction
+              title="New Order"
+              subtitle="Create a new order"
+              icon={<Icons.Orders />}
+              color="green"
+            />
+            <QuickAction
+              title="View Reports"
+              subtitle="Analytics overview"
+              icon={<Icons.Chart />}
+              color="purple"
+            />
+          </QuickActionGroup>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ============================================================================
+// Users Page
+// ============================================================================
+
+function UsersPage() {
+  const [currentPage, setCurrentPage] = React.useState(1);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Text as="h1" size="2xl" weight="bold">
+            Users
+          </Text>
+          <Text variant="muted">
+            Manage your team members and their permissions.
+          </Text>
+        </div>
+        <Button>
+          <Icons.Users />
+          Add User
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Input placeholder="Search users..." className="sm:w-64" />
+            <Select
+              placeholder="Filter by role"
+              options={[
+                { value: 'all', label: 'All Roles' },
+                { value: 'admin', label: 'Admin' },
+                { value: 'editor', label: 'Editor' },
+                { value: 'viewer', label: 'Viewer' },
+              ]}
+              className="sm:w-40"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {mockUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar src={user.avatar} name={user.name} size="sm" />
+                      <div>
+                        <Text size="sm" weight="medium">
+                          {user.name}
+                        </Text>
+                        <Text size="xs" variant="muted">
+                          {user.email}
+                        </Text>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{user.role}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={user.status === 'active' ? 'success' : 'danger'}
+                    >
+                      {user.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm">
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="border-t border-neutral-200 dark:border-neutral-700">
+          <Pagination
+            page={currentPage}
+            totalPages={5}
+            onPageChange={setCurrentPage}
+          />
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}
+
+// ============================================================================
+// Analytics Page
+// ============================================================================
+
+function AnalyticsPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Text as="h1" size="2xl" weight="bold">
+          Analytics
+        </Text>
+        <Text variant="muted">
+          Track your business performance and metrics.
+        </Text>
+      </div>
+
+      {/* Metrics Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: 'Page Views', value: '234,567', change: '+12.3%' },
+          { label: 'Unique Visitors', value: '45,678', change: '+8.1%' },
+          { label: 'Bounce Rate', value: '42.3%', change: '-3.2%' },
+          { label: 'Session Duration', value: '4m 32s', change: '+15.7%' },
+        ].map((metric, i) => (
+          <Card key={i}>
+            <CardContent className="pt-6">
+              <Text size="sm" variant="muted">
+                {metric.label}
+              </Text>
+              <div className="mt-2 flex items-baseline gap-2">
+                <Text size="2xl" weight="bold">
+                  {metric.value}
+                </Text>
+                <Badge
+                  variant={metric.change.startsWith('+') ? 'success' : 'danger'}
+                  size="sm"
+                >
+                  {metric.change}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Traffic Overview</CardTitle>
+            <CardDescription>Daily visitors over the past week</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex h-48 items-end justify-around gap-2">
+              {[65, 45, 80, 55, 70, 90, 75].map((height, i) => (
+                <div
+                  key={i}
+                  className="bg-primary-500 hover:bg-primary-600 w-8 rounded-t transition-all"
+                  style={{ height: `${height}%` }}
+                />
+              ))}
+            </div>
+            <div className="mt-2 flex justify-around text-xs text-neutral-500">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                <span key={day}>{day}</span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Traffic Sources</CardTitle>
+            <CardDescription>Where your visitors come from</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[
+              { source: 'Direct', percentage: 45 },
+              { source: 'Organic Search', percentage: 30 },
+              { source: 'Social Media', percentage: 15 },
+              { source: 'Referral', percentage: 10 },
+            ].map((item) => (
+              <div key={item.source}>
+                <div className="mb-1 flex justify-between">
+                  <Text size="sm">{item.source}</Text>
+                  <Text size="sm" weight="medium">
+                    {item.percentage}%
+                  </Text>
+                </div>
+                <Progress value={item.percentage} />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Orders Page
+// ============================================================================
+
+function OrdersPage() {
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [filter, setFilter] = React.useState('all');
+
+  const filteredOrders =
+    filter === 'all'
+      ? mockOrders
+      : mockOrders.filter((o) => o.status === filter);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Text as="h1" size="2xl" weight="bold">
+            Orders
+          </Text>
+          <Text variant="muted">Manage and track customer orders.</Text>
+        </div>
+        <Button>New Order</Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {['all', 'pending', 'processing', 'completed', 'cancelled'].map(
+                (status) => (
+                  <Button
+                    key={status}
+                    variant={filter === status ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilter(status)}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </Button>
+                )
+              )}
+            </div>
+            <Input placeholder="Search orders..." className="sm:w-64" />
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -345,35 +1208,18 @@ function DashboardStory() {
               <TableRow>
                 <TableHead>Order ID</TableHead>
                 <TableHead>Customer</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[
-                {
-                  id: 'ORD-001',
-                  customer: 'John Doe',
-                  status: 'completed',
-                  amount: '$250.00',
-                },
-                {
-                  id: 'ORD-002',
-                  customer: 'Jane Smith',
-                  status: 'pending',
-                  amount: '$150.00',
-                },
-                {
-                  id: 'ORD-003',
-                  customer: 'Bob Johnson',
-                  status: 'cancelled',
-                  amount: '$75.00',
-                },
-              ].map((order) => (
+              {filteredOrders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell>{order.id}</TableCell>
+                  <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>{order.customer}</TableCell>
+                  <TableCell>{order.date}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
@@ -381,14 +1227,16 @@ function DashboardStory() {
                           ? 'success'
                           : order.status === 'pending'
                             ? 'warning'
-                            : 'danger'
+                            : order.status === 'processing'
+                              ? 'secondary'
+                              : 'danger'
                       }
                     >
                       {order.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{order.amount}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-right">{order.amount}</TableCell>
+                  <TableCell className="text-right">
                     <Button variant="ghost" size="sm">
                       View
                     </Button>
@@ -398,30 +1246,460 @@ function DashboardStory() {
             </TableBody>
           </Table>
         </CardContent>
+        <CardFooter className="border-t border-neutral-200 dark:border-neutral-700">
+          <SimplePagination
+            page={currentPage}
+            totalPages={3}
+            onPageChange={setCurrentPage}
+          />
+        </CardFooter>
       </Card>
-
-      {/* Modal */}
-      <Modal open={modalOpen} onOpenChange={setModalOpen}>
-        <ModalHeader>
-          <ModalTitle>Edit Profile</ModalTitle>
-          <ModalClose />
-        </ModalHeader>
-        <ModalBody>
-          <Input label="Name" placeholder="Enter your name" />
-        </ModalBody>
-        <ModalFooter>
-          <Button variant="outline" onClick={() => setModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={() => setModalOpen(false)}>Save</Button>
-        </ModalFooter>
-      </Modal>
     </div>
   );
 }
 
+// ============================================================================
+// Profile Page
+// ============================================================================
+
+interface ProfilePageProps {
+  user: UserData;
+}
+
+function ProfilePage({ user }: ProfilePageProps) {
+  const [firstName, setFirstName] = React.useState(user.name.split(' ')[0]);
+  const [lastName, setLastName] = React.useState(user.name.split(' ')[1] || '');
+  const [email, setEmail] = React.useState(user.email);
+  const [phone, setPhone] = React.useState('');
+  const [bio, setBio] = React.useState('');
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <Text as="h1" size="2xl" weight="bold">
+          Profile
+        </Text>
+        <Text variant="muted">
+          Manage your personal information and preferences.
+        </Text>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Profile Card */}
+        <Card className="lg:col-span-1">
+          <CardContent className="pt-6 text-center">
+            <Avatar
+              src={user.avatarUrl}
+              name={user.name}
+              size="xl"
+              className="mx-auto"
+            />
+            <Text size="lg" weight="semibold" className="mt-4">
+              {user.name}
+            </Text>
+            <Text variant="muted">{user.email}</Text>
+            <Badge className="mt-2">{user.role}</Badge>
+            <Button variant="outline" className="mt-4 w-full">
+              Change Photo
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Edit Form */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Edit Profile</CardTitle>
+            <CardDescription>Update your personal information.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <Input
+                label="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <PhoneInput
+              label="Phone Number"
+              value={phone}
+              onChange={setPhone}
+            />
+            <Textarea
+              label="Bio"
+              placeholder="Tell us about yourself..."
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              maxLength={200}
+            />
+          </CardContent>
+          <CardFooter className="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700">
+            <Button variant="outline">Cancel</Button>
+            <Button>Save Changes</Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Settings Page
+// ============================================================================
+
+type SettingsTab = 'notifications' | 'security' | 'appearance';
+
+function SettingsPage() {
+  const [activeTab, setActiveTab] =
+    React.useState<SettingsTab>('notifications');
+  const { resolvedTheme, setTheme } = useThemeContext();
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <Text as="h1" size="2xl" weight="bold">
+          Settings
+        </Text>
+        <Text variant="muted">
+          Manage your account settings and preferences.
+        </Text>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-4">
+        {/* Settings Navigation */}
+        <Card className="lg:col-span-1">
+          <CardContent className="p-2">
+            <nav className="space-y-1">
+              {[
+                {
+                  id: 'notifications' as const,
+                  label: 'Notifications',
+                  icon: <Icons.Bell />,
+                },
+                {
+                  id: 'security' as const,
+                  label: 'Security',
+                  icon: <Icons.Shield />,
+                },
+                {
+                  id: 'appearance' as const,
+                  label: 'Appearance',
+                  icon: <Icons.Palette />,
+                },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+                    activeTab === item.id
+                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                      : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                  } `}
+                >
+                  {item.icon}
+                  <Text
+                    size="sm"
+                    weight={activeTab === item.id ? 'semibold' : 'medium'}
+                  >
+                    {item.label}
+                  </Text>
+                </button>
+              ))}
+            </nav>
+          </CardContent>
+        </Card>
+
+        {/* Settings Content */}
+        <Card className="lg:col-span-3">
+          {activeTab === 'notifications' && (
+            <>
+              <CardHeader>
+                <CardTitle>Notification Preferences</CardTitle>
+                <CardDescription>
+                  Configure how you receive notifications.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Text weight="medium">Email Notifications</Text>
+                    <Text size="sm" variant="muted">
+                      Receive email updates about your account.
+                    </Text>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Text weight="medium">Push Notifications</Text>
+                    <Text size="sm" variant="muted">
+                      Receive push notifications on your devices.
+                    </Text>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Text weight="medium">SMS Notifications</Text>
+                    <Text size="sm" variant="muted">
+                      Receive text message alerts.
+                    </Text>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Text weight="medium">Marketing Emails</Text>
+                    <Text size="sm" variant="muted">
+                      Receive emails about new features and offers.
+                    </Text>
+                  </div>
+                  <Switch />
+                </div>
+              </CardContent>
+            </>
+          )}
+
+          {activeTab === 'security' && (
+            <>
+              <CardHeader>
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>
+                  Manage your password and security preferences.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <Text weight="medium">Change Password</Text>
+                  <Input
+                    label="Current Password"
+                    type="password"
+                    placeholder="Enter current password"
+                  />
+                  <Input
+                    label="New Password"
+                    type="password"
+                    placeholder="Enter new password"
+                  />
+                  <Input
+                    label="Confirm Password"
+                    type="password"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <div className="border-t border-neutral-200 pt-6 dark:border-neutral-700">
+                  <Text weight="medium" className="mb-4">
+                    Two-Factor Authentication
+                  </Text>
+                  <CheckboxGroup>
+                    <Checkbox value="sms" label="SMS verification" />
+                    <Checkbox value="authenticator" label="Authenticator app" />
+                    <Checkbox value="email" label="Email verification" />
+                  </CheckboxGroup>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t border-neutral-200 dark:border-neutral-700">
+                <Button>Update Security Settings</Button>
+              </CardFooter>
+            </>
+          )}
+
+          {activeTab === 'appearance' && (
+            <>
+              <CardHeader>
+                <CardTitle>Appearance</CardTitle>
+                <CardDescription>
+                  Customize how the application looks.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Text weight="medium" className="mb-4">
+                    Theme
+                  </Text>
+                  <RadioGroup
+                    value={resolvedTheme}
+                    onValueChange={(value) =>
+                      setTheme(value as 'light' | 'dark')
+                    }
+                  >
+                    <Radio value="light" label="Light" />
+                    <Radio value="dark" label="Dark" />
+                  </RadioGroup>
+                </div>
+                <div className="border-t border-neutral-200 pt-6 dark:border-neutral-700">
+                  <Text weight="medium" className="mb-4">
+                    Preview
+                  </Text>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      className={`w-full cursor-pointer rounded-lg border-2 p-4 ${resolvedTheme === 'light' ? 'border-primary-500' : 'border-neutral-200 dark:border-neutral-700'}`}
+                      onClick={() => setTheme('light')}
+                    >
+                      <div className="rounded bg-white p-3 shadow-sm">
+                        <div className="mb-2 h-2 w-16 rounded bg-neutral-200" />
+                        <div className="h-2 w-24 rounded bg-neutral-100" />
+                      </div>
+                      <Text size="sm" className="mt-2 text-center">
+                        Light
+                      </Text>
+                    </button>
+                    <button
+                      type="button"
+                      className={`w-full cursor-pointer rounded-lg border-2 p-4 ${resolvedTheme === 'dark' ? 'border-primary-500' : 'border-neutral-200 dark:border-neutral-700'}`}
+                      onClick={() => setTheme('dark')}
+                    >
+                      <div className="rounded bg-neutral-800 p-3 shadow-sm">
+                        <div className="mb-2 h-2 w-16 rounded bg-neutral-600" />
+                        <div className="h-2 w-24 rounded bg-neutral-700" />
+                      </div>
+                      <Text size="sm" className="mt-2 text-center">
+                        Dark
+                      </Text>
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          )}
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Main App Shell
+// ============================================================================
+
+function AppShell() {
+  const [currentPage, setCurrentPage] = React.useState<Page>('dashboard');
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [loggedOut, setLoggedOut] = React.useState(false);
+
+  const handleLogout = () => {
+    setLoggedOut(true);
+  };
+
+  if (loggedOut) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-4 dark:bg-neutral-900">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="bg-primary-500 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold text-white">
+              M
+            </div>
+            <CardTitle>You&apos;ve been logged out</CardTitle>
+            <CardDescription>Thanks for using MieWeb UI</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button className="w-full" onClick={() => setLoggedOut(false)}>
+              Sign In Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const getBreadcrumbs = () => {
+    const breadcrumbs: { label: string; href?: string }[] = [
+      { label: 'Home', href: '#' },
+    ];
+
+    switch (currentPage) {
+      case 'dashboard':
+        breadcrumbs.push({ label: 'Dashboard' });
+        break;
+      case 'users':
+        breadcrumbs.push({ label: 'Users' });
+        break;
+      case 'analytics':
+        breadcrumbs.push({ label: 'Analytics' });
+        break;
+      case 'orders':
+        breadcrumbs.push({ label: 'Orders' });
+        break;
+      case 'profile':
+        breadcrumbs.push({ label: 'Profile' });
+        break;
+      case 'settings':
+        breadcrumbs.push({ label: 'Settings' });
+        break;
+    }
+
+    return breadcrumbs;
+  };
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'dashboard':
+        return <DashboardPage />;
+      case 'users':
+        return <UsersPage />;
+      case 'analytics':
+        return <AnalyticsPage />;
+      case 'orders':
+        return <OrdersPage />;
+      case 'profile':
+        return <ProfilePage user={mockUser} />;
+      case 'settings':
+        return <SettingsPage />;
+      default:
+        return <DashboardPage />;
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
+      <div className="flex flex-1 flex-col">
+        <Header
+          user={mockUser}
+          onMenuToggle={() => setSidebarOpen(true)}
+          onProfile={() => setCurrentPage('profile')}
+          onSettings={() => setCurrentPage('settings')}
+          onLogout={handleLogout}
+        />
+
+        <main className="flex-1 p-4 lg:p-6">
+          <div className="mb-4">
+            <Breadcrumb items={getBreadcrumbs()} />
+          </div>
+          {renderPage()}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Dashboard Story (Full Application)
+// ============================================================================
+
 export const Dashboard: StoryObj = {
-  render: () => <DashboardStory />,
+  render: () => (
+    <ThemeProvider defaultTheme="light" storageKey="mieweb-dashboard-theme">
+      <AppShell />
+    </ThemeProvider>
+  ),
 };
 
 // ============================================================================
@@ -430,102 +1708,8 @@ export const Dashboard: StoryObj = {
 
 export const DashboardDark: StoryObj = {
   render: () => (
-    <ThemeProvider defaultTheme="dark" storageKey="storybook-dashboard-theme">
-      <div className="bg-background min-h-screen p-6">
-        <Text as="h1" size="3xl" weight="bold" className="mb-6">
-          Dark Mode Dashboard
-        </Text>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenue</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Text size="3xl" weight="bold">
-                $45,231
-              </Text>
-              <Progress value={75} className="mt-4" />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Users</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Text size="3xl" weight="bold">
-                2,350
-              </Text>
-              <Progress value={60} className="mt-4" />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Sales</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Text size="3xl" weight="bold">
-                12,234
-              </Text>
-              <Progress value={90} className="mt-4" />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <QuickActionGroup>
-              <QuickAction
-                title="Complete Task"
-                subtitle="Mark items as done"
-                icon={
-                  <svg
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
-                }
-                color="green"
-              />
-              <QuickAction
-                title="View Report"
-                subtitle="Analytics overview"
-                icon={
-                  <svg
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                  </svg>
-                }
-                color="blue"
-              />
-              <QuickAction
-                title="Add New"
-                subtitle="Create new item"
-                icon={
-                  <svg
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                  </svg>
-                }
-                color="purple"
-              />
-            </QuickActionGroup>
-          </CardContent>
-        </Card>
-      </div>
+    <ThemeProvider defaultTheme="dark" storageKey="mieweb-dashboard-dark-theme">
+      <AppShell />
     </ThemeProvider>
   ),
 };
@@ -701,599 +1885,6 @@ export const AllComponents: StoryObj = {
           <SimplePagination page={1} totalPages={10} onPageChange={() => {}} />
         </div>
       </section>
-
-      {/* ============================================================ */}
-      {/* TYPOGRAPHY SECTION */}
-      {/* ============================================================ */}
-      <div className="border-border mb-8 border-t pt-8">
-        <Text as="h1" size="3xl" weight="bold" className="mb-2">
-          Typography
-        </Text>
-        <Text variant="muted" className="mb-8">
-          A comprehensive typography system using the Text component with
-          flexible sizing, weights, and semantic variants.
-        </Text>
-      </div>
-
-      {/* Headings Hierarchy */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Heading Hierarchy
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Use semantic heading elements (h1-h6) with appropriate sizing for
-          document structure.
-        </Text>
-        <div className="bg-muted/30 space-y-4 rounded-lg p-6">
-          <Text as="h1" size="3xl" weight="bold">
-            Heading 1 — Main Page Title
-          </Text>
-          <Text as="h2" size="2xl" weight="bold">
-            Heading 2 — Section Title
-          </Text>
-          <Text as="h3" size="xl" weight="semibold">
-            Heading 3 — Subsection Title
-          </Text>
-          <Text as="h4" size="lg" weight="semibold">
-            Heading 4 — Card or Panel Title
-          </Text>
-          <Text as="h5" size="base" weight="semibold">
-            Heading 5 — Minor Section
-          </Text>
-          <Text as="h6" size="sm" weight="semibold">
-            Heading 6 — Small Label
-          </Text>
-        </div>
-      </section>
-
-      {/* Font Sizes */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Font Sizes
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Seven size options from xs (12px) to 3xl (30px).
-        </Text>
-        <div className="bg-muted/30 space-y-3 rounded-lg p-6">
-          <div className="border-border flex items-baseline justify-between border-b pb-2">
-            <Text size="xs">Extra Small (xs)</Text>
-            <Text variant="muted" size="xs">
-              text-xs · 12px
-            </Text>
-          </div>
-          <div className="border-border flex items-baseline justify-between border-b pb-2">
-            <Text size="sm">Small (sm)</Text>
-            <Text variant="muted" size="xs">
-              text-sm · 14px
-            </Text>
-          </div>
-          <div className="border-border flex items-baseline justify-between border-b pb-2">
-            <Text size="base">Base (base)</Text>
-            <Text variant="muted" size="xs">
-              text-base · 16px
-            </Text>
-          </div>
-          <div className="border-border flex items-baseline justify-between border-b pb-2">
-            <Text size="lg">Large (lg)</Text>
-            <Text variant="muted" size="xs">
-              text-lg · 18px
-            </Text>
-          </div>
-          <div className="border-border flex items-baseline justify-between border-b pb-2">
-            <Text size="xl">Extra Large (xl)</Text>
-            <Text variant="muted" size="xs">
-              text-xl · 20px
-            </Text>
-          </div>
-          <div className="border-border flex items-baseline justify-between border-b pb-2">
-            <Text size="2xl">2X Large (2xl)</Text>
-            <Text variant="muted" size="xs">
-              text-2xl · 24px
-            </Text>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <Text size="3xl">3X Large (3xl)</Text>
-            <Text variant="muted" size="xs">
-              text-3xl · 30px
-            </Text>
-          </div>
-        </div>
-      </section>
-
-      {/* Font Weights */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Font Weights
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Four weight options for visual emphasis and hierarchy.
-        </Text>
-        <div className="bg-muted/30 rounded-lg p-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-2 text-center">
-              <Text size="xl" weight="normal">
-                Normal
-              </Text>
-              <Text variant="muted" size="xs">
-                font-normal · 400
-              </Text>
-            </div>
-            <div className="space-y-2 text-center">
-              <Text size="xl" weight="medium">
-                Medium
-              </Text>
-              <Text variant="muted" size="xs">
-                font-medium · 500
-              </Text>
-            </div>
-            <div className="space-y-2 text-center">
-              <Text size="xl" weight="semibold">
-                Semibold
-              </Text>
-              <Text variant="muted" size="xs">
-                font-semibold · 600
-              </Text>
-            </div>
-            <div className="space-y-2 text-center">
-              <Text size="xl" weight="bold">
-                Bold
-              </Text>
-              <Text variant="muted" size="xs">
-                font-bold · 700
-              </Text>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Text Variants */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Semantic Variants
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Color variants that convey meaning and adapt to the theme.
-        </Text>
-        <div className="bg-muted/30 grid gap-4 rounded-lg p-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardContent className="pt-4">
-              <Text variant="default" weight="medium">
-                Default
-              </Text>
-              <Text variant="muted" size="sm">
-                Standard foreground text color for body content.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <Text variant="muted" weight="medium">
-                Muted
-              </Text>
-              <Text variant="muted" size="sm">
-                Secondary text, descriptions, and captions.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <Text variant="primary" weight="medium">
-                Primary
-              </Text>
-              <Text variant="muted" size="sm">
-                Brand color for emphasis and links.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <Text variant="success" weight="medium">
-                Success
-              </Text>
-              <Text variant="muted" size="sm">
-                Positive states, confirmations, and completed items.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <Text variant="warning" weight="medium">
-                Warning
-              </Text>
-              <Text variant="muted" size="sm">
-                Cautionary messages and pending states.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <Text variant="destructive" weight="medium">
-                Destructive
-              </Text>
-              <Text variant="muted" size="sm">
-                Errors, deletions, and critical actions.
-              </Text>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Text Alignment */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Text Alignment
-        </Text>
-        <div className="bg-muted/30 grid gap-4 rounded-lg p-6 md:grid-cols-3">
-          <div className="border-border rounded border p-4">
-            <Text align="left" weight="medium">
-              Left Aligned
-            </Text>
-            <Text variant="muted" size="sm" align="left">
-              Default alignment for LTR languages. Used for body text and form
-              labels.
-            </Text>
-          </div>
-          <div className="border-border rounded border p-4">
-            <Text align="center" weight="medium">
-              Center Aligned
-            </Text>
-            <Text variant="muted" size="sm" align="center">
-              Hero sections, headings, and empty states.
-            </Text>
-          </div>
-          <div className="border-border rounded border p-4">
-            <Text align="right" weight="medium">
-              Right Aligned
-            </Text>
-            <Text variant="muted" size="sm" align="right">
-              Numeric data, prices, and table columns.
-            </Text>
-          </div>
-        </div>
-      </section>
-
-      {/* Body Text Examples */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Body Text Examples
-        </Text>
-        <div className="bg-muted/30 max-w-2xl space-y-4 rounded-lg p-6">
-          <Text>
-            This is a paragraph of regular body text. It uses the default
-            foreground color and base font size. The line height is optimized
-            for readability in longer passages.
-          </Text>
-          <Text variant="muted">
-            This muted paragraph provides secondary information. It&apos;s
-            useful for descriptions, helper text, and supplementary content that
-            shouldn&apos;t compete with primary content.
-          </Text>
-          <Text size="sm">
-            Smaller text can be used for captions, footnotes, and fine print. It
-            maintains readability while taking up less visual space.
-          </Text>
-          <Text size="lg" weight="medium">
-            Larger text with medium weight works well for lead paragraphs or
-            introductory content that needs to stand out.
-          </Text>
-        </div>
-      </section>
-
-      {/* Truncation */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Text Truncation
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Use the truncate prop to clip overflowing text with an ellipsis.
-        </Text>
-        <div className="max-w-sm space-y-4">
-          <Card>
-            <CardContent className="pt-4">
-              <Text weight="medium" truncate>
-                This is a very long title that will be truncated when it exceeds
-                the container width
-              </Text>
-              <Text variant="muted" size="sm" truncate>
-                And this description will also truncate gracefully without
-                breaking the layout
-              </Text>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* ============================================================ */}
-      {/* BRANDING & COLORS SECTION */}
-      {/* ============================================================ */}
-      <div className="border-border mb-8 border-t pt-8">
-        <Text as="h1" size="3xl" weight="bold" className="mb-2">
-          Branding & Colors
-        </Text>
-        <Text variant="muted" className="mb-8">
-          The @mieweb/ui design system supports multiple brand themes. Each
-          brand defines its own color palette, typography, and design tokens.
-        </Text>
-      </div>
-
-      {/* Current Brand Colors */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Primary Color Scale
-        </Text>
-        <Text variant="muted" className="mb-6">
-          The current brand&apos;s primary color with 50-950 shades.
-        </Text>
-        <div className="grid grid-cols-5 gap-2 sm:grid-cols-11">
-          <div className="text-center">
-            <div className="bg-primary-50 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              50
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-100 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              100
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-200 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              200
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-300 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              300
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-400 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              400
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-500 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              500
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-600 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              600
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-700 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              700
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-800 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              800
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-900 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              900
-            </Text>
-          </div>
-          <div className="text-center">
-            <div className="bg-primary-950 mb-1 h-12 w-full rounded-lg" />
-            <Text size="xs" variant="muted">
-              950
-            </Text>
-          </div>
-        </div>
-      </section>
-
-      {/* Semantic Colors */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Semantic Colors
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Colors that adapt based on context and theme.
-        </Text>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="bg-background border-border mb-2 h-16 rounded border" />
-              <Text weight="medium">Background</Text>
-              <Text variant="muted" size="xs">
-                Page background
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="bg-muted mb-2 h-16 rounded" />
-              <Text weight="medium">Muted</Text>
-              <Text variant="muted" size="xs">
-                Subtle backgrounds
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="bg-card border-border mb-2 h-16 rounded border" />
-              <Text weight="medium">Card</Text>
-              <Text variant="muted" size="xs">
-                Card backgrounds
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="bg-border mb-2 h-16 rounded" />
-              <Text weight="medium">Border</Text>
-              <Text variant="muted" size="xs">
-                Borders & dividers
-              </Text>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Status Colors */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Status Colors
-        </Text>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-primary-500 text-primary-foreground flex h-24 items-center justify-center rounded-lg">
-            <Text weight="semibold" className="text-white">
-              Primary
-            </Text>
-          </div>
-          <div className="bg-success text-success-foreground flex h-24 items-center justify-center rounded-lg">
-            <Text weight="semibold" className="text-white">
-              Success
-            </Text>
-          </div>
-          <div className="bg-warning text-warning-foreground flex h-24 items-center justify-center rounded-lg">
-            <Text weight="semibold" className="text-white">
-              Warning
-            </Text>
-          </div>
-          <div className="bg-destructive text-destructive-foreground flex h-24 items-center justify-center rounded-lg">
-            <Text weight="semibold" className="text-white">
-              Destructive
-            </Text>
-          </div>
-        </div>
-      </section>
-
-      {/* Available Brands */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Available Brands
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Use the brand switcher in the Storybook toolbar to preview components
-          with different brands.
-        </Text>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-[#27aae1]" />
-                <div>
-                  <Text weight="semibold">BlueHive</Text>
-                  <Text variant="muted" size="xs">
-                    #27aae1 · Nunito
-                  </Text>
-                </div>
-              </div>
-              <Text variant="muted" size="sm">
-                DOT Physical scheduling and healthcare compliance platform.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-[#27ae60]" />
-                <div>
-                  <Text weight="semibold">MieWeb</Text>
-                  <Text variant="muted" size="xs">
-                    #27ae60 · Inter
-                  </Text>
-                </div>
-              </div>
-              <Text variant="muted" size="sm">
-                Healthcare software and services company.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-[#6E2B68]" />
-                <div>
-                  <Text weight="semibold">Enterprise Health</Text>
-                  <Text variant="muted" size="xs">
-                    #6E2B68 · Jost
-                  </Text>
-                </div>
-              </div>
-              <Text variant="muted" size="sm">
-                Employee health and occupational medicine platform.
-              </Text>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-[#f5841f]" />
-                <div>
-                  <Text weight="semibold">WebChart</Text>
-                  <Text variant="muted" size="xs">
-                    #f5841f · Inter
-                  </Text>
-                </div>
-              </div>
-              <Text variant="muted" size="sm">
-                Future-ready electronic health record system.
-              </Text>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Font Families */}
-      <section className="mb-12">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Typography Families
-        </Text>
-        <Text variant="muted" className="mb-6">
-          Each brand can define custom font families.
-        </Text>
-        <div className="bg-muted/30 grid gap-6 rounded-lg p-6 md:grid-cols-2">
-          <div>
-            <Text weight="semibold" className="mb-2">
-              Sans Serif (Default)
-            </Text>
-            <Text
-              className="font-sans"
-              size="lg"
-              style={{
-                fontFamily:
-                  'var(--mieweb-font-sans, Inter, ui-sans-serif, system-ui, sans-serif)',
-              }}
-            >
-              The quick brown fox jumps over the lazy dog. 0123456789
-            </Text>
-            <Text variant="muted" size="xs" className="mt-1">
-              Used for headings, body text, and UI elements.
-            </Text>
-          </div>
-          <div>
-            <Text weight="semibold" className="mb-2">
-              Monospace
-            </Text>
-            <Text
-              size="lg"
-              style={{
-                fontFamily:
-                  'var(--mieweb-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)',
-              }}
-            >
-              const message = &quot;Hello, World!&quot;;
-            </Text>
-            <Text variant="muted" size="xs" className="mt-1">
-              Used for code, technical data, and tabular numbers.
-            </Text>
-          </div>
-        </div>
-      </section>
     </div>
   ),
 };
@@ -1310,8 +1901,7 @@ export const AllComponentsDark: StoryObj = {
       </Text>
       <Text variant="muted" className="mb-8">
         All components automatically adapt to the dark theme. Use the theme
-        toggle in the toolbar to switch themes, or view the AllComponents story
-        for the full showcase in light mode.
+        toggle in the toolbar to switch themes.
       </Text>
 
       {/* Sample Components in Dark Mode */}

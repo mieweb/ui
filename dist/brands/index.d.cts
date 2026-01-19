@@ -49,6 +49,33 @@ declare const enterpriseHealthBrand: BrandConfig;
 declare const miewebBrand: BrandConfig;
 
 /**
+ * Waggleline Brand Configuration
+ *
+ * The official brand theme for Waggleline.
+ * Primary color: #17AEED (Waggleline Blue)
+ *
+ * Waggleline is an experience visualization and orchestration platform
+ * that maps relationships, signals, handoffs, dependencies, and momentum
+ * across the customer journey.
+ *
+ * Brand colors from MIE Brand Guide:
+ * - Blue (#17AEED): Primary actions, momentum
+ * - Green (#009C4E): MIE core platform, success, completions
+ * - Orange (#E04501): WebChart workflow, urgency
+ * - Yellow (#FFD200): Enterprise Health, readiness, highlights
+ * - Purple (#8B5CF6): Ozwell AI, intelligence
+ */
+
+/**
+ * Waggleline brand configuration.
+ * This defines all the design tokens used in Waggleline applications.
+ *
+ * Note: Dark mode uses charcoal tones (gray-900 based), not pure black,
+ * following Waggleline's design philosophy.
+ */
+declare const wagglinelineBrand: BrandConfig;
+
+/**
  * WebChart Brand Configuration
  *
  * The official brand theme for WebChart EHR.
@@ -66,7 +93,8 @@ declare const brands: {
     readonly default: () => Promise<BrandConfig>;
     readonly 'enterprise-health': () => Promise<BrandConfig>;
     readonly mieweb: () => Promise<BrandConfig>;
+    readonly waggleline: () => Promise<BrandConfig>;
     readonly webchart: () => Promise<BrandConfig>;
 };
 
-export { BrandConfig, brands, defaultBrand, enterpriseHealthBrand, miewebBrand, webchartBrand };
+export { BrandConfig, brands, defaultBrand, enterpriseHealthBrand, miewebBrand, wagglinelineBrand, webchartBrand };

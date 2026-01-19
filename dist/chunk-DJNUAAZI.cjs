@@ -6,9 +6,10 @@ var brands = {
   default: () => import('./default-ZGHKI5WF.cjs').then((m) => m.defaultBrand),
   "enterprise-health": () => import('./enterprise-health-UDI25OCV.cjs').then((m) => m.enterpriseHealthBrand),
   mieweb: () => import('./mieweb-UJABK5XX.cjs').then((m) => m.miewebBrand),
+  waggleline: () => import('./waggleline-I2O4PTST.cjs').then((m) => m.wagglinelineBrand),
   webchart: () => import('./webchart-EHVGP46N.cjs').then((m) => m.webchartBrand)
 };
 
 exports.brands = brands;
-//# sourceMappingURL=chunk-SM3QIARX.cjs.map
-//# sourceMappingURL=chunk-SM3QIARX.cjs.map
+//# sourceMappingURL=chunk-DJNUAAZI.cjs.map
+//# sourceMappingURL=chunk-DJNUAAZI.cjs.map

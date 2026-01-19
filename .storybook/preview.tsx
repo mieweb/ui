@@ -112,11 +112,14 @@ const withBrand: Decorator = (Story, context) => {
     return null;
   }, [brand]);
 
+  // Check if the story has fullscreen layout
+  const isFullscreen = context.parameters?.layout === 'fullscreen';
+
   return (
     <>
       {fontLink && <link rel="stylesheet" href={fontLink} />}
       <div
-        className={`min-h-screen p-4 transition-colors duration-200 ${isDark ? 'dark' : ''}`}
+        className={`min-h-screen transition-colors duration-200 ${isDark ? 'dark' : ''} ${isFullscreen ? '' : 'p-4'}`}
         style={{
           backgroundColor: 'var(--mieweb-background)',
           color: 'var(--mieweb-foreground)',

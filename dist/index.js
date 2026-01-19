@@ -1,9 +1,10 @@
-export { brands } from './chunk-H2JBRHV4.js';
+export { brands } from './chunk-Q24SKRDR.js';
 export { createBrandPreset, generateBrandCSS, generateTailwindTheme } from './chunk-SOFX4T7M.js';
 export { bluehiveBrand } from './chunk-ULOA7WBW.js';
 export { defaultBrand } from './chunk-4LTN2LEN.js';
 export { enterpriseHealthBrand } from './chunk-MTZPVOP6.js';
 export { miewebBrand } from './chunk-UHSPAFY6.js';
+export { wagglinelineBrand } from './chunk-AIFKBA4U.js';
 export { webchartBrand } from './chunk-C6MDPPPL.js';
 export { Switch, switchThumbVariants, switchTrackVariants } from './chunk-TTSLBOAO.js';
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './chunk-AWIULTJW.js';

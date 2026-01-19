@@ -5,7 +5,7 @@ A themeable, accessible React component library built with Tailwind CSS 4.
 ## Features
 
 - 🎨 **Fully Themeable** - Customize colors, fonts, border radius, and more using CSS variables
-- 🏢 **Multi-Brand Support** - Pre-configured themes for BlueHive, Enterprise Health, WebChart, and MIE
+- 🏢 **Multi-Brand Support** - Pre-configured themes for BlueHive, Enterprise Health, WebChart, Waggleline, and MIE
 - ♿ **Accessible** - Built with WCAG guidelines in mind, including proper ARIA attributes and keyboard navigation
 - 🌳 **Tree-Shakeable** - Import only the components you need
 - 🌙 **Dark Mode** - Built-in dark mode support with system preference detection
@@ -156,7 +156,7 @@ This starts the Storybook development server at [http://localhost:6006](http://l
 - **Component Explorer**: Browse all components with live examples
 - **Props Documentation**: See all available props for each component
 - **Theme Switcher**: Toggle between light and dark modes
-- **Brand Switcher**: Preview components with different brand themes (BlueHive, Enterprise Health, WebChart, MIE)
+- **Brand Switcher**: Preview components with different brand themes (BlueHive, Enterprise Health, WebChart, Waggleline, MIE)
 - **Accessibility Panel**: Check accessibility compliance for each component
 - **Controls**: Interactively modify component props
 
@@ -316,6 +316,7 @@ The library includes pre-configured themes for multiple brands. Each brand has i
 | **BlueHive**          | `#27AAE1` (Blue)     | Nunito | DOT Physical scheduling and healthcare compliance |
 | **Enterprise Health** | `#6E2B68` (Burgundy) | Jost   | Employee health and occupational medicine         |
 | **WebChart**          | `#F5841F` (Orange)   | Inter  | Future-ready electronic health record system      |
+| **Waggleline**        | `#17AEED` (Blue)     | Inter  | Experience visualization and orchestration        |
 | **MIE**               | `#27AE60` (Green)    | Inter  | Healthcare software and services                  |
 
 ### Using a Brand Theme
