@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+'use strict';
+
+var react = require('react');
 
 // src/hooks/useKeyboardShortcut.ts
 function useKeyboardShortcut(key, callback, options = {}) {
@@ -9,7 +11,7 @@ function useKeyboardShortcut(key, callback, options = {}) {
     stopPropagation = false,
     ignoreInputs = true
   } = options;
-  const handleKeyDown = useCallback(
+  const handleKeyDown = react.useCallback(
     (event) => {
       if (ignoreInputs) {
         const target = event.target;
@@ -40,7 +42,7 @@ function useKeyboardShortcut(key, callback, options = {}) {
     },
     [key, callback, modifiers, preventDefault, stopPropagation, ignoreInputs]
   );
-  useEffect(() => {
+  react.useEffect(() => {
     if (!enabled) return;
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
@@ -55,11 +57,11 @@ function useCommandK(callback, enabled = true) {
   });
 }
 function useMediaQuery(query) {
-  const [matches, setMatches] = useState(() => {
+  const [matches, setMatches] = react.useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia(query).matches;
   });
-  useEffect(() => {
+  react.useEffect(() => {
     if (typeof window === "undefined") return;
     const mediaQuery = window.matchMedia(query);
     setMatches(mediaQuery.matches);
@@ -94,6 +96,14 @@ function useIsMobileOrTablet() {
   return useMediaQuery("(max-width: 1023px)");
 }
 
-export { useCommandK, useIsDesktop, useIsLargeDesktop, useIsMobile, useIsMobileOrTablet, useIsSmallTablet, useIsTablet, useKeyboardShortcut, useMediaQuery };
-//# sourceMappingURL=chunk-SMSIXPEE.js.map
-//# sourceMappingURL=chunk-SMSIXPEE.js.map
+exports.useCommandK = useCommandK;
+exports.useIsDesktop = useIsDesktop;
+exports.useIsLargeDesktop = useIsLargeDesktop;
+exports.useIsMobile = useIsMobile;
+exports.useIsMobileOrTablet = useIsMobileOrTablet;
+exports.useIsSmallTablet = useIsSmallTablet;
+exports.useIsTablet = useIsTablet;
+exports.useKeyboardShortcut = useKeyboardShortcut;
+exports.useMediaQuery = useMediaQuery;
+//# sourceMappingURL=chunk-R4DM4635.cjs.map
+//# sourceMappingURL=chunk-R4DM4635.cjs.map

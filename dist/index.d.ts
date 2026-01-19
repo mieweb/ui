@@ -74,12 +74,12 @@ interface AppHeaderActionsProps {
     /** Additional CSS classes */
     className?: string;
 }
-declare function AppHeaderActions({ children, className }: AppHeaderActionsProps): React__default.JSX.Element;
+declare function AppHeaderActions({ children, className, }: AppHeaderActionsProps): React__default.JSX.Element;
 interface AppHeaderDividerProps {
     /** Additional CSS classes */
     className?: string;
 }
-declare function AppHeaderDivider({ className }: AppHeaderDividerProps): React__default.JSX.Element;
+declare function AppHeaderDivider({ className, }: AppHeaderDividerProps): React__default.JSX.Element;
 interface AppHeaderIconButtonProps {
     /** Button icon */
     icon: ReactNode;
@@ -273,19 +273,19 @@ interface SidebarFooterProps {
     /** Additional CSS classes */
     className?: string;
 }
-declare function SidebarFooter({ children, className }: SidebarFooterProps): React__default.JSX.Element;
+declare function SidebarFooter({ children, className, }: SidebarFooterProps): React__default.JSX.Element;
 interface SidebarContentProps {
     children: ReactNode;
     /** Additional CSS classes */
     className?: string;
 }
-declare function SidebarContent({ children, className }: SidebarContentProps): React__default.JSX.Element;
+declare function SidebarContent({ children, className, }: SidebarContentProps): React__default.JSX.Element;
 interface SidebarNavProps {
     children: ReactNode;
     /** Additional CSS classes */
     className?: string;
 }
-declare function SidebarNav({ children, className }: SidebarNavProps): React__default.JSX.Element;
+declare function SidebarNav({ children, className, }: SidebarNavProps): React__default.JSX.Element;
 interface SidebarNavGroupProps {
     /** Group label */
     label: string;

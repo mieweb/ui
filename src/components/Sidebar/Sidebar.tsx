@@ -148,7 +148,7 @@ export function Sidebar({
         data-testid={testId}
         className={cn(
           'flex h-screen flex-col',
-          'border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
+          'border-r border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
           'transition-all duration-300 ease-in-out',
           // Mobile positioning
           isMobileViewport && 'fixed top-0 left-0 z-50',
@@ -194,7 +194,7 @@ export function SidebarHeader({
   return (
     <div
       className={cn(
-        'flex items-center justify-between border-b border-gray-200 px-4 py-4 dark:border-gray-700',
+        'flex items-center justify-between border-b border-neutral-200 px-4 py-4 dark:border-neutral-700',
         className
       )}
     >
@@ -202,7 +202,7 @@ export function SidebarHeader({
       {showMobileClose && isMobileViewport && (
         <button
           onClick={closeMobile}
-          className="-mr-2 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800"
+          className="-mr-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800"
           aria-label="Close navigation"
         >
           <XIcon />
@@ -229,7 +229,7 @@ export function SidebarFooter({
   return (
     <div
       className={cn(
-        'mt-auto border-t border-gray-200 px-4 py-4 dark:border-gray-700',
+        'mt-auto border-t border-neutral-200 px-4 py-4 dark:border-neutral-700',
         className
       )}
     >
@@ -329,15 +329,18 @@ export function SidebarNavGroup({
         onClick={handleToggle}
         className={cn(
           'flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold',
-          'text-gray-600 dark:text-gray-400',
-          'transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+          'text-neutral-700 dark:text-neutral-300',
+          'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
           showCollapsed && 'justify-center'
         )}
         title={showCollapsed ? label : undefined}
       >
         {icon && (
           <span
-            className={cn('h-5 w-5 flex-shrink-0', !showCollapsed && 'mr-3')}
+            className={cn(
+              'h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400',
+              !showCollapsed && 'mr-3'
+            )}
           >
             {icon}
           </span>
@@ -430,7 +433,7 @@ export function SidebarNavItem({
             'h-5 w-5 flex-shrink-0',
             isActive
               ? 'text-primary-600 dark:text-primary-400'
-              : 'text-gray-400 dark:text-gray-500',
+              : 'text-neutral-500 dark:text-neutral-400',
             !showCollapsed && 'mr-3'
           )}
         >
@@ -439,14 +442,14 @@ export function SidebarNavItem({
       )}
       {!showCollapsed && (
         <>
-          <span className="flex-1 truncate">{label}</span>
+          <span className="flex-1 truncate text-left">{label}</span>
           {badge && (
             <span
               className={cn(
                 'ml-2 rounded-full px-2 py-0.5 text-xs font-medium',
                 isActive
                   ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                  : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
               )}
             >
               {badge}
@@ -461,7 +464,7 @@ export function SidebarNavItem({
     'flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors',
     isActive
       ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
-      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+      : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800',
     disabled && 'opacity-50 cursor-not-allowed',
     showCollapsed && 'justify-center',
     className
@@ -518,8 +521,8 @@ export function SidebarToggle({
     <button
       onClick={toggleCollapsed}
       className={cn(
-        'rounded-lg p-2 text-gray-500 dark:text-gray-400',
-        'transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
       )}
@@ -531,7 +534,7 @@ export function SidebarToggle({
 
   if (position === 'floating') {
     return (
-      <div className="absolute top-6 -right-3 z-10 rounded-full border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-900">
+      <div className="absolute top-6 -right-3 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900">
         {button}
       </div>
     );
@@ -564,8 +567,8 @@ export function SidebarMobileToggle({
     <button
       onClick={openMobile}
       className={cn(
-        'rounded-lg p-2 text-gray-500 dark:text-gray-400',
-        'transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
       )}
@@ -641,7 +644,7 @@ export function SidebarSearch({
   return (
     <div className={cn('px-3 py-2', className)}>
       <div className="relative">
-        <div className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400">
+        <div className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400">
           <SearchIcon />
         </div>
         <input
@@ -653,9 +656,9 @@ export function SidebarSearch({
           data-testid={testId}
           className={cn(
             'w-full rounded-lg py-2 pr-4 pl-10 text-sm',
-            'border-transparent bg-gray-100 dark:bg-gray-800',
-            'text-gray-900 placeholder-gray-400 dark:text-white dark:placeholder-gray-500',
-            'focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-gray-700',
+            'border-transparent bg-neutral-100 dark:bg-neutral-800',
+            'text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500',
+            'focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-neutral-700',
             'transition-colors'
           )}
         />

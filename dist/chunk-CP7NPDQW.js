@@ -1,6 +1,4 @@
-'use strict';
-
-var react = require('react');
+import { useCallback, useEffect, useState } from 'react';
 
 // src/hooks/useKeyboardShortcut.ts
 function useKeyboardShortcut(key, callback, options = {}) {
@@ -11,7 +9,7 @@ function useKeyboardShortcut(key, callback, options = {}) {
     stopPropagation = false,
     ignoreInputs = true
   } = options;
-  const handleKeyDown = react.useCallback(
+  const handleKeyDown = useCallback(
     (event) => {
       if (ignoreInputs) {
         const target = event.target;
@@ -42,7 +40,7 @@ function useKeyboardShortcut(key, callback, options = {}) {
     },
     [key, callback, modifiers, preventDefault, stopPropagation, ignoreInputs]
   );
-  react.useEffect(() => {
+  useEffect(() => {
     if (!enabled) return;
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
@@ -57,11 +55,11 @@ function useCommandK(callback, enabled = true) {
   });
 }
 function useMediaQuery(query) {
-  const [matches, setMatches] = react.useState(() => {
+  const [matches, setMatches] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia(query).matches;
   });
-  react.useEffect(() => {
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const mediaQuery = window.matchMedia(query);
     setMatches(mediaQuery.matches);
@@ -96,14 +94,6 @@ function useIsMobileOrTablet() {
   return useMediaQuery("(max-width: 1023px)");
 }
 
-exports.useCommandK = useCommandK;
-exports.useIsDesktop = useIsDesktop;
-exports.useIsLargeDesktop = useIsLargeDesktop;
-exports.useIsMobile = useIsMobile;
-exports.useIsMobileOrTablet = useIsMobileOrTablet;
-exports.useIsSmallTablet = useIsSmallTablet;
-exports.useIsTablet = useIsTablet;
-exports.useKeyboardShortcut = useKeyboardShortcut;
-exports.useMediaQuery = useMediaQuery;
-//# sourceMappingURL=chunk-3AJJWLRM.cjs.map
-//# sourceMappingURL=chunk-3AJJWLRM.cjs.map
+export { useCommandK, useIsDesktop, useIsLargeDesktop, useIsMobile, useIsMobileOrTablet, useIsSmallTablet, useIsTablet, useKeyboardShortcut, useMediaQuery };
+//# sourceMappingURL=chunk-CP7NPDQW.js.map
+//# sourceMappingURL=chunk-CP7NPDQW.js.map

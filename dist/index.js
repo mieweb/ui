@@ -30,8 +30,8 @@ export { Dropdown, DropdownContent, DropdownHeader, DropdownItem, DropdownLabel,
 export { Input, inputVariants } from './chunk-LIYX5CYL.js';
 export { Modal, ModalBody, ModalClose, ModalFooter, ModalHeader, ModalTitle, modalContentVariants, modalOverlayVariants } from './chunk-D5IBXXF2.js';
 export { Pagination, SimplePagination, paginationButtonVariants } from './chunk-ONWOB76P.js';
-import { useCommandK, useMediaQuery } from './chunk-SMSIXPEE.js';
-export { useCommandK, useIsDesktop, useIsLargeDesktop, useIsMobile, useIsMobileOrTablet, useIsSmallTablet, useIsTablet, useKeyboardShortcut, useMediaQuery } from './chunk-SMSIXPEE.js';
+import { useCommandK, useMediaQuery } from './chunk-CP7NPDQW.js';
+export { useCommandK, useIsDesktop, useIsLargeDesktop, useIsMobile, useIsMobileOrTablet, useIsSmallTablet, useIsTablet, useKeyboardShortcut, useMediaQuery } from './chunk-CP7NPDQW.js';
 export { useTheme } from './chunk-KJZNEVYM.js';
 export { usePrefersReducedMotion } from './chunk-HB7C7NB5.js';
 import { useClickOutside } from './chunk-OT36EMM5.js';
@@ -101,18 +101,23 @@ function AppHeaderTitle({
   className
 }) {
   return /* @__PURE__ */ jsxs("div", { className: cn("min-w-0", className), children: [
-    /* @__PURE__ */ jsx("h1", { className: "text-lg font-semibold text-gray-900 dark:text-white truncate", children }),
-    subtitle && /* @__PURE__ */ jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400 truncate", children: subtitle })
+    /* @__PURE__ */ jsx("h1", { className: "truncate text-lg font-semibold text-gray-900 dark:text-white", children }),
+    subtitle && /* @__PURE__ */ jsx("p", { className: "truncate text-sm text-gray-500 dark:text-gray-400", children: subtitle })
   ] });
 }
-function AppHeaderActions({ children, className }) {
+function AppHeaderActions({
+  children,
+  className
+}) {
   return /* @__PURE__ */ jsx("div", { className: cn("flex items-center gap-2", className), children });
 }
-function AppHeaderDivider({ className }) {
+function AppHeaderDivider({
+  className
+}) {
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: cn("w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2", className),
+      className: cn("mx-2 h-6 w-px bg-gray-200 dark:bg-gray-700", className),
       "aria-hidden": "true"
     }
   );
@@ -132,24 +137,24 @@ function AppHeaderIconButton({
       onClick,
       "data-testid": testId,
       className: cn(
-        "relative p-2 rounded-lg transition-colors",
+        "relative rounded-lg p-2 transition-colors",
         "text-gray-500 dark:text-gray-400",
         "hover:bg-gray-100 dark:hover:bg-gray-800",
-        "focus:outline-none focus:ring-2 focus:ring-primary-500",
-        isActive && "bg-gray-100 dark:bg-gray-800 text-primary-600 dark:text-primary-400",
+        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+        isActive && "text-primary-600 dark:text-primary-400 bg-gray-100 dark:bg-gray-800",
         className
       ),
       "aria-label": label,
       title: label,
       children: [
-        /* @__PURE__ */ jsx("span", { className: "w-5 h-5", children: icon }),
+        /* @__PURE__ */ jsx("span", { className: "h-5 w-5", children: icon }),
         typeof badge === "number" && badge > 0 && /* @__PURE__ */ jsx(
           "span",
           {
             className: cn(
               "absolute -top-1 -right-1 flex items-center justify-center",
-              "min-w-[18px] h-[18px] px-1 text-[10px] font-bold",
-              "bg-red-500 text-white rounded-full"
+              "h-[18px] min-w-[18px] px-1 text-[10px] font-bold",
+              "rounded-full bg-red-500 text-white"
             ),
             children: badge > 99 ? "99+" : badge
           }
@@ -158,14 +163,24 @@ function AppHeaderIconButton({
     }
   );
 }
-var SearchIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx(
-  "path",
+var SearchIcon = () => /* @__PURE__ */ jsx(
+  "svg",
   {
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      }
+    )
   }
-) });
+);
 var isMac = typeof window !== "undefined" && typeof window.navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(window.navigator.platform);
 function AppHeaderSearch({
   onClick,
@@ -181,9 +196,9 @@ function AppHeaderSearch({
       "data-testid": testId,
       className: cn(
         "flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-600",
-        "bg-white dark:bg-gray-700 px-4 py-2 text-sm text-gray-500 dark:text-gray-400",
+        "bg-white px-4 py-2 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-400",
         "hover:border-gray-400 dark:hover:border-gray-500",
-        "hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors",
+        "transition-colors hover:bg-gray-50 dark:hover:bg-gray-600",
         !showOnMobile && "hidden sm:flex",
         "min-w-[200px] lg:min-w-[300px]",
         className
@@ -195,9 +210,9 @@ function AppHeaderSearch({
           "kbd",
           {
             className: cn(
-              "hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5",
-              "bg-gray-100 dark:bg-gray-600 rounded border border-gray-200 dark:border-gray-500",
-              "text-xs text-gray-500 dark:text-gray-300 flex-shrink-0"
+              "hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex",
+              "rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600",
+              "flex-shrink-0 text-xs text-gray-500 dark:text-gray-300"
             ),
             children: [
               isMac ? "\u2318" : "Ctrl",
@@ -226,9 +241,9 @@ function AppHeaderUserMenu({
       onClick,
       "data-testid": testId,
       className: cn(
-        "flex items-center gap-3 px-2 py-1.5 rounded-lg transition-colors",
+        "flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors",
         "hover:bg-gray-100 dark:hover:bg-gray-800",
-        "focus:outline-none focus:ring-2 focus:ring-primary-500",
+        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
         isOpen && "bg-gray-100 dark:bg-gray-800",
         className
       ),
@@ -237,21 +252,28 @@ function AppHeaderUserMenu({
           "div",
           {
             className: cn(
-              "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden",
+              "flex h-8 w-8 items-center justify-center overflow-hidden rounded-full",
               "bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-sm font-medium"
             ),
-            children: avatarUrl ? /* @__PURE__ */ jsx("img", { src: avatarUrl, alt: name, className: "w-full h-full object-cover" }) : displayInitials
+            children: avatarUrl ? /* @__PURE__ */ jsx(
+              "img",
+              {
+                src: avatarUrl,
+                alt: name,
+                className: "h-full w-full object-cover"
+              }
+            ) : displayInitials
           }
         ),
-        /* @__PURE__ */ jsxs("div", { className: "hidden lg:block text-left min-w-0", children: [
-          /* @__PURE__ */ jsx("div", { className: "text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px]", children: name }),
-          email && /* @__PURE__ */ jsx("div", { className: "text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]", children: email })
+        /* @__PURE__ */ jsxs("div", { className: "hidden min-w-0 text-left lg:block", children: [
+          /* @__PURE__ */ jsx("div", { className: "max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white", children: name }),
+          email && /* @__PURE__ */ jsx("div", { className: "max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400", children: email })
         ] }),
         /* @__PURE__ */ jsx(
           "svg",
           {
             className: cn(
-              "w-4 h-4 text-gray-400 transition-transform hidden lg:block",
+              "hidden h-4 w-4 text-gray-400 transition-transform lg:block",
               isOpen && "rotate-180"
             ),
             fill: "none",
@@ -265,7 +287,9 @@ function AppHeaderUserMenu({
     }
   );
 }
-var CommandPaletteContext = createContext(null);
+var CommandPaletteContext = createContext(
+  null
+);
 function CommandPaletteProvider({
   children,
   enableShortcut = true,
@@ -336,20 +360,49 @@ function CommandPaletteProvider({
 function useCommandPalette() {
   const context = useContext(CommandPaletteContext);
   if (!context) {
-    throw new Error("useCommandPalette must be used within a CommandPaletteProvider");
+    throw new Error(
+      "useCommandPalette must be used within a CommandPaletteProvider"
+    );
   }
   return context;
 }
-var SearchIcon2 = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx(
-  "path",
+var SearchIcon2 = () => /* @__PURE__ */ jsx(
+  "svg",
   {
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      }
+    )
   }
-) });
-var XIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) });
-var SpinnerIcon = () => /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
+);
+var XIcon = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-4 w-4",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M6 18L18 6M6 6l12 12"
+      }
+    )
+  }
+);
+var SpinnerIcon = () => /* @__PURE__ */ jsxs("svg", { className: "h-4 w-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
   /* @__PURE__ */ jsx(
     "circle",
     {
@@ -442,7 +495,9 @@ function CommandPalette({
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          setSelectedIndex(Math.min(selectedIndex + 1, filteredItems.length - 1));
+          setSelectedIndex(
+            Math.min(selectedIndex + 1, filteredItems.length - 1)
+          );
           break;
         case "ArrowUp":
           e.preventDefault();
@@ -500,7 +555,7 @@ function CommandPalette({
     /* @__PURE__ */ jsx(
       "div",
       {
-        className: "fixed inset-0 bg-black/50 dark:bg-black/70 z-50 backdrop-blur-sm",
+        className: "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/70",
         "aria-hidden": "true"
       }
     ),
@@ -510,13 +565,13 @@ function CommandPalette({
         ref: containerRef,
         "data-testid": testId,
         className: cn(
-          "bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700",
-          "shadow-2xl overflow-hidden",
+          "rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
+          "overflow-hidden shadow-2xl",
           className
         ),
         children: [
           /* @__PURE__ */ jsxs("div", { className: "relative border-b border-gray-200 dark:border-gray-700", children: [
-            /* @__PURE__ */ jsx("div", { className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400", children: /* @__PURE__ */ jsx(SearchIcon2, {}) }),
+            /* @__PURE__ */ jsx("div", { className: "absolute top-1/2 left-4 -translate-y-1/2 text-gray-400", children: /* @__PURE__ */ jsx(SearchIcon2, {}) }),
             /* @__PURE__ */ jsx(
               "input",
               {
@@ -529,7 +584,7 @@ function CommandPalette({
                 autoFocus: true,
                 "data-testid": `${testId}-input`,
                 className: cn(
-                  "w-full py-4 pl-12 pr-12 text-base bg-transparent",
+                  "w-full bg-transparent py-4 pr-12 pl-12 text-base",
                   "focus:outline-none dark:text-white dark:placeholder-gray-400"
                 )
               }
@@ -539,21 +594,21 @@ function CommandPalette({
               {
                 onClick: () => setQuery(""),
                 "data-testid": `${testId}-clear`,
-                className: "absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+                className: "absolute top-1/2 right-12 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 children: /* @__PURE__ */ jsx(XIcon, {})
               }
             ),
-            isLoading && /* @__PURE__ */ jsx("div", { className: "absolute right-4 top-1/2 -translate-y-1/2 text-primary-500", children: /* @__PURE__ */ jsx(SpinnerIcon, {}) })
+            isLoading && /* @__PURE__ */ jsx("div", { className: "text-primary-500 absolute top-1/2 right-4 -translate-y-1/2", children: /* @__PURE__ */ jsx(SpinnerIcon, {}) })
           ] }),
-          categories.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 p-2 border-b border-gray-100 dark:border-gray-700 overflow-x-auto", children: [
+          categories.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 overflow-x-auto border-b border-gray-100 p-2 dark:border-gray-700", children: [
             /* @__PURE__ */ jsx(
               "button",
               {
                 onClick: () => setActiveCategory(null),
                 "data-testid": `${testId}-filter-all`,
                 className: cn(
-                  "px-2 py-1 text-xs font-medium rounded transition-colors",
-                  activeCategory === null ? "bg-primary-500 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  "rounded px-2 py-1 text-xs font-medium transition-colors",
+                  activeCategory === null ? "bg-primary-500 text-white" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
                 ),
                 children: "All"
               }
@@ -564,136 +619,141 @@ function CommandPalette({
                 onClick: () => setActiveCategory(cat.id),
                 "data-testid": `${testId}-filter-${cat.id}`,
                 className: cn(
-                  "flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors",
-                  activeCategory === cat.id ? "bg-primary-500 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                  activeCategory === cat.id ? "bg-primary-500 text-white" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
                 ),
                 children: [
-                  cat.icon && /* @__PURE__ */ jsx("span", { className: "w-3 h-3", children: cat.icon }),
+                  cat.icon && /* @__PURE__ */ jsx("span", { className: "h-3 w-3", children: cat.icon }),
                   cat.label
                 ]
               },
               cat.id
             ))
           ] }),
-          /* @__PURE__ */ jsx("div", { ref: listRef, className: "overflow-y-auto max-h-[60vh]", children: filteredItems.length === 0 ? /* @__PURE__ */ jsx("div", { className: "p-8 text-center text-gray-500 dark:text-gray-400", children: emptyState ?? /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsx("div", { className: "w-8 h-8 mx-auto mb-2 opacity-50", children: /* @__PURE__ */ jsx(SearchIcon2, {}) }),
+          /* @__PURE__ */ jsx("div", { ref: listRef, className: "max-h-[60vh] overflow-y-auto", children: filteredItems.length === 0 ? /* @__PURE__ */ jsx("div", { className: "p-8 text-center text-gray-500 dark:text-gray-400", children: emptyState ?? /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("div", { className: "mx-auto mb-2 h-8 w-8 opacity-50", children: /* @__PURE__ */ jsx(SearchIcon2, {}) }),
             /* @__PURE__ */ jsx("p", { className: "text-sm", children: query.trim() ? `No results for "${query}"` : "Start typing to search..." })
-          ] }) }) : Array.from(groupedItems.entries()).map(([categoryId, categoryItems]) => {
-            const categoryInfo = getCategoryInfo(categoryId);
-            return /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsxs(
-                "div",
-                {
-                  className: cn(
-                    "px-3 py-2 text-xs font-semibold sticky top-0",
-                    "text-gray-500 dark:text-gray-400",
-                    "bg-gray-50 dark:bg-gray-900/50"
-                  ),
-                  children: [
-                    categoryInfo?.icon && /* @__PURE__ */ jsx(
-                      "span",
-                      {
-                        className: cn(
-                          "inline-block w-4 h-4 mr-2 align-middle",
-                          categoryInfo.colorClass
-                        ),
-                        children: categoryInfo.icon
-                      }
+          ] }) }) : Array.from(groupedItems.entries()).map(
+            ([categoryId, categoryItems]) => {
+              const categoryInfo = getCategoryInfo(categoryId);
+              return /* @__PURE__ */ jsxs("div", { children: [
+                /* @__PURE__ */ jsxs(
+                  "div",
+                  {
+                    className: cn(
+                      "sticky top-0 px-3 py-2 text-xs font-semibold",
+                      "text-gray-500 dark:text-gray-400",
+                      "bg-gray-50 dark:bg-gray-900/50"
                     ),
-                    categoryInfo?.label ?? categoryId,
-                    " (",
-                    categoryItems.length,
-                    ")"
-                  ]
-                }
-              ),
-              categoryItems.map((item) => {
-                globalIndex++;
-                const currentIndex = globalIndex;
-                const isSelected = currentIndex === selectedIndex;
-                if (renderItem) {
-                  return /* @__PURE__ */ jsx(
-                    "div",
+                    children: [
+                      categoryInfo?.icon && /* @__PURE__ */ jsx(
+                        "span",
+                        {
+                          className: cn(
+                            "mr-2 inline-block h-4 w-4 align-middle",
+                            categoryInfo.colorClass
+                          ),
+                          children: categoryInfo.icon
+                        }
+                      ),
+                      categoryInfo?.label ?? categoryId,
+                      " (",
+                      categoryItems.length,
+                      ")"
+                    ]
+                  }
+                ),
+                categoryItems.map((item) => {
+                  globalIndex++;
+                  const currentIndex = globalIndex;
+                  const isSelected = currentIndex === selectedIndex;
+                  if (renderItem) {
+                    return /* @__PURE__ */ jsx(
+                      "div",
+                      {
+                        role: "option",
+                        "aria-selected": isSelected,
+                        "data-index": currentIndex,
+                        onClick: () => handleItemClick(item),
+                        onKeyDown: (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleItemClick(item);
+                          }
+                        },
+                        onMouseEnter: () => setSelectedIndex(currentIndex),
+                        tabIndex: 0,
+                        children: renderItem(item, {
+                          isSelected,
+                          index: currentIndex
+                        })
+                      },
+                      item.id
+                    );
+                  }
+                  return /* @__PURE__ */ jsxs(
+                    "button",
                     {
-                      role: "option",
-                      "aria-selected": isSelected,
                       "data-index": currentIndex,
                       onClick: () => handleItemClick(item),
-                      onKeyDown: (e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleItemClick(item);
-                        }
-                      },
                       onMouseEnter: () => setSelectedIndex(currentIndex),
-                      tabIndex: 0,
-                      children: renderItem(item, { isSelected, index: currentIndex })
+                      disabled: item.disabled,
+                      className: cn(
+                        "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
+                        isSelected ? "bg-primary-50 dark:bg-primary-500/20" : "hover:bg-gray-50 dark:hover:bg-gray-700/50",
+                        item.disabled && "cursor-not-allowed opacity-50"
+                      ),
+                      children: [
+                        item.icon && /* @__PURE__ */ jsx(
+                          "div",
+                          {
+                            className: cn(
+                              "mt-0.5 h-4 w-4 flex-shrink-0",
+                              isSelected ? "text-primary-600 dark:text-primary-400" : "text-gray-400"
+                            ),
+                            children: item.icon
+                          }
+                        ),
+                        /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
+                          /* @__PURE__ */ jsx("div", { className: "truncate text-sm font-medium text-gray-900 dark:text-white", children: item.label }),
+                          item.subtitle && /* @__PURE__ */ jsx("div", { className: "truncate text-xs text-gray-500 dark:text-gray-400", children: item.subtitle }),
+                          item.description && /* @__PURE__ */ jsx("div", { className: "mt-0.5 truncate text-xs text-gray-400 dark:text-gray-500", children: item.description })
+                        ] }),
+                        item.shortcut && /* @__PURE__ */ jsx(
+                          "kbd",
+                          {
+                            className: cn(
+                              "hidden items-center px-1.5 py-0.5 text-[10px] sm:inline-flex",
+                              "rounded border bg-gray-100 dark:bg-gray-700",
+                              "border-gray-200 dark:border-gray-600",
+                              "text-gray-500 dark:text-gray-400"
+                            ),
+                            children: item.shortcut
+                          }
+                        )
+                      ]
                     },
                     item.id
                   );
-                }
-                return /* @__PURE__ */ jsxs(
-                  "button",
-                  {
-                    "data-index": currentIndex,
-                    onClick: () => handleItemClick(item),
-                    onMouseEnter: () => setSelectedIndex(currentIndex),
-                    disabled: item.disabled,
-                    className: cn(
-                      "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors",
-                      isSelected ? "bg-primary-50 dark:bg-primary-500/20" : "hover:bg-gray-50 dark:hover:bg-gray-700/50",
-                      item.disabled && "opacity-50 cursor-not-allowed"
-                    ),
-                    children: [
-                      item.icon && /* @__PURE__ */ jsx(
-                        "div",
-                        {
-                          className: cn(
-                            "mt-0.5 flex-shrink-0 w-4 h-4",
-                            isSelected ? "text-primary-600 dark:text-primary-400" : "text-gray-400"
-                          ),
-                          children: item.icon
-                        }
-                      ),
-                      /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
-                        /* @__PURE__ */ jsx("div", { className: "font-medium text-sm text-gray-900 dark:text-white truncate", children: item.label }),
-                        item.subtitle && /* @__PURE__ */ jsx("div", { className: "text-xs text-gray-500 dark:text-gray-400 truncate", children: item.subtitle }),
-                        item.description && /* @__PURE__ */ jsx("div", { className: "text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5", children: item.description })
-                      ] }),
-                      item.shortcut && /* @__PURE__ */ jsx(
-                        "kbd",
-                        {
-                          className: cn(
-                            "hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px]",
-                            "bg-gray-100 dark:bg-gray-700 rounded border",
-                            "border-gray-200 dark:border-gray-600",
-                            "text-gray-500 dark:text-gray-400"
-                          ),
-                          children: item.shortcut
-                        }
-                      )
-                    ]
-                  },
-                  item.id
-                );
-              })
-            ] }, categoryId);
-          }) }),
+                })
+              ] }, categoryId);
+            }
+          ) }),
           footer ?? /* @__PURE__ */ jsxs(
             "div",
             {
               className: cn(
-                "p-2 border-t border-gray-100 dark:border-gray-700",
-                "bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-500 dark:text-gray-400",
+                "border-t border-gray-100 p-2 dark:border-gray-700",
+                "bg-gray-50 text-xs text-gray-500 dark:bg-gray-900/50 dark:text-gray-400",
                 "flex items-center justify-between"
               ),
               children: [
                 /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-                  /* @__PURE__ */ jsx("kbd", { className: "px-1 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600", children: "\u2191\u2193" }),
+                  /* @__PURE__ */ jsx("kbd", { className: "rounded border border-gray-200 bg-white px-1 py-0.5 dark:border-gray-600 dark:bg-gray-700", children: "\u2191\u2193" }),
                   /* @__PURE__ */ jsx("span", { children: "navigate" }),
-                  /* @__PURE__ */ jsx("kbd", { className: "px-1 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 ml-2", children: "\u21B5" }),
+                  /* @__PURE__ */ jsx("kbd", { className: "ml-2 rounded border border-gray-200 bg-white px-1 py-0.5 dark:border-gray-600 dark:bg-gray-700", children: "\u21B5" }),
                   /* @__PURE__ */ jsx("span", { children: "select" }),
-                  /* @__PURE__ */ jsx("kbd", { className: "px-1 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 ml-2", children: "esc" }),
+                  /* @__PURE__ */ jsx("kbd", { className: "ml-2 rounded border border-gray-200 bg-white px-1 py-0.5 dark:border-gray-600 dark:bg-gray-700", children: "esc" }),
                   /* @__PURE__ */ jsx("span", { children: "close" })
                 ] }),
                 /* @__PURE__ */ jsxs("span", { children: [
@@ -722,9 +782,9 @@ function CommandPaletteTrigger({
       "data-testid": testId,
       className: cn(
         "flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-600",
-        "bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400",
+        "bg-white px-4 py-2.5 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-400",
         "hover:border-gray-400 dark:hover:border-gray-500",
-        "hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors",
+        "transition-colors hover:bg-gray-50 dark:hover:bg-gray-600",
         "min-w-[200px] sm:min-w-[300px]",
         className
       ),
@@ -736,8 +796,8 @@ function CommandPaletteTrigger({
           {
             className: cn(
               "inline-flex items-center gap-0.5 px-2 py-0.5",
-              "bg-gray-100 dark:bg-gray-600 rounded border border-gray-200 dark:border-gray-500",
-              "text-xs text-gray-500 dark:text-gray-300 flex-shrink-0"
+              "rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600",
+              "flex-shrink-0 text-xs text-gray-500 dark:text-gray-300"
             ),
             children: [
               isMac2 ? "\u2318" : "Ctrl",
@@ -769,7 +829,9 @@ function SidebarProvider({
     return defaultCollapsed;
   });
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [expandedGroup, setExpandedGroup] = useState(defaultExpandedGroup);
+  const [expandedGroup, setExpandedGroup] = useState(
+    defaultExpandedGroup
+  );
   useEffect(() => {
     if (persistCollapsed && typeof window !== "undefined") {
       localStorage.setItem(storageKey, String(isCollapsed));
@@ -834,19 +896,93 @@ function useSidebar() {
   }
   return context;
 }
-var ChevronLeftIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19l-7-7 7-7" }) });
-var ChevronRightIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" }) });
-var ChevronDownIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-3 h-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" }) });
-var XIcon2 = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) });
-var MenuIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M4 6h16M4 12h16M4 18h16" }) });
-var SearchIcon3 = () => /* @__PURE__ */ jsx("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx(
-  "path",
+var ChevronLeftIcon = () => /* @__PURE__ */ jsx(
+  "svg",
   {
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    className: "h-4 w-4",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19l-7-7 7-7" })
   }
-) });
+);
+var ChevronRightIcon = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-4 w-4",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
+  }
+);
+var ChevronDownIcon = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-3 w-3",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
+  }
+);
+var XIcon2 = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M6 18L18 6M6 6l12 12"
+      }
+    )
+  }
+);
+var MenuIcon = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M4 6h16M4 12h16M4 18h16"
+      }
+    )
+  }
+);
+var SearchIcon3 = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-4 w-4",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      }
+    )
+  }
+);
 function Sidebar({
   children,
   className,
@@ -861,7 +997,7 @@ function Sidebar({
     isMobileViewport && isMobileOpen && /* @__PURE__ */ jsx(
       "div",
       {
-        className: "fixed inset-0 bg-black/50 z-40 lg:hidden",
+        className: "fixed inset-0 z-40 bg-black/50 lg:hidden",
         onClick: closeMobile,
         "aria-hidden": "true"
       }
@@ -871,8 +1007,8 @@ function Sidebar({
       {
         "data-testid": testId,
         className: cn(
-          "flex flex-col h-screen",
-          "bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700",
+          "flex h-screen flex-col",
+          "border-r border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900",
           "transition-all duration-300 ease-in-out",
           // Mobile positioning
           isMobileViewport && "fixed top-0 left-0 z-50",
@@ -903,16 +1039,16 @@ function SidebarHeader({
     "div",
     {
       className: cn(
-        "flex items-center justify-between px-4 py-4 border-b border-gray-200 dark:border-gray-700",
+        "flex items-center justify-between border-b border-neutral-200 px-4 py-4 dark:border-neutral-700",
         className
       ),
       children: [
-        /* @__PURE__ */ jsx("div", { className: "flex-1 min-w-0", children }),
+        /* @__PURE__ */ jsx("div", { className: "min-w-0 flex-1", children }),
         showMobileClose && isMobileViewport && /* @__PURE__ */ jsx(
           "button",
           {
             onClick: closeMobile,
-            className: "p-2 -mr-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden",
+            className: "-mr-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800",
             "aria-label": "Close navigation",
             children: /* @__PURE__ */ jsx(XIcon2, {})
           }
@@ -921,22 +1057,31 @@ function SidebarHeader({
     }
   );
 }
-function SidebarFooter({ children, className }) {
+function SidebarFooter({
+  children,
+  className
+}) {
   return /* @__PURE__ */ jsx(
     "div",
     {
       className: cn(
-        "mt-auto px-4 py-4 border-t border-gray-200 dark:border-gray-700",
+        "mt-auto border-t border-neutral-200 px-4 py-4 dark:border-neutral-700",
         className
       ),
       children
     }
   );
 }
-function SidebarContent({ children, className }) {
+function SidebarContent({
+  children,
+  className
+}) {
   return /* @__PURE__ */ jsx("div", { className: cn("flex-1 overflow-y-auto py-4", className), children });
 }
-function SidebarNav({ children, className }) {
+function SidebarNav({
+  children,
+  className
+}) {
   return /* @__PURE__ */ jsx("nav", { className: cn("space-y-1 px-2", className), children });
 }
 function SidebarNavGroup({
@@ -965,9 +1110,9 @@ function SidebarNavGroup({
       {
         onClick: handleToggle,
         className: cn(
-          "flex items-center w-full px-3 py-2 text-sm font-semibold rounded-lg",
-          "text-gray-600 dark:text-gray-400",
-          "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+          "flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold",
+          "text-neutral-700 dark:text-neutral-300",
+          "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
           showCollapsed && "justify-center"
         ),
         title: showCollapsed ? label : void 0,
@@ -976,19 +1121,19 @@ function SidebarNavGroup({
             "span",
             {
               className: cn(
-                "flex-shrink-0 w-5 h-5",
+                "h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400",
                 !showCollapsed && "mr-3"
               ),
               children: icon
             }
           ),
           !showCollapsed && /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsx("span", { className: "flex-1 text-left truncate", children: label }),
+            /* @__PURE__ */ jsx("span", { className: "flex-1 truncate text-left", children: label }),
             /* @__PURE__ */ jsx(
               "span",
               {
                 className: cn(
-                  "flex-shrink-0 ml-2 transition-transform duration-200",
+                  "ml-2 flex-shrink-0 transition-transform duration-200",
                   effectiveExpanded && "rotate-180"
                 ),
                 children: /* @__PURE__ */ jsx(ChevronDownIcon, {})
@@ -1003,7 +1148,7 @@ function SidebarNavGroup({
       {
         className: cn(
           "overflow-hidden transition-all duration-300",
-          effectiveExpanded ? "max-h-[1000px] opacity-100 mt-1" : "max-h-0 opacity-0"
+          effectiveExpanded ? "mt-1 max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
         ),
         children: /* @__PURE__ */ jsx("div", { className: "pl-2", children })
       }
@@ -1035,21 +1180,21 @@ function SidebarNavItem({
       "span",
       {
         className: cn(
-          "flex-shrink-0 w-5 h-5",
-          isActive ? "text-primary-600 dark:text-primary-400" : "text-gray-400 dark:text-gray-500",
+          "h-5 w-5 flex-shrink-0",
+          isActive ? "text-primary-600 dark:text-primary-400" : "text-neutral-500 dark:text-neutral-400",
           !showCollapsed && "mr-3"
         ),
         children: icon
       }
     ),
     !showCollapsed && /* @__PURE__ */ jsxs(Fragment, { children: [
-      /* @__PURE__ */ jsx("span", { className: "flex-1 truncate", children: label }),
+      /* @__PURE__ */ jsx("span", { className: "flex-1 truncate text-left", children: label }),
       badge && /* @__PURE__ */ jsx(
         "span",
         {
           className: cn(
-            "ml-2 px-2 py-0.5 text-xs font-medium rounded-full",
-            isActive ? "bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300" : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+            "ml-2 rounded-full px-2 py-0.5 text-xs font-medium",
+            isActive ? "bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300" : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400"
           ),
           children: badge
         }
@@ -1058,7 +1203,7 @@ function SidebarNavItem({
   ] });
   const baseClasses = cn(
     "flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors",
-    isActive ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
+    isActive ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium" : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800",
     disabled && "opacity-50 cursor-not-allowed",
     showCollapsed && "justify-center",
     className
@@ -1099,9 +1244,9 @@ function SidebarToggle({
     {
       onClick: toggleCollapsed,
       className: cn(
-        "p-2 rounded-lg text-gray-500 dark:text-gray-400",
-        "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-primary-500",
+        "rounded-lg p-2 text-neutral-500 dark:text-neutral-400",
+        "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
         className
       ),
       "aria-label": isCollapsed ? "Expand sidebar" : "Collapse sidebar",
@@ -1109,7 +1254,7 @@ function SidebarToggle({
     }
   );
   if (position === "floating") {
-    return /* @__PURE__ */ jsx("div", { className: "absolute -right-3 top-6 z-10 bg-white dark:bg-gray-900 rounded-full shadow-md border border-gray-200 dark:border-gray-700", children: button });
+    return /* @__PURE__ */ jsx("div", { className: "absolute top-6 -right-3 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900", children: button });
   }
   return button;
 }
@@ -1124,9 +1269,9 @@ function SidebarMobileToggle({
     {
       onClick: openMobile,
       className: cn(
-        "p-2 rounded-lg text-gray-500 dark:text-gray-400",
-        "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-primary-500",
+        "rounded-lg p-2 text-neutral-500 dark:text-neutral-400",
+        "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
         className
       ),
       "aria-label": "Open navigation",
@@ -1166,7 +1311,7 @@ function SidebarSearch({
   }, [showCollapsed, setCollapsed]);
   if (showCollapsed) return /* @__PURE__ */ jsx(Fragment, {});
   return /* @__PURE__ */ jsx("div", { className: cn("px-3 py-2", className), children: /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-    /* @__PURE__ */ jsx("div", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-400", children: /* @__PURE__ */ jsx(SearchIcon3, {}) }),
+    /* @__PURE__ */ jsx("div", { className: "absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400", children: /* @__PURE__ */ jsx(SearchIcon3, {}) }),
     /* @__PURE__ */ jsx(
       "input",
       {
@@ -1177,42 +1322,99 @@ function SidebarSearch({
         placeholder: `${placeholder} (${shortcutHint})`,
         "data-testid": testId,
         className: cn(
-          "w-full py-2 pl-10 pr-4 text-sm rounded-lg",
-          "bg-gray-100 dark:bg-gray-800 border-transparent",
-          "text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500",
-          "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white dark:focus:bg-gray-700",
+          "w-full rounded-lg py-2 pr-4 pl-10 text-sm",
+          "border-transparent bg-neutral-100 dark:bg-neutral-800",
+          "text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500",
+          "focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-neutral-700",
           "transition-colors"
         )
       }
     )
   ] }) });
 }
-var CheckIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" }) });
-var XCircleIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx(
-  "path",
+var CheckIcon = () => /* @__PURE__ */ jsx(
+  "svg",
   {
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    d: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
   }
-) });
-var ExclamationIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx(
-  "path",
+);
+var XCircleIcon = () => /* @__PURE__ */ jsx(
+  "svg",
   {
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+      }
+    )
   }
-) });
-var InfoIcon = () => /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx(
-  "path",
+);
+var ExclamationIcon = () => /* @__PURE__ */ jsx(
+  "svg",
   {
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+      }
+    )
   }
-) });
-var XIcon3 = () => /* @__PURE__ */ jsx("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2, children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) });
+);
+var InfoIcon = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-5 w-5",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      }
+    )
+  }
+);
+var XIcon3 = () => /* @__PURE__ */ jsx(
+  "svg",
+  {
+    className: "h-4 w-4",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    children: /* @__PURE__ */ jsx(
+      "path",
+      {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M6 18L18 6M6 6l12 12"
+      }
+    )
+  }
+);
 var variantStyles = {
   success: {
     container: "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200",
@@ -1253,21 +1455,21 @@ function Toast({
     {
       role: "alert",
       className: cn(
-        "flex items-start gap-3 p-4 rounded-lg border shadow-lg",
-        "min-w-[300px] max-w-[420px]",
+        "flex items-start gap-3 rounded-lg border p-4 shadow-lg",
+        "max-w-[420px] min-w-[300px]",
         "animate-slide-in-right",
         styles.container
       ),
       children: [
         /* @__PURE__ */ jsx("div", { className: cn("flex-shrink-0", styles.icon), children: displayIcon }),
-        /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
-          title && /* @__PURE__ */ jsx("p", { className: "font-semibold text-sm mb-1", children: title }),
+        /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
+          title && /* @__PURE__ */ jsx("p", { className: "mb-1 text-sm font-semibold", children: title }),
           /* @__PURE__ */ jsx("div", { className: "text-sm opacity-90", children: message }),
           action && /* @__PURE__ */ jsx(
             "button",
             {
               onClick: action.onClick,
-              className: "mt-2 text-sm font-medium underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-2 rounded",
+              className: "mt-2 rounded text-sm font-medium underline hover:no-underline focus:ring-2 focus:ring-current focus:ring-offset-2 focus:outline-none",
               children: action.label
             }
           )
@@ -1276,7 +1478,7 @@ function Toast({
           "button",
           {
             onClick: onClose,
-            className: "flex-shrink-0 p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-current",
+            className: "flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10",
             "aria-label": "Dismiss notification",
             children: /* @__PURE__ */ jsx(XIcon3, {})
           }
@@ -1302,7 +1504,10 @@ function ToastContainer({
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: cn("fixed z-50 flex flex-col gap-2 pointer-events-none", positionStyles[position]),
+      className: cn(
+        "pointer-events-none fixed z-50 flex flex-col gap-2",
+        positionStyles[position]
+      ),
       "aria-live": "polite",
       "aria-atomic": "true",
       children: toasts.map((toast) => /* @__PURE__ */ jsx("div", { className: "pointer-events-auto", children: /* @__PURE__ */ jsx(Toast, { ...toast, onClose: () => onDismiss(toast.id) }) }, toast.id))

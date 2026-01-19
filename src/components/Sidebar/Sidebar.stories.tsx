@@ -113,14 +113,14 @@ function SidebarDemo() {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-950">
+    <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-950">
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-3">
             <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
               M
             </div>
-            <div className="font-semibold text-gray-900 dark:text-white">
+            <div className="font-semibold text-neutral-900 dark:text-white">
               MIE App
             </div>
           </div>
@@ -197,8 +197,8 @@ function SidebarDemo() {
         <SidebarFooter>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700" />
-              <div className="text-sm text-gray-700 dark:text-gray-300">
+              <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+              <div className="text-sm text-neutral-700 dark:text-neutral-300">
                 John Doe
               </div>
             </div>
@@ -211,12 +211,12 @@ function SidebarDemo() {
       <div className="flex-1 p-6">
         <div className="mb-6 flex items-center gap-4">
           <SidebarMobileToggle />
-          <h1 className="text-xl font-semibold text-gray-900 capitalize dark:text-white">
+          <h1 className="text-xl font-semibold text-neutral-900 capitalize dark:text-white">
             {activePage}
           </h1>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Content for the {activePage} page goes here. Click navigation items
             to change pages.
           </p>
@@ -231,7 +231,7 @@ function CollapsibleDemo() {
   const [activePage, setActivePage] = useState('dashboard');
 
   return (
-    <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-950">
+    <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-950">
       <Sidebar>
         <SidebarHeader>
           {isCollapsed ? (
@@ -243,7 +243,7 @@ function CollapsibleDemo() {
               <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
                 M
               </div>
-              <div className="font-semibold text-gray-900 dark:text-white">
+              <div className="font-semibold text-neutral-900 dark:text-white">
                 MIE App
               </div>
             </div>
@@ -282,7 +282,7 @@ function CollapsibleDemo() {
         <SidebarFooter>
           <button
             onClick={toggleCollapsed}
-            className="w-full py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            className="w-full py-2 text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
           >
             {isCollapsed ? '→' : '← Collapse'}
           </button>
@@ -290,10 +290,10 @@ function CollapsibleDemo() {
       </Sidebar>
 
       <div className="flex-1 p-6">
-        <h1 className="mb-4 text-xl font-semibold text-gray-900 capitalize dark:text-white">
+        <h1 className="mb-4 text-xl font-semibold text-neutral-900 capitalize dark:text-white">
           {activePage}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-neutral-600 dark:text-neutral-400">
           Try clicking the collapse button in the sidebar footer to see the
           collapsed state.
         </p>
