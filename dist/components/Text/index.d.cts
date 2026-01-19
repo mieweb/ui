@@ -6,7 +6,7 @@ declare const textVariants: (props?: ({
     variant?: "default" | "success" | "warning" | "primary" | "muted" | "destructive" | null | undefined;
     size?: "xs" | "sm" | "lg" | "xl" | "base" | "2xl" | "3xl" | null | undefined;
     weight?: "bold" | "normal" | "medium" | "semibold" | null | undefined;
-    align?: "center" | "left" | "right" | null | undefined;
+    align?: "left" | "center" | "right" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type TextElement = 'p' | 'span' | 'div' | 'label' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 interface TextProps extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof textVariants> {

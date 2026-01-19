@@ -15,6 +15,71 @@ A **themeable, accessible React component library** built with Tailwind CSS 4. D
 
 ---
 
+## 🎯 See It In Action
+
+<div className="sb-unstyled" style={{ 
+  padding: '24px', 
+  borderRadius: '12px', 
+  background: 'linear-gradient(135deg, var(--mieweb-primary-500, #27aae1) 0%, var(--mieweb-primary-700, #1786b3) 100%)',
+  marginTop: '16px',
+  marginBottom: '24px'
+}}>
+  <div style={{ color: 'white', marginBottom: '12px' }}>
+    <strong style={{ fontSize: '18px', display: 'block', marginBottom: '8px' }}>🚀 Full Dashboard Example</strong>
+    <p style={{ margin: 0, opacity: 0.9, fontSize: '14px', lineHeight: '1.5' }}>
+      Want to see how all the components work together? Check out a complete dashboard implementation 
+      featuring Sidebar navigation, AppHeader, Cards, Data tables, and more.
+    </p>
+  </div>
+  <a 
+    href="?path=/story/examples-dashboard--dashboard"
+    style={{ 
+      display: 'inline-block',
+      padding: '10px 20px', 
+      backgroundColor: 'white', 
+      color: 'var(--mieweb-primary-700, #1786b3)',
+      borderRadius: '6px',
+      fontWeight: '600',
+      textDecoration: 'none',
+      fontSize: '14px'
+    }}
+  >
+    View Dashboard Example →
+  </a>
+</div>
+
+---
+
+## 📚 What is Storybook?
+
+This documentation site is built with **Storybook** — an interactive component explorer that lets you browse, test, and understand each component in isolation.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginTop: '16px', marginBottom: '24px' }}>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>📁 Sidebar (Left Panel)</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Browse all available components organized by category. Click on any component to see its documentation, 
+      interactive examples, and all available variants.
+    </p>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>🎮 Controls Panel</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Interact with component props in real-time. Adjust sizes, colors, states, and content to see 
+      how components behave with different configurations.
+    </p>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>🔧 Toolbar (Top)</strong>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)' }}>
+      Switch between brand themes, toggle dark/light mode, adjust viewport sizes, and access 
+      accessibility testing tools.
+    </p>
+  </div>
+</div>
+
+---
+
 ## ✨ Features
 
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginTop: '16px' }}>
@@ -156,21 +221,27 @@ import { bluehiveBrand } from '@mieweb/ui/brands/bluehive';
 
 ## 📖 Exploring Components
 
-Use the sidebar to browse available components. Each component page includes:
+Use the **sidebar on the left** to browse available components. Each component page includes:
 
-- **Interactive examples** with live code
-- **Props documentation** with types and defaults  
-- **Accessibility notes** and keyboard shortcuts
-- **Usage guidelines** and best practices
+- **Interactive examples** — Live preview with real-time prop controls
+- **Props documentation** — Full API reference with types and defaults  
+- **Accessibility notes** — Keyboard shortcuts and ARIA information
+- **Code snippets** — Copy-paste ready implementation examples
 
 ### Component Categories
 
-- **Forms** — Input, Select, Checkbox, Radio, Switch, Textarea, DateInput, PhoneInput
-- **Buttons** — Button, Dropdown
-- **Layout** — Card, Modal, Tabs
-- **Feedback** — Alert, Progress, Spinner, Skeleton, Tooltip
-- **Navigation** — Breadcrumb, Pagination
-- **Data Display** — Table, Badge, Avatar, Text
+| Category | Components |
+|----------|------------|
+| **Forms** | Input, Select, Checkbox, Radio, Switch, Textarea, DateInput, PhoneInput |
+| **Buttons** | Button, Dropdown |
+| **Layout** | Card, Modal, Sidebar, AppHeader, CommandPalette |
+| **Feedback** | Alert, Progress, Toast, Spinner, Skeleton, Tooltip |
+| **Navigation** | Breadcrumb, Pagination |
+| **Data Display** | Table, Badge, Avatar |
+
+<div style={{ marginTop: '16px', padding: '16px', borderRadius: '8px', border: '2px dashed var(--mieweb-border, #e5e7eb)' }}>
+  <strong>💡 Pro Tip:</strong> Use <kbd style={{ padding: '2px 6px', backgroundColor: 'var(--mieweb-muted, #f5f5f5)', borderRadius: '4px', fontSize: '12px' }}>⌘</kbd> + <kbd style={{ padding: '2px 6px', backgroundColor: 'var(--mieweb-muted, #f5f5f5)', borderRadius: '4px', fontSize: '12px' }}>K</kbd> to quickly search for any component in Storybook.
+</div>
 
 ---
 

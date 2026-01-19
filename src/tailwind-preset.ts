@@ -176,6 +176,14 @@ export const miewebUIPreset: MiewebUIPreset = {
           '0%': { transform: 'translateY(0.5rem)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        'slide-in-right': {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
         'scale-in': {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
@@ -186,6 +194,8 @@ export const miewebUIPreset: MiewebUIPreset = {
         'fade-out': 'fade-out 150ms ease-in',
         'slide-in-from-top': 'slide-in-from-top 150ms ease-out',
         'slide-in-from-bottom': 'slide-in-from-bottom 150ms ease-out',
+        'slide-in-right': 'slide-in-right 300ms ease-out',
+        'slide-in-left': 'slide-in-left 300ms ease-out',
         'scale-in': 'scale-in 150ms ease-out',
       },
     },
