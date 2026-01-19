@@ -21,12 +21,19 @@
  * };
  * ```
  */
+/**
+ * Safelist of classes used by @mieweb/ui components.
+ * These must be safelisted because Tailwind may not detect them when
+ * components are imported from node_modules (especially with Tailwind CSS 4).
+ */
+declare const miewebUISafelist: string[];
 interface MiewebUIPreset {
     darkMode: ['class', '[data-theme="dark"]'];
+    safelist: string[];
     theme: {
         extend: Record<string, unknown>;
     };
 }
 declare const miewebUIPreset: MiewebUIPreset;
 
-export { type MiewebUIPreset, miewebUIPreset as default, miewebUIPreset };
+export { type MiewebUIPreset, miewebUIPreset as default, miewebUIPreset, miewebUISafelist };

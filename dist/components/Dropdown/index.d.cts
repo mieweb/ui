@@ -43,6 +43,32 @@ declare function Dropdown({ trigger, children, open: controlledOpen, onOpenChang
 declare namespace Dropdown {
     var displayName: string;
 }
+interface DropdownHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+    /** Avatar element or image */
+    avatar?: React.ReactNode;
+    /** Primary text (e.g., user name) */
+    title: React.ReactNode;
+    /** Secondary text (e.g., email) */
+    subtitle?: React.ReactNode;
+}
+/**
+ * A header section for dropdown menus, typically used for user info.
+ *
+ * @example
+ * ```tsx
+ * <DropdownHeader
+ *   avatar={<Avatar name="John Doe" />}
+ *   title="John Doe"
+ *   subtitle="john@example.com"
+ * />
+ * ```
+ */
+declare const DropdownHeader: React.ForwardRefExoticComponent<DropdownHeaderProps & React.RefAttributes<HTMLDivElement>>;
+type DropdownContentProps = React.HTMLAttributes<HTMLDivElement>;
+/**
+ * A container for dropdown menu items with proper padding.
+ */
+declare const DropdownContent: React.ForwardRefExoticComponent<DropdownContentProps & React.RefAttributes<HTMLDivElement>>;
 interface DropdownItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     /** Icon to display before the label */
     icon?: React.ReactNode;
@@ -73,4 +99,4 @@ declare namespace DropdownLabel {
     var displayName: string;
 }
 
-export { Dropdown, DropdownItem, type DropdownItemProps, DropdownLabel, type DropdownPlacement, type DropdownProps, DropdownSeparator };
+export { Dropdown, DropdownContent, type DropdownContentProps, DropdownHeader, type DropdownHeaderProps, DropdownItem, type DropdownItemProps, DropdownLabel, type DropdownPlacement, type DropdownProps, DropdownSeparator };

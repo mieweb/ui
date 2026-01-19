@@ -35,7 +35,7 @@ export * from './hooks';
 export * from './utils';
 
 // Tailwind Preset
-export { miewebUIPreset } from './tailwind-preset';
+export { miewebUIPreset, miewebUISafelist } from './tailwind-preset';
 
 // Brand System
 export * from './brands';

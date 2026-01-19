@@ -1,26 +1,18 @@
 'use strict';
 
-var chunkSEZI2MIS_cjs = require('../chunk-SEZI2MIS.cjs');
-var chunkS6UNPMAS_cjs = require('../chunk-S6UNPMAS.cjs');
-var chunkZ3TFPXVN_cjs = require('../chunk-Z3TFPXVN.cjs');
+var chunkSM3QIARX_cjs = require('../chunk-SM3QIARX.cjs');
 var chunkFFJVCQ5R_cjs = require('../chunk-FFJVCQ5R.cjs');
 var chunk4LNS5QDP_cjs = require('../chunk-4LNS5QDP.cjs');
 var chunkO5HS7ZND_cjs = require('../chunk-O5HS7ZND.cjs');
 var chunkP52GA3GJ_cjs = require('../chunk-P52GA3GJ.cjs');
+var chunkS6UNPMAS_cjs = require('../chunk-S6UNPMAS.cjs');
+var chunkZ3TFPXVN_cjs = require('../chunk-Z3TFPXVN.cjs');
 
 
 
 Object.defineProperty(exports, "brands", {
   enumerable: true,
-  get: function () { return chunkSEZI2MIS_cjs.brands; }
-});
-Object.defineProperty(exports, "miewebBrand", {
-  enumerable: true,
-  get: function () { return chunkS6UNPMAS_cjs.miewebBrand; }
-});
-Object.defineProperty(exports, "webchartBrand", {
-  enumerable: true,
-  get: function () { return chunkZ3TFPXVN_cjs.webchartBrand; }
+  get: function () { return chunkSM3QIARX_cjs.brands; }
 });
 Object.defineProperty(exports, "createBrandPreset", {
   enumerable: true,
@@ -45,6 +37,14 @@ Object.defineProperty(exports, "defaultBrand", {
 Object.defineProperty(exports, "enterpriseHealthBrand", {
   enumerable: true,
   get: function () { return chunkP52GA3GJ_cjs.enterpriseHealthBrand; }
+});
+Object.defineProperty(exports, "miewebBrand", {
+  enumerable: true,
+  get: function () { return chunkS6UNPMAS_cjs.miewebBrand; }
+});
+Object.defineProperty(exports, "webchartBrand", {
+  enumerable: true,
+  get: function () { return chunkZ3TFPXVN_cjs.webchartBrand; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

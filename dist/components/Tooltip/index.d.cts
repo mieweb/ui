@@ -7,13 +7,11 @@ interface TooltipProps {
     content: React.ReactNode;
     /** The element that triggers the tooltip */
     children: React.ReactElement<{
-        onMouseEnter?: () => void;
-        onMouseLeave?: () => void;
         onFocus?: () => void;
         onBlur?: () => void;
         'aria-describedby'?: string;
     }>;
-    /** Placement of the tooltip relative to the trigger */
+    /** Preferred placement of the tooltip relative to the trigger. Will flip if not enough space. */
     placement?: TooltipPlacement;
     /** Delay in ms before showing the tooltip */
     delay?: number;
@@ -25,9 +23,14 @@ interface TooltipProps {
     onOpenChange?: (open: boolean) => void;
     /** Additional class name for the tooltip content */
     className?: string;
+    /** Maximum width of the tooltip in pixels. Set to 'none' for no limit. Default: 250 */
+    maxWidth?: number | 'none';
+    /** Offset from the trigger element in pixels. Default: 8 */
+    offset?: number;
 }
 /**
  * An accessible tooltip component that displays on hover/focus.
+ * Features smart positioning that automatically flips to avoid going off-screen.
  *
  * @example
  * ```tsx
@@ -35,8 +38,16 @@ interface TooltipProps {
  *   <Button>Hover me</Button>
  * </Tooltip>
  * ```
+ *
+ * @example
+ * ```tsx
+ * // With multi-line content
+ * <Tooltip content="This is a longer description that will wrap nicely" maxWidth={200}>
+ *   <Button>Info</Button>
+ * </Tooltip>
+ * ```
  */
-declare function Tooltip({ content, children, placement, delay, disabled, open: controlledOpen, onOpenChange, className, }: TooltipProps): react_jsx_runtime.JSX.Element;
+declare function Tooltip({ content, children, placement: preferredPlacement, delay, disabled, open: controlledOpen, onOpenChange, className, maxWidth, offset, }: TooltipProps): react_jsx_runtime.JSX.Element;
 declare namespace Tooltip {
     var displayName: string;
 }

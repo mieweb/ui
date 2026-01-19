@@ -1,0 +1,110 @@
+import { cn } from './chunk-F3SOEIN2.js';
+import { cva } from 'class-variance-authority';
+import { jsx, jsxs } from 'react/jsx-runtime';
+
+var spinnerVariants = cva(
+  ["animate-spin rounded-full border-2 border-current border-t-transparent"],
+  {
+    variants: {
+      size: {
+        xs: "h-3 w-3",
+        sm: "h-4 w-4",
+        md: "h-6 w-6",
+        lg: "h-8 w-8",
+        xl: "h-12 w-12"
+      },
+      variant: {
+        default: "text-primary-500",
+        muted: "text-muted-foreground",
+        white: "text-white"
+      }
+    },
+    defaultVariants: {
+      size: "md",
+      variant: "default"
+    }
+  }
+);
+function Spinner({
+  className,
+  size,
+  variant,
+  label = "Loading",
+  ...props
+}) {
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      role: "status",
+      "aria-label": label,
+      className: cn(spinnerVariants({ size, variant }), className),
+      ...props,
+      children: /* @__PURE__ */ jsx("span", { className: "sr-only", children: label })
+    }
+  );
+}
+Spinner.displayName = "Spinner";
+function SpinnerWithLabel({
+  label,
+  labelPosition = "bottom",
+  size,
+  variant,
+  className,
+  ...props
+}) {
+  const positionClasses = {
+    top: "flex-col-reverse",
+    bottom: "flex-col",
+    left: "flex-row-reverse",
+    right: "flex-row"
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      role: "status",
+      "aria-label": label,
+      className: cn(
+        "inline-flex items-center justify-center gap-2",
+        positionClasses[labelPosition],
+        className
+      ),
+      ...props,
+      children: [
+        /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: cn(spinnerVariants({ size, variant })),
+            "aria-hidden": "true"
+          }
+        ),
+        /* @__PURE__ */ jsx("span", { className: "text-muted-foreground text-sm", children: label })
+      ]
+    }
+  );
+}
+SpinnerWithLabel.displayName = "SpinnerWithLabel";
+function FullPageSpinner({
+  backdrop = true,
+  text,
+  size = "xl",
+  ...props
+}) {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: cn(
+        "fixed inset-0 z-50 flex flex-col items-center justify-center gap-4",
+        backdrop && "bg-background/80 backdrop-blur-sm"
+      ),
+      children: [
+        /* @__PURE__ */ jsx(Spinner, { size, ...props }),
+        text && /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-sm", children: text })
+      ]
+    }
+  );
+}
+FullPageSpinner.displayName = "FullPageSpinner";
+
+export { FullPageSpinner, Spinner, SpinnerWithLabel, spinnerVariants };
+//# sourceMappingURL=chunk-GV5JQBPX.js.map
+//# sourceMappingURL=chunk-GV5JQBPX.js.map

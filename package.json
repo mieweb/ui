@@ -88,6 +88,10 @@
         "default": "./dist/brands/index.cjs"
       }
     },
+    "./brands/bluehive.css": "./dist/brands/bluehive.css",
+    "./brands/mieweb.css": "./dist/brands/mieweb.css",
+    "./brands/webchart.css": "./dist/brands/webchart.css",
+    "./brands/enterprise-health.css": "./dist/brands/enterprise-health.css",
     "./brands/*": {
       "import": {
         "types": "./dist/brands/*.d.ts",
@@ -98,7 +102,6 @@
         "default": "./dist/brands/*.cjs"
       }
     },
-    "./brands/bluehive.css": "./src/brands/bluehive.css",
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css"
   },
@@ -109,8 +112,9 @@
   ],
   "scripts": {
     "dev": "tsup --watch",
-    "build": "tsup && npm run build:css",
+    "build": "tsup && npm run build:css && npm run copy:brand-css",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
+    "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",

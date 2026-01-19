@@ -1,6 +1,8 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
 import { T as Theme, R as ResolvedTheme } from '../../useTheme-B9SWu6ui.js';
+import * as class_variance_authority_types from 'class-variance-authority/types';
+import { VariantProps } from 'class-variance-authority';
 
 interface ThemeProviderContextValue {
     theme: Theme;
@@ -50,4 +52,70 @@ declare namespace ThemeProvider {
  */
 declare function useThemeContext(): ThemeProviderContextValue;
 
-export { ThemeProvider, ThemeProviderContext, type ThemeProviderContextValue, type ThemeProviderProps, useThemeContext };
+declare const themeToggleVariants: (props?: ({
+    size?: "sm" | "md" | "lg" | null | undefined;
+    variant?: "default" | "ghost" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+declare const themeToggleIconVariants: (props?: ({
+    size?: "sm" | "md" | "lg" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface ThemeToggleProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>, VariantProps<typeof themeToggleVariants> {
+    /**
+     * What themes to cycle through.
+     * - 'two-way': Toggle between light and dark only
+     * - 'three-way': Cycle through light → dark → system
+     * @default 'two-way'
+     */
+    mode?: 'two-way' | 'three-way';
+    /**
+     * Whether to show a tooltip with the current/next theme
+     * @default true
+     */
+    showTooltip?: boolean;
+    /**
+     * Tooltip placement
+     * @default 'bottom'
+     */
+    tooltipPlacement?: 'top' | 'right' | 'bottom' | 'left';
+    /**
+     * Delay before showing tooltip in ms
+     * @default 140
+     */
+    tooltipDelay?: number;
+    /**
+     * Custom icon for light theme
+     */
+    lightIcon?: React.ReactNode;
+    /**
+     * Custom icon for dark theme
+     */
+    darkIcon?: React.ReactNode;
+    /**
+     * Custom icon for system theme (only used in three-way mode)
+     */
+    systemIcon?: React.ReactNode;
+}
+/**
+ * An accessible theme toggle button that switches between light/dark modes.
+ *
+ * Uses the mieweb-ui useTheme hook for state management and persists
+ * the user's preference to localStorage.
+ *
+ * @example
+ * ```tsx
+ * // Simple two-way toggle (light/dark)
+ * <ThemeToggle />
+ *
+ * // Three-way cycle (light → dark → system)
+ * <ThemeToggle mode="three-way" />
+ *
+ * // With custom styling
+ * <ThemeToggle size="lg" variant="ghost" />
+ *
+ * // Without tooltip
+ * <ThemeToggle showTooltip={false} />
+ * ```
+ */
+declare const ThemeToggle: React.ForwardRefExoticComponent<ThemeToggleProps & React.RefAttributes<HTMLButtonElement>>;
+
+export { ThemeProvider, ThemeProviderContext, type ThemeProviderContextValue, type ThemeProviderProps, ThemeToggle, type ThemeToggleProps, themeToggleIconVariants, themeToggleVariants, useThemeContext };

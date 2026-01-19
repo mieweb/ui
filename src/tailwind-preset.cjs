@@ -7,6 +7,67 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class', '[data-theme="dark"]'],
+  // Safelist classes used by @mieweb/ui components that may not be detected
+  // when components are imported from node_modules (especially with Tailwind CSS 4)
+  safelist: [
+    // Semantic colors
+    'border-border',
+    'border-input',
+    'ring-ring',
+    'bg-background',
+    'bg-card',
+    'bg-muted',
+    'bg-destructive',
+    'text-foreground',
+    'text-card-foreground',
+    'text-muted-foreground',
+    'text-destructive',
+    'text-destructive-foreground',
+    'focus:ring-ring',
+    'focus:border-transparent',
+    'focus:ring-destructive',
+    'border-destructive',
+    // Grid classes for QuickAction and responsive layouts
+    'grid-cols-1',
+    'grid-cols-2',
+    'grid-cols-3',
+    'grid-cols-4',
+    'grid-cols-6',
+    'sm:grid-cols-1',
+    'sm:grid-cols-2',
+    'sm:grid-cols-3',
+    'sm:grid-cols-4',
+    'sm:grid-cols-6',
+    'md:grid-cols-2',
+    'md:grid-cols-3',
+    'md:grid-cols-4',
+    'lg:grid-cols-2',
+    'lg:grid-cols-3',
+    'lg:grid-cols-4',
+    // Switch component
+    'bg-neutral-200',
+    'dark:bg-neutral-700',
+    'bg-primary-500',
+    'h-5',
+    'w-9',
+    'h-6',
+    'w-11',
+    'h-7',
+    'w-14',
+    'h-4',
+    'w-4',
+    'w-5',
+    'w-6',
+    'translate-x-0.5',
+    'translate-x-4',
+    'translate-x-5',
+    'translate-x-7',
+    // SchedulePicker / overflow handling
+    'overflow-x-auto',
+    'overflow-hidden',
+    // Select component
+    'truncate',
+  ],
   theme: {
     extend: {
       colors: {
