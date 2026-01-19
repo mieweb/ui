@@ -133,14 +133,20 @@ function AppLogo() {
   );
 }
 
-// User avatar that shows just avatar when collapsed
+// User avatar that shows just avatar when collapsed (clicking expands)
 function UserFooter() {
-  const { isCollapsed, isMobileViewport } = useSidebar();
+  const { isCollapsed, isMobileViewport, toggleCollapsed } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
 
   if (showCollapsed) {
     return (
-      <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+      <button
+        onClick={toggleCollapsed}
+        className="hover:ring-primary-500 rounded-full p-0.5 transition-colors hover:ring-2"
+        title="Expand sidebar"
+      >
+        <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+      </button>
     );
   }
 
