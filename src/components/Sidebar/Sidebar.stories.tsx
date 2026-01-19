@@ -108,30 +108,76 @@ const CogIcon = () => (
 // Demo Components
 // =============================================================================
 
-function SidebarDemo() {
+// Logo component that shows just icon when collapsed
+function AppLogo() {
+  const { isCollapsed, isMobileViewport } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+
+  if (showCollapsed) {
+    return (
+      <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+        M
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+        M
+      </div>
+      <div className="font-semibold text-neutral-900 dark:text-white">
+        MIE App
+      </div>
+    </div>
+  );
+}
+
+// User avatar that shows just avatar when collapsed
+function UserFooter() {
+  const { isCollapsed, isMobileViewport } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+
+  if (showCollapsed) {
+    return (
+      <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+        <div className="text-sm text-neutral-700 dark:text-neutral-300">
+          John Doe
+        </div>
+      </div>
+      <SidebarToggle />
+    </div>
+  );
+}
+
+function SidebarDemoContent() {
   const [activePage, setActivePage] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
+  const { isCollapsed, isMobileViewport } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
 
   return (
     <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-950">
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-3">
-            <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
-              M
-            </div>
-            <div className="font-semibold text-neutral-900 dark:text-white">
-              MIE App
-            </div>
-          </div>
+          <AppLogo />
         </SidebarHeader>
 
         <SidebarContent>
-          <SidebarSearch
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search menu"
-          />
+          {!showCollapsed && (
+            <SidebarSearch
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search menu"
+            />
+          )}
 
           <SidebarNav>
             <SidebarNavGroup
@@ -195,15 +241,7 @@ function SidebarDemo() {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
-              <div className="text-sm text-neutral-700 dark:text-neutral-300">
-                John Doe
-              </div>
-            </div>
-            <SidebarToggle />
-          </div>
+          <UserFooter />
         </SidebarFooter>
       </Sidebar>
 
@@ -226,28 +264,34 @@ function SidebarDemo() {
   );
 }
 
+function SidebarDemo() {
+  return <SidebarDemoContent />;
+}
+
+// Collapse toggle button that works in both states
+function CollapseToggle() {
+  const { isCollapsed, toggleCollapsed, isMobileViewport } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+
+  return (
+    <button
+      onClick={toggleCollapsed}
+      className="w-full rounded-lg py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+      title={showCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+    >
+      {showCollapsed ? '→' : '← Collapse'}
+    </button>
+  );
+}
+
 function CollapsibleDemo() {
-  const { isCollapsed, toggleCollapsed } = useSidebar();
   const [activePage, setActivePage] = useState('dashboard');
 
   return (
     <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-950">
       <Sidebar>
         <SidebarHeader>
-          {isCollapsed ? (
-            <div className="bg-primary-500 mx-auto flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
-              M
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
-                M
-              </div>
-              <div className="font-semibold text-neutral-900 dark:text-white">
-                MIE App
-              </div>
-            </div>
-          )}
+          <AppLogo />
         </SidebarHeader>
 
         <SidebarContent>
@@ -280,12 +324,7 @@ function CollapsibleDemo() {
         </SidebarContent>
 
         <SidebarFooter>
-          <button
-            onClick={toggleCollapsed}
-            className="w-full py-2 text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-          >
-            {isCollapsed ? '→' : '← Collapse'}
-          </button>
+          <CollapseToggle />
         </SidebarFooter>
       </Sidebar>
 

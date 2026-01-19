@@ -1036,16 +1036,27 @@ function SidebarHeader({
   className,
   showMobileClose = true
 }) {
-  const { closeMobile, isMobileViewport } = useSidebar();
+  const { closeMobile, isMobileViewport, isCollapsed } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "flex items-center justify-between border-b border-neutral-200 px-4 py-4 dark:border-neutral-700",
+        "flex items-center border-b border-neutral-200 py-4 dark:border-neutral-700",
+        showCollapsed ? "justify-center px-2" : "justify-between px-4",
         className
       ),
       children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children }),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "min-w-0",
+              showCollapsed ? "flex justify-center" : "flex-1"
+            ),
+            children
+          }
+        ),
         showMobileClose && isMobileViewport && /* @__PURE__ */ jsxRuntime.jsx(
           "button",
           {
@@ -1063,11 +1074,14 @@ function SidebarFooter({
   children,
   className
 }) {
+  const { isCollapsed, isMobileViewport } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "mt-auto border-t border-neutral-200 px-4 py-4 dark:border-neutral-700",
+        "mt-auto border-t border-neutral-200 py-4 dark:border-neutral-700",
+        showCollapsed ? "flex justify-center px-2" : "px-4",
         className
       ),
       children
