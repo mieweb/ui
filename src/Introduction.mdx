@@ -1,5 +1,4 @@
-{/* @jsxImportSource react */}
-import { Meta } from '@storybook/blocks';
+import { Meta } from '@storybook/addon-docs/blocks';
 
 <Meta title="Introduction" />
 
@@ -115,12 +114,28 @@ module.exports = {
 
 This library includes pre-built themes for MIE's product suite. Use the **Brand** selector in the toolbar above to preview components with different brand styles.
 
-| Brand | Primary Color | Description |
-|-------|--------------|-------------|
-| **BlueHive** | `#27aae1` | DOT Physical scheduling platform |
-| **Enterprise Health** | `#2563eb` | Occupational health management |
-| **WebChart** | `#16a34a` | Electronic health records |
-| **MIE** | `#6366f1` | Medical Informatics Engineering |
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginTop: '16px', marginBottom: '16px' }}>
+  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #27aae1' }}>
+    <strong>BlueHive</strong>
+    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#27aae1' }}>#27aae1</div>
+    <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)' }}>DOT Physical scheduling platform</p>
+  </div>
+  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #2563eb' }}>
+    <strong>Enterprise Health</strong>
+    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#2563eb' }}>#2563eb</div>
+    <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)' }}>Occupational health management</p>
+  </div>
+  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #16a34a' }}>
+    <strong>WebChart</strong>
+    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#16a34a' }}>#16a34a</div>
+    <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)' }}>Electronic health records</p>
+  </div>
+  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #6366f1' }}>
+    <strong>MIE</strong>
+    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#6366f1' }}>#6366f1</div>
+    <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)' }}>Medical Informatics Engineering</p>
+  </div>
+</div>
 
 ### Using a Brand Theme
 
