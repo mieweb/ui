@@ -94,6 +94,7 @@ export {
 
 // Data & Charts
 export {
+  Activity as ActivityIcon,
   BarChart3 as ChartIcon,
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
@@ -118,6 +119,7 @@ export {
 
 // Layout & View
 export {
+  Eye as EyeIcon,
   LayoutGrid as GridIcon,
   List as ListIcon,
   Table as TableIcon,
@@ -146,7 +148,6 @@ export {
 
 // Healthcare & Medical
 export {
-  Activity as ActivityIcon,
   Ambulance as AmbulanceIcon,
   Bandage as BandageIcon,
   Bone as BoneIcon,
@@ -154,7 +155,6 @@ export {
   BriefcaseMedical as BriefcaseMedicalIcon,
   Dna as DnaIcon,
   Ear as EarIcon,
-  Eye as EyeIcon,
   Fingerprint as FingerprintIcon,
   HeartPulse as HeartPulseIcon,
   Hospital as HospitalIcon,
