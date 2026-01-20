@@ -274,7 +274,7 @@ export function AppHeaderSearch({
         className={cn(
           'hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex',
           'rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600',
-          'flex-shrink-0 text-xs text-gray-500 dark:text-gray-300'
+          'flex-shrink-0 text-xs text-gray-600 dark:text-gray-300'
         )}
       >
         {isMac ? '⌘' : 'Ctrl'}+K
@@ -341,7 +341,7 @@ export function AppHeaderUserMenu({
       <div
         className={cn(
           'flex h-8 w-8 items-center justify-center overflow-hidden rounded-full',
-          'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-sm font-medium'
+          'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 text-sm font-medium'
         )}
       >
         {avatarUrl ? (

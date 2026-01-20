@@ -46,13 +46,13 @@ const DateButton = React.forwardRef<HTMLButtonElement, DateButtonProps>(
         className={cn(dateButtonVariants({ selected }), className)}
         {...props}
       >
-        <div className="text-xs text-neutral-500">
+        <div className="text-xs text-neutral-500 dark:text-neutral-400">
           {date.toLocaleDateString('en-US', { weekday: 'short' })}
         </div>
         <div className="text-lg font-semibold text-neutral-900 dark:text-white">
           {date.getDate()}
         </div>
-        <div className="text-xs text-neutral-500">
+        <div className="text-xs text-neutral-500 dark:text-neutral-400">
           {date.toLocaleDateString('en-US', { month: 'short' })}
         </div>
       </button>
@@ -187,7 +187,9 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
               {title}
             </div>
             {description && (
-              <div className="text-sm text-neutral-500">{description}</div>
+              <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                {description}
+              </div>
             )}
           </div>
         </div>

@@ -480,7 +480,7 @@ export function CommandPalette({
                                   'hidden items-center px-1.5 py-0.5 text-[10px] sm:inline-flex',
                                   'rounded border bg-gray-100 dark:bg-gray-700',
                                   'border-gray-200 dark:border-gray-600',
-                                  'text-gray-500 dark:text-gray-400'
+                                  'text-gray-600 dark:text-gray-400'
                                 )}
                               >
                                 {item.shortcut}
@@ -574,7 +574,7 @@ export function CommandPaletteTrigger({
             className={cn(
               'inline-flex items-center gap-0.5 px-2 py-0.5',
               'rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600',
-              'flex-shrink-0 text-xs text-gray-500 dark:text-gray-300'
+              'flex-shrink-0 text-xs text-gray-600 dark:text-gray-300'
             )}
           >
             {isMac ? '⌘' : 'Ctrl'}+K

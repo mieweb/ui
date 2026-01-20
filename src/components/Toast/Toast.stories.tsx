@@ -22,25 +22,25 @@ function ToastDemo() {
       <div className="flex flex-wrap justify-center gap-2">
         <button
           onClick={() => success('Changes saved successfully!')}
-          className="rounded-lg bg-green-500 px-4 py-2 text-white transition-colors hover:bg-green-600"
+          className="rounded-lg bg-green-700 px-4 py-2 text-white transition-colors hover:bg-green-800"
         >
           Success
         </button>
         <button
           onClick={() => error('Something went wrong. Please try again.')}
-          className="rounded-lg bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600"
+          className="rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
         >
           Error
         </button>
         <button
           onClick={() => warning('Your session will expire in 5 minutes.')}
-          className="rounded-lg bg-amber-500 px-4 py-2 text-white transition-colors hover:bg-amber-600"
+          className="rounded-lg bg-amber-700 px-4 py-2 text-white transition-colors hover:bg-amber-800"
         >
           Warning
         </button>
         <button
           onClick={() => info('New features are available!')}
-          className="rounded-lg bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
         >
           Info
         </button>

@@ -144,7 +144,7 @@ export function Sidebar({
       )}
 
       {/* Sidebar */}
-      <aside
+      <nav
         data-testid={testId}
         className={cn(
           'flex h-screen flex-col',
@@ -163,11 +163,10 @@ export function Sidebar({
           minWidth: width,
           ...style,
         }}
-        role="navigation"
         aria-label="Main navigation"
       >
         {children}
-      </aside>
+      </nav>
     </>
   );
 }

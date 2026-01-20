@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { Alert, AlertTitle, AlertDescription } from './Alert';
 
 const meta: Meta<typeof Alert> = {
@@ -12,6 +13,9 @@ const meta: Meta<typeof Alert> = {
     variant: {
       control: 'select',
       options: ['default', 'info', 'success', 'warning', 'danger'],
+    },
+    dismissible: {
+      control: 'boolean',
     },
   },
   decorators: [
@@ -132,4 +136,53 @@ export const AllVariants: Story = {
       </Alert>
     </div>
   ),
+};
+
+function DismissibleExample() {
+  const [visible, setVisible] = useState(true);
+
+  if (!visible) {
+    return (
+      <button
+        onClick={() => setVisible(true)}
+        className="text-primary-500 text-sm underline"
+      >
+        Show alert again
+      </button>
+    );
+  }
+
+  return (
+    <Alert
+      variant="info"
+      dismissible
+      onDismiss={() => setVisible(false)}
+      icon={
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+      }
+    >
+      <AlertTitle>Dismissible Alert</AlertTitle>
+      <AlertDescription>
+        This alert can be dismissed by clicking the close button.
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+export const Dismissible: Story = {
+  render: () => <DismissibleExample />,
 };

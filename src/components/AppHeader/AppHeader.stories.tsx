@@ -96,7 +96,10 @@ function FullHeaderDemo() {
   return (
     <AppHeader className="w-full">
       <AppHeaderSection align="left">
-        <button className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800">
+        <button
+          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800"
+          aria-label="Open menu"
+        >
           <MenuIcon />
         </button>
         <AppHeaderSearch

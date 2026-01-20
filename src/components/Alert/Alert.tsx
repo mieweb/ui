@@ -34,6 +34,12 @@ export interface AlertProps
     VariantProps<typeof alertVariants> {
   /** Icon to display in the alert */
   icon?: React.ReactNode;
+  /** Whether the alert can be dismissed */
+  dismissible?: boolean;
+  /** Callback when the alert is dismissed */
+  onDismiss?: () => void;
+  /** Accessible label for the dismiss button */
+  dismissLabel?: string;
 }
 
 /**
@@ -48,16 +54,61 @@ export interface AlertProps
  * ```
  */
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, icon, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      icon,
+      dismissible,
+      onDismiss,
+      dismissLabel = 'Dismiss alert',
+      children,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <div
         ref={ref}
         role="alert"
-        className={cn(alertVariants({ variant }), className)}
+        className={cn(
+          alertVariants({ variant }),
+          dismissible && 'pr-10',
+          className
+        )}
         {...props}
       >
         {icon}
         <div>{children}</div>
+        {dismissible && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className={cn(
+              'absolute top-2 right-2 rounded-md p-1',
+              'opacity-70 hover:opacity-100',
+              'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+              'transition-opacity'
+            )}
+            aria-label={dismissLabel}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
       </div>
     );
   }
