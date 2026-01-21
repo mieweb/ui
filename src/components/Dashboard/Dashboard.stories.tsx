@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 // Import components
 import { Alert } from '../Alert';
+import { AudioRecorder } from '../AudioRecorder';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
@@ -29,6 +30,7 @@ import { RadioGroup, Radio } from '../Radio';
 import { Switch } from '../Switch';
 import { Textarea } from '../Textarea';
 import { Progress, CircularProgress } from '../Progress';
+import { RecordButton, type TranscriptionState } from '../RecordButton';
 import { Skeleton, SkeletonText, SkeletonCard } from '../Skeleton';
 import { Spinner, SpinnerWithLabel } from '../Spinner';
 import { Breadcrumb } from '../Breadcrumb';
@@ -326,6 +328,36 @@ const Icons = {
       />
     </svg>
   ),
+  Microphone: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+      />
+    </svg>
+  ),
+  Send: () => (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+      />
+    </svg>
+  ),
 };
 
 // ============================================================================
@@ -338,7 +370,8 @@ type Page =
   | 'analytics'
   | 'orders'
   | 'profile'
-  | 'settings';
+  | 'settings'
+  | 'voice-notes';
 
 interface UserData {
   name: string;
@@ -634,6 +667,7 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
     { id: 'users', label: 'Users', icon: <Icons.Users /> },
     { id: 'analytics', label: 'Analytics', icon: <Icons.Chart /> },
     { id: 'orders', label: 'Orders', icon: <Icons.Orders /> },
+    { id: 'voice-notes', label: 'Voice Notes', icon: <Icons.Microphone /> },
   ];
 
   const handleNavigate = (page: Page) => {
@@ -726,6 +760,58 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
 }
 
 // ============================================================================
+// Voice-Enabled Search Component
+// ============================================================================
+
+function VoiceSearch() {
+  const [searchValue, setSearchValue] = React.useState('');
+  const [transcriptionState, setTranscriptionState] =
+    React.useState<TranscriptionState>('idle');
+
+  const handleRecordingComplete = (_blob: Blob, _duration: number) => {
+    // Simulate transcription
+    setTranscriptionState('transcribing');
+    setTimeout(() => {
+      setTranscriptionState('streaming');
+      // Simulate streaming text
+      const mockSearch = 'find recent orders';
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index <= mockSearch.length) {
+          setSearchValue(mockSearch.substring(0, index));
+          index++;
+        } else {
+          clearInterval(interval);
+          setTranscriptionState('complete');
+          setTimeout(() => setTranscriptionState('idle'), 500);
+        }
+      }, 50);
+    }, 800);
+  };
+
+  return (
+    <div className="relative">
+      <Input
+        placeholder="Search or speak..."
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        className="w-64 pr-10"
+      />
+      <div className="absolute top-1/2 right-2 -translate-y-1/2">
+        <RecordButton
+          size="sm"
+          variant="default"
+          transcriptionState={transcriptionState}
+          showTranscriptionState={false}
+          onRecordingComplete={handleRecordingComplete}
+          maxDuration={10}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Header Component
 // ============================================================================
 
@@ -755,9 +841,9 @@ function Header({
           <Icons.Menu />
         </button>
 
-        {/* Search */}
+        {/* Voice-Enabled Search */}
         <div className="hidden md:block">
-          <Input placeholder="Search..." className="w-64" />
+          <VoiceSearch />
         </div>
       </div>
 
@@ -1272,6 +1358,28 @@ function ProfilePage({ user }: ProfilePageProps) {
   const [email, setEmail] = React.useState(user.email);
   const [phone, setPhone] = React.useState('');
   const [bio, setBio] = React.useState('');
+  const [bioTranscriptionState, setBioTranscriptionState] =
+    React.useState<TranscriptionState>('idle');
+
+  const handleBioRecording = (_blob: Blob, _duration: number) => {
+    setBioTranscriptionState('transcribing');
+    setTimeout(() => {
+      setBioTranscriptionState('streaming');
+      const mockBio =
+        'Passionate software developer with 10 years of experience building web applications.';
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index <= mockBio.length) {
+          setBio(mockBio.substring(0, index));
+          index++;
+        } else {
+          clearInterval(interval);
+          setBioTranscriptionState('complete');
+          setTimeout(() => setBioTranscriptionState('idle'), 500);
+        }
+      }, 30);
+    }, 600);
+  };
 
   return (
     <div className="space-y-6">
@@ -1335,13 +1443,31 @@ function ProfilePage({ user }: ProfilePageProps) {
               value={phone}
               onChange={setPhone}
             />
-            <Textarea
-              label="Bio"
-              placeholder="Tell us about yourself..."
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              maxLength={200}
-            />
+            {/* Voice-enabled Bio Textarea */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Text as="label" size="sm" weight="medium">
+                  Bio
+                </Text>
+                <div className="flex items-center gap-2">
+                  <RecordButton
+                    size="sm"
+                    variant="filled"
+                    transcriptionState={bioTranscriptionState}
+                    showTranscriptionState
+                    onRecordingComplete={handleBioRecording}
+                    maxDuration={30}
+                  />
+                </div>
+              </div>
+              <Textarea
+                placeholder="Tell us about yourself... or record a voice message!"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                maxLength={200}
+                rows={4}
+              />
+            </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700">
             <Button variant="outline">Cancel</Button>
@@ -1349,6 +1475,290 @@ function ProfilePage({ user }: ProfilePageProps) {
           </CardFooter>
         </Card>
       </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Voice Notes Page
+// ============================================================================
+
+interface VoiceNote {
+  id: string;
+  title: string;
+  transcript: string;
+  duration: number;
+  createdAt: string;
+  status: 'recording' | 'transcribing' | 'complete';
+}
+
+function VoiceNotesPage() {
+  const [notes, setNotes] = React.useState<VoiceNote[]>([
+    {
+      id: '1',
+      title: 'Meeting Notes',
+      transcript:
+        'Discussed the Q4 roadmap and assigned tasks to the team. Need to follow up on budget approval.',
+      duration: 45,
+      createdAt: '2 hours ago',
+      status: 'complete',
+    },
+    {
+      id: '2',
+      title: 'Project Ideas',
+      transcript:
+        'New feature idea: Add voice commands for navigation. Users could say "go to dashboard" or "show orders".',
+      duration: 32,
+      createdAt: 'Yesterday',
+      status: 'complete',
+    },
+    {
+      id: '3',
+      title: 'Quick Reminder',
+      transcript: 'Call the client at 3pm about the contract renewal.',
+      duration: 8,
+      createdAt: '2 days ago',
+      status: 'complete',
+    },
+  ]);
+
+  const [quickNote, setQuickNote] = React.useState('');
+  const [quickNoteState, setQuickNoteState] =
+    React.useState<TranscriptionState>('idle');
+
+  const handleQuickNoteRecording = () => {
+    setQuickNoteState('transcribing');
+    setTimeout(() => {
+      setQuickNoteState('streaming');
+      const mockText =
+        'Remember to update the documentation before the release';
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index <= mockText.length) {
+          setQuickNote(mockText.substring(0, index));
+          index++;
+        } else {
+          clearInterval(interval);
+          setQuickNoteState('complete');
+          setTimeout(() => setQuickNoteState('idle'), 500);
+        }
+      }, 40);
+    }, 500);
+  };
+
+  const handleNewRecording = (_blob: Blob, duration: number) => {
+    const newNote: VoiceNote = {
+      id: Date.now().toString(),
+      title: 'New Recording',
+      transcript: '',
+      duration: Math.round(duration),
+      createdAt: 'Just now',
+      status: 'transcribing',
+    };
+    setNotes([newNote, ...notes]);
+
+    // Simulate transcription
+    setTimeout(() => {
+      setNotes((prev) =>
+        prev.map((note) =>
+          note.id === newNote.id
+            ? {
+                ...note,
+                transcript:
+                  'This is a simulated transcription of your voice note. In a real application, this would be processed by a speech-to-text API.',
+                status: 'complete',
+              }
+            : note
+        )
+      );
+    }, 2000);
+  };
+
+  const handleSaveQuickNote = () => {
+    if (quickNote.trim()) {
+      const newNote: VoiceNote = {
+        id: Date.now().toString(),
+        title: 'Quick Note',
+        transcript: quickNote,
+        duration: 0,
+        createdAt: 'Just now',
+        status: 'complete',
+      };
+      setNotes([newNote, ...notes]);
+      setQuickNote('');
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Text as="h1" size="2xl" weight="bold">
+            Voice Notes
+          </Text>
+          <Text variant="muted">
+            Record voice memos with automatic transcription.
+          </Text>
+        </div>
+      </div>
+
+      {/* Quick Voice Input Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Icons.Microphone />
+            Quick Voice Input
+          </CardTitle>
+          <CardDescription>
+            Click the mic button and speak your note, or type directly.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <Textarea
+                placeholder="Type or speak your note..."
+                value={quickNote}
+                onChange={(e) => setQuickNote(e.target.value)}
+                rows={3}
+                className="pr-12"
+              />
+              <div className="absolute right-3 bottom-3">
+                <RecordButton
+                  size="md"
+                  variant="filled"
+                  transcriptionState={quickNoteState}
+                  showDuration
+                  onRecordingComplete={handleQuickNoteRecording}
+                  maxDuration={60}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <Button onClick={handleSaveQuickNote} disabled={!quickNote.trim()}>
+              <Icons.Send />
+              Save Note
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Full Audio Recorder Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Record a Voice Note</CardTitle>
+          <CardDescription>
+            Use the full recorder for longer notes with waveform visualization.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AudioRecorder
+            showWaveform
+            showTime
+            maxDuration={300}
+            onRecordingComplete={handleNewRecording}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Voice Notes List */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Your Voice Notes</CardTitle>
+              <CardDescription>{notes.length} notes recorded</CardDescription>
+            </div>
+            <div className="relative">
+              <Input placeholder="Search notes..." className="w-48 pr-10" />
+              <div className="absolute top-1/2 right-2 -translate-y-1/2">
+                <RecordButton size="sm" variant="default" maxDuration={10} />
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {notes.map((note) => (
+            <div
+              key={note.id}
+              className="flex items-start gap-4 rounded-lg border border-neutral-200 p-4 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800/50"
+            >
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                  note.status === 'transcribing'
+                    ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                    : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                }`}
+              >
+                {note.status === 'transcribing' ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <Icons.Microphone />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <Text weight="medium">{note.title}</Text>
+                    <div className="flex items-center gap-2">
+                      <Text size="xs" variant="muted">
+                        {note.createdAt}
+                      </Text>
+                      {note.duration > 0 && (
+                        <>
+                          <span className="text-neutral-300 dark:text-neutral-600">
+                            •
+                          </span>
+                          <Text size="xs" variant="muted">
+                            {formatDuration(note.duration)}
+                          </Text>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <Badge
+                    variant={
+                      note.status === 'complete' ? 'success' : 'secondary'
+                    }
+                    size="sm"
+                  >
+                    {note.status === 'transcribing'
+                      ? 'Transcribing...'
+                      : 'Complete'}
+                  </Badge>
+                </div>
+                <Text size="sm" variant="muted" className="mt-2 line-clamp-2">
+                  {note.status === 'transcribing'
+                    ? 'Processing your recording...'
+                    : note.transcript}
+                </Text>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Voice Commands Info */}
+      <Alert variant="info">
+        <div className="flex items-start gap-3">
+          <Icons.Microphone />
+          <div>
+            <Text weight="medium">Voice Recording Tips</Text>
+            <Text size="sm" variant="muted" className="mt-1">
+              Speak clearly and at a normal pace. The RecordButton component
+              handles microphone access automatically. Maximum recording time is
+              5 minutes for full recordings.
+            </Text>
+          </div>
+        </div>
+      </Alert>
     </div>
   );
 }
@@ -1637,6 +2047,9 @@ function AppShell() {
       case 'settings':
         breadcrumbs.push({ label: 'Settings' });
         break;
+      case 'voice-notes':
+        breadcrumbs.push({ label: 'Voice Notes' });
+        break;
     }
 
     return breadcrumbs;
@@ -1656,6 +2069,8 @@ function AppShell() {
         return <ProfilePage user={mockUser} />;
       case 'settings':
         return <SettingsPage />;
+      case 'voice-notes':
+        return <VoiceNotesPage />;
       default:
         return <DashboardPage />;
     }
