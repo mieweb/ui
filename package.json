@@ -128,7 +128,8 @@
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react-dom": ">=18.0.0",
+    "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -136,6 +137,9 @@
     },
     "react-dom": {
       "optional": false
+    },
+    "wavesurfer.js": {
+      "optional": true
     }
   },
   "dependencies": {
@@ -173,7 +177,8 @@
     "tsup": "^8.3.6",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",
-    "vitest": "^3.0.4"
+    "vitest": "^3.0.4",
+    "wavesurfer.js": "^7.8.17"
   },
   "engines": {
     "node": ">=18.0.0"

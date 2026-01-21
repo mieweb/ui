@@ -1,6 +1,7 @@
 // Components
 export * from './components/Alert';
 export * from './components/AppHeader';
+export * from './components/AudioRecorder';
 export * from './components/Avatar';
 export * from './components/Badge';
 export * from './components/Breadcrumb';
@@ -11,6 +12,7 @@ export * from './components/CommandPalette';
 export * from './components/DateInput';
 export * from './components/Dropdown';
 export * from './components/Input';
+export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/Pagination';
 export * from './components/PhoneInput';
