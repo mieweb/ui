@@ -5,4 +5,6 @@ export {
   formatDuration,
   type RecordButtonProps,
   type RecordButtonState,
+  type TranscriptionState,
+  type TranscriptionResult,
 } from './RecordButton';

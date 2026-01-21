@@ -8,6 +8,24 @@ import { cn } from '../../utils/cn';
 
 export type RecordButtonState = 'idle' | 'recording' | 'processing';
 
+/** Transcription state for integration with transcription services */
+export type TranscriptionState =
+  | 'idle'
+  | 'recording'
+  | 'transcribing'
+  | 'streaming'
+  | 'complete'
+  | 'error';
+
+export interface TranscriptionResult {
+  /** The transcribed text */
+  text: string;
+  /** Whether this is a partial (streaming) or final result */
+  isFinal: boolean;
+  /** Confidence score (0-1) if available */
+  confidence?: number;
+}
+
 export interface RecordButtonProps extends VariantProps<
   typeof recordButtonVariants
 > {
@@ -33,6 +51,10 @@ export interface RecordButtonProps extends VariantProps<
   idleIcon?: React.ReactNode;
   /** Custom recording icon */
   recordingIcon?: React.ReactNode;
+  /** Current transcription state (for external control) */
+  transcriptionState?: TranscriptionState;
+  /** Show transcription state indicator */
+  showTranscriptionState?: boolean;
 }
 
 // ============================================================================
@@ -210,6 +232,8 @@ function RecordButton({
   showDuration = false,
   idleIcon,
   recordingIcon,
+  transcriptionState,
+  showTranscriptionState = false,
 }: RecordButtonProps) {
   const [state, setState] = React.useState<RecordButtonState>('idle');
   const [duration, setDuration] = React.useState(0);
@@ -222,6 +246,8 @@ function RecordButton({
 
   const isRecording = state === 'recording';
   const isProcessing = state === 'processing';
+  const isTranscribing =
+    transcriptionState === 'transcribing' || transcriptionState === 'streaming';
 
   // Cleanup on unmount
   React.useEffect(() => {
@@ -329,7 +355,7 @@ function RecordButton({
     size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5';
 
   const getIcon = () => {
-    if (isProcessing) {
+    if (isProcessing || isTranscribing) {
       return <SpinnerIcon className={iconSize} />;
     }
     if (isRecording) {
@@ -340,9 +366,16 @@ function RecordButton({
 
   const getAriaLabel = () => {
     if (ariaLabel) return ariaLabel;
+    if (isTranscribing) return 'Transcribing audio';
     if (isProcessing) return 'Processing recording';
     if (isRecording) return 'Stop recording';
     return 'Start recording';
+  };
+
+  const getTranscriptionLabel = () => {
+    if (transcriptionState === 'streaming') return 'Listening...';
+    if (transcriptionState === 'transcribing') return 'Transcribing...';
+    return null;
   };
 
   return (
@@ -350,17 +383,18 @@ function RecordButton({
       <button
         type="button"
         onClick={handleClick}
-        disabled={disabled || isProcessing}
+        disabled={disabled || isProcessing || isTranscribing}
         className={cn(
           recordButtonVariants({ variant, size }),
           isRecording && 'text-red-600 dark:text-red-400',
+          isTranscribing && 'text-primary-600 dark:text-primary-400',
           className
         )}
         aria-label={getAriaLabel()}
         aria-pressed={isRecording}
       >
         {getIcon()}
-        {isRecording && (
+        {isRecording && !isTranscribing && (
           <span
             className={cn(recordingIndicatorVariants({ size }))}
             aria-hidden="true"
@@ -370,6 +404,11 @@ function RecordButton({
       {showDuration && isRecording && (
         <span className="font-mono text-xs text-red-600 tabular-nums dark:text-red-400">
           {formatDuration(duration)}
+        </span>
+      )}
+      {showTranscriptionState && getTranscriptionLabel() && (
+        <span className="text-primary-600 dark:text-primary-400 text-xs font-medium">
+          {getTranscriptionLabel()}
         </span>
       )}
     </div>
