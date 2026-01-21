@@ -1,4 +1,5 @@
 // Components
+export * from './components/AGGrid';
 export * from './components/Alert';
 export * from './components/AppHeader';
 export * from './components/AudioPlayer';

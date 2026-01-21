@@ -1,0 +1,286 @@
+/**
+ * AG Grid Theme CSS
+ * 
+ * This stylesheet provides custom theming for AG Grid that integrates
+ * with the MIE Web UI design system CSS variables.
+ * 
+ * It uses the CSS variables defined by the theme system to ensure
+ * the grid matches the rest of the application's look and feel.
+ */
+
+.ag-theme-custom {
+  /* AG Grid uses --ag- prefixed variables for theming */
+  
+  /* Background colors */
+  --ag-background-color: var(--color-background);
+  --ag-odd-row-background-color: var(--color-muted);
+  --ag-header-background-color: var(--color-muted);
+  --ag-control-panel-background-color: var(--color-background);
+  --ag-subheader-background-color: var(--color-muted);
+  --ag-invalid-background-color: var(--color-destructive);
+  
+  /* Foreground/text colors */
+  --ag-foreground-color: var(--color-foreground);
+  --ag-header-foreground-color: var(--color-foreground);
+  --ag-secondary-foreground-color: var(--color-muted-foreground);
+  --ag-disabled-foreground-color: var(--color-muted-foreground);
+  
+  /* Border colors */
+  --ag-border-color: var(--color-border);
+  --ag-header-column-separator-color: var(--color-border);
+  --ag-row-border-color: var(--color-border);
+  
+  /* Selection colors */
+  --ag-selected-row-background-color: var(--color-accent);
+  --ag-row-hover-color: var(--color-accent);
+  --ag-range-selection-background-color: var(--color-accent);
+  --ag-range-selection-border-color: var(--color-primary);
+  
+  /* Input/control colors */
+  --ag-input-focus-border-color: var(--color-ring);
+  --ag-input-border-color: var(--color-input);
+  --ag-checkbox-checked-color: var(--color-primary);
+  --ag-checkbox-unchecked-color: var(--color-input);
+  --ag-checkbox-background-color: var(--color-background);
+  
+  /* Other colors */
+  --ag-chip-background-color: var(--color-muted);
+  --ag-card-shadow: var(--shadow-md);
+  --ag-modal-overlay-background-color: hsl(var(--color-background) / 0.8);
+  
+  /* Sizing */
+  --ag-grid-size: 6px;
+  --ag-icon-size: 16px;
+  --ag-row-height: 40px;
+  --ag-header-height: 40px;
+  --ag-cell-horizontal-padding: 12px;
+  
+  /* Font */
+  --ag-font-family: inherit;
+  --ag-font-size: 14px;
+  
+  /* Borders */
+  --ag-border-radius: var(--radius);
+  --ag-wrapper-border-radius: var(--radius);
+}
+
+/* Root wrapper styling */
+.ag-theme-custom .ag-root-wrapper {
+  border: none;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Header styling */
+.ag-theme-custom .ag-header {
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ag-theme-custom .ag-header-cell {
+  padding: 0 var(--ag-cell-horizontal-padding);
+}
+
+.ag-theme-custom .ag-header-cell-text {
+  font-weight: 500;
+}
+
+/* Cell styling */
+.ag-theme-custom .ag-cell {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ag-cell-horizontal-padding);
+  line-height: 1.5;
+}
+
+/* Row styling */
+.ag-theme-custom .ag-row {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ag-theme-custom .ag-row:last-child {
+  border-bottom: none;
+}
+
+.ag-theme-custom .ag-row-hover {
+  background-color: var(--color-accent);
+}
+
+.ag-theme-custom .ag-row-selected {
+  background-color: var(--color-accent);
+}
+
+/* Filter styling */
+.ag-theme-custom .ag-filter {
+  background-color: var(--color-background);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+
+.ag-theme-custom .ag-filter-toolpanel-header {
+  padding: 8px 12px;
+}
+
+/* Menu styling */
+.ag-theme-custom .ag-menu {
+  background-color: var(--color-popover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+
+.ag-theme-custom .ag-menu-option {
+  padding: 8px 12px;
+}
+
+.ag-theme-custom .ag-menu-option:hover {
+  background-color: var(--color-accent);
+}
+
+/* Pagination styling */
+.ag-theme-custom .ag-paging-panel {
+  border-top: 1px solid var(--color-border);
+  padding: 8px 12px;
+  height: auto;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ag-theme-custom .ag-paging-button {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+}
+
+.ag-theme-custom .ag-paging-button:hover {
+  background-color: var(--color-accent);
+}
+
+.ag-theme-custom .ag-paging-button.ag-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading overlay */
+.ag-theme-custom .ag-overlay-loading-wrapper {
+  background-color: hsl(var(--color-background) / 0.8);
+}
+
+.ag-theme-custom .ag-overlay-loading-center {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  box-shadow: var(--shadow-md);
+  color: var(--color-foreground);
+}
+
+/* No rows overlay */
+.ag-theme-custom .ag-overlay-no-rows-wrapper {
+  background-color: var(--color-background);
+}
+
+.ag-theme-custom .ag-overlay-no-rows-center {
+  color: var(--color-muted-foreground);
+}
+
+/* Checkbox styling */
+.ag-theme-custom .ag-checkbox-input-wrapper {
+  width: 16px;
+  height: 16px;
+}
+
+.ag-theme-custom .ag-checkbox-input-wrapper input {
+  cursor: pointer;
+}
+
+.ag-theme-custom .ag-checkbox-input-wrapper.ag-checked::after {
+  color: var(--color-primary-foreground);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Sort icons */
+.ag-theme-custom .ag-sort-indicator-icon {
+  color: var(--color-muted-foreground);
+}
+
+.ag-theme-custom .ag-sort-indicator-icon.ag-sort-active {
+  color: var(--color-primary);
+}
+
+/* Column resize handle */
+.ag-theme-custom .ag-header-cell-resize {
+  width: 8px;
+}
+
+.ag-theme-custom .ag-header-cell-resize::after {
+  background-color: var(--color-border);
+  width: 1px;
+}
+
+/* Drag and drop */
+.ag-theme-custom .ag-drag-handle {
+  color: var(--color-muted-foreground);
+}
+
+.ag-theme-custom .ag-row-drag {
+  cursor: grab;
+}
+
+/* Focus styling */
+.ag-theme-custom .ag-cell-focus {
+  border: 1px solid var(--color-ring);
+  outline: none;
+}
+
+.ag-theme-custom .ag-cell-focus:focus-within {
+  border-color: var(--color-ring);
+}
+
+/* Pinned columns */
+.ag-theme-custom .ag-pinned-left-header,
+.ag-theme-custom .ag-pinned-right-header,
+.ag-theme-custom .ag-pinned-left-cols-container,
+.ag-theme-custom .ag-pinned-right-cols-container {
+  box-shadow: 2px 0 4px -1px hsl(var(--color-foreground) / 0.1);
+}
+
+/* Status bar */
+.ag-theme-custom .ag-status-bar {
+  border-top: 1px solid var(--color-border);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+}
+
+/* Tool panel */
+.ag-theme-custom .ag-tool-panel-wrapper {
+  border-left: 1px solid var(--color-border);
+  background-color: var(--color-background);
+}
+
+/* Side bar */
+.ag-theme-custom .ag-side-bar {
+  border-left: 1px solid var(--color-border);
+}
+
+.ag-theme-custom .ag-side-button {
+  color: var(--color-muted-foreground);
+}
+
+.ag-theme-custom .ag-side-button.ag-selected {
+  color: var(--color-foreground);
+  background-color: var(--color-accent);
+}
+
+/* Tooltip */
+.ag-theme-custom .ag-tooltip {
+  background-color: var(--color-popover);
+  color: var(--color-popover-foreground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 12px;
+  box-shadow: var(--shadow-md);
+}
