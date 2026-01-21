@@ -7,6 +7,131 @@ import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
 
 // ============================================================================
+// Audio Sample Generation
+// ============================================================================
+
+/**
+ * Creates a synthetic audio blob URL using Web Audio API.
+ * This generates a short tone that works locally without CORS issues.
+ */
+function createSampleAudioUrl(durationSec = 5, frequency = 440): string {
+  // Create audio context
+  const audioContext = new (
+    window.AudioContext || (window as any).webkitAudioContext
+  )();
+  const sampleRate = audioContext.sampleRate;
+  const numSamples = Math.floor(sampleRate * durationSec);
+
+  // Create stereo buffer
+  const buffer = audioContext.createBuffer(2, numSamples, sampleRate);
+
+  // Generate a pleasant tone with envelope
+  for (let channel = 0; channel < 2; channel++) {
+    const data = buffer.getChannelData(channel);
+    for (let i = 0; i < numSamples; i++) {
+      const t = i / sampleRate;
+      // Apply envelope (fade in/out)
+      const envelope =
+        Math.min(t * 4, 1) * Math.min((durationSec - t) * 4, 1) * 0.3;
+      // Generate tone with harmonics
+      const fundamental = Math.sin(2 * Math.PI * frequency * t);
+      const harmonic1 = Math.sin(2 * Math.PI * frequency * 2 * t) * 0.5;
+      const harmonic2 = Math.sin(2 * Math.PI * frequency * 3 * t) * 0.25;
+      data[i] = envelope * (fundamental + harmonic1 + harmonic2);
+    }
+  }
+
+  // Convert to WAV format
+  const wavBuffer = audioBufferToWav(buffer);
+  const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+  return URL.createObjectURL(blob);
+}
+
+/**
+ * Converts an AudioBuffer to WAV format
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function audioBufferToWav(buffer: any): ArrayBuffer {
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const format = 1; // PCM
+  const bitDepth = 16;
+
+  const bytesPerSample = bitDepth / 8;
+  const blockAlign = numChannels * bytesPerSample;
+
+  const samples = buffer.length;
+  const dataSize = samples * blockAlign;
+  const bufferSize = 44 + dataSize;
+
+  const arrayBuffer = new ArrayBuffer(bufferSize);
+  const view = new DataView(arrayBuffer);
+
+  // WAV header
+  const writeString = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, bufferSize - 8, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true); // Subchunk1Size
+  view.setUint16(20, format, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitDepth, true);
+  writeString(36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  // Write interleaved audio data
+  let offset = 44;
+  for (let i = 0; i < samples; i++) {
+    for (let ch = 0; ch < numChannels; ch++) {
+      const sample = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
+      view.setInt16(
+        offset,
+        sample < 0 ? sample * 0x8000 : sample * 0x7fff,
+        true
+      );
+      offset += 2;
+    }
+  }
+
+  return arrayBuffer;
+}
+
+// Create sample audio URLs (memoized to avoid regenerating)
+let _sampleAudioUrl: string | null = null;
+let _shortAudioUrl: string | null = null;
+let _longAudioUrl: string | null = null;
+
+function getSampleAudio(): string {
+  if (!_sampleAudioUrl) {
+    _sampleAudioUrl = createSampleAudioUrl(10, 440); // 10 seconds, A4 note
+  }
+  return _sampleAudioUrl;
+}
+
+function getShortAudio(): string {
+  if (!_shortAudioUrl) {
+    _shortAudioUrl = createSampleAudioUrl(3, 523.25); // 3 seconds, C5 note
+  }
+  return _shortAudioUrl;
+}
+
+function getLongAudio(): string {
+  if (!_longAudioUrl) {
+    _longAudioUrl = createSampleAudioUrl(30, 329.63); // 30 seconds, E4 note
+  }
+  return _longAudioUrl;
+}
+
+// ============================================================================
 // Meta
 // ============================================================================
 
@@ -50,22 +175,14 @@ const meta: Meta<typeof AudioPlayer> = {
 export default meta;
 type Story = StoryObj<typeof AudioPlayer>;
 
-// Sample audio URL (using a public domain audio file)
-const SAMPLE_AUDIO =
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-const SHORT_AUDIO =
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
-
 // ============================================================================
 // Basic Stories
 // ============================================================================
 
 export const Default: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'compact',
-    showTime: true,
-  },
+  render: () => (
+    <AudioPlayer src={getSampleAudio()} variant="compact" showTime />
+  ),
   decorators: [
     (Story) => (
       <div className="w-80">
@@ -76,83 +193,63 @@ export const Default: Story = {
 };
 
 export const Inline: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'inline',
-    showDuration: true,
-  },
+  render: () => (
+    <AudioPlayer src={getShortAudio()} variant="inline" showDuration />
+  ),
 };
 
 export const InlineWithTitle: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'inline',
-    title: 'Voice Message',
-    showDuration: true,
-  },
+  render: () => (
+    <AudioPlayer
+      src={getSampleAudio()}
+      variant="inline"
+      title="Voice Message"
+      showDuration
+    />
+  ),
 };
 
 export const Compact: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'compact',
-    showTime: true,
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-80">
-        <Story />
-      </div>
-    ),
-  ],
+  render: () => (
+    <div className="w-80">
+      <AudioPlayer src={getSampleAudio()} variant="compact" showTime />
+    </div>
+  ),
 };
 
 export const CompactWithPlaybackRate: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'compact',
-    showTime: true,
-    showPlaybackRate: true,
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-96">
-        <Story />
-      </div>
-    ),
-  ],
+  render: () => (
+    <div className="w-96">
+      <AudioPlayer
+        src={getSampleAudio()}
+        variant="compact"
+        showTime
+        showPlaybackRate
+      />
+    </div>
+  ),
 };
 
 export const Waveform: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'waveform',
-    showTime: true,
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-96">
-        <Story />
-      </div>
-    ),
-  ],
+  render: () => (
+    <div className="w-96">
+      <AudioPlayer src={getSampleAudio()} variant="waveform" showTime />
+    </div>
+  ),
 };
 
 export const WaveformWithTitle: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'waveform',
-    title: 'Meeting Recording - January 2026',
-    showTime: true,
-    showPlaybackRate: true,
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-[500px]">
-        <Story />
-      </div>
-    ),
-  ],
+  render: () => (
+    <div className="w-[500px]">
+      <AudioPlayer
+        src={getLongAudio()}
+        variant="waveform"
+        title="Meeting Recording - January 2026"
+        showTime
+        showPlaybackRate
+      />
+    </div>
+  ),
 };
 
 // ============================================================================
@@ -166,7 +263,7 @@ export const Sizes: Story = {
         <Text weight="medium">Small</Text>
         <div className="w-64">
           <AudioPlayer
-            src={SAMPLE_AUDIO}
+            src={getSampleAudio()}
             variant="compact"
             size="sm"
             showTime
@@ -177,7 +274,7 @@ export const Sizes: Story = {
         <Text weight="medium">Medium (default)</Text>
         <div className="w-72">
           <AudioPlayer
-            src={SAMPLE_AUDIO}
+            src={getSampleAudio()}
             variant="compact"
             size="md"
             showTime
@@ -188,7 +285,7 @@ export const Sizes: Story = {
         <Text weight="medium">Large</Text>
         <div className="w-80">
           <AudioPlayer
-            src={SAMPLE_AUDIO}
+            src={getSampleAudio()}
             variant="compact"
             size="lg"
             showTime
@@ -207,7 +304,7 @@ export const InlineSizes: Story = {
           Small
         </Text>
         <AudioPlayer
-          src={SAMPLE_AUDIO}
+          src={getShortAudio()}
           variant="inline"
           size="sm"
           title="Audio"
@@ -219,7 +316,7 @@ export const InlineSizes: Story = {
           Medium
         </Text>
         <AudioPlayer
-          src={SAMPLE_AUDIO}
+          src={getShortAudio()}
           variant="inline"
           size="md"
           title="Audio"
@@ -231,7 +328,7 @@ export const InlineSizes: Story = {
           Large
         </Text>
         <AudioPlayer
-          src={SAMPLE_AUDIO}
+          src={getShortAudio()}
           variant="inline"
           size="lg"
           title="Audio"
@@ -247,20 +344,17 @@ export const InlineSizes: Story = {
 // ============================================================================
 
 export const CustomWaveformColors: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'waveform',
-    showTime: true,
-    waveColor: '#e2e8f0',
-    progressColor: '#22c55e',
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-96">
-        <Story />
-      </div>
-    ),
-  ],
+  render: () => (
+    <div className="w-96">
+      <AudioPlayer
+        src={getSampleAudio()}
+        variant="waveform"
+        showTime
+        waveColor="#e2e8f0"
+        progressColor="#22c55e"
+      />
+    </div>
+  ),
 };
 
 // ============================================================================
@@ -301,7 +395,7 @@ export const VoiceNotesList: Story = {
               key={note.id}
               className="flex items-center gap-3 rounded-lg border border-neutral-200 p-3 dark:border-neutral-700"
             >
-              <AudioPlayer src={SAMPLE_AUDIO} variant="inline" size="sm" />
+              <AudioPlayer src={getSampleAudio()} variant="inline" size="sm" />
               <div className="min-w-0 flex-1">
                 <Text size="sm" weight="medium" truncate>
                   {note.title}
@@ -327,7 +421,7 @@ export const ChatMessage: Story = {
         <div className="space-y-1">
           <div className="rounded-2xl rounded-tl-sm bg-neutral-100 px-3 py-2 dark:bg-neutral-800">
             <AudioPlayer
-              src={SAMPLE_AUDIO}
+              src={getSampleAudio()}
               variant="compact"
               size="sm"
               showTime
@@ -345,7 +439,7 @@ export const ChatMessage: Story = {
         <div className="space-y-1">
           <div className="bg-primary-600 rounded-2xl rounded-tr-sm px-3 py-2">
             <AudioPlayer
-              src={SHORT_AUDIO}
+              src={getShortAudio()}
               variant="compact"
               size="sm"
               showTime
@@ -385,7 +479,7 @@ export const PodcastPlayer: Story = {
         </div>
         <div className="mt-4">
           <AudioPlayer
-            src={SAMPLE_AUDIO}
+            src={getLongAudio()}
             variant="waveform"
             showTime
             showPlaybackRate
@@ -426,7 +520,12 @@ export const AudioAttachment: Story = {
             </Text>
           </div>
         </div>
-        <AudioPlayer src={SAMPLE_AUDIO} variant="compact" size="sm" showTime />
+        <AudioPlayer
+          src={getSampleAudio()}
+          variant="compact"
+          size="sm"
+          showTime
+        />
       </div>
     </div>
   ),
@@ -437,19 +536,11 @@ export const AudioAttachment: Story = {
 // ============================================================================
 
 export const Disabled: Story = {
-  args: {
-    src: SAMPLE_AUDIO,
-    variant: 'compact',
-    showTime: true,
-    disabled: true,
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-80">
-        <Story />
-      </div>
-    ),
-  ],
+  render: () => (
+    <div className="w-80">
+      <AudioPlayer src={getSampleAudio()} variant="compact" showTime disabled />
+    </div>
+  ),
 };
 
 // ============================================================================
@@ -467,9 +558,9 @@ export const AllVariants: Story = {
           Minimal footprint - perfect for lists and inline contexts
         </Text>
         <div className="flex flex-wrap gap-4">
-          <AudioPlayer src={SAMPLE_AUDIO} variant="inline" showDuration />
+          <AudioPlayer src={getShortAudio()} variant="inline" showDuration />
           <AudioPlayer
-            src={SAMPLE_AUDIO}
+            src={getShortAudio()}
             variant="inline"
             title="Voice Note"
             showDuration
@@ -485,7 +576,7 @@ export const AllVariants: Story = {
           Progress bar with time - great for messages and attachments
         </Text>
         <div className="w-80">
-          <AudioPlayer src={SAMPLE_AUDIO} variant="compact" showTime />
+          <AudioPlayer src={getSampleAudio()} variant="compact" showTime />
         </div>
       </div>
 
@@ -498,7 +589,7 @@ export const AllVariants: Story = {
         </Text>
         <div className="w-96">
           <AudioPlayer
-            src={SAMPLE_AUDIO}
+            src={getSampleAudio()}
             variant="waveform"
             title="Audio Recording"
             showTime
