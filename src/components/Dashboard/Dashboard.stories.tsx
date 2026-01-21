@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 // Import components
 import { Alert } from '../Alert';
+import { AudioPlayer } from '../AudioPlayer';
 import { AudioRecorder } from '../AudioRecorder';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
@@ -1483,6 +1484,10 @@ function ProfilePage({ user }: ProfilePageProps) {
 // Voice Notes Page
 // ============================================================================
 
+// Sample audio URL for demo purposes
+const SAMPLE_AUDIO_URL =
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
 interface VoiceNote {
   id: string;
   title: string;
@@ -1490,6 +1495,7 @@ interface VoiceNote {
   duration: number;
   createdAt: string;
   status: 'recording' | 'transcribing' | 'complete';
+  audioUrl?: string;
 }
 
 function VoiceNotesPage() {
@@ -1502,6 +1508,7 @@ function VoiceNotesPage() {
       duration: 45,
       createdAt: '2 hours ago',
       status: 'complete',
+      audioUrl: SAMPLE_AUDIO_URL,
     },
     {
       id: '2',
@@ -1511,6 +1518,7 @@ function VoiceNotesPage() {
       duration: 32,
       createdAt: 'Yesterday',
       status: 'complete',
+      audioUrl: SAMPLE_AUDIO_URL,
     },
     {
       id: '3',
@@ -1519,6 +1527,7 @@ function VoiceNotesPage() {
       duration: 8,
       createdAt: '2 days ago',
       status: 'complete',
+      audioUrl: SAMPLE_AUDIO_URL,
     },
   ]);
 
@@ -1690,19 +1699,29 @@ function VoiceNotesPage() {
               key={note.id}
               className="flex items-start gap-4 rounded-lg border border-neutral-200 p-4 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800/50"
             >
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                  note.status === 'transcribing'
-                    ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
-                    : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
-                }`}
-              >
-                {note.status === 'transcribing' ? (
-                  <Spinner size="sm" />
-                ) : (
-                  <Icons.Microphone />
-                )}
-              </div>
+              {/* Audio Player - inline variant for compact display */}
+              {note.status === 'complete' && note.audioUrl ? (
+                <AudioPlayer
+                  src={note.audioUrl}
+                  variant="inline"
+                  size="sm"
+                  showDuration
+                />
+              ) : (
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                    note.status === 'transcribing'
+                      ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                      : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                  }`}
+                >
+                  {note.status === 'transcribing' ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <Icons.Microphone />
+                  )}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <div>

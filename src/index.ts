@@ -1,6 +1,7 @@
 // Components
 export * from './components/Alert';
 export * from './components/AppHeader';
+export * from './components/AudioPlayer';
 export * from './components/AudioRecorder';
 export * from './components/Avatar';
 export * from './components/Badge';
