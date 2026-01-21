@@ -413,11 +413,16 @@ function AudioPlayer({
   'aria-label': ariaLabel,
   playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
   showPlaybackRate = false,
-}: AudioPlayerProps) {
+  /** Whether to preload audio (set to false for lists with many items) */
+  preload = false,
+  /** Fallback duration in seconds to display before audio is loaded */
+  fallbackDuration,
+}: AudioPlayerProps & { preload?: boolean; fallbackDuration?: number }) {
   const [state, setState] = React.useState<AudioPlayerState>('idle');
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
   const [playbackRate, setPlaybackRate] = React.useState(1);
+  const [audioInitialized, setAudioInitialized] = React.useState(false);
   const audioRef = React.useRef<globalThis.HTMLAudioElement | null>(null);
 
   const isPlaying = state === 'playing';
@@ -433,15 +438,16 @@ function AudioPlayer({
   );
 
   // Initialize audio element (for non-waveform variants)
-  React.useEffect(() => {
-    if (variant === 'waveform') return;
+  const initAudio = React.useCallback(() => {
+    if (variant === 'waveform' || audioInitialized) return null;
 
     const audio = new globalThis.Audio(src);
     audioRef.current = audio;
+    setAudioInitialized(true);
 
     audio.addEventListener('loadstart', () => updateState('loading'));
     audio.addEventListener('canplay', () => {
-      if (state === 'loading') updateState('idle');
+      updateState('idle');
     });
     audio.addEventListener('loadedmetadata', () => {
       setDuration(audio.duration);
@@ -460,12 +466,33 @@ function AudioPlayer({
       onError?.(new Error('Failed to load audio'));
     });
 
+    return audio;
+  }, [
+    src,
+    variant,
+    audioInitialized,
+    updateState,
+    onTimeUpdate,
+    onEnded,
+    onError,
+  ]);
+
+  // Auto-initialize if preload is true
+  React.useEffect(() => {
+    if (preload && !audioInitialized && variant !== 'waveform') {
+      initAudio();
+    }
+  }, [preload, audioInitialized, variant, initAudio]);
+
+  // Cleanup on unmount
+  React.useEffect(() => {
     return () => {
-      audio.pause();
-      audio.src = '';
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, variant]);
+  }, []);
 
   // Handle playback rate changes
   React.useEffect(() => {
@@ -475,7 +502,29 @@ function AudioPlayer({
   }, [playbackRate]);
 
   const handlePlay = React.useCallback(() => {
-    if (disabled || isLoading) return;
+    if (disabled) return;
+
+    // Lazy initialize audio on first play
+    if (!audioInitialized && !isLoading) {
+      const audio = initAudio();
+      if (audio) {
+        updateState('loading');
+        audio.addEventListener(
+          'canplay',
+          () => {
+            audio.play().catch((error) => {
+              updateState('error');
+              onError?.(error);
+            });
+            updateState('playing');
+          },
+          { once: true }
+        );
+      }
+      return;
+    }
+
+    if (isLoading) return;
 
     if (isPlaying) {
       if (audioRef.current) {
@@ -488,10 +537,18 @@ function AudioPlayer({
           updateState('error');
           onError?.(error);
         });
+        updateState('playing');
       }
-      updateState('playing');
     }
-  }, [disabled, isLoading, isPlaying, updateState, onError]);
+  }, [
+    disabled,
+    audioInitialized,
+    isLoading,
+    isPlaying,
+    initAudio,
+    updateState,
+    onError,
+  ]);
 
   const handleSeek = React.useCallback((time: number) => {
     if (audioRef.current) {
@@ -583,6 +640,7 @@ function AudioPlayer({
   // Inline Variant
   // ============================================================================
   if (variant === 'inline') {
+    const displayDuration = duration > 0 ? duration : (fallbackDuration ?? 0);
     return (
       <div className={cn(audioPlayerVariants({ variant, size }), className)}>
         {renderPlayButton()}
@@ -591,9 +649,9 @@ function AudioPlayer({
             {title}
           </span>
         )}
-        {showDuration && (
+        {showDuration && displayDuration > 0 && (
           <span className="font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400">
-            {isPlaying ? formatTime(currentTime) : formatTime(duration)}
+            {isPlaying ? formatTime(currentTime) : formatTime(displayDuration)}
           </span>
         )}
       </div>

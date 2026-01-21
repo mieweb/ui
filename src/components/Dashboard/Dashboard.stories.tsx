@@ -1706,6 +1706,7 @@ function VoiceNotesPage() {
                   variant="inline"
                   size="sm"
                   showDuration
+                  fallbackDuration={note.duration}
                 />
               ) : (
                 <div
