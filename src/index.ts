@@ -19,6 +19,7 @@ export * from './components/PhoneInput';
 export * from './components/Progress';
 export * from './components/QuickAction';
 export * from './components/Radio';
+export * from './components/RecordButton';
 export * from './components/SchedulePicker';
 export * from './components/Select';
 export * from './components/Sidebar';
