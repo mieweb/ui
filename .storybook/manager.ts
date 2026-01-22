@@ -8,43 +8,101 @@ const brandThemes = {
     primary: '#27aae1',
     secondary: '#1f98ca',
     appBg: '#f0f9ff',
+    appBgDark: '#0c1929',
     borderColor: '#b3e6f6',
+    borderColorDark: '#1e4a6e',
   },
   mieweb: {
     name: 'MIE Web',
     primary: '#27ae60',
     secondary: '#219c55',
     appBg: '#f0fdf4',
+    appBgDark: '#0a1f12',
     borderColor: '#bbf7d0',
+    borderColorDark: '#166534',
   },
   webchart: {
     name: 'WebChart',
     primary: '#f5841f',
     secondary: '#ea580c',
     appBg: '#fff7ed',
+    appBgDark: '#1c1007',
     borderColor: '#fed7aa',
+    borderColorDark: '#7c2d12',
   },
   'enterprise-health': {
     name: 'Enterprise Health',
     primary: '#9333ea',
     secondary: '#7c3aed',
     appBg: '#faf5ff',
+    appBgDark: '#1a0a2e',
     borderColor: '#e9d5ff',
+    borderColorDark: '#581c87',
   },
   default: {
     name: 'Default',
     primary: '#6b7280',
     secondary: '#4b5563',
     appBg: '#f9fafb',
+    appBgDark: '#18181b',
     borderColor: '#e5e7eb',
+    borderColorDark: '#3f3f46',
   },
 };
 
 type BrandKey = keyof typeof brandThemes;
 
 // Create a theme for a specific brand
-function createBrandTheme(brandKey: BrandKey) {
+function createBrandTheme(brandKey: BrandKey, isDark = false) {
   const brand = brandThemes[brandKey] || brandThemes.bluehive;
+  
+  if (isDark) {
+    return create({
+      base: 'dark',
+
+      // Brand
+      brandTitle: `MIE Web UI • ${brand.name}`,
+      brandUrl: 'https://github.com/mieweb/ui',
+      brandImage: 'https://mieweb.org/wp-content/uploads/2024/03/MIE-NEW-1.png',
+      brandTarget: '_blank',
+
+      // Colors
+      colorPrimary: brand.primary,
+      colorSecondary: brand.secondary,
+
+      // UI - Dark mode
+      appBg: brand.appBgDark,
+      appContentBg: '#18181b',
+      appPreviewBg: '#18181b',
+      appBorderColor: brand.borderColorDark,
+      appBorderRadius: 8,
+
+      // Text colors - Dark mode
+      textColor: '#fafafa',
+      textInverseColor: '#18181b',
+      textMutedColor: '#a1a1aa',
+
+      // Toolbar - Dark mode
+      barTextColor: '#d4d4d8',
+      barSelectedColor: brand.primary,
+      barHoverColor: brand.secondary,
+      barBg: '#27272a',
+
+      // Form colors - Dark mode
+      inputBg: '#27272a',
+      inputBorder: '#3f3f46',
+      inputTextColor: '#fafafa',
+      inputBorderRadius: 6,
+
+      // Buttons
+      buttonBg: brand.primary,
+      buttonBorder: brand.secondary,
+
+      // Typography
+      fontBase: '"Inter", "Segoe UI", "Roboto", sans-serif',
+      fontCode: '"SF Mono", "Monaco", "Consolas", monospace',
+    });
+  }
   
   return create({
     base: 'light',
@@ -112,7 +170,7 @@ addons.setConfig({
 // Inject CSS custom properties for dynamic theming
 const styleId = 'mieweb-manager-theme';
 
-function injectBrandCSS(brandKey: BrandKey) {
+function injectBrandCSS(brandKey: BrandKey, isDark = false) {
   const brand = brandThemes[brandKey] || brandThemes.bluehive;
   
   // Remove existing style
@@ -120,6 +178,16 @@ function injectBrandCSS(brandKey: BrandKey) {
   if (existingStyle) {
     existingStyle.remove();
   }
+  
+  // Dark mode colors
+  const bgColor = isDark ? brand.appBgDark : brand.appBg;
+  const borderColor = isDark ? brand.borderColorDark : brand.borderColor;
+  const contentBg = isDark ? '#18181b' : '#ffffff';
+  const textColor = isDark ? '#fafafa' : '#171717';
+  const textMuted = isDark ? '#a1a1aa' : '#6b7280';
+  const barBg = isDark ? '#27272a' : '#ffffff';
+  const inputBg = isDark ? '#27272a' : '#ffffff';
+  const inputBorder = isDark ? '#3f3f46' : '#d1d5db';
   
   // Create new style with brand colors
   const style = document.createElement('style');
@@ -129,8 +197,11 @@ function injectBrandCSS(brandKey: BrandKey) {
     :root {
       --mieweb-manager-primary: ${brand.primary};
       --mieweb-manager-secondary: ${brand.secondary};
-      --mieweb-manager-bg: ${brand.appBg};
-      --mieweb-manager-border: ${brand.borderColor};
+      --mieweb-manager-bg: ${bgColor};
+      --mieweb-manager-border: ${borderColor};
+      --mieweb-manager-content-bg: ${contentBg};
+      --mieweb-manager-text: ${textColor};
+      --mieweb-manager-text-muted: ${textMuted};
     }
     
     /* Selected story item highlight */
@@ -184,6 +255,58 @@ function injectBrandCSS(brandKey: BrandKey) {
     [role="tab"][aria-selected="true"]::after {
       background-color: ${brand.primary} !important;
     }
+    
+    /* ============================================
+       DARK MODE OVERRIDES FOR MANAGER UI
+       ============================================ */
+    ${isDark ? `
+    /* Sidebar background */
+    [class*="sidebar"] {
+      background-color: ${bgColor} !important;
+    }
+    
+    /* Main content area */
+    [class*="main"] {
+      background-color: ${contentBg} !important;
+    }
+    
+    /* Panel/addons area */
+    [class*="panel"] {
+      background-color: ${barBg} !important;
+    }
+    
+    /* All text in sidebar */
+    [class*="sidebar"] span,
+    [class*="sidebar"] button,
+    [class*="sidebar"] a {
+      color: ${textColor} !important;
+    }
+    
+    /* Toolbar */
+    [role="toolbar"],
+    [class*="toolbar"] {
+      background-color: ${barBg} !important;
+      border-color: ${borderColor} !important;
+    }
+    
+    [role="toolbar"] button,
+    [class*="toolbar"] button {
+      color: ${textMuted} !important;
+    }
+    
+    /* Input fields */
+    input, select, textarea {
+      background-color: ${inputBg} !important;
+      border-color: ${inputBorder} !important;
+      color: ${textColor} !important;
+    }
+    
+    /* Dividers */
+    hr, [class*="separator"], [class*="divider"] {
+      border-color: ${borderColor} !important;
+      background-color: ${borderColor} !important;
+    }
+    ` : ''}
   `;
   
   document.head.appendChild(style);
@@ -194,11 +317,21 @@ addons.register('mieweb-brand-sync', (api) => {
   // Get initial brand from URL or use default
   const initialGlobals = api.getGlobals();
   const initialBrand = (initialGlobals?.brand || 'bluehive') as BrandKey;
-  injectBrandCSS(initialBrand);
+  const initialDark = initialGlobals?.theme === 'dark';
+  
+  // Apply initial theme
+  injectBrandCSS(initialBrand, initialDark);
+  if (initialDark) {
+    api.setOptions({ theme: createBrandTheme(initialBrand, true) });
+  }
   
   // Listen for global changes
   api.on('globalsUpdated', ({ globals }) => {
     const brand = (globals?.brand || 'bluehive') as BrandKey;
-    injectBrandCSS(brand);
+    const isDark = globals?.theme === 'dark';
+    
+    // Update CSS and theme
+    injectBrandCSS(brand, isDark);
+    api.setOptions({ theme: createBrandTheme(brand, isDark) });
   });
 });

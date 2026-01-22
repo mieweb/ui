@@ -1,6 +1,7 @@
 import type { Preview, Decorator } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import '../src/styles/base.css';
+import './preview.css';
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { defaultBrand } from '../src/brands/default';
 import { enterpriseHealthBrand } from '../src/brands/enterprise-health';
@@ -95,9 +96,13 @@ const withBrand: Decorator = (Story, context) => {
     if (isDark) {
       document.documentElement.classList.add('dark');
       document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.style.backgroundColor = 'var(--mieweb-background)';
+      document.body.style.color = 'var(--mieweb-foreground)';
     } else {
       document.documentElement.classList.remove('dark');
       document.documentElement.setAttribute('data-theme', 'light');
+      document.body.style.backgroundColor = 'var(--mieweb-background)';
+      document.body.style.color = 'var(--mieweb-foreground)';
     }
   }, [brand, isDark]);
 
@@ -121,7 +126,7 @@ const withBrand: Decorator = (Story, context) => {
     <>
       {fontLink && <link rel="stylesheet" href={fontLink} />}
       <div
-        className={`min-h-screen transition-colors duration-200 ${isDark ? 'dark' : ''} ${isFullscreen ? '' : 'p-4'}`}
+        className={`min-h-[200px] transition-colors duration-200 ${isDark ? 'dark' : ''} ${isFullscreen ? '' : 'p-4'}`}
         style={{
           backgroundColor: 'var(--mieweb-background)',
           color: 'var(--mieweb-foreground)',

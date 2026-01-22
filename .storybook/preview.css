@@ -1,0 +1,217 @@
+/* Storybook preview styles for dark mode support */
+
+/* Apply theme background to the entire document */
+html, body {
+  background-color: var(--mieweb-background, #ffffff);
+  color: var(--mieweb-foreground, #1a1a1a);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Dark mode specific styles */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* ============================================
+   STORYBOOK DOCS PAGE - DARK MODE
+   ============================================ */
+
+/* Main docs wrapper and content */
+[data-theme="dark"] .sbdocs-wrapper,
+[data-theme="dark"] .sbdocs,
+[data-theme="dark"] .sbdocs-content {
+  background-color: var(--mieweb-background) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+/* Docs page title and description */
+[data-theme="dark"] .sbdocs h1,
+[data-theme="dark"] .sbdocs h2,
+[data-theme="dark"] .sbdocs h3,
+[data-theme="dark"] .sbdocs h4,
+[data-theme="dark"] .sbdocs h5,
+[data-theme="dark"] .sbdocs h6,
+[data-theme="dark"] .sbdocs-title,
+[data-theme="dark"] .sbdocs-p {
+  color: var(--mieweb-foreground) !important;
+}
+
+[data-theme="dark"] .sbdocs p,
+[data-theme="dark"] .sbdocs span,
+[data-theme="dark"] .sbdocs label {
+  color: var(--mieweb-muted-foreground, #a1a1aa) !important;
+}
+
+/* Story preview containers */
+[data-theme="dark"] .docs-story,
+[data-theme="dark"] .sb-story,
+[data-theme="dark"] .sbdocs-preview {
+  background-color: var(--mieweb-background) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* Story canvas area */
+[data-theme="dark"] #storybook-root {
+  background-color: var(--mieweb-background);
+}
+
+/* ============================================
+   ARGS TABLE / CONTROLS - DARK MODE
+   ============================================ */
+
+/* Args table container */
+[data-theme="dark"] .docblock-argstable,
+[data-theme="dark"] .docblock-argstable-body,
+[data-theme="dark"] table.docblock-argstable {
+  background-color: var(--mieweb-background) !important;
+}
+
+/* Table headers */
+[data-theme="dark"] .docblock-argstable thead,
+[data-theme="dark"] .docblock-argstable th {
+  background-color: var(--mieweb-card, #27272a) !important;
+  color: var(--mieweb-foreground) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* Table rows */
+[data-theme="dark"] .docblock-argstable tbody tr,
+[data-theme="dark"] .docblock-argstable td {
+  background-color: var(--mieweb-background) !important;
+  color: var(--mieweb-foreground) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+[data-theme="dark"] .docblock-argstable tbody tr:nth-child(even) {
+  background-color: var(--mieweb-card, #27272a) !important;
+}
+
+/* Property names in args table */
+[data-theme="dark"] .docblock-argstable-head,
+[data-theme="dark"] .docblock-argstable td:first-child {
+  color: var(--mieweb-foreground) !important;
+}
+
+/* Description text */
+[data-theme="dark"] .docblock-argstable td span,
+[data-theme="dark"] .docblock-argstable td p {
+  color: var(--mieweb-muted-foreground, #a1a1aa) !important;
+}
+
+/* Type badges (ReactNode, boolean, string, etc.) */
+[data-theme="dark"] .docblock-argstable code,
+[data-theme="dark"] .sbdocs code {
+  background-color: var(--mieweb-card, #27272a) !important;
+  color: var(--mieweb-primary, #3b82f6) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* ============================================
+   CONTROLS / INPUTS - DARK MODE
+   ============================================ */
+
+/* Control inputs */
+[data-theme="dark"] .docblock-argstable input,
+[data-theme="dark"] .docblock-argstable select,
+[data-theme="dark"] .docblock-argstable textarea {
+  background-color: var(--mieweb-card, #27272a) !important;
+  color: var(--mieweb-foreground) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* Buttons in controls */
+[data-theme="dark"] .docblock-argstable button {
+  background-color: var(--mieweb-card, #27272a) !important;
+  color: var(--mieweb-foreground) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+[data-theme="dark"] .docblock-argstable button:hover {
+  background-color: var(--mieweb-accent, #3f3f46) !important;
+}
+
+/* ============================================
+   CODE BLOCKS - DARK MODE
+   ============================================ */
+
+[data-theme="dark"] pre,
+[data-theme="dark"] .docblock-source {
+  background-color: var(--mieweb-card, #1e1e1e) !important;
+  color: var(--mieweb-foreground) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+[data-theme="dark"] .docblock-code-toggle {
+  background-color: var(--mieweb-card, var(--mieweb-background)) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+/* ============================================
+   STORIES SECTION - DARK MODE
+   ============================================ */
+
+/* "STORIES" heading */
+[data-theme="dark"] .sbdocs-h2,
+[data-theme="dark"] .sbdocs-h3 {
+  color: var(--mieweb-foreground) !important;
+}
+
+/* Story name labels */
+[data-theme="dark"] .sbdocs-a,
+[data-theme="dark"] .sbdocs a {
+  color: var(--mieweb-primary, #3b82f6) !important;
+}
+
+/* ============================================
+   TOOLBAR / SHOW CODE BUTTON - DARK MODE
+   ============================================ */
+
+[data-theme="dark"] .docblock-iconiconbutton,
+[data-theme="dark"] [class*="IconButton"] {
+  color: var(--mieweb-muted-foreground, #a1a1aa) !important;
+}
+
+[data-theme="dark"] [class*="IconButton"]:hover {
+  background-color: var(--mieweb-accent, #3f3f46) !important;
+}
+
+/* Show code button */
+[data-theme="dark"] button[title="Show code"] {
+  background-color: var(--mieweb-card, #27272a) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+/* ============================================
+   GENERIC STORYBOOK ELEMENTS - DARK MODE
+   ============================================ */
+
+/* All divs inside docs that might have background */
+[data-theme="dark"] .sbdocs > div,
+[data-theme="dark"] .sbdocs-wrapper > div {
+  background-color: transparent !important;
+}
+
+/* Borders */
+[data-theme="dark"] .sbdocs hr,
+[data-theme="dark"] .sbdocs-hr {
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* Scrollbar styling for dark mode */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--mieweb-background);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--mieweb-border, #3f3f46);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--mieweb-muted-foreground, #71717a);
+}
