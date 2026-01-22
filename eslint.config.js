@@ -43,6 +43,7 @@ export default [
         HTMLUListElement: 'readonly',
         HTMLHeadingElement: 'readonly',
         HTMLCanvasElement: 'readonly',
+        HTMLImageElement: 'readonly',
         KeyboardEvent: 'readonly',
         MouseEvent: 'readonly',
         FocusEvent: 'readonly',

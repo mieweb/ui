@@ -1,132 +1,602 @@
 /**
  * AG Grid Theme CSS
- * 
- * This stylesheet provides custom theming for AG Grid that integrates
- * with the MIE Web UI design system CSS variables.
- * 
- * It uses the CSS variables defined by the theme system to ensure
- * the grid matches the rest of the application's look and feel.
+ *
+ * Comprehensive AG Grid theme that integrates with the MIE Web UI design system.
+ * Supports both light and dark modes with full customization.
+ *
+ * Based on Waggleline's production-tested AG Grid styling with:
+ * - Brand color integration (primary blue #17AEED)
+ * - Always-visible scrollbars for better UX on macOS
+ * - Complete dark mode support
+ * - Floating filter styling
+ * - Status badges and cell styling
+ * - Responsive adjustments
+ *
+ * @see Waggleline AG Grid implementation for reference patterns
  */
 
+/* ============================================
+   Light Mode Theme Variables
+   ============================================ */
+
 .ag-theme-custom {
-  /* AG Grid uses --ag- prefixed variables for theming */
-  
-  /* Background colors */
-  --ag-background-color: var(--color-background);
-  --ag-odd-row-background-color: var(--color-muted);
-  --ag-header-background-color: var(--color-muted);
-  --ag-control-panel-background-color: var(--color-background);
-  --ag-subheader-background-color: var(--color-muted);
-  --ag-invalid-background-color: var(--color-destructive);
-  
-  /* Foreground/text colors */
-  --ag-foreground-color: var(--color-foreground);
-  --ag-header-foreground-color: var(--color-foreground);
-  --ag-secondary-foreground-color: var(--color-muted-foreground);
-  --ag-disabled-foreground-color: var(--color-muted-foreground);
-  
-  /* Border colors */
-  --ag-border-color: var(--color-border);
-  --ag-header-column-separator-color: var(--color-border);
-  --ag-row-border-color: var(--color-border);
-  
-  /* Selection colors */
-  --ag-selected-row-background-color: var(--color-accent);
-  --ag-row-hover-color: var(--color-accent);
-  --ag-range-selection-background-color: var(--color-accent);
-  --ag-range-selection-border-color: var(--color-primary);
-  
-  /* Input/control colors */
-  --ag-input-focus-border-color: var(--color-ring);
-  --ag-input-border-color: var(--color-input);
-  --ag-checkbox-checked-color: var(--color-primary);
-  --ag-checkbox-unchecked-color: var(--color-input);
-  --ag-checkbox-background-color: var(--color-background);
-  
-  /* Other colors */
-  --ag-chip-background-color: var(--color-muted);
-  --ag-card-shadow: var(--shadow-md);
-  --ag-modal-overlay-background-color: hsl(var(--color-background) / 0.8);
-  
-  /* Sizing */
-  --ag-grid-size: 6px;
-  --ag-icon-size: 16px;
-  --ag-row-height: 40px;
-  --ag-header-height: 40px;
-  --ag-cell-horizontal-padding: 12px;
-  
-  /* Font */
+  /* Core colors */
+  --ag-background-color: #ffffff;
+  --ag-foreground-color: #1a1a1a;
+  --ag-border-color: #e5e7eb;
+
+  /* Header */
+  --ag-header-background-color: #f9fafb;
+  --ag-header-foreground-color: #6b7280;
+  --ag-header-cell-hover-background-color: #f3f4f6;
+
+  /* Rows */
+  --ag-odd-row-background-color: #ffffff;
+  --ag-row-hover-color: #f3f4f6;
+  --ag-selected-row-background-color: #e6f7ff;
+  --ag-row-border-color: #f3f4f6;
+
+  /* Grid lines */
+  --ag-cell-horizontal-border: none;
+
+  /* Selections and focus - use primary blue */
+  --ag-range-selection-border-color: var(--color-primary, #17aeed);
+  --ag-range-selection-background-color: rgba(23, 174, 237, 0.1);
+  --ag-input-focus-border-color: var(--color-primary, #17aeed);
+
+  /* Checkbox - use primary blue */
+  --ag-checkbox-checked-color: var(--color-primary, #17aeed);
+  --ag-checkbox-unchecked-color: #d1d5db;
+  --ag-checkbox-indeterminate-color: var(--color-primary, #17aeed);
+
+  /* Typography */
   --ag-font-family: inherit;
   --ag-font-size: 14px;
-  
+  --ag-header-font-weight: 600;
+
+  /* Sizing */
+  --ag-grid-size: 6px;
+  --ag-row-height: 52px;
+  --ag-header-height: 48px;
+  --ag-cell-horizontal-padding: 16px;
+  --ag-icon-size: 16px;
+
+  /* Scrollbar - always visible and grabbable */
+  --ag-scrollbar-size: 14px;
+
   /* Borders */
-  --ag-border-radius: var(--radius);
-  --ag-wrapper-border-radius: var(--radius);
+  --ag-wrapper-border-radius: 8px;
+  --ag-border-radius: 4px;
+
+  /* Control panel */
+  --ag-control-panel-background-color: var(--color-background, #ffffff);
+  --ag-subheader-background-color: var(--color-muted, #f9fafb);
+  --ag-invalid-background-color: var(--color-destructive, #ef4444);
+
+  /* Other colors */
+  --ag-chip-background-color: var(--color-muted, #f3f4f6);
+  --ag-modal-overlay-background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* Root wrapper styling */
-.ag-theme-custom .ag-root-wrapper {
-  border: none;
-  border-radius: var(--radius);
-  overflow: hidden;
+/* ============================================
+   Dark Mode Theme Variables
+   ============================================ */
+
+.dark .ag-theme-custom,
+:root.dark .ag-theme-custom,
+[data-theme='dark'] .ag-theme-custom,
+.ag-theme-custom.dark {
+  /* Core colors - charcoal, not pure black */
+  --ag-background-color: #1f2937 !important;
+  --ag-foreground-color: #f9fafb !important;
+  --ag-border-color: #374151 !important;
+
+  /* Header */
+  --ag-header-background-color: #111827 !important;
+  --ag-header-foreground-color: #9ca3af !important;
+  --ag-header-cell-hover-background-color: #2d3748 !important;
+
+  /* Rows */
+  --ag-odd-row-background-color: #1f2937 !important;
+  --ag-row-hover-color: #2d3748 !important;
+  --ag-selected-row-background-color: rgba(23, 174, 237, 0.15) !important;
+  --ag-row-border-color: #374151 !important;
+
+  /* Checkbox */
+  --ag-checkbox-checked-color: var(--color-primary, #17aeed) !important;
+  --ag-checkbox-unchecked-color: #4b5563 !important;
+
+  /* Scrollbar */
+  --ag-scrollbar-size: 14px;
 }
 
-/* Header styling */
+/* Force dark mode background colors on key elements */
+.dark .ag-theme-custom .ag-root-wrapper,
+.dark .ag-theme-custom .ag-root,
+.dark .ag-theme-custom .ag-body,
+.dark .ag-theme-custom .ag-body-viewport,
+.dark .ag-theme-custom .ag-center-cols-viewport,
+.dark .ag-theme-custom .ag-center-cols-container,
+.dark .ag-theme-custom .ag-header,
+.dark .ag-theme-custom .ag-row,
+.dark .ag-theme-custom .ag-row-odd,
+.dark .ag-theme-custom .ag-cell,
+.dark .ag-theme-custom .ag-overlay,
+.dark .ag-theme-custom .ag-overlay-panel,
+.dark .ag-theme-custom .ag-overlay-wrapper {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.dark .ag-theme-custom .ag-header {
+  background-color: #111827 !important;
+}
+
+.dark .ag-theme-custom .ag-header-cell-text,
+.dark .ag-theme-custom .ag-header-cell-label {
+  color: #9ca3af !important;
+}
+
+.dark .ag-theme-custom .ag-row:hover {
+  background-color: #2d3748 !important;
+}
+
+/* ============================================
+   Header Styling
+   ============================================ */
+
 .ag-theme-custom .ag-header {
+  border-bottom: 1px solid var(--ag-border-color);
   font-weight: 500;
-  border-bottom: 1px solid var(--color-border);
 }
 
 .ag-theme-custom .ag-header-cell {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  font-weight: 500;
   padding: 0 var(--ag-cell-horizontal-padding);
 }
 
 .ag-theme-custom .ag-header-cell-text {
+  color: var(--ag-header-foreground-color);
   font-weight: 500;
 }
 
-/* Cell styling */
-.ag-theme-custom .ag-cell {
-  display: flex;
-  align-items: center;
-  padding: 0 var(--ag-cell-horizontal-padding);
-  line-height: 1.5;
+.ag-theme-custom .ag-header-cell:hover .ag-header-cell-text {
+  color: var(--ag-foreground-color);
 }
 
-/* Row styling */
+/* Sort indicator styling - use primary color */
+.ag-theme-custom .ag-icon-asc,
+.ag-theme-custom .ag-icon-desc {
+  color: var(--color-primary, #17aeed);
+}
+
+.ag-theme-custom .ag-sort-indicator-icon {
+  color: var(--color-muted-foreground, #6b7280);
+}
+
+.ag-theme-custom .ag-sort-indicator-icon.ag-sort-active {
+  color: var(--color-primary, #17aeed);
+}
+
+/* Header menu button - reveal on hover */
+.ag-theme-custom .ag-header-cell-menu-button {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.ag-theme-custom .ag-header-cell:hover .ag-header-cell-menu-button {
+  opacity: 1;
+}
+
+.ag-theme-custom .ag-header-cell-menu-button:hover {
+  color: var(--color-primary, #17aeed);
+}
+
+/* ============================================
+   Floating Filter Styling
+   ============================================ */
+
+.ag-theme-custom .ag-floating-filter {
+  background-color: var(--ag-header-background-color);
+  border-bottom: 1px solid var(--ag-border-color);
+}
+
+.ag-theme-custom .ag-floating-filter-input {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: 1px solid var(--ag-border-color);
+  background-color: var(--ag-background-color);
+  color: var(--ag-foreground-color);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ag-theme-custom .ag-floating-filter-input:focus {
+  border-color: var(--color-primary, #17aeed);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(23, 174, 237, 0.2);
+}
+
+.ag-theme-custom .ag-floating-filter-button {
+  color: var(--ag-header-foreground-color);
+  transition: color 0.15s ease;
+}
+
+.ag-theme-custom .ag-floating-filter-button:hover {
+  color: var(--color-primary, #17aeed);
+}
+
+/* Active filter indicator */
+.ag-theme-custom .ag-header-cell-filtered {
+  background-color: rgba(23, 174, 237, 0.1);
+}
+
+.ag-theme-custom .ag-header-cell-filtered .ag-header-cell-text {
+  color: var(--color-primary, #17aeed) !important;
+}
+
+.ag-theme-custom .ag-header-cell-filtered .ag-icon-filter {
+  color: var(--color-primary, #17aeed);
+}
+
+/* Dark mode floating filter overrides */
+.dark .ag-theme-custom .ag-floating-filter-input {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.dark .ag-theme-custom .ag-floating-filter-input:focus {
+  border-color: var(--color-primary, #17aeed) !important;
+}
+
+/* ============================================
+   Row Styling
+   ============================================ */
+
 .ag-theme-custom .ag-row {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--ag-row-border-color);
+  transition: background-color 0.15s ease;
 }
 
 .ag-theme-custom .ag-row:last-child {
   border-bottom: none;
 }
 
-.ag-theme-custom .ag-row-hover {
-  background-color: var(--color-accent);
+.ag-theme-custom .ag-row:hover {
+  background-color: var(--ag-row-hover-color);
 }
 
 .ag-theme-custom .ag-row-selected {
-  background-color: var(--color-accent);
+  background-color: var(--ag-selected-row-background-color) !important;
 }
 
-/* Filter styling */
+/* ============================================
+   Cell Styling
+   ============================================ */
+
+.ag-theme-custom .ag-cell {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ag-cell-horizontal-padding);
+  line-height: normal;
+  height: 100%;
+}
+
+.ag-theme-custom .ag-cell-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.ag-theme-custom .ag-cell-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Checkbox column cell - ensure proper vertical centering */
+.ag-theme-custom .ag-cell[col-id='checkbox'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* ============================================
+   Cell Focus Styling - Primary Blue with Glow
+   ============================================ */
+
+.ag-theme-custom .ag-cell-focus {
+  outline: 2px solid var(--color-primary, #17aeed) !important;
+  outline-offset: -2px;
+  box-shadow:
+    0 0 8px rgba(23, 174, 237, 0.4),
+    inset 0 0 0 1px rgba(23, 174, 237, 0.1) !important;
+  border-radius: 4px;
+}
+
+.dark .ag-theme-custom .ag-cell-focus {
+  box-shadow:
+    0 0 12px rgba(23, 174, 237, 0.5),
+    0 0 4px rgba(23, 174, 237, 0.3),
+    inset 0 0 0 1px rgba(23, 174, 237, 0.15) !important;
+}
+
+/* ============================================
+   Checkbox Styling
+   ============================================ */
+
+.ag-theme-custom .ag-checkbox-input-wrapper {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #d1d5db;
+  background: #ffffff;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.ag-theme-custom .ag-checkbox-input-wrapper:hover {
+  border-color: var(--color-primary, #17aeed);
+  background: #f0faff;
+}
+
+.ag-theme-custom .ag-checkbox-input-wrapper::after {
+  border-radius: 3px;
+}
+
+.ag-theme-custom .ag-checkbox-input-wrapper.ag-checked {
+  background-color: var(--color-primary, #17aeed);
+  border-color: var(--color-primary, #17aeed);
+}
+
+.ag-theme-custom .ag-checkbox-input-wrapper.ag-checked::after {
+  color: #ffffff;
+}
+
+.ag-theme-custom .ag-checkbox-input-wrapper.ag-indeterminate {
+  background-color: var(--color-primary, #17aeed);
+  border-color: var(--color-primary, #17aeed);
+}
+
+/* Dark mode checkbox styling */
+.dark .ag-theme-custom .ag-checkbox-input-wrapper {
+  border-color: #6b7280 !important;
+  background: transparent !important;
+}
+
+.dark .ag-theme-custom .ag-checkbox-input-wrapper:hover {
+  border-color: var(--color-primary, #17aeed) !important;
+  background: rgba(23, 174, 237, 0.1) !important;
+}
+
+.dark .ag-theme-custom .ag-checkbox-input-wrapper.ag-checked {
+  background-color: var(--color-primary, #17aeed) !important;
+  border-color: var(--color-primary, #17aeed) !important;
+}
+
+.dark .ag-theme-custom .ag-checkbox-input-wrapper.ag-checked::after {
+  color: #ffffff !important;
+}
+
+/* ============================================
+   Scrollbar Styling - Always Visible & Grabbable
+   
+   Forces scrollbars to be always visible on macOS
+   (which hides them by default) and styles them
+   to match the theme.
+   ============================================ */
+
+.ag-theme-custom {
+  scrollbar-gutter: stable both-edges;
+}
+
+/* ----------------------------------------
+   HORIZONTAL SCROLLBAR - Always Visible
+   ---------------------------------------- */
+
+.ag-theme-custom .ag-body-horizontal-scroll {
+  height: 14px !important;
+  min-height: 14px !important;
+  max-height: 14px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  background: #f3f4f6 !important;
+  border-top: 1px solid #e5e7eb !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll {
+  background: #1f2937 !important;
+  border-top: 1px solid #374151 !important;
+}
+
+.ag-theme-custom .ag-body-horizontal-scroll-viewport {
+  height: 14px !important;
+  min-height: 14px !important;
+  overflow-x: scroll !important;
+  overflow-y: hidden !important;
+  scrollbar-width: auto !important;
+  scrollbar-color: #9ca3af #f3f4f6 !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport {
+  scrollbar-color: #6b7280 #1f2937 !important;
+}
+
+/* ----------------------------------------
+   VERTICAL SCROLLBAR - Always Visible
+   ---------------------------------------- */
+
+.ag-theme-custom .ag-body-vertical-scroll {
+  width: 14px !important;
+  min-width: 14px !important;
+  max-width: 14px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  background: #f3f4f6 !important;
+  border-left: 1px solid #e5e7eb !important;
+}
+
+.dark .ag-theme-custom .ag-body-vertical-scroll {
+  background: #1f2937 !important;
+  border-left: 1px solid #374151 !important;
+}
+
+.ag-theme-custom .ag-body-vertical-scroll-viewport {
+  width: 14px !important;
+  min-width: 14px !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  scrollbar-width: auto !important;
+  scrollbar-color: #9ca3af #f3f4f6 !important;
+}
+
+.dark .ag-theme-custom .ag-body-vertical-scroll-viewport {
+  scrollbar-color: #6b7280 #1f2937 !important;
+}
+
+/* ----------------------------------------
+   WEBKIT SCROLLBAR STYLING (Chrome/Safari/Edge)
+   ---------------------------------------- */
+
+.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar,
+.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 14px !important;
+  height: 14px !important;
+  display: block !important;
+  background: #f3f4f6 !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar,
+.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar {
+  background: #1f2937 !important;
+}
+
+.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
+.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track {
+  background: #f3f4f6 !important;
+  border-radius: 7px !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
+.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track {
+  background: #1f2937 !important;
+}
+
+.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
+  background: #9ca3af !important;
+  border-radius: 7px !important;
+  border: 3px solid #f3f4f6 !important;
+  background-clip: padding-box !important;
+  min-height: 40px !important;
+  min-width: 40px !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
+  background: #6b7280 !important;
+  border: 3px solid #1f2937 !important;
+  background-clip: padding-box !important;
+}
+
+.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: #6b7280 !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af !important;
+}
+
+.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:active,
+.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:active {
+  background: #4b5563 !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:active,
+.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:active {
+  background: #d1d5db !important;
+}
+
+.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-corner,
+.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-corner {
+  background: #f3f4f6 !important;
+}
+
+.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-corner,
+.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-corner {
+  background: #1f2937 !important;
+}
+
+/* Override AG Grid's apple scrollbar visibility */
+.ag-body-horizontal-scroll.ag-apple-scrollbar,
+.ag-body-vertical-scroll.ag-apple-scrollbar {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.ag-body-horizontal-scroll-container,
+.ag-body-vertical-scroll-container {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ============================================
+   Filter Popup Styling
+   ============================================ */
+
+.ag-theme-custom .ag-popup {
+  border-radius: 8px;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
 .ag-theme-custom .ag-filter {
-  background-color: var(--color-background);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  background-color: var(--ag-background-color);
+  border-radius: 8px;
+  padding: 12px;
 }
 
-.ag-theme-custom .ag-filter-toolpanel-header {
-  padding: 8px 12px;
+.dark .ag-theme-custom .ag-popup {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.4),
+    0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Menu styling */
+.dark .ag-theme-custom .ag-filter {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+/* Filter menu styling */
 .ag-theme-custom .ag-menu {
-  background-color: var(--color-popover);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  background-color: var(--color-popover, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.dark .ag-theme-custom .ag-menu {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
 }
 
 .ag-theme-custom .ag-menu-option {
@@ -134,26 +604,220 @@
 }
 
 .ag-theme-custom .ag-menu-option:hover {
-  background-color: var(--color-accent);
+  background-color: var(--color-accent, #f3f4f6);
 }
 
-/* Pagination styling */
+.dark .ag-theme-custom .ag-menu-option {
+  color: #f9fafb !important;
+}
+
+.dark .ag-theme-custom .ag-menu-option:hover {
+  background-color: #374151 !important;
+}
+
+/* Filter input fields in dark mode */
+.dark .ag-theme-custom .ag-filter-body-wrapper input,
+.dark .ag-theme-custom .ag-text-field-input {
+  background-color: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: #f9fafb !important;
+  border-radius: 6px !important;
+}
+
+.dark .ag-theme-custom .ag-filter-body-wrapper input:focus,
+.dark .ag-theme-custom .ag-text-field-input:focus {
+  border-color: var(--color-primary, #17aeed) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(23, 174, 237, 0.2) !important;
+}
+
+.dark .ag-theme-custom .ag-filter-body-wrapper input::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Filter select/dropdown in dark mode */
+.dark .ag-theme-custom .ag-picker-field-wrapper {
+  background-color: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: #f9fafb !important;
+  border-radius: 6px !important;
+}
+
+.dark .ag-theme-custom .ag-picker-field-display {
+  color: #f9fafb !important;
+}
+
+.dark .ag-theme-custom .ag-picker-field-icon {
+  color: #9ca3af !important;
+}
+
+/* Filter apply/reset buttons in dark mode */
+.dark .ag-theme-custom .ag-filter-apply-panel button {
+  background-color: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: #f9fafb !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+}
+
+.dark .ag-theme-custom .ag-filter-apply-panel button:hover {
+  background-color: #4b5563 !important;
+  border-color: #6b7280 !important;
+}
+
+/* Column menu tabs in dark mode */
+.dark .ag-theme-custom .ag-tabs-header {
+  background-color: #111827 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.dark .ag-theme-custom .ag-tab {
+  color: #9ca3af !important;
+}
+
+.dark .ag-theme-custom .ag-tab-selected {
+  color: var(--color-primary, #17aeed) !important;
+  border-bottom-color: var(--color-primary, #17aeed) !important;
+}
+
+.dark .ag-theme-custom .ag-tabs-body {
+  background-color: #1f2937 !important;
+}
+
+/* Column panel (show/hide columns) in dark mode */
+.dark .ag-theme-custom .ag-column-panel {
+  background-color: #1f2937 !important;
+}
+
+.dark .ag-theme-custom .ag-column-select-header {
+  background-color: #111827 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+.dark .ag-theme-custom .ag-column-select-column,
+.dark .ag-theme-custom .ag-column-select-column-group {
+  color: #f9fafb !important;
+}
+
+.dark .ag-theme-custom .ag-column-select-column:hover {
+  background-color: #374151 !important;
+}
+
+/* Icons in dark mode */
+.dark .ag-theme-custom .ag-icon {
+  color: #9ca3af !important;
+}
+
+.dark .ag-theme-custom .ag-header-cell-menu-button .ag-icon {
+  color: #9ca3af !important;
+}
+
+.dark .ag-theme-custom .ag-header-cell-menu-button:hover .ag-icon {
+  color: var(--color-primary, #17aeed) !important;
+}
+
+/* Filter active indicator in dark mode */
+.dark .ag-theme-custom .ag-header-cell-filtered {
+  background-color: rgba(23, 174, 237, 0.15) !important;
+}
+
+.dark .ag-theme-custom .ag-header-cell-filtered .ag-header-cell-text {
+  color: var(--color-primary, #17aeed) !important;
+}
+
+.dark .ag-theme-custom .ag-header-cell-filtered .ag-icon-filter {
+  color: var(--color-primary, #17aeed) !important;
+}
+
+/* ============================================
+   Wrapper Styling
+   ============================================ */
+
+.ag-theme-custom .ag-root-wrapper {
+  border: 1px solid var(--ag-border-color);
+  border-radius: var(--ag-wrapper-border-radius);
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .ag-theme-custom .ag-root-wrapper {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   Loading & No Rows Overlay
+   ============================================ */
+
+.ag-theme-custom .ag-overlay-loading-wrapper {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.dark .ag-theme-custom .ag-overlay-loading-wrapper {
+  background-color: rgba(31, 41, 55, 0.8);
+}
+
+.ag-theme-custom .ag-overlay-loading-center {
+  background-color: var(--ag-background-color);
+  border: 1px solid var(--ag-border-color);
+  border-radius: 8px;
+  padding: 24px 32px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  color: var(--ag-foreground-color);
+}
+
+.dark .ag-theme-custom .ag-overlay-loading-center {
+  background-color: rgba(31, 41, 55, 0.9);
+}
+
+.ag-theme-custom .ag-overlay-no-rows-wrapper {
+  background-color: var(--ag-background-color);
+}
+
+.ag-theme-custom .ag-overlay-no-rows-center {
+  color: var(--color-muted-foreground, #6b7280);
+  padding: 48px;
+  font-size: 14px;
+}
+
+.dark .ag-theme-custom .ag-overlay-no-rows-center {
+  color: #9ca3af;
+}
+
+/* ============================================
+   Pagination Styling
+   ============================================ */
+
 .ag-theme-custom .ag-paging-panel {
-  border-top: 1px solid var(--color-border);
-  padding: 8px 12px;
+  border-top: 1px solid var(--ag-border-color);
+  padding: 12px 16px;
   height: auto;
   justify-content: flex-end;
   gap: 8px;
+  background-color: #f9fafb;
+}
+
+.dark .ag-theme-custom .ag-paging-panel {
+  border-top-color: #374151;
+  background-color: #111827;
 }
 
 .ag-theme-custom .ag-paging-button {
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: var(--radius);
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
 
-.ag-theme-custom .ag-paging-button:hover {
-  background-color: var(--color-accent);
+.ag-theme-custom .ag-paging-button:hover:not(.ag-disabled) {
+  background-color: #e5e7eb;
+}
+
+.dark .ag-theme-custom .ag-paging-button:hover:not(.ag-disabled) {
+  background-color: #374151;
 }
 
 .ag-theme-custom .ag-paging-button.ag-disabled {
@@ -161,52 +825,63 @@
   cursor: not-allowed;
 }
 
-/* Loading overlay */
-.ag-theme-custom .ag-overlay-loading-wrapper {
-  background-color: hsl(var(--color-background) / 0.8);
+/* ============================================
+   Tooltip Styling
+   ============================================ */
+
+.ag-theme-custom .ag-tooltip {
+  background-color: #111827;
+  color: #f9fafb;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
-.ag-theme-custom .ag-overlay-loading-center {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 16px 24px;
-  box-shadow: var(--shadow-md);
-  color: var(--color-foreground);
+/* ============================================
+   Status Bar
+   ============================================ */
+
+.ag-theme-custom .ag-status-bar {
+  border-top: 1px solid var(--ag-border-color);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--color-muted-foreground, #6b7280);
 }
 
-/* No rows overlay */
-.ag-theme-custom .ag-overlay-no-rows-wrapper {
-  background-color: var(--color-background);
+/* ============================================
+   Tool Panel / Side Bar
+   ============================================ */
+
+.ag-theme-custom .ag-tool-panel-wrapper {
+  border-left: 1px solid var(--ag-border-color);
+  background-color: var(--ag-background-color);
 }
 
-.ag-theme-custom .ag-overlay-no-rows-center {
-  color: var(--color-muted-foreground);
+.ag-theme-custom .ag-side-bar {
+  border-left: 1px solid var(--ag-border-color);
 }
 
-/* Checkbox styling */
-.ag-theme-custom .ag-checkbox-input-wrapper {
-  width: 16px;
-  height: 16px;
+.ag-theme-custom .ag-side-button {
+  color: var(--color-muted-foreground, #6b7280);
 }
 
-.ag-theme-custom .ag-checkbox-input-wrapper input {
-  cursor: pointer;
+.ag-theme-custom .ag-side-button.ag-selected {
+  color: var(--ag-foreground-color);
+  background-color: var(--color-accent, #f3f4f6);
 }
 
-.ag-theme-custom .ag-checkbox-input-wrapper.ag-checked::after {
-  color: var(--color-primary-foreground);
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-}
+/* ============================================
+   Pinned Columns
+   ============================================ */
 
-/* Sort icons */
-.ag-theme-custom .ag-sort-indicator-icon {
-  color: var(--color-muted-foreground);
-}
-
-.ag-theme-custom .ag-sort-indicator-icon.ag-sort-active {
-  color: var(--color-primary);
+.ag-theme-custom .ag-pinned-left-header,
+.ag-theme-custom .ag-pinned-right-header,
+.ag-theme-custom .ag-pinned-left-cols-container,
+.ag-theme-custom .ag-pinned-right-cols-container {
+  box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* Column resize handle */
@@ -215,72 +890,204 @@
 }
 
 .ag-theme-custom .ag-header-cell-resize::after {
-  background-color: var(--color-border);
+  background-color: var(--ag-border-color);
   width: 1px;
 }
 
 /* Drag and drop */
 .ag-theme-custom .ag-drag-handle {
-  color: var(--color-muted-foreground);
+  color: var(--color-muted-foreground, #6b7280);
 }
 
 .ag-theme-custom .ag-row-drag {
   cursor: grab;
 }
 
-/* Focus styling */
-.ag-theme-custom .ag-cell-focus {
-  border: 1px solid var(--color-ring);
-  outline: none;
+/* ============================================
+   Cell Link Styling
+   ============================================ */
+
+.ag-theme-custom .ag-cell a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.ag-theme-custom .ag-cell-focus:focus-within {
-  border-color: var(--color-ring);
+.ag-theme-custom .ag-cell a:hover {
+  text-decoration: underline;
 }
 
-/* Pinned columns */
-.ag-theme-custom .ag-pinned-left-header,
-.ag-theme-custom .ag-pinned-right-header,
-.ag-theme-custom .ag-pinned-left-cols-container,
-.ag-theme-custom .ag-pinned-right-cols-container {
-  box-shadow: 2px 0 4px -1px hsl(var(--color-foreground) / 0.1);
+/* Primary color link styling */
+.ag-theme-custom .ag-cell a.text-primary {
+  color: var(--color-primary, #17aeed);
 }
 
-/* Status bar */
-.ag-theme-custom .ag-status-bar {
-  border-top: 1px solid var(--color-border);
-  padding: 8px 12px;
+/* Truncation for long content */
+.ag-theme-custom .ag-cell .truncate {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Badge styling */
+.ag-theme-custom .ag-cell [class*='rounded-full'] {
+  flex-shrink: 0;
+}
+
+/* ============================================
+   Action Column Styling
+   ============================================ */
+
+.ag-theme-custom .ag-cell[col-id='actions'] {
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ag-theme-custom .ag-cell[col-id='actions'] button {
+  padding: 4px 8px;
+  border-radius: 6px;
   font-size: 12px;
-  color: var(--color-muted-foreground);
+  font-weight: 500;
+  transition: all 0.15s ease;
+  background-color: transparent;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
 }
 
-/* Tool panel */
-.ag-theme-custom .ag-tool-panel-wrapper {
-  border-left: 1px solid var(--color-border);
-  background-color: var(--color-background);
+.ag-theme-custom .ag-cell[col-id='actions'] button:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
 }
 
-/* Side bar */
-.ag-theme-custom .ag-side-bar {
-  border-left: 1px solid var(--color-border);
+.dark .ag-theme-custom .ag-cell[col-id='actions'] button {
+  border-color: #4b5563;
+  color: #9ca3af;
 }
 
-.ag-theme-custom .ag-side-button {
-  color: var(--color-muted-foreground);
+.dark .ag-theme-custom .ag-cell[col-id='actions'] button:hover {
+  background-color: #374151;
+  border-color: #6b7280;
+  color: #f3f4f6;
 }
 
-.ag-theme-custom .ag-side-button.ag-selected {
-  color: var(--color-foreground);
-  background-color: var(--color-accent);
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+
+@media (max-width: 768px) {
+  .ag-theme-custom {
+    --ag-font-size: 13px;
+    --ag-row-height: 48px;
+    --ag-header-height: 44px;
+    --ag-cell-horizontal-padding: 12px;
+  }
 }
 
-/* Tooltip */
-.ag-theme-custom .ag-tooltip {
-  background-color: var(--color-popover);
-  color: var(--color-popover-foreground);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 6px 10px;
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .ag-theme-custom {
+    --ag-row-hover-color: transparent;
+    --ag-selected-row-background-color: transparent;
+  }
+
+  .ag-theme-custom .ag-root-wrapper {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
+
+/* ============================================
+   Global Cell Vertical Centering Fix
+   Ensures all cell content is vertically centered
+   ============================================ */
+
+.ag-theme-custom .ag-cell,
+.ag-theme-custom .ag-cell-value,
+.ag-theme-custom .ag-cell-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+.ag-theme-custom .ag-cell span {
+  line-height: 1.4;
+}
+
+/* ============================================
+   Status Badge Utility Classes
+   ============================================ */
+
+/* Status verified */
+.ag-theme-custom .status-verified {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.dark .ag-theme-custom .status-verified {
+  background-color: rgba(0, 156, 78, 0.2);
+  color: #4ade80;
+}
+
+/* Status pending */
+.ag-theme-custom .status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.dark .ag-theme-custom .status-pending {
+  background-color: rgba(255, 210, 0, 0.2);
+  color: #fbbf24;
+}
+
+/* Status flagged */
+.ag-theme-custom .status-flagged {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.dark .ag-theme-custom .status-flagged {
+  background-color: rgba(224, 69, 1, 0.2);
+  color: #f87171;
+}
+
+/* Status new */
+.ag-theme-custom .status-new {
+  background-color: #e6f7ff;
+  color: #0369a1;
+}
+
+.dark .ag-theme-custom .status-new {
+  background-color: rgba(23, 174, 237, 0.2);
+  color: #38bdf8;
+}
+
+/* Generic status badge styles */
+.ag-theme-custom .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
   font-size: 12px;
-  box-shadow: var(--shadow-md);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Engagement score colors */
+.ag-theme-custom .engagement-high {
+  color: #009c4e;
+  font-weight: 600;
+}
+
+.ag-theme-custom .engagement-medium {
+  color: #ffd200;
+  font-weight: 600;
+}
+
+.ag-theme-custom .engagement-low {
+  color: #e04501;
+  font-weight: 600;
 }
