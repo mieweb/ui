@@ -85,6 +85,9 @@ const withBrand: Decorator = (Story, context) => {
   const brandName = context.globals.brand || 'bluehive';
   const isDark = context.globals.theme === 'dark';
   const brand = brands[brandName] || brands.bluehive;
+  
+  // Get the actual color values for this brand/mode
+  const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
   useEffect(() => {
     applyBrandStyles(brand, isDark);
@@ -93,15 +96,15 @@ const withBrand: Decorator = (Story, context) => {
     if (isDark) {
       document.documentElement.classList.add('dark');
       document.documentElement.setAttribute('data-theme', 'dark');
-      document.body.style.backgroundColor = 'var(--mieweb-background)';
-      document.body.style.color = 'var(--mieweb-foreground)';
     } else {
       document.documentElement.classList.remove('dark');
       document.documentElement.setAttribute('data-theme', 'light');
-      document.body.style.backgroundColor = 'var(--mieweb-background)';
-      document.body.style.color = 'var(--mieweb-foreground)';
     }
-  }, [brand, isDark]);
+    
+    // Apply to body with actual values (not CSS vars) to ensure immediate update
+    document.body.style.backgroundColor = semanticColors.background;
+    document.body.style.color = semanticColors.foreground;
+  }, [brand, isDark, semanticColors]);
 
   // Load Google Fonts for the brand
   const fontLink = useMemo(() => {
@@ -118,6 +121,11 @@ const withBrand: Decorator = (Story, context) => {
 
   // Check if the story has fullscreen layout
   const isFullscreen = context.parameters?.layout === 'fullscreen';
+  
+  // Build font family string
+  const fontFamily = brand.typography.fontFamily.sans
+    .map((f) => (f.includes(' ') ? `"${f}"` : f))
+    .join(', ');
 
   return (
     <>
@@ -125,9 +133,9 @@ const withBrand: Decorator = (Story, context) => {
       <div
         className={`min-h-[200px] transition-colors duration-200 ${isDark ? 'dark' : ''} ${isFullscreen ? '' : 'p-4'}`}
         style={{
-          backgroundColor: 'var(--mieweb-background)',
-          color: 'var(--mieweb-foreground)',
-          fontFamily: 'var(--mieweb-font-sans)',
+          backgroundColor: semanticColors.background,
+          color: semanticColors.foreground,
+          fontFamily: fontFamily,
         }}
       >
         <Story />
