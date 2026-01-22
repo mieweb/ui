@@ -8,6 +8,8 @@ export default defineConfig({
     'tailwind-preset': 'src/tailwind-preset.ts',
     // Individual component entries for tree-shaking
     'components/Alert/index': 'src/components/Alert/index.ts',
+    'components/AudioPlayer/index': 'src/components/AudioPlayer/index.ts',
+    'components/AudioRecorder/index': 'src/components/AudioRecorder/index.ts',
     'components/Avatar/index': 'src/components/Avatar/index.ts',
     'components/Badge/index': 'src/components/Badge/index.ts',
     'components/Breadcrumb/index': 'src/components/Breadcrumb/index.ts',
@@ -23,6 +25,7 @@ export default defineConfig({
     'components/Progress/index': 'src/components/Progress/index.ts',
     'components/QuickAction/index': 'src/components/QuickAction/index.ts',
     'components/Radio/index': 'src/components/Radio/index.ts',
+    'components/RecordButton/index': 'src/components/RecordButton/index.ts',
     'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
     'components/Select/index': 'src/components/Select/index.ts',
     'components/Skeleton/index': 'src/components/Skeleton/index.ts',
