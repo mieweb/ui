@@ -154,6 +154,7 @@
     "@swc/helpers": "^0.5.18",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lucide-react": "^0.562.0",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
@@ -163,6 +164,7 @@
     "@storybook/addon-links": "^10.1.11",
     "@storybook/react": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
+    "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/postcss": "^4.1.3",
     "@types/node": "^22.13.0",
     "@types/react": "^19.1.0",
@@ -180,8 +182,8 @@
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "storybook": "^10.1.11",
     "tailwindcss": "^4.1.3",
     "tsup": "^8.3.6",
