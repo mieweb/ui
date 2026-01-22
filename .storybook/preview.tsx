@@ -26,61 +26,58 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   const colors = brand.colors;
   const semanticColors = isDark ? colors.dark : colors.light;
 
-  // Primary color scale
-  root.style.setProperty('--mieweb-primary-50', colors.primary[50]);
-  root.style.setProperty('--mieweb-primary-100', colors.primary[100]);
-  root.style.setProperty('--mieweb-primary-200', colors.primary[200]);
-  root.style.setProperty('--mieweb-primary-300', colors.primary[300]);
-  root.style.setProperty('--mieweb-primary-400', colors.primary[400]);
-  root.style.setProperty('--mieweb-primary-500', colors.primary[500]);
-  root.style.setProperty('--mieweb-primary-600', colors.primary[600]);
-  root.style.setProperty('--mieweb-primary-700', colors.primary[700]);
-  root.style.setProperty('--mieweb-primary-800', colors.primary[800]);
-  root.style.setProperty('--mieweb-primary-900', colors.primary[900]);
-  root.style.setProperty('--mieweb-primary-950', colors.primary[950]);
-
-  // Semantic colors
-  root.style.setProperty('--mieweb-background', semanticColors.background);
-  root.style.setProperty('--mieweb-foreground', semanticColors.foreground);
-  root.style.setProperty('--mieweb-card', semanticColors.card);
-  root.style.setProperty('--mieweb-card-foreground', semanticColors.cardForeground);
-  root.style.setProperty('--mieweb-muted', semanticColors.muted);
-  root.style.setProperty('--mieweb-muted-foreground', semanticColors.mutedForeground);
-  root.style.setProperty('--mieweb-border', semanticColors.border);
-  root.style.setProperty('--mieweb-input', semanticColors.input);
-  root.style.setProperty('--mieweb-ring', semanticColors.ring);
-  root.style.setProperty('--mieweb-destructive', semanticColors.destructive);
-  root.style.setProperty('--mieweb-destructive-foreground', semanticColors.destructiveForeground);
-  root.style.setProperty('--mieweb-success', semanticColors.success);
-  root.style.setProperty('--mieweb-success-foreground', semanticColors.successForeground);
-  root.style.setProperty('--mieweb-warning', semanticColors.warning);
-  root.style.setProperty('--mieweb-warning-foreground', semanticColors.warningForeground);
-
-  // Typography
-  root.style.setProperty(
-    '--mieweb-font-sans',
-    brand.typography.fontFamily.sans.map((f) => (f.includes(' ') ? `"${f}"` : f)).join(', ')
-  );
-  if (brand.typography.fontFamily.mono) {
-    root.style.setProperty(
-      '--mieweb-font-mono',
-      brand.typography.fontFamily.mono.map((f) => (f.includes(' ') ? `"${f}"` : f)).join(', ')
-    );
+  // Remove any existing brand style tag
+  const existingStyle = document.getElementById('mieweb-brand-styles');
+  if (existingStyle) {
+    existingStyle.remove();
   }
 
-  // Border radius
-  root.style.setProperty('--mieweb-radius-none', brand.borderRadius.none);
-  root.style.setProperty('--mieweb-radius-sm', brand.borderRadius.sm);
-  root.style.setProperty('--mieweb-radius-md', brand.borderRadius.md);
-  root.style.setProperty('--mieweb-radius-lg', brand.borderRadius.lg);
-  root.style.setProperty('--mieweb-radius-xl', brand.borderRadius.xl);
-  root.style.setProperty('--mieweb-radius-2xl', brand.borderRadius['2xl']);
-  root.style.setProperty('--mieweb-radius-full', brand.borderRadius.full);
-
-  // Shadows
-  root.style.setProperty('--mieweb-shadow-card', brand.boxShadow.card);
-  root.style.setProperty('--mieweb-shadow-dropdown', brand.boxShadow.dropdown);
-  root.style.setProperty('--mieweb-shadow-modal', brand.boxShadow.modal);
+  // Create a style tag with high specificity to override base.css
+  const styleTag = document.createElement('style');
+  styleTag.id = 'mieweb-brand-styles';
+  styleTag.textContent = `
+    :root, [data-theme="light"], [data-theme="dark"] {
+      --mieweb-primary-50: ${colors.primary[50]} !important;
+      --mieweb-primary-100: ${colors.primary[100]} !important;
+      --mieweb-primary-200: ${colors.primary[200]} !important;
+      --mieweb-primary-300: ${colors.primary[300]} !important;
+      --mieweb-primary-400: ${colors.primary[400]} !important;
+      --mieweb-primary-500: ${colors.primary[500]} !important;
+      --mieweb-primary-600: ${colors.primary[600]} !important;
+      --mieweb-primary-700: ${colors.primary[700]} !important;
+      --mieweb-primary-800: ${colors.primary[800]} !important;
+      --mieweb-primary-900: ${colors.primary[900]} !important;
+      --mieweb-primary-950: ${colors.primary[950]} !important;
+      --mieweb-background: ${semanticColors.background} !important;
+      --mieweb-foreground: ${semanticColors.foreground} !important;
+      --mieweb-card: ${semanticColors.card} !important;
+      --mieweb-card-foreground: ${semanticColors.cardForeground} !important;
+      --mieweb-muted: ${semanticColors.muted} !important;
+      --mieweb-muted-foreground: ${semanticColors.mutedForeground} !important;
+      --mieweb-border: ${semanticColors.border} !important;
+      --mieweb-input: ${semanticColors.input} !important;
+      --mieweb-ring: ${semanticColors.ring} !important;
+      --mieweb-destructive: ${semanticColors.destructive} !important;
+      --mieweb-destructive-foreground: ${semanticColors.destructiveForeground} !important;
+      --mieweb-success: ${semanticColors.success} !important;
+      --mieweb-success-foreground: ${semanticColors.successForeground} !important;
+      --mieweb-warning: ${semanticColors.warning} !important;
+      --mieweb-warning-foreground: ${semanticColors.warningForeground} !important;
+      --mieweb-font-sans: ${brand.typography.fontFamily.sans.map((f) => (f.includes(' ') ? `"${f}"` : f)).join(', ')} !important;
+      ${brand.typography.fontFamily.mono ? `--mieweb-font-mono: ${brand.typography.fontFamily.mono.map((f) => (f.includes(' ') ? `"${f}"` : f)).join(', ')} !important;` : ''}
+      --mieweb-radius-none: ${brand.borderRadius.none} !important;
+      --mieweb-radius-sm: ${brand.borderRadius.sm} !important;
+      --mieweb-radius-md: ${brand.borderRadius.md} !important;
+      --mieweb-radius-lg: ${brand.borderRadius.lg} !important;
+      --mieweb-radius-xl: ${brand.borderRadius.xl} !important;
+      --mieweb-radius-2xl: ${brand.borderRadius['2xl']} !important;
+      --mieweb-radius-full: ${brand.borderRadius.full} !important;
+      --mieweb-shadow-card: ${brand.boxShadow.card} !important;
+      --mieweb-shadow-dropdown: ${brand.boxShadow.dropdown} !important;
+      --mieweb-shadow-modal: ${brand.boxShadow.modal} !important;
+    }
+  `;
+  document.head.appendChild(styleTag);
 }
 
 // Brand switcher decorator
