@@ -53,6 +53,8 @@
   --ag-font-family: inherit;
   --ag-font-size: 14px;
   --ag-header-font-weight: 600;
+  /* Icon font - must use agGridQuartz for icons to render correctly */
+  --ag-icon-font-family: 'agGridQuartz';
 
   /* Sizing */
   --ag-grid-size: 6px;
@@ -706,6 +708,11 @@
 /* Icons in dark mode */
 .dark .ag-theme-custom .ag-icon {
   color: #9ca3af !important;
+}
+
+/* Ensure AG Grid icons use the correct icon font */
+.ag-theme-custom .ag-icon {
+  font-family: 'agGridQuartz' !important;
 }
 
 .dark .ag-theme-custom .ag-header-cell-menu-button .ag-icon {

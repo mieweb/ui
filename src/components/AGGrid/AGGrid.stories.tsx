@@ -25,6 +25,7 @@ import {
 
 // Import AG Grid styles
 import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/agGridQuartzFont.css';
 import './ag-grid-theme.css';
 
 // ============================================================================

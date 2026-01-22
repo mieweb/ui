@@ -325,7 +325,7 @@ function IconsPage() {
 
         {Object.keys(filteredCategories).length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            No icons found matching "{search}"
+            No icons found matching &ldquo;{search}&rdquo;
           </div>
         )}
 

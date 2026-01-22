@@ -12,6 +12,14 @@ import * as React from 'react';
 import { memo } from 'react';
 import type { ICellRendererParams } from 'ag-grid-community';
 import { cn } from '../../utils/cn';
+import {
+  MailIcon,
+  PhoneIcon,
+  GlobeIcon,
+  CheckCircleIcon,
+  ClockIcon,
+} from '../Icons';
+import { Linkedin } from 'lucide-react';
 
 // =============================================================================
 // Utility Functions
@@ -322,9 +330,7 @@ export function EmailRenderer(props: ICellRendererParams): React.ReactElement {
       className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
-      <svg className="h-3 w-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
+      <MailIcon className="h-3 w-3 opacity-60" />
       <span className="truncate">{value}</span>
     </a>
   );
@@ -349,9 +355,7 @@ export function PhoneRenderer(props: ICellRendererParams): React.ReactElement {
       className="inline-flex items-center gap-1.5 text-foreground hover:text-blue-600 dark:hover:text-blue-400"
       onClick={(e) => e.stopPropagation()}
     >
-      <svg className="h-3 w-3 text-green-500 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-      </svg>
+      <PhoneIcon className="h-3 w-3 text-green-500 opacity-70" />
       <span>{displayValue}</span>
     </a>
   );
@@ -379,9 +383,7 @@ export function DomainRenderer(props: ICellRendererParams): React.ReactElement {
       className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
-      <svg className="h-3 w-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-      </svg>
+      <GlobeIcon className="h-3 w-3 opacity-60" />
       <span className="truncate">{displayDomain}</span>
     </a>
   );
@@ -402,9 +404,7 @@ export function LinkedInRenderer(props: ICellRendererParams): React.ReactElement
       className="inline-flex items-center gap-1.5 text-[#0A66C2] hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
-      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-      </svg>
+      <Linkedin className="h-4 w-4" />
       <span className="truncate text-sm">LinkedIn</span>
     </a>
   );
@@ -540,13 +540,9 @@ export function BooleanRenderer(props: ICellRendererParams): React.ReactElement 
       )}
     >
       {isTrue ? (
-        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <CheckCircleIcon className="h-3 w-3" />
       ) : (
-        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <ClockIcon className="h-3 w-3" />
       )}
       {isTrue ? 'Yes' : 'No'}
     </span>
