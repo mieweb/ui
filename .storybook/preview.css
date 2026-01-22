@@ -45,7 +45,11 @@ html, body {
 /* Story preview containers */
 [data-theme="dark"] .docs-story,
 [data-theme="dark"] .sb-story,
-[data-theme="dark"] .sbdocs-preview {
+[data-theme="dark"] .sbdocs-preview,
+[data-theme="dark"] .sb-wrapper,
+[data-theme="dark"] .sb-preparing-story,
+[data-theme="dark"] .sb-preparing-docs,
+[data-theme="dark"] .sb-previewBlock {
   background-color: var(--mieweb-background) !important;
   border-color: var(--mieweb-border, #3f3f46) !important;
 }
@@ -62,7 +66,10 @@ html, body {
 /* Args table container */
 [data-theme="dark"] .docblock-argstable,
 [data-theme="dark"] .docblock-argstable-body,
-[data-theme="dark"] table.docblock-argstable {
+[data-theme="dark"] table.docblock-argstable,
+[data-theme="dark"] .sb-argstableBlock,
+[data-theme="dark"] .sb-argstableBlock td,
+[data-theme="dark"] .sb-argstableBlock th {
   background-color: var(--mieweb-background) !important;
 }
 
