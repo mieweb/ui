@@ -130,9 +130,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </>
         ) : (
           <>
-            {leftIcon && <span className="shrink-0">{leftIcon}</span>}
+            {React.isValidElement(leftIcon) && <span className="shrink-0">{leftIcon}</span>}
             {children}
-            {rightIcon && <span className="shrink-0">{rightIcon}</span>}
+            {React.isValidElement(rightIcon) && <span className="shrink-0">{rightIcon}</span>}
           </>
         )}
       </button>
