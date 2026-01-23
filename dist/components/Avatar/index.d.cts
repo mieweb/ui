@@ -3,7 +3,7 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const avatarVariants: (props?: ({
-    size?: "xs" | "sm" | "md" | "lg" | "xl" | null | undefined;
+    size?: "sm" | "md" | "lg" | "xs" | "xl" | null | undefined;
     ring?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface AvatarProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof avatarVariants> {

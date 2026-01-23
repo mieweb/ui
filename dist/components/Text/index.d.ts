@@ -3,10 +3,10 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const textVariants: (props?: ({
-    variant?: "default" | "success" | "warning" | "primary" | "muted" | "destructive" | null | undefined;
-    size?: "xs" | "sm" | "lg" | "xl" | "base" | "2xl" | "3xl" | null | undefined;
+    variant?: "success" | "default" | "warning" | "primary" | "muted" | "destructive" | null | undefined;
+    size?: "sm" | "lg" | "xs" | "xl" | "base" | "2xl" | "3xl" | null | undefined;
     weight?: "bold" | "normal" | "medium" | "semibold" | null | undefined;
-    align?: "left" | "center" | "right" | null | undefined;
+    align?: "center" | "left" | "right" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type TextElement = 'p' | 'span' | 'div' | 'label' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 interface TextProps extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof textVariants> {
@@ -30,6 +30,6 @@ declare const Text: React.ForwardRefExoticComponent<TextProps & React.RefAttribu
  * Small muted text, useful for helper text and descriptions.
  * This is a convenience component equivalent to <Text variant="muted" size="sm">
  */
-declare const SmallMuted: React.ForwardRefExoticComponent<Omit<TextProps, "variant" | "size"> & React.RefAttributes<HTMLElement>>;
+declare const SmallMuted: React.ForwardRefExoticComponent<Omit<TextProps, "size" | "variant"> & React.RefAttributes<HTMLElement>>;
 
 export { SmallMuted, Text, type TextProps, textVariants };

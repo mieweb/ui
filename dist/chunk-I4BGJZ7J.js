@@ -26,17 +26,63 @@ var alertVariants = cva(
   }
 );
 var Alert = React.forwardRef(
-  ({ className, variant, icon, children, ...props }, ref) => {
+  ({
+    className,
+    variant,
+    icon,
+    dismissible,
+    onDismiss,
+    dismissLabel = "Dismiss alert",
+    children,
+    ...props
+  }, ref) => {
     return /* @__PURE__ */ jsxs(
       "div",
       {
         ref,
         role: "alert",
-        className: cn(alertVariants({ variant }), className),
+        className: cn(
+          alertVariants({ variant }),
+          dismissible && "pr-10",
+          className
+        ),
         ...props,
         children: [
           icon,
-          /* @__PURE__ */ jsx("div", { children })
+          /* @__PURE__ */ jsx("div", { children }),
+          dismissible && /* @__PURE__ */ jsx(
+            "button",
+            {
+              type: "button",
+              onClick: onDismiss,
+              className: cn(
+                "absolute top-2 right-2 rounded-md p-1",
+                "opacity-70 hover:opacity-100",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "transition-opacity"
+              ),
+              "aria-label": dismissLabel,
+              children: /* @__PURE__ */ jsxs(
+                "svg",
+                {
+                  xmlns: "http://www.w3.org/2000/svg",
+                  width: "16",
+                  height: "16",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  "aria-hidden": "true",
+                  children: [
+                    /* @__PURE__ */ jsx("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+                    /* @__PURE__ */ jsx("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+                  ]
+                }
+              )
+            }
+          )
         ]
       }
     );
@@ -64,5 +110,5 @@ var AlertDescription = React.forwardRef(({ className, ...props }, ref) => /* @__
 AlertDescription.displayName = "AlertDescription";
 
 export { Alert, AlertDescription, AlertTitle, alertVariants };
-//# sourceMappingURL=chunk-KOHBAPLC.js.map
-//# sourceMappingURL=chunk-KOHBAPLC.js.map
+//# sourceMappingURL=chunk-I4BGJZ7J.js.map
+//# sourceMappingURL=chunk-I4BGJZ7J.js.map

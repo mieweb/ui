@@ -29,7 +29,7 @@ var avatarVariants = classVarianceAuthority.cva(
   [
     "relative inline-flex items-center justify-center",
     "rounded-full overflow-hidden",
-    "bg-primary-500 text-white font-semibold"
+    "bg-primary-800 text-white font-semibold"
   ],
   {
     variants: {
@@ -135,5 +135,5 @@ exports.Avatar = Avatar;
 exports.AvatarGroup = AvatarGroup;
 exports.avatarVariants = avatarVariants;
 exports.getInitials = getInitials;
-//# sourceMappingURL=chunk-UHS53NVJ.cjs.map
-//# sourceMappingURL=chunk-UHS53NVJ.cjs.map
+//# sourceMappingURL=chunk-MMCNMTBR.cjs.map
+//# sourceMappingURL=chunk-MMCNMTBR.cjs.map

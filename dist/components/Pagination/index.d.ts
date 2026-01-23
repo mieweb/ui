@@ -3,7 +3,7 @@ import * as class_variance_authority_types from 'class-variance-authority/types'
 import { VariantProps } from 'class-variance-authority';
 
 declare const paginationButtonVariants: (props?: ({
-    variant?: "default" | "outline" | "ghost" | null | undefined;
+    variant?: "default" | "ghost" | "outline" | null | undefined;
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface PaginationProps extends VariantProps<typeof paginationButtonVariants> {

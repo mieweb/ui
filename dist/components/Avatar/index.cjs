@@ -1,25 +1,25 @@
 'use strict';
 
-var chunkUHS53NVJ_cjs = require('../../chunk-UHS53NVJ.cjs');
+var chunkMMCNMTBR_cjs = require('../../chunk-MMCNMTBR.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
 
 
 Object.defineProperty(exports, "Avatar", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.Avatar; }
+  get: function () { return chunkMMCNMTBR_cjs.Avatar; }
 });
 Object.defineProperty(exports, "AvatarGroup", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.AvatarGroup; }
+  get: function () { return chunkMMCNMTBR_cjs.AvatarGroup; }
 });
 Object.defineProperty(exports, "avatarVariants", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.avatarVariants; }
+  get: function () { return chunkMMCNMTBR_cjs.avatarVariants; }
 });
 Object.defineProperty(exports, "getInitials", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.getInitials; }
+  get: function () { return chunkMMCNMTBR_cjs.getInitials; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

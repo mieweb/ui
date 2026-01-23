@@ -5,7 +5,7 @@ import { VariantProps } from 'class-variance-authority';
 
 declare const modalOverlayVariants: (props?: ({} & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const modalContentVariants: (props?: ({
-    size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "full" | null | undefined;
+    size?: "sm" | "md" | "lg" | "xl" | "full" | "2xl" | "3xl" | "4xl" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface ModalProps extends VariantProps<typeof modalContentVariants> {
     /** Whether the modal is open */

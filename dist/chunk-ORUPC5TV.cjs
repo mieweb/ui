@@ -156,7 +156,7 @@ var tabsTriggerVariants = classVarianceAuthority.cva(
           "px-4 py-2 -mb-px",
           "border-b-2 border-transparent",
           "text-muted-foreground hover:text-foreground",
-          "data-[state=active]:border-primary-500 data-[state=active]:text-primary-500"
+          "data-[state=active]:border-primary-700 data-[state=active]:text-primary-800"
         ],
         pills: [
           "px-3 py-1.5 rounded-md text-sm",
@@ -240,5 +240,5 @@ exports.TabsList = TabsList;
 exports.TabsTrigger = TabsTrigger;
 exports.tabsListVariants = tabsListVariants;
 exports.tabsTriggerVariants = tabsTriggerVariants;
-//# sourceMappingURL=chunk-PFPBF3TQ.cjs.map
-//# sourceMappingURL=chunk-PFPBF3TQ.cjs.map
+//# sourceMappingURL=chunk-ORUPC5TV.cjs.map
+//# sourceMappingURL=chunk-ORUPC5TV.cjs.map
