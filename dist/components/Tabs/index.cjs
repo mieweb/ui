@@ -1,33 +1,33 @@
 'use strict';
 
-var chunkPFPBF3TQ_cjs = require('../../chunk-PFPBF3TQ.cjs');
+var chunkORUPC5TV_cjs = require('../../chunk-ORUPC5TV.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
 
 
 Object.defineProperty(exports, "Tabs", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.Tabs; }
+  get: function () { return chunkORUPC5TV_cjs.Tabs; }
 });
 Object.defineProperty(exports, "TabsContent", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.TabsContent; }
+  get: function () { return chunkORUPC5TV_cjs.TabsContent; }
 });
 Object.defineProperty(exports, "TabsList", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.TabsList; }
+  get: function () { return chunkORUPC5TV_cjs.TabsList; }
 });
 Object.defineProperty(exports, "TabsTrigger", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.TabsTrigger; }
+  get: function () { return chunkORUPC5TV_cjs.TabsTrigger; }
 });
 Object.defineProperty(exports, "tabsListVariants", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.tabsListVariants; }
+  get: function () { return chunkORUPC5TV_cjs.tabsListVariants; }
 });
 Object.defineProperty(exports, "tabsTriggerVariants", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.tabsTriggerVariants; }
+  get: function () { return chunkORUPC5TV_cjs.tabsTriggerVariants; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

@@ -6,7 +6,7 @@ declare const progressBarTrackVariants: (props?: ({
     size?: "sm" | "md" | "lg" | "xl" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const progressBarFillVariants: (props?: ({
-    variant?: "default" | "success" | "warning" | "danger" | null | undefined;
+    variant?: "success" | "default" | "warning" | "danger" | null | undefined;
     animated?: boolean | null | undefined;
     striped?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;

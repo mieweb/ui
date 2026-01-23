@@ -4,7 +4,7 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const spinnerVariants: (props?: ({
-    size?: "xs" | "sm" | "md" | "lg" | "xl" | null | undefined;
+    size?: "sm" | "md" | "lg" | "xs" | "xl" | null | undefined;
     variant?: "default" | "white" | "muted" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof spinnerVariants> {

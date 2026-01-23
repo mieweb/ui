@@ -134,7 +134,7 @@ var tabsTriggerVariants = cva(
           "px-4 py-2 -mb-px",
           "border-b-2 border-transparent",
           "text-muted-foreground hover:text-foreground",
-          "data-[state=active]:border-primary-500 data-[state=active]:text-primary-500"
+          "data-[state=active]:border-primary-700 data-[state=active]:text-primary-800"
         ],
         pills: [
           "px-3 py-1.5 rounded-md text-sm",
@@ -213,5 +213,5 @@ var TabsContent = React.forwardRef(
 TabsContent.displayName = "TabsContent";
 
 export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants, tabsTriggerVariants };
-//# sourceMappingURL=chunk-AL3FB3Q5.js.map
-//# sourceMappingURL=chunk-AL3FB3Q5.js.map
+//# sourceMappingURL=chunk-JFAXLE2J.js.map
+//# sourceMappingURL=chunk-JFAXLE2J.js.map

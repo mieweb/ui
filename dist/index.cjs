@@ -10,7 +10,7 @@ var chunkSWV5E75F_cjs = require('./chunk-SWV5E75F.cjs');
 var chunkZ3TFPXVN_cjs = require('./chunk-Z3TFPXVN.cjs');
 var chunkEXDNFGI7_cjs = require('./chunk-EXDNFGI7.cjs');
 var chunkLZEY55QZ_cjs = require('./chunk-LZEY55QZ.cjs');
-var chunkPFPBF3TQ_cjs = require('./chunk-PFPBF3TQ.cjs');
+var chunkORUPC5TV_cjs = require('./chunk-ORUPC5TV.cjs');
 var chunkQDGZBDBI_cjs = require('./chunk-QDGZBDBI.cjs');
 var chunkB7YGVKTE_cjs = require('./chunk-B7YGVKTE.cjs');
 var chunkVDMQCSXT_cjs = require('./chunk-VDMQCSXT.cjs');
@@ -20,11 +20,11 @@ var chunkG4IYKDQ2_cjs = require('./chunk-G4IYKDQ2.cjs');
 var chunkNAATBUHR_cjs = require('./chunk-NAATBUHR.cjs');
 var chunk2QX46LFO_cjs = require('./chunk-2QX46LFO.cjs');
 var chunkXZB73CF4_cjs = require('./chunk-XZB73CF4.cjs');
-var chunkXNY3NM2W_cjs = require('./chunk-XNY3NM2W.cjs');
+var chunkEF46XW4Z_cjs = require('./chunk-EF46XW4Z.cjs');
 var chunkLEE3NMNP_cjs = require('./chunk-LEE3NMNP.cjs');
 var chunkN3QTYHRZ_cjs = require('./chunk-N3QTYHRZ.cjs');
 var chunkJYMQJ32S_cjs = require('./chunk-JYMQJ32S.cjs');
-var chunkYEZJKPEN_cjs = require('./chunk-YEZJKPEN.cjs');
+var chunkGCCKT63N_cjs = require('./chunk-GCCKT63N.cjs');
 var chunkZENVEUAE_cjs = require('./chunk-ZENVEUAE.cjs');
 var chunkL7TTMKLJ_cjs = require('./chunk-L7TTMKLJ.cjs');
 var chunkJGADLLQW_cjs = require('./chunk-JGADLLQW.cjs');
@@ -42,18 +42,2886 @@ require('./chunk-ZO46CFVN.cjs');
 var chunkBTJHYGPI_cjs = require('./chunk-BTJHYGPI.cjs');
 var chunkKMN7JX2X_cjs = require('./chunk-KMN7JX2X.cjs');
 var chunkZEFZRYQS_cjs = require('./chunk-ZEFZRYQS.cjs');
-var chunkQLLBEUXV_cjs = require('./chunk-QLLBEUXV.cjs');
-var chunkUHS53NVJ_cjs = require('./chunk-UHS53NVJ.cjs');
-var chunkPA5DHCK4_cjs = require('./chunk-PA5DHCK4.cjs');
+var chunkMJKFQ4TF_cjs = require('./chunk-MJKFQ4TF.cjs');
+var chunkMMCNMTBR_cjs = require('./chunk-MMCNMTBR.cjs');
+var chunkEKIQE524_cjs = require('./chunk-EKIQE524.cjs');
 var chunkPEFJAWNR_cjs = require('./chunk-PEFJAWNR.cjs');
 var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
+var React10 = require('react');
+var classVarianceAuthority = require('class-variance-authority');
 var jsxRuntime = require('react/jsx-runtime');
-var React = require('react');
 
-function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () { return e[k]; }
+        });
+      }
+    });
+  }
+  n.default = e;
+  return Object.freeze(n);
+}
 
-var React__default = /*#__PURE__*/_interopDefault(React);
+var React10__namespace = /*#__PURE__*/_interopNamespace(React10);
 
+var statusIconVariants = classVarianceAuthority.cva(
+  "flex h-5 w-5 items-center justify-center rounded-full",
+  {
+    variants: {
+      status: {
+        pending: "bg-neutral-200 dark:bg-neutral-700",
+        running: "bg-primary-100 dark:bg-primary-900/50",
+        success: "bg-green-100 dark:bg-green-900/50",
+        error: "bg-red-100 dark:bg-red-900/50",
+        cancelled: "bg-neutral-200 dark:bg-neutral-700"
+      }
+    },
+    defaultVariants: {
+      status: "pending"
+    }
+  }
+);
+function ToolStatusIcon({ status, className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: chunkOR5DRJCW_cjs.cn(statusIconVariants({ status }), className), children: [
+    status === "pending" && /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-3 w-3 text-neutral-500", fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "10", cy: "10", r: "3" }) }),
+    status === "running" && /* @__PURE__ */ jsxRuntime.jsxs(
+      "svg",
+      {
+        className: "h-3 w-3 animate-spin text-primary-600 dark:text-primary-400",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "circle",
+            {
+              className: "opacity-25",
+              cx: "12",
+              cy: "12",
+              r: "10",
+              stroke: "currentColor",
+              strokeWidth: "4"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              className: "opacity-75",
+              fill: "currentColor",
+              d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            }
+          )
+        ]
+      }
+    ),
+    status === "success" && /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-3 w-3 text-green-600 dark:text-green-400",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "3",
+        children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+      }
+    ),
+    status === "error" && /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-3 w-3 text-red-600 dark:text-red-400",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "3",
+        children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" })
+      }
+    ),
+    status === "cancelled" && /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-3 w-3 text-neutral-500",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "3",
+        children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M18 12H6" })
+      }
+    )
+  ] });
+}
+var TOOL_ICONS = {
+  // Patient tools
+  create_patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" }) }),
+  get_patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" }) }),
+  search_patients: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" }) }),
+  // Appointment tools
+  schedule_appointment: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" }) }),
+  // Document tools
+  create_document: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" }) }),
+  // Default tool icon
+  default: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" }) })
+};
+function getToolIcon(toolName) {
+  return TOOL_ICONS[toolName] || TOOL_ICONS.default;
+}
+function ResourceLink({ link, onClick, className }) {
+  const handleClick = (e) => {
+    if (onClick) {
+      e.preventDefault();
+      onClick(link);
+    }
+  };
+  const linkTypeIcons = {
+    patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" }) }),
+    document: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" }) }),
+    appointment: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" }) }),
+    order: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" }) }),
+    external: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" }) }),
+    internal: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" }) })
+  };
+  const icon = link.type ? linkTypeIcons[link.type] : linkTypeIcons.internal;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "a",
+    {
+      href: link.href,
+      onClick: handleClick,
+      className: chunkOR5DRJCW_cjs.cn(
+        "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5",
+        "bg-primary-50 text-primary-700 hover:bg-primary-100",
+        "dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50",
+        "text-sm font-medium transition-colors",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+        "dark:focus:ring-offset-neutral-900",
+        className
+      ),
+      children: [
+        icon,
+        /* @__PURE__ */ jsxRuntime.jsx("span", { children: link.label }),
+        link.type === "external" && /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-3 w-3 opacity-60", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" }) })
+      ]
+    }
+  );
+}
+function ToolResultDisplay({ result, onLinkClick, showRawData = false, className }) {
+  const [showJson, setShowJson] = React10__namespace.useState(false);
+  if (result.type === "error") {
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("mt-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20", className), children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-700 dark:text-red-300", children: typeof result.data === "string" ? String(result.data) : "An error occurred" }) });
+  }
+  const hasRawData = result.type === "json" && result.data !== void 0 && result.data !== null;
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-2", className), children: [
+    result.summary && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-neutral-700 dark:text-neutral-300", children: result.summary }),
+    result.link && /* @__PURE__ */ jsxRuntime.jsx(ResourceLink, { link: result.link, onClick: onLinkClick }),
+    result.resources && result.resources.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-2", children: result.resources.map((resource) => /* @__PURE__ */ jsxRuntime.jsx(
+      ResourceLink,
+      {
+        link: {
+          href: resource.uri || "#",
+          label: resource.name,
+          type: resource.type
+        },
+        onClick: onLinkClick
+      },
+      resource.id
+    )) }),
+    hasRawData && showRawData && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-2", children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(
+        "button",
+        {
+          onClick: () => setShowJson(!showJson),
+          className: "flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300",
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "svg",
+              {
+                className: chunkOR5DRJCW_cjs.cn("h-3 w-3 transition-transform", showJson && "rotate-90"),
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                strokeWidth: "2",
+                children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
+              }
+            ),
+            showJson ? "Hide" : "Show",
+            " raw data"
+          ]
+        }
+      ),
+      showJson && /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "mt-2 max-h-40 overflow-auto rounded-md bg-neutral-100 p-2 text-xs dark:bg-neutral-800", children: JSON.stringify(result.data, null, 2) })
+    ] })
+  ] });
+}
+var toolCallVariants = classVarianceAuthority.cva(
+  [
+    "rounded-lg border",
+    "overflow-hidden",
+    "transition-all duration-200"
+  ],
+  {
+    variants: {
+      status: {
+        pending: "border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50",
+        running: "border-primary-200 bg-primary-50/50 dark:border-primary-800 dark:bg-primary-900/20",
+        success: "border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/20",
+        error: "border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-900/20",
+        cancelled: "border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50 opacity-60"
+      },
+      compact: {
+        true: "p-2",
+        false: "p-3"
+      }
+    },
+    defaultVariants: {
+      status: "pending",
+      compact: false
+    }
+  }
+);
+var TOOL_FRIENDLY_NAMES = {
+  create_patient: "Creating patient",
+  get_patient: "Looking up patient",
+  search_patients: "Searching patients",
+  update_patient: "Updating patient",
+  delete_patient: "Removing patient",
+  schedule_appointment: "Scheduling appointment",
+  cancel_appointment: "Canceling appointment",
+  update_appointment: "Updating appointment",
+  create_document: "Creating document",
+  upload_document: "Uploading document",
+  get_document: "Retrieving document",
+  search_documents: "Searching documents",
+  create_order: "Creating order",
+  send_message: "Sending message",
+  search: "Searching"
+};
+function getToolFriendlyName(toolName, status) {
+  const baseName = TOOL_FRIENDLY_NAMES[toolName] || toolName.replace(/_/g, " ");
+  if (status === "success") {
+    if (baseName.startsWith("Creating")) return baseName.replace("Creating", "Created");
+    if (baseName.startsWith("Scheduling")) return baseName.replace("Scheduling", "Scheduled");
+    if (baseName.startsWith("Searching")) return baseName.replace("Searching", "Searched");
+    if (baseName.startsWith("Looking")) return baseName.replace("Looking", "Found");
+    if (baseName.startsWith("Updating")) return baseName.replace("Updating", "Updated");
+    if (baseName.startsWith("Removing")) return baseName.replace("Removing", "Removed");
+    if (baseName.startsWith("Canceling")) return baseName.replace("Canceling", "Canceled");
+    if (baseName.startsWith("Retrieving")) return baseName.replace("Retrieving", "Retrieved");
+    if (baseName.startsWith("Uploading")) return baseName.replace("Uploading", "Uploaded");
+    if (baseName.startsWith("Sending")) return baseName.replace("Sending", "Sent");
+  }
+  return baseName;
+}
+function getParameterSummary(toolName, params) {
+  const paramMap = Object.fromEntries(params.map((p) => [p.name, p.value]));
+  if (toolName === "create_patient" && paramMap.firstName && paramMap.lastName) {
+    return `${paramMap.firstName} ${paramMap.lastName}`;
+  }
+  if (toolName.includes("search") && paramMap.query) {
+    return `"${paramMap.query}"`;
+  }
+  if (toolName.includes("appointment") && paramMap.patientName) {
+    const date = paramMap.preferredDate || paramMap.date;
+    return date ? `${paramMap.patientName} on ${date}` : String(paramMap.patientName);
+  }
+  return null;
+}
+function MCPToolCallDisplay({
+  toolCall,
+  showParameters = true,
+  collapsible = true,
+  defaultCollapsed = true,
+  compact,
+  onLinkClick,
+  className
+}) {
+  const [showDetails, setShowDetails] = React10__namespace.useState(!defaultCollapsed);
+  const formatDuration2 = (ms) => {
+    if (!ms) return null;
+    if (ms < 1e3) return `${ms}ms`;
+    return `${(ms / 1e3).toFixed(1)}s`;
+  };
+  const friendlyName = getToolFriendlyName(toolCall.toolName, toolCall.status);
+  const paramSummary = getParameterSummary(toolCall.toolName, toolCall.parameters);
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(toolCallVariants({ status: toolCall.status, compact }), className), children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-3", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400", children: getToolIcon(toolCall.toolName) }),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-900 dark:text-white", children: friendlyName }),
+        /* @__PURE__ */ jsxRuntime.jsx(ToolStatusIcon, { status: toolCall.status }),
+        toolCall.duration && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-neutral-400", children: formatDuration2(toolCall.duration) })
+      ] }),
+      paramSummary && toolCall.status !== "success" && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-sm text-neutral-600 dark:text-neutral-400", children: paramSummary }),
+      toolCall.result && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2", children: /* @__PURE__ */ jsxRuntime.jsx(
+        ToolResultDisplay,
+        {
+          result: toolCall.result,
+          onLinkClick,
+          showRawData: showDetails
+        }
+      ) }),
+      toolCall.error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 rounded-md bg-red-100 p-2 dark:bg-red-900/30", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-700 dark:text-red-300", children: toolCall.error }) }),
+      collapsible && (showParameters && toolCall.parameters.length > 0) && /* @__PURE__ */ jsxRuntime.jsxs(
+        "button",
+        {
+          onClick: () => setShowDetails(!showDetails),
+          className: "mt-2 flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300",
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "svg",
+              {
+                className: chunkOR5DRJCW_cjs.cn("h-3 w-3 transition-transform", showDetails && "rotate-90"),
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                strokeWidth: "2",
+                children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
+              }
+            ),
+            showDetails ? "Hide" : "Show",
+            " details"
+          ]
+        }
+      ),
+      showDetails && showParameters && toolCall.parameters.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400", children: "Parameters" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-0.5", children: toolCall.parameters.map((param) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-2 text-xs", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-mono text-neutral-500 dark:text-neutral-500", children: [
+            param.name,
+            ":"
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-neutral-700 dark:text-neutral-300", children: typeof param.value === "string" ? param.value : JSON.stringify(param.value) })
+        ] }, param.name)) })
+      ] })
+    ] })
+  ] }) });
+}
+var avatarVariants2 = classVarianceAuthority.cva(
+  "flex shrink-0 items-center justify-center rounded-full",
+  {
+    variants: {
+      role: {
+        user: "bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300",
+        assistant: "bg-gradient-to-br from-violet-500 to-purple-600 text-white",
+        system: "bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400",
+        tool: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+      },
+      size: {
+        sm: "h-6 w-6 text-xs",
+        md: "h-8 w-8 text-sm",
+        lg: "h-10 w-10 text-base"
+      }
+    },
+    defaultVariants: {
+      role: "user",
+      size: "md"
+    }
+  }
+);
+function MessageAvatar({ role, size, userName, className }) {
+  const getInitials2 = (name) => {
+    if (!name) return "?";
+    return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
+  };
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(avatarVariants2({ role, size }), className), children: role === "assistant" ? /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-5 w-5", viewBox: "0 0 24 24", fill: "none", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        d: "M12 2L2 7L12 12L22 7L12 2Z",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        fill: "currentColor",
+        fillOpacity: "0.2"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        d: "M2 17L12 22L22 17",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        d: "M2 12L12 17L22 12",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }
+    )
+  ] }) : role === "user" ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: getInitials2(userName) }) : role === "system" ? /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" }) }) : /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" }) }) });
+}
+function AITypingIndicator({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex items-center gap-1", className), children: [
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 animate-bounce rounded-full bg-neutral-400 dark:bg-neutral-500 [animation-delay:-0.3s]" }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 animate-bounce rounded-full bg-neutral-400 dark:bg-neutral-500 [animation-delay:-0.15s]" }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 animate-bounce rounded-full bg-neutral-400 dark:bg-neutral-500" })
+  ] });
+}
+function ContentBlock({ content, onLinkClick }) {
+  const [isCollapsed, setIsCollapsed] = React10__namespace.useState(content.collapsed ?? false);
+  if (content.type === "text" && content.text) {
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "prose prose-sm dark:prose-invert max-w-none", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "whitespace-pre-wrap", children: content.text }) });
+  }
+  if (content.type === "tool_use" && content.toolCall) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      MCPToolCallDisplay,
+      {
+        toolCall: content.toolCall,
+        onLinkClick,
+        defaultCollapsed: content.collapsed
+      }
+    );
+  }
+  if (content.type === "thinking" && content.text) {
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50", children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(
+        "button",
+        {
+          onClick: () => setIsCollapsed(!isCollapsed),
+          className: "flex w-full items-center justify-between px-3 py-2 text-left",
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400", children: [
+              /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" }) }),
+              "Thinking..."
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "svg",
+              {
+                className: chunkOR5DRJCW_cjs.cn("h-4 w-4 text-neutral-400 transition-transform", isCollapsed && "-rotate-90"),
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                strokeWidth: "2",
+                children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
+              }
+            )
+          ]
+        }
+      ),
+      !isCollapsed && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-t border-neutral-200 px-3 py-2 dark:border-neutral-700", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-neutral-600 italic dark:text-neutral-400", children: content.text }) })
+    ] });
+  }
+  if (content.type === "code" && content.text) {
+    return /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "rounded-lg bg-neutral-900 p-3 text-sm dark:bg-neutral-950", children: /* @__PURE__ */ jsxRuntime.jsx("code", { className: content.language ? `language-${content.language}` : "", children: content.text }) });
+  }
+  return null;
+}
+var messageVariants = classVarianceAuthority.cva("flex gap-3", {
+  variants: {
+    role: {
+      user: "flex-row-reverse",
+      assistant: "flex-row",
+      system: "flex-row justify-center",
+      tool: "flex-row"
+    }
+  },
+  defaultVariants: {
+    role: "assistant"
+  }
+});
+var bubbleVariants = classVarianceAuthority.cva(
+  "rounded-2xl px-4 py-2.5 max-w-[85%]",
+  {
+    variants: {
+      role: {
+        user: "bg-primary-600 text-white dark:bg-primary-500",
+        assistant: "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white",
+        system: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400 text-center text-sm max-w-[95%]",
+        tool: "bg-transparent p-0 max-w-full w-full"
+      }
+    },
+    defaultVariants: {
+      role: "assistant"
+    }
+  }
+);
+function AIMessageDisplay({
+  message,
+  userName,
+  showAvatar = true,
+  showTimestamp = false,
+  onLinkClick,
+  className
+}) {
+  const isStreaming = message.status === "streaming";
+  const hasContent = message.content.length > 0;
+  const formatTime3 = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString(void 0, { hour: "numeric", minute: "2-digit" });
+  };
+  if (message.role === "tool") {
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(messageVariants({ role: message.role }), className), children: [
+      showAvatar && /* @__PURE__ */ jsxRuntime.jsx(MessageAvatar, { role: message.role }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1 space-y-2", children: message.content.map((content, index) => /* @__PURE__ */ jsxRuntime.jsx(ContentBlock, { content, onLinkClick }, index)) })
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(messageVariants({ role: message.role }), className), children: [
+    showAvatar && message.role !== "system" && /* @__PURE__ */ jsxRuntime.jsx(MessageAvatar, { role: message.role, userName }),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-col gap-1", message.role === "user" && "items-end"), children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: bubbleVariants({ role: message.role }), children: hasContent ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: message.content.map((content, index) => /* @__PURE__ */ jsxRuntime.jsx(ContentBlock, { content, onLinkClick }, index)) }) : isStreaming ? /* @__PURE__ */ jsxRuntime.jsx(AITypingIndicator, {}) : null }),
+      showTimestamp && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "px-2 text-xs text-neutral-500", children: formatTime3(message.timestamp) }),
+      message.status === "error" && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "px-2 text-xs text-red-500", children: "Failed to send" })
+    ] })
+  ] });
+}
+function getFileType(mimeType) {
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType.startsWith("video/")) return "video";
+  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType.includes("pdf") || mimeType.includes("document") || mimeType.includes("text")) {
+    return "document";
+  }
+  return "file";
+}
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+function validateFile(file, acceptedTypes, maxSize) {
+  if (acceptedTypes && acceptedTypes.length > 0) {
+    const isAccepted = acceptedTypes.some((type) => {
+      if (type.startsWith(".")) {
+        return file.name.toLowerCase().endsWith(type.toLowerCase());
+      }
+      if (type.endsWith("/*")) {
+        return file.type.startsWith(type.replace("/*", "/"));
+      }
+      return file.type === type;
+    });
+    if (!isAccepted) {
+      return { valid: false, error: "File type not supported" };
+    }
+  }
+  if (maxSize && file.size > maxSize) {
+    return {
+      valid: false,
+      error: `File too large (max ${formatFileSize(maxSize)})`
+    };
+  }
+  return { valid: true };
+}
+function generateAttachmentId() {
+  return `attachment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+function AttachmentPreviewItem({
+  attachment,
+  onRemove,
+  onRetry,
+  className
+}) {
+  const { file, previewUrl, type, state, progress } = attachment;
+  const isImage = type === "image";
+  const isVideo = type === "video";
+  const isUploading = state === "uploading";
+  const isFailed = state === "failed";
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "group relative overflow-hidden rounded-lg",
+        "bg-neutral-100 dark:bg-neutral-800",
+        "border border-neutral-200 dark:border-neutral-700",
+        isFailed && "border-red-500",
+        className
+      ),
+      children: [
+        (isImage || isVideo) && previewUrl ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative h-20 w-20", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "img",
+            {
+              src: previewUrl,
+              alt: file.name,
+              className: chunkOR5DRJCW_cjs.cn(
+                "h-full w-full object-cover",
+                (isUploading || isFailed) && "opacity-50"
+              )
+            }
+          ),
+          isVideo && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsx(
+            "svg",
+            {
+              className: "h-6 w-6 text-white drop-shadow",
+              fill: "currentColor",
+              viewBox: "0 0 24 24",
+              children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M8 5v14l11-7z" })
+            }
+          ) })
+        ] }) : (
+          /* File preview */
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-20 w-20 flex-col items-center justify-center p-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "svg",
+              {
+                className: "h-8 w-8 text-neutral-400",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                children: /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    strokeWidth: 2,
+                    d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  }
+                )
+              }
+            ),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mt-1 max-w-full truncate px-1 text-xs text-neutral-500", children: file.name.split(".").pop()?.toUpperCase() })
+          ] })
+        ),
+        isUploading && progress !== void 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center text-white", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs(
+            "svg",
+            {
+              className: "mx-auto h-6 w-6 animate-spin",
+              fill: "none",
+              viewBox: "0 0 24 24",
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "circle",
+                  {
+                    className: "opacity-25",
+                    cx: "12",
+                    cy: "12",
+                    r: "10",
+                    stroke: "currentColor",
+                    strokeWidth: "4"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    className: "opacity-75",
+                    fill: "currentColor",
+                    d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  }
+                )
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "mt-1 text-xs", children: [
+            progress,
+            "%"
+          ] })
+        ] }) }),
+        isFailed && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "svg",
+            {
+              className: "mx-auto h-6 w-6 text-red-400",
+              fill: "none",
+              viewBox: "0 0 24 24",
+              stroke: "currentColor",
+              children: /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  strokeWidth: 2,
+                  d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                }
+              )
+            }
+          ),
+          onRetry && /* @__PURE__ */ jsxRuntime.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: onRetry,
+              className: "mt-1 text-xs text-white underline hover:no-underline",
+              children: "Retry"
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: onRemove,
+            className: chunkOR5DRJCW_cjs.cn(
+              "absolute -top-1 -right-1 z-10",
+              "rounded-full p-1",
+              "bg-neutral-900 text-white",
+              "opacity-0 group-hover:opacity-100",
+              "focus:ring-primary-500 focus:opacity-100 focus:ring-2 focus:outline-none",
+              "transition-opacity"
+            ),
+            "aria-label": `Remove ${file.name}`,
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "svg",
+              {
+                className: "h-3 w-3",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                children: /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    strokeWidth: 2,
+                    d: "M6 18L18 6M6 6l12 12"
+                  }
+                )
+              }
+            )
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "absolute right-0 bottom-0 left-0",
+              "bg-black/70 px-1 py-0.5",
+              "opacity-0 group-hover:opacity-100",
+              "transition-opacity"
+            ),
+            children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-xs text-white", children: file.name })
+          }
+        )
+      ]
+    }
+  );
+}
+AttachmentPreviewItem.displayName = "AttachmentPreviewItem";
+var AttachmentPicker = React10__namespace.forwardRef(
+  ({
+    onFilesSelected,
+    acceptedTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
+    maxFileSize = 25 * 1024 * 1024,
+    // 25MB
+    maxFiles = 10,
+    multiple = true,
+    disabled = false,
+    onError,
+    className,
+    children
+  }, ref) => {
+    const inputRef = React10__namespace.useRef(null);
+    React10__namespace.useImperativeHandle(ref, () => inputRef.current);
+    const handleClick = () => {
+      inputRef.current?.click();
+    };
+    const handleChange = (event) => {
+      const files = Array.from(event.target.files || []);
+      if (files.length === 0) return;
+      const validFiles = [];
+      for (const file of files.slice(0, maxFiles)) {
+        const validation = validateFile(file, acceptedTypes, maxFileSize);
+        if (validation.valid) {
+          validFiles.push(file);
+        } else if (onError) {
+          onError(`${file.name}: ${validation.error}`);
+        }
+      }
+      if (files.length > maxFiles && onError) {
+        onError(`Maximum ${maxFiles} files allowed`);
+      }
+      if (validFiles.length > 0) {
+        onFilesSelected(validFiles);
+      }
+      event.target.value = "";
+    };
+    return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "input",
+        {
+          ref: inputRef,
+          type: "file",
+          accept: acceptedTypes.join(","),
+          multiple,
+          onChange: handleChange,
+          disabled,
+          className: "sr-only",
+          "aria-label": "Select files to attach"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: handleClick,
+          disabled,
+          className: chunkOR5DRJCW_cjs.cn(
+            "inline-flex items-center justify-center",
+            "rounded-full p-2",
+            "text-neutral-500 hover:text-neutral-700",
+            "dark:text-neutral-400 dark:hover:text-neutral-200",
+            "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+            "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            "transition-colors",
+            className
+          ),
+          "aria-label": "Attach files",
+          children: children || /* @__PURE__ */ jsxRuntime.jsx(
+            "svg",
+            {
+              className: "h-5 w-5",
+              fill: "none",
+              viewBox: "0 0 24 24",
+              stroke: "currentColor",
+              children: /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  strokeWidth: 2,
+                  d: "M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                }
+              )
+            }
+          )
+        }
+      )
+    ] });
+  }
+);
+AttachmentPicker.displayName = "AttachmentPicker";
+function DragDropZone({
+  onFilesDropped,
+  acceptedTypes,
+  maxFileSize,
+  maxFiles = 10,
+  disabled = false,
+  onError,
+  children,
+  className
+}) {
+  const [isDragging, setIsDragging] = React10__namespace.useState(false);
+  const dragCounterRef = React10__namespace.useRef(0);
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (disabled) return;
+    dragCounterRef.current++;
+    if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (disabled) return;
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false);
+    }
+  };
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (disabled) return;
+    setIsDragging(false);
+    dragCounterRef.current = 0;
+    const files = Array.from(event.dataTransfer.files);
+    if (files.length === 0) return;
+    const validFiles = [];
+    for (const file of files.slice(0, maxFiles)) {
+      const validation = validateFile(file, acceptedTypes, maxFileSize);
+      if (validation.valid) {
+        validFiles.push(file);
+      } else if (onError) {
+        onError(`${file.name}: ${validation.error}`);
+      }
+    }
+    if (files.length > maxFiles && onError) {
+      onError(`Maximum ${maxFiles} files allowed`);
+    }
+    if (validFiles.length > 0) {
+      onFilesDropped(validFiles);
+    }
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      onDragEnter: handleDragEnter,
+      onDragLeave: handleDragLeave,
+      onDragOver: handleDragOver,
+      onDrop: handleDrop,
+      className: chunkOR5DRJCW_cjs.cn("relative", className),
+      children: [
+        children,
+        isDragging && /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "absolute inset-0 z-50",
+              "flex items-center justify-center",
+              "bg-primary-50/90 dark:bg-primary-900/90",
+              "border-primary-500 border-2 border-dashed",
+              "rounded-lg"
+            ),
+            children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "svg",
+                {
+                  className: "text-primary-500 mx-auto h-12 w-12",
+                  fill: "none",
+                  viewBox: "0 0 24 24",
+                  stroke: "currentColor",
+                  children: /* @__PURE__ */ jsxRuntime.jsx(
+                    "path",
+                    {
+                      strokeLinecap: "round",
+                      strokeLinejoin: "round",
+                      strokeWidth: 2,
+                      d: "M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    }
+                  )
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-primary-700 dark:text-primary-300 mt-2 text-sm font-medium", children: "Drop files here" })
+            ] })
+          }
+        )
+      ]
+    }
+  );
+}
+DragDropZone.displayName = "DragDropZone";
+function CameraButton({
+  onCapture,
+  useFrontCamera = false,
+  disabled = false,
+  className
+}) {
+  const inputRef = React10__namespace.useRef(null);
+  const handleClick = () => {
+    inputRef.current?.click();
+  };
+  const handleChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      onCapture(file);
+    }
+    event.target.value = "";
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "input",
+      {
+        ref: inputRef,
+        type: "file",
+        accept: "image/*",
+        capture: useFrontCamera ? "user" : "environment",
+        onChange: handleChange,
+        disabled,
+        className: "sr-only",
+        "aria-label": "Take a photo"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: handleClick,
+        disabled,
+        className: chunkOR5DRJCW_cjs.cn(
+          "inline-flex items-center justify-center",
+          "rounded-full p-2",
+          "text-neutral-500 hover:text-neutral-700",
+          "dark:text-neutral-400 dark:hover:text-neutral-200",
+          "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+          "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          "transition-colors",
+          className
+        ),
+        "aria-label": "Take a photo",
+        children: /* @__PURE__ */ jsxRuntime.jsxs(
+          "svg",
+          {
+            className: "h-5 w-5",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  strokeWidth: 2,
+                  d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  strokeWidth: 2,
+                  d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                }
+              )
+            ]
+          }
+        )
+      }
+    )
+  ] });
+}
+CameraButton.displayName = "CameraButton";
+function CharacterCounter({
+  current,
+  max,
+  showWarningAt = 0.9,
+  className
+}) {
+  const percentage = current / max;
+  const isWarning = percentage >= showWarningAt && percentage < 1;
+  const isOver = current > max;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "span",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "text-xs tabular-nums",
+        isOver ? "font-medium text-red-500" : isWarning ? "text-amber-500" : "text-neutral-400",
+        className
+      ),
+      "aria-live": "polite",
+      "aria-label": `${current} of ${max} characters`,
+      children: [
+        current,
+        "/",
+        max
+      ]
+    }
+  );
+}
+CharacterCounter.displayName = "CharacterCounter";
+var sendButtonVariants = classVarianceAuthority.cva(
+  [
+    "inline-flex items-center justify-center",
+    "rounded-full p-2.5",
+    "transition-all duration-200",
+    "focus:outline-none focus:ring-2 focus:ring-primary-500",
+    "disabled:opacity-50 disabled:cursor-not-allowed"
+  ],
+  {
+    variants: {
+      variant: {
+        primary: [
+          "bg-primary-800 text-white",
+          "hover:bg-primary-700",
+          "active:scale-95"
+        ],
+        subtle: [
+          "bg-transparent text-primary-600",
+          "hover:bg-primary-50 dark:hover:bg-primary-900/20"
+        ]
+      },
+      canSend: {
+        true: "",
+        false: "opacity-50 cursor-not-allowed"
+      }
+    },
+    defaultVariants: {
+      variant: "primary",
+      canSend: false
+    }
+  }
+);
+var SendButton = React10__namespace.forwardRef(
+  ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "button",
+      {
+        ref,
+        type: "submit",
+        disabled: disabled || !canSend || isLoading,
+        className: chunkOR5DRJCW_cjs.cn(sendButtonVariants({ variant, canSend }), className),
+        "aria-label": isLoading ? "Sending message" : "Send message",
+        ...props,
+        children: isLoading ? /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-5 w-5 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "circle",
+            {
+              className: "opacity-25",
+              cx: "12",
+              cy: "12",
+              r: "10",
+              stroke: "currentColor",
+              strokeWidth: "4"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              className: "opacity-75",
+              fill: "currentColor",
+              d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            }
+          )
+        ] }) : /* @__PURE__ */ jsxRuntime.jsx(
+          "svg",
+          {
+            className: "h-5 w-5",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "path",
+              {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                strokeWidth: 2,
+                d: "M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              }
+            )
+          }
+        )
+      }
+    );
+  }
+);
+SendButton.displayName = "SendButton";
+var MessageComposer = React10__namespace.forwardRef(
+  ({
+    onSend,
+    onTypingStart,
+    onTypingStop,
+    placeholder = "Type a message...",
+    maxLength = 1600,
+    showCharacterCount = false,
+    disabled = false,
+    isSending = false,
+    showAttachmentPicker = true,
+    showCameraButton = false,
+    acceptedFileTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
+    maxFileSize = 25 * 1024 * 1024,
+    maxAttachments = 10,
+    onError,
+    autoFocus = false,
+    replyTo = null,
+    onCancelReply,
+    className
+  }, ref) => {
+    const textareaRef = React10__namespace.useRef(null);
+    const [content, setContent] = React10__namespace.useState("");
+    const [attachments, setAttachments] = React10__namespace.useState(
+      []
+    );
+    const [isTyping, setIsTyping] = React10__namespace.useState(false);
+    const typingTimeoutRef = React10__namespace.useRef(null);
+    React10__namespace.useImperativeHandle(ref, () => textareaRef.current);
+    React10__namespace.useEffect(() => {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+      }
+    }, [content]);
+    React10__namespace.useEffect(() => {
+      if (content.length > 0 && !isTyping) {
+        setIsTyping(true);
+        onTypingStart?.();
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      typingTimeoutRef.current = setTimeout(() => {
+        if (isTyping) {
+          setIsTyping(false);
+          onTypingStop?.();
+        }
+      }, 2e3);
+      return () => {
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+      };
+    }, [content, isTyping, onTypingStart, onTypingStop]);
+    React10__namespace.useEffect(() => {
+      if (autoFocus) {
+        textareaRef.current?.focus();
+      }
+    }, [autoFocus]);
+    React10__namespace.useEffect(() => {
+      if (replyTo) {
+        textareaRef.current?.focus();
+      }
+    }, [replyTo]);
+    const canSend = (content.trim().length > 0 || attachments.length > 0) && content.length <= maxLength && !disabled && !isSending;
+    const handleSubmit = async (event) => {
+      event.preventDefault();
+      if (!canSend) return;
+      const message = {
+        content: content.trim(),
+        attachments: attachments.map((a) => a.file),
+        replyToId: replyTo?.id
+      };
+      setContent("");
+      setAttachments([]);
+      setIsTyping(false);
+      onTypingStop?.();
+      try {
+        await onSend(message);
+      } catch {
+        setContent(message.content);
+        onError?.("Failed to send message");
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        if (canSend) {
+          handleSubmit(event);
+        }
+      }
+    };
+    const handleFilesSelected = (files) => {
+      const remainingSlots = maxAttachments - attachments.length;
+      const filesToAdd = files.slice(0, remainingSlots);
+      if (files.length > remainingSlots) {
+        onError?.(`Maximum ${maxAttachments} attachments allowed`);
+      }
+      const newAttachments = filesToAdd.map((file) => {
+        const type = getFileType(file.type);
+        let previewUrl;
+        if (type === "image" || type === "video") {
+          previewUrl = URL.createObjectURL(file);
+        }
+        return {
+          id: generateAttachmentId(),
+          file,
+          previewUrl,
+          type,
+          state: "pending"
+        };
+      });
+      setAttachments((prev) => [...prev, ...newAttachments]);
+    };
+    const handleRemoveAttachment = (attachmentId) => {
+      setAttachments((prev) => {
+        const attachment = prev.find((a) => a.id === attachmentId);
+        if (attachment?.previewUrl) {
+          URL.revokeObjectURL(attachment.previewUrl);
+        }
+        return prev.filter((a) => a.id !== attachmentId);
+      });
+    };
+    React10__namespace.useEffect(() => {
+      const currentAttachments = attachments;
+      return () => {
+        currentAttachments.forEach((a) => {
+          if (a.previewUrl) {
+            URL.revokeObjectURL(a.previewUrl);
+          }
+        });
+      };
+    }, [attachments]);
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      DragDropZone,
+      {
+        onFilesDropped: handleFilesSelected,
+        acceptedTypes: acceptedFileTypes,
+        maxFileSize,
+        maxFiles: maxAttachments - attachments.length,
+        disabled: disabled || attachments.length >= maxAttachments,
+        onError,
+        className: chunkOR5DRJCW_cjs.cn("w-full", className),
+        children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "w-full", children: [
+          replyTo && /* @__PURE__ */ jsxRuntime.jsxs(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex items-center gap-2 px-4 py-2",
+                "bg-neutral-50 dark:bg-neutral-800/50",
+                "border-primary-500 border-l-4"
+              ),
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+                  /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-primary-600 dark:text-primary-400 text-xs font-medium", children: [
+                    "Replying to ",
+                    replyTo.senderName
+                  ] }),
+                  /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-sm text-neutral-600 dark:text-neutral-300", children: replyTo.content })
+                ] }),
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: onCancelReply,
+                    className: chunkOR5DRJCW_cjs.cn(
+                      "shrink-0 rounded p-1",
+                      "text-neutral-400 hover:text-neutral-600",
+                      "dark:text-neutral-500 dark:hover:text-neutral-300",
+                      "focus:ring-primary-500 focus:ring-2 focus:outline-none"
+                    ),
+                    "aria-label": "Cancel reply",
+                    children: /* @__PURE__ */ jsxRuntime.jsx(
+                      "svg",
+                      {
+                        className: "h-4 w-4",
+                        fill: "none",
+                        viewBox: "0 0 24 24",
+                        stroke: "currentColor",
+                        children: /* @__PURE__ */ jsxRuntime.jsx(
+                          "path",
+                          {
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeWidth: 2,
+                            d: "M6 18L18 6M6 6l12 12"
+                          }
+                        )
+                      }
+                    )
+                  }
+                )
+              ]
+            }
+          ),
+          attachments.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex flex-wrap gap-2 p-3",
+                "border-t border-neutral-200 dark:border-neutral-700"
+              ),
+              children: attachments.map((attachment) => /* @__PURE__ */ jsxRuntime.jsx(
+                AttachmentPreviewItem,
+                {
+                  attachment,
+                  onRemove: () => handleRemoveAttachment(attachment.id)
+                },
+                attachment.id
+              ))
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsxs(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex items-end gap-2 p-3",
+                "bg-white dark:bg-neutral-900",
+                "border-t border-neutral-200 dark:border-neutral-700"
+              ),
+              children: [
+                showAttachmentPicker && /* @__PURE__ */ jsxRuntime.jsx(
+                  AttachmentPicker,
+                  {
+                    onFilesSelected: handleFilesSelected,
+                    acceptedTypes: acceptedFileTypes,
+                    maxFileSize,
+                    maxFiles: maxAttachments - attachments.length,
+                    disabled: disabled || attachments.length >= maxAttachments,
+                    onError
+                  }
+                ),
+                showCameraButton && /* @__PURE__ */ jsxRuntime.jsx(
+                  CameraButton,
+                  {
+                    onCapture: (file) => handleFilesSelected([file]),
+                    disabled: disabled || attachments.length >= maxAttachments
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative flex-1", children: [
+                  /* @__PURE__ */ jsxRuntime.jsx(
+                    "textarea",
+                    {
+                      ref: textareaRef,
+                      value: content,
+                      onChange: (e) => setContent(e.target.value),
+                      onKeyDown: handleKeyDown,
+                      placeholder,
+                      disabled: disabled || isSending,
+                      rows: 1,
+                      className: chunkOR5DRJCW_cjs.cn(
+                        "w-full resize-none rounded-2xl px-4 py-2.5",
+                        "bg-neutral-100 dark:bg-neutral-800",
+                        "text-neutral-900 dark:text-neutral-100",
+                        "placeholder:text-neutral-400 dark:placeholder:text-neutral-500",
+                        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                        "disabled:cursor-not-allowed disabled:opacity-50",
+                        "transition-colors",
+                        "max-h-[150px]"
+                      ),
+                      "aria-label": "Message",
+                      "aria-describedby": showCharacterCount ? "char-count" : void 0
+                    }
+                  ),
+                  showCharacterCount && /* @__PURE__ */ jsxRuntime.jsx("div", { id: "char-count", className: "absolute right-3 bottom-1.5", children: /* @__PURE__ */ jsxRuntime.jsx(CharacterCounter, { current: content.length, max: maxLength }) })
+                ] }),
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  SendButton,
+                  {
+                    canSend,
+                    isLoading: isSending,
+                    disabled
+                  }
+                )
+              ]
+            }
+          )
+        ] })
+      }
+    );
+  }
+);
+MessageComposer.displayName = "MessageComposer";
+var statusIconVariants2 = classVarianceAuthority.cva(
+  "inline-flex items-center gap-0.5 text-current",
+  {
+    variants: {
+      status: {
+        sending: "text-neutral-400",
+        sent: "text-neutral-500",
+        delivered: "text-neutral-600 dark:text-neutral-400",
+        read: "text-primary-600 dark:text-primary-400",
+        failed: "text-red-500"
+      }
+    },
+    defaultVariants: {
+      status: "sent"
+    }
+  }
+);
+function MessageStatusIcon({ status, className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "span",
+    {
+      className: chunkOR5DRJCW_cjs.cn(statusIconVariants2({ status }), className),
+      role: "img",
+      "aria-label": `Message ${status}`,
+      children: [
+        status === "sending" && /* @__PURE__ */ jsxRuntime.jsxs(
+          "svg",
+          {
+            className: "h-3.5 w-3.5 animate-spin",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "circle",
+                {
+                  className: "opacity-25",
+                  cx: "12",
+                  cy: "12",
+                  r: "10",
+                  stroke: "currentColor",
+                  strokeWidth: "4"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  className: "opacity-75",
+                  fill: "currentColor",
+                  d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                }
+              )
+            ]
+          }
+        ),
+        status === "sent" && /* @__PURE__ */ jsxRuntime.jsx(
+          "svg",
+          {
+            className: "h-3.5 w-3.5",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "path",
+              {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                d: "M5 13l4 4L19 7"
+              }
+            )
+          }
+        ),
+        (status === "delivered" || status === "read") && /* @__PURE__ */ jsxRuntime.jsxs(
+          "svg",
+          {
+            className: "h-4 w-4",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  d: "M5 13l4 4L19 7"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  d: "M12 13l4 4L26 7",
+                  transform: "translate(-5, 0)"
+                }
+              )
+            ]
+          }
+        ),
+        status === "failed" && /* @__PURE__ */ jsxRuntime.jsx(
+          "svg",
+          {
+            className: "h-3.5 w-3.5",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "path",
+              {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              }
+            )
+          }
+        )
+      ]
+    }
+  );
+}
+function ReadReceiptIndicator({
+  receipts,
+  maxAvatars = 3,
+  size = "xs",
+  className
+}) {
+  if (receipts.length === 0) return null;
+  const visibleReceipts = receipts.slice(0, maxAvatars);
+  const remainingCount = receipts.length - maxAvatars;
+  const sizeClasses = {
+    xs: "h-4 w-4 text-[8px]",
+    sm: "h-5 w-5 text-[10px]"
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn("flex items-center -space-x-1", className),
+      "aria-label": `Read by ${receipts.map((r) => r.participant.name).join(", ")}`,
+      children: [
+        visibleReceipts.map((receipt) => /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "rounded-full ring-2 ring-white dark:ring-neutral-900",
+              "bg-primary-800 font-medium text-white",
+              "flex items-center justify-center",
+              sizeClasses[size]
+            ),
+            title: `Read by ${receipt.participant.name}`,
+            children: receipt.participant.avatarUrl ? /* @__PURE__ */ jsxRuntime.jsx(
+              "img",
+              {
+                src: receipt.participant.avatarUrl,
+                alt: receipt.participant.name,
+                className: "h-full w-full rounded-full object-cover"
+              }
+            ) : receipt.participant.name.charAt(0).toUpperCase()
+          },
+          receipt.participant.id
+        )),
+        remainingCount > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "rounded-full ring-2 ring-white dark:ring-neutral-900",
+              "bg-neutral-500 font-medium text-white",
+              "flex items-center justify-center",
+              sizeClasses[size]
+            ),
+            children: [
+              "+",
+              remainingCount
+            ]
+          }
+        )
+      ]
+    }
+  );
+}
+function AttachmentPreview({
+  attachment,
+  onClick,
+  className
+}) {
+  const isImage = attachment.type === "image";
+  const isVideo = attachment.type === "video";
+  if (isImage || isVideo) {
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "button",
+      {
+        type: "button",
+        onClick,
+        className: chunkOR5DRJCW_cjs.cn(
+          "relative block overflow-hidden rounded-lg",
+          "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+          "transition-transform hover:scale-[1.02]",
+          className
+        ),
+        "aria-label": `View ${attachment.alt || attachment.filename}`,
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "img",
+            {
+              src: attachment.thumbnailUrl || attachment.url,
+              alt: attachment.alt || attachment.filename,
+              className: "max-h-64 w-auto rounded-lg object-cover",
+              loading: "lazy"
+            }
+          ),
+          isVideo && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/30", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-full bg-white/90 p-3", children: /* @__PURE__ */ jsxRuntime.jsx(
+            "svg",
+            {
+              className: "h-6 w-6 text-neutral-900",
+              fill: "currentColor",
+              viewBox: "0 0 24 24",
+              children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M8 5v14l11-7z" })
+            }
+          ) }) }),
+          attachment.state === "uploading" && attachment.progress !== void 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center text-white", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs(
+              "svg",
+              {
+                className: "mx-auto h-8 w-8 animate-spin",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                children: [
+                  /* @__PURE__ */ jsxRuntime.jsx(
+                    "circle",
+                    {
+                      className: "opacity-25",
+                      cx: "12",
+                      cy: "12",
+                      r: "10",
+                      stroke: "currentColor",
+                      strokeWidth: "4"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntime.jsx(
+                    "path",
+                    {
+                      className: "opacity-75",
+                      fill: "currentColor",
+                      d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    }
+                  )
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "mt-1 text-sm", children: [
+              attachment.progress,
+              "%"
+            ] })
+          ] }) }),
+          attachment.state === "failed" && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center text-white", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "svg",
+              {
+                className: "mx-auto h-8 w-8 text-red-400",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                children: /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    strokeWidth: 2,
+                    d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  }
+                )
+              }
+            ),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mt-1 text-sm", children: "Upload failed" })
+          ] }) })
+        ]
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "button",
+    {
+      type: "button",
+      onClick,
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex items-center gap-3 rounded-lg p-3",
+        "bg-white/10 hover:bg-white/20",
+        "transition-colors",
+        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg bg-white/20 p-2", children: /* @__PURE__ */ jsxRuntime.jsx(
+          "svg",
+          {
+            className: "h-6 w-6",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "path",
+              {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                strokeWidth: 2,
+                d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              }
+            )
+          }
+        ) }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1 text-left", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-sm font-medium", children: attachment.filename }),
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs opacity-70", children: formatFileSize2(attachment.size) })
+        ] })
+      ]
+    }
+  );
+}
+function formatFileSize2(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+var bubbleVariants2 = classVarianceAuthority.cva(
+  [
+    "relative max-w-[85%] sm:max-w-[70%]",
+    "rounded-2xl px-4 py-2",
+    "transition-all duration-200"
+  ],
+  {
+    variants: {
+      variant: {
+        outgoing: ["bg-primary-800 text-white", "rounded-br-md", "ml-auto"],
+        incoming: [
+          "bg-neutral-100 text-neutral-900",
+          "dark:bg-neutral-800 dark:text-neutral-100",
+          "rounded-bl-md",
+          "mr-auto"
+        ],
+        system: [
+          "mx-auto max-w-none",
+          "bg-transparent text-neutral-500 dark:text-neutral-400",
+          "text-center text-sm",
+          "py-1 px-2"
+        ]
+      },
+      status: {
+        sending: "opacity-70",
+        sent: "",
+        delivered: "",
+        read: "",
+        failed: "ring-2 ring-red-500/50"
+      }
+    },
+    defaultVariants: {
+      variant: "incoming",
+      status: "sent"
+    }
+  }
+);
+function defaultFormatTimestamp(timestamp) {
+  const date = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
+  return date.toLocaleTimeString(void 0, {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+var MessageBubble = React10__namespace.forwardRef(
+  ({
+    className,
+    message,
+    showAvatar = false,
+    showSenderName = false,
+    showTimestamp = true,
+    showStatus = true,
+    showReadReceipts = true,
+    onRetry,
+    onAttachmentClick,
+    isOutgoing,
+    formatTimestamp = defaultFormatTimestamp,
+    ...props
+  }, ref) => {
+    const isSystem = message.type === "system";
+    const variant = isSystem ? "system" : isOutgoing ? "outgoing" : "incoming";
+    const hasAttachments = message.attachments && message.attachments.length > 0;
+    const hasText = message.content && message.content.trim().length > 0;
+    const isFailed = message.status === "failed";
+    if (isSystem) {
+      return /* @__PURE__ */ jsxRuntime.jsx(
+        "div",
+        {
+          ref,
+          className: chunkOR5DRJCW_cjs.cn(bubbleVariants2({ variant: "system" }), className),
+          role: "status",
+          "aria-live": "polite",
+          ...props,
+          children: message.content
+        }
+      );
+    }
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        ref,
+        className: chunkOR5DRJCW_cjs.cn(
+          "group flex items-end gap-2",
+          isOutgoing ? "flex-row-reverse" : "flex-row",
+          className
+        ),
+        ...props,
+        children: [
+          showAvatar && !isOutgoing && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-1 shrink-0", children: /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex h-8 w-8 items-center justify-center rounded-full",
+                "bg-primary-800 text-sm font-medium text-white"
+              ),
+              children: message.sender.avatarUrl ? /* @__PURE__ */ jsxRuntime.jsx(
+                "img",
+                {
+                  src: message.sender.avatarUrl,
+                  alt: message.sender.name,
+                  className: "h-full w-full rounded-full object-cover"
+                }
+              ) : message.sender.name.charAt(0).toUpperCase()
+            }
+          ) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex flex-col",
+                isOutgoing ? "items-end" : "items-start"
+              ),
+              children: [
+                showSenderName && !isOutgoing && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-1 px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400", children: message.sender.name }),
+                message.replyTo && /* @__PURE__ */ jsxRuntime.jsxs(
+                  "div",
+                  {
+                    className: chunkOR5DRJCW_cjs.cn(
+                      "mb-1 max-w-full rounded-lg px-3 py-1.5 text-xs",
+                      isOutgoing ? "bg-primary-700/50 text-white/80" : "bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
+                    ),
+                    children: [
+                      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: message.replyTo.sender.name }),
+                      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate", children: message.replyTo.content })
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntime.jsxs(
+                  "div",
+                  {
+                    className: chunkOR5DRJCW_cjs.cn(bubbleVariants2({ variant, status: message.status })),
+                    role: "article",
+                    "aria-label": `Message from ${message.sender.name}`,
+                    children: [
+                      hasAttachments && /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("space-y-2", hasText && "mb-2"), children: message.attachments.map((attachment) => /* @__PURE__ */ jsxRuntime.jsx(
+                        AttachmentPreview,
+                        {
+                          attachment,
+                          onClick: () => onAttachmentClick?.(attachment)
+                        },
+                        attachment.id
+                      )) }),
+                      hasText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "break-words whitespace-pre-wrap", children: message.isDeleted ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "italic opacity-60", children: "This message was deleted" }) : message.content }),
+                      message.isEdited && !message.isDeleted && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-xs opacity-60", children: "(edited)" })
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntime.jsxs(
+                  "div",
+                  {
+                    className: chunkOR5DRJCW_cjs.cn(
+                      "mt-1 flex items-center gap-2 px-1",
+                      isOutgoing ? "flex-row-reverse" : "flex-row"
+                    ),
+                    children: [
+                      showTimestamp && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-neutral-400 dark:text-neutral-500", children: formatTimestamp(message.timestamp) }),
+                      showStatus && isOutgoing && /* @__PURE__ */ jsxRuntime.jsx(MessageStatusIcon, { status: message.status }),
+                      showReadReceipts && isOutgoing && message.readReceipts && message.readReceipts.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(ReadReceiptIndicator, { receipts: message.readReceipts }),
+                      isFailed && onRetry && /* @__PURE__ */ jsxRuntime.jsxs(
+                        "button",
+                        {
+                          type: "button",
+                          onClick: onRetry,
+                          className: chunkOR5DRJCW_cjs.cn(
+                            "flex items-center gap-1 rounded px-2 py-0.5",
+                            "text-xs font-medium text-red-500",
+                            "hover:bg-red-50 dark:hover:bg-red-900/20",
+                            "focus:ring-2 focus:ring-red-500 focus:outline-none"
+                          ),
+                          "aria-label": "Retry sending message",
+                          children: [
+                            /* @__PURE__ */ jsxRuntime.jsx(
+                              "svg",
+                              {
+                                className: "h-3 w-3",
+                                fill: "none",
+                                viewBox: "0 0 24 24",
+                                stroke: "currentColor",
+                                children: /* @__PURE__ */ jsxRuntime.jsx(
+                                  "path",
+                                  {
+                                    strokeLinecap: "round",
+                                    strokeLinejoin: "round",
+                                    strokeWidth: 2,
+                                    d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                  }
+                                )
+                              }
+                            ),
+                            "Retry"
+                          ]
+                        }
+                      )
+                    ]
+                  }
+                ),
+                message.reactions && message.reactions.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
+                  "div",
+                  {
+                    className: chunkOR5DRJCW_cjs.cn(
+                      "-mt-1 flex flex-wrap gap-1",
+                      isOutgoing ? "justify-end" : "justify-start"
+                    ),
+                    children: message.reactions.map((reaction) => /* @__PURE__ */ jsxRuntime.jsxs(
+                      "span",
+                      {
+                        className: chunkOR5DRJCW_cjs.cn(
+                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5",
+                          "bg-neutral-100 text-xs dark:bg-neutral-800",
+                          "border border-neutral-200 dark:border-neutral-700"
+                        ),
+                        title: reaction.participants.map((p) => p.name).join(", "),
+                        children: [
+                          /* @__PURE__ */ jsxRuntime.jsx("span", { children: reaction.emoji }),
+                          reaction.count > 1 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-neutral-500", children: reaction.count })
+                        ]
+                      },
+                      reaction.emoji
+                    ))
+                  }
+                )
+              ]
+            }
+          ),
+          showAvatar && isOutgoing && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "w-8 shrink-0" })
+        ]
+      }
+    );
+  }
+);
+MessageBubble.displayName = "MessageBubble";
+function groupMessagesByDate(messages) {
+  const groups = /* @__PURE__ */ new Map();
+  messages.forEach((message) => {
+    const date = new Date(message.timestamp);
+    const dateKey = date.toDateString();
+    const existing = groups.get(dateKey) || [];
+    groups.set(dateKey, [...existing, message]);
+  });
+  return Array.from(groups.entries()).map(([dateKey, msgs]) => ({
+    date: dateKey,
+    label: formatDateLabel(new Date(dateKey)),
+    messages: msgs
+  }));
+}
+function formatDateLabel(date) {
+  const now = /* @__PURE__ */ new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const messageDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+  if (messageDate.getTime() === today.getTime()) {
+    return "Today";
+  }
+  if (messageDate.getTime() === yesterday.getTime()) {
+    return "Yesterday";
+  }
+  if (date.getFullYear() === now.getFullYear()) {
+    return date.toLocaleDateString(void 0, {
+      weekday: "long",
+      month: "long",
+      day: "numeric"
+    });
+  }
+  return date.toLocaleDateString(void 0, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+function isSameSenderGroup(prev, current, thresholdMinutes = 5) {
+  if (!prev) return false;
+  if (prev.sender.id !== current.sender.id) return false;
+  if (prev.type === "system" || current.type === "system") return false;
+  const prevTime = new Date(prev.timestamp).getTime();
+  const currentTime = new Date(current.timestamp).getTime();
+  const diffMinutes = (currentTime - prevTime) / (1e3 * 60);
+  return diffMinutes < thresholdMinutes;
+}
+function SkeletonMessage({
+  isOutgoing = false,
+  showAvatar = true,
+  className
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex items-end gap-2",
+        isOutgoing ? "flex-row-reverse" : "flex-row",
+        className
+      ),
+      "aria-hidden": "true",
+      children: [
+        showAvatar && !isOutgoing && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-8 w-8 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" }),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "animate-pulse rounded-2xl",
+              isOutgoing ? "bg-primary-800/30 rounded-br-md" : "rounded-bl-md bg-neutral-200 dark:bg-neutral-700",
+              "h-10 w-48"
+            )
+          }
+        ),
+        showAvatar && isOutgoing && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "w-8" })
+      ]
+    }
+  );
+}
+SkeletonMessage.displayName = "SkeletonMessage";
+function TypingIndicator({ typingState, className }) {
+  const { participants } = typingState;
+  if (participants.length === 0) return null;
+  const typingText = participants.length === 1 ? `${participants[0].name} is typing` : participants.length === 2 ? `${participants[0].name} and ${participants[1].name} are typing` : `${participants[0].name} and ${participants.length - 1} others are typing`;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn("flex items-center gap-2 px-4 py-2", className),
+      role: "status",
+      "aria-live": "polite",
+      "aria-label": typingText,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1 rounded-2xl rounded-bl-md bg-neutral-200 px-4 py-3 dark:bg-neutral-700", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: "h-2 w-2 animate-bounce rounded-full bg-neutral-500",
+              style: { animationDelay: "0ms" }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: "h-2 w-2 animate-bounce rounded-full bg-neutral-500",
+              style: { animationDelay: "150ms" }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: "h-2 w-2 animate-bounce rounded-full bg-neutral-500",
+              style: { animationDelay: "300ms" }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-neutral-500 dark:text-neutral-400", children: typingText })
+      ]
+    }
+  );
+}
+TypingIndicator.displayName = "TypingIndicator";
+function DateSeparator({ label, className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn("flex items-center justify-center py-4", className),
+      role: "separator",
+      "aria-label": label,
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "span",
+        {
+          className: chunkOR5DRJCW_cjs.cn(
+            "rounded-full px-3 py-1 text-xs font-medium",
+            "bg-neutral-100 text-neutral-500",
+            "dark:bg-neutral-800 dark:text-neutral-400"
+          ),
+          children: label
+        }
+      )
+    }
+  );
+}
+DateSeparator.displayName = "DateSeparator";
+function EmptyState({
+  title = "No messages yet",
+  description = "Start the conversation by sending a message below.",
+  icon,
+  action,
+  className
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex flex-1 flex-col items-center justify-center p-8 text-center",
+        className
+      ),
+      role: "status",
+      "aria-label": title,
+      children: [
+        icon || /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800", children: /* @__PURE__ */ jsxRuntime.jsx(
+          "svg",
+          {
+            className: "h-12 w-12 text-neutral-400",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "path",
+              {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                strokeWidth: 1.5,
+                d: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              }
+            )
+          }
+        ) }),
+        /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100", children: title }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-4 max-w-sm text-sm text-neutral-500 dark:text-neutral-400", children: description }),
+        action
+      ]
+    }
+  );
+}
+EmptyState.displayName = "EmptyState";
+function LoadMoreButton({
+  isLoading,
+  onClick,
+  className
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("flex justify-center py-4", className), children: /* @__PURE__ */ jsxRuntime.jsx(
+    "button",
+    {
+      type: "button",
+      onClick,
+      disabled: isLoading,
+      className: chunkOR5DRJCW_cjs.cn(
+        "rounded-full px-4 py-2 text-sm font-medium",
+        "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300",
+        "hover:bg-neutral-200 dark:hover:bg-neutral-700",
+        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        "transition-colors"
+      ),
+      "aria-label": isLoading ? "Loading more messages" : "Load more messages",
+      children: isLoading ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(
+          "svg",
+          {
+            className: "h-4 w-4 animate-spin",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "circle",
+                {
+                  className: "opacity-25",
+                  cx: "12",
+                  cy: "12",
+                  r: "10",
+                  stroke: "currentColor",
+                  strokeWidth: "4"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  className: "opacity-75",
+                  fill: "currentColor",
+                  d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                }
+              )
+            ]
+          }
+        ),
+        "Loading..."
+      ] }) : "Load earlier messages"
+    }
+  ) });
+}
+LoadMoreButton.displayName = "LoadMoreButton";
+var MessageList = React10__namespace.forwardRef(
+  ({
+    messages,
+    currentUser,
+    isLoading = false,
+    hasMore = false,
+    isLoadingMore = false,
+    typingState,
+    showAvatars = true,
+    showSenderNames = false,
+    groupByDate = true,
+    onLoadMore,
+    onRetryMessage,
+    onAttachmentClick,
+    emptyState,
+    formatTimestamp,
+    className,
+    autoScroll = "onNewMessage"
+  }, ref) => {
+    const scrollContainerRef = React10__namespace.useRef(null);
+    const bottomRef = React10__namespace.useRef(null);
+    const [isUserScrolled, setIsUserScrolled] = React10__namespace.useState(false);
+    const prevMessageCountRef = React10__namespace.useRef(messages.length);
+    React10__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
+    const handleScroll = React10__namespace.useCallback(() => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setIsUserScrolled(!isAtBottom);
+    }, []);
+    React10__namespace.useEffect(() => {
+      const container = scrollContainerRef.current;
+      const bottom = bottomRef.current;
+      if (!container || !bottom) return;
+      const messageCountChanged = messages.length !== prevMessageCountRef.current;
+      prevMessageCountRef.current = messages.length;
+      if (autoScroll === "always") {
+        bottom.scrollIntoView({ behavior: "smooth" });
+      } else if (autoScroll === "onNewMessage" && messageCountChanged) {
+        const lastMessage = messages[messages.length - 1];
+        const isOutgoing = lastMessage?.sender.id === currentUser.id;
+        if (isOutgoing || !isUserScrolled) {
+          bottom.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }, [messages, currentUser.id, autoScroll, isUserScrolled]);
+    React10__namespace.useEffect(() => {
+      const bottom = bottomRef.current;
+      if (bottom && !isLoading) {
+        bottom.scrollIntoView();
+      }
+    }, [isLoading]);
+    const messageGroups = groupByDate ? groupMessagesByDate(messages) : [{ date: "all", label: "", messages }];
+    if (isLoading) {
+      return /* @__PURE__ */ jsxRuntime.jsx(
+        "div",
+        {
+          className: chunkOR5DRJCW_cjs.cn(
+            "flex flex-1 flex-col gap-3 overflow-y-auto p-4",
+            className
+          ),
+          "aria-busy": "true",
+          "aria-label": "Loading messages",
+          children: Array.from({ length: 8 }).map((_, i) => /* @__PURE__ */ jsxRuntime.jsx(
+            SkeletonMessage,
+            {
+              isOutgoing: i % 3 === 0,
+              showAvatar: showAvatars
+            },
+            i
+          ))
+        }
+      );
+    }
+    if (messages.length === 0) {
+      return emptyState || /* @__PURE__ */ jsxRuntime.jsx(EmptyState, {});
+    }
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        ref: scrollContainerRef,
+        className: chunkOR5DRJCW_cjs.cn(
+          "flex flex-1 flex-col overflow-y-auto",
+          "scroll-smooth",
+          className
+        ),
+        onScroll: handleScroll,
+        role: "log",
+        "aria-label": "Message history",
+        "aria-live": "polite",
+        children: [
+          hasMore && onLoadMore && /* @__PURE__ */ jsxRuntime.jsx(LoadMoreButton, { isLoading: isLoadingMore, onClick: onLoadMore }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
+            groupByDate && group.label && /* @__PURE__ */ jsxRuntime.jsx(DateSeparator, { label: group.label }),
+            group.messages.map((message, index) => {
+              const prevMessage = group.messages[index - 1];
+              const isOutgoing = message.sender.id === currentUser.id;
+              const isSameGroup = isSameSenderGroup(prevMessage, message);
+              return /* @__PURE__ */ jsxRuntime.jsx(
+                "div",
+                {
+                  className: chunkOR5DRJCW_cjs.cn(
+                    "transition-opacity duration-200",
+                    isSameGroup ? "mt-0.5" : "mt-3",
+                    index === 0 && "mt-0"
+                  ),
+                  children: /* @__PURE__ */ jsxRuntime.jsx(
+                    MessageBubble,
+                    {
+                      message,
+                      isOutgoing,
+                      showAvatar: showAvatars && !isSameGroup && !isOutgoing,
+                      showSenderName: showSenderNames && !isSameGroup && !isOutgoing,
+                      showTimestamp: !isSameGroup,
+                      onRetry: message.status === "failed" && onRetryMessage ? () => onRetryMessage(message.id) : void 0,
+                      onAttachmentClick: (attachment) => onAttachmentClick?.(attachment, message),
+                      formatTimestamp
+                    }
+                  )
+                },
+                message.id
+              );
+            })
+          ] }, group.date)) }),
+          typingState && typingState.participants.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(TypingIndicator, { typingState }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { ref: bottomRef, className: "h-0", "aria-hidden": "true" }),
+          isUserScrolled && /* @__PURE__ */ jsxRuntime.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: () => {
+                bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+              },
+              className: chunkOR5DRJCW_cjs.cn(
+                "fixed right-4 bottom-24 z-10",
+                "rounded-full p-3 shadow-lg",
+                "bg-white dark:bg-neutral-800",
+                "border border-neutral-200 dark:border-neutral-700",
+                "hover:bg-neutral-50 dark:hover:bg-neutral-700",
+                "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                "transition-all"
+              ),
+              "aria-label": "Scroll to bottom",
+              children: /* @__PURE__ */ jsxRuntime.jsx(
+                "svg",
+                {
+                  className: "h-5 w-5 text-neutral-600 dark:text-neutral-300",
+                  fill: "none",
+                  viewBox: "0 0 24 24",
+                  stroke: "currentColor",
+                  children: /* @__PURE__ */ jsxRuntime.jsx(
+                    "path",
+                    {
+                      strokeLinecap: "round",
+                      strokeLinejoin: "round",
+                      strokeWidth: 2,
+                      d: "M19 14l-7 7m0 0l-7-7m7 7V3"
+                    }
+                  )
+                }
+              )
+            }
+          )
+        ]
+      }
+    );
+  }
+);
+MessageList.displayName = "MessageList";
+var ACTION_ICONS = {
+  patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" }) }),
+  search: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" }) }),
+  appointment: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" }) }),
+  document: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" }) }),
+  help: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" }) }),
+  default: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" }) })
+};
+function SuggestedActions({ actions, onSelect, className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-wrap gap-2", className), children: actions.map((action) => /* @__PURE__ */ jsxRuntime.jsxs(
+    "button",
+    {
+      onClick: () => onSelect(action),
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5",
+        "text-sm text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700",
+        "dark:border-neutral-700 dark:text-neutral-300",
+        "dark:hover:border-primary-700 dark:hover:bg-primary-900/20 dark:hover:text-primary-300",
+        "transition-colors"
+      ),
+      children: [
+        ACTION_ICONS[action.icon || "default"] || ACTION_ICONS.default,
+        /* @__PURE__ */ jsxRuntime.jsx("span", { children: action.label })
+      ]
+    },
+    action.id
+  )) });
+}
+function AIEmptyState({
+  title = "How can I help you today?",
+  description = "Ask me anything about patients, appointments, documents, or how to use the system.",
+  suggestions,
+  onSuggestionSelect,
+  className,
+  ...props
+}) {
+  const aiIcon = /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-8 w-8 text-white", viewBox: "0 0 24 24", fill: "none", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        d: "M12 2L2 7L12 12L22 7L12 2Z",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        fill: "currentColor",
+        fillOpacity: "0.2"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        d: "M2 17L12 22L22 17",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        d: "M2 12L12 17L22 12",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }
+    )
+  ] }) });
+  const suggestionsAction = suggestions && suggestions.length > 0 && onSuggestionSelect ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-6", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 text-sm text-neutral-500 dark:text-neutral-400", children: "Try asking:" }),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      SuggestedActions,
+      {
+        actions: suggestions,
+        onSelect: onSuggestionSelect
+      }
+    )
+  ] }) : void 0;
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    EmptyState,
+    {
+      title,
+      description,
+      icon: aiIcon,
+      action: suggestionsAction,
+      className,
+      ...props
+    }
+  );
+}
+var chatVariants = classVarianceAuthority.cva(
+  "flex flex-col",
+  {
+    variants: {
+      variant: {
+        default: "bg-white dark:bg-neutral-900",
+        embedded: "bg-transparent",
+        floating: "bg-white dark:bg-neutral-900 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700"
+      },
+      size: {
+        sm: "max-w-sm",
+        md: "max-w-lg",
+        lg: "max-w-2xl",
+        xl: "max-w-4xl",
+        full: "w-full"
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "full"
+    }
+  }
+);
+function AIChat({
+  session,
+  messages: messagesProp,
+  isGenerating: isGeneratingProp,
+  userName = "You",
+  title = "AI Assistant",
+  suggestions,
+  showHeader = true,
+  showTimestamps = false,
+  inputPlaceholder = "Ask anything...",
+  variant,
+  size,
+  height,
+  composerProps,
+  className,
+  onSendMessage,
+  onToolCall: _onToolCall,
+  onResourceClick,
+  onSuggestedAction,
+  onCancel,
+  onClear
+}) {
+  const messagesEndRef = React10__namespace.useRef(null);
+  const messages = React10__namespace.useMemo(
+    () => session?.messages || messagesProp || [],
+    [session?.messages, messagesProp]
+  );
+  const isGenerating = session?.isGenerating || isGeneratingProp || false;
+  React10__namespace.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+  const handleSend = async (message) => {
+    if (message.content.trim() && onSendMessage) {
+      onSendMessage(message.content.trim());
+    }
+  };
+  const handleSuggestionSelect = (action) => {
+    if (onSuggestedAction) {
+      onSuggestedAction(action);
+    } else if (onSendMessage) {
+      onSendMessage(action.prompt);
+    }
+  };
+  const handleLinkClick = (link) => {
+    if (onResourceClick) {
+      onResourceClick(link);
+    }
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(chatVariants({ variant, size }), className),
+      style: { height: height || void 0 },
+      children: [
+        showHeader && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-4 w-4 text-white", viewBox: "0 0 24 24", fill: "none", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  d: "M12 2L2 7L12 12L22 7L12 2Z",
+                  stroke: "currentColor",
+                  strokeWidth: "1.5",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  fill: "currentColor",
+                  fillOpacity: "0.2"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  d: "M2 17L12 22L22 17",
+                  stroke: "currentColor",
+                  strokeWidth: "1.5",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "path",
+                {
+                  d: "M2 12L12 17L22 12",
+                  stroke: "currentColor",
+                  strokeWidth: "1.5",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round"
+                }
+              )
+            ] }) }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "font-semibold text-neutral-900 dark:text-white", children: title }),
+              isGenerating && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-neutral-500", children: "Generating..." })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+            isGenerating && onCancel && /* @__PURE__ */ jsxRuntime.jsx(
+              "button",
+              {
+                onClick: onCancel,
+                className: chunkOR5DRJCW_cjs.cn(
+                  "rounded-lg px-3 py-1.5 text-sm",
+                  "bg-red-100 text-red-600 hover:bg-red-200",
+                  "dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50",
+                  "transition-colors"
+                ),
+                children: "Stop"
+              }
+            ),
+            onClear && messages.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
+              "button",
+              {
+                onClick: onClear,
+                className: "rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300",
+                title: "Clear chat",
+                children: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" }) })
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1 overflow-y-auto px-4 py-4", children: messages.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx(
+          AIEmptyState,
+          {
+            suggestions,
+            onSuggestionSelect: handleSuggestionSelect
+          }
+        ) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
+          messages.map((message) => /* @__PURE__ */ jsxRuntime.jsx(
+            AIMessageDisplay,
+            {
+              message,
+              userName,
+              showTimestamp: showTimestamps,
+              onLinkClick: handleLinkClick
+            },
+            message.id
+          )),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { ref: messagesEndRef })
+        ] }) }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-t border-neutral-200 p-4 dark:border-neutral-700", children: [
+          suggestions && suggestions.length > 0 && messages.length > 0 && !isGenerating && /* @__PURE__ */ jsxRuntime.jsx(
+            SuggestedActions,
+            {
+              actions: suggestions,
+              onSelect: handleSuggestionSelect,
+              className: "mb-3"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            MessageComposer,
+            {
+              onSend: handleSend,
+              placeholder: inputPlaceholder,
+              disabled: isGenerating,
+              isSending: isGenerating,
+              showAttachmentPicker: false,
+              showCameraButton: false,
+              showCharacterCount: false,
+              ...composerProps
+            }
+          )
+        ] })
+      ]
+    }
+  );
+}
+function AIChatTrigger({
+  isOpen = false,
+  onClick,
+  pulse = false,
+  badge,
+  position = "bottom-right",
+  className
+}) {
+  const positionClasses = {
+    "bottom-right": "bottom-4 right-4",
+    "bottom-left": "bottom-4 left-4",
+    "top-right": "top-4 right-4",
+    "top-left": "top-4 left-4"
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "button",
+    {
+      onClick,
+      className: chunkOR5DRJCW_cjs.cn(
+        "fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg",
+        "bg-gradient-to-br from-violet-500 to-purple-600 text-white",
+        "hover:from-violet-600 hover:to-purple-700",
+        "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2",
+        "dark:focus:ring-offset-neutral-900",
+        "transition-all duration-200",
+        isOpen && "scale-0 opacity-0",
+        positionClasses[position],
+        className
+      ),
+      "aria-label": "Open AI Assistant",
+      children: [
+        pulse && !isOpen && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" }),
+        badge && badge > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold", children: badge > 9 ? "9+" : badge }),
+        /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-7 w-7", viewBox: "0 0 24 24", fill: "none", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              d: "M12 2L2 7L12 12L22 7L12 2Z",
+              stroke: "currentColor",
+              strokeWidth: "1.5",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              fill: "currentColor",
+              fillOpacity: "0.2"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              d: "M2 17L12 22L22 17",
+              stroke: "currentColor",
+              strokeWidth: "1.5",
+              strokeLinecap: "round",
+              strokeLinejoin: "round"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              d: "M2 12L12 17L22 12",
+              stroke: "currentColor",
+              strokeWidth: "1.5",
+              strokeLinecap: "round",
+              strokeLinejoin: "round"
+            }
+          )
+        ] })
+      ]
+    }
+  );
+}
+function AIChatModal({
+  open,
+  onOpenChange,
+  position = "bottom-right",
+  width = 400,
+  height = 600,
+  modalClassName,
+  ...chatProps
+}) {
+  const modalRef = chunkBR2XGATJ_cjs.useFocusTrap(open);
+  chunkFHY3K6PL_cjs.useEscapeKey(() => {
+    if (open) onOpenChange(false);
+  });
+  if (!open) return null;
+  const positionClasses = {
+    "bottom-right": "bottom-20 right-4",
+    "bottom-left": "bottom-20 left-4",
+    "center": "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    position === "center" && /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: "fixed inset-0 z-40 bg-black/50 backdrop-blur-sm",
+        onClick: () => onOpenChange(false),
+        onKeyDown: (e) => e.key === "Escape" && onOpenChange(false),
+        role: "button",
+        tabIndex: 0,
+        "aria-label": "Close dialog"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        ref: modalRef,
+        className: chunkOR5DRJCW_cjs.cn(
+          "fixed z-50",
+          "animate-in fade-in-0 zoom-in-95",
+          positionClasses[position],
+          modalClassName
+        ),
+        style: {
+          width: typeof width === "number" ? `${width}px` : width,
+          height: typeof height === "number" ? `${height}px` : height,
+          maxHeight: "calc(100vh - 6rem)",
+          maxWidth: "calc(100vw - 2rem)"
+        },
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-label": "AI Assistant Chat",
+        children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative h-full w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "button",
+            {
+              onClick: () => onOpenChange(false),
+              className: chunkOR5DRJCW_cjs.cn(
+                "absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full",
+                "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700",
+                "dark:hover:bg-neutral-800 dark:hover:text-neutral-300",
+                "transition-colors"
+              ),
+              "aria-label": "Close chat",
+              children: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) })
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            AIChat,
+            {
+              ...chatProps,
+              variant: "embedded",
+              height: "100%",
+              className: "h-full"
+            }
+          )
+        ] })
+      }
+    )
+  ] });
+}
+function FloatingAIChat({
+  defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  buttonPosition = "bottom-right",
+  position = "bottom-right",
+  pulse = false,
+  ...chatProps
+}) {
+  const [internalOpen, setInternalOpen] = React10__namespace.useState(defaultOpen);
+  const isControlled = controlledOpen !== void 0;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const handleOpenChange = (open) => {
+    if (!isControlled) {
+      setInternalOpen(open);
+    }
+    controlledOnOpenChange?.(open);
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      AIChatTrigger,
+      {
+        isOpen,
+        onClick: () => handleOpenChange(true),
+        position: buttonPosition,
+        pulse: pulse && !isOpen
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      AIChatModal,
+      {
+        open: isOpen,
+        onOpenChange: handleOpenChange,
+        position,
+        ...chatProps
+      }
+    )
+  ] });
+}
 function AppHeader({
   children,
   className,
@@ -214,7 +3082,7 @@ function AppHeaderSearch({
             className: chunkOR5DRJCW_cjs.cn(
               "hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex",
               "rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600",
-              "flex-shrink-0 text-xs text-gray-500 dark:text-gray-300"
+              "flex-shrink-0 text-xs text-gray-600 dark:text-gray-300"
             ),
             children: [
               isMac ? "\u2318" : "Ctrl",
@@ -255,7 +3123,7 @@ function AppHeaderUserMenu({
           {
             className: chunkOR5DRJCW_cjs.cn(
               "flex h-8 w-8 items-center justify-center overflow-hidden rounded-full",
-              "bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-sm font-medium"
+              "bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 text-sm font-medium"
             ),
             children: avatarUrl ? /* @__PURE__ */ jsxRuntime.jsx(
               "img",
@@ -289,7 +3157,1253 @@ function AppHeaderUserMenu({
     }
   );
 }
-var CommandPaletteContext = React.createContext(
+var audioPlayerVariants = classVarianceAuthority.cva("", {
+  variants: {
+    variant: {
+      inline: "inline-flex items-center gap-2",
+      compact: [
+        "flex items-center gap-3 p-3",
+        "rounded-lg border border-border",
+        "bg-card text-card-foreground"
+      ],
+      waveform: [
+        "flex flex-col gap-3 p-4",
+        "rounded-xl border border-border",
+        "bg-card text-card-foreground"
+      ]
+    },
+    size: {
+      sm: "",
+      md: "",
+      lg: ""
+    }
+  },
+  compoundVariants: [
+    { variant: "compact", size: "sm", class: "p-2 gap-2" },
+    { variant: "compact", size: "lg", class: "p-4 gap-4" },
+    { variant: "waveform", size: "sm", class: "p-3 gap-2" },
+    { variant: "waveform", size: "lg", class: "p-5 gap-4" }
+  ],
+  defaultVariants: {
+    variant: "compact",
+    size: "md"
+  }
+});
+var playButtonVariants = classVarianceAuthority.cva(
+  [
+    "inline-flex items-center justify-center",
+    "rounded-full transition-all duration-200",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "active:scale-95"
+  ],
+  {
+    variants: {
+      variant: {
+        inline: [
+          "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100",
+          "dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800"
+        ],
+        compact: [
+          "bg-primary-600 text-white",
+          "hover:bg-primary-700",
+          "active:bg-primary-800"
+        ],
+        waveform: [
+          "bg-primary-600 text-white",
+          "hover:bg-primary-700",
+          "active:bg-primary-800"
+        ]
+      },
+      size: {
+        sm: "h-7 w-7",
+        md: "h-9 w-9",
+        lg: "h-11 w-11"
+      }
+    },
+    defaultVariants: {
+      variant: "compact",
+      size: "md"
+    }
+  }
+);
+function formatTime(seconds) {
+  if (!isFinite(seconds) || isNaN(seconds)) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+function PlayIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M8 5v14l11-7z" })
+    }
+  );
+}
+function PauseIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M6 19h4V5H6v14zm8-14v14h4V5h-4z" })
+    }
+  );
+}
+function SpinnerIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("animate-spin", className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "circle",
+          {
+            className: "opacity-25",
+            cx: "12",
+            cy: "12",
+            r: "10",
+            stroke: "currentColor",
+            strokeWidth: "4"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            className: "opacity-75",
+            fill: "currentColor",
+            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          }
+        )
+      ]
+    }
+  );
+}
+function ProgressBar({
+  currentTime,
+  duration,
+  onSeek,
+  disabled
+}) {
+  const progressRef = React10__namespace.useRef(null);
+  const progress = duration > 0 ? currentTime / duration * 100 : 0;
+  const handleClick = (e) => {
+    if (disabled || !progressRef.current || duration <= 0) return;
+    const rect = progressRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    onSeek(percentage * duration);
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      ref: progressRef,
+      role: "slider",
+      "aria-label": "Audio progress",
+      "aria-valuemin": 0,
+      "aria-valuemax": duration,
+      "aria-valuenow": currentTime,
+      "aria-valuetext": `${formatTime(currentTime)} of ${formatTime(duration)}`,
+      tabIndex: disabled ? -1 : 0,
+      className: chunkOR5DRJCW_cjs.cn(
+        "relative h-1.5 flex-1 cursor-pointer rounded-full bg-neutral-200 dark:bg-neutral-700",
+        disabled && "cursor-not-allowed opacity-50"
+      ),
+      onClick: handleClick,
+      onKeyDown: (e) => {
+        if (disabled) return;
+        const step = duration * 0.05;
+        if (e.key === "ArrowRight") {
+          onSeek(Math.min(currentTime + step, duration));
+        } else if (e.key === "ArrowLeft") {
+          onSeek(Math.max(currentTime - step, 0));
+        }
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: "bg-primary-600 absolute inset-y-0 left-0 rounded-full transition-all",
+            style: { width: `${progress}%` }
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: "bg-primary-600 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all",
+            style: { left: `calc(${progress}% - 6px)` }
+          }
+        )
+      ]
+    }
+  );
+}
+function Waveform({
+  src,
+  isPlaying,
+  onReady,
+  onTimeUpdate,
+  onFinish,
+  onSeek,
+  waveColor,
+  progressColor,
+  height = 64
+}) {
+  const containerRef = React10__namespace.useRef(null);
+  const wavesurferRef = React10__namespace.useRef(null);
+  const [isLoaded, setIsLoaded] = React10__namespace.useState(false);
+  React10__namespace.useEffect(() => {
+    if (!containerRef.current) return;
+    const initWaveSurfer = async () => {
+      try {
+        const WaveSurfer = (await import('wavesurfer.js')).default;
+        if (wavesurferRef.current) {
+          wavesurferRef.current.destroy();
+        }
+        wavesurferRef.current = WaveSurfer.create({
+          container: containerRef.current,
+          waveColor: waveColor || "#d1d5db",
+          progressColor: progressColor || "var(--color-primary-600, #2563eb)",
+          cursorColor: "transparent",
+          barWidth: 2,
+          barGap: 2,
+          barRadius: 2,
+          height,
+          normalize: true,
+          interact: true
+        });
+        wavesurferRef.current.on("ready", () => {
+          setIsLoaded(true);
+          onReady(wavesurferRef.current.getDuration());
+        });
+        wavesurferRef.current.on("audioprocess", () => {
+          onTimeUpdate(wavesurferRef.current.getCurrentTime());
+        });
+        wavesurferRef.current.on("seeking", () => {
+          onTimeUpdate(wavesurferRef.current.getCurrentTime());
+        });
+        wavesurferRef.current.on("interaction", () => {
+          onSeek(wavesurferRef.current.getCurrentTime());
+        });
+        wavesurferRef.current.on("finish", () => {
+          onFinish();
+        });
+        wavesurferRef.current.load(src);
+      } catch (error) {
+        console.error("Failed to load WaveSurfer:", error);
+      }
+    };
+    initWaveSurfer();
+    return () => {
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+        wavesurferRef.current = null;
+      }
+    };
+  }, [src]);
+  React10__namespace.useEffect(() => {
+    if (!wavesurferRef.current || !isLoaded) return;
+    if (isPlaying) {
+      wavesurferRef.current.play();
+    } else {
+      wavesurferRef.current.pause();
+    }
+  }, [isPlaying, isLoaded]);
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      ref: containerRef,
+      className: chunkOR5DRJCW_cjs.cn(
+        "w-full rounded-lg bg-neutral-100 dark:bg-neutral-800",
+        !isLoaded && "animate-pulse"
+      ),
+      style: { height }
+    }
+  );
+}
+function AudioPlayer({
+  src,
+  title,
+  variant = "compact",
+  size = "md",
+  onStateChange,
+  onEnded,
+  onError,
+  onTimeUpdate,
+  showTime = true,
+  showDuration = true,
+  waveColor,
+  progressColor,
+  waveformHeight = 64,
+  disabled = false,
+  className,
+  "aria-label": ariaLabel,
+  playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
+  showPlaybackRate = false,
+  /** Whether to preload audio (set to false for lists with many items) */
+  preload = false,
+  /** Fallback duration in seconds to display before audio is loaded */
+  fallbackDuration
+}) {
+  const [state, setState] = React10__namespace.useState("idle");
+  const [currentTime, setCurrentTime] = React10__namespace.useState(0);
+  const [duration, setDuration] = React10__namespace.useState(0);
+  const [playbackRate, setPlaybackRate] = React10__namespace.useState(1);
+  const [audioInitialized, setAudioInitialized] = React10__namespace.useState(false);
+  const audioRef = React10__namespace.useRef(null);
+  const isPlaying = state === "playing";
+  const isLoading = state === "loading";
+  const updateState = React10__namespace.useCallback(
+    (newState) => {
+      setState(newState);
+      onStateChange?.(newState);
+    },
+    [onStateChange]
+  );
+  const initAudio = React10__namespace.useCallback(() => {
+    if (variant === "waveform" || audioInitialized) return null;
+    const audio = new globalThis.Audio(src);
+    audioRef.current = audio;
+    setAudioInitialized(true);
+    audio.addEventListener("loadstart", () => updateState("loading"));
+    audio.addEventListener("canplay", () => {
+      updateState("idle");
+    });
+    audio.addEventListener("loadedmetadata", () => {
+      setDuration(audio.duration);
+    });
+    audio.addEventListener("timeupdate", () => {
+      setCurrentTime(audio.currentTime);
+      onTimeUpdate?.(audio.currentTime, audio.duration);
+    });
+    audio.addEventListener("ended", () => {
+      updateState("idle");
+      setCurrentTime(0);
+      onEnded?.();
+    });
+    audio.addEventListener("error", () => {
+      updateState("error");
+      onError?.(new Error("Failed to load audio"));
+    });
+    return audio;
+  }, [
+    src,
+    variant,
+    audioInitialized,
+    updateState,
+    onTimeUpdate,
+    onEnded,
+    onError
+  ]);
+  React10__namespace.useEffect(() => {
+    if (preload && !audioInitialized && variant !== "waveform") {
+      initAudio();
+    }
+  }, [preload, audioInitialized, variant, initAudio]);
+  React10__namespace.useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
+  }, []);
+  React10__namespace.useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate]);
+  const handlePlay = React10__namespace.useCallback(() => {
+    if (disabled) return;
+    if (!audioInitialized && !isLoading) {
+      const audio = initAudio();
+      if (audio) {
+        updateState("loading");
+        audio.addEventListener(
+          "canplay",
+          () => {
+            audio.play().catch((error) => {
+              updateState("error");
+              onError?.(error);
+            });
+            updateState("playing");
+          },
+          { once: true }
+        );
+      }
+      return;
+    }
+    if (isLoading) return;
+    if (isPlaying) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      updateState("paused");
+    } else {
+      if (audioRef.current) {
+        audioRef.current.play().catch((error) => {
+          updateState("error");
+          onError?.(error);
+        });
+        updateState("playing");
+      }
+    }
+  }, [
+    disabled,
+    audioInitialized,
+    isLoading,
+    isPlaying,
+    initAudio,
+    updateState,
+    onError
+  ]);
+  const handleSeek = React10__namespace.useCallback((time) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  }, []);
+  const handleWaveformReady = React10__namespace.useCallback((dur) => {
+    setDuration(dur);
+    setState("idle");
+  }, []);
+  const handleWaveformTimeUpdate = React10__namespace.useCallback(
+    (time) => {
+      setCurrentTime(time);
+      onTimeUpdate?.(time, duration);
+    },
+    [duration, onTimeUpdate]
+  );
+  const handleWaveformFinish = React10__namespace.useCallback(() => {
+    updateState("idle");
+    setCurrentTime(0);
+    onEnded?.();
+  }, [updateState, onEnded]);
+  const handleWaveformSeek = React10__namespace.useCallback((time) => {
+    setCurrentTime(time);
+  }, []);
+  const iconSize = size === "sm" ? "h-3.5 w-3.5" : size === "lg" ? "h-5 w-5" : "h-4 w-4";
+  const getAriaLabel = () => {
+    if (ariaLabel) return ariaLabel;
+    if (title) return `${isPlaying ? "Pause" : "Play"} ${title}`;
+    return isPlaying ? "Pause audio" : "Play audio";
+  };
+  const renderPlayButton = () => /* @__PURE__ */ jsxRuntime.jsx(
+    "button",
+    {
+      type: "button",
+      onClick: handlePlay,
+      disabled: disabled || isLoading,
+      className: chunkOR5DRJCW_cjs.cn(playButtonVariants({ variant, size })),
+      "aria-label": getAriaLabel(),
+      "aria-pressed": isPlaying,
+      children: isLoading ? /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon, { className: iconSize }) : isPlaying ? /* @__PURE__ */ jsxRuntime.jsx(PauseIcon, { className: iconSize }) : /* @__PURE__ */ jsxRuntime.jsx(PlayIcon, { className: iconSize })
+    }
+  );
+  const renderTime = () => {
+    if (!showTime) return null;
+    return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400", children: [
+      formatTime(currentTime),
+      " / ",
+      formatTime(duration)
+    ] });
+  };
+  const renderPlaybackRateControl = () => {
+    if (!showPlaybackRate) return null;
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "select",
+      {
+        value: playbackRate,
+        onChange: (e) => setPlaybackRate(Number(e.target.value)),
+        className: "rounded border border-neutral-200 bg-transparent px-1 py-0.5 text-xs dark:border-neutral-700",
+        "aria-label": "Playback speed",
+        children: playbackRates.map((rate) => /* @__PURE__ */ jsxRuntime.jsxs("option", { value: rate, children: [
+          rate,
+          "x"
+        ] }, rate))
+      }
+    );
+  };
+  if (variant === "inline") {
+    const displayDuration = duration > 0 ? duration : fallbackDuration ?? 0;
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(audioPlayerVariants({ variant, size }), className), children: [
+      renderPlayButton(),
+      title && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
+      showDuration && displayDuration > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400", children: isPlaying ? formatTime(currentTime) : formatTime(displayDuration) })
+    ] });
+  }
+  if (variant === "compact") {
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(audioPlayerVariants({ variant, size }), className), children: [
+      renderPlayButton(),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        ProgressBar,
+        {
+          currentTime,
+          duration,
+          onSeek: handleSeek,
+          disabled
+        }
+      ),
+      renderTime(),
+      renderPlaybackRateControl()
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(audioPlayerVariants({ variant, size }), className), children: [
+    title && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      Waveform,
+      {
+        src,
+        isPlaying,
+        onReady: handleWaveformReady,
+        onTimeUpdate: handleWaveformTimeUpdate,
+        onFinish: handleWaveformFinish,
+        onSeek: handleWaveformSeek,
+        waveColor,
+        progressColor,
+        height: waveformHeight
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
+      renderPlayButton(),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-1 items-center justify-between", children: [
+        renderTime(),
+        renderPlaybackRateControl()
+      ] })
+    ] })
+  ] });
+}
+AudioPlayer.displayName = "AudioPlayer";
+var audioRecorderVariants = classVarianceAuthority.cva(
+  [
+    "relative flex flex-col gap-3",
+    "rounded-xl border border-border",
+    "bg-card text-card-foreground",
+    "transition-all duration-200"
+  ],
+  {
+    variants: {
+      size: {
+        sm: "p-3",
+        md: "p-4",
+        lg: "p-5"
+      },
+      variant: {
+        default: "",
+        minimal: "border-none bg-transparent shadow-none",
+        elevated: "shadow-lg border-0"
+      }
+    },
+    defaultVariants: {
+      size: "md",
+      variant: "default"
+    }
+  }
+);
+var waveformContainerVariants = classVarianceAuthority.cva(
+  [
+    "relative w-full overflow-hidden rounded-lg",
+    "bg-neutral-100 dark:bg-neutral-800",
+    "transition-all duration-200"
+  ],
+  {
+    variants: {
+      state: {
+        idle: "opacity-50",
+        listening: "opacity-75",
+        recording: "",
+        paused: "opacity-90",
+        stopped: "",
+        playback: ""
+      }
+    },
+    defaultVariants: {
+      state: "idle"
+    }
+  }
+);
+var controlButtonVariants = classVarianceAuthority.cva(
+  [
+    "inline-flex items-center justify-center",
+    "rounded-full transition-all duration-200",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "active:scale-95"
+  ],
+  {
+    variants: {
+      variant: {
+        primary: [
+          "bg-primary-600 text-white",
+          "hover:bg-primary-700",
+          "active:bg-primary-800"
+        ],
+        secondary: [
+          "bg-neutral-200 text-neutral-700",
+          "hover:bg-neutral-300",
+          "dark:bg-neutral-700 dark:text-neutral-200",
+          "dark:hover:bg-neutral-600"
+        ],
+        danger: [
+          "bg-red-600 text-white",
+          "hover:bg-red-700",
+          "active:bg-red-800"
+        ],
+        ghost: [
+          "bg-transparent text-neutral-600",
+          "hover:bg-neutral-100",
+          "dark:text-neutral-400 dark:hover:bg-neutral-800"
+        ]
+      },
+      size: {
+        sm: "h-8 w-8",
+        md: "h-10 w-10",
+        lg: "h-12 w-12"
+      }
+    },
+    defaultVariants: {
+      variant: "primary",
+      size: "md"
+    }
+  }
+);
+function formatTime2(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+function MicrophoneIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      strokeWidth: 2,
+      stroke: "currentColor",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+        }
+      )
+    }
+  );
+}
+function StopIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx("rect", { x: "6", y: "6", width: "12", height: "12", rx: "2" })
+    }
+  );
+}
+function PlayIcon2({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M8 5.14v14l11-7-11-7z" })
+    }
+  );
+}
+function PauseIcon2({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M6 4h4v16H6V4zm8 0h4v16h-4V4z" })
+    }
+  );
+}
+function TrashIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      strokeWidth: 2,
+      stroke: "currentColor",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+        }
+      )
+    }
+  );
+}
+function RecordingIndicator({
+  isRecording,
+  isPaused
+}) {
+  if (!isRecording && !isPaused) return null;
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "h-3 w-3 rounded-full",
+          isRecording && !isPaused ? "animate-pulse bg-red-500" : "bg-yellow-500"
+        ),
+        "aria-hidden": "true"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-600 dark:text-neutral-400", children: isPaused ? "Paused" : "Recording" })
+  ] });
+}
+function TimeDisplay({
+  currentTime,
+  duration,
+  maxDuration,
+  showMax
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1 font-mono text-sm text-neutral-600 dark:text-neutral-400", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("span", { children: formatTime2(currentTime) }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { children: "/" }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { children: formatTime2(showMax && maxDuration ? maxDuration : duration) })
+  ] });
+}
+function LiveVisualizer({
+  analyser,
+  isActive,
+  height,
+  barColor
+}) {
+  const canvasRef = React10__namespace.useRef(null);
+  const animationRef = React10__namespace.useRef(void 0);
+  React10__namespace.useEffect(() => {
+    if (!analyser || !canvasRef.current || !isActive) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    const draw = () => {
+      if (!isActive) return;
+      analyser.getByteFrequencyData(dataArray);
+      ctx.fillStyle = "transparent";
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const barWidth = canvas.width / bufferLength * 2.5;
+      let x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = dataArray[i] / 255 * canvas.height;
+        ctx.fillStyle = barColor || getComputedStyle(document.documentElement).getPropertyValue(
+          "--color-primary-500"
+        ) || "#3b82f6";
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+      }
+      animationRef.current = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [analyser, isActive, barColor]);
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "canvas",
+    {
+      ref: canvasRef,
+      width: 600,
+      height,
+      className: "w-full",
+      style: { height }
+    }
+  );
+}
+function AudioRecorder({
+  state: controlledState,
+  onStateChange,
+  onRecordingComplete,
+  onRecordingStart,
+  onError,
+  maxDuration = 0,
+  mimeType = "audio/webm",
+  waveColor,
+  progressColor,
+  cursorColor,
+  waveformHeight = 80,
+  showTime = true,
+  showWaveform = true,
+  size,
+  variant,
+  className,
+  "aria-label": ariaLabel = "Audio recorder",
+  audioUrl,
+  disabled = false,
+  renderControls
+}) {
+  const [internalState, setInternalState] = React10__namespace.useState("idle");
+  const state = controlledState ?? internalState;
+  const [currentTime, setCurrentTime] = React10__namespace.useState(0);
+  const [duration, setDuration] = React10__namespace.useState(0);
+  const [audioBlob, setAudioBlob] = React10__namespace.useState(null);
+  const [audioObjectUrl, setAudioObjectUrl] = React10__namespace.useState(
+    null
+  );
+  const [pendingBlob, setPendingBlob] = React10__namespace.useState(null);
+  const waveformRef = React10__namespace.useRef(null);
+  const wavesurferRef = React10__namespace.useRef(null);
+  const mediaRecorderRef = React10__namespace.useRef(null);
+  const audioContextRef = React10__namespace.useRef(null);
+  const analyserRef = React10__namespace.useRef(null);
+  const streamRef = React10__namespace.useRef(null);
+  const chunksRef = React10__namespace.useRef([]);
+  const timerRef = React10__namespace.useRef(void 0);
+  const startTimeRef = React10__namespace.useRef(0);
+  const handleStopRef = React10__namespace.useRef(() => {
+  });
+  const updateState = React10__namespace.useCallback(
+    (newState) => {
+      if (!controlledState) {
+        setInternalState(newState);
+      }
+      onStateChange?.(newState);
+    },
+    [controlledState, onStateChange]
+  );
+  const initWaveSurfer = React10__namespace.useCallback(async () => {
+    if (!waveformRef.current || !showWaveform) return;
+    const WaveSurferModule = await import('wavesurfer.js');
+    const WaveSurfer = WaveSurferModule.default;
+    if (wavesurferRef.current) {
+      wavesurferRef.current.destroy();
+    }
+    const computedStyle = getComputedStyle(document.documentElement);
+    const defaultWaveColor = computedStyle.getPropertyValue("--color-primary-400").trim() || "#60a5fa";
+    const defaultProgressColor = computedStyle.getPropertyValue("--color-primary-600").trim() || "#2563eb";
+    const defaultCursorColor = computedStyle.getPropertyValue("--color-primary-800").trim() || "#1e40af";
+    wavesurferRef.current = WaveSurfer.create({
+      container: waveformRef.current,
+      waveColor: waveColor || defaultWaveColor,
+      progressColor: progressColor || defaultProgressColor,
+      cursorColor: cursorColor || defaultCursorColor,
+      cursorWidth: 2,
+      height: waveformHeight,
+      barWidth: 2,
+      barGap: 1,
+      barRadius: 2,
+      normalize: true,
+      hideScrollbar: true
+    });
+    const ws = wavesurferRef.current;
+    ws.on("timeupdate", (time) => {
+      setCurrentTime(time);
+    });
+    ws.on("ready", () => {
+      if (wavesurferRef.current) {
+        setDuration(wavesurferRef.current.getDuration());
+      }
+    });
+    ws.on("finish", () => {
+      updateState("stopped");
+    });
+  }, [
+    showWaveform,
+    waveColor,
+    progressColor,
+    cursorColor,
+    waveformHeight,
+    updateState
+  ]);
+  React10__namespace.useEffect(() => {
+    if (audioUrl && wavesurferRef.current) {
+      wavesurferRef.current.load(audioUrl);
+      updateState("stopped");
+    }
+  }, [audioUrl, updateState]);
+  React10__namespace.useEffect(() => {
+    if (pendingBlob && waveformRef.current && state === "stopped") {
+      const loadBlob = async () => {
+        if (!wavesurferRef.current) {
+          await initWaveSurfer();
+        }
+        if (wavesurferRef.current && pendingBlob) {
+          wavesurferRef.current.loadBlob(pendingBlob);
+          setPendingBlob(null);
+        }
+      };
+      const timer = setTimeout(loadBlob, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingBlob, state, initWaveSurfer]);
+  React10__namespace.useEffect(() => {
+    initWaveSurfer();
+    return () => {
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+      if (audioObjectUrl) {
+        URL.revokeObjectURL(audioObjectUrl);
+      }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [initWaveSurfer, audioObjectUrl]);
+  const handleRecord = React10__namespace.useCallback(async () => {
+    if (disabled) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      audioContextRef.current = new AudioContext();
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 256;
+      source.connect(analyserRef.current);
+      const options = { mimeType };
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mediaRecorderRef.current = new MediaRecorder(stream);
+      } else {
+        mediaRecorderRef.current = new MediaRecorder(stream, options);
+      }
+      chunksRef.current = [];
+      mediaRecorderRef.current.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+      mediaRecorderRef.current.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        setAudioBlob(blob);
+        if (audioObjectUrl) {
+          URL.revokeObjectURL(audioObjectUrl);
+        }
+        const url = URL.createObjectURL(blob);
+        setAudioObjectUrl(url);
+        setPendingBlob(blob);
+        onRecordingComplete?.(blob, duration);
+        updateState("stopped");
+      };
+      mediaRecorderRef.current.start(100);
+      startTimeRef.current = Date.now();
+      updateState("recording");
+      onRecordingStart?.();
+      timerRef.current = window.setInterval(() => {
+        const elapsed = (Date.now() - startTimeRef.current) / 1e3;
+        setCurrentTime(elapsed);
+        setDuration(elapsed);
+        if (maxDuration > 0 && elapsed >= maxDuration) {
+          handleStopRef.current();
+        }
+      }, 100);
+    } catch (error) {
+      onError?.(error);
+      updateState("idle");
+    }
+  }, [
+    disabled,
+    mimeType,
+    maxDuration,
+    audioObjectUrl,
+    duration,
+    initWaveSurfer,
+    onRecordingComplete,
+    onRecordingStart,
+    onError,
+    updateState
+  ]);
+  const handlePause = React10__namespace.useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.pause();
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      updateState("paused");
+    } else if (wavesurferRef.current && (state === "playback" || state === "stopped")) {
+      wavesurferRef.current.pause();
+      updateState("paused");
+    }
+  }, [state, updateState]);
+  const handleResume = React10__namespace.useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "paused") {
+      mediaRecorderRef.current.resume();
+      const pausedTime = currentTime;
+      startTimeRef.current = Date.now() - pausedTime * 1e3;
+      timerRef.current = window.setInterval(() => {
+        const elapsed = (Date.now() - startTimeRef.current) / 1e3;
+        setCurrentTime(elapsed);
+        setDuration(elapsed);
+        if (maxDuration > 0 && elapsed >= maxDuration) {
+          handleStopRef.current();
+        }
+      }, 100);
+      updateState("recording");
+    } else if (wavesurferRef.current && state === "paused") {
+      wavesurferRef.current.play();
+      updateState("playback");
+    }
+  }, [currentTime, maxDuration, state, updateState]);
+  const handleStop = React10__namespace.useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    if (mediaRecorderRef.current && (mediaRecorderRef.current.state === "recording" || mediaRecorderRef.current.state === "paused")) {
+      mediaRecorderRef.current.stop();
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+  }, []);
+  handleStopRef.current = handleStop;
+  const handlePlay = React10__namespace.useCallback(() => {
+    if (wavesurferRef.current) {
+      wavesurferRef.current.play();
+      updateState("playback");
+    }
+  }, [updateState]);
+  const handleSeek = React10__namespace.useCallback((time) => {
+    if (wavesurferRef.current) {
+      const progress = time / wavesurferRef.current.getDuration();
+      wavesurferRef.current.seekTo(progress);
+      setCurrentTime(time);
+    }
+  }, []);
+  const handleDelete = React10__namespace.useCallback(() => {
+    setAudioBlob(null);
+    if (audioObjectUrl) {
+      URL.revokeObjectURL(audioObjectUrl);
+      setAudioObjectUrl(null);
+    }
+    setCurrentTime(0);
+    setDuration(0);
+    updateState("idle");
+  }, [audioObjectUrl, updateState]);
+  const isRecording = state === "recording";
+  const isPaused = state === "paused";
+  const isPlaying = state === "playback";
+  const hasRecording = audioBlob !== null || audioUrl !== void 0;
+  const controlRenderProps = {
+    state,
+    currentTime,
+    duration,
+    isRecording,
+    isPaused,
+    isPlaying,
+    onRecord: handleRecord,
+    onPause: handlePause,
+    onResume: handleResume,
+    onStop: handleStop,
+    onPlay: handlePlay,
+    onSeek: handleSeek,
+    formatTime: formatTime2
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(audioRecorderVariants({ size, variant }), className),
+      role: "group",
+      "aria-label": ariaLabel,
+      children: [
+        showWaveform && /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(waveformContainerVariants({ state })),
+            style: { height: waveformHeight },
+            children: (state === "recording" || state === "listening") && !hasRecording ? /* @__PURE__ */ jsxRuntime.jsx(
+              LiveVisualizer,
+              {
+                analyser: analyserRef.current,
+                isActive: isRecording,
+                height: waveformHeight,
+                barColor: waveColor
+              }
+            ) : /* @__PURE__ */ jsxRuntime.jsx("div", { ref: waveformRef, className: "w-full" })
+          }
+        ),
+        showTime && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(RecordingIndicator, { isRecording, isPaused }),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            TimeDisplay,
+            {
+              currentTime,
+              duration,
+              maxDuration,
+              showMax: isRecording || isPaused
+            }
+          )
+        ] }),
+        renderControls ? renderControls(controlRenderProps) : /* @__PURE__ */ jsxRuntime.jsx(
+          DefaultControls,
+          {
+            ...controlRenderProps,
+            disabled,
+            hasRecording,
+            onDelete: handleDelete
+          }
+        )
+      ]
+    }
+  );
+}
+AudioRecorder.displayName = "AudioRecorder";
+function DefaultControls({
+  state,
+  isRecording,
+  isPaused,
+  isPlaying,
+  hasRecording,
+  disabled,
+  onRecord,
+  onPause,
+  onResume,
+  onStop,
+  onPlay,
+  onDelete
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-center gap-3", children: [
+    hasRecording && !isRecording && /* @__PURE__ */ jsxRuntime.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: onDelete,
+        disabled,
+        className: chunkOR5DRJCW_cjs.cn(
+          controlButtonVariants({ variant: "ghost", size: "md" })
+        ),
+        "aria-label": "Delete recording",
+        children: /* @__PURE__ */ jsxRuntime.jsx(TrashIcon, { className: "h-5 w-5" })
+      }
+    ),
+    state === "idle" && /* @__PURE__ */ jsxRuntime.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: onRecord,
+        disabled,
+        className: chunkOR5DRJCW_cjs.cn(
+          controlButtonVariants({ variant: "danger", size: "lg" })
+        ),
+        "aria-label": "Start recording",
+        children: /* @__PURE__ */ jsxRuntime.jsx(MicrophoneIcon, { className: "h-6 w-6" })
+      }
+    ),
+    isRecording && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: onPause,
+          disabled,
+          className: chunkOR5DRJCW_cjs.cn(
+            controlButtonVariants({ variant: "secondary", size: "md" })
+          ),
+          "aria-label": "Pause recording",
+          children: /* @__PURE__ */ jsxRuntime.jsx(PauseIcon2, { className: "h-5 w-5" })
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: onStop,
+          disabled,
+          className: chunkOR5DRJCW_cjs.cn(
+            controlButtonVariants({ variant: "danger", size: "lg" })
+          ),
+          "aria-label": "Stop recording",
+          children: /* @__PURE__ */ jsxRuntime.jsx(StopIcon, { className: "h-6 w-6" })
+        }
+      )
+    ] }),
+    isPaused && !hasRecording && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: onResume,
+          disabled,
+          className: chunkOR5DRJCW_cjs.cn(
+            controlButtonVariants({ variant: "danger", size: "lg" })
+          ),
+          "aria-label": "Resume recording",
+          children: /* @__PURE__ */ jsxRuntime.jsx(MicrophoneIcon, { className: "h-6 w-6" })
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: onStop,
+          disabled,
+          className: chunkOR5DRJCW_cjs.cn(
+            controlButtonVariants({ variant: "secondary", size: "md" })
+          ),
+          "aria-label": "Stop recording",
+          children: /* @__PURE__ */ jsxRuntime.jsx(StopIcon, { className: "h-5 w-5" })
+        }
+      )
+    ] }),
+    (state === "stopped" || isPaused && hasRecording) && hasRecording && /* @__PURE__ */ jsxRuntime.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: isPlaying || isPaused ? onPause : onPlay,
+        disabled,
+        className: chunkOR5DRJCW_cjs.cn(
+          controlButtonVariants({ variant: "primary", size: "lg" })
+        ),
+        "aria-label": isPaused ? "Resume playback" : isPlaying ? "Pause playback" : "Play recording",
+        children: isPaused || !isPlaying ? /* @__PURE__ */ jsxRuntime.jsx(PlayIcon2, { className: "h-6 w-6" }) : /* @__PURE__ */ jsxRuntime.jsx(PauseIcon2, { className: "h-6 w-6" })
+      }
+    ),
+    isPlaying && /* @__PURE__ */ jsxRuntime.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: onPause,
+        disabled,
+        className: chunkOR5DRJCW_cjs.cn(
+          controlButtonVariants({ variant: "primary", size: "lg" })
+        ),
+        "aria-label": "Pause playback",
+        children: /* @__PURE__ */ jsxRuntime.jsx(PauseIcon2, { className: "h-6 w-6" })
+      }
+    )
+  ] });
+}
+var CommandPaletteContext = React10.createContext(
   null
 );
 function CommandPaletteProvider({
@@ -297,24 +4411,24 @@ function CommandPaletteProvider({
   enableShortcut = true,
   customEventName
 }) {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [query, setQuery] = React.useState("");
-  const [selectedIndex, setSelectedIndex] = React.useState(-1);
-  const [activeCategory, setActiveCategory] = React.useState(null);
-  const [items, setItems] = React.useState([]);
-  const [categories, setCategories] = React.useState([]);
-  const open = React.useCallback(() => {
+  const [isOpen, setIsOpen] = React10.useState(false);
+  const [query, setQuery] = React10.useState("");
+  const [selectedIndex, setSelectedIndex] = React10.useState(-1);
+  const [activeCategory, setActiveCategory] = React10.useState(null);
+  const [items, setItems] = React10.useState([]);
+  const [categories, setCategories] = React10.useState([]);
+  const open = React10.useCallback(() => {
     setIsOpen(true);
     setQuery("");
     setSelectedIndex(-1);
     setActiveCategory(null);
   }, []);
-  const close = React.useCallback(() => {
+  const close = React10.useCallback(() => {
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(-1);
   }, []);
-  const toggle = React.useCallback(() => {
+  const toggle = React10.useCallback(() => {
     if (isOpen) {
       close();
     } else {
@@ -322,13 +4436,13 @@ function CommandPaletteProvider({
     }
   }, [isOpen, open, close]);
   chunkR4DM4635_cjs.useCommandK(toggle, enableShortcut);
-  React__default.default.useEffect(() => {
+  React10__namespace.default.useEffect(() => {
     if (!customEventName) return;
     const handler = () => open();
     document.addEventListener(customEventName, handler);
     return () => document.removeEventListener(customEventName, handler);
   }, [customEventName, open]);
-  const contextValue = React.useMemo(
+  const contextValue = React10.useMemo(
     () => ({
       isOpen,
       open,
@@ -360,7 +4474,7 @@ function CommandPaletteProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(CommandPaletteContext.Provider, { value: contextValue, children });
 }
 function useCommandPalette() {
-  const context = React.useContext(CommandPaletteContext);
+  const context = React10.useContext(CommandPaletteContext);
   if (!context) {
     throw new Error(
       "useCommandPalette must be used within a CommandPaletteProvider"
@@ -404,7 +4518,7 @@ var XIcon = () => /* @__PURE__ */ jsxRuntime.jsx(
     )
   }
 );
-var SpinnerIcon = () => /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-4 w-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
+var SpinnerIcon2 = () => /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-4 w-4 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
   /* @__PURE__ */ jsxRuntime.jsx(
     "circle",
     {
@@ -448,10 +4562,10 @@ function CommandPalette({
     items,
     categories
   } = useCommandPalette();
-  const inputRef = React.useRef(null);
-  const containerRef = React.useRef(null);
-  const listRef = React.useRef(null);
-  const filteredItems = React.useMemo(() => {
+  const inputRef = React10.useRef(null);
+  const containerRef = React10.useRef(null);
+  const listRef = React10.useRef(null);
+  const filteredItems = React10.useMemo(() => {
     let result = items;
     if (activeCategory) {
       result = result.filter((item) => item.category === activeCategory);
@@ -464,7 +4578,7 @@ function CommandPalette({
     }
     return result;
   }, [items, query, activeCategory]);
-  const groupedItems = React.useMemo(() => {
+  const groupedItems = React10.useMemo(() => {
     const groups = /* @__PURE__ */ new Map();
     filteredItems.forEach((item) => {
       const category = item.category ?? "Other";
@@ -476,15 +4590,15 @@ function CommandPalette({
   }, [filteredItems]);
   chunkFHY3K6PL_cjs.useEscapeKey(close, isOpen);
   chunkSWMRCGL4_cjs.useClickOutside(containerRef, close);
-  React.useEffect(() => {
+  React10.useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
-  React.useEffect(() => {
+  React10.useEffect(() => {
     setSelectedIndex(filteredItems.length > 0 ? 0 : -1);
   }, [filteredItems.length, setSelectedIndex]);
-  React.useEffect(() => {
+  React10.useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
       const selectedElement = listRef.current.querySelector(
         `[data-index="${selectedIndex}"]`
@@ -492,7 +4606,7 @@ function CommandPalette({
       selectedElement?.scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
-  const handleKeyDown = React.useCallback(
+  const handleKeyDown = React10.useCallback(
     (e) => {
       switch (e.key) {
         case "ArrowDown":
@@ -536,7 +4650,7 @@ function CommandPalette({
       setActiveCategory
     ]
   );
-  const handleItemClick = React.useCallback(
+  const handleItemClick = React10.useCallback(
     (item) => {
       if (!item.disabled) {
         onSelect?.(item);
@@ -545,7 +4659,7 @@ function CommandPalette({
     },
     [onSelect, close]
   );
-  const getCategoryInfo = React.useCallback(
+  const getCategoryInfo = React10.useCallback(
     (categoryId) => {
       return categories.find((c) => c.id === categoryId);
     },
@@ -600,7 +4714,7 @@ function CommandPalette({
                 children: /* @__PURE__ */ jsxRuntime.jsx(XIcon, {})
               }
             ),
-            isLoading && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-primary-500 absolute top-1/2 right-4 -translate-y-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon, {}) })
+            isLoading && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-primary-500 absolute top-1/2 right-4 -translate-y-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon2, {}) })
           ] }),
           categories.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1 overflow-x-auto border-b border-gray-100 p-2 dark:border-gray-700", children: [
             /* @__PURE__ */ jsxRuntime.jsx(
@@ -728,7 +4842,7 @@ function CommandPalette({
                               "hidden items-center px-1.5 py-0.5 text-[10px] sm:inline-flex",
                               "rounded border bg-gray-100 dark:bg-gray-700",
                               "border-gray-200 dark:border-gray-600",
-                              "text-gray-500 dark:text-gray-400"
+                              "text-gray-600 dark:text-gray-400"
                             ),
                             children: item.shortcut
                           }
@@ -799,7 +4913,7 @@ function CommandPaletteTrigger({
             className: chunkOR5DRJCW_cjs.cn(
               "inline-flex items-center gap-0.5 px-2 py-0.5",
               "rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600",
-              "flex-shrink-0 text-xs text-gray-500 dark:text-gray-300"
+              "flex-shrink-0 text-xs text-gray-600 dark:text-gray-300"
             ),
             children: [
               isMac2 ? "\u2318" : "Ctrl",
@@ -811,7 +4925,1185 @@ function CommandPaletteTrigger({
     }
   );
 }
-var SidebarContext = React.createContext(null);
+var headerVariants = classVarianceAuthority.cva(
+  [
+    "flex items-center gap-3 px-4 py-3",
+    "bg-white dark:bg-neutral-900",
+    "border-b border-neutral-200 dark:border-neutral-700"
+  ],
+  {
+    variants: {
+      size: {
+        sm: "py-2",
+        md: "py-3",
+        lg: "py-4"
+      }
+    },
+    defaultVariants: {
+      size: "md"
+    }
+  }
+);
+function getConversationTitle(conversation, participant) {
+  if (conversation?.name) return conversation.name;
+  if (participant?.name) return participant.name;
+  if (conversation?.participants && conversation.participants.length > 0) {
+    const names = conversation.participants.filter((p) => !p.isCurrentUser).map((p) => p.name);
+    if (names.length <= 2) return names.join(" & ");
+    return `${names[0]} and ${names.length - 1} others`;
+  }
+  return "Conversation";
+}
+function getConversationSubtitle(conversation, participant, showOnlineStatus) {
+  if (participant) {
+    if (showOnlineStatus && participant.isOnline) {
+      return "Online";
+    }
+    if (participant.lastSeen) {
+      const lastSeen = new Date(participant.lastSeen);
+      return `Last seen ${formatLastSeen(lastSeen)}`;
+    }
+    if (participant.phoneNumber) {
+      return participant.phoneNumber;
+    }
+  }
+  if (conversation?.type === "group" && conversation.participants) {
+    return `${conversation.participants.length} participants`;
+  }
+  return void 0;
+}
+function formatLastSeen(date) {
+  const now = /* @__PURE__ */ new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1e3 * 60));
+  const diffHours = Math.floor(diffMs / (1e3 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1e3 * 60 * 60 * 24));
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+var ConversationHeader = React10__namespace.forwardRef(
+  ({
+    className,
+    size,
+    conversation,
+    title,
+    subtitle,
+    avatarUrl,
+    participant,
+    showOnlineStatus = true,
+    showBackButton = false,
+    onBack,
+    actions,
+    leftContent,
+    rightContent,
+    ...props
+  }, ref) => {
+    const displayTitle = title || getConversationTitle(conversation, participant);
+    const displaySubtitle = subtitle || getConversationSubtitle(conversation, participant, showOnlineStatus);
+    const displayAvatar = avatarUrl || conversation?.avatarUrl || participant?.avatarUrl;
+    const isOnline = participant?.isOnline;
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "header",
+      {
+        ref,
+        className: chunkOR5DRJCW_cjs.cn(headerVariants({ size }), className),
+        ...props,
+        children: [
+          leftContent || showBackButton && onBack && /* @__PURE__ */ jsxRuntime.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: onBack,
+              className: chunkOR5DRJCW_cjs.cn(
+                "-ml-2 rounded-full p-2",
+                "text-neutral-500 hover:text-neutral-700",
+                "dark:text-neutral-400 dark:hover:text-neutral-200",
+                "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                "transition-colors"
+              ),
+              "aria-label": "Go back",
+              children: /* @__PURE__ */ jsxRuntime.jsx(
+                "svg",
+                {
+                  className: "h-5 w-5",
+                  fill: "none",
+                  viewBox: "0 0 24 24",
+                  stroke: "currentColor",
+                  children: /* @__PURE__ */ jsxRuntime.jsx(
+                    "path",
+                    {
+                      strokeLinecap: "round",
+                      strokeLinejoin: "round",
+                      strokeWidth: 2,
+                      d: "M15 19l-7-7 7-7"
+                    }
+                  )
+                }
+              )
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative shrink-0", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "div",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full",
+                  "bg-primary-800 font-medium text-white"
+                ),
+                children: displayAvatar ? /* @__PURE__ */ jsxRuntime.jsx(
+                  "img",
+                  {
+                    src: displayAvatar,
+                    alt: displayTitle,
+                    className: "h-full w-full rounded-full object-cover"
+                  }
+                ) : displayTitle.charAt(0).toUpperCase()
+              }
+            ),
+            showOnlineStatus && isOnline && /* @__PURE__ */ jsxRuntime.jsx(
+              "span",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "absolute right-0 bottom-0",
+                  "h-3 w-3 rounded-full",
+                  "bg-green-500 ring-2 ring-white dark:ring-neutral-900"
+                ),
+                "aria-label": "Online"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "truncate font-semibold text-neutral-900 dark:text-neutral-100", children: displayTitle }),
+            displaySubtitle && /* @__PURE__ */ jsxRuntime.jsx(
+              "p",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "truncate text-sm",
+                  isOnline ? "text-green-600 dark:text-green-400" : "text-neutral-500 dark:text-neutral-400"
+                ),
+                children: displaySubtitle
+              }
+            )
+          ] }),
+          rightContent || actions && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex shrink-0 items-center gap-1", children: actions })
+        ]
+      }
+    );
+  }
+);
+ConversationHeader.displayName = "ConversationHeader";
+var ConversationListItem = React10__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
+  const participant = conversation.participants.find((p) => !p.isCurrentUser);
+  const title = getConversationTitle(conversation, participant);
+  const avatarUrl = conversation.avatarUrl || participant?.avatarUrl;
+  const lastMessage = conversation.lastMessage;
+  const isUnread = conversation.unreadCount > 0;
+  const formatTime3 = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = /* @__PURE__ */ new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const messageDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+    if (messageDate.getTime() === today.getTime()) {
+      return date.toLocaleTimeString(void 0, {
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (messageDate.getTime() === yesterday.getTime()) {
+      return "Yesterday";
+    }
+    return date.toLocaleDateString(void 0, {
+      month: "short",
+      day: "numeric"
+    });
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "button",
+    {
+      ref,
+      type: "button",
+      onClick: () => onSelect?.(conversation),
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex w-full items-center gap-3 px-4 py-3",
+        "text-left transition-colors",
+        isSelected ? "bg-primary-50 dark:bg-primary-900/20" : "hover:bg-neutral-50 dark:hover:bg-neutral-800/50",
+        "focus:bg-neutral-50 focus:outline-none dark:focus:bg-neutral-800/50",
+        className
+      ),
+      "aria-current": isSelected ? "true" : void 0,
+      ...props,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative shrink-0", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex h-12 w-12 items-center justify-center rounded-full",
+                "bg-primary-800 font-medium text-white"
+              ),
+              children: avatarUrl ? /* @__PURE__ */ jsxRuntime.jsx(
+                "img",
+                {
+                  src: avatarUrl,
+                  alt: title,
+                  className: "h-full w-full rounded-full object-cover"
+                }
+              ) : title.charAt(0).toUpperCase()
+            }
+          ),
+          participant?.isOnline && /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "absolute right-0 bottom-0",
+                "h-3 w-3 rounded-full",
+                "bg-green-500 ring-2 ring-white dark:ring-neutral-900"
+              )
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "h3",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "truncate text-sm",
+                  isUnread ? "font-semibold text-neutral-900 dark:text-neutral-100" : "font-medium text-neutral-700 dark:text-neutral-300"
+                ),
+                children: title
+              }
+            ),
+            lastMessage && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0 text-xs text-neutral-500 dark:text-neutral-400", children: formatTime3(lastMessage.timestamp) })
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "p",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "truncate text-sm",
+                  isUnread ? "text-neutral-700 dark:text-neutral-300" : "text-neutral-500 dark:text-neutral-400"
+                ),
+                children: lastMessage?.content || "No messages yet"
+              }
+            ),
+            isUnread && /* @__PURE__ */ jsxRuntime.jsx(
+              "span",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "flex shrink-0 items-center justify-center",
+                  "h-5 min-w-[20px] rounded-full px-1.5",
+                  "bg-primary-600 text-xs font-medium text-white"
+                ),
+                children: conversation.unreadCount > 99 ? "99+" : conversation.unreadCount
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex shrink-0 flex-col items-center gap-1", children: [
+          conversation.isPinned && /* @__PURE__ */ jsxRuntime.jsx(
+            "svg",
+            {
+              className: "text-primary-500 h-4 w-4",
+              fill: "currentColor",
+              viewBox: "0 0 24 24",
+              children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M16 4v8l2 2v2h-6v6l-1 1-1-1v-6H4v-2l2-2V4c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2z" })
+            }
+          ),
+          conversation.isMuted && /* @__PURE__ */ jsxRuntime.jsxs(
+            "svg",
+            {
+              className: "h-4 w-4 text-neutral-400",
+              fill: "none",
+              viewBox: "0 0 24 24",
+              stroke: "currentColor",
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    strokeWidth: 2,
+                    d: "M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    strokeWidth: 2,
+                    d: "M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+                  }
+                )
+              ]
+            }
+          )
+        ] })
+      ]
+    }
+  );
+});
+ConversationListItem.displayName = "ConversationListItem";
+function ConversationListSkeleton({
+  count = 5,
+  className
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "divide-y divide-neutral-200 dark:divide-neutral-700",
+        className
+      ),
+      children: Array.from({ length: count }).map((_, i) => /* @__PURE__ */ jsxRuntime.jsxs(
+        "div",
+        {
+          className: "flex items-center gap-3 px-4 py-3",
+          "aria-hidden": "true",
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-12 w-12 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 space-y-2", children: [
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" }),
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-48 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" })
+            ] })
+          ]
+        },
+        i
+      ))
+    }
+  );
+}
+ConversationListSkeleton.displayName = "ConversationListSkeleton";
+function LightboxModal({ attachment, onClose }) {
+  React10__namespace.useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+    if (attachment) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [attachment, onClose]);
+  if (!attachment) return null;
+  const isImage = attachment.type === "image";
+  const isVideo = attachment.type === "video";
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn("fixed inset-0 z-50", "flex items-center justify-center"),
+      role: "dialog",
+      "aria-modal": "true",
+      "aria-label": `View ${attachment.filename}`,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "button",
+          {
+            type: "button",
+            className: "absolute inset-0 cursor-default bg-black/90",
+            onClick: onClose,
+            "aria-label": "Close lightbox"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: onClose,
+            className: chunkOR5DRJCW_cjs.cn(
+              "absolute top-4 right-4 z-10",
+              "rounded-full p-2",
+              "bg-white/10 text-white",
+              "hover:bg-white/20",
+              "focus:ring-2 focus:ring-white focus:outline-none",
+              "transition-colors"
+            ),
+            "aria-label": "Close",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "svg",
+              {
+                className: "h-6 w-6",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                stroke: "currentColor",
+                children: /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    strokeWidth: 2,
+                    d: "M6 18L18 6M6 6l12 12"
+                  }
+                )
+              }
+            )
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative z-10 max-h-[90vh] max-w-[90vw]", children: [
+          isImage && /* @__PURE__ */ jsxRuntime.jsx(
+            "img",
+            {
+              src: attachment.url,
+              alt: attachment.alt || attachment.filename,
+              className: "max-h-[90vh] max-w-[90vw] object-contain"
+            }
+          ),
+          isVideo && /* @__PURE__ */ jsxRuntime.jsx(
+            "video",
+            {
+              src: attachment.url,
+              controls: true,
+              autoPlay: true,
+              className: "max-h-[90vh] max-w-[90vw]",
+              children: /* @__PURE__ */ jsxRuntime.jsx("track", { kind: "captions" })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-4 left-1/2 -translate-x-1/2", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "rounded-full bg-black/50 px-4 py-2 text-sm text-white", children: attachment.filename }) })
+      ]
+    }
+  );
+}
+LightboxModal.displayName = "LightboxModal";
+var MessageThread = React10__namespace.forwardRef(
+  ({
+    conversation,
+    messages,
+    currentUser,
+    typingState,
+    isLoading = false,
+    hasMore = false,
+    isLoadingMore = false,
+    isSending = false,
+    eventHandlers = {},
+    showHeader = true,
+    showBackButton = false,
+    onBack,
+    headerActions,
+    placeholder = "Type a message...",
+    maxMessageLength = 1600,
+    showCharacterCount = false,
+    showAttachmentPicker = true,
+    showCameraButton = false,
+    acceptedFileTypes,
+    maxFileSize,
+    maxAttachments,
+    showAvatars = true,
+    showSenderNames = false,
+    groupByDate = true,
+    emptyState,
+    formatTimestamp,
+    onError,
+    className
+  }, ref) => {
+    const [lightboxAttachment, setLightboxAttachment] = React10__namespace.useState(null);
+    const [replyTo, setReplyTo] = React10__namespace.useState(null);
+    const participant = conversation?.type === "direct" ? conversation.participants.find((p) => p.id !== currentUser.id) : void 0;
+    const handleAttachmentClick = (attachment, message) => {
+      if (attachment.type === "image" || attachment.type === "video") {
+        setLightboxAttachment(attachment);
+      }
+      eventHandlers.onAttachmentClick?.(attachment, message);
+    };
+    const handleSendMessage = async (newMessage) => {
+      const messageWithReply = {
+        ...newMessage,
+        replyToId: replyTo?.id || newMessage.replyToId
+      };
+      setReplyTo(null);
+      await eventHandlers.onSendMessage?.(messageWithReply);
+    };
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        ref,
+        className: chunkOR5DRJCW_cjs.cn(
+          "flex h-full flex-col",
+          "bg-white dark:bg-neutral-900",
+          className
+        ),
+        children: [
+          showHeader && /* @__PURE__ */ jsxRuntime.jsx(
+            ConversationHeader,
+            {
+              conversation,
+              participant,
+              showBackButton,
+              onBack,
+              actions: headerActions
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            DragDropZone,
+            {
+              onFilesDropped: () => {
+                onError?.("Drop files on the composer to attach them");
+              },
+              disabled: !showAttachmentPicker,
+              className: "flex-1 overflow-hidden",
+              children: /* @__PURE__ */ jsxRuntime.jsx(
+                MessageList,
+                {
+                  messages,
+                  currentUser,
+                  isLoading,
+                  hasMore,
+                  isLoadingMore,
+                  typingState,
+                  showAvatars,
+                  showSenderNames,
+                  groupByDate,
+                  onLoadMore: eventHandlers.onLoadMore,
+                  onRetryMessage: eventHandlers.onRetryMessage,
+                  onAttachmentClick: handleAttachmentClick,
+                  emptyState,
+                  formatTimestamp,
+                  className: "h-full"
+                }
+              )
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            MessageComposer,
+            {
+              onSend: handleSendMessage,
+              onTypingStart: eventHandlers.onTypingStart,
+              onTypingStop: eventHandlers.onTypingStop,
+              placeholder,
+              maxLength: maxMessageLength,
+              showCharacterCount,
+              isSending,
+              showAttachmentPicker,
+              showCameraButton,
+              acceptedFileTypes,
+              maxFileSize,
+              maxAttachments,
+              onError,
+              replyTo,
+              onCancelReply: () => setReplyTo(null)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            LightboxModal,
+            {
+              attachment: lightboxAttachment,
+              onClose: () => setLightboxAttachment(null)
+            }
+          )
+        ]
+      }
+    );
+  }
+);
+MessageThread.displayName = "MessageThread";
+function MessagingSplitView({
+  conversationList,
+  messageThread,
+  hasSelectedConversation = false,
+  listWidth = 320,
+  mobileBreakpoint = "md",
+  className
+}) {
+  const breakpointClasses = {
+    sm: "sm:flex",
+    md: "md:flex",
+    lg: "lg:flex"
+  };
+  const hideMobileClasses = {
+    sm: hasSelectedConversation ? "hidden sm:block" : "block sm:block",
+    md: hasSelectedConversation ? "hidden md:block" : "block md:block",
+    lg: hasSelectedConversation ? "hidden lg:block" : "block lg:block"
+  };
+  const showMobileClasses = {
+    sm: hasSelectedConversation ? "block sm:block" : "hidden sm:block",
+    md: hasSelectedConversation ? "block md:block" : "hidden md:block",
+    lg: hasSelectedConversation ? "block lg:block" : "hidden lg:block"
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "h-full w-full",
+        breakpointClasses[mobileBreakpoint],
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "h-full w-full flex-shrink-0",
+              "border-r border-neutral-200 dark:border-neutral-700",
+              hideMobileClasses[mobileBreakpoint]
+            ),
+            style: {
+              width: typeof listWidth === "number" ? `${listWidth}px` : listWidth
+            },
+            children: conversationList
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "h-full min-w-0 flex-1",
+              showMobileClasses[mobileBreakpoint]
+            ),
+            children: messageThread
+          }
+        )
+      ]
+    }
+  );
+}
+MessagingSplitView.displayName = "MessagingSplitView";
+function useMessages(options) {
+  const {
+    initialMessages = [],
+    currentUser,
+    onSend,
+    onRetry,
+    onLoadMore
+  } = options;
+  const [messages, setMessages] = React10__namespace.useState(initialMessages);
+  const [isSending, setIsSending] = React10__namespace.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React10__namespace.useState(false);
+  React10__namespace.useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+  const addMessage = React10__namespace.useCallback((message) => {
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === message.id)) {
+        return prev;
+      }
+      return [...prev, message];
+    });
+  }, []);
+  const updateMessage = React10__namespace.useCallback(
+    (messageId, updates) => {
+      setMessages(
+        (prev) => prev.map((m) => m.id === messageId ? { ...m, ...updates } : m)
+      );
+    },
+    []
+  );
+  const removeMessage = React10__namespace.useCallback((messageId) => {
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  }, []);
+  const updateStatus = React10__namespace.useCallback(
+    (messageId, status) => {
+      updateMessage(messageId, { status });
+    },
+    [updateMessage]
+  );
+  const markAsRead = React10__namespace.useCallback(
+    (messageId) => {
+      updateStatus(messageId, "read");
+    },
+    [updateStatus]
+  );
+  const sendMessage = React10__namespace.useCallback(
+    async (newMessage) => {
+      const optimisticId = `optimistic-${Date.now()}`;
+      const optimisticMessage = {
+        id: optimisticId,
+        type: "text",
+        content: newMessage.content,
+        sender: currentUser,
+        timestamp: /* @__PURE__ */ new Date(),
+        status: "sending",
+        attachments: []
+        // Would handle attachment uploads here
+      };
+      addMessage(optimisticMessage);
+      setIsSending(true);
+      try {
+        if (onSend) {
+          const sentMessage = await onSend(newMessage);
+          setMessages(
+            (prev) => prev.map((m) => m.id === optimisticId ? sentMessage : m)
+          );
+        } else {
+          updateStatus(optimisticId, "sent");
+        }
+      } catch {
+        updateStatus(optimisticId, "failed");
+      } finally {
+        setIsSending(false);
+      }
+    },
+    [currentUser, onSend, addMessage, updateStatus]
+  );
+  const retryMessage = React10__namespace.useCallback(
+    async (messageId) => {
+      updateStatus(messageId, "sending");
+      try {
+        if (onRetry) {
+          await onRetry(messageId);
+          updateStatus(messageId, "sent");
+        }
+      } catch {
+        updateStatus(messageId, "failed");
+      }
+    },
+    [onRetry, updateStatus]
+  );
+  const loadMore = React10__namespace.useCallback(async () => {
+    if (isLoadingMore || !onLoadMore) return;
+    setIsLoadingMore(true);
+    try {
+      const olderMessages = await onLoadMore();
+      setMessages((prev) => [...olderMessages, ...prev]);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, onLoadMore]);
+  return {
+    messages,
+    addMessage,
+    updateMessage,
+    removeMessage,
+    sendMessage,
+    retryMessage,
+    loadMore,
+    isSending,
+    isLoadingMore,
+    markAsRead,
+    updateStatus
+  };
+}
+function useTypingIndicator(options = {}) {
+  const {
+    typingParticipants: initialParticipants = [],
+    debounceTime = 2e3,
+    onTypingStart,
+    onTypingStop
+  } = options;
+  const [participants, setParticipants] = React10__namespace.useState(initialParticipants);
+  const [isLocalTyping, setIsLocalTyping] = React10__namespace.useState(false);
+  const typingTimeoutRef = React10__namespace.useRef(null);
+  React10__namespace.useEffect(() => {
+    setParticipants(initialParticipants);
+  }, [initialParticipants]);
+  const startTyping = React10__namespace.useCallback(() => {
+    if (!isLocalTyping) {
+      setIsLocalTyping(true);
+      onTypingStart?.();
+    }
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsLocalTyping(false);
+      onTypingStop?.();
+    }, debounceTime);
+  }, [isLocalTyping, debounceTime, onTypingStart, onTypingStop]);
+  const stopTyping = React10__namespace.useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    setIsLocalTyping(false);
+    onTypingStop?.();
+  }, [onTypingStop]);
+  React10__namespace.useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+  const typingState = React10__namespace.useMemo(
+    () => ({
+      participants,
+      lastUpdated: /* @__PURE__ */ new Date()
+    }),
+    [participants]
+  );
+  return {
+    typingState,
+    startTyping,
+    stopTyping,
+    setTypingParticipants: setParticipants
+  };
+}
+function useMessageScroll(options) {
+  const { messages, currentUserId, threshold = 100 } = options;
+  const scrollContainerRef = React10__namespace.useRef(null);
+  const bottomRef = React10__namespace.useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = React10__namespace.useState(false);
+  const prevMessageCountRef = React10__namespace.useRef(messages.length);
+  React10__namespace.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < threshold;
+      setIsScrolledUp(!isAtBottom);
+    };
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [threshold]);
+  const scrollToBottom = React10__namespace.useCallback((smooth = true) => {
+    bottomRef.current?.scrollIntoView({
+      behavior: smooth ? "smooth" : "auto"
+    });
+  }, []);
+  React10__namespace.useEffect(() => {
+    const messageCountChanged = messages.length !== prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
+    if (!messageCountChanged) return;
+    const lastMessage = messages[messages.length - 1];
+    const isOutgoing = lastMessage?.sender.id === currentUserId;
+    if (isOutgoing || !isScrolledUp) {
+      scrollToBottom(true);
+    }
+  }, [messages, currentUserId, isScrolledUp, scrollToBottom]);
+  return {
+    scrollContainerRef,
+    bottomRef,
+    isScrolledUp,
+    scrollToBottom
+  };
+}
+function useReadReceipts(options) {
+  const { currentUserId, onMarkRead, threshold = 0.5 } = options;
+  const observerRef = React10__namespace.useRef(null);
+  const observedMessagesRef = React10__namespace.useRef(/* @__PURE__ */ new Set());
+  React10__namespace.useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const messageId = entry.target.getAttribute("data-message-id");
+            if (messageId && !observedMessagesRef.current.has(messageId)) {
+              observedMessagesRef.current.add(messageId);
+              onMarkRead?.(messageId);
+            }
+          }
+        });
+      },
+      { threshold }
+    );
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [onMarkRead, threshold]);
+  const observeMessage = React10__namespace.useCallback(
+    (element, message) => {
+      if (!element || !observerRef.current) return;
+      if (message.sender.id !== currentUserId && message.status !== "read" && !observedMessagesRef.current.has(message.id)) {
+        element.setAttribute("data-message-id", message.id);
+        observerRef.current.observe(element);
+      }
+    },
+    [currentUserId]
+  );
+  return { observeMessage };
+}
+var recordButtonVariants = classVarianceAuthority.cva(
+  [
+    "relative inline-flex items-center justify-center",
+    "rounded-full transition-all duration-200",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+    "disabled:pointer-events-none disabled:opacity-50"
+  ],
+  {
+    variants: {
+      variant: {
+        default: [
+          "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100",
+          "dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800"
+        ],
+        filled: [
+          "bg-neutral-100 text-neutral-600 hover:bg-neutral-200",
+          "dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        ],
+        primary: [
+          "bg-primary-600 text-white hover:bg-primary-700",
+          "dark:bg-primary-500 dark:hover:bg-primary-600"
+        ]
+      },
+      size: {
+        sm: "h-7 w-7",
+        md: "h-9 w-9",
+        lg: "h-11 w-11"
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "md"
+    }
+  }
+);
+var recordingIndicatorVariants = classVarianceAuthority.cva(
+  [
+    "absolute -top-1 -right-1",
+    "flex items-center justify-center",
+    "rounded-full bg-red-500 text-white",
+    "animate-pulse"
+  ],
+  {
+    variants: {
+      size: {
+        sm: "h-3 w-3",
+        md: "h-4 w-4",
+        lg: "h-5 w-5"
+      }
+    },
+    defaultVariants: {
+      size: "md"
+    }
+  }
+);
+function formatDuration(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+function MicrophoneIcon2({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      strokeWidth: 2,
+      stroke: "currentColor",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+        }
+      )
+    }
+  );
+}
+function StopIcon2({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx("rect", { x: "6", y: "6", width: "12", height: "12", rx: "2" })
+    }
+  );
+}
+function SpinnerIcon3({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("animate-spin", className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "circle",
+          {
+            className: "opacity-25",
+            cx: "12",
+            cy: "12",
+            r: "10",
+            stroke: "currentColor",
+            strokeWidth: "4"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            className: "opacity-75",
+            fill: "currentColor",
+            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          }
+        )
+      ]
+    }
+  );
+}
+function RecordButton({
+  onRecordingComplete,
+  onRecordingStart,
+  onError,
+  maxDuration = 0,
+  mimeType = "audio/webm",
+  disabled = false,
+  variant,
+  size,
+  className,
+  "aria-label": ariaLabel,
+  showDuration = false,
+  idleIcon,
+  recordingIcon,
+  transcriptionState,
+  showTranscriptionState = false
+}) {
+  const [state, setState] = React10__namespace.useState("idle");
+  const [duration, setDuration] = React10__namespace.useState(0);
+  const mediaRecorderRef = React10__namespace.useRef(null);
+  const streamRef = React10__namespace.useRef(null);
+  const chunksRef = React10__namespace.useRef([]);
+  const timerRef = React10__namespace.useRef(void 0);
+  const startTimeRef = React10__namespace.useRef(0);
+  const isRecording = state === "recording";
+  const isProcessing = state === "processing";
+  const isTranscribing = transcriptionState === "transcribing" || transcriptionState === "streaming";
+  React10__namespace.useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+  const startRecording = React10__namespace.useCallback(async () => {
+    if (disabled || isRecording || isProcessing) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const options = { mimeType };
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mediaRecorderRef.current = new MediaRecorder(stream);
+      } else {
+        mediaRecorderRef.current = new MediaRecorder(stream, options);
+      }
+      chunksRef.current = [];
+      mediaRecorderRef.current.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+      mediaRecorderRef.current.onstop = () => {
+        setState("processing");
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        const finalDuration = duration;
+        setTimeout(() => {
+          onRecordingComplete?.(blob, finalDuration);
+          setState("idle");
+          setDuration(0);
+        }, 200);
+      };
+      mediaRecorderRef.current.start(100);
+      startTimeRef.current = Date.now();
+      setState("recording");
+      onRecordingStart?.();
+      timerRef.current = window.setInterval(() => {
+        const elapsed = (Date.now() - startTimeRef.current) / 1e3;
+        setDuration(elapsed);
+        if (maxDuration > 0 && elapsed >= maxDuration) {
+          stopRecording();
+        }
+      }, 100);
+    } catch (error) {
+      onError?.(error);
+      setState("idle");
+    }
+  }, [
+    disabled,
+    isRecording,
+    isProcessing,
+    mimeType,
+    maxDuration,
+    duration,
+    onRecordingComplete,
+    onRecordingStart,
+    onError
+  ]);
+  const stopRecording = React10__namespace.useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+  }, []);
+  const handleClick = React10__namespace.useCallback(() => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording]);
+  const iconSize = size === "sm" ? "h-4 w-4" : size === "lg" ? "h-6 w-6" : "h-5 w-5";
+  const getIcon = () => {
+    if (isProcessing || isTranscribing) {
+      return /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon3, { className: iconSize });
+    }
+    if (isRecording) {
+      return recordingIcon || /* @__PURE__ */ jsxRuntime.jsx(StopIcon2, { className: iconSize });
+    }
+    return idleIcon || /* @__PURE__ */ jsxRuntime.jsx(MicrophoneIcon2, { className: iconSize });
+  };
+  const getAriaLabel = () => {
+    if (ariaLabel) return ariaLabel;
+    if (isTranscribing) return "Transcribing audio";
+    if (isProcessing) return "Processing recording";
+    if (isRecording) return "Stop recording";
+    return "Start recording";
+  };
+  const getTranscriptionLabel = () => {
+    if (transcriptionState === "streaming") return "Listening...";
+    if (transcriptionState === "transcribing") return "Transcribing...";
+    return null;
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative inline-flex items-center gap-2", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      "button",
+      {
+        type: "button",
+        onClick: handleClick,
+        disabled: disabled || isProcessing || isTranscribing,
+        className: chunkOR5DRJCW_cjs.cn(
+          recordButtonVariants({ variant, size }),
+          isRecording && "text-red-600 dark:text-red-400",
+          isTranscribing && "text-primary-600 dark:text-primary-400",
+          className
+        ),
+        "aria-label": getAriaLabel(),
+        "aria-pressed": isRecording,
+        children: [
+          getIcon(),
+          isRecording && !isTranscribing && /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: chunkOR5DRJCW_cjs.cn(recordingIndicatorVariants({ size })),
+              "aria-hidden": "true"
+            }
+          )
+        ]
+      }
+    ),
+    showDuration && isRecording && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-xs text-red-600 tabular-nums dark:text-red-400", children: formatDuration(duration) }),
+    showTranscriptionState && getTranscriptionLabel() && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-primary-600 dark:text-primary-400 text-xs font-medium", children: getTranscriptionLabel() })
+  ] });
+}
+RecordButton.displayName = "RecordButton";
+var SidebarContext = React10.createContext(null);
 function SidebarProvider({
   children,
   defaultCollapsed = false,
@@ -821,7 +6113,7 @@ function SidebarProvider({
   mobileBreakpoint = "(max-width: 1023px)"
 }) {
   const isMobileViewport = chunkR4DM4635_cjs.useMediaQuery(mobileBreakpoint);
-  const [isCollapsed, setIsCollapsed] = React.useState(() => {
+  const [isCollapsed, setIsCollapsed] = React10.useState(() => {
     if (typeof window !== "undefined" && persistCollapsed) {
       const stored = localStorage.getItem(storageKey);
       if (stored !== null) {
@@ -830,39 +6122,39 @@ function SidebarProvider({
     }
     return defaultCollapsed;
   });
-  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
-  const [expandedGroup, setExpandedGroup] = React.useState(
+  const [isMobileOpen, setIsMobileOpen] = React10.useState(false);
+  const [expandedGroup, setExpandedGroup] = React10.useState(
     defaultExpandedGroup
   );
-  React.useEffect(() => {
+  React10.useEffect(() => {
     if (persistCollapsed && typeof window !== "undefined") {
       localStorage.setItem(storageKey, String(isCollapsed));
     }
   }, [isCollapsed, persistCollapsed, storageKey]);
-  React.useEffect(() => {
+  React10.useEffect(() => {
     if (!isMobileViewport && isMobileOpen) {
       setIsMobileOpen(false);
     }
   }, [isMobileViewport, isMobileOpen]);
-  const toggleCollapsed = React.useCallback(() => {
+  const toggleCollapsed = React10.useCallback(() => {
     setIsCollapsed((prev) => !prev);
   }, []);
-  const setCollapsed = React.useCallback((collapsed) => {
+  const setCollapsed = React10.useCallback((collapsed) => {
     setIsCollapsed(collapsed);
   }, []);
-  const openMobile = React.useCallback(() => {
+  const openMobile = React10.useCallback(() => {
     setIsMobileOpen(true);
   }, []);
-  const closeMobile = React.useCallback(() => {
+  const closeMobile = React10.useCallback(() => {
     setIsMobileOpen(false);
   }, []);
-  const toggleMobile = React.useCallback(() => {
+  const toggleMobile = React10.useCallback(() => {
     setIsMobileOpen((prev) => !prev);
   }, []);
-  const toggleGroup = React.useCallback((group) => {
+  const toggleGroup = React10.useCallback((group) => {
     setExpandedGroup((prev) => prev === group ? null : group);
   }, []);
-  const contextValue = React.useMemo(
+  const contextValue = React10.useMemo(
     () => ({
       isCollapsed,
       toggleCollapsed,
@@ -892,7 +6184,7 @@ function SidebarProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(SidebarContext.Provider, { value: contextValue, children });
 }
 function useSidebar() {
-  const context = React.useContext(SidebarContext);
+  const context = React10.useContext(SidebarContext);
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider");
   }
@@ -1005,7 +6297,7 @@ function Sidebar({
       }
     ),
     /* @__PURE__ */ jsxRuntime.jsx(
-      "aside",
+      "nav",
       {
         "data-testid": testId,
         className: chunkOR5DRJCW_cjs.cn(
@@ -1024,7 +6316,6 @@ function Sidebar({
           minWidth: width,
           ...style
         },
-        role: "navigation",
         "aria-label": "Main navigation",
         children
       }
@@ -1111,9 +6402,9 @@ function SidebarNavGroup({
   const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
-  const [localExpanded, setLocalExpanded] = React.useState(defaultExpanded);
+  const [localExpanded, setLocalExpanded] = React10.useState(defaultExpanded);
   const effectiveExpanded = groupId ? isExpanded : localExpanded;
-  const handleToggle = React.useCallback(() => {
+  const handleToggle = React10.useCallback(() => {
     if (groupId) {
       toggleGroup(groupId);
     } else {
@@ -1184,7 +6475,7 @@ function SidebarNavItem({
 }) {
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
-  const handleClick = React.useCallback(() => {
+  const handleClick = React10.useCallback(() => {
     if (disabled) return;
     onClick?.();
     if (isMobileViewport) {
@@ -1304,9 +6595,9 @@ function SidebarSearch({
   "data-testid": testId = "sidebar-search"
 }) {
   const { isCollapsed, isMobileViewport, setCollapsed } = useSidebar();
-  const inputRef = React.useRef(null);
+  const inputRef = React10.useRef(null);
   const showCollapsed = !isMobileViewport && isCollapsed;
-  React.useEffect(() => {
+  React10.useEffect(() => {
     const handleKeyDown = (e) => {
       const target = e.target;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
@@ -1530,7 +6821,7 @@ function ToastContainer({
     }
   );
 }
-var ToastContext = React.createContext(null);
+var ToastContext = React10.createContext(null);
 var toastIdCounter = 0;
 function generateToastId() {
   return `toast-${++toastIdCounter}-${Date.now()}`;
@@ -1540,8 +6831,8 @@ function ToastProvider({
   maxToasts = 5,
   defaultDuration = 5e3
 }) {
-  const [toasts, setToasts] = React.useState([]);
-  const dismiss = React.useCallback((id) => {
+  const [toasts, setToasts] = React10.useState([]);
+  const dismiss = React10.useCallback((id) => {
     setToasts((prev) => {
       const toast2 = prev.find((t) => t.id === id);
       if (toast2?.onDismiss) {
@@ -1550,13 +6841,13 @@ function ToastProvider({
       return prev.filter((t) => t.id !== id);
     });
   }, []);
-  const dismissAll = React.useCallback(() => {
+  const dismissAll = React10.useCallback(() => {
     setToasts((prev) => {
       prev.forEach((t) => t.onDismiss?.());
       return [];
     });
   }, []);
-  const toast = React.useCallback(
+  const toast = React10.useCallback(
     (options) => {
       const id = generateToastId();
       const duration = options.duration ?? defaultDuration;
@@ -1583,13 +6874,13 @@ function ToastProvider({
     },
     [maxToasts, defaultDuration, dismiss]
   );
-  const success = React.useCallback(
+  const success = React10.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "success" });
     },
     [toast]
   );
-  const error = React.useCallback(
+  const error = React10.useCallback(
     (message, options) => {
       return toast({
         ...options,
@@ -1601,19 +6892,19 @@ function ToastProvider({
     },
     [toast]
   );
-  const warning = React.useCallback(
+  const warning = React10.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "warning" });
     },
     [toast]
   );
-  const info = React.useCallback(
+  const info = React10.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "info" });
     },
     [toast]
   );
-  const contextValue = React.useMemo(
+  const contextValue = React10.useMemo(
     () => ({
       toasts,
       toast,
@@ -1629,7 +6920,7 @@ function ToastProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(ToastContext.Provider, { value: contextValue, children });
 }
 function useToast() {
-  const context = React.useContext(ToastContext);
+  const context = React10.useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
   }
@@ -1722,27 +7013,27 @@ Object.defineProperty(exports, "TableRow", {
 });
 Object.defineProperty(exports, "Tabs", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.Tabs; }
+  get: function () { return chunkORUPC5TV_cjs.Tabs; }
 });
 Object.defineProperty(exports, "TabsContent", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.TabsContent; }
+  get: function () { return chunkORUPC5TV_cjs.TabsContent; }
 });
 Object.defineProperty(exports, "TabsList", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.TabsList; }
+  get: function () { return chunkORUPC5TV_cjs.TabsList; }
 });
 Object.defineProperty(exports, "TabsTrigger", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.TabsTrigger; }
+  get: function () { return chunkORUPC5TV_cjs.TabsTrigger; }
 });
 Object.defineProperty(exports, "tabsListVariants", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.tabsListVariants; }
+  get: function () { return chunkORUPC5TV_cjs.tabsListVariants; }
 });
 Object.defineProperty(exports, "tabsTriggerVariants", {
   enumerable: true,
-  get: function () { return chunkPFPBF3TQ_cjs.tabsTriggerVariants; }
+  get: function () { return chunkORUPC5TV_cjs.tabsTriggerVariants; }
 });
 Object.defineProperty(exports, "SmallMuted", {
   enumerable: true,
@@ -1854,39 +7145,39 @@ Object.defineProperty(exports, "radioVariants", {
 });
 Object.defineProperty(exports, "DateButton", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.DateButton; }
+  get: function () { return chunkEF46XW4Z_cjs.DateButton; }
 });
 Object.defineProperty(exports, "DatePicker", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.DatePicker; }
+  get: function () { return chunkEF46XW4Z_cjs.DatePicker; }
 });
 Object.defineProperty(exports, "RadioOption", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.RadioOption; }
+  get: function () { return chunkEF46XW4Z_cjs.RadioOption; }
 });
 Object.defineProperty(exports, "SchedulePicker", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.SchedulePicker; }
+  get: function () { return chunkEF46XW4Z_cjs.SchedulePicker; }
 });
 Object.defineProperty(exports, "TimeButton", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.TimeButton; }
+  get: function () { return chunkEF46XW4Z_cjs.TimeButton; }
 });
 Object.defineProperty(exports, "TimePicker", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.TimePicker; }
+  get: function () { return chunkEF46XW4Z_cjs.TimePicker; }
 });
 Object.defineProperty(exports, "dateButtonVariants", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.dateButtonVariants; }
+  get: function () { return chunkEF46XW4Z_cjs.dateButtonVariants; }
 });
 Object.defineProperty(exports, "radioOptionVariants", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.radioOptionVariants; }
+  get: function () { return chunkEF46XW4Z_cjs.radioOptionVariants; }
 });
 Object.defineProperty(exports, "timeButtonVariants", {
   enumerable: true,
-  get: function () { return chunkXNY3NM2W_cjs.timeButtonVariants; }
+  get: function () { return chunkEF46XW4Z_cjs.timeButtonVariants; }
 });
 Object.defineProperty(exports, "Select", {
   enumerable: true,
@@ -1934,11 +7225,11 @@ Object.defineProperty(exports, "spinnerVariants", {
 });
 Object.defineProperty(exports, "Button", {
   enumerable: true,
-  get: function () { return chunkYEZJKPEN_cjs.Button; }
+  get: function () { return chunkGCCKT63N_cjs.Button; }
 });
 Object.defineProperty(exports, "buttonVariants", {
   enumerable: true,
-  get: function () { return chunkYEZJKPEN_cjs.buttonVariants; }
+  get: function () { return chunkGCCKT63N_cjs.buttonVariants; }
 });
 Object.defineProperty(exports, "Card", {
   enumerable: true,
@@ -2174,43 +7465,43 @@ Object.defineProperty(exports, "miewebUISafelist", {
 });
 Object.defineProperty(exports, "Alert", {
   enumerable: true,
-  get: function () { return chunkQLLBEUXV_cjs.Alert; }
+  get: function () { return chunkMJKFQ4TF_cjs.Alert; }
 });
 Object.defineProperty(exports, "AlertDescription", {
   enumerable: true,
-  get: function () { return chunkQLLBEUXV_cjs.AlertDescription; }
+  get: function () { return chunkMJKFQ4TF_cjs.AlertDescription; }
 });
 Object.defineProperty(exports, "AlertTitle", {
   enumerable: true,
-  get: function () { return chunkQLLBEUXV_cjs.AlertTitle; }
+  get: function () { return chunkMJKFQ4TF_cjs.AlertTitle; }
 });
 Object.defineProperty(exports, "alertVariants", {
   enumerable: true,
-  get: function () { return chunkQLLBEUXV_cjs.alertVariants; }
+  get: function () { return chunkMJKFQ4TF_cjs.alertVariants; }
 });
 Object.defineProperty(exports, "Avatar", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.Avatar; }
+  get: function () { return chunkMMCNMTBR_cjs.Avatar; }
 });
 Object.defineProperty(exports, "AvatarGroup", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.AvatarGroup; }
+  get: function () { return chunkMMCNMTBR_cjs.AvatarGroup; }
 });
 Object.defineProperty(exports, "avatarVariants", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.avatarVariants; }
+  get: function () { return chunkMMCNMTBR_cjs.avatarVariants; }
 });
 Object.defineProperty(exports, "getInitials", {
   enumerable: true,
-  get: function () { return chunkUHS53NVJ_cjs.getInitials; }
+  get: function () { return chunkMMCNMTBR_cjs.getInitials; }
 });
 Object.defineProperty(exports, "Badge", {
   enumerable: true,
-  get: function () { return chunkPA5DHCK4_cjs.Badge; }
+  get: function () { return chunkEKIQE524_cjs.Badge; }
 });
 Object.defineProperty(exports, "badgeVariants", {
   enumerable: true,
-  get: function () { return chunkPA5DHCK4_cjs.badgeVariants; }
+  get: function () { return chunkEKIQE524_cjs.badgeVariants; }
 });
 Object.defineProperty(exports, "Breadcrumb", {
   enumerable: true,
@@ -2224,6 +7515,11 @@ Object.defineProperty(exports, "cn", {
   enumerable: true,
   get: function () { return chunkOR5DRJCW_cjs.cn; }
 });
+exports.AIChat = AIChat;
+exports.AIChatModal = AIChatModal;
+exports.AIChatTrigger = AIChatTrigger;
+exports.AIMessageDisplay = AIMessageDisplay;
+exports.AITypingIndicator = AITypingIndicator;
 exports.AppHeader = AppHeader;
 exports.AppHeaderActions = AppHeaderActions;
 exports.AppHeaderDivider = AppHeaderDivider;
@@ -2232,9 +7528,38 @@ exports.AppHeaderSearch = AppHeaderSearch;
 exports.AppHeaderSection = AppHeaderSection;
 exports.AppHeaderTitle = AppHeaderTitle;
 exports.AppHeaderUserMenu = AppHeaderUserMenu;
+exports.AttachmentPicker = AttachmentPicker;
+exports.AttachmentPreview = AttachmentPreview;
+exports.AttachmentPreviewItem = AttachmentPreviewItem;
+exports.AudioPlayer = AudioPlayer;
+exports.AudioRecorder = AudioRecorder;
+exports.CameraButton = CameraButton;
+exports.CharacterCounter = CharacterCounter;
 exports.CommandPalette = CommandPalette;
 exports.CommandPaletteProvider = CommandPaletteProvider;
 exports.CommandPaletteTrigger = CommandPaletteTrigger;
+exports.ConversationHeader = ConversationHeader;
+exports.ConversationListItem = ConversationListItem;
+exports.ConversationListSkeleton = ConversationListSkeleton;
+exports.DateSeparator = DateSeparator;
+exports.DragDropZone = DragDropZone;
+exports.EmptyState = EmptyState;
+exports.FloatingAIChat = FloatingAIChat;
+exports.LightboxModal = LightboxModal;
+exports.LoadMoreButton = LoadMoreButton;
+exports.MCPToolCallDisplay = MCPToolCallDisplay;
+exports.MessageAvatar = MessageAvatar;
+exports.MessageBubble = MessageBubble;
+exports.MessageComposer = MessageComposer;
+exports.MessageList = MessageList;
+exports.MessageStatusIcon = MessageStatusIcon;
+exports.MessageThread = MessageThread;
+exports.MessagingSplitView = MessagingSplitView;
+exports.ProgressBar = ProgressBar;
+exports.ReadReceiptIndicator = ReadReceiptIndicator;
+exports.RecordButton = RecordButton;
+exports.ResourceLink = ResourceLink;
+exports.SendButton = SendButton;
 exports.Sidebar = Sidebar;
 exports.SidebarContent = SidebarContent;
 exports.SidebarFooter = SidebarFooter;
@@ -2246,11 +7571,43 @@ exports.SidebarNavItem = SidebarNavItem;
 exports.SidebarProvider = SidebarProvider;
 exports.SidebarSearch = SidebarSearch;
 exports.SidebarToggle = SidebarToggle;
+exports.SkeletonMessage = SkeletonMessage;
+exports.SuggestedActions = SuggestedActions;
 exports.Toast = Toast;
 exports.ToastContainer = ToastContainer;
 exports.ToastProvider = ToastProvider;
+exports.ToolStatusIcon = ToolStatusIcon;
+exports.TypingIndicator = TypingIndicator;
+exports.audioPlayerVariants = audioPlayerVariants;
+exports.audioRecorderVariants = audioRecorderVariants;
+exports.bubbleVariants = bubbleVariants2;
+exports.controlButtonVariants = controlButtonVariants;
+exports.formatAudioTime = formatTime;
+exports.formatDateLabel = formatDateLabel;
+exports.formatDuration = formatDuration;
+exports.formatFileSize = formatFileSize2;
+exports.formatLastSeen = formatLastSeen;
+exports.formatTime = formatTime2;
+exports.generateAttachmentId = generateAttachmentId;
+exports.getConversationSubtitle = getConversationSubtitle;
+exports.getConversationTitle = getConversationTitle;
+exports.getFileType = getFileType;
+exports.getToolIcon = getToolIcon;
+exports.groupMessagesByDate = groupMessagesByDate;
+exports.headerVariants = headerVariants;
+exports.isSameSenderGroup = isSameSenderGroup;
+exports.playButtonVariants = playButtonVariants;
+exports.recordButtonVariants = recordButtonVariants;
+exports.recordingIndicatorVariants = recordingIndicatorVariants;
+exports.sendButtonVariants = sendButtonVariants;
 exports.useCommandPalette = useCommandPalette;
+exports.useMessageScroll = useMessageScroll;
+exports.useMessages = useMessages;
+exports.useReadReceipts = useReadReceipts;
 exports.useSidebar = useSidebar;
 exports.useToast = useToast;
+exports.useTypingIndicator = useTypingIndicator;
+exports.validateFile = validateFile;
+exports.waveformContainerVariants = waveformContainerVariants;
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

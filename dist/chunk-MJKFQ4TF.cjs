@@ -48,17 +48,63 @@ var alertVariants = classVarianceAuthority.cva(
   }
 );
 var Alert = React__namespace.forwardRef(
-  ({ className, variant, icon, children, ...props }, ref) => {
+  ({
+    className,
+    variant,
+    icon,
+    dismissible,
+    onDismiss,
+    dismissLabel = "Dismiss alert",
+    children,
+    ...props
+  }, ref) => {
     return /* @__PURE__ */ jsxRuntime.jsxs(
       "div",
       {
         ref,
         role: "alert",
-        className: chunkOR5DRJCW_cjs.cn(alertVariants({ variant }), className),
+        className: chunkOR5DRJCW_cjs.cn(
+          alertVariants({ variant }),
+          dismissible && "pr-10",
+          className
+        ),
         ...props,
         children: [
           icon,
-          /* @__PURE__ */ jsxRuntime.jsx("div", { children })
+          /* @__PURE__ */ jsxRuntime.jsx("div", { children }),
+          dismissible && /* @__PURE__ */ jsxRuntime.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: onDismiss,
+              className: chunkOR5DRJCW_cjs.cn(
+                "absolute top-2 right-2 rounded-md p-1",
+                "opacity-70 hover:opacity-100",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "transition-opacity"
+              ),
+              "aria-label": dismissLabel,
+              children: /* @__PURE__ */ jsxRuntime.jsxs(
+                "svg",
+                {
+                  xmlns: "http://www.w3.org/2000/svg",
+                  width: "16",
+                  height: "16",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  "aria-hidden": "true",
+                  children: [
+                    /* @__PURE__ */ jsxRuntime.jsx("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+                    /* @__PURE__ */ jsxRuntime.jsx("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+                  ]
+                }
+              )
+            }
+          )
         ]
       }
     );
@@ -89,5 +135,5 @@ exports.Alert = Alert;
 exports.AlertDescription = AlertDescription;
 exports.AlertTitle = AlertTitle;
 exports.alertVariants = alertVariants;
-//# sourceMappingURL=chunk-QLLBEUXV.cjs.map
-//# sourceMappingURL=chunk-QLLBEUXV.cjs.map
+//# sourceMappingURL=chunk-MJKFQ4TF.cjs.map
+//# sourceMappingURL=chunk-MJKFQ4TF.cjs.map

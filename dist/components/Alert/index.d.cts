@@ -3,11 +3,17 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const alertVariants: (props?: ({
-    variant?: "default" | "info" | "success" | "warning" | "danger" | null | undefined;
+    variant?: "success" | "default" | "info" | "warning" | "danger" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface AlertProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {
     /** Icon to display in the alert */
     icon?: React.ReactNode;
+    /** Whether the alert can be dismissed */
+    dismissible?: boolean;
+    /** Callback when the alert is dismissed */
+    onDismiss?: () => void;
+    /** Accessible label for the dismiss button */
+    dismissLabel?: string;
 }
 /**
  * An alert component for displaying important messages.

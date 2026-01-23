@@ -7,7 +7,7 @@ var avatarVariants = cva(
   [
     "relative inline-flex items-center justify-center",
     "rounded-full overflow-hidden",
-    "bg-primary-500 text-white font-semibold"
+    "bg-primary-800 text-white font-semibold"
   ],
   {
     variants: {
@@ -110,5 +110,5 @@ var AvatarGroup = React.forwardRef(
 AvatarGroup.displayName = "AvatarGroup";
 
 export { Avatar, AvatarGroup, avatarVariants, getInitials };
-//# sourceMappingURL=chunk-4XWG5RKH.js.map
-//# sourceMappingURL=chunk-4XWG5RKH.js.map
+//# sourceMappingURL=chunk-DKOQSOJC.js.map
+//# sourceMappingURL=chunk-DKOQSOJC.js.map
