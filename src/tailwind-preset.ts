@@ -151,6 +151,7 @@ export const miewebUIPreset: MiewebUIPreset = {
         ],
       },
       borderRadius: {
+        '2xl': 'var(--mieweb-radius-2xl, 1rem)',
         lg: 'var(--mieweb-radius-lg, 0.75rem)',
         md: 'var(--mieweb-radius-md, 0.5rem)',
         sm: 'var(--mieweb-radius-sm, 0.25rem)',

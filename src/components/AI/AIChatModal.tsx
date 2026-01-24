@@ -51,9 +51,9 @@ export function AIChatTrigger({
       onClick={onClick}
       className={cn(
         'fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg',
-        'bg-gradient-to-br from-violet-500 to-purple-600 text-white',
-        'hover:from-violet-600 hover:to-purple-700',
-        'focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none',
+        'bg-primary-500 text-white',
+        'hover:bg-primary-600',
+        'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
         'dark:focus:ring-offset-neutral-900',
         'transition-all duration-200',
         isOpen && 'scale-0 opacity-0',
@@ -64,7 +64,7 @@ export function AIChatTrigger({
     >
       {/* Pulse effect */}
       {pulse && !isOpen && (
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" />
+        <span className="bg-primary-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
       )}
 
       {/* Badge */}

@@ -180,7 +180,7 @@ function AIEmptyState({
   ...props
 }: AIEmptyStateProps) {
   const aiIcon = (
-    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+    <div className="bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white">
       <SparklesIcon size="lg" className="h-8 w-8" />
     </div>
   );
@@ -332,7 +332,7 @@ export function AIChat({
       {showHeader && (
         <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+            <div className="bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white">
               <SparklesIcon size="sm" />
             </div>
             <div>
