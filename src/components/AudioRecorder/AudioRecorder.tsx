@@ -683,7 +683,6 @@ function AudioRecorder({
     maxDuration,
     audioObjectUrl,
     duration,
-    initWaveSurfer,
     onRecordingComplete,
     onRecordingStart,
     onError,

@@ -324,6 +324,7 @@ function RecordButton({
     onRecordingComplete,
     onRecordingStart,
     onError,
+    stopRecording,
   ]);
 
   const stopRecording = React.useCallback(() => {

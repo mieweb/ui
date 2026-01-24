@@ -84,13 +84,21 @@ export default [
       ],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      '@typescript-eslint/no-explicit-any': 'error',
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'react-hooks/exhaustive-deps': 'error',
     },
     settings: {
       react: {
         version: 'detect',
       },
+    },
+  },
+  // Allow console logs in Storybook stories for development/testing
+  {
+    files: ['src/**/*.stories.{ts,tsx}'],
+    rules: {
+      'no-console': 'off',
     },
   },
   {

@@ -114,7 +114,6 @@ export const WithClickHandler: Story = {
     subtitle: 'Click me!',
     icon: <QuickActionIcons.Search />,
     color: 'blue',
-    // eslint-disable-next-line no-console
     onClick: () => console.log('QuickAction clicked!'),
   },
 };
