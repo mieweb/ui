@@ -113,7 +113,9 @@ function AITypingIndicator({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn('inline-flex items-center justify-center gap-2', className)}>
+    <div
+      className={cn('inline-flex items-center justify-center gap-2', className)}
+    >
       <span
         className="rounded-full bg-neutral-500 dark:bg-neutral-400"
         style={{
@@ -251,7 +253,7 @@ const messageVariants = cva('flex gap-3', {
   },
 });
 
-const bubbleVariants = cva('rounded-2xl px-4 py-2.5 max-w-[85%]', {
+const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
   variants: {
     role: {
       user: 'bg-primary-600 text-white dark:bg-primary-500',
