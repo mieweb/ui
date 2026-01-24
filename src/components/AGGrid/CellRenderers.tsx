@@ -91,14 +91,14 @@ function getInitials(name: string): string {
  */
 function getAvatarColor(name: string): string {
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-orange-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-    'bg-teal-500',
-    'bg-amber-500',
+    'bg-primary-600',
+    'bg-green-600',
+    'bg-orange-600',
+    'bg-secondary-600',
+    'bg-pink-600',
+    'bg-primary-700',
+    'bg-teal-600',
+    'bg-amber-600',
   ];
   if (!name || typeof name !== 'string') return colors[0];
   let hash = 0;
@@ -154,8 +154,8 @@ export const statusColors: Record<string, StatusConfig> = {
   },
   new: {
     label: 'New',
-    bgClass: 'bg-blue-100 dark:bg-blue-900/30',
-    textClass: 'text-blue-600 dark:text-blue-400',
+    bgClass: 'bg-primary-100 dark:bg-primary-900/30',
+    textClass: 'text-primary-600 dark:text-primary-400',
   },
   verified: {
     label: 'Verified',
@@ -360,7 +360,7 @@ export function EmailRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`mailto:${value}`}
-      className="inline-flex items-center gap-1.5 text-blue-600 hover:underline dark:text-blue-400"
+      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
       <MailIcon className="h-3 w-3 opacity-60" />
@@ -385,7 +385,7 @@ export function PhoneRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`tel:${value}`}
-      className="text-foreground inline-flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400"
+      className="text-foreground hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5"
       onClick={(e) => e.stopPropagation()}
     >
       <PhoneIcon className="h-3 w-3 text-green-500 opacity-70" />
@@ -413,7 +413,7 @@ export function DomainRenderer(props: ICellRendererParams): React.ReactElement {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-blue-600 hover:underline dark:text-blue-400"
+      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
       <GlobeIcon className="h-3 w-3 opacity-60" />
@@ -660,7 +660,7 @@ export interface ProgressRendererProps extends ICellRendererParams {
 export function ProgressRenderer(
   props: ProgressRendererProps
 ): React.ReactElement {
-  const { value, barColor = 'bg-blue-500', max = 100 } = props;
+  const { value, barColor = 'bg-primary-500', max = 100 } = props;
   if (value == null) return <span className="text-muted-foreground">--</span>;
 
   const percentage = Math.min(100, Math.max(0, (Number(value) / max) * 100));
