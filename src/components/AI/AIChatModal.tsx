@@ -10,7 +10,7 @@ import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import type { AIChatProps } from './AIChat';
 import { AIChat } from './AIChat';
-import { AILogoIcon } from './icons';
+import { SparklesIcon } from './icons';
 
 // ============================================================================
 // AI Chat Trigger Button
@@ -75,7 +75,7 @@ export function AIChatTrigger({
       )}
 
       {/* AI Icon */}
-      <AILogoIcon size="lg" />
+      <SparklesIcon size="lg" />
     </button>
   );
 }

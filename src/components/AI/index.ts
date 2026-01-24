@@ -10,12 +10,14 @@ export * from './types';
 
 // Icons
 export {
+  SparklesIcon,
   AILogoIcon,
   CloseIcon,
   RefreshIcon,
   ChevronIcon,
   SendIcon,
   SpinnerIcon,
+  type SparklesIconProps,
   type AILogoIconProps,
   type CloseIconProps,
   type RefreshIconProps,

@@ -8,10 +8,10 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
-// AI Logo Icon (Stack/Layers)
+// Sparkles Icon (Modern AI Symbol)
 // ============================================================================
 
-export interface AILogoIconProps {
+export interface SparklesIconProps {
   className?: string;
   /** Size variant */
   size?: 'sm' | 'md' | 'lg';
@@ -24,7 +24,48 @@ const sizeClasses = {
 };
 
 /**
+ * Sparkles icon - the modern symbol for AI features
+ * Used by ChatGPT, GitHub Copilot, Google Gemini, etc.
+ */
+export function SparklesIcon({ className, size = 'md' }: SparklesIconProps) {
+  return (
+    <svg
+      className={cn(sizeClasses[size], className)}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      {/* Large sparkle */}
+      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+      {/* Small sparkle */}
+      <path
+        d="M20 3v4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M22 5h-4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+// ============================================================================
+// AI Logo Icon (Stack/Layers) - Legacy
+// ============================================================================
+
+export interface AILogoIconProps {
+  className?: string;
+  /** Size variant */
+  size?: 'sm' | 'md' | 'lg';
+}
+
+/**
  * The AI assistant logo - a stacked layers/prism icon
+ * @deprecated Use SparklesIcon for a more recognizable AI symbol
  */
 export function AILogoIcon({ className, size = 'md' }: AILogoIconProps) {
   return (

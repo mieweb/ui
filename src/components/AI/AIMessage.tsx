@@ -9,7 +9,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
-import { AILogoIcon, ChevronIcon } from './icons';
+import { SparklesIcon, ChevronIcon } from './icons';
 
 // ============================================================================
 // Avatar Component
@@ -63,7 +63,7 @@ function MessageAvatar({
   return (
     <div className={cn(avatarVariants({ role, size }), className)}>
       {role === 'assistant' ? (
-        <AILogoIcon size="md" />
+        <SparklesIcon size="md" />
       ) : role === 'user' ? (
         <span className="font-medium">{getInitials(userName)}</span>
       ) : role === 'system' ? (
@@ -104,11 +104,45 @@ function MessageAvatar({
 // ============================================================================
 
 function AITypingIndicator({ className }: { className?: string }) {
+  const dotStyle = {
+    width: '6px',
+    height: '6px',
+    minWidth: '6px',
+    minHeight: '6px',
+    flexShrink: 0,
+  };
+
   return (
-    <div className={cn('flex items-center gap-1', className)}>
-      <span className="h-2 w-2 animate-bounce rounded-full bg-neutral-400 [animation-delay:-0.3s] dark:bg-neutral-500" />
-      <span className="h-2 w-2 animate-bounce rounded-full bg-neutral-400 [animation-delay:-0.15s] dark:bg-neutral-500" />
-      <span className="h-2 w-2 animate-bounce rounded-full bg-neutral-400 dark:bg-neutral-500" />
+    <div className={cn('flex items-center gap-2', className)}>
+      <span
+        className="rounded-full bg-neutral-500 dark:bg-neutral-400"
+        style={{
+          ...dotStyle,
+          animation: 'typing-dot 1.4s infinite ease-in-out both',
+          animationDelay: '-0.32s',
+        }}
+      />
+      <span
+        className="rounded-full bg-neutral-500 dark:bg-neutral-400"
+        style={{
+          ...dotStyle,
+          animation: 'typing-dot 1.4s infinite ease-in-out both',
+          animationDelay: '-0.16s',
+        }}
+      />
+      <span
+        className="rounded-full bg-neutral-500 dark:bg-neutral-400"
+        style={{
+          ...dotStyle,
+          animation: 'typing-dot 1.4s infinite ease-in-out both',
+        }}
+      />
+      <style>{`
+        @keyframes typing-dot {
+          0%, 80%, 100% { opacity: 0.4; }
+          40% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

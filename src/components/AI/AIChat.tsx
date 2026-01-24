@@ -27,7 +27,7 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
-import { AILogoIcon, CloseIcon, RefreshIcon } from './icons';
+import { SparklesIcon, CloseIcon, RefreshIcon } from './icons';
 
 // ============================================================================
 // Suggested Actions Component
@@ -181,7 +181,7 @@ function AIEmptyState({
 }: AIEmptyStateProps) {
   const aiIcon = (
     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white">
-      <AILogoIcon size="lg" className="h-8 w-8" />
+      <SparklesIcon size="lg" className="h-8 w-8" />
     </div>
   );
 
@@ -333,7 +333,7 @@ export function AIChat({
         <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white">
-              <AILogoIcon size="sm" />
+              <SparklesIcon size="sm" />
             </div>
             <div>
               <h2 className="font-semibold text-neutral-900 dark:text-white">
