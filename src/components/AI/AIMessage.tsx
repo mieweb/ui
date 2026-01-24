@@ -113,7 +113,12 @@ function AITypingIndicator({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div
+      className={cn(
+        'inline-flex items-center justify-center gap-2 rounded-full bg-neutral-200 px-4 py-3 dark:bg-neutral-700',
+        className
+      )}
+    >
       <span
         className="rounded-full bg-neutral-500 dark:bg-neutral-400"
         style={{
