@@ -348,7 +348,9 @@ export function AIMessageDisplay({
               ))}
             </div>
           ) : isStreaming ? (
-            <AITypingIndicator />
+            <div className="flex items-center justify-center">
+              <AITypingIndicator />
+            </div>
           ) : null}
         </div>
 
