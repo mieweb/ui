@@ -48,7 +48,7 @@ const iconCategories: Record<string, IconInfo[]> = {
     { name: 'LogInIcon', component: Icons.LogInIcon },
     { name: 'LogOutIcon', component: Icons.LogOutIcon },
   ],
-  'Actions': [
+  Actions: [
     { name: 'PlusIcon', component: Icons.PlusIcon },
     { name: 'MinusIcon', component: Icons.MinusIcon },
     { name: 'PencilIcon', component: Icons.PencilIcon },
@@ -72,7 +72,7 @@ const iconCategories: Record<string, IconInfo[]> = {
     { name: 'HelpCircleIcon', component: Icons.HelpCircleIcon },
     { name: 'LoaderIcon', component: Icons.LoaderIcon },
   ],
-  'Communication': [
+  Communication: [
     { name: 'BellIcon', component: Icons.BellIcon },
     { name: 'BellOffIcon', component: Icons.BellOffIcon },
     { name: 'MailIcon', component: Icons.MailIcon },
@@ -118,13 +118,13 @@ const iconCategories: Record<string, IconInfo[]> = {
     { name: 'EyeIcon', component: Icons.EyeIcon },
     { name: 'EyeOffIcon', component: Icons.EyeOffIcon },
   ],
-  'Theme': [
+  Theme: [
     { name: 'SunIcon', component: Icons.SunIcon },
     { name: 'MoonIcon', component: Icons.MoonIcon },
     { name: 'MonitorIcon', component: Icons.MonitorIcon },
     { name: 'PaletteIcon', component: Icons.PaletteIcon },
   ],
-  'Security': [
+  Security: [
     { name: 'ShieldIcon', component: Icons.ShieldIcon },
     { name: 'ShieldCheckIcon', component: Icons.ShieldCheckIcon },
     { name: 'ShieldPlusIcon', component: Icons.ShieldPlusIcon },
@@ -182,7 +182,7 @@ const iconCategories: Record<string, IconInfo[]> = {
     { name: 'BadgeCheckIcon', component: Icons.BadgeCheckIcon },
     { name: 'BadgeAlertIcon', component: Icons.BadgeAlertIcon },
   ],
-  'Misc': [
+  Misc: [
     { name: 'HeartIcon', component: Icons.HeartIcon },
     { name: 'StarIcon', component: Icons.StarIcon },
     { name: 'BookmarkIcon', component: Icons.BookmarkIcon },
@@ -225,11 +225,11 @@ function IconCard({ name, Icon }: IconCardProps) {
   return (
     <button
       onClick={copyImport}
-      className="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-border bg-card hover:bg-muted/50 hover:border-primary-300 transition-all cursor-pointer group"
+      className="border-border bg-card hover:bg-muted/50 hover:border-primary-300 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border p-4 transition-all"
       title={`Click to copy import for ${name}`}
     >
-      <Icon className="h-6 w-6 text-foreground group-hover:text-primary-500 transition-colors" />
-      <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors text-center break-all">
+      <Icon className="text-foreground group-hover:text-primary-500 h-6 w-6 transition-colors" />
+      <span className="text-muted-foreground group-hover:text-foreground text-center text-xs break-all transition-colors">
         {copied ? '✓ Copied!' : name.replace('Icon', '')}
       </span>
     </button>
@@ -248,8 +248,8 @@ interface IconSectionProps {
 function IconSection({ title, icons }: IconSectionProps) {
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-semibold text-foreground mb-4">{title}</h2>
-      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+      <h2 className="text-foreground mb-4 text-lg font-semibold">{title}</h2>
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
         {icons.map((icon) => (
           <IconCard key={icon.name} name={icon.name} Icon={icon.component} />
         ))}
@@ -287,11 +287,11 @@ function IconsPage() {
   const totalIcons = Object.values(iconCategories).flat().length;
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="bg-background min-h-screen p-8">
+      <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Icons</h1>
+          <h1 className="text-foreground mb-2 text-3xl font-bold">Icons</h1>
           <p className="text-muted-foreground mb-4">
             {totalIcons} icons powered by{' '}
             <a
@@ -307,13 +307,13 @@ function IconsPage() {
 
           {/* Search */}
           <div className="relative max-w-md">
-            <Icons.SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Icons.SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search icons..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-2 focus:outline-none"
             />
           </div>
         </div>
@@ -324,19 +324,21 @@ function IconsPage() {
         ))}
 
         {Object.keys(filteredCategories).length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="text-muted-foreground py-12 text-center">
             No icons found matching &ldquo;{search}&rdquo;
           </div>
         )}
 
         {/* Usage Example */}
-        <div className="mt-12 p-6 bg-card rounded-xl border border-border">
-          <h2 className="text-xl font-bold text-foreground mb-4">Usage</h2>
+        <div className="bg-card border-border mt-12 rounded-xl border p-6">
+          <h2 className="text-foreground mb-4 text-xl font-bold">Usage</h2>
           <div className="space-y-4 text-sm">
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Import from @mieweb/ui:</h3>
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto font-mono text-foreground">
-{`import { HomeIcon, UserIcon, SettingsIcon } from '@mieweb/ui';
+              <h3 className="text-foreground mb-2 font-semibold">
+                Import from @mieweb/ui:
+              </h3>
+              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+                {`import { HomeIcon, UserIcon, SettingsIcon } from '@mieweb/ui';
 
 function MyComponent() {
   return (
@@ -349,17 +351,21 @@ function MyComponent() {
               </pre>
             </div>
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Or import directly from lucide-react:</h3>
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto font-mono text-foreground">
-{`import { Accessibility, AlertOctagon } from 'lucide-react';
+              <h3 className="text-foreground mb-2 font-semibold">
+                Or import directly from lucide-react:
+              </h3>
+              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+                {`import { Accessibility, AlertOctagon } from 'lucide-react';
 
 // Full icon set available at https://lucide.dev/icons`}
               </pre>
             </div>
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Styling with Tailwind:</h3>
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto font-mono text-foreground">
-{`<HomeIcon className="h-4 w-4" />           {/* 16px */}
+              <h3 className="text-foreground mb-2 font-semibold">
+                Styling with Tailwind:
+              </h3>
+              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+                {`<HomeIcon className="h-4 w-4" />           {/* 16px */}
 <HomeIcon className="h-5 w-5" />           {/* 20px - default */}
 <HomeIcon className="h-6 w-6" />           {/* 24px */}
 <HomeIcon className="text-primary-500" />  {/* Brand color */}

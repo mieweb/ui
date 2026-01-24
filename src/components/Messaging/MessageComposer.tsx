@@ -78,7 +78,7 @@ CharacterCounter.displayName = 'CharacterCounter';
 const sendButtonVariants = cva(
   [
     'inline-flex items-center justify-center',
-    'rounded-full p-2.5',
+    'rounded-full p-3 self-start',
     'transition-all duration-200',
     'focus:outline-none focus:ring-2 focus:ring-primary-500',
     'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -210,6 +210,8 @@ export interface MessageComposerProps {
   } | null;
   /** Called when reply is cancelled */
   onCancelReply?: () => void;
+  /** Visual variant - 'default' shows border-t, 'minimal' has no border */
+  variant?: 'default' | 'minimal';
   /** Additional class name */
   className?: string;
 }
@@ -250,6 +252,7 @@ const MessageComposer = React.forwardRef<
       autoFocus = false,
       replyTo = null,
       onCancelReply,
+      variant = 'default',
       className,
     },
     ref
@@ -485,9 +488,10 @@ const MessageComposer = React.forwardRef<
           {/* Input area */}
           <div
             className={cn(
-              'flex items-end gap-2 p-3',
+              'flex items-center gap-2 p-3',
               'bg-white dark:bg-neutral-900',
-              'border-t border-neutral-200 dark:border-neutral-700'
+              variant === 'default' &&
+                'border-t border-neutral-200 dark:border-neutral-700'
             )}
           >
             {/* Attachment buttons */}

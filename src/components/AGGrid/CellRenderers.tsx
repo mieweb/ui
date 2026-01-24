@@ -28,7 +28,10 @@ import { Linkedin } from 'lucide-react';
 /**
  * Get a nested value from an object using dot notation (e.g., 'company.domain')
  */
-function getNestedValue(obj: Record<string, unknown> | undefined | null, path: string): unknown {
+function getNestedValue(
+  obj: Record<string, unknown> | undefined | null,
+  path: string
+): unknown {
   if (!obj || !path) return undefined;
   const parts = path.split('.');
   let current: unknown = obj;
@@ -110,7 +113,7 @@ function getAvatarColor(name: string): string {
  */
 function cellRendererPropsAreEqual(
   prevProps: ICellRendererParams,
-  nextProps: ICellRendererParams,
+  nextProps: ICellRendererParams
 ): boolean {
   if (prevProps.value !== nextProps.value) return false;
   if (prevProps.data !== nextProps.data) return false;
@@ -178,12 +181,16 @@ interface AvatarNameRendererProps extends ICellRendererParams {
 /**
  * Renders an avatar with name, suitable for contact/owner columns
  */
-export function AvatarNameRenderer(props: AvatarNameRendererProps): React.ReactElement {
+export function AvatarNameRenderer(
+  props: AvatarNameRendererProps
+): React.ReactElement {
   const { data, value } = props;
   if (!data && !value) return <span className="text-muted-foreground">--</span>;
 
   const displayName = typeof value === 'string' && value ? value : 'Unknown';
-  const isSystemValue = ['Unknown', 'Unassigned', 'System'].includes(displayName);
+  const isSystemValue = ['Unknown', 'Unassigned', 'System'].includes(
+    displayName
+  );
 
   const avatarUrl =
     props.avatarField && data
@@ -202,10 +209,12 @@ export function AvatarNameRenderer(props: AvatarNameRendererProps): React.ReactE
   if (isSystemValue) {
     return (
       <div className="flex items-center gap-2 py-1">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-xs font-semibold text-gray-400 dark:text-gray-500">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-500">
           {displayName === 'Unassigned' ? '—' : '??'}
         </div>
-        <span className="truncate text-gray-400 dark:text-gray-500 italic">{displayName}</span>
+        <span className="truncate text-gray-400 italic dark:text-gray-500">
+          {displayName}
+        </span>
       </div>
     );
   }
@@ -216,7 +225,7 @@ export function AvatarNameRenderer(props: AvatarNameRendererProps): React.ReactE
         <img
           src={imageUrl}
           alt={displayName}
-          className="h-7 w-7 rounded-full object-cover ring-2 ring-white dark:ring-gray-700 bg-white"
+          className="h-7 w-7 rounded-full bg-white object-cover ring-2 ring-white dark:ring-gray-700"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
@@ -228,13 +237,15 @@ export function AvatarNameRenderer(props: AvatarNameRendererProps): React.ReactE
       <div
         className={cn(
           'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold text-white',
-          getAvatarColor(displayName),
+          getAvatarColor(displayName)
         )}
         style={{ display: imageUrl ? 'none' : 'flex' }}
       >
         {initials}
       </div>
-      <span className="truncate font-medium text-foreground">{displayName}</span>
+      <span className="text-foreground truncate font-medium">
+        {displayName}
+      </span>
     </div>
   );
 }
@@ -251,7 +262,9 @@ export interface StatusBadgeRendererProps extends ICellRendererParams {
 /**
  * Renders a colorful status badge
  */
-export function StatusBadgeRenderer(props: StatusBadgeRendererProps): React.ReactElement {
+export function StatusBadgeRenderer(
+  props: StatusBadgeRendererProps
+): React.ReactElement {
   const { value, statusConfig = statusColors } = props;
   if (!value) return <span className="text-muted-foreground">--</span>;
 
@@ -267,7 +280,7 @@ export function StatusBadgeRenderer(props: StatusBadgeRendererProps): React.Reac
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
         config.bgClass,
-        config.textClass,
+        config.textClass
       )}
     >
       {config.label}
@@ -282,17 +295,37 @@ export function StatusBadgeRenderer(props: StatusBadgeRendererProps): React.Reac
 /**
  * Get engagement score colors based on threshold
  */
-function getEngagementScoreColors(score: number): { barColor: string; textColor: string } {
-  if (score >= 70) return { barColor: 'bg-green-500', textColor: 'text-green-600 dark:text-green-400' };
-  if (score >= 40) return { barColor: 'bg-amber-500', textColor: 'text-amber-600 dark:text-amber-400' };
-  if (score >= 20) return { barColor: 'bg-orange-500', textColor: 'text-orange-600 dark:text-orange-400' };
-  return { barColor: 'bg-gray-400', textColor: 'text-gray-600 dark:text-gray-400' };
+function getEngagementScoreColors(score: number): {
+  barColor: string;
+  textColor: string;
+} {
+  if (score >= 70)
+    return {
+      barColor: 'bg-green-500',
+      textColor: 'text-green-600 dark:text-green-400',
+    };
+  if (score >= 40)
+    return {
+      barColor: 'bg-amber-500',
+      textColor: 'text-amber-600 dark:text-amber-400',
+    };
+  if (score >= 20)
+    return {
+      barColor: 'bg-orange-500',
+      textColor: 'text-orange-600 dark:text-orange-400',
+    };
+  return {
+    barColor: 'bg-gray-400',
+    textColor: 'text-gray-600 dark:text-gray-400',
+  };
 }
 
 /**
  * Renders engagement score with color-coded progress bar
  */
-export function EngagementScoreRenderer(props: ICellRendererParams): React.ReactElement {
+export function EngagementScoreRenderer(
+  props: ICellRendererParams
+): React.ReactElement {
   const { value } = props;
   if (value == null) return <span className="text-muted-foreground">--</span>;
 
@@ -302,7 +335,7 @@ export function EngagementScoreRenderer(props: ICellRendererParams): React.React
 
   return (
     <div className="flex items-center gap-2 py-1">
-      <div className="w-16 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
         <div
           className={cn('h-full rounded-full transition-all', barColor)}
           style={{ width: `${percentage}%` }}
@@ -327,7 +360,7 @@ export function EmailRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`mailto:${value}`}
-      className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline"
+      className="inline-flex items-center gap-1.5 text-blue-600 hover:underline dark:text-blue-400"
       onClick={(e) => e.stopPropagation()}
     >
       <MailIcon className="h-3 w-3 opacity-60" />
@@ -352,7 +385,7 @@ export function PhoneRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`tel:${value}`}
-      className="inline-flex items-center gap-1.5 text-foreground hover:text-blue-600 dark:hover:text-blue-400"
+      className="text-foreground inline-flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400"
       onClick={(e) => e.stopPropagation()}
     >
       <PhoneIcon className="h-3 w-3 text-green-500 opacity-70" />
@@ -380,7 +413,7 @@ export function DomainRenderer(props: ICellRendererParams): React.ReactElement {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline"
+      className="inline-flex items-center gap-1.5 text-blue-600 hover:underline dark:text-blue-400"
       onClick={(e) => e.stopPropagation()}
     >
       <GlobeIcon className="h-3 w-3 opacity-60" />
@@ -392,7 +425,9 @@ export function DomainRenderer(props: ICellRendererParams): React.ReactElement {
 /**
  * Renders a LinkedIn URL with icon
  */
-export function LinkedInRenderer(props: ICellRendererParams): React.ReactElement {
+export function LinkedInRenderer(
+  props: ICellRendererParams
+): React.ReactElement {
   const { value } = props;
   if (!value) return <span className="text-muted-foreground">--</span>;
 
@@ -417,7 +452,9 @@ export function LinkedInRenderer(props: ICellRendererParams): React.ReactElement
 /**
  * Renders currency with proper formatting
  */
-export function CurrencyRenderer(props: ICellRendererParams): React.ReactElement {
+export function CurrencyRenderer(
+  props: ICellRendererParams
+): React.ReactElement {
   const { value } = props;
   if (value == null) return <span className="text-muted-foreground">--</span>;
 
@@ -428,7 +465,11 @@ export function CurrencyRenderer(props: ICellRendererParams): React.ReactElement
     maximumFractionDigits: 0,
   }).format(value);
 
-  return <span className="font-medium tabular-nums text-foreground">{formatted}</span>;
+  return (
+    <span className="text-foreground font-medium tabular-nums">
+      {formatted}
+    </span>
+  );
 }
 
 // =============================================================================
@@ -444,7 +485,7 @@ export function NumberRenderer(props: ICellRendererParams): React.ReactElement {
 
   const formatted = Number(value).toLocaleString();
 
-  return <span className="tabular-nums text-foreground">{formatted}</span>;
+  return <span className="text-foreground tabular-nums">{formatted}</span>;
 }
 
 // =============================================================================
@@ -524,7 +565,9 @@ export function DateRenderer(props: DateRendererProps): React.ReactElement {
 /**
  * Renders boolean as styled Yes/No badge
  */
-export function BooleanRenderer(props: ICellRendererParams): React.ReactElement {
+export function BooleanRenderer(
+  props: ICellRendererParams
+): React.ReactElement {
   const { value } = props;
   if (value == null) return <span className="text-muted-foreground">--</span>;
 
@@ -535,8 +578,8 @@ export function BooleanRenderer(props: ICellRendererParams): React.ReactElement 
       className={cn(
         'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
         isTrue
-          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-          : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+          ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+          : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
       )}
     >
       {isTrue ? (
@@ -561,7 +604,9 @@ interface CompanyRendererProps extends ICellRendererParams {
 /**
  * Renders company name with favicon
  */
-export function CompanyRenderer(props: CompanyRendererProps): React.ReactElement {
+export function CompanyRenderer(
+  props: CompanyRendererProps
+): React.ReactElement {
   const { data, value } = props;
   if (!value) return <span className="text-muted-foreground">--</span>;
 
@@ -578,7 +623,7 @@ export function CompanyRenderer(props: CompanyRendererProps): React.ReactElement
         <img
           src={faviconUrl}
           alt={value}
-          className="h-5 w-5 rounded object-contain bg-white"
+          className="h-5 w-5 rounded bg-white object-contain"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
@@ -588,7 +633,7 @@ export function CompanyRenderer(props: CompanyRendererProps): React.ReactElement
         />
       ) : null}
       <div
-        className="flex h-5 w-5 items-center justify-center rounded bg-blue-100 dark:bg-blue-900/30 text-[9px] font-semibold text-blue-600 dark:text-blue-400"
+        className="flex h-5 w-5 items-center justify-center rounded bg-blue-100 text-[9px] font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
         style={{ display: faviconUrl ? 'none' : 'flex' }}
       >
         {getInitials(value)}
@@ -612,7 +657,9 @@ export interface ProgressRendererProps extends ICellRendererParams {
 /**
  * Renders a progress bar
  */
-export function ProgressRenderer(props: ProgressRendererProps): React.ReactElement {
+export function ProgressRenderer(
+  props: ProgressRendererProps
+): React.ReactElement {
   const { value, barColor = 'bg-blue-500', max = 100 } = props;
   if (value == null) return <span className="text-muted-foreground">--</span>;
 
@@ -620,13 +667,15 @@ export function ProgressRenderer(props: ProgressRendererProps): React.ReactEleme
 
   return (
     <div className="flex items-center gap-2 py-1">
-      <div className="w-20 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="h-2 w-20 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
         <div
           className={cn('h-full rounded-full transition-all', barColor)}
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <span className="text-xs font-medium text-muted-foreground">{Math.round(percentage)}%</span>
+      <span className="text-muted-foreground text-xs font-medium">
+        {Math.round(percentage)}%
+      </span>
     </div>
   );
 }
@@ -649,13 +698,15 @@ export function TagsRenderer(props: ICellRendererParams): React.ReactElement {
       {value.slice(0, 3).map((tag: string, index: number) => (
         <span
           key={index}
-          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+          className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400"
         >
           {tag}
         </span>
       ))}
       {value.length > 3 && (
-        <span className="text-xs text-muted-foreground">+{value.length - 3}</span>
+        <span className="text-muted-foreground text-xs">
+          +{value.length - 3}
+        </span>
       )}
     </div>
   );
@@ -665,20 +716,62 @@ export function TagsRenderer(props: ICellRendererParams): React.ReactElement {
 // Memoized Renderer Exports (for performance)
 // =============================================================================
 
-export const MemoizedAvatarNameRenderer = memo(AvatarNameRenderer, cellRendererPropsAreEqual);
-export const MemoizedStatusBadgeRenderer = memo(StatusBadgeRenderer, cellRendererPropsAreEqual);
-export const MemoizedEngagementScoreRenderer = memo(EngagementScoreRenderer, cellRendererPropsAreEqual);
-export const MemoizedEmailRenderer = memo(EmailRenderer, cellRendererPropsAreEqual);
-export const MemoizedPhoneRenderer = memo(PhoneRenderer, cellRendererPropsAreEqual);
-export const MemoizedLinkedInRenderer = memo(LinkedInRenderer, cellRendererPropsAreEqual);
-export const MemoizedDomainRenderer = memo(DomainRenderer, cellRendererPropsAreEqual);
-export const MemoizedCurrencyRenderer = memo(CurrencyRenderer, cellRendererPropsAreEqual);
-export const MemoizedNumberRenderer = memo(NumberRenderer, cellRendererPropsAreEqual);
-export const MemoizedDateRenderer = memo(DateRenderer, cellRendererPropsAreEqual);
-export const MemoizedBooleanRenderer = memo(BooleanRenderer, cellRendererPropsAreEqual);
-export const MemoizedCompanyRenderer = memo(CompanyRenderer, cellRendererPropsAreEqual);
-export const MemoizedProgressRenderer = memo(ProgressRenderer, cellRendererPropsAreEqual);
-export const MemoizedTagsRenderer = memo(TagsRenderer, cellRendererPropsAreEqual);
+export const MemoizedAvatarNameRenderer = memo(
+  AvatarNameRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedStatusBadgeRenderer = memo(
+  StatusBadgeRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedEngagementScoreRenderer = memo(
+  EngagementScoreRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedEmailRenderer = memo(
+  EmailRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedPhoneRenderer = memo(
+  PhoneRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedLinkedInRenderer = memo(
+  LinkedInRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedDomainRenderer = memo(
+  DomainRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedCurrencyRenderer = memo(
+  CurrencyRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedNumberRenderer = memo(
+  NumberRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedDateRenderer = memo(
+  DateRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedBooleanRenderer = memo(
+  BooleanRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedCompanyRenderer = memo(
+  CompanyRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedProgressRenderer = memo(
+  ProgressRenderer,
+  cellRendererPropsAreEqual
+);
+export const MemoizedTagsRenderer = memo(
+  TagsRenderer,
+  cellRendererPropsAreEqual
+);
 
 // =============================================================================
 // Default Export

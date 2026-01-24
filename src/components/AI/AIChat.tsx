@@ -27,6 +27,7 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
+import { AILogoIcon, CloseIcon, RefreshIcon } from './icons';
 
 // ============================================================================
 // Suggested Actions Component
@@ -179,32 +180,8 @@ function AIEmptyState({
   ...props
 }: AIEmptyStateProps) {
   const aiIcon = (
-    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600">
-      <svg className="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M12 2L2 7L12 12L22 7L12 2Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="currentColor"
-          fillOpacity="0.2"
-        />
-        <path
-          d="M2 17L12 22L22 17"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M2 12L12 17L22 12"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+      <AILogoIcon size="lg" className="h-8 w-8" />
     </div>
   );
 
@@ -280,6 +257,8 @@ export interface AIChatProps
   height?: string | number;
   /** Props to pass to the MessageComposer */
   composerProps?: Partial<MessageComposerProps>;
+  /** Callback when close button is clicked (shows close button when provided) */
+  onClose?: () => void;
   /** Additional class name */
   className?: string;
 }
@@ -309,6 +288,7 @@ export function AIChat({
   onSuggestedAction,
   onCancel,
   onClear,
+  onClose,
 }: AIChatProps) {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -352,36 +332,8 @@ export function AIChat({
       {showHeader && (
         <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600">
-              <svg
-                className="h-4 w-4 text-white"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <path
-                  d="M12 2L2 7L12 12L22 7L12 2Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="currentColor"
-                  fillOpacity="0.2"
-                />
-                <path
-                  d="M2 17L12 22L22 17"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M2 12L12 17L22 12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+              <AILogoIcon size="sm" />
             </div>
             <div>
               <h2 className="font-semibold text-neutral-900 dark:text-white">
@@ -393,7 +345,7 @@ export function AIChat({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {isGenerating && onCancel && (
               <button
                 onClick={onCancel}
@@ -413,19 +365,17 @@ export function AIChat({
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Clear chat"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-                  />
-                </svg>
+                <RefreshIcon />
+              </button>
+            )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                title="Close chat"
+                aria-label="Close chat"
+              >
+                <CloseIcon />
               </button>
             )}
           </div>
@@ -456,16 +406,17 @@ export function AIChat({
       </div>
 
       {/* Input - Using MessageComposer from Messaging */}
-      <div className="border-t border-neutral-200 p-4 dark:border-neutral-700">
+      <div className="shrink-0 border-t border-neutral-200 dark:border-neutral-700">
         {suggestions &&
           suggestions.length > 0 &&
           messages.length > 0 &&
           !isGenerating && (
-            <SuggestedActions
-              actions={suggestions}
-              onSelect={handleSuggestionSelect}
-              className="mb-3"
-            />
+            <div className="px-4 pt-3">
+              <SuggestedActions
+                actions={suggestions}
+                onSelect={handleSuggestionSelect}
+              />
+            </div>
           )}
         <MessageComposer
           onSend={handleSend}
@@ -475,6 +426,7 @@ export function AIChat({
           showAttachmentPicker={false}
           showCameraButton={false}
           showCharacterCount={false}
+          variant="minimal"
           {...composerProps}
         />
       </div>

@@ -493,8 +493,12 @@
   border-radius: 7px !important;
 }
 
-.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
-.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track {
+.dark
+  .ag-theme-custom
+  .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-track,
+.dark
+  .ag-theme-custom
+  .ag-body-vertical-scroll-viewport::-webkit-scrollbar-track {
   background: #1f2937 !important;
 }
 
@@ -508,30 +512,46 @@
   min-width: 40px !important;
 }
 
-.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
-.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
+.dark
+  .ag-theme-custom
+  .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb,
+.dark
+  .ag-theme-custom
+  .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb {
   background: #6b7280 !important;
   border: 3px solid #1f2937 !important;
   background-clip: padding-box !important;
 }
 
-.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
-.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
+.ag-theme-custom
+  .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.ag-theme-custom
+  .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
   background: #6b7280 !important;
 }
 
-.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
-.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
+.dark
+  .ag-theme-custom
+  .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover,
+.dark
+  .ag-theme-custom
+  .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:hover {
   background: #9ca3af !important;
 }
 
-.ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:active,
-.ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:active {
+.ag-theme-custom
+  .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:active,
+.ag-theme-custom
+  .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:active {
   background: #4b5563 !important;
 }
 
-.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:active,
-.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:active {
+.dark
+  .ag-theme-custom
+  .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-thumb:active,
+.dark
+  .ag-theme-custom
+  .ag-body-vertical-scroll-viewport::-webkit-scrollbar-thumb:active {
   background: #d1d5db !important;
 }
 
@@ -540,8 +560,12 @@
   background: #f3f4f6 !important;
 }
 
-.dark .ag-theme-custom .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-corner,
-.dark .ag-theme-custom .ag-body-vertical-scroll-viewport::-webkit-scrollbar-corner {
+.dark
+  .ag-theme-custom
+  .ag-body-horizontal-scroll-viewport::-webkit-scrollbar-corner,
+.dark
+  .ag-theme-custom
+  .ag-body-vertical-scroll-viewport::-webkit-scrollbar-corner {
   background: #1f2937 !important;
 }
 

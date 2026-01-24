@@ -9,6 +9,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
+import { AILogoIcon, ChevronIcon } from './icons';
 
 // ============================================================================
 // Avatar Component
@@ -62,31 +63,7 @@ function MessageAvatar({
   return (
     <div className={cn(avatarVariants({ role, size }), className)}>
       {role === 'assistant' ? (
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 2L2 7L12 12L22 7L12 2Z"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="currentColor"
-            fillOpacity="0.2"
-          />
-          <path
-            d="M2 17L12 22L22 17"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M2 12L12 17L22 12"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <AILogoIcon size="md" />
       ) : role === 'user' ? (
         <span className="font-medium">{getInitials(userName)}</span>
       ) : role === 'system' ? (
@@ -191,22 +168,10 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
             </svg>
             Thinking...
           </span>
-          <svg
-            className={cn(
-              'h-4 w-4 text-neutral-400 transition-transform',
-              isCollapsed && '-rotate-90'
-            )}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
+          <ChevronIcon
+            direction={isCollapsed ? 'right' : 'down'}
+            className="text-neutral-400"
+          />
         </button>
         {!isCollapsed && (
           <div className="border-t border-neutral-200 px-3 py-2 dark:border-neutral-700">

@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { AgGridReact, AgGridReactProps } from 'ag-grid-react';
-import { 
-  ModuleRegistry, 
+import {
+  ModuleRegistry,
   AllCommunityModule,
-  type GridApi, 
-  type GridReadyEvent, 
-  type ColDef as AGColDef, 
+  type GridApi,
+  type GridReadyEvent,
+  type ColDef as AGColDef,
   type RowClickedEvent,
-  type RowSelectionOptions 
+  type RowSelectionOptions,
 } from 'ag-grid-community';
 import { cn } from '../../utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -19,40 +19,39 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 // AG Grid Wrapper Styles
 // ============================================================================
 
-const agGridVariants = cva(
-  'ag-theme-custom w-full',
-  {
-    variants: {
-      /**
-       * Visual variant of the grid
-       */
-      variant: {
-        default: '',
-        bordered: '[&_.ag-root-wrapper]:border [&_.ag-root-wrapper]:border-border [&_.ag-root-wrapper]:rounded-lg',
-        striped: '[&_.ag-row-odd]:bg-muted/50',
-      },
-      /**
-       * Size/density of the grid rows
-       */
-      size: {
-        sm: '[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs',
-        md: '[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm',
-        lg: '[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base',
-      },
+const agGridVariants = cva('ag-theme-custom w-full', {
+  variants: {
+    /**
+     * Visual variant of the grid
+     */
+    variant: {
+      default: '',
+      bordered:
+        '[&_.ag-root-wrapper]:border [&_.ag-root-wrapper]:border-border [&_.ag-root-wrapper]:rounded-lg',
+      striped: '[&_.ag-row-odd]:bg-muted/50',
     },
-    defaultVariants: {
-      variant: 'default',
-      size: 'md',
+    /**
+     * Size/density of the grid rows
+     */
+    size: {
+      sm: '[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs',
+      md: '[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm',
+      lg: '[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base',
     },
-  }
-);
+  },
+  defaultVariants: {
+    variant: 'default',
+    size: 'md',
+  },
+});
 
 // ============================================================================
 // AG Grid Component Types
 // ============================================================================
 
 export interface AGGridProps<TData = unknown>
-  extends Omit<AgGridReactProps<TData>, 'className' | 'rowSelection'>,
+  extends
+    Omit<AgGridReactProps<TData>, 'className' | 'rowSelection'>,
     VariantProps<typeof agGridVariants> {
   /** Additional CSS classes for the grid container */
   className?: string;
@@ -157,37 +156,40 @@ function AGGridInner<TData = unknown>(
 
   // Merge default column definitions
   const mergedDefaultColDef = React.useMemo(
-    () => ({
-      ...defaultColDef,
-      ...userDefaultColDef,
-    }) as AGColDef<TData>,
+    () =>
+      ({
+        ...defaultColDef,
+        ...userDefaultColDef,
+      }) as AGColDef<TData>,
     [userDefaultColDef]
   );
 
   // Convert legacy rowSelection string to v35+ object format
-  const resolvedRowSelection = React.useMemo((): RowSelectionOptions | undefined => {
+  const resolvedRowSelection = React.useMemo(():
+    | RowSelectionOptions
+    | undefined => {
     if (!rowSelection) return undefined;
-    
+
     // If already in object format, use as-is
     if (typeof rowSelection === 'object') {
       return rowSelection;
     }
-    
+
     // Convert legacy string format to v35+ object format
     if (rowSelection === 'multiple') {
-      return { 
-        mode: 'multiRow', 
+      return {
+        mode: 'multiRow',
         enableClickSelection: true,
       };
     }
-    
+
     if (rowSelection === 'single') {
-      return { 
-        mode: 'singleRow', 
+      return {
+        mode: 'singleRow',
         enableClickSelection: true,
       };
     }
-    
+
     return undefined;
   }, [rowSelection]);
 

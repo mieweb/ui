@@ -8,6 +8,22 @@
 // Types
 export * from './types';
 
+// Icons
+export {
+  AILogoIcon,
+  CloseIcon,
+  RefreshIcon,
+  ChevronIcon,
+  SendIcon,
+  SpinnerIcon,
+  type AILogoIconProps,
+  type CloseIconProps,
+  type RefreshIconProps,
+  type ChevronIconProps,
+  type SendIconProps,
+  type SpinnerIconProps,
+} from './icons';
+
 // MCP Tool Call Display
 export {
   MCPToolCallDisplay,

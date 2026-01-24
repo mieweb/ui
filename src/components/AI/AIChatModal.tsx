@@ -10,6 +10,7 @@ import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import type { AIChatProps } from './AIChat';
 import { AIChat } from './AIChat';
+import { AILogoIcon } from './icons';
 
 // ============================================================================
 // AI Chat Trigger Button
@@ -74,31 +75,7 @@ export function AIChatTrigger({
       )}
 
       {/* AI Icon */}
-      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M12 2L2 7L12 12L22 7L12 2Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="currentColor"
-          fillOpacity="0.2"
-        />
-        <path
-          d="M2 17L12 22L22 17"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M2 12L12 17L22 12"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <AILogoIcon size="lg" />
     </button>
   );
 }
@@ -187,37 +164,12 @@ export function AIChatModal({
         aria-label="AI Assistant Chat"
       >
         <div className="relative h-full w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-          {/* Close Button */}
-          <button
-            onClick={() => onOpenChange(false)}
-            className={cn(
-              'absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full',
-              'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700',
-              'dark:hover:bg-neutral-800 dark:hover:text-neutral-300',
-              'transition-colors'
-            )}
-            aria-label="Close chat"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-
           <AIChat
             {...chatProps}
             variant="embedded"
             height="100%"
             className="h-full"
+            onClose={() => onOpenChange(false)}
           />
         </div>
       </div>

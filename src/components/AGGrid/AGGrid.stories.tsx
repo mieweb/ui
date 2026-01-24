@@ -46,14 +46,86 @@ interface User {
 
 // Sample data
 const userData: User[] = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', department: 'Engineering', status: 'Active', salary: 95000, startDate: '2020-01-15' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Developer', department: 'Engineering', status: 'Active', salary: 85000, startDate: '2021-03-22' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Designer', department: 'Design', status: 'Inactive', salary: 75000, startDate: '2019-06-10' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Manager', department: 'Product', status: 'Active', salary: 110000, startDate: '2018-11-05' },
-  { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Developer', department: 'Engineering', status: 'Pending', salary: 80000, startDate: '2024-01-08' },
-  { id: 6, name: 'Diana Lee', email: 'diana@example.com', role: 'QA Engineer', department: 'Quality', status: 'Active', salary: 78000, startDate: '2022-07-19' },
-  { id: 7, name: 'Edward Chen', email: 'edward@example.com', role: 'DevOps', department: 'Engineering', status: 'Active', salary: 92000, startDate: '2021-09-14' },
-  { id: 8, name: 'Fiona Garcia', email: 'fiona@example.com', role: 'Designer', department: 'Design', status: 'Pending', salary: 72000, startDate: '2024-02-01' },
+  {
+    id: 1,
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'Admin',
+    department: 'Engineering',
+    status: 'Active',
+    salary: 95000,
+    startDate: '2020-01-15',
+  },
+  {
+    id: 2,
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    role: 'Developer',
+    department: 'Engineering',
+    status: 'Active',
+    salary: 85000,
+    startDate: '2021-03-22',
+  },
+  {
+    id: 3,
+    name: 'Bob Johnson',
+    email: 'bob@example.com',
+    role: 'Designer',
+    department: 'Design',
+    status: 'Inactive',
+    salary: 75000,
+    startDate: '2019-06-10',
+  },
+  {
+    id: 4,
+    name: 'Alice Brown',
+    email: 'alice@example.com',
+    role: 'Manager',
+    department: 'Product',
+    status: 'Active',
+    salary: 110000,
+    startDate: '2018-11-05',
+  },
+  {
+    id: 5,
+    name: 'Charlie Wilson',
+    email: 'charlie@example.com',
+    role: 'Developer',
+    department: 'Engineering',
+    status: 'Pending',
+    salary: 80000,
+    startDate: '2024-01-08',
+  },
+  {
+    id: 6,
+    name: 'Diana Lee',
+    email: 'diana@example.com',
+    role: 'QA Engineer',
+    department: 'Quality',
+    status: 'Active',
+    salary: 78000,
+    startDate: '2022-07-19',
+  },
+  {
+    id: 7,
+    name: 'Edward Chen',
+    email: 'edward@example.com',
+    role: 'DevOps',
+    department: 'Engineering',
+    status: 'Active',
+    salary: 92000,
+    startDate: '2021-09-14',
+  },
+  {
+    id: 8,
+    name: 'Fiona Garcia',
+    email: 'fiona@example.com',
+    role: 'Designer',
+    department: 'Design',
+    status: 'Pending',
+    salary: 72000,
+    startDate: '2024-02-01',
+  },
 ];
 
 // Basic column definitions
@@ -88,11 +160,11 @@ function WithRowSelectionComponent() {
           setSelectedRows(event.api.getSelectedRows());
         }}
       />
-      <div className="text-sm text-muted-foreground">
+      <div className="text-muted-foreground text-sm">
         Selected: {selectedRows.length} row(s)
         {selectedRows.length > 0 && (
           <span className="ml-2">
-            ({selectedRows.map(r => r.name).join(', ')})
+            ({selectedRows.map((r) => r.name).join(', ')})
           </span>
         )}
       </div>
@@ -115,9 +187,9 @@ function WithRowClickComponent() {
         }}
       />
       {clickedRow && (
-        <div className="p-4 bg-muted rounded-lg">
+        <div className="bg-muted rounded-lg p-4">
           <p className="font-medium">Clicked Row:</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {clickedRow.name} - {clickedRow.email} ({clickedRow.role})
           </p>
         </div>
@@ -132,14 +204,21 @@ function WithEditableCellsComponent() {
   const columnDefs: ColDef<User>[] = [
     { field: 'name', headerName: 'Name', flex: 1, editable: true },
     { field: 'email', headerName: 'Email', flex: 1, editable: true },
-    { 
-      field: 'role', 
-      headerName: 'Role', 
-      flex: 1, 
+    {
+      field: 'role',
+      headerName: 'Role',
+      flex: 1,
       editable: true,
       cellEditor: 'agSelectCellEditor',
       cellEditorParams: {
-        values: ['Admin', 'Developer', 'Designer', 'Manager', 'QA Engineer', 'DevOps'],
+        values: [
+          'Admin',
+          'Developer',
+          'Designer',
+          'Manager',
+          'QA Engineer',
+          'DevOps',
+        ],
       },
     },
     { field: 'status', headerName: 'Status', flex: 1 },
@@ -147,7 +226,7 @@ function WithEditableCellsComponent() {
 
   return (
     <div className="w-full space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Double-click a cell in the Name, Email, or Role columns to edit.
       </p>
       <AGGrid<User>
@@ -329,11 +408,12 @@ export const WithCustomCellRenderers: Story = {
         headerName: 'Status',
         flex: 1,
         cellRenderer: (params: { value: string }) => {
-          const variant = params.value === 'Active' 
-            ? 'success' 
-            : params.value === 'Inactive' 
-              ? 'danger' 
-              : 'warning';
+          const variant =
+            params.value === 'Active'
+              ? 'success'
+              : params.value === 'Inactive'
+                ? 'danger'
+                : 'warning';
           return <Badge variant={variant}>{params.value}</Badge>;
         },
       },
@@ -373,9 +453,9 @@ export const WithSorting: Story = {
     const columnDefs: ColDef<User>[] = [
       { field: 'name', headerName: 'Name', flex: 1, sort: 'asc' },
       { field: 'email', headerName: 'Email', flex: 1 },
-      { 
-        field: 'salary', 
-        headerName: 'Salary', 
+      {
+        field: 'salary',
+        headerName: 'Salary',
         flex: 1,
         valueFormatter: (params) => {
           return new Intl.NumberFormat('en-US', {
@@ -410,14 +490,34 @@ export const WithFiltering: Story = {
   },
   render: () => {
     const columnDefs: ColDef<User>[] = [
-      { field: 'name', headerName: 'Name', flex: 1, filter: 'agTextColumnFilter' },
-      { field: 'email', headerName: 'Email', flex: 1, filter: 'agTextColumnFilter' },
-      { field: 'department', headerName: 'Department', flex: 1, filter: 'agTextColumnFilter' },
-      { field: 'status', headerName: 'Status', flex: 1, filter: 'agTextColumnFilter' },
-      { 
-        field: 'salary', 
-        headerName: 'Salary', 
-        flex: 1, 
+      {
+        field: 'name',
+        headerName: 'Name',
+        flex: 1,
+        filter: 'agTextColumnFilter',
+      },
+      {
+        field: 'email',
+        headerName: 'Email',
+        flex: 1,
+        filter: 'agTextColumnFilter',
+      },
+      {
+        field: 'department',
+        headerName: 'Department',
+        flex: 1,
+        filter: 'agTextColumnFilter',
+      },
+      {
+        field: 'status',
+        headerName: 'Status',
+        flex: 1,
+        filter: 'agTextColumnFilter',
+      },
+      {
+        field: 'salary',
+        headerName: 'Salary',
+        flex: 1,
         filter: 'agNumberColumnFilter',
         valueFormatter: (params) => {
           return new Intl.NumberFormat('en-US', {
@@ -471,7 +571,7 @@ export const WithActionColumn: Story = {
         headerName: 'Actions',
         width: 200,
         cellRenderer: (params: { data: User }) => (
-          <div className="flex items-center gap-2 h-full">
+          <div className="flex h-full items-center gap-2">
             <Button
               size="sm"
               variant="outline"
@@ -524,40 +624,57 @@ export const FullFeatured: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'A comprehensive example showing multiple AG Grid features combined.',
+        story:
+          'A comprehensive example showing multiple AG Grid features combined.',
       },
     },
   },
   render: () => {
     const columnDefs: ColDef<User>[] = [
-      { 
-        field: 'name', 
-        headerName: 'Name', 
-        flex: 1, 
+      {
+        field: 'name',
+        headerName: 'Name',
+        flex: 1,
         filter: 'agTextColumnFilter',
         pinned: 'left',
       },
-      { field: 'email', headerName: 'Email', flex: 1, filter: 'agTextColumnFilter' },
-      { field: 'role', headerName: 'Role', flex: 1, filter: 'agTextColumnFilter' },
-      { field: 'department', headerName: 'Department', flex: 1, filter: 'agTextColumnFilter' },
+      {
+        field: 'email',
+        headerName: 'Email',
+        flex: 1,
+        filter: 'agTextColumnFilter',
+      },
+      {
+        field: 'role',
+        headerName: 'Role',
+        flex: 1,
+        filter: 'agTextColumnFilter',
+      },
+      {
+        field: 'department',
+        headerName: 'Department',
+        flex: 1,
+        filter: 'agTextColumnFilter',
+      },
       {
         field: 'status',
         headerName: 'Status',
         flex: 1,
         filter: 'agTextColumnFilter',
         cellRenderer: (params: { value: string }) => {
-          const variant = params.value === 'Active' 
-            ? 'success' 
-            : params.value === 'Inactive' 
-              ? 'danger' 
-              : 'warning';
+          const variant =
+            params.value === 'Active'
+              ? 'success'
+              : params.value === 'Inactive'
+                ? 'danger'
+                : 'warning';
           return <Badge variant={variant}>{params.value}</Badge>;
         },
       },
-      { 
-        field: 'salary', 
-        headerName: 'Salary', 
-        flex: 1, 
+      {
+        field: 'salary',
+        headerName: 'Salary',
+        flex: 1,
         filter: 'agNumberColumnFilter',
         valueFormatter: (params) => {
           return new Intl.NumberFormat('en-US', {
@@ -566,9 +683,9 @@ export const FullFeatured: Story = {
           }).format(params.value as number);
         },
       },
-      { 
-        field: 'startDate', 
-        headerName: 'Start Date', 
+      {
+        field: 'startDate',
+        headerName: 'Start Date',
         flex: 1,
         filter: 'agDateColumnFilter',
       },
@@ -795,8 +912,9 @@ Showcases all the built-in cell renderers available for AG Grid columns.
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
-          This grid demonstrates Avatar, Status, Engagement, Email, Phone, and Currency renderers.
+        <p className="text-muted-foreground text-sm">
+          This grid demonstrates Avatar, Status, Engagement, Email, Phone, and
+          Currency renderers.
         </p>
         <AGGrid<Contact>
           variant="bordered"
@@ -866,8 +984,9 @@ export const CompanyAndLinksRenderers: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Click on domains or LinkedIn icons to open links. Tags overflow is handled gracefully.
+        <p className="text-muted-foreground text-sm">
+          Click on domains or LinkedIn icons to open links. Tags overflow is
+          handled gracefully.
         </p>
         <AGGrid<Contact>
           variant="bordered"
@@ -885,7 +1004,8 @@ export const DateFormatsShowcase: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Shows different date formatting options: short, medium, long, relative, and datetime.',
+        story:
+          'Shows different date formatting options: short, medium, long, relative, and datetime.',
       },
     },
   },
@@ -936,8 +1056,9 @@ export const DateFormatsShowcase: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
-          The DateRenderer supports multiple format options for displaying dates.
+        <p className="text-muted-foreground text-sm">
+          The DateRenderer supports multiple format options for displaying
+          dates.
         </p>
         <AGGrid<Contact>
           variant="bordered"
@@ -1000,8 +1121,9 @@ export const ProgressAndBooleansShowcase: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Progress bars show completion percentage. Boolean values display as colored Yes/No badges.
+        <p className="text-muted-foreground text-sm">
+          Progress bars show completion percentage. Boolean values display as
+          colored Yes/No badges.
         </p>
         <AGGrid<Contact>
           variant="bordered"
@@ -1019,7 +1141,8 @@ export const StatusColorsVariations: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Shows how StatusBadgeRenderer handles different status values with configurable colors.',
+        story:
+          'Shows how StatusBadgeRenderer handles different status values with configurable colors.',
       },
     },
   },
@@ -1034,28 +1157,94 @@ export const StatusColorsVariations: Story = {
     }
 
     const statusDemoData: StatusDemo[] = [
-      { id: 1, name: 'Project Alpha', status: 'active', priority: 'high', stage: 'discovery' },
-      { id: 2, name: 'Project Beta', status: 'pending', priority: 'medium', stage: 'proposal' },
-      { id: 3, name: 'Project Gamma', status: 'closed_won', priority: 'low', stage: 'negotiation' },
-      { id: 4, name: 'Project Delta', status: 'inactive', priority: 'urgent', stage: 'closed_won' },
-      { id: 5, name: 'Project Epsilon', status: 'closed_lost', priority: 'high', stage: 'closed_lost' },
+      {
+        id: 1,
+        name: 'Project Alpha',
+        status: 'active',
+        priority: 'high',
+        stage: 'discovery',
+      },
+      {
+        id: 2,
+        name: 'Project Beta',
+        status: 'pending',
+        priority: 'medium',
+        stage: 'proposal',
+      },
+      {
+        id: 3,
+        name: 'Project Gamma',
+        status: 'closed_won',
+        priority: 'low',
+        stage: 'negotiation',
+      },
+      {
+        id: 4,
+        name: 'Project Delta',
+        status: 'inactive',
+        priority: 'urgent',
+        stage: 'closed_won',
+      },
+      {
+        id: 5,
+        name: 'Project Epsilon',
+        status: 'closed_lost',
+        priority: 'high',
+        stage: 'closed_lost',
+      },
     ];
 
     // Custom status colors for priority
     const priorityColors = {
-      urgent: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', label: 'Urgent' },
-      high: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-300', label: 'High' },
-      medium: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300', label: 'Medium' },
-      low: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', label: 'Low' },
+      urgent: {
+        bg: 'bg-red-100 dark:bg-red-900/30',
+        text: 'text-red-700 dark:text-red-300',
+        label: 'Urgent',
+      },
+      high: {
+        bg: 'bg-orange-100 dark:bg-orange-900/30',
+        text: 'text-orange-700 dark:text-orange-300',
+        label: 'High',
+      },
+      medium: {
+        bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+        text: 'text-yellow-700 dark:text-yellow-300',
+        label: 'Medium',
+      },
+      low: {
+        bg: 'bg-green-100 dark:bg-green-900/30',
+        text: 'text-green-700 dark:text-green-300',
+        label: 'Low',
+      },
     };
 
     // Stage colors
     const stageColors = {
-      discovery: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300', label: 'Discovery' },
-      proposal: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', label: 'Proposal' },
-      negotiation: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', label: 'Negotiation' },
-      closed_won: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', label: 'Won' },
-      closed_lost: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', label: 'Lost' },
+      discovery: {
+        bg: 'bg-purple-100 dark:bg-purple-900/30',
+        text: 'text-purple-700 dark:text-purple-300',
+        label: 'Discovery',
+      },
+      proposal: {
+        bg: 'bg-blue-100 dark:bg-blue-900/30',
+        text: 'text-blue-700 dark:text-blue-300',
+        label: 'Proposal',
+      },
+      negotiation: {
+        bg: 'bg-amber-100 dark:bg-amber-900/30',
+        text: 'text-amber-700 dark:text-amber-300',
+        label: 'Negotiation',
+      },
+      closed_won: {
+        bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+        text: 'text-emerald-700 dark:text-emerald-300',
+        label: 'Won',
+      },
+      closed_lost: {
+        bg: 'bg-red-100 dark:bg-red-900/30',
+        text: 'text-red-700 dark:text-red-300',
+        label: 'Lost',
+      },
     };
 
     const columnDefs: ColDef<StatusDemo>[] = [
@@ -1085,8 +1274,9 @@ export const StatusColorsVariations: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
-          StatusBadgeRenderer can use different color configurations for different columns.
+        <p className="text-muted-foreground text-sm">
+          StatusBadgeRenderer can use different color configurations for
+          different columns.
         </p>
         <AGGrid<StatusDemo>
           variant="bordered"
@@ -1156,7 +1346,7 @@ export const WithFloatingFilters: Story = {
 
     return (
       <div className="w-full space-y-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Type in the filter inputs below each column header to filter the data.
         </p>
         <AGGrid<Contact>
