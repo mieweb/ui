@@ -1,55 +1,61 @@
 'use strict';
 
-var chunkUBWTYI3A_cjs = require('./chunk-UBWTYI3A.cjs');
+var chunkVDMQCSXT_cjs = require('./chunk-VDMQCSXT.cjs');
+var chunkBXK5TNJE_cjs = require('./chunk-BXK5TNJE.cjs');
+var chunkZJCPW6MS_cjs = require('./chunk-ZJCPW6MS.cjs');
+var chunk6DP6RKUA_cjs = require('./chunk-6DP6RKUA.cjs');
+var chunkS6UNPMAS_cjs = require('./chunk-S6UNPMAS.cjs');
+var chunkSWV5E75F_cjs = require('./chunk-SWV5E75F.cjs');
+var chunkZ3TFPXVN_cjs = require('./chunk-Z3TFPXVN.cjs');
 var chunkFFJVCQ5R_cjs = require('./chunk-FFJVCQ5R.cjs');
 var chunk4LNS5QDP_cjs = require('./chunk-4LNS5QDP.cjs');
 var chunkO5HS7ZND_cjs = require('./chunk-O5HS7ZND.cjs');
 var chunkP52GA3GJ_cjs = require('./chunk-P52GA3GJ.cjs');
-var chunkS6UNPMAS_cjs = require('./chunk-S6UNPMAS.cjs');
-var chunkSWV5E75F_cjs = require('./chunk-SWV5E75F.cjs');
-var chunkZ3TFPXVN_cjs = require('./chunk-Z3TFPXVN.cjs');
+var chunkLEE3NMNP_cjs = require('./chunk-LEE3NMNP.cjs');
+var chunkN3QTYHRZ_cjs = require('./chunk-N3QTYHRZ.cjs');
+var chunkJYMQJ32S_cjs = require('./chunk-JYMQJ32S.cjs');
 var chunkEXDNFGI7_cjs = require('./chunk-EXDNFGI7.cjs');
 var chunkLZEY55QZ_cjs = require('./chunk-LZEY55QZ.cjs');
 var chunkORUPC5TV_cjs = require('./chunk-ORUPC5TV.cjs');
 var chunkQDGZBDBI_cjs = require('./chunk-QDGZBDBI.cjs');
 var chunkB7YGVKTE_cjs = require('./chunk-B7YGVKTE.cjs');
-var chunkVDMQCSXT_cjs = require('./chunk-VDMQCSXT.cjs');
-var chunkBXK5TNJE_cjs = require('./chunk-BXK5TNJE.cjs');
-var chunkZJCPW6MS_cjs = require('./chunk-ZJCPW6MS.cjs');
+var chunkNH2JVQ6V_cjs = require('./chunk-NH2JVQ6V.cjs');
+var chunkPF3XWKE5_cjs = require('./chunk-PF3XWKE5.cjs');
 var chunkG4IYKDQ2_cjs = require('./chunk-G4IYKDQ2.cjs');
 var chunkNAATBUHR_cjs = require('./chunk-NAATBUHR.cjs');
-var chunk2QX46LFO_cjs = require('./chunk-2QX46LFO.cjs');
+var chunkBBCXRXHI_cjs = require('./chunk-BBCXRXHI.cjs');
 var chunkXZB73CF4_cjs = require('./chunk-XZB73CF4.cjs');
+var chunkZJIXG4RV_cjs = require('./chunk-ZJIXG4RV.cjs');
 var chunkEF46XW4Z_cjs = require('./chunk-EF46XW4Z.cjs');
-var chunkLEE3NMNP_cjs = require('./chunk-LEE3NMNP.cjs');
-var chunkN3QTYHRZ_cjs = require('./chunk-N3QTYHRZ.cjs');
-var chunkJYMQJ32S_cjs = require('./chunk-JYMQJ32S.cjs');
+var chunkEKIQE524_cjs = require('./chunk-EKIQE524.cjs');
+var chunkPEFJAWNR_cjs = require('./chunk-PEFJAWNR.cjs');
 var chunkGCCKT63N_cjs = require('./chunk-GCCKT63N.cjs');
 var chunkZENVEUAE_cjs = require('./chunk-ZENVEUAE.cjs');
 var chunkL7TTMKLJ_cjs = require('./chunk-L7TTMKLJ.cjs');
 var chunkJGADLLQW_cjs = require('./chunk-JGADLLQW.cjs');
 var chunkFIXAVBUA_cjs = require('./chunk-FIXAVBUA.cjs');
 var chunkDQTQ4AQQ_cjs = require('./chunk-DQTQ4AQQ.cjs');
-var chunkNH2JVQ6V_cjs = require('./chunk-NH2JVQ6V.cjs');
-var chunkPF3XWKE5_cjs = require('./chunk-PF3XWKE5.cjs');
 var chunkR4DM4635_cjs = require('./chunk-R4DM4635.cjs');
 var chunk2O7D6F67_cjs = require('./chunk-2O7D6F67.cjs');
 var chunk6HFFWEM3_cjs = require('./chunk-6HFFWEM3.cjs');
-var chunkSWMRCGL4_cjs = require('./chunk-SWMRCGL4.cjs');
 var chunkBR2XGATJ_cjs = require('./chunk-BR2XGATJ.cjs');
+var chunkSWMRCGL4_cjs = require('./chunk-SWMRCGL4.cjs');
 var chunkFHY3K6PL_cjs = require('./chunk-FHY3K6PL.cjs');
 require('./chunk-ZO46CFVN.cjs');
 var chunkBTJHYGPI_cjs = require('./chunk-BTJHYGPI.cjs');
 var chunkKMN7JX2X_cjs = require('./chunk-KMN7JX2X.cjs');
-var chunkZEFZRYQS_cjs = require('./chunk-ZEFZRYQS.cjs');
+var chunkYDA3J724_cjs = require('./chunk-YDA3J724.cjs');
 var chunkMJKFQ4TF_cjs = require('./chunk-MJKFQ4TF.cjs');
+var chunkOIUNIDUY_cjs = require('./chunk-OIUNIDUY.cjs');
+var chunk53K3KWXQ_cjs = require('./chunk-53K3KWXQ.cjs');
 var chunkMMCNMTBR_cjs = require('./chunk-MMCNMTBR.cjs');
-var chunkEKIQE524_cjs = require('./chunk-EKIQE524.cjs');
-var chunkPEFJAWNR_cjs = require('./chunk-PEFJAWNR.cjs');
 var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
-var React10 = require('react');
+var React14 = require('react');
+var agGridReact = require('ag-grid-react');
+var agGridCommunity = require('ag-grid-community');
 var classVarianceAuthority = require('class-variance-authority');
 var jsxRuntime = require('react/jsx-runtime');
+var lucideReact = require('lucide-react');
 
 function _interopNamespace(e) {
   if (e && e.__esModule) return e;
@@ -69,8 +75,833 @@ function _interopNamespace(e) {
   return Object.freeze(n);
 }
 
-var React10__namespace = /*#__PURE__*/_interopNamespace(React10);
+var React14__namespace = /*#__PURE__*/_interopNamespace(React14);
 
+agGridCommunity.ModuleRegistry.registerModules([agGridCommunity.AllCommunityModule]);
+var agGridVariants = classVarianceAuthority.cva("ag-theme-custom w-full", {
+  variants: {
+    /**
+     * Visual variant of the grid
+     */
+    variant: {
+      default: "",
+      bordered: "[&_.ag-root-wrapper]:border [&_.ag-root-wrapper]:border-border [&_.ag-root-wrapper]:rounded-lg",
+      striped: "[&_.ag-row-odd]:bg-muted/50"
+    },
+    /**
+     * Size/density of the grid rows
+     */
+    size: {
+      sm: "[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs",
+      md: "[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm",
+      lg: "[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base"
+    }
+  },
+  defaultVariants: {
+    variant: "default",
+    size: "md"
+  }
+});
+var defaultColDef = {
+  sortable: true,
+  filter: true,
+  resizable: true,
+  minWidth: 100
+};
+function AGGridInner({
+  className,
+  variant,
+  size,
+  height = 400,
+  loading = false,
+  columnDefs,
+  rowData,
+  defaultColDef: userDefaultColDef,
+  onGridReady,
+  onRowClick,
+  gridRef,
+  rowSelection,
+  ...props
+}, ref) {
+  const internalRef = React14__namespace.useRef(null);
+  const gridApiRef = React14__namespace.useRef(null);
+  const resolvedRef = gridRef || ref || internalRef;
+  const handleGridReady = React14__namespace.useCallback(
+    (event) => {
+      gridApiRef.current = event.api;
+      onGridReady?.(event);
+    },
+    [onGridReady]
+  );
+  const handleRowClicked = React14__namespace.useCallback(
+    (event) => {
+      onRowClick?.(event);
+    },
+    [onRowClick]
+  );
+  const mergedDefaultColDef = React14__namespace.useMemo(
+    () => ({
+      ...defaultColDef,
+      ...userDefaultColDef
+    }),
+    [userDefaultColDef]
+  );
+  const resolvedRowSelection = React14__namespace.useMemo(() => {
+    if (!rowSelection) return void 0;
+    if (typeof rowSelection === "object") {
+      return rowSelection;
+    }
+    if (rowSelection === "multiple") {
+      return {
+        mode: "multiRow",
+        enableClickSelection: true
+      };
+    }
+    if (rowSelection === "single") {
+      return {
+        mode: "singleRow",
+        enableClickSelection: true
+      };
+    }
+    return void 0;
+  }, [rowSelection]);
+  React14__namespace.useEffect(() => {
+    if (gridApiRef.current) {
+      if (loading) {
+        gridApiRef.current.showLoadingOverlay();
+      } else {
+        gridApiRef.current.hideOverlay();
+      }
+    }
+  }, [loading]);
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(agGridVariants({ variant, size }), className),
+      style: { height: typeof height === "number" ? `${height}px` : height },
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        agGridReact.AgGridReact,
+        {
+          ref: resolvedRef,
+          columnDefs,
+          rowData,
+          defaultColDef: mergedDefaultColDef,
+          onGridReady: handleGridReady,
+          onRowClicked: handleRowClicked,
+          animateRows: false,
+          rowSelection: resolvedRowSelection,
+          theme: "legacy",
+          ...props
+        }
+      )
+    }
+  );
+}
+var AGGrid = React14__namespace.forwardRef(AGGridInner);
+AGGrid.displayName = "AGGrid";
+function getNestedValue(obj, path) {
+  if (!obj || !path) return void 0;
+  const parts = path.split(".");
+  let current = obj;
+  for (const part of parts) {
+    if (current === null || current === void 0) return void 0;
+    if (typeof current === "object") {
+      current = current[part];
+    } else {
+      return void 0;
+    }
+  }
+  return current;
+}
+function getFaviconUrl(domain) {
+  if (!domain || typeof domain !== "string") return null;
+  const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "").trim();
+  if (!cleanDomain) return null;
+  return `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=64`;
+}
+function formatPhoneDisplay(phone) {
+  if (!phone) return "";
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 10) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  }
+  if (cleaned.length === 11 && cleaned.startsWith("1")) {
+    return `${cleaned[0]}-${cleaned.slice(1, 4)}-${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+  }
+  return phone;
+}
+function getInitials2(name) {
+  if (!name || typeof name !== "string") return "??";
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+}
+function getAvatarColor(name) {
+  const colors = [
+    "bg-primary-600",
+    "bg-green-600",
+    "bg-orange-600",
+    "bg-secondary-600",
+    "bg-pink-600",
+    "bg-primary-700",
+    "bg-teal-600",
+    "bg-amber-600"
+  ];
+  if (!name || typeof name !== "string") return colors[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+function cellRendererPropsAreEqual(prevProps, nextProps) {
+  if (prevProps.value !== nextProps.value) return false;
+  if (prevProps.data !== nextProps.data) return false;
+  if (prevProps.node?.rowIndex !== nextProps.node?.rowIndex) return false;
+  return true;
+}
+var statusColors = {
+  active: {
+    label: "Active",
+    bgClass: "bg-green-100 dark:bg-green-900/30",
+    textClass: "text-green-600 dark:text-green-400"
+  },
+  inactive: {
+    label: "Inactive",
+    bgClass: "bg-gray-200 dark:bg-gray-700",
+    textClass: "text-gray-600 dark:text-gray-400"
+  },
+  pending: {
+    label: "Pending",
+    bgClass: "bg-amber-100 dark:bg-amber-900/30",
+    textClass: "text-amber-600 dark:text-amber-400"
+  },
+  new: {
+    label: "New",
+    bgClass: "bg-primary-100 dark:bg-primary-900/30",
+    textClass: "text-primary-600 dark:text-primary-400"
+  },
+  verified: {
+    label: "Verified",
+    bgClass: "bg-green-100 dark:bg-green-900/30",
+    textClass: "text-green-600 dark:text-green-400"
+  },
+  flagged: {
+    label: "Flagged",
+    bgClass: "bg-red-100 dark:bg-red-900/30",
+    textClass: "text-red-600 dark:text-red-400"
+  }
+};
+function AvatarNameRenderer(props) {
+  const { data, value } = props;
+  if (!data && !value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const displayName = typeof value === "string" && value ? value : "Unknown";
+  const isSystemValue = ["Unknown", "Unassigned", "System"].includes(
+    displayName
+  );
+  const avatarUrl = props.avatarField && data ? getNestedValue(data, props.avatarField) : data?.avatarUrl;
+  const domain = props.domainField && data ? getNestedValue(data, props.domainField) : data?.company?.domain || data?.domain;
+  const faviconUrl = getFaviconUrl(domain);
+  const initials = getInitials2(displayName);
+  const imageUrl = avatarUrl || faviconUrl;
+  if (isSystemValue) {
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 py-1", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-500", children: displayName === "Unassigned" ? "\u2014" : "??" }),
+      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate text-gray-400 italic dark:text-gray-500", children: displayName })
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 py-1", children: [
+    imageUrl ? /* @__PURE__ */ jsxRuntime.jsx(
+      "img",
+      {
+        src: imageUrl,
+        alt: displayName,
+        className: "h-7 w-7 rounded-full bg-white object-cover ring-2 ring-white dark:ring-gray-700",
+        onError: (e) => {
+          const target = e.target;
+          target.style.display = "none";
+          const sibling = target.nextElementSibling;
+          if (sibling) sibling.style.display = "flex";
+        }
+      }
+    ) : null,
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold text-white",
+          getAvatarColor(displayName)
+        ),
+        style: { display: imageUrl ? "none" : "flex" },
+        children: initials
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground truncate font-medium", children: displayName })
+  ] });
+}
+function StatusBadgeRenderer(props) {
+  const { value, statusConfig = statusColors } = props;
+  if (!value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const normalizedValue = String(value).toLowerCase().replace(/\s+/g, "_");
+  const config = statusConfig[normalizedValue] || {
+    label: value,
+    bgClass: "bg-gray-200 dark:bg-gray-700",
+    textClass: "text-gray-600 dark:text-gray-400"
+  };
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "span",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
+        config.bgClass,
+        config.textClass
+      ),
+      children: config.label
+    }
+  );
+}
+function getEngagementScoreColors(score) {
+  if (score >= 70)
+    return {
+      barColor: "bg-green-500",
+      textColor: "text-green-600 dark:text-green-400"
+    };
+  if (score >= 40)
+    return {
+      barColor: "bg-amber-500",
+      textColor: "text-amber-600 dark:text-amber-400"
+    };
+  if (score >= 20)
+    return {
+      barColor: "bg-orange-500",
+      textColor: "text-orange-600 dark:text-orange-400"
+    };
+  return {
+    barColor: "bg-gray-400",
+    textColor: "text-gray-600 dark:text-gray-400"
+  };
+}
+function EngagementScoreRenderer(props) {
+  const { value } = props;
+  if (value == null) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const score = Number(value);
+  const percentage = Math.min(100, Math.max(0, score));
+  const { barColor, textColor } = getEngagementScoreColors(score);
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 py-1", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-1.5 w-16 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn("h-full rounded-full transition-all", barColor),
+        style: { width: `${percentage}%` }
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: chunkOR5DRJCW_cjs.cn("text-sm font-medium", textColor), children: score })
+  ] });
+}
+function EmailRenderer(props) {
+  const { value } = props;
+  if (!value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "a",
+    {
+      href: `mailto:${value}`,
+      className: "text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline",
+      onClick: (e) => e.stopPropagation(),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Mail, { className: "h-3 w-3 opacity-60" }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate", children: value })
+      ]
+    }
+  );
+}
+function PhoneRenderer(props) {
+  const { value } = props;
+  if (!value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const displayValue = formatPhoneDisplay(value);
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "a",
+    {
+      href: `tel:${value}`,
+      className: "text-foreground hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5",
+      onClick: (e) => e.stopPropagation(),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Phone, { className: "h-3 w-3 text-green-500 opacity-70" }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { children: displayValue })
+      ]
+    }
+  );
+}
+function DomainRenderer(props) {
+  const { value } = props;
+  if (!value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const url = value.startsWith("http") ? value : `https://${value}`;
+  const displayDomain = value.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "a",
+    {
+      href: url,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      className: "text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline",
+      onClick: (e) => e.stopPropagation(),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Globe, { className: "h-3 w-3 opacity-60" }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate", children: displayDomain })
+      ]
+    }
+  );
+}
+function LinkedInRenderer(props) {
+  const { value } = props;
+  if (!value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "a",
+    {
+      href: value,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      className: "inline-flex items-center gap-1.5 text-[#0A66C2] hover:underline",
+      onClick: (e) => e.stopPropagation(),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Linkedin, { className: "h-4 w-4" }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate text-sm", children: "LinkedIn" })
+      ]
+    }
+  );
+}
+function CurrencyRenderer(props) {
+  const { value } = props;
+  if (value == null) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const formatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value);
+  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground font-medium tabular-nums", children: formatted });
+}
+function NumberRenderer(props) {
+  const { value } = props;
+  if (value == null) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const formatted = Number(value).toLocaleString();
+  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground tabular-nums", children: formatted });
+}
+function DateRenderer(props) {
+  const { value, format = "medium" } = props;
+  if (!value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const date = value instanceof Date ? value : new Date(value);
+  if (isNaN(date.getTime())) {
+    return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  }
+  if (format === "relative") {
+    const now = /* @__PURE__ */ new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1e3 * 60 * 60 * 24));
+    let relativeText;
+    if (days === 0) {
+      relativeText = "Today";
+    } else if (days === 1) {
+      relativeText = "Yesterday";
+    } else if (days < 7) {
+      relativeText = `${days} days ago`;
+    } else if (days < 30) {
+      const weeks = Math.floor(days / 7);
+      relativeText = `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+    } else if (days < 365) {
+      const months = Math.floor(days / 30);
+      relativeText = `${months} month${months > 1 ? "s" : ""} ago`;
+    } else {
+      const years = Math.floor(days / 365);
+      relativeText = `${years} year${years > 1 ? "s" : ""} ago`;
+    }
+    return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: relativeText });
+  }
+  const dateOptions = format === "short" ? { month: "numeric", day: "numeric" } : format === "long" ? { month: "long", day: "numeric", year: "numeric" } : { month: "short", day: "numeric", year: "numeric" };
+  if (format === "datetime") {
+    const formatted2 = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    });
+    return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground", children: formatted2 });
+  }
+  const formatted = date.toLocaleDateString("en-US", dateOptions);
+  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground", children: formatted });
+}
+function BooleanRenderer(props) {
+  const { value } = props;
+  if (value == null) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const isTrue = Boolean(value);
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "span",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+        isTrue ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+      ),
+      children: [
+        isTrue ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.CheckCircle, { className: "h-3 w-3" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Clock, { className: "h-3 w-3" }),
+        isTrue ? "Yes" : "No"
+      ]
+    }
+  );
+}
+function CompanyRenderer(props) {
+  const { data, value } = props;
+  if (!value) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const domain = props.domainField && data ? getNestedValue(data, props.domainField) : data?.company?.domain || data?.domain;
+  const faviconUrl = getFaviconUrl(domain);
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 py-0.5", children: [
+    faviconUrl ? /* @__PURE__ */ jsxRuntime.jsx(
+      "img",
+      {
+        src: faviconUrl,
+        alt: value,
+        className: "h-5 w-5 rounded bg-white object-contain",
+        onError: (e) => {
+          const target = e.target;
+          target.style.display = "none";
+          const sibling = target.nextElementSibling;
+          if (sibling) sibling.style.display = "flex";
+        }
+      }
+    ) : null,
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: "flex h-5 w-5 items-center justify-center rounded bg-primary-100 text-[9px] font-semibold text-primary-600 dark:bg-primary-900/30 dark:text-primary-400",
+        style: { display: faviconUrl ? "none" : "flex" },
+        children: getInitials2(value)
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate font-medium", children: value })
+  ] });
+}
+function ProgressRenderer(props) {
+  const { value, barColor = "bg-primary-500", max = 100 } = props;
+  if (value == null) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  const percentage = Math.min(100, Math.max(0, Number(value) / max * 100));
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 py-1", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-2 w-20 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn("h-full rounded-full transition-all", barColor),
+        style: { width: `${percentage}%` }
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs font-medium", children: [
+      Math.round(percentage),
+      "%"
+    ] })
+  ] });
+}
+function TagsRenderer(props) {
+  const { value } = props;
+  if (!value || !Array.isArray(value) || value.length === 0) {
+    return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap gap-1", children: [
+    value.slice(0, 3).map((tag, index) => /* @__PURE__ */ jsxRuntime.jsx(
+      "span",
+      {
+        className: "inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+        children: tag
+      },
+      index
+    )),
+    value.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
+      "+",
+      value.length - 3
+    ] })
+  ] });
+}
+var MemoizedAvatarNameRenderer = React14.memo(
+  AvatarNameRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedStatusBadgeRenderer = React14.memo(
+  StatusBadgeRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedEngagementScoreRenderer = React14.memo(
+  EngagementScoreRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedEmailRenderer = React14.memo(
+  EmailRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedPhoneRenderer = React14.memo(
+  PhoneRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedLinkedInRenderer = React14.memo(
+  LinkedInRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedDomainRenderer = React14.memo(
+  DomainRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedCurrencyRenderer = React14.memo(
+  CurrencyRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedNumberRenderer = React14.memo(
+  NumberRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedDateRenderer = React14.memo(
+  DateRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedBooleanRenderer = React14.memo(
+  BooleanRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedCompanyRenderer = React14.memo(
+  CompanyRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedProgressRenderer = React14.memo(
+  ProgressRenderer,
+  cellRendererPropsAreEqual
+);
+var MemoizedTagsRenderer = React14.memo(
+  TagsRenderer,
+  cellRendererPropsAreEqual
+);
+var CellRenderers = {
+  // Original renderers
+  AvatarNameRenderer,
+  StatusBadgeRenderer,
+  EngagementScoreRenderer,
+  EmailRenderer,
+  PhoneRenderer,
+  LinkedInRenderer,
+  DomainRenderer,
+  CurrencyRenderer,
+  NumberRenderer,
+  DateRenderer,
+  BooleanRenderer,
+  CompanyRenderer,
+  ProgressRenderer,
+  TagsRenderer,
+  // Memoized renderers (recommended for performance)
+  MemoizedAvatarNameRenderer,
+  MemoizedStatusBadgeRenderer,
+  MemoizedEngagementScoreRenderer,
+  MemoizedEmailRenderer,
+  MemoizedPhoneRenderer,
+  MemoizedLinkedInRenderer,
+  MemoizedDomainRenderer,
+  MemoizedCurrencyRenderer,
+  MemoizedNumberRenderer,
+  MemoizedDateRenderer,
+  MemoizedBooleanRenderer,
+  MemoizedCompanyRenderer,
+  MemoizedProgressRenderer,
+  MemoizedTagsRenderer,
+  // Utility functions
+  formatPhoneDisplay
+};
+var sizeClasses = {
+  sm: "h-4 w-4",
+  md: "h-5 w-5",
+  lg: "h-7 w-7"
+};
+function SparklesIcon({ className, size = "md" }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn(sizeClasses[size], className),
+      viewBox: "0 0 24 24",
+      fill: "currentColor",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" }),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            d: "M20 3v4",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            d: "M22 5h-4",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round"
+          }
+        )
+      ]
+    }
+  );
+}
+function AILogoIcon({ className, size = "md" }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn(sizeClasses[size], className),
+      viewBox: "0 0 24 24",
+      fill: "none",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            d: "M12 2L2 7L12 12L22 7L12 2Z",
+            stroke: "currentColor",
+            strokeWidth: "1.5",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            fill: "currentColor",
+            fillOpacity: "0.2"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            d: "M2 17L12 22L22 17",
+            stroke: "currentColor",
+            strokeWidth: "1.5",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            d: "M2 12L12 17L22 12",
+            stroke: "currentColor",
+            strokeWidth: "1.5",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+          }
+        )
+      ]
+    }
+  );
+}
+function CloseIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("h-5 w-5", className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M6 18L18 6M6 6l12 12"
+        }
+      )
+    }
+  );
+}
+function RefreshIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("h-5 w-5", className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+        }
+      )
+    }
+  );
+}
+var chevronRotation = {
+  up: "-rotate-180",
+  down: "",
+  left: "rotate-90",
+  right: "-rotate-90"
+};
+function ChevronIcon({
+  className,
+  direction = "down"
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("h-4 w-4", chevronRotation[direction], className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
+    }
+  );
+}
+function SendIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("h-5 w-5", className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          strokeWidth: 2,
+          d: "M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+        }
+      )
+    }
+  );
+}
+function SpinnerIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("h-5 w-5 animate-spin", className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "circle",
+          {
+            className: "opacity-25",
+            cx: "12",
+            cy: "12",
+            r: "10",
+            stroke: "currentColor",
+            strokeWidth: "4"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            className: "opacity-75",
+            fill: "currentColor",
+            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          }
+        )
+      ]
+    }
+  );
+}
 var statusIconVariants = classVarianceAuthority.cva(
   "flex h-5 w-5 items-center justify-center rounded-full",
   {
@@ -90,11 +921,19 @@ var statusIconVariants = classVarianceAuthority.cva(
 );
 function ToolStatusIcon({ status, className }) {
   return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: chunkOR5DRJCW_cjs.cn(statusIconVariants({ status }), className), children: [
-    status === "pending" && /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-3 w-3 text-neutral-500", fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "10", cy: "10", r: "3" }) }),
+    status === "pending" && /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-3 w-3 text-neutral-500",
+        fill: "currentColor",
+        viewBox: "0 0 20 20",
+        children: /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "10", cy: "10", r: "3" })
+      }
+    ),
     status === "running" && /* @__PURE__ */ jsxRuntime.jsxs(
       "svg",
       {
-        className: "h-3 w-3 animate-spin text-primary-600 dark:text-primary-400",
+        className: "text-primary-600 dark:text-primary-400 h-3 w-3 animate-spin",
         fill: "none",
         viewBox: "0 0 24 24",
         children: [
@@ -128,7 +967,14 @@ function ToolStatusIcon({ status, className }) {
         viewBox: "0 0 24 24",
         stroke: "currentColor",
         strokeWidth: "3",
-        children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M5 13l4 4L19 7"
+          }
+        )
       }
     ),
     status === "error" && /* @__PURE__ */ jsxRuntime.jsx(
@@ -139,7 +985,14 @@ function ToolStatusIcon({ status, className }) {
         viewBox: "0 0 24 24",
         stroke: "currentColor",
         strokeWidth: "3",
-        children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" })
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M6 18L18 6M6 6l12 12"
+          }
+        )
       }
     ),
     status === "cancelled" && /* @__PURE__ */ jsxRuntime.jsx(
@@ -157,15 +1010,117 @@ function ToolStatusIcon({ status, className }) {
 }
 var TOOL_ICONS = {
   // Patient tools
-  create_patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" }) }),
-  get_patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" }) }),
-  search_patients: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" }) }),
+  create_patient: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z"
+        }
+      )
+    }
+  ),
+  get_patient: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+        }
+      )
+    }
+  ),
+  search_patients: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+        }
+      )
+    }
+  ),
   // Appointment tools
-  schedule_appointment: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" }) }),
+  schedule_appointment: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"
+        }
+      )
+    }
+  ),
   // Document tools
-  create_document: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" }) }),
+  create_document: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+        }
+      )
+    }
+  ),
   // Default tool icon
-  default: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" }) })
+  default: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"
+        }
+      )
+    }
+  )
 };
 function getToolIcon(toolName) {
   return TOOL_ICONS[toolName] || TOOL_ICONS.default;
@@ -178,12 +1133,114 @@ function ResourceLink({ link, onClick, className }) {
     }
   };
   const linkTypeIcons = {
-    patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" }) }),
-    document: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" }) }),
-    appointment: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" }) }),
-    order: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" }) }),
-    external: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" }) }),
-    internal: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" }) })
+    patient: /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-4 w-4",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+          }
+        )
+      }
+    ),
+    document: /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-4 w-4",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+          }
+        )
+      }
+    ),
+    appointment: /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-4 w-4",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+          }
+        )
+      }
+    ),
+    order: /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-4 w-4",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"
+          }
+        )
+      }
+    ),
+    external: /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-4 w-4",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+          }
+        )
+      }
+    ),
+    internal: /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-4 w-4",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+          }
+        )
+      }
+    )
   };
   const icon = link.type ? linkTypeIcons[link.type] : linkTypeIcons.internal;
   return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -196,22 +1253,53 @@ function ResourceLink({ link, onClick, className }) {
         "bg-primary-50 text-primary-700 hover:bg-primary-100",
         "dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50",
         "text-sm font-medium transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+        "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none",
         "dark:focus:ring-offset-neutral-900",
         className
       ),
       children: [
         icon,
         /* @__PURE__ */ jsxRuntime.jsx("span", { children: link.label }),
-        link.type === "external" && /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-3 w-3 opacity-60", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" }) })
+        link.type === "external" && /* @__PURE__ */ jsxRuntime.jsx(
+          "svg",
+          {
+            className: "h-3 w-3 opacity-60",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "path",
+              {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                d: "M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+              }
+            )
+          }
+        )
       ]
     }
   );
 }
-function ToolResultDisplay({ result, onLinkClick, showRawData = false, className }) {
-  const [showJson, setShowJson] = React10__namespace.useState(false);
+function ToolResultDisplay({
+  result,
+  onLinkClick,
+  showRawData = false,
+  className
+}) {
+  const [showJson, setShowJson] = React14__namespace.useState(false);
   if (result.type === "error") {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("mt-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20", className), children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-700 dark:text-red-300", children: typeof result.data === "string" ? String(result.data) : "An error occurred" }) });
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "mt-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20",
+          className
+        ),
+        children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-700 dark:text-red-300", children: typeof result.data === "string" ? String(result.data) : "An error occurred" })
+      }
+    );
   }
   const hasRawData = result.type === "json" && result.data !== void 0 && result.data !== null;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-2", className), children: [
@@ -239,12 +1327,22 @@ function ToolResultDisplay({ result, onLinkClick, showRawData = false, className
             /* @__PURE__ */ jsxRuntime.jsx(
               "svg",
               {
-                className: chunkOR5DRJCW_cjs.cn("h-3 w-3 transition-transform", showJson && "rotate-90"),
+                className: chunkOR5DRJCW_cjs.cn(
+                  "h-3 w-3 transition-transform",
+                  showJson && "rotate-90"
+                ),
                 fill: "none",
                 viewBox: "0 0 24 24",
                 stroke: "currentColor",
                 strokeWidth: "2",
-                children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
+                children: /* @__PURE__ */ jsxRuntime.jsx(
+                  "path",
+                  {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    d: "M9 5l7 7-7 7"
+                  }
+                )
               }
             ),
             showJson ? "Hide" : "Show",
@@ -257,11 +1355,7 @@ function ToolResultDisplay({ result, onLinkClick, showRawData = false, className
   ] });
 }
 var toolCallVariants = classVarianceAuthority.cva(
-  [
-    "rounded-lg border",
-    "overflow-hidden",
-    "transition-all duration-200"
-  ],
+  ["rounded-lg border", "overflow-hidden", "transition-all duration-200"],
   {
     variants: {
       status: {
@@ -302,16 +1396,26 @@ var TOOL_FRIENDLY_NAMES = {
 function getToolFriendlyName(toolName, status) {
   const baseName = TOOL_FRIENDLY_NAMES[toolName] || toolName.replace(/_/g, " ");
   if (status === "success") {
-    if (baseName.startsWith("Creating")) return baseName.replace("Creating", "Created");
-    if (baseName.startsWith("Scheduling")) return baseName.replace("Scheduling", "Scheduled");
-    if (baseName.startsWith("Searching")) return baseName.replace("Searching", "Searched");
-    if (baseName.startsWith("Looking")) return baseName.replace("Looking", "Found");
-    if (baseName.startsWith("Updating")) return baseName.replace("Updating", "Updated");
-    if (baseName.startsWith("Removing")) return baseName.replace("Removing", "Removed");
-    if (baseName.startsWith("Canceling")) return baseName.replace("Canceling", "Canceled");
-    if (baseName.startsWith("Retrieving")) return baseName.replace("Retrieving", "Retrieved");
-    if (baseName.startsWith("Uploading")) return baseName.replace("Uploading", "Uploaded");
-    if (baseName.startsWith("Sending")) return baseName.replace("Sending", "Sent");
+    if (baseName.startsWith("Creating"))
+      return baseName.replace("Creating", "Created");
+    if (baseName.startsWith("Scheduling"))
+      return baseName.replace("Scheduling", "Scheduled");
+    if (baseName.startsWith("Searching"))
+      return baseName.replace("Searching", "Searched");
+    if (baseName.startsWith("Looking"))
+      return baseName.replace("Looking", "Found");
+    if (baseName.startsWith("Updating"))
+      return baseName.replace("Updating", "Updated");
+    if (baseName.startsWith("Removing"))
+      return baseName.replace("Removing", "Removed");
+    if (baseName.startsWith("Canceling"))
+      return baseName.replace("Canceling", "Canceled");
+    if (baseName.startsWith("Retrieving"))
+      return baseName.replace("Retrieving", "Retrieved");
+    if (baseName.startsWith("Uploading"))
+      return baseName.replace("Uploading", "Uploaded");
+    if (baseName.startsWith("Sending"))
+      return baseName.replace("Sending", "Sent");
   }
   return baseName;
 }
@@ -338,66 +1442,95 @@ function MCPToolCallDisplay({
   onLinkClick,
   className
 }) {
-  const [showDetails, setShowDetails] = React10__namespace.useState(!defaultCollapsed);
+  const [showDetails, setShowDetails] = React14__namespace.useState(!defaultCollapsed);
   const formatDuration2 = (ms) => {
     if (!ms) return null;
     if (ms < 1e3) return `${ms}ms`;
     return `${(ms / 1e3).toFixed(1)}s`;
   };
   const friendlyName = getToolFriendlyName(toolCall.toolName, toolCall.status);
-  const paramSummary = getParameterSummary(toolCall.toolName, toolCall.parameters);
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(toolCallVariants({ status: toolCall.status, compact }), className), children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-3", children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400", children: getToolIcon(toolCall.toolName) }),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-900 dark:text-white", children: friendlyName }),
-        /* @__PURE__ */ jsxRuntime.jsx(ToolStatusIcon, { status: toolCall.status }),
-        toolCall.duration && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-neutral-400", children: formatDuration2(toolCall.duration) })
-      ] }),
-      paramSummary && toolCall.status !== "success" && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-sm text-neutral-600 dark:text-neutral-400", children: paramSummary }),
-      toolCall.result && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2", children: /* @__PURE__ */ jsxRuntime.jsx(
-        ToolResultDisplay,
-        {
-          result: toolCall.result,
-          onLinkClick,
-          showRawData: showDetails
-        }
-      ) }),
-      toolCall.error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 rounded-md bg-red-100 p-2 dark:bg-red-900/30", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-700 dark:text-red-300", children: toolCall.error }) }),
-      collapsible && (showParameters && toolCall.parameters.length > 0) && /* @__PURE__ */ jsxRuntime.jsxs(
-        "button",
-        {
-          onClick: () => setShowDetails(!showDetails),
-          className: "mt-2 flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300",
-          children: [
-            /* @__PURE__ */ jsxRuntime.jsx(
-              "svg",
-              {
-                className: chunkOR5DRJCW_cjs.cn("h-3 w-3 transition-transform", showDetails && "rotate-90"),
-                fill: "none",
-                viewBox: "0 0 24 24",
-                stroke: "currentColor",
-                strokeWidth: "2",
-                children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
-              }
-            ),
-            showDetails ? "Hide" : "Show",
-            " details"
-          ]
-        }
+  const paramSummary = getParameterSummary(
+    toolCall.toolName,
+    toolCall.parameters
+  );
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        toolCallVariants({ status: toolCall.status, compact }),
+        className
       ),
-      showDetails && showParameters && toolCall.parameters.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400", children: "Parameters" }),
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-0.5", children: toolCall.parameters.map((param) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-2 text-xs", children: [
-          /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-mono text-neutral-500 dark:text-neutral-500", children: [
-            param.name,
-            ":"
+      children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-3", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400", children: getToolIcon(toolCall.toolName) }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-900 dark:text-white", children: friendlyName }),
+            /* @__PURE__ */ jsxRuntime.jsx(ToolStatusIcon, { status: toolCall.status }),
+            toolCall.duration && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-neutral-400", children: formatDuration2(toolCall.duration) })
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-neutral-700 dark:text-neutral-300", children: typeof param.value === "string" ? param.value : JSON.stringify(param.value) })
-        ] }, param.name)) })
+          paramSummary && toolCall.status !== "success" && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-sm text-neutral-600 dark:text-neutral-400", children: paramSummary }),
+          toolCall.result && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2", children: /* @__PURE__ */ jsxRuntime.jsx(
+            ToolResultDisplay,
+            {
+              result: toolCall.result,
+              onLinkClick,
+              showRawData: showDetails
+            }
+          ) }),
+          toolCall.error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 rounded-md bg-red-100 p-2 dark:bg-red-900/30", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-700 dark:text-red-300", children: toolCall.error }) }),
+          collapsible && showParameters && toolCall.parameters.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
+            "button",
+            {
+              onClick: () => setShowDetails(!showDetails),
+              className: "mt-2 flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300",
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "svg",
+                  {
+                    className: chunkOR5DRJCW_cjs.cn(
+                      "h-3 w-3 transition-transform",
+                      showDetails && "rotate-90"
+                    ),
+                    fill: "none",
+                    viewBox: "0 0 24 24",
+                    stroke: "currentColor",
+                    strokeWidth: "2",
+                    children: /* @__PURE__ */ jsxRuntime.jsx(
+                      "path",
+                      {
+                        strokeLinecap: "round",
+                        strokeLinejoin: "round",
+                        d: "M9 5l7 7-7 7"
+                      }
+                    )
+                  }
+                ),
+                showDetails ? "Hide" : "Show",
+                " details"
+              ]
+            }
+          ),
+          showDetails && showParameters && toolCall.parameters.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "mb-1.5 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400", children: "Parameters" }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-0.5", children: toolCall.parameters.map((param) => /* @__PURE__ */ jsxRuntime.jsxs(
+              "div",
+              {
+                className: "flex items-start gap-2 text-xs",
+                children: [
+                  /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-mono text-neutral-500 dark:text-neutral-500", children: [
+                    param.name,
+                    ":"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-neutral-700 dark:text-neutral-300", children: typeof param.value === "string" ? param.value : JSON.stringify(param.value) })
+                ]
+              },
+              param.name
+            )) })
+          ] })
+        ] })
       ] })
-    ] })
-  ] }) });
+    }
+  );
 }
 var avatarVariants2 = classVarianceAuthority.cva(
   "flex shrink-0 items-center justify-center rounded-full",
@@ -405,7 +1538,7 @@ var avatarVariants2 = classVarianceAuthority.cva(
     variants: {
       role: {
         user: "bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300",
-        assistant: "bg-gradient-to-br from-violet-500 to-purple-600 text-white",
+        assistant: "bg-primary-500 text-white dark:bg-primary-600",
         system: "bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400",
         tool: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
       },
@@ -421,55 +1554,111 @@ var avatarVariants2 = classVarianceAuthority.cva(
     }
   }
 );
-function MessageAvatar({ role, size, userName, className }) {
-  const getInitials2 = (name) => {
+function MessageAvatar({
+  role,
+  size,
+  userName,
+  className
+}) {
+  const getInitials3 = (name) => {
     if (!name) return "?";
     return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
   };
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(avatarVariants2({ role, size }), className), children: role === "assistant" ? /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-5 w-5", viewBox: "0 0 24 24", fill: "none", children: [
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        d: "M12 2L2 7L12 12L22 7L12 2Z",
-        stroke: "currentColor",
-        strokeWidth: "1.5",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        fill: "currentColor",
-        fillOpacity: "0.2"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        d: "M2 17L12 22L22 17",
-        stroke: "currentColor",
-        strokeWidth: "1.5",
-        strokeLinecap: "round",
-        strokeLinejoin: "round"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        d: "M2 12L12 17L22 12",
-        stroke: "currentColor",
-        strokeWidth: "1.5",
-        strokeLinecap: "round",
-        strokeLinejoin: "round"
-      }
-    )
-  ] }) : role === "user" ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: getInitials2(userName) }) : role === "system" ? /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" }) }) : /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" }) }) });
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(avatarVariants2({ role, size }), className), children: role === "assistant" ? /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "md" }) : role === "user" ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: getInitials3(userName) }) : role === "system" ? /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+        }
+      )
+    }
+  ) : /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"
+        }
+      )
+    }
+  ) });
 }
 function AITypingIndicator({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex items-center gap-1", className), children: [
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 animate-bounce rounded-full bg-neutral-400 dark:bg-neutral-500 [animation-delay:-0.3s]" }),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 animate-bounce rounded-full bg-neutral-400 dark:bg-neutral-500 [animation-delay:-0.15s]" }),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 animate-bounce rounded-full bg-neutral-400 dark:bg-neutral-500" })
-  ] });
+  const dotStyle = {
+    width: "6px",
+    height: "6px",
+    minWidth: "6px",
+    minHeight: "6px",
+    flexShrink: 0
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn("inline-flex items-center justify-center gap-2", className),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "span",
+          {
+            className: "rounded-full bg-neutral-500 dark:bg-neutral-400",
+            style: {
+              ...dotStyle,
+              animation: "typing-dot 1.4s infinite ease-in-out both",
+              animationDelay: "-0.32s"
+            }
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "span",
+          {
+            className: "rounded-full bg-neutral-500 dark:bg-neutral-400",
+            style: {
+              ...dotStyle,
+              animation: "typing-dot 1.4s infinite ease-in-out both",
+              animationDelay: "-0.16s"
+            }
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "span",
+          {
+            className: "rounded-full bg-neutral-500 dark:bg-neutral-400",
+            style: {
+              ...dotStyle,
+              animation: "typing-dot 1.4s infinite ease-in-out both"
+            }
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx("style", { children: `
+        @keyframes typing-dot {
+          0%, 80%, 100% { opacity: 0.4; }
+          40% { opacity: 1; }
+        }
+      ` })
+      ]
+    }
+  );
 }
 function ContentBlock({ content, onLinkClick }) {
-  const [isCollapsed, setIsCollapsed] = React10__namespace.useState(content.collapsed ?? false);
+  const [isCollapsed, setIsCollapsed] = React14__namespace.useState(
+    content.collapsed ?? false
+  );
   if (content.type === "text" && content.text) {
     return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "prose prose-sm dark:prose-invert max-w-none", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "whitespace-pre-wrap", children: content.text }) });
   }
@@ -492,18 +1681,31 @@ function ContentBlock({ content, onLinkClick }) {
           className: "flex w-full items-center justify-between px-3 py-2 text-left",
           children: [
             /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400", children: [
-              /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" }) }),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "svg",
+                {
+                  className: "h-4 w-4",
+                  fill: "none",
+                  viewBox: "0 0 24 24",
+                  stroke: "currentColor",
+                  strokeWidth: "1.5",
+                  children: /* @__PURE__ */ jsxRuntime.jsx(
+                    "path",
+                    {
+                      strokeLinecap: "round",
+                      strokeLinejoin: "round",
+                      d: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                    }
+                  )
+                }
+              ),
               "Thinking..."
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              "svg",
+              ChevronIcon,
               {
-                className: chunkOR5DRJCW_cjs.cn("h-4 w-4 text-neutral-400 transition-transform", isCollapsed && "-rotate-90"),
-                fill: "none",
-                viewBox: "0 0 24 24",
-                stroke: "currentColor",
-                strokeWidth: "2",
-                children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
+                direction: isCollapsed ? "right" : "down",
+                className: "text-neutral-400"
               }
             )
           ]
@@ -513,7 +1715,13 @@ function ContentBlock({ content, onLinkClick }) {
     ] });
   }
   if (content.type === "code" && content.text) {
-    return /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "rounded-lg bg-neutral-900 p-3 text-sm dark:bg-neutral-950", children: /* @__PURE__ */ jsxRuntime.jsx("code", { className: content.language ? `language-${content.language}` : "", children: content.text }) });
+    return /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "rounded-lg bg-neutral-900 p-3 text-sm dark:bg-neutral-950", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "code",
+      {
+        className: content.language ? `language-${content.language}` : "",
+        children: content.text
+      }
+    ) });
   }
   return null;
 }
@@ -530,22 +1738,19 @@ var messageVariants = classVarianceAuthority.cva("flex gap-3", {
     role: "assistant"
   }
 });
-var bubbleVariants = classVarianceAuthority.cva(
-  "rounded-2xl px-4 py-2.5 max-w-[85%]",
-  {
-    variants: {
-      role: {
-        user: "bg-primary-600 text-white dark:bg-primary-500",
-        assistant: "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white",
-        system: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400 text-center text-sm max-w-[95%]",
-        tool: "bg-transparent p-0 max-w-full w-full"
-      }
-    },
-    defaultVariants: {
-      role: "assistant"
+var bubbleVariants = classVarianceAuthority.cva("rounded-2xl px-4 py-2.5 w-fit max-w-[85%]", {
+  variants: {
+    role: {
+      user: "bg-primary-600 text-white dark:bg-primary-500",
+      assistant: "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white",
+      system: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400 text-center text-sm max-w-[95%]",
+      tool: "bg-transparent p-0 max-w-full w-full"
     }
+  },
+  defaultVariants: {
+    role: "assistant"
   }
-);
+});
 function AIMessageDisplay({
   message,
   userName,
@@ -558,21 +1763,47 @@ function AIMessageDisplay({
   const hasContent = message.content.length > 0;
   const formatTime3 = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString(void 0, { hour: "numeric", minute: "2-digit" });
+    return date.toLocaleTimeString(void 0, {
+      hour: "numeric",
+      minute: "2-digit"
+    });
   };
   if (message.role === "tool") {
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(messageVariants({ role: message.role }), className), children: [
       showAvatar && /* @__PURE__ */ jsxRuntime.jsx(MessageAvatar, { role: message.role }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1 space-y-2", children: message.content.map((content, index) => /* @__PURE__ */ jsxRuntime.jsx(ContentBlock, { content, onLinkClick }, index)) })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1 space-y-2", children: message.content.map((content, index) => /* @__PURE__ */ jsxRuntime.jsx(
+        ContentBlock,
+        {
+          content,
+          onLinkClick
+        },
+        index
+      )) })
     ] });
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(messageVariants({ role: message.role }), className), children: [
     showAvatar && message.role !== "system" && /* @__PURE__ */ jsxRuntime.jsx(MessageAvatar, { role: message.role, userName }),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-col gap-1", message.role === "user" && "items-end"), children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: bubbleVariants({ role: message.role }), children: hasContent ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: message.content.map((content, index) => /* @__PURE__ */ jsxRuntime.jsx(ContentBlock, { content, onLinkClick }, index)) }) : isStreaming ? /* @__PURE__ */ jsxRuntime.jsx(AITypingIndicator, {}) : null }),
-      showTimestamp && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "px-2 text-xs text-neutral-500", children: formatTime3(message.timestamp) }),
-      message.status === "error" && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "px-2 text-xs text-red-500", children: "Failed to send" })
-    ] })
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "flex flex-col gap-1",
+          message.role === "user" && "items-end"
+        ),
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: bubbleVariants({ role: message.role }), children: hasContent ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: message.content.map((content, index) => /* @__PURE__ */ jsxRuntime.jsx(
+            ContentBlock,
+            {
+              content,
+              onLinkClick
+            },
+            index
+          )) }) : isStreaming ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsx(AITypingIndicator, {}) }) : null }),
+          showTimestamp && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "px-2 text-xs text-neutral-500", children: formatTime3(message.timestamp) }),
+          message.status === "error" && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "px-2 text-xs text-red-500", children: "Failed to send" })
+        ]
+      }
+    )
   ] });
 }
 function getFileType(mimeType) {
@@ -797,7 +2028,7 @@ function AttachmentPreviewItem({
   );
 }
 AttachmentPreviewItem.displayName = "AttachmentPreviewItem";
-var AttachmentPicker = React10__namespace.forwardRef(
+var AttachmentPicker = React14__namespace.forwardRef(
   ({
     onFilesSelected,
     acceptedTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
@@ -810,8 +2041,8 @@ var AttachmentPicker = React10__namespace.forwardRef(
     className,
     children
   }, ref) => {
-    const inputRef = React10__namespace.useRef(null);
-    React10__namespace.useImperativeHandle(ref, () => inputRef.current);
+    const inputRef = React14__namespace.useRef(null);
+    React14__namespace.useImperativeHandle(ref, () => inputRef.current);
     const handleClick = () => {
       inputRef.current?.click();
     };
@@ -901,8 +2132,8 @@ function DragDropZone({
   children,
   className
 }) {
-  const [isDragging, setIsDragging] = React10__namespace.useState(false);
-  const dragCounterRef = React10__namespace.useRef(0);
+  const [isDragging, setIsDragging] = React14__namespace.useState(false);
+  const dragCounterRef = React14__namespace.useRef(0);
   const handleDragEnter = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1003,7 +2234,7 @@ function CameraButton({
   disabled = false,
   className
 }) {
-  const inputRef = React10__namespace.useRef(null);
+  const inputRef = React14__namespace.useRef(null);
   const handleClick = () => {
     inputRef.current?.click();
   };
@@ -1111,7 +2342,7 @@ CharacterCounter.displayName = "CharacterCounter";
 var sendButtonVariants = classVarianceAuthority.cva(
   [
     "inline-flex items-center justify-center",
-    "rounded-full p-2.5",
+    "rounded-full p-3 self-start",
     "transition-all duration-200",
     "focus:outline-none focus:ring-2 focus:ring-primary-500",
     "disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1140,7 +2371,7 @@ var sendButtonVariants = classVarianceAuthority.cva(
     }
   }
 );
-var SendButton = React10__namespace.forwardRef(
+var SendButton = React14__namespace.forwardRef(
   ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "button",
@@ -1194,7 +2425,7 @@ var SendButton = React10__namespace.forwardRef(
   }
 );
 SendButton.displayName = "SendButton";
-var MessageComposer = React10__namespace.forwardRef(
+var MessageComposer = React14__namespace.forwardRef(
   ({
     onSend,
     onTypingStart,
@@ -1213,24 +2444,25 @@ var MessageComposer = React10__namespace.forwardRef(
     autoFocus = false,
     replyTo = null,
     onCancelReply,
+    variant = "default",
     className
   }, ref) => {
-    const textareaRef = React10__namespace.useRef(null);
-    const [content, setContent] = React10__namespace.useState("");
-    const [attachments, setAttachments] = React10__namespace.useState(
+    const textareaRef = React14__namespace.useRef(null);
+    const [content, setContent] = React14__namespace.useState("");
+    const [attachments, setAttachments] = React14__namespace.useState(
       []
     );
-    const [isTyping, setIsTyping] = React10__namespace.useState(false);
-    const typingTimeoutRef = React10__namespace.useRef(null);
-    React10__namespace.useImperativeHandle(ref, () => textareaRef.current);
-    React10__namespace.useEffect(() => {
+    const [isTyping, setIsTyping] = React14__namespace.useState(false);
+    const typingTimeoutRef = React14__namespace.useRef(null);
+    React14__namespace.useImperativeHandle(ref, () => textareaRef.current);
+    React14__namespace.useEffect(() => {
       const textarea = textareaRef.current;
       if (textarea) {
         textarea.style.height = "auto";
         textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
       }
     }, [content]);
-    React10__namespace.useEffect(() => {
+    React14__namespace.useEffect(() => {
       if (content.length > 0 && !isTyping) {
         setIsTyping(true);
         onTypingStart?.();
@@ -1250,12 +2482,12 @@ var MessageComposer = React10__namespace.forwardRef(
         }
       };
     }, [content, isTyping, onTypingStart, onTypingStop]);
-    React10__namespace.useEffect(() => {
+    React14__namespace.useEffect(() => {
       if (autoFocus) {
         textareaRef.current?.focus();
       }
     }, [autoFocus]);
-    React10__namespace.useEffect(() => {
+    React14__namespace.useEffect(() => {
       if (replyTo) {
         textareaRef.current?.focus();
       }
@@ -1319,7 +2551,7 @@ var MessageComposer = React10__namespace.forwardRef(
         return prev.filter((a) => a.id !== attachmentId);
       });
     };
-    React10__namespace.useEffect(() => {
+    React14__namespace.useEffect(() => {
       const currentAttachments = attachments;
       return () => {
         currentAttachments.forEach((a) => {
@@ -1412,9 +2644,9 @@ var MessageComposer = React10__namespace.forwardRef(
             "div",
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "flex items-end gap-2 p-3",
+                "flex items-center gap-2 p-3",
                 "bg-white dark:bg-neutral-900",
-                "border-t border-neutral-200 dark:border-neutral-700"
+                variant === "default" && "border-t border-neutral-200 dark:border-neutral-700"
               ),
               children: [
                 showAttachmentPicker && /* @__PURE__ */ jsxRuntime.jsx(
@@ -1611,7 +2843,7 @@ function ReadReceiptIndicator({
   if (receipts.length === 0) return null;
   const visibleReceipts = receipts.slice(0, maxAvatars);
   const remainingCount = receipts.length - maxAvatars;
-  const sizeClasses = {
+  const sizeClasses2 = {
     xs: "h-4 w-4 text-[8px]",
     sm: "h-5 w-5 text-[10px]"
   };
@@ -1628,7 +2860,7 @@ function ReadReceiptIndicator({
               "rounded-full ring-2 ring-white dark:ring-neutral-900",
               "bg-primary-800 font-medium text-white",
               "flex items-center justify-center",
-              sizeClasses[size]
+              sizeClasses2[size]
             ),
             title: `Read by ${receipt.participant.name}`,
             children: receipt.participant.avatarUrl ? /* @__PURE__ */ jsxRuntime.jsx(
@@ -1649,7 +2881,7 @@ function ReadReceiptIndicator({
               "rounded-full ring-2 ring-white dark:ring-neutral-900",
               "bg-neutral-500 font-medium text-white",
               "flex items-center justify-center",
-              sizeClasses[size]
+              sizeClasses2[size]
             ),
             children: [
               "+",
@@ -1848,7 +3080,7 @@ function defaultFormatTimestamp(timestamp) {
     minute: "2-digit"
   });
 }
-var MessageBubble = React10__namespace.forwardRef(
+var MessageBubble = React14__namespace.forwardRef(
   ({
     className,
     message,
@@ -2282,7 +3514,7 @@ function LoadMoreButton({
   ) });
 }
 LoadMoreButton.displayName = "LoadMoreButton";
-var MessageList = React10__namespace.forwardRef(
+var MessageList = React14__namespace.forwardRef(
   ({
     messages,
     currentUser,
@@ -2301,19 +3533,19 @@ var MessageList = React10__namespace.forwardRef(
     className,
     autoScroll = "onNewMessage"
   }, ref) => {
-    const scrollContainerRef = React10__namespace.useRef(null);
-    const bottomRef = React10__namespace.useRef(null);
-    const [isUserScrolled, setIsUserScrolled] = React10__namespace.useState(false);
-    const prevMessageCountRef = React10__namespace.useRef(messages.length);
-    React10__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
-    const handleScroll = React10__namespace.useCallback(() => {
+    const scrollContainerRef = React14__namespace.useRef(null);
+    const bottomRef = React14__namespace.useRef(null);
+    const [isUserScrolled, setIsUserScrolled] = React14__namespace.useState(false);
+    const prevMessageCountRef = React14__namespace.useRef(messages.length);
+    React14__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
+    const handleScroll = React14__namespace.useCallback(() => {
       const container = scrollContainerRef.current;
       if (!container) return;
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       setIsUserScrolled(!isAtBottom);
     }, []);
-    React10__namespace.useEffect(() => {
+    React14__namespace.useEffect(() => {
       const container = scrollContainerRef.current;
       const bottom = bottomRef.current;
       if (!container || !bottom) return;
@@ -2329,7 +3561,7 @@ var MessageList = React10__namespace.forwardRef(
         }
       }
     }, [messages, currentUser.id, autoScroll, isUserScrolled]);
-    React10__namespace.useEffect(() => {
+    React14__namespace.useEffect(() => {
       const bottom = bottomRef.current;
       if (bottom && !isLoading) {
         bottom.scrollIntoView();
@@ -2375,7 +3607,7 @@ var MessageList = React10__namespace.forwardRef(
         "aria-live": "polite",
         children: [
           hasMore && onLoadMore && /* @__PURE__ */ jsxRuntime.jsx(LoadMoreButton, { isLoading: isLoadingMore, onClick: onLoadMore }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React14__namespace.Fragment, { children: [
             groupByDate && group.label && /* @__PURE__ */ jsxRuntime.jsx(DateSeparator, { label: group.label }),
             group.messages.map((message, index) => {
               const prevMessage = group.messages[index - 1];
@@ -2453,21 +3685,127 @@ var MessageList = React10__namespace.forwardRef(
 );
 MessageList.displayName = "MessageList";
 var ACTION_ICONS = {
-  patient: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" }) }),
-  search: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" }) }),
-  appointment: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" }) }),
-  document: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" }) }),
-  help: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" }) }),
-  default: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" }) })
+  patient: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z"
+        }
+      )
+    }
+  ),
+  search: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+        }
+      )
+    }
+  ),
+  appointment: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+        }
+      )
+    }
+  ),
+  document: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+        }
+      )
+    }
+  ),
+  help: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
+        }
+      )
+    }
+  ),
+  default: /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        }
+      )
+    }
+  )
 };
-function SuggestedActions({ actions, onSelect, className }) {
+function SuggestedActions({
+  actions,
+  onSelect,
+  className
+}) {
   return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-wrap gap-2", className), children: actions.map((action) => /* @__PURE__ */ jsxRuntime.jsxs(
     "button",
     {
       onClick: () => onSelect(action),
       className: chunkOR5DRJCW_cjs.cn(
         "flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5",
-        "text-sm text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700",
+        "hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 text-sm text-neutral-700",
         "dark:border-neutral-700 dark:text-neutral-300",
         "dark:hover:border-primary-700 dark:hover:bg-primary-900/20 dark:hover:text-primary-300",
         "transition-colors"
@@ -2488,49 +3826,10 @@ function AIEmptyState({
   className,
   ...props
 }) {
-  const aiIcon = /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-8 w-8 text-white", viewBox: "0 0 24 24", fill: "none", children: [
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        d: "M12 2L2 7L12 12L22 7L12 2Z",
-        stroke: "currentColor",
-        strokeWidth: "1.5",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        fill: "currentColor",
-        fillOpacity: "0.2"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        d: "M2 17L12 22L22 17",
-        stroke: "currentColor",
-        strokeWidth: "1.5",
-        strokeLinecap: "round",
-        strokeLinejoin: "round"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        d: "M2 12L12 17L22 12",
-        stroke: "currentColor",
-        strokeWidth: "1.5",
-        strokeLinecap: "round",
-        strokeLinejoin: "round"
-      }
-    )
-  ] }) });
+  const aiIcon = /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white", children: /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "lg", className: "h-8 w-8" }) });
   const suggestionsAction = suggestions && suggestions.length > 0 && onSuggestionSelect ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-6", children: [
     /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 text-sm text-neutral-500 dark:text-neutral-400", children: "Try asking:" }),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      SuggestedActions,
-      {
-        actions: suggestions,
-        onSelect: onSuggestionSelect
-      }
-    )
+    /* @__PURE__ */ jsxRuntime.jsx(SuggestedActions, { actions: suggestions, onSelect: onSuggestionSelect })
   ] }) : void 0;
   return /* @__PURE__ */ jsxRuntime.jsx(
     EmptyState,
@@ -2544,29 +3843,26 @@ function AIEmptyState({
     }
   );
 }
-var chatVariants = classVarianceAuthority.cva(
-  "flex flex-col",
-  {
-    variants: {
-      variant: {
-        default: "bg-white dark:bg-neutral-900",
-        embedded: "bg-transparent",
-        floating: "bg-white dark:bg-neutral-900 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700"
-      },
-      size: {
-        sm: "max-w-sm",
-        md: "max-w-lg",
-        lg: "max-w-2xl",
-        xl: "max-w-4xl",
-        full: "w-full"
-      }
+var chatVariants = classVarianceAuthority.cva("flex flex-col", {
+  variants: {
+    variant: {
+      default: "bg-white dark:bg-neutral-900",
+      embedded: "bg-transparent",
+      floating: "bg-white dark:bg-neutral-900 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-700"
     },
-    defaultVariants: {
-      variant: "default",
-      size: "full"
+    size: {
+      sm: "max-w-sm",
+      md: "max-w-lg",
+      lg: "max-w-2xl",
+      xl: "max-w-4xl",
+      full: "w-full"
     }
+  },
+  defaultVariants: {
+    variant: "default",
+    size: "full"
   }
-);
+});
 function AIChat({
   session,
   messages: messagesProp,
@@ -2587,15 +3883,16 @@ function AIChat({
   onResourceClick,
   onSuggestedAction,
   onCancel,
-  onClear
+  onClear,
+  onClose
 }) {
-  const messagesEndRef = React10__namespace.useRef(null);
-  const messages = React10__namespace.useMemo(
+  const messagesEndRef = React14__namespace.useRef(null);
+  const messages = React14__namespace.useMemo(
     () => session?.messages || messagesProp || [],
     [session?.messages, messagesProp]
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
-  React10__namespace.useEffect(() => {
+  React14__namespace.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   const handleSend = async (message) => {
@@ -2623,46 +3920,13 @@ function AIChat({
       children: [
         showHeader && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-4 w-4 text-white", viewBox: "0 0 24 24", fill: "none", children: [
-              /* @__PURE__ */ jsxRuntime.jsx(
-                "path",
-                {
-                  d: "M12 2L2 7L12 12L22 7L12 2Z",
-                  stroke: "currentColor",
-                  strokeWidth: "1.5",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round",
-                  fill: "currentColor",
-                  fillOpacity: "0.2"
-                }
-              ),
-              /* @__PURE__ */ jsxRuntime.jsx(
-                "path",
-                {
-                  d: "M2 17L12 22L22 17",
-                  stroke: "currentColor",
-                  strokeWidth: "1.5",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round"
-                }
-              ),
-              /* @__PURE__ */ jsxRuntime.jsx(
-                "path",
-                {
-                  d: "M2 12L12 17L22 12",
-                  stroke: "currentColor",
-                  strokeWidth: "1.5",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round"
-                }
-              )
-            ] }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white", children: /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "sm" }) }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
               /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "font-semibold text-neutral-900 dark:text-white", children: title }),
               isGenerating && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-neutral-500", children: "Generating..." })
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1", children: [
             isGenerating && onCancel && /* @__PURE__ */ jsxRuntime.jsx(
               "button",
               {
@@ -2682,7 +3946,17 @@ function AIChat({
                 onClick: onClear,
                 className: "rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300",
                 title: "Clear chat",
-                children: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" }) })
+                children: /* @__PURE__ */ jsxRuntime.jsx(RefreshIcon, {})
+              }
+            ),
+            onClose && /* @__PURE__ */ jsxRuntime.jsx(
+              "button",
+              {
+                onClick: onClose,
+                className: "rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300",
+                title: "Close chat",
+                "aria-label": "Close chat",
+                children: /* @__PURE__ */ jsxRuntime.jsx(CloseIcon, {})
               }
             )
           ] })
@@ -2706,15 +3980,14 @@ function AIChat({
           )),
           /* @__PURE__ */ jsxRuntime.jsx("div", { ref: messagesEndRef })
         ] }) }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-t border-neutral-200 p-4 dark:border-neutral-700", children: [
-          suggestions && suggestions.length > 0 && messages.length > 0 && !isGenerating && /* @__PURE__ */ jsxRuntime.jsx(
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "shrink-0 border-t border-neutral-200 dark:border-neutral-700", children: [
+          suggestions && suggestions.length > 0 && messages.length > 0 && !isGenerating && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-4 pt-3", children: /* @__PURE__ */ jsxRuntime.jsx(
             SuggestedActions,
             {
               actions: suggestions,
-              onSelect: handleSuggestionSelect,
-              className: "mb-3"
+              onSelect: handleSuggestionSelect
             }
-          ),
+          ) }),
           /* @__PURE__ */ jsxRuntime.jsx(
             MessageComposer,
             {
@@ -2725,6 +3998,7 @@ function AIChat({
               showAttachmentPicker: false,
               showCameraButton: false,
               showCharacterCount: false,
+              variant: "minimal",
               ...composerProps
             }
           )
@@ -2753,9 +4027,9 @@ function AIChatTrigger({
       onClick,
       className: chunkOR5DRJCW_cjs.cn(
         "fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg",
-        "bg-gradient-to-br from-violet-500 to-purple-600 text-white",
-        "hover:from-violet-600 hover:to-purple-700",
-        "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2",
+        "bg-primary-500 text-white",
+        "hover:bg-primary-600",
+        "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none",
         "dark:focus:ring-offset-neutral-900",
         "transition-all duration-200",
         isOpen && "scale-0 opacity-0",
@@ -2764,42 +4038,9 @@ function AIChatTrigger({
       ),
       "aria-label": "Open AI Assistant",
       children: [
-        pulse && !isOpen && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" }),
-        badge && badge > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold", children: badge > 9 ? "9+" : badge }),
-        /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-7 w-7", viewBox: "0 0 24 24", fill: "none", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "path",
-            {
-              d: "M12 2L2 7L12 12L22 7L12 2Z",
-              stroke: "currentColor",
-              strokeWidth: "1.5",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-              fill: "currentColor",
-              fillOpacity: "0.2"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "path",
-            {
-              d: "M2 17L12 22L22 17",
-              stroke: "currentColor",
-              strokeWidth: "1.5",
-              strokeLinecap: "round",
-              strokeLinejoin: "round"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "path",
-            {
-              d: "M2 12L12 17L22 12",
-              stroke: "currentColor",
-              strokeWidth: "1.5",
-              strokeLinecap: "round",
-              strokeLinejoin: "round"
-            }
-          )
-        ] })
+        pulse && !isOpen && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-primary-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" }),
+        badge && badge > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold", children: badge > 9 ? "9+" : badge }),
+        /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "lg" })
       ]
     }
   );
@@ -2821,7 +4062,7 @@ function AIChatModal({
   const positionClasses = {
     "bottom-right": "bottom-20 right-4",
     "bottom-left": "bottom-20 left-4",
-    "center": "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    center: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
   };
   return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
     position === "center" && /* @__PURE__ */ jsxRuntime.jsx(
@@ -2854,31 +4095,16 @@ function AIChatModal({
         role: "dialog",
         "aria-modal": "true",
         "aria-label": "AI Assistant Chat",
-        children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative h-full w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "button",
-            {
-              onClick: () => onOpenChange(false),
-              className: chunkOR5DRJCW_cjs.cn(
-                "absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full",
-                "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700",
-                "dark:hover:bg-neutral-800 dark:hover:text-neutral-300",
-                "transition-colors"
-              ),
-              "aria-label": "Close chat",
-              children: /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }) })
-            }
-          ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            AIChat,
-            {
-              ...chatProps,
-              variant: "embedded",
-              height: "100%",
-              className: "h-full"
-            }
-          )
-        ] })
+        children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative h-full w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900", children: /* @__PURE__ */ jsxRuntime.jsx(
+          AIChat,
+          {
+            ...chatProps,
+            variant: "embedded",
+            height: "100%",
+            className: "h-full",
+            onClose: () => onOpenChange(false)
+          }
+        ) })
       }
     )
   ] });
@@ -2892,7 +4118,7 @@ function FloatingAIChat({
   pulse = false,
   ...chatProps
 }) {
-  const [internalOpen, setInternalOpen] = React10__namespace.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React14__namespace.useState(defaultOpen);
   const isControlled = controlledOpen !== void 0;
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const handleOpenChange = (open) => {
@@ -3157,1253 +4383,7 @@ function AppHeaderUserMenu({
     }
   );
 }
-var audioPlayerVariants = classVarianceAuthority.cva("", {
-  variants: {
-    variant: {
-      inline: "inline-flex items-center gap-2",
-      compact: [
-        "flex items-center gap-3 p-3",
-        "rounded-lg border border-border",
-        "bg-card text-card-foreground"
-      ],
-      waveform: [
-        "flex flex-col gap-3 p-4",
-        "rounded-xl border border-border",
-        "bg-card text-card-foreground"
-      ]
-    },
-    size: {
-      sm: "",
-      md: "",
-      lg: ""
-    }
-  },
-  compoundVariants: [
-    { variant: "compact", size: "sm", class: "p-2 gap-2" },
-    { variant: "compact", size: "lg", class: "p-4 gap-4" },
-    { variant: "waveform", size: "sm", class: "p-3 gap-2" },
-    { variant: "waveform", size: "lg", class: "p-5 gap-4" }
-  ],
-  defaultVariants: {
-    variant: "compact",
-    size: "md"
-  }
-});
-var playButtonVariants = classVarianceAuthority.cva(
-  [
-    "inline-flex items-center justify-center",
-    "rounded-full transition-all duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-    "disabled:pointer-events-none disabled:opacity-50",
-    "active:scale-95"
-  ],
-  {
-    variants: {
-      variant: {
-        inline: [
-          "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100",
-          "dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800"
-        ],
-        compact: [
-          "bg-primary-600 text-white",
-          "hover:bg-primary-700",
-          "active:bg-primary-800"
-        ],
-        waveform: [
-          "bg-primary-600 text-white",
-          "hover:bg-primary-700",
-          "active:bg-primary-800"
-        ]
-      },
-      size: {
-        sm: "h-7 w-7",
-        md: "h-9 w-9",
-        lg: "h-11 w-11"
-      }
-    },
-    defaultVariants: {
-      variant: "compact",
-      size: "md"
-    }
-  }
-);
-function formatTime(seconds) {
-  if (!isFinite(seconds) || isNaN(seconds)) return "0:00";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
-function PlayIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M8 5v14l11-7z" })
-    }
-  );
-}
-function PauseIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M6 19h4V5H6v14zm8-14v14h4V5h-4z" })
-    }
-  );
-}
-function SpinnerIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "svg",
-    {
-      className: chunkOR5DRJCW_cjs.cn("animate-spin", className),
-      fill: "none",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
-          "circle",
-          {
-            className: "opacity-25",
-            cx: "12",
-            cy: "12",
-            r: "10",
-            stroke: "currentColor",
-            strokeWidth: "4"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          "path",
-          {
-            className: "opacity-75",
-            fill: "currentColor",
-            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          }
-        )
-      ]
-    }
-  );
-}
-function ProgressBar({
-  currentTime,
-  duration,
-  onSeek,
-  disabled
-}) {
-  const progressRef = React10__namespace.useRef(null);
-  const progress = duration > 0 ? currentTime / duration * 100 : 0;
-  const handleClick = (e) => {
-    if (disabled || !progressRef.current || duration <= 0) return;
-    const rect = progressRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / rect.width;
-    onSeek(percentage * duration);
-  };
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
-    {
-      ref: progressRef,
-      role: "slider",
-      "aria-label": "Audio progress",
-      "aria-valuemin": 0,
-      "aria-valuemax": duration,
-      "aria-valuenow": currentTime,
-      "aria-valuetext": `${formatTime(currentTime)} of ${formatTime(duration)}`,
-      tabIndex: disabled ? -1 : 0,
-      className: chunkOR5DRJCW_cjs.cn(
-        "relative h-1.5 flex-1 cursor-pointer rounded-full bg-neutral-200 dark:bg-neutral-700",
-        disabled && "cursor-not-allowed opacity-50"
-      ),
-      onClick: handleClick,
-      onKeyDown: (e) => {
-        if (disabled) return;
-        const step = duration * 0.05;
-        if (e.key === "ArrowRight") {
-          onSeek(Math.min(currentTime + step, duration));
-        } else if (e.key === "ArrowLeft") {
-          onSeek(Math.max(currentTime - step, 0));
-        }
-      },
-      children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
-          "div",
-          {
-            className: "bg-primary-600 absolute inset-y-0 left-0 rounded-full transition-all",
-            style: { width: `${progress}%` }
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          "div",
-          {
-            className: "bg-primary-600 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all",
-            style: { left: `calc(${progress}% - 6px)` }
-          }
-        )
-      ]
-    }
-  );
-}
-function Waveform({
-  src,
-  isPlaying,
-  onReady,
-  onTimeUpdate,
-  onFinish,
-  onSeek,
-  waveColor,
-  progressColor,
-  height = 64
-}) {
-  const containerRef = React10__namespace.useRef(null);
-  const wavesurferRef = React10__namespace.useRef(null);
-  const [isLoaded, setIsLoaded] = React10__namespace.useState(false);
-  React10__namespace.useEffect(() => {
-    if (!containerRef.current) return;
-    const initWaveSurfer = async () => {
-      try {
-        const WaveSurfer = (await import('wavesurfer.js')).default;
-        if (wavesurferRef.current) {
-          wavesurferRef.current.destroy();
-        }
-        wavesurferRef.current = WaveSurfer.create({
-          container: containerRef.current,
-          waveColor: waveColor || "#d1d5db",
-          progressColor: progressColor || "var(--color-primary-600, #2563eb)",
-          cursorColor: "transparent",
-          barWidth: 2,
-          barGap: 2,
-          barRadius: 2,
-          height,
-          normalize: true,
-          interact: true
-        });
-        wavesurferRef.current.on("ready", () => {
-          setIsLoaded(true);
-          onReady(wavesurferRef.current.getDuration());
-        });
-        wavesurferRef.current.on("audioprocess", () => {
-          onTimeUpdate(wavesurferRef.current.getCurrentTime());
-        });
-        wavesurferRef.current.on("seeking", () => {
-          onTimeUpdate(wavesurferRef.current.getCurrentTime());
-        });
-        wavesurferRef.current.on("interaction", () => {
-          onSeek(wavesurferRef.current.getCurrentTime());
-        });
-        wavesurferRef.current.on("finish", () => {
-          onFinish();
-        });
-        wavesurferRef.current.load(src);
-      } catch (error) {
-        console.error("Failed to load WaveSurfer:", error);
-      }
-    };
-    initWaveSurfer();
-    return () => {
-      if (wavesurferRef.current) {
-        wavesurferRef.current.destroy();
-        wavesurferRef.current = null;
-      }
-    };
-  }, [src]);
-  React10__namespace.useEffect(() => {
-    if (!wavesurferRef.current || !isLoaded) return;
-    if (isPlaying) {
-      wavesurferRef.current.play();
-    } else {
-      wavesurferRef.current.pause();
-    }
-  }, [isPlaying, isLoaded]);
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      ref: containerRef,
-      className: chunkOR5DRJCW_cjs.cn(
-        "w-full rounded-lg bg-neutral-100 dark:bg-neutral-800",
-        !isLoaded && "animate-pulse"
-      ),
-      style: { height }
-    }
-  );
-}
-function AudioPlayer({
-  src,
-  title,
-  variant = "compact",
-  size = "md",
-  onStateChange,
-  onEnded,
-  onError,
-  onTimeUpdate,
-  showTime = true,
-  showDuration = true,
-  waveColor,
-  progressColor,
-  waveformHeight = 64,
-  disabled = false,
-  className,
-  "aria-label": ariaLabel,
-  playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
-  showPlaybackRate = false,
-  /** Whether to preload audio (set to false for lists with many items) */
-  preload = false,
-  /** Fallback duration in seconds to display before audio is loaded */
-  fallbackDuration
-}) {
-  const [state, setState] = React10__namespace.useState("idle");
-  const [currentTime, setCurrentTime] = React10__namespace.useState(0);
-  const [duration, setDuration] = React10__namespace.useState(0);
-  const [playbackRate, setPlaybackRate] = React10__namespace.useState(1);
-  const [audioInitialized, setAudioInitialized] = React10__namespace.useState(false);
-  const audioRef = React10__namespace.useRef(null);
-  const isPlaying = state === "playing";
-  const isLoading = state === "loading";
-  const updateState = React10__namespace.useCallback(
-    (newState) => {
-      setState(newState);
-      onStateChange?.(newState);
-    },
-    [onStateChange]
-  );
-  const initAudio = React10__namespace.useCallback(() => {
-    if (variant === "waveform" || audioInitialized) return null;
-    const audio = new globalThis.Audio(src);
-    audioRef.current = audio;
-    setAudioInitialized(true);
-    audio.addEventListener("loadstart", () => updateState("loading"));
-    audio.addEventListener("canplay", () => {
-      updateState("idle");
-    });
-    audio.addEventListener("loadedmetadata", () => {
-      setDuration(audio.duration);
-    });
-    audio.addEventListener("timeupdate", () => {
-      setCurrentTime(audio.currentTime);
-      onTimeUpdate?.(audio.currentTime, audio.duration);
-    });
-    audio.addEventListener("ended", () => {
-      updateState("idle");
-      setCurrentTime(0);
-      onEnded?.();
-    });
-    audio.addEventListener("error", () => {
-      updateState("error");
-      onError?.(new Error("Failed to load audio"));
-    });
-    return audio;
-  }, [
-    src,
-    variant,
-    audioInitialized,
-    updateState,
-    onTimeUpdate,
-    onEnded,
-    onError
-  ]);
-  React10__namespace.useEffect(() => {
-    if (preload && !audioInitialized && variant !== "waveform") {
-      initAudio();
-    }
-  }, [preload, audioInitialized, variant, initAudio]);
-  React10__namespace.useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
-    };
-  }, []);
-  React10__namespace.useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = playbackRate;
-    }
-  }, [playbackRate]);
-  const handlePlay = React10__namespace.useCallback(() => {
-    if (disabled) return;
-    if (!audioInitialized && !isLoading) {
-      const audio = initAudio();
-      if (audio) {
-        updateState("loading");
-        audio.addEventListener(
-          "canplay",
-          () => {
-            audio.play().catch((error) => {
-              updateState("error");
-              onError?.(error);
-            });
-            updateState("playing");
-          },
-          { once: true }
-        );
-      }
-      return;
-    }
-    if (isLoading) return;
-    if (isPlaying) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      updateState("paused");
-    } else {
-      if (audioRef.current) {
-        audioRef.current.play().catch((error) => {
-          updateState("error");
-          onError?.(error);
-        });
-        updateState("playing");
-      }
-    }
-  }, [
-    disabled,
-    audioInitialized,
-    isLoading,
-    isPlaying,
-    initAudio,
-    updateState,
-    onError
-  ]);
-  const handleSeek = React10__namespace.useCallback((time) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  }, []);
-  const handleWaveformReady = React10__namespace.useCallback((dur) => {
-    setDuration(dur);
-    setState("idle");
-  }, []);
-  const handleWaveformTimeUpdate = React10__namespace.useCallback(
-    (time) => {
-      setCurrentTime(time);
-      onTimeUpdate?.(time, duration);
-    },
-    [duration, onTimeUpdate]
-  );
-  const handleWaveformFinish = React10__namespace.useCallback(() => {
-    updateState("idle");
-    setCurrentTime(0);
-    onEnded?.();
-  }, [updateState, onEnded]);
-  const handleWaveformSeek = React10__namespace.useCallback((time) => {
-    setCurrentTime(time);
-  }, []);
-  const iconSize = size === "sm" ? "h-3.5 w-3.5" : size === "lg" ? "h-5 w-5" : "h-4 w-4";
-  const getAriaLabel = () => {
-    if (ariaLabel) return ariaLabel;
-    if (title) return `${isPlaying ? "Pause" : "Play"} ${title}`;
-    return isPlaying ? "Pause audio" : "Play audio";
-  };
-  const renderPlayButton = () => /* @__PURE__ */ jsxRuntime.jsx(
-    "button",
-    {
-      type: "button",
-      onClick: handlePlay,
-      disabled: disabled || isLoading,
-      className: chunkOR5DRJCW_cjs.cn(playButtonVariants({ variant, size })),
-      "aria-label": getAriaLabel(),
-      "aria-pressed": isPlaying,
-      children: isLoading ? /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon, { className: iconSize }) : isPlaying ? /* @__PURE__ */ jsxRuntime.jsx(PauseIcon, { className: iconSize }) : /* @__PURE__ */ jsxRuntime.jsx(PlayIcon, { className: iconSize })
-    }
-  );
-  const renderTime = () => {
-    if (!showTime) return null;
-    return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400", children: [
-      formatTime(currentTime),
-      " / ",
-      formatTime(duration)
-    ] });
-  };
-  const renderPlaybackRateControl = () => {
-    if (!showPlaybackRate) return null;
-    return /* @__PURE__ */ jsxRuntime.jsx(
-      "select",
-      {
-        value: playbackRate,
-        onChange: (e) => setPlaybackRate(Number(e.target.value)),
-        className: "rounded border border-neutral-200 bg-transparent px-1 py-0.5 text-xs dark:border-neutral-700",
-        "aria-label": "Playback speed",
-        children: playbackRates.map((rate) => /* @__PURE__ */ jsxRuntime.jsxs("option", { value: rate, children: [
-          rate,
-          "x"
-        ] }, rate))
-      }
-    );
-  };
-  if (variant === "inline") {
-    const displayDuration = duration > 0 ? duration : fallbackDuration ?? 0;
-    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(audioPlayerVariants({ variant, size }), className), children: [
-      renderPlayButton(),
-      title && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
-      showDuration && displayDuration > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400", children: isPlaying ? formatTime(currentTime) : formatTime(displayDuration) })
-    ] });
-  }
-  if (variant === "compact") {
-    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(audioPlayerVariants({ variant, size }), className), children: [
-      renderPlayButton(),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        ProgressBar,
-        {
-          currentTime,
-          duration,
-          onSeek: handleSeek,
-          disabled
-        }
-      ),
-      renderTime(),
-      renderPlaybackRateControl()
-    ] });
-  }
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(audioPlayerVariants({ variant, size }), className), children: [
-    title && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      Waveform,
-      {
-        src,
-        isPlaying,
-        onReady: handleWaveformReady,
-        onTimeUpdate: handleWaveformTimeUpdate,
-        onFinish: handleWaveformFinish,
-        onSeek: handleWaveformSeek,
-        waveColor,
-        progressColor,
-        height: waveformHeight
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-      renderPlayButton(),
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-1 items-center justify-between", children: [
-        renderTime(),
-        renderPlaybackRateControl()
-      ] })
-    ] })
-  ] });
-}
-AudioPlayer.displayName = "AudioPlayer";
-var audioRecorderVariants = classVarianceAuthority.cva(
-  [
-    "relative flex flex-col gap-3",
-    "rounded-xl border border-border",
-    "bg-card text-card-foreground",
-    "transition-all duration-200"
-  ],
-  {
-    variants: {
-      size: {
-        sm: "p-3",
-        md: "p-4",
-        lg: "p-5"
-      },
-      variant: {
-        default: "",
-        minimal: "border-none bg-transparent shadow-none",
-        elevated: "shadow-lg border-0"
-      }
-    },
-    defaultVariants: {
-      size: "md",
-      variant: "default"
-    }
-  }
-);
-var waveformContainerVariants = classVarianceAuthority.cva(
-  [
-    "relative w-full overflow-hidden rounded-lg",
-    "bg-neutral-100 dark:bg-neutral-800",
-    "transition-all duration-200"
-  ],
-  {
-    variants: {
-      state: {
-        idle: "opacity-50",
-        listening: "opacity-75",
-        recording: "",
-        paused: "opacity-90",
-        stopped: "",
-        playback: ""
-      }
-    },
-    defaultVariants: {
-      state: "idle"
-    }
-  }
-);
-var controlButtonVariants = classVarianceAuthority.cva(
-  [
-    "inline-flex items-center justify-center",
-    "rounded-full transition-all duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-    "disabled:pointer-events-none disabled:opacity-50",
-    "active:scale-95"
-  ],
-  {
-    variants: {
-      variant: {
-        primary: [
-          "bg-primary-600 text-white",
-          "hover:bg-primary-700",
-          "active:bg-primary-800"
-        ],
-        secondary: [
-          "bg-neutral-200 text-neutral-700",
-          "hover:bg-neutral-300",
-          "dark:bg-neutral-700 dark:text-neutral-200",
-          "dark:hover:bg-neutral-600"
-        ],
-        danger: [
-          "bg-red-600 text-white",
-          "hover:bg-red-700",
-          "active:bg-red-800"
-        ],
-        ghost: [
-          "bg-transparent text-neutral-600",
-          "hover:bg-neutral-100",
-          "dark:text-neutral-400 dark:hover:bg-neutral-800"
-        ]
-      },
-      size: {
-        sm: "h-8 w-8",
-        md: "h-10 w-10",
-        lg: "h-12 w-12"
-      }
-    },
-    defaultVariants: {
-      variant: "primary",
-      size: "md"
-    }
-  }
-);
-function formatTime2(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
-function MicrophoneIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "none",
-      viewBox: "0 0 24 24",
-      strokeWidth: 2,
-      stroke: "currentColor",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx(
-        "path",
-        {
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          d: "M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-        }
-      )
-    }
-  );
-}
-function StopIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx("rect", { x: "6", y: "6", width: "12", height: "12", rx: "2" })
-    }
-  );
-}
-function PlayIcon2({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M8 5.14v14l11-7-11-7z" })
-    }
-  );
-}
-function PauseIcon2({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M6 4h4v16H6V4zm8 0h4v16h-4V4z" })
-    }
-  );
-}
-function TrashIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "none",
-      viewBox: "0 0 24 24",
-      strokeWidth: 2,
-      stroke: "currentColor",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx(
-        "path",
-        {
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          d: "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-        }
-      )
-    }
-  );
-}
-function RecordingIndicator({
-  isRecording,
-  isPaused
-}) {
-  if (!isRecording && !isPaused) return null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "div",
-      {
-        className: chunkOR5DRJCW_cjs.cn(
-          "h-3 w-3 rounded-full",
-          isRecording && !isPaused ? "animate-pulse bg-red-500" : "bg-yellow-500"
-        ),
-        "aria-hidden": "true"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-neutral-600 dark:text-neutral-400", children: isPaused ? "Paused" : "Recording" })
-  ] });
-}
-function TimeDisplay({
-  currentTime,
-  duration,
-  maxDuration,
-  showMax
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1 font-mono text-sm text-neutral-600 dark:text-neutral-400", children: [
-    /* @__PURE__ */ jsxRuntime.jsx("span", { children: formatTime2(currentTime) }),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { children: "/" }),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { children: formatTime2(showMax && maxDuration ? maxDuration : duration) })
-  ] });
-}
-function LiveVisualizer({
-  analyser,
-  isActive,
-  height,
-  barColor
-}) {
-  const canvasRef = React10__namespace.useRef(null);
-  const animationRef = React10__namespace.useRef(void 0);
-  React10__namespace.useEffect(() => {
-    if (!analyser || !canvasRef.current || !isActive) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    const draw = () => {
-      if (!isActive) return;
-      analyser.getByteFrequencyData(dataArray);
-      ctx.fillStyle = "transparent";
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const barWidth = canvas.width / bufferLength * 2.5;
-      let x = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = dataArray[i] / 255 * canvas.height;
-        ctx.fillStyle = barColor || getComputedStyle(document.documentElement).getPropertyValue(
-          "--color-primary-500"
-        ) || "#3b82f6";
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
-      }
-      animationRef.current = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [analyser, isActive, barColor]);
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "canvas",
-    {
-      ref: canvasRef,
-      width: 600,
-      height,
-      className: "w-full",
-      style: { height }
-    }
-  );
-}
-function AudioRecorder({
-  state: controlledState,
-  onStateChange,
-  onRecordingComplete,
-  onRecordingStart,
-  onError,
-  maxDuration = 0,
-  mimeType = "audio/webm",
-  waveColor,
-  progressColor,
-  cursorColor,
-  waveformHeight = 80,
-  showTime = true,
-  showWaveform = true,
-  size,
-  variant,
-  className,
-  "aria-label": ariaLabel = "Audio recorder",
-  audioUrl,
-  disabled = false,
-  renderControls
-}) {
-  const [internalState, setInternalState] = React10__namespace.useState("idle");
-  const state = controlledState ?? internalState;
-  const [currentTime, setCurrentTime] = React10__namespace.useState(0);
-  const [duration, setDuration] = React10__namespace.useState(0);
-  const [audioBlob, setAudioBlob] = React10__namespace.useState(null);
-  const [audioObjectUrl, setAudioObjectUrl] = React10__namespace.useState(
-    null
-  );
-  const [pendingBlob, setPendingBlob] = React10__namespace.useState(null);
-  const waveformRef = React10__namespace.useRef(null);
-  const wavesurferRef = React10__namespace.useRef(null);
-  const mediaRecorderRef = React10__namespace.useRef(null);
-  const audioContextRef = React10__namespace.useRef(null);
-  const analyserRef = React10__namespace.useRef(null);
-  const streamRef = React10__namespace.useRef(null);
-  const chunksRef = React10__namespace.useRef([]);
-  const timerRef = React10__namespace.useRef(void 0);
-  const startTimeRef = React10__namespace.useRef(0);
-  const handleStopRef = React10__namespace.useRef(() => {
-  });
-  const updateState = React10__namespace.useCallback(
-    (newState) => {
-      if (!controlledState) {
-        setInternalState(newState);
-      }
-      onStateChange?.(newState);
-    },
-    [controlledState, onStateChange]
-  );
-  const initWaveSurfer = React10__namespace.useCallback(async () => {
-    if (!waveformRef.current || !showWaveform) return;
-    const WaveSurferModule = await import('wavesurfer.js');
-    const WaveSurfer = WaveSurferModule.default;
-    if (wavesurferRef.current) {
-      wavesurferRef.current.destroy();
-    }
-    const computedStyle = getComputedStyle(document.documentElement);
-    const defaultWaveColor = computedStyle.getPropertyValue("--color-primary-400").trim() || "#60a5fa";
-    const defaultProgressColor = computedStyle.getPropertyValue("--color-primary-600").trim() || "#2563eb";
-    const defaultCursorColor = computedStyle.getPropertyValue("--color-primary-800").trim() || "#1e40af";
-    wavesurferRef.current = WaveSurfer.create({
-      container: waveformRef.current,
-      waveColor: waveColor || defaultWaveColor,
-      progressColor: progressColor || defaultProgressColor,
-      cursorColor: cursorColor || defaultCursorColor,
-      cursorWidth: 2,
-      height: waveformHeight,
-      barWidth: 2,
-      barGap: 1,
-      barRadius: 2,
-      normalize: true,
-      hideScrollbar: true
-    });
-    const ws = wavesurferRef.current;
-    ws.on("timeupdate", (time) => {
-      setCurrentTime(time);
-    });
-    ws.on("ready", () => {
-      if (wavesurferRef.current) {
-        setDuration(wavesurferRef.current.getDuration());
-      }
-    });
-    ws.on("finish", () => {
-      updateState("stopped");
-    });
-  }, [
-    showWaveform,
-    waveColor,
-    progressColor,
-    cursorColor,
-    waveformHeight,
-    updateState
-  ]);
-  React10__namespace.useEffect(() => {
-    if (audioUrl && wavesurferRef.current) {
-      wavesurferRef.current.load(audioUrl);
-      updateState("stopped");
-    }
-  }, [audioUrl, updateState]);
-  React10__namespace.useEffect(() => {
-    if (pendingBlob && waveformRef.current && state === "stopped") {
-      const loadBlob = async () => {
-        if (!wavesurferRef.current) {
-          await initWaveSurfer();
-        }
-        if (wavesurferRef.current && pendingBlob) {
-          wavesurferRef.current.loadBlob(pendingBlob);
-          setPendingBlob(null);
-        }
-      };
-      const timer = setTimeout(loadBlob, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [pendingBlob, state, initWaveSurfer]);
-  React10__namespace.useEffect(() => {
-    initWaveSurfer();
-    return () => {
-      if (wavesurferRef.current) {
-        wavesurferRef.current.destroy();
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-      if (audioObjectUrl) {
-        URL.revokeObjectURL(audioObjectUrl);
-      }
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [initWaveSurfer, audioObjectUrl]);
-  const handleRecord = React10__namespace.useCallback(async () => {
-    if (disabled) return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      audioContextRef.current = new AudioContext();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 256;
-      source.connect(analyserRef.current);
-      const options = { mimeType };
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mediaRecorderRef.current = new MediaRecorder(stream);
-      } else {
-        mediaRecorderRef.current = new MediaRecorder(stream, options);
-      }
-      chunksRef.current = [];
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-      mediaRecorderRef.current.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: mimeType });
-        setAudioBlob(blob);
-        if (audioObjectUrl) {
-          URL.revokeObjectURL(audioObjectUrl);
-        }
-        const url = URL.createObjectURL(blob);
-        setAudioObjectUrl(url);
-        setPendingBlob(blob);
-        onRecordingComplete?.(blob, duration);
-        updateState("stopped");
-      };
-      mediaRecorderRef.current.start(100);
-      startTimeRef.current = Date.now();
-      updateState("recording");
-      onRecordingStart?.();
-      timerRef.current = window.setInterval(() => {
-        const elapsed = (Date.now() - startTimeRef.current) / 1e3;
-        setCurrentTime(elapsed);
-        setDuration(elapsed);
-        if (maxDuration > 0 && elapsed >= maxDuration) {
-          handleStopRef.current();
-        }
-      }, 100);
-    } catch (error) {
-      onError?.(error);
-      updateState("idle");
-    }
-  }, [
-    disabled,
-    mimeType,
-    maxDuration,
-    audioObjectUrl,
-    duration,
-    initWaveSurfer,
-    onRecordingComplete,
-    onRecordingStart,
-    onError,
-    updateState
-  ]);
-  const handlePause = React10__namespace.useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.pause();
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      updateState("paused");
-    } else if (wavesurferRef.current && (state === "playback" || state === "stopped")) {
-      wavesurferRef.current.pause();
-      updateState("paused");
-    }
-  }, [state, updateState]);
-  const handleResume = React10__namespace.useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "paused") {
-      mediaRecorderRef.current.resume();
-      const pausedTime = currentTime;
-      startTimeRef.current = Date.now() - pausedTime * 1e3;
-      timerRef.current = window.setInterval(() => {
-        const elapsed = (Date.now() - startTimeRef.current) / 1e3;
-        setCurrentTime(elapsed);
-        setDuration(elapsed);
-        if (maxDuration > 0 && elapsed >= maxDuration) {
-          handleStopRef.current();
-        }
-      }, 100);
-      updateState("recording");
-    } else if (wavesurferRef.current && state === "paused") {
-      wavesurferRef.current.play();
-      updateState("playback");
-    }
-  }, [currentTime, maxDuration, state, updateState]);
-  const handleStop = React10__namespace.useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    if (mediaRecorderRef.current && (mediaRecorderRef.current.state === "recording" || mediaRecorderRef.current.state === "paused")) {
-      mediaRecorderRef.current.stop();
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-    analyserRef.current = null;
-  }, []);
-  handleStopRef.current = handleStop;
-  const handlePlay = React10__namespace.useCallback(() => {
-    if (wavesurferRef.current) {
-      wavesurferRef.current.play();
-      updateState("playback");
-    }
-  }, [updateState]);
-  const handleSeek = React10__namespace.useCallback((time) => {
-    if (wavesurferRef.current) {
-      const progress = time / wavesurferRef.current.getDuration();
-      wavesurferRef.current.seekTo(progress);
-      setCurrentTime(time);
-    }
-  }, []);
-  const handleDelete = React10__namespace.useCallback(() => {
-    setAudioBlob(null);
-    if (audioObjectUrl) {
-      URL.revokeObjectURL(audioObjectUrl);
-      setAudioObjectUrl(null);
-    }
-    setCurrentTime(0);
-    setDuration(0);
-    updateState("idle");
-  }, [audioObjectUrl, updateState]);
-  const isRecording = state === "recording";
-  const isPaused = state === "paused";
-  const isPlaying = state === "playback";
-  const hasRecording = audioBlob !== null || audioUrl !== void 0;
-  const controlRenderProps = {
-    state,
-    currentTime,
-    duration,
-    isRecording,
-    isPaused,
-    isPlaying,
-    onRecord: handleRecord,
-    onPause: handlePause,
-    onResume: handleResume,
-    onStop: handleStop,
-    onPlay: handlePlay,
-    onSeek: handleSeek,
-    formatTime: formatTime2
-  };
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
-    {
-      className: chunkOR5DRJCW_cjs.cn(audioRecorderVariants({ size, variant }), className),
-      role: "group",
-      "aria-label": ariaLabel,
-      children: [
-        showWaveform && /* @__PURE__ */ jsxRuntime.jsx(
-          "div",
-          {
-            className: chunkOR5DRJCW_cjs.cn(waveformContainerVariants({ state })),
-            style: { height: waveformHeight },
-            children: (state === "recording" || state === "listening") && !hasRecording ? /* @__PURE__ */ jsxRuntime.jsx(
-              LiveVisualizer,
-              {
-                analyser: analyserRef.current,
-                isActive: isRecording,
-                height: waveformHeight,
-                barColor: waveColor
-              }
-            ) : /* @__PURE__ */ jsxRuntime.jsx("div", { ref: waveformRef, className: "w-full" })
-          }
-        ),
-        showTime && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(RecordingIndicator, { isRecording, isPaused }),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            TimeDisplay,
-            {
-              currentTime,
-              duration,
-              maxDuration,
-              showMax: isRecording || isPaused
-            }
-          )
-        ] }),
-        renderControls ? renderControls(controlRenderProps) : /* @__PURE__ */ jsxRuntime.jsx(
-          DefaultControls,
-          {
-            ...controlRenderProps,
-            disabled,
-            hasRecording,
-            onDelete: handleDelete
-          }
-        )
-      ]
-    }
-  );
-}
-AudioRecorder.displayName = "AudioRecorder";
-function DefaultControls({
-  state,
-  isRecording,
-  isPaused,
-  isPlaying,
-  hasRecording,
-  disabled,
-  onRecord,
-  onPause,
-  onResume,
-  onStop,
-  onPlay,
-  onDelete
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-center gap-3", children: [
-    hasRecording && !isRecording && /* @__PURE__ */ jsxRuntime.jsx(
-      "button",
-      {
-        type: "button",
-        onClick: onDelete,
-        disabled,
-        className: chunkOR5DRJCW_cjs.cn(
-          controlButtonVariants({ variant: "ghost", size: "md" })
-        ),
-        "aria-label": "Delete recording",
-        children: /* @__PURE__ */ jsxRuntime.jsx(TrashIcon, { className: "h-5 w-5" })
-      }
-    ),
-    state === "idle" && /* @__PURE__ */ jsxRuntime.jsx(
-      "button",
-      {
-        type: "button",
-        onClick: onRecord,
-        disabled,
-        className: chunkOR5DRJCW_cjs.cn(
-          controlButtonVariants({ variant: "danger", size: "lg" })
-        ),
-        "aria-label": "Start recording",
-        children: /* @__PURE__ */ jsxRuntime.jsx(MicrophoneIcon, { className: "h-6 w-6" })
-      }
-    ),
-    isRecording && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: onPause,
-          disabled,
-          className: chunkOR5DRJCW_cjs.cn(
-            controlButtonVariants({ variant: "secondary", size: "md" })
-          ),
-          "aria-label": "Pause recording",
-          children: /* @__PURE__ */ jsxRuntime.jsx(PauseIcon2, { className: "h-5 w-5" })
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: onStop,
-          disabled,
-          className: chunkOR5DRJCW_cjs.cn(
-            controlButtonVariants({ variant: "danger", size: "lg" })
-          ),
-          "aria-label": "Stop recording",
-          children: /* @__PURE__ */ jsxRuntime.jsx(StopIcon, { className: "h-6 w-6" })
-        }
-      )
-    ] }),
-    isPaused && !hasRecording && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: onResume,
-          disabled,
-          className: chunkOR5DRJCW_cjs.cn(
-            controlButtonVariants({ variant: "danger", size: "lg" })
-          ),
-          "aria-label": "Resume recording",
-          children: /* @__PURE__ */ jsxRuntime.jsx(MicrophoneIcon, { className: "h-6 w-6" })
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: onStop,
-          disabled,
-          className: chunkOR5DRJCW_cjs.cn(
-            controlButtonVariants({ variant: "secondary", size: "md" })
-          ),
-          "aria-label": "Stop recording",
-          children: /* @__PURE__ */ jsxRuntime.jsx(StopIcon, { className: "h-5 w-5" })
-        }
-      )
-    ] }),
-    (state === "stopped" || isPaused && hasRecording) && hasRecording && /* @__PURE__ */ jsxRuntime.jsx(
-      "button",
-      {
-        type: "button",
-        onClick: isPlaying || isPaused ? onPause : onPlay,
-        disabled,
-        className: chunkOR5DRJCW_cjs.cn(
-          controlButtonVariants({ variant: "primary", size: "lg" })
-        ),
-        "aria-label": isPaused ? "Resume playback" : isPlaying ? "Pause playback" : "Play recording",
-        children: isPaused || !isPlaying ? /* @__PURE__ */ jsxRuntime.jsx(PlayIcon2, { className: "h-6 w-6" }) : /* @__PURE__ */ jsxRuntime.jsx(PauseIcon2, { className: "h-6 w-6" })
-      }
-    ),
-    isPlaying && /* @__PURE__ */ jsxRuntime.jsx(
-      "button",
-      {
-        type: "button",
-        onClick: onPause,
-        disabled,
-        className: chunkOR5DRJCW_cjs.cn(
-          controlButtonVariants({ variant: "primary", size: "lg" })
-        ),
-        "aria-label": "Pause playback",
-        children: /* @__PURE__ */ jsxRuntime.jsx(PauseIcon2, { className: "h-6 w-6" })
-      }
-    )
-  ] });
-}
-var CommandPaletteContext = React10.createContext(
+var CommandPaletteContext = React14.createContext(
   null
 );
 function CommandPaletteProvider({
@@ -4411,24 +4391,24 @@ function CommandPaletteProvider({
   enableShortcut = true,
   customEventName
 }) {
-  const [isOpen, setIsOpen] = React10.useState(false);
-  const [query, setQuery] = React10.useState("");
-  const [selectedIndex, setSelectedIndex] = React10.useState(-1);
-  const [activeCategory, setActiveCategory] = React10.useState(null);
-  const [items, setItems] = React10.useState([]);
-  const [categories, setCategories] = React10.useState([]);
-  const open = React10.useCallback(() => {
+  const [isOpen, setIsOpen] = React14.useState(false);
+  const [query, setQuery] = React14.useState("");
+  const [selectedIndex, setSelectedIndex] = React14.useState(-1);
+  const [activeCategory, setActiveCategory] = React14.useState(null);
+  const [items, setItems] = React14.useState([]);
+  const [categories, setCategories] = React14.useState([]);
+  const open = React14.useCallback(() => {
     setIsOpen(true);
     setQuery("");
     setSelectedIndex(-1);
     setActiveCategory(null);
   }, []);
-  const close = React10.useCallback(() => {
+  const close = React14.useCallback(() => {
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(-1);
   }, []);
-  const toggle = React10.useCallback(() => {
+  const toggle = React14.useCallback(() => {
     if (isOpen) {
       close();
     } else {
@@ -4436,13 +4416,13 @@ function CommandPaletteProvider({
     }
   }, [isOpen, open, close]);
   chunkR4DM4635_cjs.useCommandK(toggle, enableShortcut);
-  React10__namespace.default.useEffect(() => {
+  React14__namespace.default.useEffect(() => {
     if (!customEventName) return;
     const handler = () => open();
     document.addEventListener(customEventName, handler);
     return () => document.removeEventListener(customEventName, handler);
   }, [customEventName, open]);
-  const contextValue = React10.useMemo(
+  const contextValue = React14.useMemo(
     () => ({
       isOpen,
       open,
@@ -4474,7 +4454,7 @@ function CommandPaletteProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(CommandPaletteContext.Provider, { value: contextValue, children });
 }
 function useCommandPalette() {
-  const context = React10.useContext(CommandPaletteContext);
+  const context = React14.useContext(CommandPaletteContext);
   if (!context) {
     throw new Error(
       "useCommandPalette must be used within a CommandPaletteProvider"
@@ -4562,10 +4542,10 @@ function CommandPalette({
     items,
     categories
   } = useCommandPalette();
-  const inputRef = React10.useRef(null);
-  const containerRef = React10.useRef(null);
-  const listRef = React10.useRef(null);
-  const filteredItems = React10.useMemo(() => {
+  const inputRef = React14.useRef(null);
+  const containerRef = React14.useRef(null);
+  const listRef = React14.useRef(null);
+  const filteredItems = React14.useMemo(() => {
     let result = items;
     if (activeCategory) {
       result = result.filter((item) => item.category === activeCategory);
@@ -4578,7 +4558,7 @@ function CommandPalette({
     }
     return result;
   }, [items, query, activeCategory]);
-  const groupedItems = React10.useMemo(() => {
+  const groupedItems = React14.useMemo(() => {
     const groups = /* @__PURE__ */ new Map();
     filteredItems.forEach((item) => {
       const category = item.category ?? "Other";
@@ -4590,15 +4570,15 @@ function CommandPalette({
   }, [filteredItems]);
   chunkFHY3K6PL_cjs.useEscapeKey(close, isOpen);
   chunkSWMRCGL4_cjs.useClickOutside(containerRef, close);
-  React10.useEffect(() => {
+  React14.useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
-  React10.useEffect(() => {
+  React14.useEffect(() => {
     setSelectedIndex(filteredItems.length > 0 ? 0 : -1);
   }, [filteredItems.length, setSelectedIndex]);
-  React10.useEffect(() => {
+  React14.useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
       const selectedElement = listRef.current.querySelector(
         `[data-index="${selectedIndex}"]`
@@ -4606,7 +4586,7 @@ function CommandPalette({
       selectedElement?.scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
-  const handleKeyDown = React10.useCallback(
+  const handleKeyDown = React14.useCallback(
     (e) => {
       switch (e.key) {
         case "ArrowDown":
@@ -4650,7 +4630,7 @@ function CommandPalette({
       setActiveCategory
     ]
   );
-  const handleItemClick = React10.useCallback(
+  const handleItemClick = React14.useCallback(
     (item) => {
       if (!item.disabled) {
         onSelect?.(item);
@@ -4659,7 +4639,7 @@ function CommandPalette({
     },
     [onSelect, close]
   );
-  const getCategoryInfo = React10.useCallback(
+  const getCategoryInfo = React14.useCallback(
     (categoryId) => {
       return categories.find((c) => c.id === categoryId);
     },
@@ -4984,7 +4964,7 @@ function formatLastSeen(date) {
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString();
 }
-var ConversationHeader = React10__namespace.forwardRef(
+var ConversationHeader = React14__namespace.forwardRef(
   ({
     className,
     size,
@@ -5096,7 +5076,7 @@ var ConversationHeader = React10__namespace.forwardRef(
   }
 );
 ConversationHeader.displayName = "ConversationHeader";
-var ConversationListItem = React10__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
+var ConversationListItem = React14__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
   const participant = conversation.participants.find((p) => !p.isCurrentUser);
   const title = getConversationTitle(conversation, participant);
   const avatarUrl = conversation.avatarUrl || participant?.avatarUrl;
@@ -5286,7 +5266,7 @@ function ConversationListSkeleton({
 }
 ConversationListSkeleton.displayName = "ConversationListSkeleton";
 function LightboxModal({ attachment, onClose }) {
-  React10__namespace.useEffect(() => {
+  React14__namespace.useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
@@ -5381,7 +5361,7 @@ function LightboxModal({ attachment, onClose }) {
   );
 }
 LightboxModal.displayName = "LightboxModal";
-var MessageThread = React10__namespace.forwardRef(
+var MessageThread = React14__namespace.forwardRef(
   ({
     conversation,
     messages,
@@ -5412,8 +5392,8 @@ var MessageThread = React10__namespace.forwardRef(
     onError,
     className
   }, ref) => {
-    const [lightboxAttachment, setLightboxAttachment] = React10__namespace.useState(null);
-    const [replyTo, setReplyTo] = React10__namespace.useState(null);
+    const [lightboxAttachment, setLightboxAttachment] = React14__namespace.useState(null);
+    const [replyTo, setReplyTo] = React14__namespace.useState(null);
     const participant = conversation?.type === "direct" ? conversation.participants.find((p) => p.id !== currentUser.id) : void 0;
     const handleAttachmentClick = (attachment, message) => {
       if (attachment.type === "image" || attachment.type === "video") {
@@ -5581,13 +5561,13 @@ function useMessages(options) {
     onRetry,
     onLoadMore
   } = options;
-  const [messages, setMessages] = React10__namespace.useState(initialMessages);
-  const [isSending, setIsSending] = React10__namespace.useState(false);
-  const [isLoadingMore, setIsLoadingMore] = React10__namespace.useState(false);
-  React10__namespace.useEffect(() => {
+  const [messages, setMessages] = React14__namespace.useState(initialMessages);
+  const [isSending, setIsSending] = React14__namespace.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React14__namespace.useState(false);
+  React14__namespace.useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
-  const addMessage = React10__namespace.useCallback((message) => {
+  const addMessage = React14__namespace.useCallback((message) => {
     setMessages((prev) => {
       if (prev.some((m) => m.id === message.id)) {
         return prev;
@@ -5595,7 +5575,7 @@ function useMessages(options) {
       return [...prev, message];
     });
   }, []);
-  const updateMessage = React10__namespace.useCallback(
+  const updateMessage = React14__namespace.useCallback(
     (messageId, updates) => {
       setMessages(
         (prev) => prev.map((m) => m.id === messageId ? { ...m, ...updates } : m)
@@ -5603,22 +5583,22 @@ function useMessages(options) {
     },
     []
   );
-  const removeMessage = React10__namespace.useCallback((messageId) => {
+  const removeMessage = React14__namespace.useCallback((messageId) => {
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
-  const updateStatus = React10__namespace.useCallback(
+  const updateStatus = React14__namespace.useCallback(
     (messageId, status) => {
       updateMessage(messageId, { status });
     },
     [updateMessage]
   );
-  const markAsRead = React10__namespace.useCallback(
+  const markAsRead = React14__namespace.useCallback(
     (messageId) => {
       updateStatus(messageId, "read");
     },
     [updateStatus]
   );
-  const sendMessage = React10__namespace.useCallback(
+  const sendMessage = React14__namespace.useCallback(
     async (newMessage) => {
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticMessage = {
@@ -5650,7 +5630,7 @@ function useMessages(options) {
     },
     [currentUser, onSend, addMessage, updateStatus]
   );
-  const retryMessage = React10__namespace.useCallback(
+  const retryMessage = React14__namespace.useCallback(
     async (messageId) => {
       updateStatus(messageId, "sending");
       try {
@@ -5664,7 +5644,7 @@ function useMessages(options) {
     },
     [onRetry, updateStatus]
   );
-  const loadMore = React10__namespace.useCallback(async () => {
+  const loadMore = React14__namespace.useCallback(async () => {
     if (isLoadingMore || !onLoadMore) return;
     setIsLoadingMore(true);
     try {
@@ -5695,13 +5675,13 @@ function useTypingIndicator(options = {}) {
     onTypingStart,
     onTypingStop
   } = options;
-  const [participants, setParticipants] = React10__namespace.useState(initialParticipants);
-  const [isLocalTyping, setIsLocalTyping] = React10__namespace.useState(false);
-  const typingTimeoutRef = React10__namespace.useRef(null);
-  React10__namespace.useEffect(() => {
+  const [participants, setParticipants] = React14__namespace.useState(initialParticipants);
+  const [isLocalTyping, setIsLocalTyping] = React14__namespace.useState(false);
+  const typingTimeoutRef = React14__namespace.useRef(null);
+  React14__namespace.useEffect(() => {
     setParticipants(initialParticipants);
   }, [initialParticipants]);
-  const startTyping = React10__namespace.useCallback(() => {
+  const startTyping = React14__namespace.useCallback(() => {
     if (!isLocalTyping) {
       setIsLocalTyping(true);
       onTypingStart?.();
@@ -5714,21 +5694,21 @@ function useTypingIndicator(options = {}) {
       onTypingStop?.();
     }, debounceTime);
   }, [isLocalTyping, debounceTime, onTypingStart, onTypingStop]);
-  const stopTyping = React10__namespace.useCallback(() => {
+  const stopTyping = React14__namespace.useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     setIsLocalTyping(false);
     onTypingStop?.();
   }, [onTypingStop]);
-  React10__namespace.useEffect(() => {
+  React14__namespace.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
     };
   }, []);
-  const typingState = React10__namespace.useMemo(
+  const typingState = React14__namespace.useMemo(
     () => ({
       participants,
       lastUpdated: /* @__PURE__ */ new Date()
@@ -5744,11 +5724,11 @@ function useTypingIndicator(options = {}) {
 }
 function useMessageScroll(options) {
   const { messages, currentUserId, threshold = 100 } = options;
-  const scrollContainerRef = React10__namespace.useRef(null);
-  const bottomRef = React10__namespace.useRef(null);
-  const [isScrolledUp, setIsScrolledUp] = React10__namespace.useState(false);
-  const prevMessageCountRef = React10__namespace.useRef(messages.length);
-  React10__namespace.useEffect(() => {
+  const scrollContainerRef = React14__namespace.useRef(null);
+  const bottomRef = React14__namespace.useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = React14__namespace.useState(false);
+  const prevMessageCountRef = React14__namespace.useRef(messages.length);
+  React14__namespace.useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     const handleScroll = () => {
@@ -5759,12 +5739,12 @@ function useMessageScroll(options) {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [threshold]);
-  const scrollToBottom = React10__namespace.useCallback((smooth = true) => {
+  const scrollToBottom = React14__namespace.useCallback((smooth = true) => {
     bottomRef.current?.scrollIntoView({
       behavior: smooth ? "smooth" : "auto"
     });
   }, []);
-  React10__namespace.useEffect(() => {
+  React14__namespace.useEffect(() => {
     const messageCountChanged = messages.length !== prevMessageCountRef.current;
     prevMessageCountRef.current = messages.length;
     if (!messageCountChanged) return;
@@ -5783,9 +5763,9 @@ function useMessageScroll(options) {
 }
 function useReadReceipts(options) {
   const { currentUserId, onMarkRead, threshold = 0.5 } = options;
-  const observerRef = React10__namespace.useRef(null);
-  const observedMessagesRef = React10__namespace.useRef(/* @__PURE__ */ new Set());
-  React10__namespace.useEffect(() => {
+  const observerRef = React14__namespace.useRef(null);
+  const observedMessagesRef = React14__namespace.useRef(/* @__PURE__ */ new Set());
+  React14__namespace.useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -5804,7 +5784,7 @@ function useReadReceipts(options) {
       observerRef.current?.disconnect();
     };
   }, [onMarkRead, threshold]);
-  const observeMessage = React10__namespace.useCallback(
+  const observeMessage = React14__namespace.useCallback(
     (element, message) => {
       if (!element || !observerRef.current) return;
       if (message.sender.id !== currentUserId && message.status !== "read" && !observedMessagesRef.current.has(message.id)) {
@@ -5816,294 +5796,7 @@ function useReadReceipts(options) {
   );
   return { observeMessage };
 }
-var recordButtonVariants = classVarianceAuthority.cva(
-  [
-    "relative inline-flex items-center justify-center",
-    "rounded-full transition-all duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-    "disabled:pointer-events-none disabled:opacity-50"
-  ],
-  {
-    variants: {
-      variant: {
-        default: [
-          "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100",
-          "dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800"
-        ],
-        filled: [
-          "bg-neutral-100 text-neutral-600 hover:bg-neutral-200",
-          "dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
-        ],
-        primary: [
-          "bg-primary-600 text-white hover:bg-primary-700",
-          "dark:bg-primary-500 dark:hover:bg-primary-600"
-        ]
-      },
-      size: {
-        sm: "h-7 w-7",
-        md: "h-9 w-9",
-        lg: "h-11 w-11"
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "md"
-    }
-  }
-);
-var recordingIndicatorVariants = classVarianceAuthority.cva(
-  [
-    "absolute -top-1 -right-1",
-    "flex items-center justify-center",
-    "rounded-full bg-red-500 text-white",
-    "animate-pulse"
-  ],
-  {
-    variants: {
-      size: {
-        sm: "h-3 w-3",
-        md: "h-4 w-4",
-        lg: "h-5 w-5"
-      }
-    },
-    defaultVariants: {
-      size: "md"
-    }
-  }
-);
-function formatDuration(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
-function MicrophoneIcon2({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "none",
-      viewBox: "0 0 24 24",
-      strokeWidth: 2,
-      stroke: "currentColor",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx(
-        "path",
-        {
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          d: "M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-        }
-      )
-    }
-  );
-}
-function StopIcon2({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: /* @__PURE__ */ jsxRuntime.jsx("rect", { x: "6", y: "6", width: "12", height: "12", rx: "2" })
-    }
-  );
-}
-function SpinnerIcon3({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "svg",
-    {
-      className: chunkOR5DRJCW_cjs.cn("animate-spin", className),
-      fill: "none",
-      viewBox: "0 0 24 24",
-      "aria-hidden": "true",
-      children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
-          "circle",
-          {
-            className: "opacity-25",
-            cx: "12",
-            cy: "12",
-            r: "10",
-            stroke: "currentColor",
-            strokeWidth: "4"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          "path",
-          {
-            className: "opacity-75",
-            fill: "currentColor",
-            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          }
-        )
-      ]
-    }
-  );
-}
-function RecordButton({
-  onRecordingComplete,
-  onRecordingStart,
-  onError,
-  maxDuration = 0,
-  mimeType = "audio/webm",
-  disabled = false,
-  variant,
-  size,
-  className,
-  "aria-label": ariaLabel,
-  showDuration = false,
-  idleIcon,
-  recordingIcon,
-  transcriptionState,
-  showTranscriptionState = false
-}) {
-  const [state, setState] = React10__namespace.useState("idle");
-  const [duration, setDuration] = React10__namespace.useState(0);
-  const mediaRecorderRef = React10__namespace.useRef(null);
-  const streamRef = React10__namespace.useRef(null);
-  const chunksRef = React10__namespace.useRef([]);
-  const timerRef = React10__namespace.useRef(void 0);
-  const startTimeRef = React10__namespace.useRef(0);
-  const isRecording = state === "recording";
-  const isProcessing = state === "processing";
-  const isTranscribing = transcriptionState === "transcribing" || transcriptionState === "streaming";
-  React10__namespace.useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, []);
-  const startRecording = React10__namespace.useCallback(async () => {
-    if (disabled || isRecording || isProcessing) return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const options = { mimeType };
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mediaRecorderRef.current = new MediaRecorder(stream);
-      } else {
-        mediaRecorderRef.current = new MediaRecorder(stream, options);
-      }
-      chunksRef.current = [];
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-      mediaRecorderRef.current.onstop = () => {
-        setState("processing");
-        const blob = new Blob(chunksRef.current, { type: mimeType });
-        const finalDuration = duration;
-        setTimeout(() => {
-          onRecordingComplete?.(blob, finalDuration);
-          setState("idle");
-          setDuration(0);
-        }, 200);
-      };
-      mediaRecorderRef.current.start(100);
-      startTimeRef.current = Date.now();
-      setState("recording");
-      onRecordingStart?.();
-      timerRef.current = window.setInterval(() => {
-        const elapsed = (Date.now() - startTimeRef.current) / 1e3;
-        setDuration(elapsed);
-        if (maxDuration > 0 && elapsed >= maxDuration) {
-          stopRecording();
-        }
-      }, 100);
-    } catch (error) {
-      onError?.(error);
-      setState("idle");
-    }
-  }, [
-    disabled,
-    isRecording,
-    isProcessing,
-    mimeType,
-    maxDuration,
-    duration,
-    onRecordingComplete,
-    onRecordingStart,
-    onError
-  ]);
-  const stopRecording = React10__namespace.useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
-  }, []);
-  const handleClick = React10__namespace.useCallback(() => {
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
-  }, [isRecording, startRecording, stopRecording]);
-  const iconSize = size === "sm" ? "h-4 w-4" : size === "lg" ? "h-6 w-6" : "h-5 w-5";
-  const getIcon = () => {
-    if (isProcessing || isTranscribing) {
-      return /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon3, { className: iconSize });
-    }
-    if (isRecording) {
-      return recordingIcon || /* @__PURE__ */ jsxRuntime.jsx(StopIcon2, { className: iconSize });
-    }
-    return idleIcon || /* @__PURE__ */ jsxRuntime.jsx(MicrophoneIcon2, { className: iconSize });
-  };
-  const getAriaLabel = () => {
-    if (ariaLabel) return ariaLabel;
-    if (isTranscribing) return "Transcribing audio";
-    if (isProcessing) return "Processing recording";
-    if (isRecording) return "Stop recording";
-    return "Start recording";
-  };
-  const getTranscriptionLabel = () => {
-    if (transcriptionState === "streaming") return "Listening...";
-    if (transcriptionState === "transcribing") return "Transcribing...";
-    return null;
-  };
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative inline-flex items-center gap-2", children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(
-      "button",
-      {
-        type: "button",
-        onClick: handleClick,
-        disabled: disabled || isProcessing || isTranscribing,
-        className: chunkOR5DRJCW_cjs.cn(
-          recordButtonVariants({ variant, size }),
-          isRecording && "text-red-600 dark:text-red-400",
-          isTranscribing && "text-primary-600 dark:text-primary-400",
-          className
-        ),
-        "aria-label": getAriaLabel(),
-        "aria-pressed": isRecording,
-        children: [
-          getIcon(),
-          isRecording && !isTranscribing && /* @__PURE__ */ jsxRuntime.jsx(
-            "span",
-            {
-              className: chunkOR5DRJCW_cjs.cn(recordingIndicatorVariants({ size })),
-              "aria-hidden": "true"
-            }
-          )
-        ]
-      }
-    ),
-    showDuration && isRecording && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-xs text-red-600 tabular-nums dark:text-red-400", children: formatDuration(duration) }),
-    showTranscriptionState && getTranscriptionLabel() && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-primary-600 dark:text-primary-400 text-xs font-medium", children: getTranscriptionLabel() })
-  ] });
-}
-RecordButton.displayName = "RecordButton";
-var SidebarContext = React10.createContext(null);
+var SidebarContext = React14.createContext(null);
 function SidebarProvider({
   children,
   defaultCollapsed = false,
@@ -6113,7 +5806,7 @@ function SidebarProvider({
   mobileBreakpoint = "(max-width: 1023px)"
 }) {
   const isMobileViewport = chunkR4DM4635_cjs.useMediaQuery(mobileBreakpoint);
-  const [isCollapsed, setIsCollapsed] = React10.useState(() => {
+  const [isCollapsed, setIsCollapsed] = React14.useState(() => {
     if (typeof window !== "undefined" && persistCollapsed) {
       const stored = localStorage.getItem(storageKey);
       if (stored !== null) {
@@ -6122,39 +5815,39 @@ function SidebarProvider({
     }
     return defaultCollapsed;
   });
-  const [isMobileOpen, setIsMobileOpen] = React10.useState(false);
-  const [expandedGroup, setExpandedGroup] = React10.useState(
+  const [isMobileOpen, setIsMobileOpen] = React14.useState(false);
+  const [expandedGroup, setExpandedGroup] = React14.useState(
     defaultExpandedGroup
   );
-  React10.useEffect(() => {
+  React14.useEffect(() => {
     if (persistCollapsed && typeof window !== "undefined") {
       localStorage.setItem(storageKey, String(isCollapsed));
     }
   }, [isCollapsed, persistCollapsed, storageKey]);
-  React10.useEffect(() => {
+  React14.useEffect(() => {
     if (!isMobileViewport && isMobileOpen) {
       setIsMobileOpen(false);
     }
   }, [isMobileViewport, isMobileOpen]);
-  const toggleCollapsed = React10.useCallback(() => {
+  const toggleCollapsed = React14.useCallback(() => {
     setIsCollapsed((prev) => !prev);
   }, []);
-  const setCollapsed = React10.useCallback((collapsed) => {
+  const setCollapsed = React14.useCallback((collapsed) => {
     setIsCollapsed(collapsed);
   }, []);
-  const openMobile = React10.useCallback(() => {
+  const openMobile = React14.useCallback(() => {
     setIsMobileOpen(true);
   }, []);
-  const closeMobile = React10.useCallback(() => {
+  const closeMobile = React14.useCallback(() => {
     setIsMobileOpen(false);
   }, []);
-  const toggleMobile = React10.useCallback(() => {
+  const toggleMobile = React14.useCallback(() => {
     setIsMobileOpen((prev) => !prev);
   }, []);
-  const toggleGroup = React10.useCallback((group) => {
+  const toggleGroup = React14.useCallback((group) => {
     setExpandedGroup((prev) => prev === group ? null : group);
   }, []);
-  const contextValue = React10.useMemo(
+  const contextValue = React14.useMemo(
     () => ({
       isCollapsed,
       toggleCollapsed,
@@ -6184,7 +5877,7 @@ function SidebarProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(SidebarContext.Provider, { value: contextValue, children });
 }
 function useSidebar() {
-  const context = React10.useContext(SidebarContext);
+  const context = React14.useContext(SidebarContext);
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider");
   }
@@ -6402,9 +6095,9 @@ function SidebarNavGroup({
   const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
-  const [localExpanded, setLocalExpanded] = React10.useState(defaultExpanded);
+  const [localExpanded, setLocalExpanded] = React14.useState(defaultExpanded);
   const effectiveExpanded = groupId ? isExpanded : localExpanded;
-  const handleToggle = React10.useCallback(() => {
+  const handleToggle = React14.useCallback(() => {
     if (groupId) {
       toggleGroup(groupId);
     } else {
@@ -6475,7 +6168,7 @@ function SidebarNavItem({
 }) {
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
-  const handleClick = React10.useCallback(() => {
+  const handleClick = React14.useCallback(() => {
     if (disabled) return;
     onClick?.();
     if (isMobileViewport) {
@@ -6595,9 +6288,9 @@ function SidebarSearch({
   "data-testid": testId = "sidebar-search"
 }) {
   const { isCollapsed, isMobileViewport, setCollapsed } = useSidebar();
-  const inputRef = React10.useRef(null);
+  const inputRef = React14.useRef(null);
   const showCollapsed = !isMobileViewport && isCollapsed;
-  React10.useEffect(() => {
+  React14.useEffect(() => {
     const handleKeyDown = (e) => {
       const target = e.target;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
@@ -6736,8 +6429,8 @@ var variantStyles = {
     icon: "text-amber-500 dark:text-amber-400"
   },
   info: {
-    container: "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200",
-    icon: "text-blue-500 dark:text-blue-400"
+    container: "bg-primary-50 dark:bg-primary-900/30 border-primary-200 dark:border-primary-800 text-primary-800 dark:text-primary-200",
+    icon: "text-primary-500 dark:text-primary-400"
   }
 };
 var defaultIcons = {
@@ -6821,7 +6514,7 @@ function ToastContainer({
     }
   );
 }
-var ToastContext = React10.createContext(null);
+var ToastContext = React14.createContext(null);
 var toastIdCounter = 0;
 function generateToastId() {
   return `toast-${++toastIdCounter}-${Date.now()}`;
@@ -6831,8 +6524,8 @@ function ToastProvider({
   maxToasts = 5,
   defaultDuration = 5e3
 }) {
-  const [toasts, setToasts] = React10.useState([]);
-  const dismiss = React10.useCallback((id) => {
+  const [toasts, setToasts] = React14.useState([]);
+  const dismiss = React14.useCallback((id) => {
     setToasts((prev) => {
       const toast2 = prev.find((t) => t.id === id);
       if (toast2?.onDismiss) {
@@ -6841,13 +6534,13 @@ function ToastProvider({
       return prev.filter((t) => t.id !== id);
     });
   }, []);
-  const dismissAll = React10.useCallback(() => {
+  const dismissAll = React14.useCallback(() => {
     setToasts((prev) => {
       prev.forEach((t) => t.onDismiss?.());
       return [];
     });
   }, []);
-  const toast = React10.useCallback(
+  const toast = React14.useCallback(
     (options) => {
       const id = generateToastId();
       const duration = options.duration ?? defaultDuration;
@@ -6874,13 +6567,13 @@ function ToastProvider({
     },
     [maxToasts, defaultDuration, dismiss]
   );
-  const success = React10.useCallback(
+  const success = React14.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "success" });
     },
     [toast]
   );
-  const error = React10.useCallback(
+  const error = React14.useCallback(
     (message, options) => {
       return toast({
         ...options,
@@ -6892,19 +6585,19 @@ function ToastProvider({
     },
     [toast]
   );
-  const warning = React10.useCallback(
+  const warning = React14.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "warning" });
     },
     [toast]
   );
-  const info = React10.useCallback(
+  const info = React14.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "info" });
     },
     [toast]
   );
-  const contextValue = React10.useMemo(
+  const contextValue = React14.useMemo(
     () => ({
       toasts,
       toast,
@@ -6920,16 +6613,60 @@ function ToastProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(ToastContext.Provider, { value: contextValue, children });
 }
 function useToast() {
-  const context = React10.useContext(ToastContext);
+  const context = React14.useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
 }
 
+Object.defineProperty(exports, "ThemeProvider", {
+  enumerable: true,
+  get: function () { return chunkVDMQCSXT_cjs.ThemeProvider; }
+});
+Object.defineProperty(exports, "ThemeProviderContext", {
+  enumerable: true,
+  get: function () { return chunkVDMQCSXT_cjs.ThemeProviderContext; }
+});
+Object.defineProperty(exports, "ThemeToggle", {
+  enumerable: true,
+  get: function () { return chunkVDMQCSXT_cjs.ThemeToggle; }
+});
+Object.defineProperty(exports, "themeToggleIconVariants", {
+  enumerable: true,
+  get: function () { return chunkVDMQCSXT_cjs.themeToggleIconVariants; }
+});
+Object.defineProperty(exports, "themeToggleVariants", {
+  enumerable: true,
+  get: function () { return chunkVDMQCSXT_cjs.themeToggleVariants; }
+});
+Object.defineProperty(exports, "useThemeContext", {
+  enumerable: true,
+  get: function () { return chunkVDMQCSXT_cjs.useThemeContext; }
+});
+Object.defineProperty(exports, "Tooltip", {
+  enumerable: true,
+  get: function () { return chunkBXK5TNJE_cjs.Tooltip; }
+});
+Object.defineProperty(exports, "VisuallyHidden", {
+  enumerable: true,
+  get: function () { return chunkZJCPW6MS_cjs.VisuallyHidden; }
+});
 Object.defineProperty(exports, "brands", {
   enumerable: true,
-  get: function () { return chunkUBWTYI3A_cjs.brands; }
+  get: function () { return chunk6DP6RKUA_cjs.brands; }
+});
+Object.defineProperty(exports, "miewebBrand", {
+  enumerable: true,
+  get: function () { return chunkS6UNPMAS_cjs.miewebBrand; }
+});
+Object.defineProperty(exports, "wagglelineBrand", {
+  enumerable: true,
+  get: function () { return chunkSWV5E75F_cjs.wagglelineBrand; }
+});
+Object.defineProperty(exports, "webchartBrand", {
+  enumerable: true,
+  get: function () { return chunkZ3TFPXVN_cjs.webchartBrand; }
 });
 Object.defineProperty(exports, "createBrandPreset", {
   enumerable: true,
@@ -6955,17 +6692,49 @@ Object.defineProperty(exports, "enterpriseHealthBrand", {
   enumerable: true,
   get: function () { return chunkP52GA3GJ_cjs.enterpriseHealthBrand; }
 });
-Object.defineProperty(exports, "miewebBrand", {
+Object.defineProperty(exports, "Select", {
   enumerable: true,
-  get: function () { return chunkS6UNPMAS_cjs.miewebBrand; }
+  get: function () { return chunkLEE3NMNP_cjs.Select; }
 });
-Object.defineProperty(exports, "wagglelineBrand", {
+Object.defineProperty(exports, "selectTriggerVariants", {
   enumerable: true,
-  get: function () { return chunkSWV5E75F_cjs.wagglelineBrand; }
+  get: function () { return chunkLEE3NMNP_cjs.selectTriggerVariants; }
 });
-Object.defineProperty(exports, "webchartBrand", {
+Object.defineProperty(exports, "Skeleton", {
   enumerable: true,
-  get: function () { return chunkZ3TFPXVN_cjs.webchartBrand; }
+  get: function () { return chunkN3QTYHRZ_cjs.Skeleton; }
+});
+Object.defineProperty(exports, "SkeletonCard", {
+  enumerable: true,
+  get: function () { return chunkN3QTYHRZ_cjs.SkeletonCard; }
+});
+Object.defineProperty(exports, "SkeletonTable", {
+  enumerable: true,
+  get: function () { return chunkN3QTYHRZ_cjs.SkeletonTable; }
+});
+Object.defineProperty(exports, "SkeletonText", {
+  enumerable: true,
+  get: function () { return chunkN3QTYHRZ_cjs.SkeletonText; }
+});
+Object.defineProperty(exports, "skeletonVariants", {
+  enumerable: true,
+  get: function () { return chunkN3QTYHRZ_cjs.skeletonVariants; }
+});
+Object.defineProperty(exports, "FullPageSpinner", {
+  enumerable: true,
+  get: function () { return chunkJYMQJ32S_cjs.FullPageSpinner; }
+});
+Object.defineProperty(exports, "Spinner", {
+  enumerable: true,
+  get: function () { return chunkJYMQJ32S_cjs.Spinner; }
+});
+Object.defineProperty(exports, "SpinnerWithLabel", {
+  enumerable: true,
+  get: function () { return chunkJYMQJ32S_cjs.SpinnerWithLabel; }
+});
+Object.defineProperty(exports, "spinnerVariants", {
+  enumerable: true,
+  get: function () { return chunkJYMQJ32S_cjs.spinnerVariants; }
 });
 Object.defineProperty(exports, "Switch", {
   enumerable: true,
@@ -7055,37 +6824,49 @@ Object.defineProperty(exports, "textareaVariants", {
   enumerable: true,
   get: function () { return chunkB7YGVKTE_cjs.textareaVariants; }
 });
-Object.defineProperty(exports, "ThemeProvider", {
+Object.defineProperty(exports, "Modal", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.ThemeProvider; }
+  get: function () { return chunkNH2JVQ6V_cjs.Modal; }
 });
-Object.defineProperty(exports, "ThemeProviderContext", {
+Object.defineProperty(exports, "ModalBody", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.ThemeProviderContext; }
+  get: function () { return chunkNH2JVQ6V_cjs.ModalBody; }
 });
-Object.defineProperty(exports, "ThemeToggle", {
+Object.defineProperty(exports, "ModalClose", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.ThemeToggle; }
+  get: function () { return chunkNH2JVQ6V_cjs.ModalClose; }
 });
-Object.defineProperty(exports, "themeToggleIconVariants", {
+Object.defineProperty(exports, "ModalFooter", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.themeToggleIconVariants; }
+  get: function () { return chunkNH2JVQ6V_cjs.ModalFooter; }
 });
-Object.defineProperty(exports, "themeToggleVariants", {
+Object.defineProperty(exports, "ModalHeader", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.themeToggleVariants; }
+  get: function () { return chunkNH2JVQ6V_cjs.ModalHeader; }
 });
-Object.defineProperty(exports, "useThemeContext", {
+Object.defineProperty(exports, "ModalTitle", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.useThemeContext; }
+  get: function () { return chunkNH2JVQ6V_cjs.ModalTitle; }
 });
-Object.defineProperty(exports, "Tooltip", {
+Object.defineProperty(exports, "modalContentVariants", {
   enumerable: true,
-  get: function () { return chunkBXK5TNJE_cjs.Tooltip; }
+  get: function () { return chunkNH2JVQ6V_cjs.modalContentVariants; }
 });
-Object.defineProperty(exports, "VisuallyHidden", {
+Object.defineProperty(exports, "modalOverlayVariants", {
   enumerable: true,
-  get: function () { return chunkZJCPW6MS_cjs.VisuallyHidden; }
+  get: function () { return chunkNH2JVQ6V_cjs.modalOverlayVariants; }
+});
+Object.defineProperty(exports, "Pagination", {
+  enumerable: true,
+  get: function () { return chunkPF3XWKE5_cjs.Pagination; }
+});
+Object.defineProperty(exports, "SimplePagination", {
+  enumerable: true,
+  get: function () { return chunkPF3XWKE5_cjs.SimplePagination; }
+});
+Object.defineProperty(exports, "paginationButtonVariants", {
+  enumerable: true,
+  get: function () { return chunkPF3XWKE5_cjs.paginationButtonVariants; }
 });
 Object.defineProperty(exports, "PhoneInput", {
   enumerable: true,
@@ -7113,23 +6894,23 @@ Object.defineProperty(exports, "progressBarTrackVariants", {
 });
 Object.defineProperty(exports, "QuickAction", {
   enumerable: true,
-  get: function () { return chunk2QX46LFO_cjs.QuickAction; }
+  get: function () { return chunkBBCXRXHI_cjs.QuickAction; }
 });
 Object.defineProperty(exports, "QuickActionGroup", {
   enumerable: true,
-  get: function () { return chunk2QX46LFO_cjs.QuickActionGroup; }
+  get: function () { return chunkBBCXRXHI_cjs.QuickActionGroup; }
 });
 Object.defineProperty(exports, "QuickActionIcons", {
   enumerable: true,
-  get: function () { return chunk2QX46LFO_cjs.QuickActionIcons; }
+  get: function () { return chunkBBCXRXHI_cjs.QuickActionIcons; }
 });
 Object.defineProperty(exports, "quickActionIconVariants", {
   enumerable: true,
-  get: function () { return chunk2QX46LFO_cjs.quickActionIconVariants; }
+  get: function () { return chunkBBCXRXHI_cjs.quickActionIconVariants; }
 });
 Object.defineProperty(exports, "quickActionVariants", {
   enumerable: true,
-  get: function () { return chunk2QX46LFO_cjs.quickActionVariants; }
+  get: function () { return chunkBBCXRXHI_cjs.quickActionVariants; }
 });
 Object.defineProperty(exports, "Radio", {
   enumerable: true,
@@ -7142,6 +6923,22 @@ Object.defineProperty(exports, "RadioGroup", {
 Object.defineProperty(exports, "radioVariants", {
   enumerable: true,
   get: function () { return chunkXZB73CF4_cjs.radioVariants; }
+});
+Object.defineProperty(exports, "RecordButton", {
+  enumerable: true,
+  get: function () { return chunkZJIXG4RV_cjs.RecordButton; }
+});
+Object.defineProperty(exports, "formatDuration", {
+  enumerable: true,
+  get: function () { return chunkZJIXG4RV_cjs.formatDuration; }
+});
+Object.defineProperty(exports, "recordButtonVariants", {
+  enumerable: true,
+  get: function () { return chunkZJIXG4RV_cjs.recordButtonVariants; }
+});
+Object.defineProperty(exports, "recordingIndicatorVariants", {
+  enumerable: true,
+  get: function () { return chunkZJIXG4RV_cjs.recordingIndicatorVariants; }
 });
 Object.defineProperty(exports, "DateButton", {
   enumerable: true,
@@ -7179,49 +6976,21 @@ Object.defineProperty(exports, "timeButtonVariants", {
   enumerable: true,
   get: function () { return chunkEF46XW4Z_cjs.timeButtonVariants; }
 });
-Object.defineProperty(exports, "Select", {
+Object.defineProperty(exports, "Badge", {
   enumerable: true,
-  get: function () { return chunkLEE3NMNP_cjs.Select; }
+  get: function () { return chunkEKIQE524_cjs.Badge; }
 });
-Object.defineProperty(exports, "selectTriggerVariants", {
+Object.defineProperty(exports, "badgeVariants", {
   enumerable: true,
-  get: function () { return chunkLEE3NMNP_cjs.selectTriggerVariants; }
+  get: function () { return chunkEKIQE524_cjs.badgeVariants; }
 });
-Object.defineProperty(exports, "Skeleton", {
+Object.defineProperty(exports, "Breadcrumb", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.Skeleton; }
+  get: function () { return chunkPEFJAWNR_cjs.Breadcrumb; }
 });
-Object.defineProperty(exports, "SkeletonCard", {
+Object.defineProperty(exports, "BreadcrumbSlash", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonCard; }
-});
-Object.defineProperty(exports, "SkeletonTable", {
-  enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonTable; }
-});
-Object.defineProperty(exports, "SkeletonText", {
-  enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonText; }
-});
-Object.defineProperty(exports, "skeletonVariants", {
-  enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.skeletonVariants; }
-});
-Object.defineProperty(exports, "FullPageSpinner", {
-  enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.FullPageSpinner; }
-});
-Object.defineProperty(exports, "Spinner", {
-  enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.Spinner; }
-});
-Object.defineProperty(exports, "SpinnerWithLabel", {
-  enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.SpinnerWithLabel; }
-});
-Object.defineProperty(exports, "spinnerVariants", {
-  enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.spinnerVariants; }
+  get: function () { return chunkPEFJAWNR_cjs.BreadcrumbSlash; }
 });
 Object.defineProperty(exports, "Button", {
   enumerable: true,
@@ -7307,50 +7076,6 @@ Object.defineProperty(exports, "inputVariants", {
   enumerable: true,
   get: function () { return chunkDQTQ4AQQ_cjs.inputVariants; }
 });
-Object.defineProperty(exports, "Modal", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.Modal; }
-});
-Object.defineProperty(exports, "ModalBody", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.ModalBody; }
-});
-Object.defineProperty(exports, "ModalClose", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.ModalClose; }
-});
-Object.defineProperty(exports, "ModalFooter", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.ModalFooter; }
-});
-Object.defineProperty(exports, "ModalHeader", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.ModalHeader; }
-});
-Object.defineProperty(exports, "ModalTitle", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.ModalTitle; }
-});
-Object.defineProperty(exports, "modalContentVariants", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.modalContentVariants; }
-});
-Object.defineProperty(exports, "modalOverlayVariants", {
-  enumerable: true,
-  get: function () { return chunkNH2JVQ6V_cjs.modalOverlayVariants; }
-});
-Object.defineProperty(exports, "Pagination", {
-  enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.Pagination; }
-});
-Object.defineProperty(exports, "SimplePagination", {
-  enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.SimplePagination; }
-});
-Object.defineProperty(exports, "paginationButtonVariants", {
-  enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.paginationButtonVariants; }
-});
 Object.defineProperty(exports, "useCommandK", {
   enumerable: true,
   get: function () { return chunkR4DM4635_cjs.useCommandK; }
@@ -7395,13 +7120,13 @@ Object.defineProperty(exports, "usePrefersReducedMotion", {
   enumerable: true,
   get: function () { return chunk6HFFWEM3_cjs.usePrefersReducedMotion; }
 });
-Object.defineProperty(exports, "useClickOutside", {
-  enumerable: true,
-  get: function () { return chunkSWMRCGL4_cjs.useClickOutside; }
-});
 Object.defineProperty(exports, "useFocusTrap", {
   enumerable: true,
   get: function () { return chunkBR2XGATJ_cjs.useFocusTrap; }
+});
+Object.defineProperty(exports, "useClickOutside", {
+  enumerable: true,
+  get: function () { return chunkSWMRCGL4_cjs.useClickOutside; }
 });
 Object.defineProperty(exports, "useEscapeKey", {
   enumerable: true,
@@ -7457,11 +7182,11 @@ Object.defineProperty(exports, "parseDateValue", {
 });
 Object.defineProperty(exports, "miewebUIPreset", {
   enumerable: true,
-  get: function () { return chunkZEFZRYQS_cjs.miewebUIPreset; }
+  get: function () { return chunkYDA3J724_cjs.miewebUIPreset; }
 });
 Object.defineProperty(exports, "miewebUISafelist", {
   enumerable: true,
-  get: function () { return chunkZEFZRYQS_cjs.miewebUISafelist; }
+  get: function () { return chunkYDA3J724_cjs.miewebUISafelist; }
 });
 Object.defineProperty(exports, "Alert", {
   enumerable: true,
@@ -7479,6 +7204,46 @@ Object.defineProperty(exports, "alertVariants", {
   enumerable: true,
   get: function () { return chunkMJKFQ4TF_cjs.alertVariants; }
 });
+Object.defineProperty(exports, "AudioPlayer", {
+  enumerable: true,
+  get: function () { return chunkOIUNIDUY_cjs.AudioPlayer; }
+});
+Object.defineProperty(exports, "ProgressBar", {
+  enumerable: true,
+  get: function () { return chunkOIUNIDUY_cjs.ProgressBar; }
+});
+Object.defineProperty(exports, "audioPlayerVariants", {
+  enumerable: true,
+  get: function () { return chunkOIUNIDUY_cjs.audioPlayerVariants; }
+});
+Object.defineProperty(exports, "formatAudioTime", {
+  enumerable: true,
+  get: function () { return chunkOIUNIDUY_cjs.formatTime; }
+});
+Object.defineProperty(exports, "playButtonVariants", {
+  enumerable: true,
+  get: function () { return chunkOIUNIDUY_cjs.playButtonVariants; }
+});
+Object.defineProperty(exports, "AudioRecorder", {
+  enumerable: true,
+  get: function () { return chunk53K3KWXQ_cjs.AudioRecorder; }
+});
+Object.defineProperty(exports, "audioRecorderVariants", {
+  enumerable: true,
+  get: function () { return chunk53K3KWXQ_cjs.audioRecorderVariants; }
+});
+Object.defineProperty(exports, "controlButtonVariants", {
+  enumerable: true,
+  get: function () { return chunk53K3KWXQ_cjs.controlButtonVariants; }
+});
+Object.defineProperty(exports, "formatTime", {
+  enumerable: true,
+  get: function () { return chunk53K3KWXQ_cjs.formatTime; }
+});
+Object.defineProperty(exports, "waveformContainerVariants", {
+  enumerable: true,
+  get: function () { return chunk53K3KWXQ_cjs.waveformContainerVariants; }
+});
 Object.defineProperty(exports, "Avatar", {
   enumerable: true,
   get: function () { return chunkMMCNMTBR_cjs.Avatar; }
@@ -7495,29 +7260,19 @@ Object.defineProperty(exports, "getInitials", {
   enumerable: true,
   get: function () { return chunkMMCNMTBR_cjs.getInitials; }
 });
-Object.defineProperty(exports, "Badge", {
-  enumerable: true,
-  get: function () { return chunkEKIQE524_cjs.Badge; }
-});
-Object.defineProperty(exports, "badgeVariants", {
-  enumerable: true,
-  get: function () { return chunkEKIQE524_cjs.badgeVariants; }
-});
-Object.defineProperty(exports, "Breadcrumb", {
-  enumerable: true,
-  get: function () { return chunkPEFJAWNR_cjs.Breadcrumb; }
-});
-Object.defineProperty(exports, "BreadcrumbSlash", {
-  enumerable: true,
-  get: function () { return chunkPEFJAWNR_cjs.BreadcrumbSlash; }
-});
 Object.defineProperty(exports, "cn", {
   enumerable: true,
   get: function () { return chunkOR5DRJCW_cjs.cn; }
 });
+Object.defineProperty(exports, "AgGridReact", {
+  enumerable: true,
+  get: function () { return agGridReact.AgGridReact; }
+});
+exports.AGGrid = AGGrid;
 exports.AIChat = AIChat;
 exports.AIChatModal = AIChatModal;
 exports.AIChatTrigger = AIChatTrigger;
+exports.AILogoIcon = AILogoIcon;
 exports.AIMessageDisplay = AIMessageDisplay;
 exports.AITypingIndicator = AITypingIndicator;
 exports.AppHeader = AppHeader;
@@ -7531,23 +7286,47 @@ exports.AppHeaderUserMenu = AppHeaderUserMenu;
 exports.AttachmentPicker = AttachmentPicker;
 exports.AttachmentPreview = AttachmentPreview;
 exports.AttachmentPreviewItem = AttachmentPreviewItem;
-exports.AudioPlayer = AudioPlayer;
-exports.AudioRecorder = AudioRecorder;
+exports.AvatarNameRenderer = AvatarNameRenderer;
+exports.BooleanRenderer = BooleanRenderer;
 exports.CameraButton = CameraButton;
+exports.CellRenderers = CellRenderers;
 exports.CharacterCounter = CharacterCounter;
+exports.ChevronIcon = ChevronIcon;
+exports.CloseIcon = CloseIcon;
 exports.CommandPalette = CommandPalette;
 exports.CommandPaletteProvider = CommandPaletteProvider;
 exports.CommandPaletteTrigger = CommandPaletteTrigger;
+exports.CompanyRenderer = CompanyRenderer;
 exports.ConversationHeader = ConversationHeader;
 exports.ConversationListItem = ConversationListItem;
 exports.ConversationListSkeleton = ConversationListSkeleton;
+exports.CurrencyRenderer = CurrencyRenderer;
+exports.DateRenderer = DateRenderer;
 exports.DateSeparator = DateSeparator;
+exports.DomainRenderer = DomainRenderer;
 exports.DragDropZone = DragDropZone;
+exports.EmailRenderer = EmailRenderer;
 exports.EmptyState = EmptyState;
+exports.EngagementScoreRenderer = EngagementScoreRenderer;
 exports.FloatingAIChat = FloatingAIChat;
 exports.LightboxModal = LightboxModal;
+exports.LinkedInRenderer = LinkedInRenderer;
 exports.LoadMoreButton = LoadMoreButton;
 exports.MCPToolCallDisplay = MCPToolCallDisplay;
+exports.MemoizedAvatarNameRenderer = MemoizedAvatarNameRenderer;
+exports.MemoizedBooleanRenderer = MemoizedBooleanRenderer;
+exports.MemoizedCompanyRenderer = MemoizedCompanyRenderer;
+exports.MemoizedCurrencyRenderer = MemoizedCurrencyRenderer;
+exports.MemoizedDateRenderer = MemoizedDateRenderer;
+exports.MemoizedDomainRenderer = MemoizedDomainRenderer;
+exports.MemoizedEmailRenderer = MemoizedEmailRenderer;
+exports.MemoizedEngagementScoreRenderer = MemoizedEngagementScoreRenderer;
+exports.MemoizedLinkedInRenderer = MemoizedLinkedInRenderer;
+exports.MemoizedNumberRenderer = MemoizedNumberRenderer;
+exports.MemoizedPhoneRenderer = MemoizedPhoneRenderer;
+exports.MemoizedProgressRenderer = MemoizedProgressRenderer;
+exports.MemoizedStatusBadgeRenderer = MemoizedStatusBadgeRenderer;
+exports.MemoizedTagsRenderer = MemoizedTagsRenderer;
 exports.MessageAvatar = MessageAvatar;
 exports.MessageBubble = MessageBubble;
 exports.MessageComposer = MessageComposer;
@@ -7555,11 +7334,14 @@ exports.MessageList = MessageList;
 exports.MessageStatusIcon = MessageStatusIcon;
 exports.MessageThread = MessageThread;
 exports.MessagingSplitView = MessagingSplitView;
-exports.ProgressBar = ProgressBar;
+exports.NumberRenderer = NumberRenderer;
+exports.PhoneRenderer = PhoneRenderer;
+exports.ProgressRenderer = ProgressRenderer;
 exports.ReadReceiptIndicator = ReadReceiptIndicator;
-exports.RecordButton = RecordButton;
+exports.RefreshIcon = RefreshIcon;
 exports.ResourceLink = ResourceLink;
 exports.SendButton = SendButton;
+exports.SendIcon = SendIcon;
 exports.Sidebar = Sidebar;
 exports.SidebarContent = SidebarContent;
 exports.SidebarFooter = SidebarFooter;
@@ -7572,22 +7354,21 @@ exports.SidebarProvider = SidebarProvider;
 exports.SidebarSearch = SidebarSearch;
 exports.SidebarToggle = SidebarToggle;
 exports.SkeletonMessage = SkeletonMessage;
+exports.SparklesIcon = SparklesIcon;
+exports.SpinnerIcon = SpinnerIcon;
+exports.StatusBadgeRenderer = StatusBadgeRenderer;
 exports.SuggestedActions = SuggestedActions;
+exports.TagsRenderer = TagsRenderer;
 exports.Toast = Toast;
 exports.ToastContainer = ToastContainer;
 exports.ToastProvider = ToastProvider;
 exports.ToolStatusIcon = ToolStatusIcon;
 exports.TypingIndicator = TypingIndicator;
-exports.audioPlayerVariants = audioPlayerVariants;
-exports.audioRecorderVariants = audioRecorderVariants;
 exports.bubbleVariants = bubbleVariants2;
-exports.controlButtonVariants = controlButtonVariants;
-exports.formatAudioTime = formatTime;
 exports.formatDateLabel = formatDateLabel;
-exports.formatDuration = formatDuration;
 exports.formatFileSize = formatFileSize2;
 exports.formatLastSeen = formatLastSeen;
-exports.formatTime = formatTime2;
+exports.formatPhoneDisplay = formatPhoneDisplay;
 exports.generateAttachmentId = generateAttachmentId;
 exports.getConversationSubtitle = getConversationSubtitle;
 exports.getConversationTitle = getConversationTitle;
@@ -7596,10 +7377,8 @@ exports.getToolIcon = getToolIcon;
 exports.groupMessagesByDate = groupMessagesByDate;
 exports.headerVariants = headerVariants;
 exports.isSameSenderGroup = isSameSenderGroup;
-exports.playButtonVariants = playButtonVariants;
-exports.recordButtonVariants = recordButtonVariants;
-exports.recordingIndicatorVariants = recordingIndicatorVariants;
 exports.sendButtonVariants = sendButtonVariants;
+exports.statusColors = statusColors;
 exports.useCommandPalette = useCommandPalette;
 exports.useMessageScroll = useMessageScroll;
 exports.useMessages = useMessages;
@@ -7608,6 +7387,5 @@ exports.useSidebar = useSidebar;
 exports.useToast = useToast;
 exports.useTypingIndicator = useTypingIndicator;
 exports.validateFile = validateFile;
-exports.waveformContainerVariants = waveformContainerVariants;
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

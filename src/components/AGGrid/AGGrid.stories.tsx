@@ -1221,13 +1221,13 @@ export const StatusColorsVariations: Story = {
     // Stage colors
     const stageColors = {
       discovery: {
-        bg: 'bg-purple-100 dark:bg-purple-900/30',
-        text: 'text-purple-700 dark:text-purple-300',
+        bg: 'bg-secondary-100 dark:bg-secondary-900/30',
+        text: 'text-secondary-700 dark:text-secondary-300',
         label: 'Discovery',
       },
       proposal: {
-        bg: 'bg-blue-100 dark:bg-blue-900/30',
-        text: 'text-blue-700 dark:text-blue-300',
+        bg: 'bg-primary-100 dark:bg-primary-900/30',
+        text: 'text-primary-700 dark:text-primary-300',
         label: 'Proposal',
       },
       negotiation: {

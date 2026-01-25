@@ -120,4 +120,30 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'components-tabs--underline');
     await expect(page).toHaveScreenshot('tabs-underline.png');
   });
+
+  // Components with branding fixes
+  test('Toast - Success', async ({ page }) => {
+    await gotoStory(page, 'components-toast--success');
+    await expect(page).toHaveScreenshot('toast-success.png');
+  });
+
+  test('AudioPlayer - Compact', async ({ page }) => {
+    await gotoStory(page, 'components-audioplayer--compact');
+    await expect(page).toHaveScreenshot('audioplayer-compact.png');
+  });
+
+  test('AudioPlayer - Podcast Player', async ({ page }) => {
+    await gotoStory(page, 'components-audioplayer--podcast-player');
+    await expect(page).toHaveScreenshot('audioplayer-podcast-player.png');
+  });
+
+  test('CommandPalette - Default', async ({ page }) => {
+    await gotoStory(page, 'components-commandpalette--default');
+    await expect(page).toHaveScreenshot('commandpalette-default.png');
+  });
+
+  test('AGGrid - Default', async ({ page }) => {
+    await gotoStory(page, 'components-aggrid--default');
+    await expect(page).toHaveScreenshot('aggrid-default.png');
+  });
 });

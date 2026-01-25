@@ -462,7 +462,7 @@ export const PodcastPlayer: Story = {
     <Card className="w-[500px]">
       <CardContent className="pt-6">
         <div className="flex gap-4">
-          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+          <div className="bg-primary-500 h-24 w-24 shrink-0 overflow-hidden rounded-lg">
             <div className="flex h-full items-center justify-center text-2xl text-white">
               🎙️
             </div>
@@ -498,9 +498,9 @@ export const AudioAttachment: Story = {
     <div className="w-72">
       <div className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded bg-blue-100 dark:bg-blue-900/30">
+          <div className="bg-primary-100 dark:bg-primary-900/30 flex h-8 w-8 items-center justify-center rounded">
             <svg
-              className="h-4 w-4 text-blue-600 dark:text-blue-400"
+              className="text-primary-600 dark:text-primary-400 h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

@@ -38,7 +38,7 @@ function ToastDemo() {
         </button>
         <button
           onClick={() => info('New features are available!')}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+          className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white transition-colors"
         >
           Info
         </button>

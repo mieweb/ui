@@ -3,8 +3,8 @@
 var chunkR4DM4635_cjs = require('../chunk-R4DM4635.cjs');
 var chunk2O7D6F67_cjs = require('../chunk-2O7D6F67.cjs');
 var chunk6HFFWEM3_cjs = require('../chunk-6HFFWEM3.cjs');
-var chunkSWMRCGL4_cjs = require('../chunk-SWMRCGL4.cjs');
 var chunkBR2XGATJ_cjs = require('../chunk-BR2XGATJ.cjs');
+var chunkSWMRCGL4_cjs = require('../chunk-SWMRCGL4.cjs');
 var chunkFHY3K6PL_cjs = require('../chunk-FHY3K6PL.cjs');
 
 
@@ -53,13 +53,13 @@ Object.defineProperty(exports, "usePrefersReducedMotion", {
   enumerable: true,
   get: function () { return chunk6HFFWEM3_cjs.usePrefersReducedMotion; }
 });
-Object.defineProperty(exports, "useClickOutside", {
-  enumerable: true,
-  get: function () { return chunkSWMRCGL4_cjs.useClickOutside; }
-});
 Object.defineProperty(exports, "useFocusTrap", {
   enumerable: true,
   get: function () { return chunkBR2XGATJ_cjs.useFocusTrap; }
+});
+Object.defineProperty(exports, "useClickOutside", {
+  enumerable: true,
+  get: function () { return chunkSWMRCGL4_cjs.useClickOutside; }
 });
 Object.defineProperty(exports, "useEscapeKey", {
   enumerable: true,

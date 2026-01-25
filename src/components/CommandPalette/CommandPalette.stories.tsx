@@ -18,7 +18,7 @@ const sampleCategories: CommandPaletteCategory[] = [
     id: 'pages',
     label: 'Pages',
     icon: <span>📄</span>,
-    colorClass: 'text-blue-500',
+    colorClass: 'text-primary-500',
   },
   {
     id: 'users',
