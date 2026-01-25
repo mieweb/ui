@@ -235,10 +235,18 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       outline-color: ${brand.primary} !important;
     }
     
-    /* Control buttons */
-    [data-testid="controls-panel"] button {
+    /* Control buttons in addon panel (args table) */
+    .docblock-argstable button,
+    .docblock-argstable-body button {
       background-color: ${brand.primary} !important;
       border-color: ${brand.secondary} !important;
+      color: #ffffff !important;
+    }
+    
+    /* Ensure hover state also has white text */
+    .docblock-argstable button:hover,
+    .docblock-argstable-body button:hover {
+      color: #ffffff !important;
     }
     
     /* Progress indicators and spinners */
