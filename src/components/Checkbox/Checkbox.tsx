@@ -100,19 +100,24 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
               .join(' ') || undefined
           }
           aria-invalid={!!error}
-          className={cn(checkboxVariants({ size }), className)}
+          className={cn('peer', checkboxVariants({ size }), className)}
           {...props}
         />
         {/* Custom check icon overlay */}
         <CheckIcon
           size={size}
-          className="pointer-events-none absolute text-white opacity-0 peer-checked:opacity-100"
+          className="pointer-events-none absolute text-white opacity-0 transition-opacity peer-checked:opacity-100"
+        />
+        {/* Custom indeterminate icon overlay */}
+        <MinusIcon
+          size={size}
+          className="pointer-events-none absolute text-white opacity-0 transition-opacity peer-indeterminate:opacity-100"
         />
       </span>
     );
 
     const labelElement = label && (
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col">
         <label
           htmlFor={checkboxId}
           className={cn(
@@ -123,7 +128,10 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           {label}
         </label>
         {description && (
-          <p id={descriptionId} className="text-muted-foreground text-xs">
+          <p
+            id={descriptionId}
+            className="text-muted-foreground mt-0.5 text-xs"
+          >
             {description}
           </p>
         )}
@@ -134,7 +142,8 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       <div className="flex flex-col gap-1">
         <div
           className={cn(
-            'flex items-start gap-3',
+            'flex gap-2',
+            description ? 'items-start' : 'items-center',
             labelPosition === 'left' && 'flex-row-reverse'
           )}
         >
@@ -198,7 +207,7 @@ function CheckboxGroup({
 
   return (
     <fieldset
-      className={cn('flex flex-col gap-2', className)}
+      className={cn('flex flex-col', className)}
       aria-describedby={
         [description ? descriptionId : null, error ? errorId : null]
           .filter(Boolean)
@@ -206,10 +215,12 @@ function CheckboxGroup({
       }
     >
       {label && (
-        <legend className="text-foreground text-sm font-medium">{label}</legend>
+        <legend className="text-foreground mb-1 text-sm font-medium">
+          {label}
+        </legend>
       )}
       {description && (
-        <p id={descriptionId} className="text-muted-foreground text-xs">
+        <p id={descriptionId} className="text-muted-foreground mb-3 text-xs">
           {description}
         </p>
       )}
@@ -217,13 +228,13 @@ function CheckboxGroup({
         role="group"
         className={cn(
           'flex gap-4',
-          orientation === 'vertical' && 'flex-col gap-3'
+          orientation === 'vertical' && 'flex-col gap-2'
         )}
       >
         {children}
       </div>
       {error && (
-        <p id={errorId} className="text-destructive text-sm" role="alert">
+        <p id={errorId} className="text-destructive mt-2 text-sm" role="alert">
           {error}
         </p>
       )}
@@ -265,6 +276,33 @@ function CheckIcon({ size, className }: CheckIconProps) {
       aria-hidden="true"
     >
       <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+function MinusIcon({ size, className }: CheckIconProps) {
+  const sizeMap = {
+    sm: 10,
+    md: 12,
+    lg: 14,
+  };
+  const iconSize = sizeMap[size || 'md'];
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={iconSize}
+      height={iconSize}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
     </svg>
   );
 }
