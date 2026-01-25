@@ -35,16 +35,33 @@ export const miewebUISafelist = [
   'bg-background',
   'bg-card',
   'bg-muted',
+  'bg-primary',
+  'bg-success',
+  'bg-warning',
   'bg-destructive',
+  'bg-info',
   'text-foreground',
   'text-card-foreground',
   'text-muted-foreground',
+  'text-primary',
+  'text-primary-foreground',
+  'text-success',
+  'text-success-foreground',
+  'text-warning',
+  'text-warning-foreground',
   'text-destructive',
   'text-destructive-foreground',
+  'text-info',
+  'text-info-foreground',
   'focus:ring-ring',
+  'focus:ring-primary',
   'focus:border-transparent',
   'focus:ring-destructive',
+  'border-primary',
   'border-destructive',
+  'ring-primary',
+  'ring-2',
+  'ring-offset-2',
   // Grid classes for QuickAction and responsive layouts
   'grid-cols-1',
   'grid-cols-2',
@@ -103,6 +120,7 @@ export const miewebUIPreset: MiewebUIPreset = {
       colors: {
         // Primary color scale - easily overridable by consumers
         primary: {
+          DEFAULT: 'var(--mieweb-primary, var(--mieweb-primary-500, #27aae1))',
           50: 'var(--mieweb-primary-50, #f0f9ff)',
           100: 'var(--mieweb-primary-100, #e0f4fe)',
           200: 'var(--mieweb-primary-200, #b9eafd)',
@@ -114,6 +132,7 @@ export const miewebUIPreset: MiewebUIPreset = {
           800: 'var(--mieweb-primary-800, #0f6086)',
           900: 'var(--mieweb-primary-900, #124f6f)',
           950: 'var(--mieweb-primary-950, #0c334a)',
+          foreground: 'var(--mieweb-primary-foreground, hsl(210 40% 98%))',
         },
         // Semantic colors using CSS variables for theming
         border: 'var(--mieweb-border, hsl(214.3 31.8% 91.4%))',
@@ -141,6 +160,10 @@ export const miewebUIPreset: MiewebUIPreset = {
         warning: {
           DEFAULT: 'var(--mieweb-warning, hsl(45.4 93.4% 47.5%))',
           foreground: 'var(--mieweb-warning-foreground, hsl(26 83.3% 14.1%))',
+        },
+        info: {
+          DEFAULT: 'var(--mieweb-info, hsl(204 94% 94%))',
+          foreground: 'var(--mieweb-info-foreground, hsl(213 31% 91%))',
         },
       },
       fontFamily: {
