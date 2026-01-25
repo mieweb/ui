@@ -5,3 +5,7 @@ storybook-static/
 .env
 .env.local
 coverage/
+# Playwright test results
+playwright-report/
+playwright-results/
+test-results/
