@@ -558,7 +558,7 @@ function CompanyRenderer(props) {
     /* @__PURE__ */ jsx(
       "div",
       {
-        className: "flex h-5 w-5 items-center justify-center rounded bg-primary-100 text-[9px] font-semibold text-primary-600 dark:bg-primary-900/30 dark:text-primary-400",
+        className: "bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 flex h-5 w-5 items-center justify-center rounded text-[9px] font-semibold",
         style: { display: faviconUrl ? "none" : "flex" },
         children: getInitials2(value)
       }

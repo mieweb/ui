@@ -11,6 +11,7 @@ import {
 } from 'ag-grid-community';
 import { cn } from '../../utils/cn';
 import { cva, type VariantProps } from 'class-variance-authority';
+import type { BrandConfig } from '../../brands/types';
 
 // Register AG Grid Community modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -29,19 +30,34 @@ const agGridVariants = cva('ag-theme-custom w-full', {
       bordered:
         '[&_.ag-root-wrapper]:border [&_.ag-root-wrapper]:border-border [&_.ag-root-wrapper]:rounded-lg',
       striped: '[&_.ag-row-odd]:bg-muted/50',
+      card: '[&_.ag-root-wrapper]:shadow-card [&_.ag-root-wrapper]:rounded-lg [&_.ag-root-wrapper]:border-0',
     },
     /**
      * Size/density of the grid rows
      */
     size: {
-      sm: '[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs',
-      md: '[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm',
-      lg: '[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base',
+      xs: '[&_.ag-row]:h-7 [&_.ag-header-row]:h-7 text-xs [&_.ag-cell]:px-2',
+      sm: '[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs [&_.ag-cell]:px-3',
+      md: '[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm [&_.ag-cell]:px-4',
+      lg: '[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base [&_.ag-cell]:px-4',
+      xl: '[&_.ag-row]:h-14 [&_.ag-header-row]:h-14 text-base [&_.ag-cell]:px-6',
+    },
+    /**
+     * Brand theme variant
+     */
+    brand: {
+      default: '',
+      mieweb: 'ag-brand-mieweb',
+      bluehive: 'ag-brand-bluehive',
+      waggleline: 'ag-brand-waggleline',
+      webchart: 'ag-brand-webchart',
+      'enterprise-health': 'ag-brand-enterprise-health',
     },
   },
   defaultVariants: {
     variant: 'default',
     size: 'md',
+    brand: 'default',
   },
 });
 
@@ -65,18 +81,41 @@ export interface AGGridProps<TData = unknown>
   gridRef?: React.RefObject<AgGridReact<TData> | null>;
   /** Row selection configuration (v35+ object format or legacy string) */
   rowSelection?: RowSelectionOptions | 'single' | 'multiple';
+  /** Brand configuration for theming */
+  brandConfig?: BrandConfig;
+  /** Show pagination controls */
+  pagination?: boolean;
+  /** Enable column resizing */
+  resizable?: boolean;
+  /** Enable sorting */
+  sortable?: boolean;
+  /** Enable filtering */
+  filterable?: boolean;
+  /** Custom empty state message */
+  noDataMessage?: string;
+  /** Custom loading message */
+  loadingMessage?: string;
 }
 
 // ============================================================================
 // Default Column Definitions
 // ============================================================================
 
-const defaultColDef: AGColDef = {
-  sortable: true,
-  filter: true,
-  resizable: true,
+// Enhanced default column definitions with brand awareness
+const getDefaultColDef = (
+  sortable: boolean,
+  filterable: boolean,
+  resizable: boolean
+): AGColDef => ({
+  sortable,
+  filter: filterable,
+  resizable,
   minWidth: 100,
-};
+  flex: 1,
+  suppressMovable: false,
+  headerClass: 'ag-header-cell-custom',
+  cellClass: 'ag-cell-custom',
+});
 
 // ============================================================================
 // AG Grid Component
@@ -118,6 +157,7 @@ function AGGridInner<TData = unknown>(
     className,
     variant,
     size,
+    brand,
     height = 400,
     loading = false,
     columnDefs,
@@ -127,6 +167,13 @@ function AGGridInner<TData = unknown>(
     onRowClick,
     gridRef,
     rowSelection,
+    brandConfig,
+    pagination = false,
+    resizable = true,
+    sortable = true,
+    filterable = true,
+    noDataMessage = 'No data to display',
+    loadingMessage = 'Loading...',
     ...props
   }: AGGridProps<TData>,
   ref: React.ForwardedRef<AgGridReact<TData>>
@@ -154,14 +201,14 @@ function AGGridInner<TData = unknown>(
     [onRowClick]
   );
 
-  // Merge default column definitions
+  // Merge default column definitions with feature toggles
   const mergedDefaultColDef = React.useMemo(
     () =>
       ({
-        ...defaultColDef,
+        ...getDefaultColDef(sortable, filterable, resizable),
         ...userDefaultColDef,
       }) as AGColDef<TData>,
-    [userDefaultColDef]
+    [userDefaultColDef, sortable, filterable, resizable]
   );
 
   // Convert legacy rowSelection string to v35+ object format
@@ -206,8 +253,17 @@ function AGGridInner<TData = unknown>(
 
   return (
     <div
-      className={cn(agGridVariants({ variant, size }), className)}
-      style={{ height: typeof height === 'number' ? `${height}px` : height }}
+      className={cn(agGridVariants({ variant, size, brand }), className)}
+      style={{
+        height: typeof height === 'number' ? `${height}px` : height,
+        ...(brandConfig &&
+          ({
+            '--ag-primary-color': brandConfig.colors.primary[600],
+            '--ag-font-family':
+              brandConfig.typography.fontFamily.sans.join(', '),
+          } as React.CSSProperties)),
+      }}
+      data-brand={brand}
     >
       <AgGridReact<TData>
         ref={resolvedRef as React.RefObject<AgGridReact<TData>>}
@@ -216,8 +272,22 @@ function AGGridInner<TData = unknown>(
         defaultColDef={mergedDefaultColDef}
         onGridReady={handleGridReady}
         onRowClicked={handleRowClicked}
-        animateRows={false}
+        animateRows={true}
+        enableBrowserTooltips={true}
         rowSelection={resolvedRowSelection}
+        pagination={pagination}
+        paginationPageSize={pagination ? 50 : undefined}
+        paginationPageSizeSelector={pagination ? [25, 50, 100, 200] : undefined}
+        noRowsOverlayComponent={() => (
+          <div className="text-muted-foreground py-8 text-center">
+            {noDataMessage}
+          </div>
+        )}
+        loadingOverlayComponent={() => (
+          <div className="text-muted-foreground py-8 text-center">
+            {loadingMessage}
+          </div>
+        )}
         theme="legacy"
         {...props}
       />
