@@ -126,6 +126,18 @@ html, body {
   border-color: var(--mieweb-border, #3f3f46) !important;
 }
 
+/* Boolean toggle controls (False/True buttons) */
+[data-theme="dark"] [id*="control-"][role="switch"],
+[data-theme="dark"] [class*="BooleanControl"] {
+  background-color: var(--mieweb-card, #27272a) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+[data-theme="dark"] [id*="control-"][role="switch"] span,
+[data-theme="dark"] [class*="BooleanControl"] span {
+  color: var(--mieweb-foreground, #fafafa) !important;
+}
+
 /* Buttons in controls */
 [data-theme="dark"] .docblock-argstable button {
   background-color: var(--mieweb-card, #27272a) !important;

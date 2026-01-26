@@ -1,0 +1,14 @@
+<style>
+  /* Fix boolean toggle control text visibility in dark mode */
+  /* The checkbox input is positioned absolute and covers the spans with a dark background */
+  
+  /* Make the checkbox input background transparent so text shows through */
+  label[for^="control-"] input[type="checkbox"] {
+    background: transparent !important;
+  }
+  
+  /* Ensure the False/True text is visible in dark mode */
+  [data-base="dark"] label[for^="control-"] span {
+    color: #fafafa !important;
+  }
+</style>
