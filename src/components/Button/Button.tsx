@@ -78,10 +78,10 @@ export interface ButtonProps
   extends
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  /** Optional icon to render before the button text */
-  leftIcon?: React.ReactNode;
-  /** Optional icon to render after the button text */
-  rightIcon?: React.ReactNode;
+  /** Optional icon element to render before the button text */
+  leftIcon?: React.ReactElement | null;
+  /** Optional icon element to render after the button text */
+  rightIcon?: React.ReactElement | null;
   /** Shows a loading spinner and disables the button */
   isLoading?: boolean;
   /** Accessible label for the loading state */

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import React from 'react';
 import { Button } from './Button';
 import {
   Plus,
@@ -52,8 +51,8 @@ import {
 } from 'lucide-react';
 
 // Icon registry for Storybook controls
-const iconRegistry: Record<string, LucideIcon> = {
-  None: undefined as unknown as LucideIcon,
+const iconRegistry: Record<string, LucideIcon | undefined> = {
+  None: undefined,
   Plus,
   Minus,
   Check,
