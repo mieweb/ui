@@ -8,6 +8,9 @@ const meta: Meta<typeof Avatar> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  args: {
+    ring: false,
+  },
   argTypes: {
     size: {
       control: 'select',
@@ -45,9 +48,9 @@ export const Default: Story = {
 
 export const WithImage: Story = {
   args: {
-    src: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-    alt: 'John Doe',
-    name: 'John Doe',
+    src: 'https://i.imgur.com/8Km9tLL.jpg',
+    alt: 'Sea Otter',
+    name: 'Sea Otter',
   },
 };
 
