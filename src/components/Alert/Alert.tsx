@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const alertVariants = cva(
@@ -32,8 +33,8 @@ export interface AlertProps
   extends
     React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof alertVariants> {
-  /** Icon to display in the alert */
-  icon?: React.ReactNode;
+  /** Icon element to display in the alert */
+  icon?: React.ReactElement | null;
   /** Whether the alert can be dismissed */
   dismissible?: boolean;
   /** Callback when the alert is dismissed */
@@ -78,7 +79,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         )}
         {...props}
       >
-        {icon}
+        {React.isValidElement(icon) && icon}
         <div>{children}</div>
         {dismissible && (
           <button
@@ -92,21 +93,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             )}
             aria-label={dismissLabel}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <X size={16} aria-hidden="true" />
           </button>
         )}
       </div>
