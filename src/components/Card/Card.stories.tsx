@@ -64,15 +64,27 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    children: 'This is a basic card with default padding.',
+    orientation: 'vertical',
   },
-  decorators: [
-    (Story) => (
-      <div style={{ width: '350px' }}>
-        <Story />
-      </div>
-    ),
-  ],
+  render: (args) => (
+    <div style={{ width: args.orientation === 'horizontal' ? '500px' : '350px' }}>
+      <Card {...args}>
+        <CardHeader>
+          <CardTitle>Card Title</CardTitle>
+          <CardDescription>Card description goes here.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>This is the main content area of the card.</p>
+        </CardContent>
+        <CardFooter className="gap-2">
+          <Button variant="outline" size="sm">
+            Cancel
+          </Button>
+          <Button size="sm">Submit</Button>
+        </CardFooter>
+      </Card>
+    </div>
+  ),
 };
 
 export const WithHeaderAndContent: Story = {
