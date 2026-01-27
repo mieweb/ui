@@ -1,5 +1,47 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import React from 'react';
 import { Badge } from './Badge';
+import {
+  CheckIcon,
+  AlertCircleIcon,
+  InfoIcon,
+  StarIcon,
+  HeartIcon,
+  BellIcon,
+  TagIcon,
+  ZapIcon,
+  ShieldIcon,
+  ClockIcon,
+  UserIcon,
+  MailIcon,
+  PlusIcon,
+  SparklesIcon,
+} from '../Icons';
+import type { LucideIcon } from 'lucide-react';
+
+// Map of available icons for the dropdown
+const iconMap: Record<string, LucideIcon | undefined> = {
+  none: undefined,
+  check: CheckIcon,
+  alert: AlertCircleIcon,
+  info: InfoIcon,
+  star: StarIcon,
+  heart: HeartIcon,
+  bell: BellIcon,
+  tag: TagIcon,
+  zap: ZapIcon,
+  shield: ShieldIcon,
+  clock: ClockIcon,
+  user: UserIcon,
+  mail: MailIcon,
+  plus: PlusIcon,
+  sparkles: SparklesIcon,
+};
+
+// Extended args type that includes our custom iconName prop
+type BadgeStoryArgs = React.ComponentProps<typeof Badge> & {
+  iconName?: keyof typeof iconMap;
+};
 
 const meta: Meta<typeof Badge> = {
   title: 'Components/Badge',
@@ -24,16 +66,26 @@ const meta: Meta<typeof Badge> = {
       control: 'select',
       options: ['sm', 'md', 'lg'],
     },
-    // Disable control for ReactNode props - Storybook's "Set object" creates an empty {}
-    // which causes "Objects are not valid as a React child" error
     icon: {
-      control: false,
+      table: { disable: true }, // Hide the raw icon prop
     },
+    iconName: {
+      control: 'select',
+      options: Object.keys(iconMap),
+      description: 'Select an icon from the Lucide icon library',
+    },
+  } as Meta<BadgeStoryArgs>['argTypes'],
+  // Convert iconName to actual icon element in render
+  render: ({ iconName, ...args }: BadgeStoryArgs) => {
+    const IconComponent = iconName ? iconMap[iconName] : undefined;
+    return (
+      <Badge {...args} icon={IconComponent ? <IconComponent size={12} /> : undefined} />
+    );
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<BadgeStoryArgs>;
 
 export const Default: Story = {
   args: {
@@ -67,21 +119,7 @@ export const AllSizes: Story = {
 export const WithIcon: Story = {
   args: {
     children: 'New',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="12"
-        height="12"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10" />
-      </svg>
-    ),
+    iconName: 'sparkles',
     variant: 'success',
   },
 };
