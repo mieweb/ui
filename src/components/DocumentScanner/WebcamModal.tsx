@@ -204,20 +204,30 @@ export function WebcamModal({
   const [capturedFile, setCapturedFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
+  // Track if we've started the camera for this modal session
+  const hasStartedRef = React.useRef(false);
+
   // Start camera when modal opens
   React.useEffect(() => {
     if (open && permission !== 'denied' && permission !== 'unavailable') {
-      startCamera();
+      if (!hasStartedRef.current) {
+        hasStartedRef.current = true;
+        startCamera();
+      }
     } else if (!open) {
+      hasStartedRef.current = false;
       stopCamera();
       // Reset captured state
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
       setCapturedFile(null);
-      setPreviewUrl(null);
+      setPreviewUrl((prev) => {
+        if (prev) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
     }
-  }, [open, permission, startCamera, stopCamera, previewUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, permission]);
 
   const handleCapture = React.useCallback(() => {
     const file = capturePhoto();

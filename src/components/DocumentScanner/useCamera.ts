@@ -179,19 +179,33 @@ export function useCamera({
     }
   }, [stream]);
 
+  // Track if we should restart after facing mode change
+  const shouldRestartRef = React.useRef(false);
+
   const switchCamera = React.useCallback(() => {
     const newFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-    setCurrentFacingMode(newFacingMode);
 
-    // If camera is running, restart with new facing mode
+    // If camera is running, stop it and mark for restart
     if (stream) {
-      stopCamera();
-      // Use setTimeout to allow state to update
-      setTimeout(() => {
-        startCamera();
-      }, 100);
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+      setIsReady(false);
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      shouldRestartRef.current = true;
     }
-  }, [currentFacingMode, stream, stopCamera, startCamera]);
+
+    setCurrentFacingMode(newFacingMode);
+  }, [currentFacingMode, stream]);
+
+  // Restart camera after facing mode changes
+  React.useEffect(() => {
+    if (shouldRestartRef.current && !stream) {
+      shouldRestartRef.current = false;
+      startCamera();
+    }
+  }, [currentFacingMode, stream, startCamera]);
 
   const capturePhoto = React.useCallback((): File | null => {
     if (!videoRef.current || !isReady) {
