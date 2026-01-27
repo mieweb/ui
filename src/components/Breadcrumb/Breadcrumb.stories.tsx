@@ -1,17 +1,55 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Breadcrumb, BreadcrumbSlash } from './Breadcrumb';
+import { Breadcrumb, BreadcrumbProps, BreadcrumbSlash } from './Breadcrumb';
+import { ChevronRight } from 'lucide-react';
+import React from 'react';
 
-const meta: Meta<typeof Breadcrumb> = {
+// Map of separator names to React elements
+const separatorMap: Record<string, React.ReactNode> = {
+  chevron: <ChevronRight className="h-4 w-4" />,
+  slash: <BreadcrumbSlash />,
+  arrow: <span className="text-muted-foreground">→</span>,
+  guillemet: <span className="text-muted-foreground">›</span>,
+  pipe: <span className="text-muted-foreground">|</span>,
+  dot: <span className="text-muted-foreground">•</span>,
+};
+
+// Custom args type that uses separatorName instead of separator ReactNode
+type BreadcrumbStoryArgs = Omit<BreadcrumbProps, 'separator'> & {
+  separatorName?: keyof typeof separatorMap;
+};
+
+const meta: Meta<BreadcrumbStoryArgs> = {
   title: 'Components/Breadcrumb',
   component: Breadcrumb,
   parameters: {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  argTypes: {
+    separatorName: {
+      control: 'select',
+      options: Object.keys(separatorMap),
+      description: 'The separator between breadcrumb items',
+      table: {
+        defaultValue: { summary: 'chevron' },
+      },
+    },
+    separator: {
+      table: { disable: true },
+    },
+    renderLink: {
+      control: false,
+      description: 'Custom render function for links',
+    },
+  },
+  // Convert separatorName to separator ReactNode
+  render: ({ separatorName = 'chevron', ...args }) => (
+    <Breadcrumb {...args} separator={separatorMap[separatorName]} />
+  ),
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<BreadcrumbStoryArgs>;
 
 export const Default: Story = {
   args: {
@@ -21,26 +59,26 @@ export const Default: Story = {
       { label: 'Electronics', href: '/products/electronics' },
       { label: 'Smartphones' },
     ],
+    separatorName: 'chevron',
   },
 };
 
 export const TwoItems: Story = {
   args: {
     items: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Settings' }],
+    separatorName: 'chevron',
   },
 };
 
 export const WithSlashSeparator: Story = {
-  render: () => (
-    <Breadcrumb
-      items={[
-        { label: 'Home', href: '/' },
-        { label: 'Library', href: '/library' },
-        { label: 'Data' },
-      ]}
-      separator={<BreadcrumbSlash />}
-    />
-  ),
+  args: {
+    items: [
+      { label: 'Home', href: '/' },
+      { label: 'Library', href: '/library' },
+      { label: 'Data' },
+    ],
+    separatorName: 'slash',
+  },
 };
 
 function HomeIcon() {
