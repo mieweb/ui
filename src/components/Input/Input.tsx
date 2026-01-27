@@ -43,6 +43,8 @@ export interface InputProps
   label?: string;
   /** Whether the label should be visually hidden (still accessible) */
   hideLabel?: boolean;
+  /** Whether the input is required */
+  required?: boolean;
 }
 
 /**
@@ -64,6 +66,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       helperText,
       label,
       hideLabel,
+      required,
+      disabled,
       id,
       'aria-describedby': ariaDescribedBy,
       ...props
@@ -84,7 +88,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       .join(' ');
 
     return (
-      <div className="flex flex-col gap-1.5">
+      <div className={cn('flex flex-col gap-1.5', disabled && 'opacity-50')}>
         {label && (
           <label
             htmlFor={inputId}
@@ -94,6 +98,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             )}
           >
             {label}
+            {required && (
+              <span className="text-destructive ml-1" aria-hidden="true">
+                *
+              </span>
+            )}
           </label>
         )}
         <input
@@ -105,6 +114,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
           aria-invalid={hasError || !!error}
           aria-describedby={describedByIds || undefined}
+          required={required}
+          disabled={disabled}
           {...props}
         />
         {error && (

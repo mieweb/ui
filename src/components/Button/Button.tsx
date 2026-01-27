@@ -120,7 +120,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(buttonVariants({ variant, size, fullWidth }), className)}
         ref={ref}
         disabled={disabled || isLoading}
-        aria-busy={isLoading}
+        aria-busy={isLoading ? 'true' : 'false'}
         {...props}
       >
         {isLoading ? (
@@ -152,7 +152,8 @@ function LoadingSpinner() {
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      aria-hidden="true"
+      role="img"
+      aria-label="Loading"
     >
       <circle
         className="opacity-25"
