@@ -7,7 +7,7 @@ import { ThemeProvider } from '../components/ThemeProvider';
  */
 export const renderWithTheme = (ui: ReactElement, options = {}) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <ThemeProvider theme="mieweb" darkMode={false}>
+    <ThemeProvider defaultTheme="light">
       {children}
     </ThemeProvider>
   );
@@ -20,7 +20,7 @@ export const renderWithTheme = (ui: ReactElement, options = {}) => {
  */
 export const renderWithDarkTheme = (ui: ReactElement, options = {}) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <ThemeProvider theme="mieweb" darkMode={true}>
+    <ThemeProvider defaultTheme="dark">
       {children}
     </ThemeProvider>
   );

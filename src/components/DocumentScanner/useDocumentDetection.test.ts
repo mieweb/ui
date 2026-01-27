@@ -4,6 +4,7 @@
  * Tests the pure functions used for stability detection
  */
 
+/* eslint-disable no-undef */
 import { describe, it, expect } from 'vitest';
 
 // We need to test the pure functions, so we'll recreate them here

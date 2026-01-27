@@ -261,6 +261,23 @@ function RecordButton({
     };
   }, []);
 
+  const stopRecording = React.useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== 'inactive'
+    ) {
+      mediaRecorderRef.current.stop();
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+  }, []);
+
   const startRecording = React.useCallback(async () => {
     if (disabled || isRecording || isProcessing) return;
 
@@ -326,23 +343,6 @@ function RecordButton({
     onError,
     stopRecording,
   ]);
-
-  const stopRecording = React.useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== 'inactive'
-    ) {
-      mediaRecorderRef.current.stop();
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
-  }, []);
 
   const handleClick = React.useCallback(() => {
     if (isRecording) {
