@@ -2,7 +2,6 @@
  * DocumentDetectionOverlay component
  *
  * Displays visual feedback for document detection status including:
- * - Document boundary outline (green when ready, yellow when detecting)
  * - Focus/blur indicator
  * - Brightness indicator
  * - Stability progress bar
@@ -10,7 +9,7 @@
  */
 
 import React from 'react';
-import type { DetectionMetrics, DocumentBoundary } from './useDocumentDetection';
+import type { DetectionMetrics } from './useDocumentDetection';
 
 export interface DocumentDetectionOverlayProps {
   /** Detection metrics from useDocumentDetection */
@@ -23,49 +22,6 @@ export interface DocumentDetectionOverlayProps {
   videoDimensions: { width: number; height: number };
   /** Whether to show detailed metrics (debug mode) */
   showDetailedMetrics?: boolean;
-}
-
-/**
- * Draw document boundary as SVG polygon
- */
-function BoundaryOverlay({
-  boundary,
-  isReady,
-  videoDimensions,
-}: {
-  boundary: DocumentBoundary | null;
-  isReady: boolean;
-  videoDimensions: { width: number; height: number };
-}) {
-  if (!boundary || videoDimensions.width === 0) return null;
-
-  const { topLeft, topRight, bottomRight, bottomLeft } = boundary;
-
-  const points = `${topLeft.x},${topLeft.y} ${topRight.x},${topRight.y} ${bottomRight.x},${bottomRight.y} ${bottomLeft.x},${bottomLeft.y}`;
-
-  const strokeColor = isReady ? '#22c55e' : '#eab308'; // green-500 or yellow-500
-  const fillColor = isReady ? 'rgba(34, 197, 94, 0.1)' : 'rgba(234, 179, 8, 0.1)';
-
-  return (
-    <svg
-      className="absolute inset-0 pointer-events-none"
-      viewBox={`0 0 ${videoDimensions.width} ${videoDimensions.height}`}
-      preserveAspectRatio="none"
-      style={{ width: '100%', height: '100%' }}
-    >
-      <polygon
-        points={points}
-        fill={fillColor}
-        stroke={strokeColor}
-        strokeWidth="3"
-        strokeLinejoin="round"
-      />
-      {/* Corner indicators */}
-      {[topLeft, topRight, bottomRight, bottomLeft].map((corner, i) => (
-        <circle key={i} cx={corner.x} cy={corner.y} r="8" fill={strokeColor} />
-      ))}
-    </svg>
-  );
 }
 
 /**
@@ -156,7 +112,7 @@ export function DocumentDetectionOverlay({
   metrics,
   isReadyForCapture,
   captureCountdown,
-  videoDimensions,
+  videoDimensions: _videoDimensions,
   showDetailedMetrics = false,
 }: DocumentDetectionOverlayProps) {
   const {
@@ -164,21 +120,30 @@ export function DocumentDetectionOverlay({
     isInFocus,
     brightness,
     isBrightnessOk,
-    boundary,
     isDocumentDetected,
-    documentCoverage,
     isStable,
     stabilityDuration,
   } = metrics;
 
+  // Determine border color based on state
+  const borderColor = isReadyForCapture
+    ? 'border-green-500'
+    : isDocumentDetected
+      ? 'border-yellow-400'
+      : 'border-white/40';
+
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {/* Document boundary overlay */}
-      <BoundaryOverlay
-        boundary={boundary}
-        isReady={isReadyForCapture}
-        videoDimensions={videoDimensions}
-      />
+      {/* Simple frame guide - shows ready state through color */}
+      <div
+        className={`absolute inset-4 border-4 rounded-lg transition-colors duration-300 ${borderColor}`}
+      >
+        {/* Corner accents */}
+        <div className="absolute -top-1 -left-1 w-6 h-6 border-l-4 border-t-4 border-current rounded-tl" />
+        <div className="absolute -top-1 -right-1 w-6 h-6 border-r-4 border-t-4 border-current rounded-tr" />
+        <div className="absolute -bottom-1 -left-1 w-6 h-6 border-l-4 border-b-4 border-current rounded-bl" />
+        <div className="absolute -bottom-1 -right-1 w-6 h-6 border-r-4 border-b-4 border-current rounded-br" />
+      </div>
 
       {/* Countdown display */}
       <CountdownDisplay seconds={captureCountdown} />
@@ -204,19 +169,15 @@ export function DocumentDetectionOverlay({
             </span>
           ) : (
             <span>
-              {!isDocumentDetected
-                ? '📄 Position document in frame'
-                : !isInFocus
-                  ? '🔍 Hold camera steady for focus'
-                  : !isBrightnessOk
-                    ? brightness < 40
-                      ? '💡 Need more light'
-                      : '💡 Too much light'
-                    : !isStable
-                      ? '✋ Hold steady...'
-                      : documentCoverage < 20
-                        ? '↔️ Move closer to document'
-                        : '↔️ Move further from document'}
+              {!isInFocus
+                ? '🔍 Hold camera steady'
+                : !isBrightnessOk
+                  ? brightness < 40
+                    ? '💡 Need more light'
+                    : '💡 Too bright'
+                  : !isStable
+                    ? '✋ Hold steady...'
+                    : '📄 Position document in frame'}
             </span>
           )}
         </div>
@@ -224,7 +185,7 @@ export function DocumentDetectionOverlay({
         {/* Stability progress */}
         {isDocumentDetected && !isStable && (
           <div className="px-2">
-            <StabilityBar stabilityDuration={stabilityDuration} targetDuration={800} />
+            <StabilityBar stabilityDuration={stabilityDuration} targetDuration={500} />
           </div>
         )}
       </div>
@@ -239,24 +200,8 @@ export function DocumentDetectionOverlay({
               isOk={isBrightnessOk}
               value={brightness}
             />
-            <StatusPill
-              label="Document"
-              isOk={isDocumentDetected}
-              value={isDocumentDetected ? `${documentCoverage}%` : 'Not found'}
-            />
             <StatusPill label="Stable" isOk={isStable} />
           </div>
-        </div>
-      )}
-
-      {/* Edge guides when no document detected */}
-      {!isDocumentDetected && (
-        <div className="absolute inset-8 border-2 border-dashed border-white/30 rounded-lg pointer-events-none">
-          {/* Corner guides */}
-          <div className="absolute -top-0.5 -left-0.5 w-8 h-8 border-l-4 border-t-4 border-white/60 rounded-tl-lg" />
-          <div className="absolute -top-0.5 -right-0.5 w-8 h-8 border-r-4 border-t-4 border-white/60 rounded-tr-lg" />
-          <div className="absolute -bottom-0.5 -left-0.5 w-8 h-8 border-l-4 border-b-4 border-white/60 rounded-bl-lg" />
-          <div className="absolute -bottom-0.5 -right-0.5 w-8 h-8 border-r-4 border-b-4 border-white/60 rounded-br-lg" />
         </div>
       )}
     </div>

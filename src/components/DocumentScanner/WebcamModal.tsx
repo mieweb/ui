@@ -227,14 +227,14 @@ export function WebcamModal({
     }
   }, [capturePhoto, stopCamera]);
 
-  // Document detection hook
+  // Document detection hook - uses simplified focus + stability detection
   const detection = useDocumentDetection(
     videoRef,
     {
       enableAutoCapture: autoDetectEnabled,
-      minFocusScore: 25, // Lower threshold for easier capture
-      stabilityDuration: 800, // 0.8 seconds - more forgiving
-      captureCountdown: 3,
+      minFocusScore: 15, // Very forgiving focus threshold
+      stabilityDuration: 500, // 0.5 seconds of stability
+      captureCountdown: 2, // 2 second countdown
     },
     handleAutoCapture
   );
