@@ -1,14 +1,39 @@
 <style>
   /* Fix boolean toggle control text visibility in dark mode */
-  /* The checkbox input is positioned absolute and covers the spans with a dark background */
+  /* Storybook boolean controls have dark background in dark mode that hides text */
   
-  /* Make the checkbox input background transparent so text shows through */
-  label[for^="control-"] input[type="checkbox"] {
-    background: transparent !important;
-  }
-  
-  /* Ensure the False/True text is visible in dark mode */
-  [data-base="dark"] label[for^="control-"] span {
-    color: #fafafa !important;
+  /* Target boolean toggle labels - give them a visible light background in dark mode */
+  @media (prefers-color-scheme: dark) {
+    /* The toggle switch background */
+    label[for^="control-"] {
+      background-color: #52525b !important;
+    }
+    
+    /* The "False" span (left side) */
+    label[for^="control-"] > span:first-of-type {
+      color: #e4e4e7 !important;
+      background-color: #71717a !important;
+    }
+    
+    /* The "True" span (right side) */
+    label[for^="control-"] > span:last-of-type {
+      color: #a1a1aa !important;
+    }
+    
+    /* When checked/active state - "True" is active */
+    label[for^="control-"] input:checked ~ span:last-of-type {
+      color: #e4e4e7 !important;
+      background-color: #71717a !important;
+    }
+    
+    label[for^="control-"] input:checked ~ span:first-of-type {
+      background-color: transparent !important;
+      color: #a1a1aa !important;
+    }
+    
+    /* Make checkbox input transparent */
+    label[for^="control-"] input[type="checkbox"] {
+      background: transparent !important;
+    }
   }
 </style>
