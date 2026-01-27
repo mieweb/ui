@@ -44,6 +44,7 @@ export default [
         HTMLHeadingElement: 'readonly',
         HTMLCanvasElement: 'readonly',
         HTMLImageElement: 'readonly',
+        HTMLVideoElement: 'readonly',
         KeyboardEvent: 'readonly',
         MouseEvent: 'readonly',
         FocusEvent: 'readonly',
@@ -57,12 +58,23 @@ export default [
         navigator: 'readonly',
         MediaRecorder: 'readonly',
         MediaStream: 'readonly',
+        MediaStreamConstraints: 'readonly',
         AudioContext: 'readonly',
         AnalyserNode: 'readonly',
         Uint8Array: 'readonly',
+        ArrayBuffer: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         getComputedStyle: 'readonly',
+        // File APIs
+        File: 'readonly',
+        FileList: 'readonly',
+        DataTransfer: 'readonly',
+        // Encoding APIs
+        atob: 'readonly',
+        btoa: 'readonly',
+        // Types
+        PermissionName: 'readonly',
       },
     },
     plugins: {

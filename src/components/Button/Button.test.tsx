@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Button } from './Button';
 
@@ -109,14 +110,14 @@ describe('Button', () => {
       );
     });
 
-    it('is keyboard navigable', () => {
+    it('is keyboard navigable', async () => {
+      const user = userEvent.setup();
       const handleClick = vi.fn();
       renderWithTheme(<Button onClick={handleClick}>Button</Button>);
 
       const button = screen.getByRole('button');
       button.focus();
-      fireEvent.keyDown(button, { key: 'Enter' });
-      fireEvent.keyUp(button, { key: 'Enter' });
+      await user.keyboard('{Enter}');
 
       expect(handleClick).toHaveBeenCalled();
     });
