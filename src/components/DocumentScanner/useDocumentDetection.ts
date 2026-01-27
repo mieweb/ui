@@ -97,7 +97,7 @@ const DEFAULT_CONFIG: Required<DetectionConfig> = {
   maxBrightness: 220,
   minDocumentCoverage: 20,
   maxDocumentCoverage: 90,
-  stabilityDuration: 1500,
+  stabilityDuration: 800,
   captureCountdown: 3,
   detectionFps: 10,
   enableAutoCapture: true,
@@ -397,11 +397,12 @@ function distance(p1: Point, p2: Point): number {
 
 /**
  * Check if two boundaries are similar (for stability detection)
+ * Using a generous threshold to allow for minor hand movements
  */
 function areBoundariesSimilar(
   b1: DocumentBoundary | null,
   b2: DocumentBoundary | null,
-  threshold: number = 20
+  threshold: number = 40
 ): boolean {
   if (!b1 && !b2) return true;
   if (!b1 || !b2) return false;

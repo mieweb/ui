@@ -224,7 +224,7 @@ export function DocumentDetectionOverlay({
         {/* Stability progress */}
         {isDocumentDetected && !isStable && (
           <div className="px-2">
-            <StabilityBar stabilityDuration={stabilityDuration} targetDuration={1500} />
+            <StabilityBar stabilityDuration={stabilityDuration} targetDuration={800} />
           </div>
         )}
       </div>

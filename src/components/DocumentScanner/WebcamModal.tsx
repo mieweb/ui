@@ -232,8 +232,8 @@ export function WebcamModal({
     videoRef,
     {
       enableAutoCapture: autoDetectEnabled,
-      minFocusScore: 30, // Lower threshold for usability
-      stabilityDuration: 1500,
+      minFocusScore: 25, // Lower threshold for easier capture
+      stabilityDuration: 800, // 0.8 seconds - more forgiving
       captureCountdown: 3,
     },
     handleAutoCapture
