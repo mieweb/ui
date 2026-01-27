@@ -11,8 +11,10 @@ import {
 } from '../Modal';
 import { Spinner } from '../Spinner';
 import { Alert, AlertTitle, AlertDescription } from '../Alert';
-import { CameraIcon, RefreshIcon, CheckIcon, AlertCircleIcon } from '../Icons';
+import { CameraIcon, RefreshIcon, CheckIcon, AlertCircleIcon, ScanLineIcon } from '../Icons';
 import { useCamera } from './useCamera';
+import { useDocumentDetection } from './useDocumentDetection';
+import { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
 import type { WebcamModalProps } from './types';
 
 /**
@@ -21,9 +23,11 @@ import type { WebcamModalProps } from './types';
 function CameraViewfinder({
   videoRef,
   isReady,
+  detectionOverlay,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   isReady: boolean;
+  detectionOverlay?: React.ReactNode;
 }) {
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black">
@@ -47,8 +51,11 @@ function CameraViewfinder({
         </div>
       )}
 
-      {/* Viewfinder overlay */}
-      {isReady && (
+      {/* Detection overlay (replaces default viewfinder when auto-detect is enabled) */}
+      {isReady && detectionOverlay}
+
+      {/* Default viewfinder overlay (when no detection overlay) */}
+      {isReady && !detectionOverlay && (
         <div className="pointer-events-none absolute inset-0">
           {/* Corner guides */}
           <div className="absolute inset-8 rounded-lg border-2 border-white/30">
@@ -185,7 +192,11 @@ export function WebcamModal({
   open,
   onOpenChange,
   onCapture,
-}: Omit<WebcamModalProps, 'permission' | 'onRequestPermission'>) {
+  enableAutoCapture = true,
+}: Omit<WebcamModalProps, 'permission' | 'onRequestPermission'> & {
+  /** Enable auto-capture when document is detected */
+  enableAutoCapture?: boolean;
+}) {
   const {
     permission,
     videoRef,
@@ -203,11 +214,51 @@ export function WebcamModal({
 
   const [capturedFile, setCapturedFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [autoDetectEnabled, setAutoDetectEnabled] = React.useState(enableAutoCapture);
+  const [videoDimensions, setVideoDimensions] = React.useState({ width: 0, height: 0 });
+
+  // Auto-capture callback
+  const handleAutoCapture = React.useCallback(() => {
+    const file = capturePhoto();
+    if (file) {
+      setCapturedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      stopCamera();
+    }
+  }, [capturePhoto, stopCamera]);
+
+  // Document detection hook
+  const detection = useDocumentDetection(
+    videoRef,
+    {
+      enableAutoCapture: autoDetectEnabled,
+      minFocusScore: 30, // Lower threshold for usability
+      stabilityDuration: 1500,
+      captureCountdown: 3,
+    },
+    handleAutoCapture
+  );
 
   // Track if we've started the camera for this modal session
   const hasStartedRef = React.useRef(false);
 
-  // Start camera when modal opens
+  // Update video dimensions when ready
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (video && isReady) {
+      const updateDimensions = () => {
+        setVideoDimensions({
+          width: video.videoWidth,
+          height: video.videoHeight,
+        });
+      };
+      updateDimensions();
+      video.addEventListener('resize', updateDimensions);
+      return () => video.removeEventListener('resize', updateDimensions);
+    }
+  }, [isReady, videoRef]);
+
+  // Start camera and detection when modal opens
   React.useEffect(() => {
     if (open && permission !== 'denied' && permission !== 'unavailable') {
       if (!hasStartedRef.current) {
@@ -217,6 +268,7 @@ export function WebcamModal({
     } else if (!open) {
       hasStartedRef.current = false;
       stopCamera();
+      detection.stopDetection();
       // Reset captured state
       setCapturedFile(null);
       setPreviewUrl((prev) => {
@@ -228,6 +280,17 @@ export function WebcamModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, permission]);
+
+  // Start detection when camera is ready
+  React.useEffect(() => {
+    if (isReady && autoDetectEnabled && !capturedFile) {
+      detection.startDetection();
+    }
+    return () => {
+      detection.stopDetection();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady, autoDetectEnabled, capturedFile]);
 
   const handleCapture = React.useCallback(() => {
     const file = capturePhoto();
@@ -244,8 +307,9 @@ export function WebcamModal({
     }
     setCapturedFile(null);
     setPreviewUrl(null);
+    detection.resetDetection();
     startCamera();
-  }, [previewUrl, startCamera]);
+  }, [previewUrl, startCamera, detection]);
 
   const handleConfirm = React.useCallback(() => {
     if (capturedFile) {
@@ -256,13 +320,14 @@ export function WebcamModal({
 
   const handleClose = React.useCallback(() => {
     stopCamera();
+    detection.stopDetection();
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
     setCapturedFile(null);
     setPreviewUrl(null);
     onOpenChange(false);
-  }, [stopCamera, previewUrl, onOpenChange]);
+  }, [stopCamera, detection, previewUrl, onOpenChange]);
 
   const renderContent = () => {
     if (permission === 'denied') {
@@ -285,28 +350,64 @@ export function WebcamModal({
 
     return (
       <div className="flex flex-col gap-4">
-        <CameraViewfinder videoRef={videoRef} isReady={isReady} />
+        <CameraViewfinder
+          videoRef={videoRef}
+          isReady={isReady}
+          detectionOverlay={
+            autoDetectEnabled && isReady ? (
+              <DocumentDetectionOverlay
+                metrics={detection.metrics}
+                isReadyForCapture={detection.isReadyForCapture}
+                captureCountdown={detection.captureCountdown}
+                videoDimensions={videoDimensions}
+                showDetailedMetrics={false}
+              />
+            ) : undefined
+          }
+        />
 
-        <div className="flex justify-center gap-3">
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={switchCamera}
-            disabled={!isReady}
-            aria-label={`Switch to ${currentFacingMode === 'user' ? 'back' : 'front'} camera`}
-          >
-            <RefreshIcon className="h-5 w-5" />
-          </Button>
+        <div className="flex flex-col gap-3">
+          {/* Auto-detect toggle */}
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant={autoDetectEnabled ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => {
+                setAutoDetectEnabled(!autoDetectEnabled);
+                if (!autoDetectEnabled) {
+                  detection.startDetection();
+                } else {
+                  detection.stopDetection();
+                }
+              }}
+              leftIcon={<ScanLineIcon className="h-4 w-4" />}
+            >
+              {autoDetectEnabled ? 'Auto-capture ON' : 'Auto-capture OFF'}
+            </Button>
+          </div>
 
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleCapture}
-            disabled={!isReady}
-            leftIcon={<CameraIcon className="h-5 w-5" />}
-          >
-            Capture
-          </Button>
+          {/* Capture controls */}
+          <div className="flex justify-center gap-3">
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={switchCamera}
+              disabled={!isReady}
+              aria-label={`Switch to ${currentFacingMode === 'user' ? 'back' : 'front'} camera`}
+            >
+              <RefreshIcon className="h-5 w-5" />
+            </Button>
+
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleCapture}
+              disabled={!isReady}
+              leftIcon={<CameraIcon className="h-5 w-5" />}
+            >
+              {autoDetectEnabled ? 'Manual Capture' : 'Capture'}
+            </Button>
+          </div>
         </div>
       </div>
     );

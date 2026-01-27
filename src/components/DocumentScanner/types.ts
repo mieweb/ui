@@ -159,6 +159,8 @@ export interface WebcamModalProps {
   permission: CameraPermission;
   /** Request camera permission */
   onRequestPermission: () => Promise<void>;
+  /** Enable auto-capture when document is detected (default: true) */
+  enableAutoCapture?: boolean;
 }
 
 /**

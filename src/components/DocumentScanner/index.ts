@@ -44,6 +44,15 @@ export { DocumentScanner } from './DocumentScanner';
 export { DropZone } from './DropZone';
 export { FilePreview } from './FilePreview';
 export { WebcamModal } from './WebcamModal';
+export { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
 export { useFileUpload } from './useFileUpload';
 export { useCamera } from './useCamera';
+export { useDocumentDetection } from './useDocumentDetection';
 export type * from './types';
+export type {
+  Point,
+  DocumentBoundary,
+  DetectionMetrics,
+  DetectionState,
+  DetectionConfig,
+} from './useDocumentDetection';

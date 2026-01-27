@@ -439,3 +439,59 @@ export const Compact: Story = {
     className: 'max-w-sm',
   },
 };
+
+/**
+ * Auto-capture feature demonstration
+ *
+ * The webcam modal includes intelligent auto-capture that:
+ * - Detects document edges and boundaries in real-time
+ * - Checks for blur/focus quality using Laplacian variance
+ * - Monitors lighting conditions
+ * - Tracks stability (document not moving)
+ * - Auto-captures with countdown when all conditions are met
+ *
+ * Users can toggle auto-capture on/off and always have manual capture available.
+ */
+export const AutoCapture: Story = {
+  args: {
+    onScan: mockScanSuccess,
+    onResult: (data: unknown) => console.log('Result:', data),
+    title: 'Smart Document Scanner',
+    description:
+      'Open webcam for intelligent auto-capture when document is detected',
+    enableWebcam: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+## Auto-Capture Feature
+
+The webcam modal now includes **intelligent document detection** with automatic capture:
+
+### How it works:
+1. **Edge Detection** - Uses Sobel operator to find document boundaries
+2. **Blur Detection** - Laplacian variance ensures the image is in focus
+3. **Brightness Check** - Validates lighting isn't too dark or too bright  
+4. **Stability Tracking** - Waits for the document to be still for 1.5 seconds
+5. **Auto-Capture** - 3-second countdown when all conditions are met
+
+### Visual Feedback:
+- **Green outline** - Document detected and ready to capture
+- **Yellow outline** - Document detected but conditions not yet met
+- **Status messages** - Real-time guidance (e.g., "Hold camera steady for focus")
+- **Progress bar** - Shows stability duration
+- **Countdown** - Displays 3, 2, 1 before auto-capture
+
+### User Control:
+- Toggle auto-capture ON/OFF anytime
+- Manual capture always available
+- Can retake after auto-capture
+
+This feature is especially useful for scanning IDs, driver's licenses, and business cards
+where consistent, well-framed captures are important.
+        `,
+      },
+    },
+  },
+};
