@@ -24,6 +24,11 @@ const meta: Meta<typeof Badge> = {
       control: 'select',
       options: ['sm', 'md', 'lg'],
     },
+    // Disable control for ReactNode props - Storybook's "Set object" creates an empty {}
+    // which causes "Objects are not valid as a React child" error
+    icon: {
+      control: false,
+    },
   },
 };
 
