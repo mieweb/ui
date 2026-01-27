@@ -178,7 +178,15 @@ export const EnhancedActionsRenderer = memo<ActionsRendererProps>((params) => {
       {customActions.map((action, index) => (
         <Button
           key={index}
-          variant={(action.variant as 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger' | 'link') || 'ghost'}
+          variant={
+            (action.variant as
+              | 'primary'
+              | 'secondary'
+              | 'ghost'
+              | 'outline'
+              | 'danger'
+              | 'link') || 'ghost'
+          }
           size="sm"
           onClick={() => action.onClick(data)}
           className="h-8 px-2"

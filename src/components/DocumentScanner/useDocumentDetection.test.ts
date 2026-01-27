@@ -32,7 +32,8 @@ function calculateFrameFingerprint(imageData: ImageData): number[] {
         for (let x = startX; x < startX + cellWidth; x += 4) {
           const idx = (y * width + x) * 4;
           if (idx < data.length - 2) {
-            sum += 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+            sum +=
+              0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
             count++;
           }
         }
@@ -63,13 +64,17 @@ function compareFingerprints(fp1: number[], fp2: number[]): number {
 /**
  * Helper to create mock ImageData
  */
-function createMockImageData(width: number, height: number, fillValue: number = 128): ImageData {
+function createMockImageData(
+  width: number,
+  height: number,
+  fillValue: number = 128
+): ImageData {
   const data = new Uint8ClampedArray(width * height * 4);
   for (let i = 0; i < data.length; i += 4) {
-    data[i] = fillValue;     // R
+    data[i] = fillValue; // R
     data[i + 1] = fillValue; // G
     data[i + 2] = fillValue; // B
-    data[i + 3] = 255;       // A
+    data[i + 3] = 255; // A
   }
   return { data, width, height, colorSpace: 'srgb' };
 }

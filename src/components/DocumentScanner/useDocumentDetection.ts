@@ -142,7 +142,9 @@ function calculateLaplacianVariance(imageData: ImageData): number {
     for (let x = step; x < width - step; x += step) {
       const getGray = (px: number, py: number): number => {
         const idx = (py * width + px) * 4;
-        return 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+        return (
+          0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2]
+        );
       };
 
       // Simple Laplacian: center pixel minus average of neighbors
@@ -212,7 +214,8 @@ function calculateFrameFingerprint(imageData: ImageData): number[] {
           const idx = (y * width + x) * 4;
           if (idx < data.length - 2) {
             // Use grayscale value
-            sum += 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+            sum +=
+              0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
             count++;
           }
         }
@@ -336,7 +339,10 @@ export function useDocumentDetection(
 
     // Check stability - compare current frame to previous
     const now = Date.now();
-    const similarity = compareFingerprints(fingerprint, lastFingerprintRef.current);
+    const similarity = compareFingerprints(
+      fingerprint,
+      lastFingerprintRef.current
+    );
     const isSimilarFrame = similarity >= STABILITY_THRESHOLD;
 
     if (isSimilarFrame && lastFingerprintRef.current.length > 0) {

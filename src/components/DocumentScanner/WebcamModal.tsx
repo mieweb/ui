@@ -11,7 +11,13 @@ import {
 } from '../Modal';
 import { Spinner } from '../Spinner';
 import { Alert, AlertTitle, AlertDescription } from '../Alert';
-import { CameraIcon, RefreshIcon, CheckIcon, AlertCircleIcon, ScanLineIcon } from '../Icons';
+import {
+  CameraIcon,
+  RefreshIcon,
+  CheckIcon,
+  AlertCircleIcon,
+  ScanLineIcon,
+} from '../Icons';
 import { useCamera } from './useCamera';
 import { useDocumentDetection } from './useDocumentDetection';
 import { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
@@ -214,8 +220,12 @@ export function WebcamModal({
 
   const [capturedFile, setCapturedFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
-  const [autoDetectEnabled, setAutoDetectEnabled] = React.useState(enableAutoCapture);
-  const [videoDimensions, setVideoDimensions] = React.useState({ width: 0, height: 0 });
+  const [autoDetectEnabled, setAutoDetectEnabled] =
+    React.useState(enableAutoCapture);
+  const [videoDimensions, setVideoDimensions] = React.useState({
+    width: 0,
+    height: 0,
+  });
 
   // Auto-capture callback
   const handleAutoCapture = React.useCallback(() => {
