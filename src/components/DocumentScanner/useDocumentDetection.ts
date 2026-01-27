@@ -187,12 +187,13 @@ function calculateBrightness(imageData: ImageData): number {
 }
 
 /**
- * Calculate a simple hash of the image for stability detection.
- * Uses average color of grid cells.
+ * Calculate a fingerprint of the image for stability detection.
+ * Returns an array of numeric values representing grid cell averages.
+ * More sensitive than string hash for detecting small movements.
  */
-function calculateFrameHash(imageData: ImageData): string {
+function calculateFrameFingerprint(imageData: ImageData): number[] {
   const { data, width, height } = imageData;
-  const gridSize = 4; // 4x4 grid
+  const gridSize = 8; // 8x8 grid for better sensitivity
   const cellWidth = Math.floor(width / gridSize);
   const cellHeight = Math.floor(height / gridSize);
   const values: number[] = [];
@@ -205,23 +206,41 @@ function calculateFrameHash(imageData: ImageData): string {
       const startX = gx * cellWidth;
       const startY = gy * cellHeight;
 
-      // Sample a few pixels in each cell
-      for (let y = startY; y < startY + cellHeight; y += 8) {
-        for (let x = startX; x < startX + cellWidth; x += 8) {
+      // Sample pixels in each cell
+      for (let y = startY; y < startY + cellHeight; y += 4) {
+        for (let x = startX; x < startX + cellWidth; x += 4) {
           const idx = (y * width + x) * 4;
           if (idx < data.length - 2) {
-            sum += data[idx] + data[idx + 1] + data[idx + 2];
+            // Use grayscale value
+            sum += 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
             count++;
           }
         }
       }
 
-      // Quantize to reduce noise sensitivity
-      values.push(count > 0 ? Math.floor(sum / count / 32) : 0);
+      values.push(count > 0 ? sum / count : 0);
     }
   }
 
-  return values.join(',');
+  return values;
+}
+
+/**
+ * Compare two fingerprints and return similarity score (0-100).
+ * 100 = identical, 0 = completely different
+ */
+function compareFingerprints(fp1: number[], fp2: number[]): number {
+  if (fp1.length !== fp2.length || fp1.length === 0) return 0;
+
+  let totalDiff = 0;
+  for (let i = 0; i < fp1.length; i++) {
+    // Calculate absolute difference, normalized by max possible (255)
+    totalDiff += Math.abs(fp1[i] - fp2[i]) / 255;
+  }
+
+  // Average difference per cell, convert to similarity percentage
+  const avgDiff = totalDiff / fp1.length;
+  return Math.max(0, Math.min(100, (1 - avgDiff * 5) * 100)); // Scale: 20% avg diff = 0 similarity
 }
 
 /**
@@ -258,10 +277,13 @@ export function useDocumentDetection(
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const lastFrameHashRef = useRef<string>('');
+  const lastFingerprintRef = useRef<number[]>([]);
   const stabilityStartRef = useRef<number | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isDetectingRef = useRef(false);
+
+  // Stability threshold - how similar frames need to be (0-100)
+  const STABILITY_THRESHOLD = 85;
 
   // Initialize canvas
   useEffect(() => {
@@ -310,13 +332,14 @@ export function useDocumentDetection(
     // Calculate simple metrics
     const focusScore = calculateLaplacianVariance(imageData);
     const brightness = calculateBrightness(imageData);
-    const frameHash = calculateFrameHash(imageData);
+    const fingerprint = calculateFrameFingerprint(imageData);
 
-    // Check stability - frame hasn't changed much
+    // Check stability - compare current frame to previous
     const now = Date.now();
-    const isSimilarFrame = frameHash === lastFrameHashRef.current;
+    const similarity = compareFingerprints(fingerprint, lastFingerprintRef.current);
+    const isSimilarFrame = similarity >= STABILITY_THRESHOLD;
 
-    if (isSimilarFrame) {
+    if (isSimilarFrame && lastFingerprintRef.current.length > 0) {
       if (!stabilityStartRef.current) {
         stabilityStartRef.current = now;
       }
@@ -324,7 +347,7 @@ export function useDocumentDetection(
       stabilityStartRef.current = now;
     }
 
-    lastFrameHashRef.current = frameHash;
+    lastFingerprintRef.current = fingerprint;
 
     const stabilityDuration = stabilityStartRef.current
       ? now - stabilityStartRef.current
@@ -442,7 +465,7 @@ export function useDocumentDetection(
 
   const resetDetection = useCallback(() => {
     stopDetection();
-    lastFrameHashRef.current = '';
+    lastFingerprintRef.current = [];
     stabilityStartRef.current = null;
     setState(INITIAL_STATE);
   }, [stopDetection]);
