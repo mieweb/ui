@@ -78,10 +78,10 @@ export interface ButtonProps
   extends
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  /** Optional icon to render before the button text */
-  leftIcon?: React.ReactNode;
-  /** Optional icon to render after the button text */
-  rightIcon?: React.ReactNode;
+  /** Optional icon element to render before the button text */
+  leftIcon?: React.ReactElement | null;
+  /** Optional icon element to render after the button text */
+  rightIcon?: React.ReactElement | null;
   /** Shows a loading spinner and disables the button */
   isLoading?: boolean;
   /** Accessible label for the loading state */
@@ -120,7 +120,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(buttonVariants({ variant, size, fullWidth }), className)}
         ref={ref}
         disabled={disabled || isLoading}
-        aria-busy={isLoading ? 'true' : 'false'}
+        aria-busy={isLoading}
         {...props}
       >
         {isLoading ? (
@@ -130,9 +130,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </>
         ) : (
           <>
-            {leftIcon && <span className="shrink-0">{leftIcon}</span>}
+            {React.isValidElement(leftIcon) && (
+              <span className="shrink-0">{leftIcon}</span>
+            )}
             {children}
-            {rightIcon && <span className="shrink-0">{rightIcon}</span>}
+            {React.isValidElement(rightIcon) && (
+              <span className="shrink-0">{rightIcon}</span>
+            )}
           </>
         )}
       </button>
@@ -152,8 +156,7 @@ function LoadingSpinner() {
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      role="img"
-      aria-label="Loading"
+      aria-hidden="true"
     >
       <circle
         className="opacity-25"

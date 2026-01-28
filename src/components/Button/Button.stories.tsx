@@ -1,5 +1,114 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from './Button';
+import {
+  Plus,
+  Minus,
+  Check,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+  ArrowLeft,
+  Search,
+  Settings,
+  User,
+  Users,
+  Mail,
+  Phone,
+  Calendar,
+  Clock,
+  Heart,
+  Star,
+  Trash2,
+  Edit,
+  Copy,
+  Download,
+  Upload,
+  Share,
+  Send,
+  Save,
+  Loader2,
+  RefreshCw,
+  ExternalLink,
+  Link as LinkIcon,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  Bell,
+  BellOff,
+  Home,
+  Menu,
+  MoreHorizontal,
+  MoreVertical,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
+
+// Icon registry for Storybook controls
+const iconRegistry: Record<string, LucideIcon | undefined> = {
+  None: undefined,
+  Plus,
+  Minus,
+  Check,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+  ArrowLeft,
+  Search,
+  Settings,
+  User,
+  Users,
+  Mail,
+  Phone,
+  Calendar,
+  Clock,
+  Heart,
+  Star,
+  Trash2,
+  Edit,
+  Copy,
+  Download,
+  Upload,
+  Share,
+  Send,
+  Save,
+  Loader2,
+  RefreshCw,
+  ExternalLink,
+  Link: LinkIcon,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  Bell,
+  BellOff,
+  Home,
+  Menu,
+  MoreHorizontal,
+  MoreVertical,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Zap,
+};
+
+const iconOptions = Object.keys(iconRegistry);
+
+// Helper to render icon from name
+const renderIcon = (iconName: string | undefined) => {
+  if (!iconName || iconName === 'None') return undefined;
+  const IconComponent = iconRegistry[iconName];
+  return IconComponent ? <IconComponent size={16} /> : undefined;
+};
 
 const meta: Meta<typeof Button> = {
   title: 'Components/Button',
@@ -25,6 +134,22 @@ const meta: Meta<typeof Button> = {
     },
     disabled: {
       control: 'boolean',
+    },
+    leftIcon: {
+      control: 'select',
+      options: iconOptions,
+      description: 'Icon to display before the button text',
+      mapping: Object.fromEntries(
+        iconOptions.map((name) => [name, renderIcon(name)])
+      ),
+    },
+    rightIcon: {
+      control: 'select',
+      options: iconOptions,
+      description: 'Icon to display after the button text',
+      mapping: Object.fromEntries(
+        iconOptions.map((name) => [name, renderIcon(name)])
+      ),
     },
   },
 };
@@ -119,23 +244,23 @@ export const FullWidth: Story = {
 
 export const WithIcons: Story = {
   args: {
-    children: 'With Icon',
-    leftIcon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M5 12h14" />
-        <path d="M12 5v14" />
-      </svg>
-    ),
+    children: 'Add Item',
+    leftIcon: <Plus size={16} />,
+  },
+};
+
+export const WithRightIcon: Story = {
+  args: {
+    children: 'Continue',
+    rightIcon: <ChevronRight size={16} />,
+  },
+};
+
+export const WithBothIcons: Story = {
+  args: {
+    children: 'Settings',
+    leftIcon: <Settings size={16} />,
+    rightIcon: <ChevronDown size={16} />,
   },
 };
 
