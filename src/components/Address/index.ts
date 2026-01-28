@@ -17,3 +17,9 @@ export {
   type AddressInlineProps,
   type AddressCompactProps,
 } from './Address';
+
+export {
+  AddressForm,
+  type AddressFormProps,
+  type AddressFormData,
+} from './AddressForm';
