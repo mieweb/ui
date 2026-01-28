@@ -14,10 +14,22 @@ const meta: Meta<typeof DateInput> = {
       control: 'select',
       options: ['default', 'dob', 'expiration', 'past', 'future'],
     },
+    width: {
+      control: 'select',
+      options: ['full', 'fit', 'fixed'],
+      description: 'Width behavior of the input',
+    },
+    showCalendar: {
+      control: 'boolean',
+      description: 'Show calendar picker button',
+    },
+    validateOnBlur: {
+      control: 'boolean',
+    },
   },
   decorators: [
     (Story) => (
-      <div style={{ width: '300px' }}>
+      <div style={{ width: '400px' }}>
         <Story />
       </div>
     ),
@@ -33,6 +45,23 @@ export const Default: Story = {
   },
 };
 
+export const WithCalendar: Story = {
+  args: {
+    label: 'Select Date',
+    showCalendar: true,
+    width: 'fixed',
+  },
+};
+
+export const WithCalendarPreFilled: Story = {
+  args: {
+    label: 'Appointment Date',
+    showCalendar: true,
+    width: 'fixed',
+    value: '06/15/2026',
+  },
+};
+
 export const DateOfBirth: Story = {
   args: {
     label: 'Date of Birth',
@@ -43,10 +72,31 @@ export const DateOfBirth: Story = {
   },
 };
 
+export const DateOfBirthWithCalendar: Story = {
+  args: {
+    label: 'Date of Birth',
+    mode: 'dob',
+    showCalendar: true,
+    validateOnBlur: true,
+    minAge: 18,
+    helperText: 'Must be 18 years or older',
+  },
+};
+
 export const ExpirationDate: Story = {
   args: {
     label: 'License Expiration',
     mode: 'expiration',
+    validateOnBlur: true,
+    helperText: 'Must be a future date',
+  },
+};
+
+export const ExpirationWithCalendar: Story = {
+  args: {
+    label: 'License Expiration',
+    mode: 'expiration',
+    showCalendar: true,
     validateOnBlur: true,
     helperText: 'Must be a future date',
   },

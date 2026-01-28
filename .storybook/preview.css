@@ -42,6 +42,13 @@ html, body {
   color: var(--mieweb-muted-foreground, #a1a1aa) !important;
 }
 
+/* Exception: Allow destructive (error) color to override the muted foreground */
+[data-theme="dark"] .sbdocs p.text-destructive,
+[data-theme="dark"] .sbdocs span.text-destructive,
+[data-theme="dark"] .sbdocs .text-destructive {
+  color: var(--mieweb-destructive) !important;
+}
+
 /* Story preview containers */
 [data-theme="dark"] .docs-story,
 [data-theme="dark"] .sb-story,
