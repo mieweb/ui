@@ -12,146 +12,297 @@ const meta: Meta<typeof Progress> = {
   argTypes: {
     value: {
       control: { type: 'range', min: 0, max: 100 },
+      description: 'Current progress value (0-100)',
+    },
+    max: {
+      control: { type: 'number', min: 1 },
+      description: 'Maximum value (default: 100)',
     },
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg', 'xl'],
+      description: 'Size of the progress bar',
     },
     variant: {
       control: 'select',
       options: ['default', 'success', 'warning', 'danger'],
+      description: 'Visual style variant',
+    },
+    label: {
+      control: 'text',
+      description: 'Label for the progress bar',
     },
     showValue: {
       control: 'boolean',
+      description: 'Show the percentage value',
     },
     striped: {
       control: 'boolean',
+      description: 'Show striped pattern',
     },
     animated: {
       control: 'boolean',
+      description: 'Enable animation',
     },
     indeterminate: {
       control: 'boolean',
+      description: 'Show indeterminate loading state',
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="w-80">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => (
-    <div className="w-80">
-      <Progress value={60} />
-    </div>
-  ),
+  args: {
+    value: 60,
+    size: 'md',
+    variant: 'default',
+    showValue: false,
+    striped: false,
+    animated: false,
+    indeterminate: false,
+  },
 };
 
 export const WithLabel: Story = {
-  render: () => (
-    <div className="w-80">
-      <Progress value={45} label="Upload progress" showValue />
-    </div>
-  ),
+  args: {
+    ...Default.args,
+    value: 45,
+    label: 'Upload progress',
+    showValue: true,
+  },
 };
 
-export const Sizes: Story = {
-  render: () => (
-    <div className="w-80 space-y-4">
-      <Progress value={60} size="sm" label="Small" showValue />
-      <Progress value={60} size="md" label="Medium" showValue />
-      <Progress value={60} size="lg" label="Large" showValue />
-      <Progress value={60} size="xl" label="Extra Large" showValue />
-    </div>
-  ),
+export const Small: Story = {
+  args: {
+    ...Default.args,
+    value: 60,
+    size: 'sm',
+    label: 'Small',
+    showValue: true,
+  },
 };
 
-export const Variants: Story = {
-  render: () => (
-    <div className="w-80 space-y-4">
-      <Progress value={60} variant="default" label="Default" showValue />
-      <Progress value={80} variant="success" label="Success" showValue />
-      <Progress value={50} variant="warning" label="Warning" showValue />
-      <Progress value={30} variant="danger" label="Danger" showValue />
-    </div>
-  ),
+export const Medium: Story = {
+  args: {
+    ...Default.args,
+    value: 60,
+    size: 'md',
+    label: 'Medium',
+    showValue: true,
+  },
+};
+
+export const Large: Story = {
+  args: {
+    ...Default.args,
+    value: 60,
+    size: 'lg',
+    label: 'Large',
+    showValue: true,
+  },
+};
+
+export const ExtraLarge: Story = {
+  args: {
+    ...Default.args,
+    value: 60,
+    size: 'xl',
+    label: 'Extra Large',
+    showValue: true,
+  },
+};
+
+export const Success: Story = {
+  args: {
+    ...Default.args,
+    value: 80,
+    variant: 'success',
+    label: 'Success',
+    showValue: true,
+  },
+};
+
+export const Warning: Story = {
+  args: {
+    ...Default.args,
+    value: 50,
+    variant: 'warning',
+    label: 'Warning',
+    showValue: true,
+  },
+};
+
+export const Danger: Story = {
+  args: {
+    ...Default.args,
+    value: 30,
+    variant: 'danger',
+    label: 'Danger',
+    showValue: true,
+  },
 };
 
 export const Striped: Story = {
-  render: () => (
-    <div className="w-80">
-      <Progress value={70} striped label="Striped progress" showValue />
-    </div>
-  ),
+  args: {
+    ...Default.args,
+    value: 70,
+    striped: true,
+    label: 'Striped progress',
+    showValue: true,
+  },
 };
 
 export const Animated: Story = {
-  render: () => (
-    <div className="w-80">
-      <Progress value={50} animated label="Animated progress" showValue />
-    </div>
-  ),
+  args: {
+    ...Default.args,
+    value: 50,
+    animated: true,
+    label: 'Animated progress',
+    showValue: true,
+  },
 };
 
 export const Indeterminate: Story = {
-  render: () => (
-    <div className="w-80">
-      <Progress value={0} indeterminate label="Loading..." />
-    </div>
-  ),
+  args: {
+    ...Default.args,
+    value: 0,
+    indeterminate: true,
+    label: 'Loading...',
+    showValue: false,
+  },
 };
 
-export const CustomFormat: Story = {
-  render: () => (
-    <div className="w-80">
-      <Progress
-        value={750}
-        max={1000}
-        label="Storage used"
-        showValue
-        formatValue={(value, max) => `${value}MB / ${max}MB`}
-      />
-    </div>
-  ),
+export const CustomMax: Story = {
+  args: {
+    ...Default.args,
+    value: 750,
+    max: 1000,
+    label: 'Storage used',
+    showValue: true,
+  },
 };
 
-// Circular Progress Stories
-export const CircularDefault: Story = {
-  render: () => <CircularProgress value={75} showValue />,
+// Circular Progress stories
+const circularMeta: Meta<typeof CircularProgress> = {
+  component: CircularProgress,
+  argTypes: {
+    value: {
+      control: { type: 'range', min: 0, max: 100 },
+      description: 'Current progress value (0-100)',
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg', 'xl'],
+      description: 'Size of the circular progress',
+    },
+    variant: {
+      control: 'select',
+      options: ['default', 'success', 'warning', 'danger'],
+      description: 'Visual style variant',
+    },
+    showValue: {
+      control: 'boolean',
+      description: 'Show the percentage value in the center',
+    },
+    indeterminate: {
+      control: 'boolean',
+      description: 'Show indeterminate spinning state',
+    },
+    strokeWidth: {
+      control: { type: 'number', min: 1, max: 20 },
+      description: 'Width of the progress stroke',
+    },
+  },
 };
 
-export const CircularSizes: Story = {
-  render: () => (
-    <div className="flex items-center gap-4">
-      <CircularProgress value={60} size="sm" showValue />
-      <CircularProgress value={60} size="md" showValue />
-      <CircularProgress value={60} size="lg" showValue />
-      <CircularProgress value={60} size="xl" showValue />
-    </div>
-  ),
+type CircularStory = StoryObj<typeof circularMeta>;
+
+export const CircularDefault: CircularStory = {
+  args: {
+    value: 75,
+    size: 'md',
+    variant: 'default',
+    showValue: true,
+    indeterminate: false,
+  },
+  render: (args) => <CircularProgress {...args} />,
 };
 
-export const CircularVariants: Story = {
-  render: () => (
-    <div className="flex items-center gap-4">
-      <CircularProgress value={75} variant="default" showValue />
-      <CircularProgress value={100} variant="success" showValue />
-      <CircularProgress value={50} variant="warning" showValue />
-      <CircularProgress value={25} variant="danger" showValue />
-    </div>
-  ),
+export const CircularSmall: CircularStory = {
+  args: {
+    ...CircularDefault.args,
+    size: 'sm',
+    value: 60,
+  },
+  render: (args) => <CircularProgress {...args} />,
 };
 
-export const CircularIndeterminate: Story = {
-  render: () => (
-    <div className="flex items-center gap-4">
-      <CircularProgress value={0} size="sm" indeterminate />
-      <CircularProgress value={0} size="md" indeterminate />
-      <CircularProgress value={0} size="lg" indeterminate />
-    </div>
-  ),
+export const CircularLarge: CircularStory = {
+  args: {
+    ...CircularDefault.args,
+    size: 'lg',
+    value: 60,
+  },
+  render: (args) => <CircularProgress {...args} />,
 };
 
+export const CircularExtraLarge: CircularStory = {
+  args: {
+    ...CircularDefault.args,
+    size: 'xl',
+    value: 60,
+  },
+  render: (args) => <CircularProgress {...args} />,
+};
+
+export const CircularSuccess: CircularStory = {
+  args: {
+    ...CircularDefault.args,
+    value: 100,
+    variant: 'success',
+  },
+  render: (args) => <CircularProgress {...args} />,
+};
+
+export const CircularWarning: CircularStory = {
+  args: {
+    ...CircularDefault.args,
+    value: 50,
+    variant: 'warning',
+  },
+  render: (args) => <CircularProgress {...args} />,
+};
+
+export const CircularDanger: CircularStory = {
+  args: {
+    ...CircularDefault.args,
+    value: 25,
+    variant: 'danger',
+  },
+  render: (args) => <CircularProgress {...args} />,
+};
+
+export const CircularIndeterminate: CircularStory = {
+  args: {
+    ...CircularDefault.args,
+    value: 0,
+    indeterminate: true,
+    showValue: false,
+  },
+  render: (args) => <CircularProgress {...args} />,
+};
+
+// Animated demo with state management
 function AnimatedProgressDemo() {
   const [progress, setProgress] = React.useState(0);
 
@@ -167,18 +318,84 @@ function AnimatedProgressDemo() {
   }, []);
 
   return (
-    <div className="w-80 space-y-4">
-      <Progress value={progress} label="Downloading..." showValue />
+    <div className="flex items-center gap-8">
+      <div className="w-60">
+        <Progress value={progress} label="Downloading..." showValue />
+      </div>
       <CircularProgress value={progress} size="lg" showValue />
     </div>
   );
 }
 
 export const AnimatedDemo: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => <AnimatedProgressDemo />,
 };
 
-export const UseCaseFileUpload: Story = {
+// Showcase stories
+export const AllSizes: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="w-80 space-y-4">
+      <Progress value={60} size="sm" label="Small" showValue />
+      <Progress value={60} size="md" label="Medium" showValue />
+      <Progress value={60} size="lg" label="Large" showValue />
+      <Progress value={60} size="xl" label="Extra Large" showValue />
+    </div>
+  ),
+};
+
+export const AllVariants: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="w-80 space-y-4">
+      <Progress value={60} variant="default" label="Default" showValue />
+      <Progress value={80} variant="success" label="Success" showValue />
+      <Progress value={50} variant="warning" label="Warning" showValue />
+      <Progress value={30} variant="danger" label="Danger" showValue />
+    </div>
+  ),
+};
+
+export const AllCircularSizes: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex items-center gap-4">
+      <CircularProgress value={60} size="sm" showValue />
+      <CircularProgress value={60} size="md" showValue />
+      <CircularProgress value={60} size="lg" showValue />
+      <CircularProgress value={60} size="xl" showValue />
+    </div>
+  ),
+};
+
+export const AllCircularVariants: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => (
+    <div className="flex items-center gap-4">
+      <CircularProgress value={75} variant="default" showValue />
+      <CircularProgress value={100} variant="success" showValue />
+      <CircularProgress value={50} variant="warning" showValue />
+      <CircularProgress value={25} variant="danger" showValue />
+    </div>
+  ),
+};
+
+// Use case examples
+export const FileUploadExample: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => (
     <div className="w-80 space-y-2">
       <div className="flex items-center justify-between">
@@ -191,7 +408,10 @@ export const UseCaseFileUpload: Story = {
   ),
 };
 
-export const UseCaseSkillLevel: Story = {
+export const SkillLevelsExample: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => (
     <div className="w-80 space-y-4">
       <Progress
