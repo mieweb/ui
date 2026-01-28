@@ -13,8 +13,8 @@ import {
 import { Alert, AlertTitle, AlertDescription } from './Alert';
 
 // Icon registry for Storybook controls
-const iconRegistry: Record<string, React.ReactElement> = {
-  none: undefined as unknown as React.ReactElement,
+const iconRegistry: Record<string, React.ReactElement | null> = {
+  none: null,
   info: <InfoIcon size={16} />,
   alertCircle: <AlertCircle size={16} />,
   alertTriangle: <AlertTriangle size={16} />,
