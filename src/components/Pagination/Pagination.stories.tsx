@@ -8,7 +8,9 @@ function PaginationWithState({
   totalPages = 10,
   onPageChange,
   ...props
-}: React.ComponentProps<typeof Pagination>) {
+}: Omit<React.ComponentProps<typeof Pagination>, 'onPageChange'> & {
+  onPageChange?: (page: number) => void;
+}) {
   const [page, setPage] = React.useState(initialPage);
 
   const handlePageChange = (newPage: number) => {
@@ -168,7 +170,9 @@ function SimplePaginationWithState({
   totalPages = 10,
   onPageChange,
   ...props
-}: React.ComponentProps<typeof SimplePagination>) {
+}: Omit<React.ComponentProps<typeof SimplePagination>, 'onPageChange'> & {
+  onPageChange?: (page: number) => void;
+}) {
   const [page, setPage] = React.useState(initialPage);
 
   const handlePageChange = (newPage: number) => {
