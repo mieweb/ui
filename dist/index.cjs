@@ -21,20 +21,20 @@ var chunkQDGZBDBI_cjs = require('./chunk-QDGZBDBI.cjs');
 var chunkB7YGVKTE_cjs = require('./chunk-B7YGVKTE.cjs');
 var chunkNH2JVQ6V_cjs = require('./chunk-NH2JVQ6V.cjs');
 var chunkPF3XWKE5_cjs = require('./chunk-PF3XWKE5.cjs');
-var chunkG4IYKDQ2_cjs = require('./chunk-G4IYKDQ2.cjs');
+var chunk43WUKHJZ_cjs = require('./chunk-43WUKHJZ.cjs');
 var chunkNAATBUHR_cjs = require('./chunk-NAATBUHR.cjs');
 var chunkBBCXRXHI_cjs = require('./chunk-BBCXRXHI.cjs');
 var chunkXZB73CF4_cjs = require('./chunk-XZB73CF4.cjs');
-var chunkZJIXG4RV_cjs = require('./chunk-ZJIXG4RV.cjs');
+var chunkHLW3XD5R_cjs = require('./chunk-HLW3XD5R.cjs');
 var chunkEF46XW4Z_cjs = require('./chunk-EF46XW4Z.cjs');
 var chunkEKIQE524_cjs = require('./chunk-EKIQE524.cjs');
 var chunkPEFJAWNR_cjs = require('./chunk-PEFJAWNR.cjs');
-var chunkGCCKT63N_cjs = require('./chunk-GCCKT63N.cjs');
-var chunkZENVEUAE_cjs = require('./chunk-ZENVEUAE.cjs');
-var chunkL7TTMKLJ_cjs = require('./chunk-L7TTMKLJ.cjs');
-var chunkJGADLLQW_cjs = require('./chunk-JGADLLQW.cjs');
+var chunkJYPDL2HB_cjs = require('./chunk-JYPDL2HB.cjs');
+var chunkHRA4FUO6_cjs = require('./chunk-HRA4FUO6.cjs');
+var chunkQYJ7RQJ2_cjs = require('./chunk-QYJ7RQJ2.cjs');
+var chunkKVSUL3EW_cjs = require('./chunk-KVSUL3EW.cjs');
 var chunkFIXAVBUA_cjs = require('./chunk-FIXAVBUA.cjs');
-var chunkDQTQ4AQQ_cjs = require('./chunk-DQTQ4AQQ.cjs');
+var chunkVV4N4WY6_cjs = require('./chunk-VV4N4WY6.cjs');
 var chunkR4DM4635_cjs = require('./chunk-R4DM4635.cjs');
 var chunk2O7D6F67_cjs = require('./chunk-2O7D6F67.cjs');
 var chunk6HFFWEM3_cjs = require('./chunk-6HFFWEM3.cjs');
@@ -44,13 +44,13 @@ var chunkFHY3K6PL_cjs = require('./chunk-FHY3K6PL.cjs');
 require('./chunk-ZO46CFVN.cjs');
 var chunkBTJHYGPI_cjs = require('./chunk-BTJHYGPI.cjs');
 var chunkKMN7JX2X_cjs = require('./chunk-KMN7JX2X.cjs');
-var chunkYDA3J724_cjs = require('./chunk-YDA3J724.cjs');
+var chunk2PZGSRKB_cjs = require('./chunk-2PZGSRKB.cjs');
 var chunkMJKFQ4TF_cjs = require('./chunk-MJKFQ4TF.cjs');
 var chunkOIUNIDUY_cjs = require('./chunk-OIUNIDUY.cjs');
 var chunk53K3KWXQ_cjs = require('./chunk-53K3KWXQ.cjs');
 var chunkMMCNMTBR_cjs = require('./chunk-MMCNMTBR.cjs');
 var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
-var React14 = require('react');
+var React21 = require('react');
 var agGridReact = require('ag-grid-react');
 var agGridCommunity = require('ag-grid-community');
 var classVarianceAuthority = require('class-variance-authority');
@@ -75,7 +75,7 @@ function _interopNamespace(e) {
   return Object.freeze(n);
 }
 
-var React14__namespace = /*#__PURE__*/_interopNamespace(React14);
+var React21__namespace = /*#__PURE__*/_interopNamespace(React21);
 
 agGridCommunity.ModuleRegistry.registerModules([agGridCommunity.AllCommunityModule]);
 var agGridVariants = classVarianceAuthority.cva("ag-theme-custom w-full", {
@@ -86,32 +86,52 @@ var agGridVariants = classVarianceAuthority.cva("ag-theme-custom w-full", {
     variant: {
       default: "",
       bordered: "[&_.ag-root-wrapper]:border [&_.ag-root-wrapper]:border-border [&_.ag-root-wrapper]:rounded-lg",
-      striped: "[&_.ag-row-odd]:bg-muted/50"
+      striped: "[&_.ag-row-odd]:bg-muted/50",
+      card: "[&_.ag-root-wrapper]:shadow-card [&_.ag-root-wrapper]:rounded-lg [&_.ag-root-wrapper]:border-0"
     },
     /**
      * Size/density of the grid rows
      */
     size: {
-      sm: "[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs",
-      md: "[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm",
-      lg: "[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base"
+      xs: "[&_.ag-row]:h-7 [&_.ag-header-row]:h-7 text-xs [&_.ag-cell]:px-2",
+      sm: "[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs [&_.ag-cell]:px-3",
+      md: "[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm [&_.ag-cell]:px-4",
+      lg: "[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base [&_.ag-cell]:px-4",
+      xl: "[&_.ag-row]:h-14 [&_.ag-header-row]:h-14 text-base [&_.ag-cell]:px-6"
+    },
+    /**
+     * Brand theme variant
+     */
+    brand: {
+      default: "",
+      mieweb: "ag-brand-mieweb",
+      bluehive: "ag-brand-bluehive",
+      waggleline: "ag-brand-waggleline",
+      webchart: "ag-brand-webchart",
+      "enterprise-health": "ag-brand-enterprise-health"
     }
   },
   defaultVariants: {
     variant: "default",
-    size: "md"
+    size: "md",
+    brand: "default"
   }
 });
-var defaultColDef = {
-  sortable: true,
-  filter: true,
-  resizable: true,
-  minWidth: 100
-};
+var getDefaultColDef = (sortable, filterable, resizable) => ({
+  sortable,
+  filter: filterable,
+  resizable,
+  minWidth: 100,
+  flex: 1,
+  suppressMovable: false,
+  headerClass: "ag-header-cell-custom",
+  cellClass: "ag-cell-custom"
+});
 function AGGridInner({
   className,
   variant,
   size,
+  brand,
   height = 400,
   loading = false,
   columnDefs,
@@ -121,32 +141,39 @@ function AGGridInner({
   onRowClick,
   gridRef,
   rowSelection,
+  brandConfig,
+  pagination = false,
+  resizable = true,
+  sortable = true,
+  filterable = true,
+  noDataMessage = "No data to display",
+  loadingMessage = "Loading...",
   ...props
 }, ref) {
-  const internalRef = React14__namespace.useRef(null);
-  const gridApiRef = React14__namespace.useRef(null);
+  const internalRef = React21__namespace.useRef(null);
+  const gridApiRef = React21__namespace.useRef(null);
   const resolvedRef = gridRef || ref || internalRef;
-  const handleGridReady = React14__namespace.useCallback(
+  const handleGridReady = React21__namespace.useCallback(
     (event) => {
       gridApiRef.current = event.api;
       onGridReady?.(event);
     },
     [onGridReady]
   );
-  const handleRowClicked = React14__namespace.useCallback(
+  const handleRowClicked = React21__namespace.useCallback(
     (event) => {
       onRowClick?.(event);
     },
     [onRowClick]
   );
-  const mergedDefaultColDef = React14__namespace.useMemo(
+  const mergedDefaultColDef = React21__namespace.useMemo(
     () => ({
-      ...defaultColDef,
+      ...getDefaultColDef(sortable, filterable, resizable),
       ...userDefaultColDef
     }),
-    [userDefaultColDef]
+    [userDefaultColDef, sortable, filterable, resizable]
   );
-  const resolvedRowSelection = React14__namespace.useMemo(() => {
+  const resolvedRowSelection = React21__namespace.useMemo(() => {
     if (!rowSelection) return void 0;
     if (typeof rowSelection === "object") {
       return rowSelection;
@@ -165,7 +192,7 @@ function AGGridInner({
     }
     return void 0;
   }, [rowSelection]);
-  React14__namespace.useEffect(() => {
+  React21__namespace.useEffect(() => {
     if (gridApiRef.current) {
       if (loading) {
         gridApiRef.current.showLoadingOverlay();
@@ -177,8 +204,15 @@ function AGGridInner({
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
-      className: chunkOR5DRJCW_cjs.cn(agGridVariants({ variant, size }), className),
-      style: { height: typeof height === "number" ? `${height}px` : height },
+      className: chunkOR5DRJCW_cjs.cn(agGridVariants({ variant, size, brand }), className),
+      style: {
+        height: typeof height === "number" ? `${height}px` : height,
+        ...brandConfig && {
+          "--ag-primary-color": brandConfig.colors.primary[600],
+          "--ag-font-family": brandConfig.typography.fontFamily.sans.join(", ")
+        }
+      },
+      "data-brand": brand,
       children: /* @__PURE__ */ jsxRuntime.jsx(
         agGridReact.AgGridReact,
         {
@@ -188,8 +222,14 @@ function AGGridInner({
           defaultColDef: mergedDefaultColDef,
           onGridReady: handleGridReady,
           onRowClicked: handleRowClicked,
-          animateRows: false,
+          animateRows: true,
+          enableBrowserTooltips: true,
           rowSelection: resolvedRowSelection,
+          pagination,
+          paginationPageSize: pagination ? 50 : void 0,
+          paginationPageSizeSelector: pagination ? [25, 50, 100, 200] : void 0,
+          noRowsOverlayComponent: () => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground py-8 text-center", children: noDataMessage }),
+          loadingOverlayComponent: () => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground py-8 text-center", children: loadingMessage }),
           theme: "legacy",
           ...props
         }
@@ -197,7 +237,7 @@ function AGGridInner({
     }
   );
 }
-var AGGrid = React14__namespace.forwardRef(AGGridInner);
+var AGGrid = React21__namespace.forwardRef(AGGridInner);
 AGGrid.displayName = "AGGrid";
 function getNestedValue(obj, path) {
   if (!obj || !path) return void 0;
@@ -619,59 +659,59 @@ function TagsRenderer(props) {
     ] })
   ] });
 }
-var MemoizedAvatarNameRenderer = React14.memo(
+var MemoizedAvatarNameRenderer = React21.memo(
   AvatarNameRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedStatusBadgeRenderer = React14.memo(
+var MemoizedStatusBadgeRenderer = React21.memo(
   StatusBadgeRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedEngagementScoreRenderer = React14.memo(
+var MemoizedEngagementScoreRenderer = React21.memo(
   EngagementScoreRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedEmailRenderer = React14.memo(
+var MemoizedEmailRenderer = React21.memo(
   EmailRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedPhoneRenderer = React14.memo(
+var MemoizedPhoneRenderer = React21.memo(
   PhoneRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedLinkedInRenderer = React14.memo(
+var MemoizedLinkedInRenderer = React21.memo(
   LinkedInRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedDomainRenderer = React14.memo(
+var MemoizedDomainRenderer = React21.memo(
   DomainRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedCurrencyRenderer = React14.memo(
+var MemoizedCurrencyRenderer = React21.memo(
   CurrencyRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedNumberRenderer = React14.memo(
+var MemoizedNumberRenderer = React21.memo(
   NumberRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedDateRenderer = React14.memo(
+var MemoizedDateRenderer = React21.memo(
   DateRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedBooleanRenderer = React14.memo(
+var MemoizedBooleanRenderer = React21.memo(
   BooleanRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedCompanyRenderer = React14.memo(
+var MemoizedCompanyRenderer = React21.memo(
   CompanyRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedProgressRenderer = React14.memo(
+var MemoizedProgressRenderer = React21.memo(
   ProgressRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedTagsRenderer = React14.memo(
+var MemoizedTagsRenderer = React21.memo(
   TagsRenderer,
   cellRendererPropsAreEqual
 );
@@ -1288,7 +1328,7 @@ function ToolResultDisplay({
   showRawData = false,
   className
 }) {
-  const [showJson, setShowJson] = React14__namespace.useState(false);
+  const [showJson, setShowJson] = React21__namespace.useState(false);
   if (result.type === "error") {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "div",
@@ -1442,7 +1482,7 @@ function MCPToolCallDisplay({
   onLinkClick,
   className
 }) {
-  const [showDetails, setShowDetails] = React14__namespace.useState(!defaultCollapsed);
+  const [showDetails, setShowDetails] = React21__namespace.useState(!defaultCollapsed);
   const formatDuration2 = (ms) => {
     if (!ms) return null;
     if (ms < 1e3) return `${ms}ms`;
@@ -1656,7 +1696,7 @@ function AITypingIndicator({ className }) {
   );
 }
 function ContentBlock({ content, onLinkClick }) {
-  const [isCollapsed, setIsCollapsed] = React14__namespace.useState(
+  const [isCollapsed, setIsCollapsed] = React21__namespace.useState(
     content.collapsed ?? false
   );
   if (content.type === "text" && content.text) {
@@ -2028,7 +2068,7 @@ function AttachmentPreviewItem({
   );
 }
 AttachmentPreviewItem.displayName = "AttachmentPreviewItem";
-var AttachmentPicker = React14__namespace.forwardRef(
+var AttachmentPicker = React21__namespace.forwardRef(
   ({
     onFilesSelected,
     acceptedTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
@@ -2041,8 +2081,8 @@ var AttachmentPicker = React14__namespace.forwardRef(
     className,
     children
   }, ref) => {
-    const inputRef = React14__namespace.useRef(null);
-    React14__namespace.useImperativeHandle(ref, () => inputRef.current);
+    const inputRef = React21__namespace.useRef(null);
+    React21__namespace.useImperativeHandle(ref, () => inputRef.current);
     const handleClick = () => {
       inputRef.current?.click();
     };
@@ -2132,8 +2172,8 @@ function DragDropZone({
   children,
   className
 }) {
-  const [isDragging, setIsDragging] = React14__namespace.useState(false);
-  const dragCounterRef = React14__namespace.useRef(0);
+  const [isDragging, setIsDragging] = React21__namespace.useState(false);
+  const dragCounterRef = React21__namespace.useRef(0);
   const handleDragEnter = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -2234,7 +2274,7 @@ function CameraButton({
   disabled = false,
   className
 }) {
-  const inputRef = React14__namespace.useRef(null);
+  const inputRef = React21__namespace.useRef(null);
   const handleClick = () => {
     inputRef.current?.click();
   };
@@ -2371,7 +2411,7 @@ var sendButtonVariants = classVarianceAuthority.cva(
     }
   }
 );
-var SendButton = React14__namespace.forwardRef(
+var SendButton = React21__namespace.forwardRef(
   ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "button",
@@ -2425,7 +2465,7 @@ var SendButton = React14__namespace.forwardRef(
   }
 );
 SendButton.displayName = "SendButton";
-var MessageComposer = React14__namespace.forwardRef(
+var MessageComposer = React21__namespace.forwardRef(
   ({
     onSend,
     onTypingStart,
@@ -2447,22 +2487,22 @@ var MessageComposer = React14__namespace.forwardRef(
     variant = "default",
     className
   }, ref) => {
-    const textareaRef = React14__namespace.useRef(null);
-    const [content, setContent] = React14__namespace.useState("");
-    const [attachments, setAttachments] = React14__namespace.useState(
+    const textareaRef = React21__namespace.useRef(null);
+    const [content, setContent] = React21__namespace.useState("");
+    const [attachments, setAttachments] = React21__namespace.useState(
       []
     );
-    const [isTyping, setIsTyping] = React14__namespace.useState(false);
-    const typingTimeoutRef = React14__namespace.useRef(null);
-    React14__namespace.useImperativeHandle(ref, () => textareaRef.current);
-    React14__namespace.useEffect(() => {
+    const [isTyping, setIsTyping] = React21__namespace.useState(false);
+    const typingTimeoutRef = React21__namespace.useRef(null);
+    React21__namespace.useImperativeHandle(ref, () => textareaRef.current);
+    React21__namespace.useEffect(() => {
       const textarea = textareaRef.current;
       if (textarea) {
         textarea.style.height = "auto";
         textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
       }
     }, [content]);
-    React14__namespace.useEffect(() => {
+    React21__namespace.useEffect(() => {
       if (content.length > 0 && !isTyping) {
         setIsTyping(true);
         onTypingStart?.();
@@ -2482,12 +2522,12 @@ var MessageComposer = React14__namespace.forwardRef(
         }
       };
     }, [content, isTyping, onTypingStart, onTypingStop]);
-    React14__namespace.useEffect(() => {
+    React21__namespace.useEffect(() => {
       if (autoFocus) {
         textareaRef.current?.focus();
       }
     }, [autoFocus]);
-    React14__namespace.useEffect(() => {
+    React21__namespace.useEffect(() => {
       if (replyTo) {
         textareaRef.current?.focus();
       }
@@ -2551,7 +2591,7 @@ var MessageComposer = React14__namespace.forwardRef(
         return prev.filter((a) => a.id !== attachmentId);
       });
     };
-    React14__namespace.useEffect(() => {
+    React21__namespace.useEffect(() => {
       const currentAttachments = attachments;
       return () => {
         currentAttachments.forEach((a) => {
@@ -3080,7 +3120,7 @@ function defaultFormatTimestamp(timestamp) {
     minute: "2-digit"
   });
 }
-var MessageBubble = React14__namespace.forwardRef(
+var MessageBubble = React21__namespace.forwardRef(
   ({
     className,
     message,
@@ -3514,7 +3554,7 @@ function LoadMoreButton({
   ) });
 }
 LoadMoreButton.displayName = "LoadMoreButton";
-var MessageList = React14__namespace.forwardRef(
+var MessageList = React21__namespace.forwardRef(
   ({
     messages,
     currentUser,
@@ -3533,19 +3573,19 @@ var MessageList = React14__namespace.forwardRef(
     className,
     autoScroll = "onNewMessage"
   }, ref) => {
-    const scrollContainerRef = React14__namespace.useRef(null);
-    const bottomRef = React14__namespace.useRef(null);
-    const [isUserScrolled, setIsUserScrolled] = React14__namespace.useState(false);
-    const prevMessageCountRef = React14__namespace.useRef(messages.length);
-    React14__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
-    const handleScroll = React14__namespace.useCallback(() => {
+    const scrollContainerRef = React21__namespace.useRef(null);
+    const bottomRef = React21__namespace.useRef(null);
+    const [isUserScrolled, setIsUserScrolled] = React21__namespace.useState(false);
+    const prevMessageCountRef = React21__namespace.useRef(messages.length);
+    React21__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
+    const handleScroll = React21__namespace.useCallback(() => {
       const container = scrollContainerRef.current;
       if (!container) return;
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       setIsUserScrolled(!isAtBottom);
     }, []);
-    React14__namespace.useEffect(() => {
+    React21__namespace.useEffect(() => {
       const container = scrollContainerRef.current;
       const bottom = bottomRef.current;
       if (!container || !bottom) return;
@@ -3561,7 +3601,7 @@ var MessageList = React14__namespace.forwardRef(
         }
       }
     }, [messages, currentUser.id, autoScroll, isUserScrolled]);
-    React14__namespace.useEffect(() => {
+    React21__namespace.useEffect(() => {
       const bottom = bottomRef.current;
       if (bottom && !isLoading) {
         bottom.scrollIntoView();
@@ -3607,7 +3647,7 @@ var MessageList = React14__namespace.forwardRef(
         "aria-live": "polite",
         children: [
           hasMore && onLoadMore && /* @__PURE__ */ jsxRuntime.jsx(LoadMoreButton, { isLoading: isLoadingMore, onClick: onLoadMore }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React14__namespace.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React21__namespace.Fragment, { children: [
             groupByDate && group.label && /* @__PURE__ */ jsxRuntime.jsx(DateSeparator, { label: group.label }),
             group.messages.map((message, index) => {
               const prevMessage = group.messages[index - 1];
@@ -3886,13 +3926,13 @@ function AIChat({
   onClear,
   onClose
 }) {
-  const messagesEndRef = React14__namespace.useRef(null);
-  const messages = React14__namespace.useMemo(
+  const messagesEndRef = React21__namespace.useRef(null);
+  const messages = React21__namespace.useMemo(
     () => session?.messages || messagesProp || [],
     [session?.messages, messagesProp]
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
-  React14__namespace.useEffect(() => {
+  React21__namespace.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   const handleSend = async (message) => {
@@ -4118,7 +4158,7 @@ function FloatingAIChat({
   pulse = false,
   ...chatProps
 }) {
-  const [internalOpen, setInternalOpen] = React14__namespace.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React21__namespace.useState(defaultOpen);
   const isControlled = controlledOpen !== void 0;
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const handleOpenChange = (open) => {
@@ -4383,7 +4423,7 @@ function AppHeaderUserMenu({
     }
   );
 }
-var CommandPaletteContext = React14.createContext(
+var CommandPaletteContext = React21.createContext(
   null
 );
 function CommandPaletteProvider({
@@ -4391,24 +4431,24 @@ function CommandPaletteProvider({
   enableShortcut = true,
   customEventName
 }) {
-  const [isOpen, setIsOpen] = React14.useState(false);
-  const [query, setQuery] = React14.useState("");
-  const [selectedIndex, setSelectedIndex] = React14.useState(-1);
-  const [activeCategory, setActiveCategory] = React14.useState(null);
-  const [items, setItems] = React14.useState([]);
-  const [categories, setCategories] = React14.useState([]);
-  const open = React14.useCallback(() => {
+  const [isOpen, setIsOpen] = React21.useState(false);
+  const [query, setQuery] = React21.useState("");
+  const [selectedIndex, setSelectedIndex] = React21.useState(-1);
+  const [activeCategory, setActiveCategory] = React21.useState(null);
+  const [items, setItems] = React21.useState([]);
+  const [categories, setCategories] = React21.useState([]);
+  const open = React21.useCallback(() => {
     setIsOpen(true);
     setQuery("");
     setSelectedIndex(-1);
     setActiveCategory(null);
   }, []);
-  const close = React14.useCallback(() => {
+  const close = React21.useCallback(() => {
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(-1);
   }, []);
-  const toggle = React14.useCallback(() => {
+  const toggle = React21.useCallback(() => {
     if (isOpen) {
       close();
     } else {
@@ -4416,13 +4456,13 @@ function CommandPaletteProvider({
     }
   }, [isOpen, open, close]);
   chunkR4DM4635_cjs.useCommandK(toggle, enableShortcut);
-  React14__namespace.default.useEffect(() => {
+  React21__namespace.default.useEffect(() => {
     if (!customEventName) return;
     const handler = () => open();
     document.addEventListener(customEventName, handler);
     return () => document.removeEventListener(customEventName, handler);
   }, [customEventName, open]);
-  const contextValue = React14.useMemo(
+  const contextValue = React21.useMemo(
     () => ({
       isOpen,
       open,
@@ -4454,7 +4494,7 @@ function CommandPaletteProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(CommandPaletteContext.Provider, { value: contextValue, children });
 }
 function useCommandPalette() {
-  const context = React14.useContext(CommandPaletteContext);
+  const context = React21.useContext(CommandPaletteContext);
   if (!context) {
     throw new Error(
       "useCommandPalette must be used within a CommandPaletteProvider"
@@ -4542,10 +4582,10 @@ function CommandPalette({
     items,
     categories
   } = useCommandPalette();
-  const inputRef = React14.useRef(null);
-  const containerRef = React14.useRef(null);
-  const listRef = React14.useRef(null);
-  const filteredItems = React14.useMemo(() => {
+  const inputRef = React21.useRef(null);
+  const containerRef = React21.useRef(null);
+  const listRef = React21.useRef(null);
+  const filteredItems = React21.useMemo(() => {
     let result = items;
     if (activeCategory) {
       result = result.filter((item) => item.category === activeCategory);
@@ -4558,7 +4598,7 @@ function CommandPalette({
     }
     return result;
   }, [items, query, activeCategory]);
-  const groupedItems = React14.useMemo(() => {
+  const groupedItems = React21.useMemo(() => {
     const groups = /* @__PURE__ */ new Map();
     filteredItems.forEach((item) => {
       const category = item.category ?? "Other";
@@ -4570,15 +4610,15 @@ function CommandPalette({
   }, [filteredItems]);
   chunkFHY3K6PL_cjs.useEscapeKey(close, isOpen);
   chunkSWMRCGL4_cjs.useClickOutside(containerRef, close);
-  React14.useEffect(() => {
+  React21.useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
-  React14.useEffect(() => {
+  React21.useEffect(() => {
     setSelectedIndex(filteredItems.length > 0 ? 0 : -1);
   }, [filteredItems.length, setSelectedIndex]);
-  React14.useEffect(() => {
+  React21.useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
       const selectedElement = listRef.current.querySelector(
         `[data-index="${selectedIndex}"]`
@@ -4586,7 +4626,7 @@ function CommandPalette({
       selectedElement?.scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
-  const handleKeyDown = React14.useCallback(
+  const handleKeyDown = React21.useCallback(
     (e) => {
       switch (e.key) {
         case "ArrowDown":
@@ -4630,7 +4670,7 @@ function CommandPalette({
       setActiveCategory
     ]
   );
-  const handleItemClick = React14.useCallback(
+  const handleItemClick = React21.useCallback(
     (item) => {
       if (!item.disabled) {
         onSelect?.(item);
@@ -4639,7 +4679,7 @@ function CommandPalette({
     },
     [onSelect, close]
   );
-  const getCategoryInfo = React14.useCallback(
+  const getCategoryInfo = React21.useCallback(
     (categoryId) => {
       return categories.find((c) => c.id === categoryId);
     },
@@ -4905,6 +4945,1942 @@ function CommandPaletteTrigger({
     }
   );
 }
+function DropZone({
+  onFilesSelected,
+  acceptedFileTypes,
+  multiple,
+  disabled = false,
+  className,
+  children
+}) {
+  const [isDragging, setIsDragging] = React21__namespace.useState(false);
+  const inputRef = React21__namespace.useRef(null);
+  const dropZoneRef = React21__namespace.useRef(null);
+  const dragCounter = React21__namespace.useRef(0);
+  const handleDragEnter = React21__namespace.useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (disabled) return;
+      dragCounter.current++;
+      if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+        setIsDragging(true);
+      }
+    },
+    [disabled]
+  );
+  const handleDragLeave = React21__namespace.useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (disabled) return;
+      dragCounter.current--;
+      if (dragCounter.current === 0) {
+        setIsDragging(false);
+      }
+    },
+    [disabled]
+  );
+  const handleDragOver = React21__namespace.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+  const handleDrop = React21__namespace.useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (disabled) return;
+      setIsDragging(false);
+      dragCounter.current = 0;
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        onFilesSelected(e.dataTransfer.files);
+      }
+    },
+    [disabled, onFilesSelected]
+  );
+  const handleClick = React21__namespace.useCallback(() => {
+    if (!disabled) {
+      inputRef.current?.click();
+    }
+  }, [disabled]);
+  const handleKeyDown = React21__namespace.useCallback(
+    (e) => {
+      if ((e.key === "Enter" || e.key === " ") && !disabled) {
+        e.preventDefault();
+        inputRef.current?.click();
+      }
+    },
+    [disabled]
+  );
+  const handleInputChange = React21__namespace.useCallback(
+    (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        onFilesSelected(e.target.files);
+        e.target.value = "";
+      }
+    },
+    [onFilesSelected]
+  );
+  const acceptString = acceptedFileTypes.join(",");
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      ref: dropZoneRef,
+      role: "button",
+      tabIndex: disabled ? -1 : 0,
+      "aria-label": "Drop files here or click to browse",
+      "aria-disabled": disabled,
+      onClick: handleClick,
+      onKeyDown: handleKeyDown,
+      onDragEnter: handleDragEnter,
+      onDragLeave: handleDragLeave,
+      onDragOver: handleDragOver,
+      onDrop: handleDrop,
+      className: chunkOR5DRJCW_cjs.cn(
+        // Base styles
+        "relative flex flex-col items-center justify-center",
+        "min-h-[200px] w-full p-6",
+        "rounded-xl border-2 border-dashed",
+        "transition-all duration-200",
+        "cursor-pointer",
+        // Default state
+        "border-neutral-300 bg-neutral-50",
+        "dark:border-neutral-600 dark:bg-neutral-800/50",
+        // Hover state
+        "hover:border-primary-400 hover:bg-primary-50/50",
+        "dark:hover:border-primary-500 dark:hover:bg-primary-900/20",
+        // Focus state
+        "focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        // Dragging state
+        isDragging && [
+          "border-primary-500 bg-primary-50",
+          "dark:border-primary-400 dark:bg-primary-900/30",
+          "scale-[1.01]"
+        ],
+        // Disabled state
+        disabled && [
+          "cursor-not-allowed opacity-50",
+          "hover:border-neutral-300 hover:bg-neutral-50",
+          "dark:hover:border-neutral-600 dark:hover:bg-neutral-800/50"
+        ],
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "input",
+          {
+            ref: inputRef,
+            type: "file",
+            accept: acceptString,
+            multiple,
+            onChange: handleInputChange,
+            disabled,
+            className: "sr-only",
+            "aria-hidden": "true",
+            tabIndex: -1
+          }
+        ),
+        children,
+        isDragging && /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "absolute inset-0 flex items-center justify-center",
+              "bg-primary-500/10 rounded-xl",
+              "pointer-events-none"
+            ),
+            children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-primary-600 dark:text-primary-400 text-lg font-medium", children: "Drop files here" })
+          }
+        )
+      ]
+    }
+  );
+}
+DropZone.displayName = "DropZone";
+function FilePreviewItem({ file, onRemove, disabled }) {
+  const isPdf = file.file.type === "application/pdf";
+  const isImage = file.file.type.startsWith("image/");
+  const handleRemove = React21__namespace.useCallback(() => {
+    onRemove(file.id);
+  }, [file.id, onRemove]);
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      role: "group",
+      "aria-label": `File: ${file.file.name}`,
+      className: chunkOR5DRJCW_cjs.cn(
+        "group relative overflow-hidden rounded-lg",
+        "border-border bg-card border",
+        "focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2"
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800", children: [
+          isImage ? /* @__PURE__ */ jsxRuntime.jsx(
+            "img",
+            {
+              src: file.previewUrl,
+              alt: `Preview of ${file.file.name}`,
+              className: "h-full w-full object-cover"
+            }
+          ) : isPdf ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full w-full flex-col items-center justify-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.FileText, { className: "text-muted-foreground h-12 w-12" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs", children: "PDF Document" })
+          ] }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full w-full flex-col items-center justify-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Image, { className: "text-muted-foreground h-12 w-12" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs", children: "File" })
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "absolute inset-0 flex items-center justify-center",
+                "bg-black/0 transition-all duration-200",
+                "group-hover:bg-black/30",
+                disabled && "pointer-events-none"
+              ),
+              children: /* @__PURE__ */ jsxRuntime.jsx(
+                chunkJYPDL2HB_cjs.Button,
+                {
+                  variant: "danger",
+                  size: "icon",
+                  onClick: handleRemove,
+                  disabled,
+                  className: chunkOR5DRJCW_cjs.cn(
+                    "h-8 w-8 rounded-full",
+                    "opacity-0 transition-all duration-200",
+                    "group-hover:opacity-100",
+                    "focus-visible:opacity-100"
+                  ),
+                  "aria-label": `Remove ${file.file.name}`,
+                  children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" })
+                }
+              )
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "absolute bottom-2 left-2 px-2 py-0.5",
+                "rounded-full text-xs font-medium",
+                "bg-black/50 text-white",
+                "capitalize"
+              ),
+              children: file.source
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "p-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "p",
+            {
+              className: "text-foreground truncate text-sm font-medium",
+              title: file.file.name,
+              children: file.file.name
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: formatFileSize3(file.file.size) })
+        ] })
+      ]
+    }
+  );
+}
+function formatFileSize3(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+function FilePreview({ files, onRemove, disabled }) {
+  if (files.length === 0) {
+    return null;
+  }
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "grid gap-4",
+        files.length === 1 && "mx-auto max-w-xs grid-cols-1",
+        files.length === 2 && "grid-cols-2",
+        files.length >= 3 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+      ),
+      role: "list",
+      "aria-label": "Selected files",
+      children: files.map((file) => /* @__PURE__ */ jsxRuntime.jsx(
+        FilePreviewItem,
+        {
+          file,
+          onRemove,
+          disabled
+        },
+        file.id
+      ))
+    }
+  );
+}
+FilePreview.displayName = "FilePreview";
+function hasCameraSupport() {
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+async function checkCameraPermission() {
+  if (!hasCameraSupport()) {
+    return "unavailable";
+  }
+  try {
+    if (navigator.permissions) {
+      const result = await navigator.permissions.query({
+        name: "camera"
+      });
+      return result.state;
+    }
+    return "prompt";
+  } catch {
+    return "prompt";
+  }
+}
+function useCamera({
+  facingMode: initialFacingMode = "environment",
+  width = 1920,
+  height = 1080
+} = {}) {
+  const [permission, setPermission] = React21__namespace.useState("prompt");
+  const [stream, setStream] = React21__namespace.useState(null);
+  const [isReady, setIsReady] = React21__namespace.useState(false);
+  const [error, setError] = React21__namespace.useState(null);
+  const [currentFacingMode, setCurrentFacingMode] = React21__namespace.useState(initialFacingMode);
+  const videoRef = React21__namespace.useRef(null);
+  const canvasRef = React21__namespace.useRef(null);
+  React21__namespace.useEffect(() => {
+    checkCameraPermission().then(setPermission);
+  }, []);
+  React21__namespace.useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
+  const startCamera = React21__namespace.useCallback(async () => {
+    if (!hasCameraSupport()) {
+      setPermission("unavailable");
+      setError(new Error("Camera is not supported on this device"));
+      return;
+    }
+    try {
+      setError(null);
+      const constraints = {
+        video: {
+          facingMode: currentFacingMode,
+          width: { ideal: width },
+          height: { ideal: height }
+        },
+        audio: false
+      };
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(mediaStream);
+      setPermission("granted");
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        await videoRef.current.play();
+        setIsReady(true);
+      }
+    } catch (err) {
+      const error2 = err;
+      setError(error2);
+      if (error2.name === "NotAllowedError" || error2.name === "PermissionDeniedError") {
+        setPermission("denied");
+      } else if (error2.name === "NotFoundError" || error2.name === "DevicesNotFoundError") {
+        setPermission("unavailable");
+      }
+    }
+  }, [currentFacingMode, width, height]);
+  const stopCamera = React21__namespace.useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+    setIsReady(false);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, [stream]);
+  const shouldRestartRef = React21__namespace.useRef(false);
+  const switchCamera = React21__namespace.useCallback(() => {
+    const newFacingMode = currentFacingMode === "user" ? "environment" : "user";
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+      setIsReady(false);
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      shouldRestartRef.current = true;
+    }
+    setCurrentFacingMode(newFacingMode);
+  }, [currentFacingMode, stream]);
+  React21__namespace.useEffect(() => {
+    if (shouldRestartRef.current && !stream) {
+      shouldRestartRef.current = false;
+      startCamera();
+    }
+  }, [currentFacingMode, stream, startCamera]);
+  const capturePhoto = React21__namespace.useCallback(() => {
+    if (!videoRef.current || !isReady) {
+      return null;
+    }
+    const video = videoRef.current;
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement("canvas");
+    }
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return null;
+    }
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    const byteString = atob(dataUrl.split(",")[1]);
+    const mimeType = dataUrl.split(",")[0].split(":")[1].split(";")[0];
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([arrayBuffer], { type: mimeType });
+    const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
+    const filename = `capture-${timestamp}.jpg`;
+    return new File([blob], filename, { type: "image/jpeg" });
+  }, [isReady]);
+  return {
+    permission,
+    stream,
+    videoRef,
+    isReady,
+    error,
+    startCamera,
+    stopCamera,
+    capturePhoto,
+    switchCamera,
+    currentFacingMode
+  };
+}
+var DEFAULT_CONFIG = {
+  minFocusScore: 15,
+  minBrightness: 30,
+  maxBrightness: 240,
+  minDocumentCoverage: 10,
+  maxDocumentCoverage: 95,
+  stabilityDuration: 500,
+  captureCountdown: 2,
+  detectionFps: 5,
+  enableAutoCapture: true
+};
+var INITIAL_METRICS = {
+  focusScore: 0,
+  isInFocus: false,
+  brightness: 0,
+  isBrightnessOk: false,
+  boundary: null,
+  isDocumentDetected: false,
+  documentCoverage: 0,
+  isStable: false,
+  stabilityDuration: 0
+};
+var INITIAL_STATE = {
+  isDetecting: false,
+  metrics: INITIAL_METRICS,
+  isReadyForCapture: false,
+  captureCountdown: 0,
+  error: null
+};
+function calculateLaplacianVariance(imageData) {
+  const { data, width, height } = imageData;
+  let sum = 0;
+  let sumSq = 0;
+  let count = 0;
+  const step = 4;
+  for (let y = step; y < height - step; y += step) {
+    for (let x = step; x < width - step; x += step) {
+      const getGray = (px, py) => {
+        const idx = (py * width + px) * 4;
+        return 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+      };
+      const center = getGray(x, y);
+      const neighbors = (getGray(x, y - step) + getGray(x - step, y) + getGray(x + step, y) + getGray(x, y + step)) / 4;
+      const laplacian = center - neighbors;
+      sum += laplacian;
+      sumSq += laplacian * laplacian;
+      count++;
+    }
+  }
+  if (count === 0) return 0;
+  const mean = sum / count;
+  const variance = sumSq / count - mean * mean;
+  return Math.abs(variance);
+}
+function calculateBrightness(imageData) {
+  const { data } = imageData;
+  let sum = 0;
+  let count = 0;
+  for (let i = 0; i < data.length; i += 64) {
+    sum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    count++;
+  }
+  return count > 0 ? sum / count : 0;
+}
+function calculateFrameFingerprint(imageData) {
+  const { data, width, height } = imageData;
+  const gridSize = 8;
+  const cellWidth = Math.floor(width / gridSize);
+  const cellHeight = Math.floor(height / gridSize);
+  const values = [];
+  for (let gy = 0; gy < gridSize; gy++) {
+    for (let gx = 0; gx < gridSize; gx++) {
+      let sum = 0;
+      let count = 0;
+      const startX = gx * cellWidth;
+      const startY = gy * cellHeight;
+      for (let y = startY; y < startY + cellHeight; y += 4) {
+        for (let x = startX; x < startX + cellWidth; x += 4) {
+          const idx = (y * width + x) * 4;
+          if (idx < data.length - 2) {
+            sum += 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+            count++;
+          }
+        }
+      }
+      values.push(count > 0 ? sum / count : 0);
+    }
+  }
+  return values;
+}
+function compareFingerprints(fp1, fp2) {
+  if (fp1.length !== fp2.length || fp1.length === 0) return 0;
+  let totalDiff = 0;
+  for (let i = 0; i < fp1.length; i++) {
+    totalDiff += Math.abs(fp1[i] - fp2[i]) / 255;
+  }
+  const avgDiff = totalDiff / fp1.length;
+  return Math.max(0, Math.min(100, (1 - avgDiff * 5) * 100));
+}
+function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
+  const mergedConfig = React21.useMemo(
+    () => ({ ...DEFAULT_CONFIG, ...config }),
+    // Intentionally depend on individual properties to avoid unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      config.minFocusScore,
+      config.minBrightness,
+      config.maxBrightness,
+      config.minDocumentCoverage,
+      config.maxDocumentCoverage,
+      config.stabilityDuration,
+      config.captureCountdown,
+      config.detectionFps,
+      config.enableAutoCapture
+    ]
+  );
+  const [state, setState] = React21.useState(INITIAL_STATE);
+  const canvasRef = React21.useRef(null);
+  const ctxRef = React21.useRef(null);
+  const animationFrameRef = React21.useRef(null);
+  const lastFingerprintRef = React21.useRef([]);
+  const stabilityStartRef = React21.useRef(null);
+  const countdownIntervalRef = React21.useRef(null);
+  const isDetectingRef = React21.useRef(false);
+  const STABILITY_THRESHOLD = 85;
+  React21.useEffect(() => {
+    canvasRef.current = document.createElement("canvas");
+    ctxRef.current = canvasRef.current.getContext("2d", {
+      willReadFrequently: true
+    });
+    return () => {
+      canvasRef.current = null;
+      ctxRef.current = null;
+    };
+  }, []);
+  const processFrame = React21.useCallback(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+    if (!video || !canvas || !ctx || !isDetectingRef.current) {
+      return;
+    }
+    if (video.readyState < 2) {
+      animationFrameRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+    const scale = 0.15;
+    const width = Math.floor(video.videoWidth * scale);
+    const height = Math.floor(video.videoHeight * scale);
+    if (width === 0 || height === 0) {
+      animationFrameRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+    canvas.width = width;
+    canvas.height = height;
+    ctx.drawImage(video, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const focusScore = calculateLaplacianVariance(imageData);
+    const brightness = calculateBrightness(imageData);
+    const fingerprint = calculateFrameFingerprint(imageData);
+    const now = Date.now();
+    const similarity = compareFingerprints(
+      fingerprint,
+      lastFingerprintRef.current
+    );
+    const isSimilarFrame = similarity >= STABILITY_THRESHOLD;
+    if (isSimilarFrame && lastFingerprintRef.current.length > 0) {
+      if (!stabilityStartRef.current) {
+        stabilityStartRef.current = now;
+      }
+    } else {
+      stabilityStartRef.current = now;
+    }
+    lastFingerprintRef.current = fingerprint;
+    const stabilityDuration = stabilityStartRef.current ? now - stabilityStartRef.current : 0;
+    const isStable = stabilityDuration >= mergedConfig.stabilityDuration;
+    const isInFocus = focusScore >= mergedConfig.minFocusScore;
+    const isBrightnessOk = brightness >= mergedConfig.minBrightness && brightness <= mergedConfig.maxBrightness;
+    const isDocumentDetected = isInFocus && isBrightnessOk;
+    const isReadyForCapture = isInFocus && isBrightnessOk && isStable;
+    const metrics = {
+      focusScore: Math.round(focusScore),
+      isInFocus,
+      brightness: Math.round(brightness),
+      isBrightnessOk,
+      boundary: null,
+      // No longer doing boundary detection
+      isDocumentDetected,
+      documentCoverage: isDocumentDetected ? 50 : 0,
+      // Dummy value
+      isStable,
+      stabilityDuration
+    };
+    setState((prev) => ({
+      ...prev,
+      metrics,
+      isReadyForCapture
+    }));
+    const frameDelay = 1e3 / mergedConfig.detectionFps;
+    setTimeout(() => {
+      if (isDetectingRef.current) {
+        animationFrameRef.current = requestAnimationFrame(processFrame);
+      }
+    }, frameDelay);
+  }, [videoRef, mergedConfig]);
+  React21.useEffect(() => {
+    if (state.isReadyForCapture && mergedConfig.enableAutoCapture && state.captureCountdown === 0 && !countdownIntervalRef.current) {
+      let countdown = mergedConfig.captureCountdown;
+      setState((prev) => ({ ...prev, captureCountdown: countdown }));
+      countdownIntervalRef.current = setInterval(() => {
+        countdown -= 1;
+        if (countdown <= 0) {
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          setState((prev) => ({ ...prev, captureCountdown: 0 }));
+          onAutoCapture?.();
+        } else {
+          setState((prev) => ({ ...prev, captureCountdown: countdown }));
+        }
+      }, 1e3);
+    } else if (!state.isReadyForCapture && countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+      setState((prev) => ({ ...prev, captureCountdown: 0 }));
+    }
+  }, [
+    state.isReadyForCapture,
+    mergedConfig.enableAutoCapture,
+    mergedConfig.captureCountdown,
+    onAutoCapture,
+    state.captureCountdown
+  ]);
+  React21.useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
+  const startDetection = React21.useCallback(() => {
+    isDetectingRef.current = true;
+    setState((prev) => ({ ...prev, isDetecting: true, error: null }));
+    processFrame();
+  }, [processFrame]);
+  const stopDetection = React21.useCallback(() => {
+    isDetectingRef.current = false;
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setState((prev) => ({ ...prev, isDetecting: false }));
+  }, []);
+  const resetDetection = React21.useCallback(() => {
+    stopDetection();
+    lastFingerprintRef.current = [];
+    stabilityStartRef.current = null;
+    setState(INITIAL_STATE);
+  }, [stopDetection]);
+  return {
+    ...state,
+    startDetection,
+    stopDetection,
+    resetDetection
+  };
+}
+function StatusPill({
+  label,
+  isOk,
+  value
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: `inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${isOk ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"} `,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "span",
+          {
+            className: `h-2 w-2 rounded-full ${isOk ? "bg-green-400" : "bg-red-400"}`
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { children: label }),
+        value !== void 0 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "opacity-70", children: [
+          "(",
+          value,
+          ")"
+        ] })
+      ]
+    }
+  );
+}
+function CountdownDisplay({ seconds }) {
+  if (seconds <= 0) return null;
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pointer-events-none absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 animate-ping rounded-full bg-green-500 opacity-25" }),
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative flex h-24 w-24 items-center justify-center rounded-full bg-green-500/90", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-4xl font-bold text-white", children: seconds }) })
+  ] }) });
+}
+function StabilityBar({
+  stabilityDuration,
+  targetDuration
+}) {
+  const progress = Math.min(stabilityDuration / targetDuration * 100, 100);
+  const isComplete = progress >= 100;
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-full", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-1 flex justify-between text-xs text-white/70", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("span", { children: "Stability" }),
+      /* @__PURE__ */ jsxRuntime.jsx("span", { children: isComplete ? "Stable!" : "Hold steady..." })
+    ] }),
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-1.5 overflow-hidden rounded-full bg-white/20", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: `h-full transition-all duration-100 ${isComplete ? "bg-green-400" : "bg-yellow-400"}`,
+        style: { width: `${progress}%` }
+      }
+    ) })
+  ] });
+}
+function DocumentDetectionOverlay({
+  metrics,
+  isReadyForCapture,
+  captureCountdown,
+  videoDimensions: _videoDimensions,
+  showDetailedMetrics = false
+}) {
+  const {
+    focusScore,
+    isInFocus,
+    brightness,
+    isBrightnessOk,
+    isDocumentDetected,
+    isStable,
+    stabilityDuration
+  } = metrics;
+  const borderColor = isReadyForCapture ? "border-green-500" : isDocumentDetected ? "border-yellow-400" : "border-white/40";
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "pointer-events-none absolute inset-0", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        className: `absolute inset-4 rounded-lg border-4 transition-colors duration-300 ${borderColor}`,
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-1 -left-1 h-6 w-6 rounded-tl border-t-4 border-l-4 border-current" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-1 -right-1 h-6 w-6 rounded-tr border-t-4 border-r-4 border-current" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -bottom-1 -left-1 h-6 w-6 rounded-bl border-b-4 border-l-4 border-current" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -right-1 -bottom-1 h-6 w-6 rounded-br border-r-4 border-b-4 border-current" })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(CountdownDisplay, { seconds: captureCountdown }),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute top-3 right-3 left-3", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "div",
+        {
+          className: `mb-2 rounded-lg px-4 py-2 text-center backdrop-blur-sm ${isReadyForCapture ? "bg-green-500/80 text-white" : "bg-black/60 text-white"} `,
+          children: isReadyForCapture ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: captureCountdown > 0 ? `Capturing in ${captureCountdown}...` : "\u2713 Ready to capture!" }) : /* @__PURE__ */ jsxRuntime.jsx("span", { children: !isInFocus ? "\u{1F50D} Hold camera steady" : !isBrightnessOk ? brightness < 40 ? "\u{1F4A1} Need more light" : "\u{1F4A1} Too bright" : !isStable ? "\u270B Hold steady..." : "\u{1F4C4} Position document in frame" })
+        }
+      ),
+      isDocumentDetected && !isStable && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-2", children: /* @__PURE__ */ jsxRuntime.jsx(
+        StabilityBar,
+        {
+          stabilityDuration,
+          targetDuration: 500
+        }
+      ) })
+    ] }),
+    showDetailedMetrics && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute right-3 bottom-3 left-3", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-center gap-2 rounded-lg bg-black/60 p-2 backdrop-blur-sm", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(StatusPill, { label: "Focus", isOk: isInFocus, value: focusScore }),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        StatusPill,
+        {
+          label: "Brightness",
+          isOk: isBrightnessOk,
+          value: brightness
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(StatusPill, { label: "Stable", isOk: isStable })
+    ] }) })
+  ] });
+}
+function CameraViewfinder({
+  videoRef,
+  isReady,
+  detectionOverlay
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "video",
+      {
+        ref: videoRef,
+        autoPlay: true,
+        playsInline: true,
+        muted: true,
+        className: chunkOR5DRJCW_cjs.cn(
+          "h-full w-full object-cover",
+          "transition-opacity duration-300",
+          isReady ? "opacity-100" : "opacity-0"
+        )
+      }
+    ),
+    !isReady && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center gap-3", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkJYMQJ32S_cjs.Spinner, { size: "lg" }),
+      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-neutral-400", children: "Starting camera..." })
+    ] }),
+    isReady && detectionOverlay,
+    isReady && !detectionOverlay && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "pointer-events-none absolute inset-0", children: [
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute inset-8 rounded-lg border-2 border-white/30", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-0.5 -left-0.5 h-6 w-6 rounded-tl-lg border-t-4 border-l-4 border-white" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-0.5 -right-0.5 h-6 w-6 rounded-tr-lg border-t-4 border-r-4 border-white" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-lg border-b-4 border-l-4 border-white" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -right-0.5 -bottom-0.5 h-6 w-6 rounded-br-lg border-r-4 border-b-4 border-white" })
+      ] }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute right-0 bottom-4 left-0 text-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "rounded-full bg-black/50 px-3 py-1 text-sm text-white", children: "Position document within the frame" }) })
+    ] })
+  ] });
+}
+function PermissionDeniedMessage({ onRetry }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-8", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkMJKFQ4TF_cjs.Alert, { variant: "warning", className: "w-full", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Camera access denied" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: "Please allow camera access in your browser settings to use this feature. You may need to refresh the page after changing permissions." })
+    ] }),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-2 text-center", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm", children: "To enable camera access:" }),
+      /* @__PURE__ */ jsxRuntime.jsxs("ol", { className: "text-muted-foreground list-inside list-decimal space-y-1 text-left text-sm", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("li", { children: "Click the camera/lock icon in your browser's address bar" }),
+        /* @__PURE__ */ jsxRuntime.jsx("li", { children: "Allow camera access for this site" }),
+        /* @__PURE__ */ jsxRuntime.jsx("li", { children: "Click the button below to try again" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntime.jsx(chunkJYPDL2HB_cjs.Button, { onClick: onRetry, leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "h-4 w-4" }), children: "Try again" })
+  ] });
+}
+function CameraUnavailableMessage() {
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col items-center justify-center gap-4 py-8", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkMJKFQ4TF_cjs.Alert, { variant: "danger", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+    /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Camera unavailable" }),
+    /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: "No camera was detected on this device. Please ensure your camera is connected and not in use by another application." })
+  ] }) });
+}
+function PhotoPreview({
+  previewUrl,
+  onConfirm,
+  onRetake
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "img",
+      {
+        src: previewUrl,
+        alt: "Captured document",
+        className: "h-full w-full object-cover"
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-center gap-3", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        chunkJYPDL2HB_cjs.Button,
+        {
+          variant: "secondary",
+          onClick: onRetake,
+          leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "h-4 w-4" }),
+          children: "Retake"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        chunkJYPDL2HB_cjs.Button,
+        {
+          variant: "primary",
+          onClick: onConfirm,
+          leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-4 w-4" }),
+          children: "Use this photo"
+        }
+      )
+    ] })
+  ] });
+}
+function WebcamModal({
+  open,
+  onOpenChange,
+  onCapture,
+  enableAutoCapture = true
+}) {
+  const {
+    permission,
+    videoRef,
+    isReady,
+    startCamera,
+    stopCamera,
+    capturePhoto,
+    switchCamera,
+    currentFacingMode
+  } = useCamera({
+    facingMode: "environment",
+    width: 1920,
+    height: 1080
+  });
+  const [capturedFile, setCapturedFile] = React21__namespace.useState(null);
+  const [previewUrl, setPreviewUrl] = React21__namespace.useState(null);
+  const [autoDetectEnabled, setAutoDetectEnabled] = React21__namespace.useState(enableAutoCapture);
+  const [videoDimensions, setVideoDimensions] = React21__namespace.useState({
+    width: 0,
+    height: 0
+  });
+  const handleAutoCapture = React21__namespace.useCallback(() => {
+    const file = capturePhoto();
+    if (file) {
+      setCapturedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      stopCamera();
+    }
+  }, [capturePhoto, stopCamera]);
+  const detection = useDocumentDetection(
+    videoRef,
+    {
+      enableAutoCapture: autoDetectEnabled,
+      minFocusScore: 15,
+      // Very forgiving focus threshold
+      stabilityDuration: 500,
+      // 0.5 seconds of stability
+      captureCountdown: 2
+      // 2 second countdown
+    },
+    handleAutoCapture
+  );
+  const hasStartedRef = React21__namespace.useRef(false);
+  React21__namespace.useEffect(() => {
+    const video = videoRef.current;
+    if (video && isReady) {
+      const updateDimensions = () => {
+        setVideoDimensions({
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+      };
+      updateDimensions();
+      video.addEventListener("resize", updateDimensions);
+      return () => video.removeEventListener("resize", updateDimensions);
+    }
+  }, [isReady, videoRef]);
+  React21__namespace.useEffect(() => {
+    if (open && permission !== "denied" && permission !== "unavailable") {
+      if (!hasStartedRef.current) {
+        hasStartedRef.current = true;
+        startCamera();
+      }
+    } else if (!open) {
+      hasStartedRef.current = false;
+      stopCamera();
+      detection.stopDetection();
+      setCapturedFile(null);
+      setPreviewUrl((prev) => {
+        if (prev) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
+    }
+  }, [open, permission]);
+  React21__namespace.useEffect(() => {
+    if (isReady && autoDetectEnabled && !capturedFile) {
+      detection.startDetection();
+    }
+    return () => {
+      detection.stopDetection();
+    };
+  }, [isReady, autoDetectEnabled, capturedFile]);
+  const handleCapture = React21__namespace.useCallback(() => {
+    const file = capturePhoto();
+    if (file) {
+      setCapturedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      stopCamera();
+    }
+  }, [capturePhoto, stopCamera]);
+  const handleRetake = React21__namespace.useCallback(() => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setCapturedFile(null);
+    setPreviewUrl(null);
+    detection.resetDetection();
+    startCamera();
+  }, [previewUrl, startCamera, detection]);
+  const handleConfirm = React21__namespace.useCallback(() => {
+    if (capturedFile) {
+      onCapture(capturedFile);
+      onOpenChange(false);
+    }
+  }, [capturedFile, onCapture, onOpenChange]);
+  const handleClose = React21__namespace.useCallback(() => {
+    stopCamera();
+    detection.stopDetection();
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setCapturedFile(null);
+    setPreviewUrl(null);
+    onOpenChange(false);
+  }, [stopCamera, detection, previewUrl, onOpenChange]);
+  const renderContent = () => {
+    if (permission === "denied") {
+      return /* @__PURE__ */ jsxRuntime.jsx(PermissionDeniedMessage, { onRetry: startCamera });
+    }
+    if (permission === "unavailable") {
+      return /* @__PURE__ */ jsxRuntime.jsx(CameraUnavailableMessage, {});
+    }
+    if (capturedFile && previewUrl) {
+      return /* @__PURE__ */ jsxRuntime.jsx(
+        PhotoPreview,
+        {
+          previewUrl,
+          onConfirm: handleConfirm,
+          onRetake: handleRetake
+        }
+      );
+    }
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        CameraViewfinder,
+        {
+          videoRef,
+          isReady,
+          detectionOverlay: autoDetectEnabled && isReady ? /* @__PURE__ */ jsxRuntime.jsx(
+            DocumentDetectionOverlay,
+            {
+              metrics: detection.metrics,
+              isReadyForCapture: detection.isReadyForCapture,
+              captureCountdown: detection.captureCountdown,
+              videoDimensions,
+              showDetailedMetrics: false
+            }
+          ) : void 0
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-3", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center gap-2", children: /* @__PURE__ */ jsxRuntime.jsx(
+          chunkJYPDL2HB_cjs.Button,
+          {
+            variant: autoDetectEnabled ? "primary" : "secondary",
+            size: "sm",
+            onClick: () => {
+              setAutoDetectEnabled(!autoDetectEnabled);
+              if (!autoDetectEnabled) {
+                detection.startDetection();
+              } else {
+                detection.stopDetection();
+              }
+            },
+            leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ScanLine, { className: "h-4 w-4" }),
+            children: autoDetectEnabled ? "Auto-capture ON" : "Auto-capture OFF"
+          }
+        ) }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              size: "icon",
+              onClick: switchCamera,
+              disabled: !isReady,
+              "aria-label": `Switch to ${currentFacingMode === "user" ? "back" : "front"} camera`,
+              children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "h-5 w-5" })
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "primary",
+              size: "lg",
+              onClick: handleCapture,
+              disabled: !isReady,
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Camera, { className: "h-5 w-5" }),
+              children: autoDetectEnabled ? "Manual Capture" : "Capture"
+            }
+          )
+        ] })
+      ] })
+    ] });
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    chunkNH2JVQ6V_cjs.Modal,
+    {
+      open,
+      onOpenChange: handleClose,
+      size: "lg",
+      "aria-label": "Webcam capture",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkNH2JVQ6V_cjs.ModalHeader, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkNH2JVQ6V_cjs.ModalTitle, { children: "Take a Photo" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkNH2JVQ6V_cjs.ModalClose, {})
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkNH2JVQ6V_cjs.ModalBody, { children: renderContent() }),
+        permission !== "denied" && permission !== "unavailable" && !capturedFile && /* @__PURE__ */ jsxRuntime.jsx(chunkNH2JVQ6V_cjs.ModalFooter, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkJYPDL2HB_cjs.Button, { variant: "secondary", onClick: handleClose, children: "Cancel" }) })
+      ]
+    }
+  );
+}
+WebcamModal.displayName = "WebcamModal";
+
+// src/components/DocumentScanner/types.ts
+var DEFAULT_ACCEPTED_FILE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/heic",
+  "image/webp",
+  "application/pdf"
+];
+var DEFAULT_MAX_FILE_SIZE_MB = 10;
+
+// src/components/DocumentScanner/useFileUpload.ts
+function generateFileId() {
+  return `file-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+function validateFile2(file, acceptedTypes, maxSizeMb) {
+  if (!acceptedTypes.includes(file.type)) {
+    return {
+      file,
+      type: "type",
+      message: `File type "${file.type || "unknown"}" is not supported. Accepted types: ${acceptedTypes.join(", ")}`
+    };
+  }
+  const maxSizeBytes = maxSizeMb * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    return {
+      file,
+      type: "size",
+      message: `File size (${(file.size / 1024 / 1024).toFixed(2)} MB) exceeds the maximum allowed size of ${maxSizeMb} MB`
+    };
+  }
+  return null;
+}
+function createPreviewUrl(file) {
+  return URL.createObjectURL(file);
+}
+function useFileUpload({
+  acceptedFileTypes = [...DEFAULT_ACCEPTED_FILE_TYPES],
+  maxFileSizeMb = DEFAULT_MAX_FILE_SIZE_MB,
+  multiple = false,
+  onValidationError
+} = {}) {
+  const [files, setFiles] = React21__namespace.useState([]);
+  React21__namespace.useEffect(() => {
+    return () => {
+      files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+    };
+  }, []);
+  const addFiles = React21__namespace.useCallback(
+    (fileList, source = "upload") => {
+      const newFiles = [];
+      const errors = [];
+      Array.from(fileList).forEach((file) => {
+        const error = validateFile2(file, acceptedFileTypes, maxFileSizeMb);
+        if (error) {
+          errors.push(error);
+        } else {
+          newFiles.push({
+            file,
+            previewUrl: createPreviewUrl(file),
+            source,
+            id: generateFileId()
+          });
+        }
+      });
+      if (errors.length > 0) {
+        onValidationError?.(errors);
+      }
+      if (newFiles.length > 0) {
+        setFiles((prev) => {
+          if (!multiple) {
+            prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+            return newFiles.slice(0, 1);
+          }
+          return [...prev, ...newFiles];
+        });
+      }
+    },
+    [acceptedFileTypes, maxFileSizeMb, multiple, onValidationError]
+  );
+  const addFile = React21__namespace.useCallback(
+    (file, source = "upload") => {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      addFiles(dataTransfer.files, source);
+    },
+    [addFiles]
+  );
+  const removeFile = React21__namespace.useCallback((id) => {
+    setFiles((prev) => {
+      const fileToRemove = prev.find((f) => f.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.previewUrl);
+      }
+      return prev.filter((f) => f.id !== id);
+    });
+  }, []);
+  const clearFiles = React21__namespace.useCallback(() => {
+    setFiles((prev) => {
+      prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+      return [];
+    });
+  }, []);
+  const getFiles = React21__namespace.useCallback(() => {
+    return files.map((f) => f.file);
+  }, [files]);
+  return {
+    files,
+    addFiles,
+    addFile,
+    removeFile,
+    clearFiles,
+    getFiles,
+    hasFiles: files.length > 0
+  };
+}
+function DocumentScanner({
+  onScan,
+  onResult,
+  multiple = false,
+  acceptedFileTypes = [...DEFAULT_ACCEPTED_FILE_TYPES],
+  maxFileSizeMb = DEFAULT_MAX_FILE_SIZE_MB,
+  disabled = false,
+  enableWebcam = true,
+  enableCamera = true,
+  title = "Scan your document",
+  description = "Upload a file, take a photo, or use your webcam",
+  className,
+  onValidationError,
+  onStateChange
+}) {
+  const [state, setState] = React21__namespace.useState("idle");
+  const [error, setError] = React21__namespace.useState(null);
+  const [isWebcamOpen, setIsWebcamOpen] = React21__namespace.useState(false);
+  const [validationErrors, setValidationErrors] = React21__namespace.useState([]);
+  const isMobile = chunkR4DM4635_cjs.useIsMobile();
+  const cameraInputRef = React21__namespace.useRef(null);
+  const {
+    files,
+    addFiles,
+    addFile,
+    removeFile,
+    clearFiles,
+    getFiles,
+    hasFiles
+  } = useFileUpload({
+    acceptedFileTypes,
+    maxFileSizeMb,
+    multiple,
+    onValidationError: (errors) => {
+      setValidationErrors(errors);
+      onValidationError?.(errors);
+    }
+  });
+  React21__namespace.useEffect(() => {
+    onStateChange?.(state);
+  }, [state, onStateChange]);
+  React21__namespace.useEffect(() => {
+    if (hasFiles && state === "idle") {
+      setState("preview");
+    } else if (!hasFiles && state === "preview") {
+      setState("idle");
+    }
+  }, [hasFiles, state]);
+  const handleFilesSelected = React21__namespace.useCallback(
+    (fileList) => {
+      setError(null);
+      setValidationErrors([]);
+      addFiles(fileList, "upload");
+    },
+    [addFiles]
+  );
+  const handleCameraCapture = React21__namespace.useCallback(() => {
+    cameraInputRef.current?.click();
+  }, []);
+  const handleCameraInputChange = React21__namespace.useCallback(
+    (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        setError(null);
+        setValidationErrors([]);
+        addFiles(e.target.files, "camera");
+        e.target.value = "";
+      }
+    },
+    [addFiles]
+  );
+  const handleWebcamCapture = React21__namespace.useCallback(
+    (file) => {
+      setError(null);
+      setValidationErrors([]);
+      addFile(file, "webcam");
+    },
+    [addFile]
+  );
+  const handleScan = React21__namespace.useCallback(async () => {
+    if (!hasFiles) return;
+    try {
+      setState("processing");
+      setError(null);
+      const filesToScan = getFiles();
+      const result = await onScan(filesToScan);
+      setState("success");
+      onResult(result);
+      setTimeout(() => {
+        clearFiles();
+        setState("idle");
+      }, 2e3);
+    } catch (err) {
+      setState("error");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred while processing your document. Please try again.";
+      setError(errorMessage);
+    }
+  }, [hasFiles, getFiles, onScan, onResult, clearFiles]);
+  const handleRetry = React21__namespace.useCallback(() => {
+    setState("preview");
+    setError(null);
+  }, []);
+  const handleClearAll = React21__namespace.useCallback(() => {
+    clearFiles();
+    setError(null);
+    setValidationErrors([]);
+    setState("idle");
+  }, [clearFiles]);
+  const cameraAcceptString = acceptedFileTypes.filter((type) => type.startsWith("image/")).join(",");
+  const renderContent = () => {
+    if (state === "processing") {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          chunkJYMQJ32S_cjs.SpinnerWithLabel,
+          {
+            size: "xl",
+            label: "Analyzing your document...",
+            labelPosition: "bottom"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", className: "max-w-xs text-center", children: "Our AI is extracting information from your document. This usually takes a few seconds." })
+      ] });
+    }
+    if (state === "success") {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.CheckCircle, { className: "h-8 w-8 text-green-600 dark:text-green-400" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { weight: "semibold", size: "lg", children: "Document scanned successfully!" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "The extracted data has been processed." })
+      ] });
+    }
+    if (state === "error") {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-4 py-8", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkMJKFQ4TF_cjs.Alert, { variant: "danger", className: "w-full", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Processing failed" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: error })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkJYPDL2HB_cjs.Button, { variant: "secondary", onClick: handleClearAll, children: "Start over" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkJYPDL2HB_cjs.Button, { variant: "primary", onClick: handleRetry, children: "Try again" })
+        ] })
+      ] });
+    }
+    if (state === "preview" && hasFiles) {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-6", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          FilePreview,
+          {
+            files,
+            onRemove: removeFile,
+            disabled
+          }
+        ),
+        validationErrors.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
+          chunkMJKFQ4TF_cjs.Alert,
+          {
+            variant: "warning",
+            dismissible: true,
+            onDismiss: () => setValidationErrors([]),
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Some files were not added" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
+                /* @__PURE__ */ jsxRuntime.jsxs("strong", { children: [
+                  err.file.name,
+                  ":"
+                ] }),
+                " ",
+                err.message
+              ] }, index)) }) })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-center justify-center gap-3", children: [
+          multiple && /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: () => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = acceptedFileTypes.join(",");
+                input.multiple = multiple;
+                input.onchange = (e) => {
+                  const files2 = e.target.files;
+                  if (files2) addFiles(files2, "upload");
+                };
+                input.click();
+              },
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "h-4 w-4" }),
+              disabled,
+              children: "Add more files"
+            }
+          ) }),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: handleClearAll,
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Trash2, { className: "h-4 w-4" }),
+              disabled,
+              children: "Clear all"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsxs(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "primary",
+              onClick: handleScan,
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Scan, { className: "h-4 w-4" }),
+              disabled,
+              children: [
+                "Scan ",
+                files.length > 1 ? `${files.length} documents` : "document"
+              ]
+            }
+          )
+        ] })
+      ] });
+    }
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-6", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        DropZone,
+        {
+          onFilesSelected: handleFilesSelected,
+          acceptedFileTypes,
+          multiple,
+          disabled,
+          className: "min-h-[240px]",
+          children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-4 text-center", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "text-primary-600 dark:text-primary-400 h-7 w-7" }) }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { weight: "medium", children: "Drag and drop your files here" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "or click to browse" })
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsxs(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "xs", className: "max-w-xs", children: [
+              "Supported formats: JPEG, PNG, HEIC, WebP, PDF",
+              /* @__PURE__ */ jsxRuntime.jsx("br", {}),
+              "Max size: ",
+              maxFileSizeMb,
+              " MB"
+            ] })
+          ] })
+        }
+      ),
+      (enableCamera || enableWebcam) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-3", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full max-w-xs items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-border h-px flex-1" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "or" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-border h-px flex-1" })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-center gap-3", children: [
+          enableCamera && isMobile && /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: handleCameraCapture,
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Camera, { className: "h-4 w-4" }),
+              disabled,
+              children: "Take a photo"
+            }
+          ),
+          enableWebcam && !isMobile && /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: () => setIsWebcamOpen(true),
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Camera, { className: "h-4 w-4" }),
+              disabled,
+              children: "Use webcam"
+            }
+          )
+        ] })
+      ] }),
+      validationErrors.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
+        chunkMJKFQ4TF_cjs.Alert,
+        {
+          variant: "warning",
+          dismissible: true,
+          onDismiss: () => setValidationErrors([]),
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Invalid files" }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("strong", { children: [
+                err.file.name,
+                ":"
+              ] }),
+              " ",
+              err.message
+            ] }, index)) }) })
+          ]
+        }
+      )
+    ] });
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "border-border bg-card w-full rounded-xl border p-6",
+        "shadow-sm",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-6 text-center", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { as: "h2", size: "xl", weight: "semibold", className: "mb-1", children: title }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: description })
+        ] }),
+        renderContent(),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "input",
+          {
+            ref: cameraInputRef,
+            type: "file",
+            accept: cameraAcceptString,
+            capture: "environment",
+            onChange: handleCameraInputChange,
+            className: "sr-only",
+            "aria-hidden": "true",
+            tabIndex: -1
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          WebcamModal,
+          {
+            open: isWebcamOpen,
+            onOpenChange: setIsWebcamOpen,
+            onCapture: handleWebcamCapture
+          }
+        )
+      ]
+    }
+  );
+}
+DocumentScanner.displayName = "DocumentScanner";
+function DocumentScannerModal({
+  open,
+  onOpenChange,
+  onScan,
+  onResult,
+  title = "Scan Document",
+  description = "Upload a file, take a photo, or use your webcam",
+  multiple = false,
+  acceptedFileTypes = [...DEFAULT_ACCEPTED_FILE_TYPES],
+  maxFileSizeMb = DEFAULT_MAX_FILE_SIZE_MB,
+  disabled = false,
+  enableWebcam = true,
+  enableCamera = true,
+  onValidationError,
+  onStateChange,
+  size = "xl",
+  className,
+  closeOnSuccess = true
+}) {
+  const [state, setState] = React21__namespace.useState("idle");
+  const [error, setError] = React21__namespace.useState(null);
+  const [isWebcamOpen, setIsWebcamOpen] = React21__namespace.useState(false);
+  const [validationErrors, setValidationErrors] = React21__namespace.useState([]);
+  const isMobile = chunkR4DM4635_cjs.useIsMobile();
+  const cameraInputRef = React21__namespace.useRef(null);
+  const {
+    files,
+    addFiles,
+    addFile,
+    removeFile,
+    clearFiles,
+    getFiles,
+    hasFiles
+  } = useFileUpload({
+    acceptedFileTypes,
+    maxFileSizeMb,
+    multiple,
+    onValidationError: (errors) => {
+      setValidationErrors(errors);
+      onValidationError?.(errors);
+    }
+  });
+  React21__namespace.useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        clearFiles();
+        setState("idle");
+        setError(null);
+        setValidationErrors([]);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [open, clearFiles]);
+  React21__namespace.useEffect(() => {
+    onStateChange?.(state);
+  }, [state, onStateChange]);
+  React21__namespace.useEffect(() => {
+    if (hasFiles && state === "idle") {
+      setState("preview");
+    } else if (!hasFiles && state === "preview") {
+      setState("idle");
+    }
+  }, [hasFiles, state]);
+  const handleFilesSelected = React21__namespace.useCallback(
+    (fileList) => {
+      setError(null);
+      setValidationErrors([]);
+      addFiles(fileList, "upload");
+    },
+    [addFiles]
+  );
+  const handleCameraCapture = React21__namespace.useCallback(() => {
+    cameraInputRef.current?.click();
+  }, []);
+  const handleCameraInputChange = React21__namespace.useCallback(
+    (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        setError(null);
+        setValidationErrors([]);
+        addFiles(e.target.files, "camera");
+        e.target.value = "";
+      }
+    },
+    [addFiles]
+  );
+  const handleWebcamCapture = React21__namespace.useCallback(
+    (file) => {
+      setError(null);
+      setValidationErrors([]);
+      addFile(file, "webcam");
+    },
+    [addFile]
+  );
+  const handleScan = React21__namespace.useCallback(async () => {
+    if (!hasFiles) return;
+    try {
+      setState("processing");
+      setError(null);
+      const filesToScan = getFiles();
+      const result = await onScan(filesToScan);
+      setState("success");
+      onResult(result);
+      if (closeOnSuccess) {
+        setTimeout(() => {
+          onOpenChange(false);
+        }, 1500);
+      }
+    } catch (err) {
+      setState("error");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred while processing your document. Please try again.";
+      setError(errorMessage);
+    }
+  }, [hasFiles, getFiles, onScan, onResult, closeOnSuccess, onOpenChange]);
+  const handleRetry = React21__namespace.useCallback(() => {
+    setState("preview");
+    setError(null);
+  }, []);
+  const handleClearAll = React21__namespace.useCallback(() => {
+    clearFiles();
+    setError(null);
+    setValidationErrors([]);
+    setState("idle");
+  }, [clearFiles]);
+  const cameraAcceptString = acceptedFileTypes.filter((type) => type.startsWith("image/")).join(",");
+  const renderContent = () => {
+    if (state === "processing") {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          chunkJYMQJ32S_cjs.SpinnerWithLabel,
+          {
+            size: "xl",
+            label: "Analyzing your document...",
+            labelPosition: "bottom"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", className: "max-w-xs text-center", children: "Our AI is extracting information from your document. This usually takes a few seconds." })
+      ] });
+    }
+    if (state === "success") {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.CheckCircle, { className: "h-8 w-8 text-green-600 dark:text-green-400" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { weight: "semibold", size: "lg", children: "Document scanned successfully!" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "The extracted data has been processed." })
+      ] });
+    }
+    if (state === "error") {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-4 py-8", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkMJKFQ4TF_cjs.Alert, { variant: "danger", className: "w-full", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Processing failed" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: error })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkJYPDL2HB_cjs.Button, { variant: "secondary", onClick: handleClearAll, children: "Start over" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkJYPDL2HB_cjs.Button, { variant: "primary", onClick: handleRetry, children: "Try again" })
+        ] })
+      ] });
+    }
+    if (state === "preview" && hasFiles) {
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-6", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          FilePreview,
+          {
+            files,
+            onRemove: removeFile,
+            disabled
+          }
+        ),
+        validationErrors.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
+          chunkMJKFQ4TF_cjs.Alert,
+          {
+            variant: "warning",
+            dismissible: true,
+            onDismiss: () => setValidationErrors([]),
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Some files were not added" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
+                /* @__PURE__ */ jsxRuntime.jsxs("strong", { children: [
+                  err.file.name,
+                  ":"
+                ] }),
+                " ",
+                err.message
+              ] }, index)) }) })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-center justify-center gap-3", children: [
+          multiple && /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: () => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = acceptedFileTypes.join(",");
+                input.multiple = multiple;
+                input.onchange = (e) => {
+                  const inputFiles = e.target.files;
+                  if (inputFiles) addFiles(inputFiles, "upload");
+                };
+                input.click();
+              },
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "h-4 w-4" }),
+              disabled,
+              children: "Add more files"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: handleClearAll,
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Trash2, { className: "h-4 w-4" }),
+              disabled,
+              children: "Clear all"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsxs(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "primary",
+              onClick: handleScan,
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Scan, { className: "h-4 w-4" }),
+              disabled,
+              children: [
+                "Scan ",
+                files.length > 1 ? `${files.length} documents` : "document"
+              ]
+            }
+          )
+        ] })
+      ] });
+    }
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-6", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        DropZone,
+        {
+          onFilesSelected: handleFilesSelected,
+          acceptedFileTypes,
+          multiple,
+          disabled,
+          className: "min-h-[200px]",
+          children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-4 text-center", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "text-primary-600 dark:text-primary-400 h-7 w-7" }) }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { weight: "medium", children: "Drag and drop your files here" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "or click to browse" })
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsxs(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "xs", className: "max-w-xs", children: [
+              "Supported formats: JPEG, PNG, HEIC, WebP, PDF",
+              /* @__PURE__ */ jsxRuntime.jsx("br", {}),
+              "Max size: ",
+              maxFileSizeMb,
+              " MB"
+            ] })
+          ] })
+        }
+      ),
+      (enableCamera || enableWebcam) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-3", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full max-w-xs items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-border h-px flex-1" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "or" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-border h-px flex-1" })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-center gap-3", children: [
+          enableCamera && isMobile && /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: handleCameraCapture,
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Camera, { className: "h-4 w-4" }),
+              disabled,
+              children: "Take a photo"
+            }
+          ),
+          enableWebcam && !isMobile && /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJYPDL2HB_cjs.Button,
+            {
+              variant: "secondary",
+              onClick: () => setIsWebcamOpen(true),
+              leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Camera, { className: "h-4 w-4" }),
+              disabled,
+              children: "Use webcam"
+            }
+          )
+        ] })
+      ] }),
+      validationErrors.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
+        chunkMJKFQ4TF_cjs.Alert,
+        {
+          variant: "warning",
+          dismissible: true,
+          onDismiss: () => setValidationErrors([]),
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertTitle, { children: "Invalid files" }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkMJKFQ4TF_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("strong", { children: [
+                err.file.name,
+                ":"
+              ] }),
+              " ",
+              err.message
+            ] }, index)) }) })
+          ]
+        }
+      )
+    ] });
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      chunkNH2JVQ6V_cjs.Modal,
+      {
+        open,
+        onOpenChange,
+        size,
+        className: chunkOR5DRJCW_cjs.cn("max-h-[90vh] overflow-y-auto", className),
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkNH2JVQ6V_cjs.ModalHeader, { children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntime.jsx(chunkNH2JVQ6V_cjs.ModalTitle, { children: title }),
+              description && /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", className: "mt-1", children: description })
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkNH2JVQ6V_cjs.ModalClose, {})
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkNH2JVQ6V_cjs.ModalBody, { children: renderContent() })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "input",
+      {
+        ref: cameraInputRef,
+        type: "file",
+        accept: cameraAcceptString,
+        capture: "environment",
+        onChange: handleCameraInputChange,
+        className: "sr-only",
+        "aria-hidden": "true",
+        tabIndex: -1
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      WebcamModal,
+      {
+        open: isWebcamOpen,
+        onOpenChange: setIsWebcamOpen,
+        onCapture: handleWebcamCapture
+      }
+    )
+  ] });
+}
+DocumentScannerModal.displayName = "DocumentScannerModal";
 var headerVariants = classVarianceAuthority.cva(
   [
     "flex items-center gap-3 px-4 py-3",
@@ -4964,7 +6940,7 @@ function formatLastSeen(date) {
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString();
 }
-var ConversationHeader = React14__namespace.forwardRef(
+var ConversationHeader = React21__namespace.forwardRef(
   ({
     className,
     size,
@@ -5076,7 +7052,7 @@ var ConversationHeader = React14__namespace.forwardRef(
   }
 );
 ConversationHeader.displayName = "ConversationHeader";
-var ConversationListItem = React14__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
+var ConversationListItem = React21__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
   const participant = conversation.participants.find((p) => !p.isCurrentUser);
   const title = getConversationTitle(conversation, participant);
   const avatarUrl = conversation.avatarUrl || participant?.avatarUrl;
@@ -5266,7 +7242,7 @@ function ConversationListSkeleton({
 }
 ConversationListSkeleton.displayName = "ConversationListSkeleton";
 function LightboxModal({ attachment, onClose }) {
-  React14__namespace.useEffect(() => {
+  React21__namespace.useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
@@ -5361,7 +7337,7 @@ function LightboxModal({ attachment, onClose }) {
   );
 }
 LightboxModal.displayName = "LightboxModal";
-var MessageThread = React14__namespace.forwardRef(
+var MessageThread = React21__namespace.forwardRef(
   ({
     conversation,
     messages,
@@ -5392,8 +7368,8 @@ var MessageThread = React14__namespace.forwardRef(
     onError,
     className
   }, ref) => {
-    const [lightboxAttachment, setLightboxAttachment] = React14__namespace.useState(null);
-    const [replyTo, setReplyTo] = React14__namespace.useState(null);
+    const [lightboxAttachment, setLightboxAttachment] = React21__namespace.useState(null);
+    const [replyTo, setReplyTo] = React21__namespace.useState(null);
     const participant = conversation?.type === "direct" ? conversation.participants.find((p) => p.id !== currentUser.id) : void 0;
     const handleAttachmentClick = (attachment, message) => {
       if (attachment.type === "image" || attachment.type === "video") {
@@ -5561,13 +7537,13 @@ function useMessages(options) {
     onRetry,
     onLoadMore
   } = options;
-  const [messages, setMessages] = React14__namespace.useState(initialMessages);
-  const [isSending, setIsSending] = React14__namespace.useState(false);
-  const [isLoadingMore, setIsLoadingMore] = React14__namespace.useState(false);
-  React14__namespace.useEffect(() => {
+  const [messages, setMessages] = React21__namespace.useState(initialMessages);
+  const [isSending, setIsSending] = React21__namespace.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React21__namespace.useState(false);
+  React21__namespace.useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
-  const addMessage = React14__namespace.useCallback((message) => {
+  const addMessage = React21__namespace.useCallback((message) => {
     setMessages((prev) => {
       if (prev.some((m) => m.id === message.id)) {
         return prev;
@@ -5575,7 +7551,7 @@ function useMessages(options) {
       return [...prev, message];
     });
   }, []);
-  const updateMessage = React14__namespace.useCallback(
+  const updateMessage = React21__namespace.useCallback(
     (messageId, updates) => {
       setMessages(
         (prev) => prev.map((m) => m.id === messageId ? { ...m, ...updates } : m)
@@ -5583,22 +7559,22 @@ function useMessages(options) {
     },
     []
   );
-  const removeMessage = React14__namespace.useCallback((messageId) => {
+  const removeMessage = React21__namespace.useCallback((messageId) => {
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
-  const updateStatus = React14__namespace.useCallback(
+  const updateStatus = React21__namespace.useCallback(
     (messageId, status) => {
       updateMessage(messageId, { status });
     },
     [updateMessage]
   );
-  const markAsRead = React14__namespace.useCallback(
+  const markAsRead = React21__namespace.useCallback(
     (messageId) => {
       updateStatus(messageId, "read");
     },
     [updateStatus]
   );
-  const sendMessage = React14__namespace.useCallback(
+  const sendMessage = React21__namespace.useCallback(
     async (newMessage) => {
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticMessage = {
@@ -5630,7 +7606,7 @@ function useMessages(options) {
     },
     [currentUser, onSend, addMessage, updateStatus]
   );
-  const retryMessage = React14__namespace.useCallback(
+  const retryMessage = React21__namespace.useCallback(
     async (messageId) => {
       updateStatus(messageId, "sending");
       try {
@@ -5644,7 +7620,7 @@ function useMessages(options) {
     },
     [onRetry, updateStatus]
   );
-  const loadMore = React14__namespace.useCallback(async () => {
+  const loadMore = React21__namespace.useCallback(async () => {
     if (isLoadingMore || !onLoadMore) return;
     setIsLoadingMore(true);
     try {
@@ -5675,13 +7651,13 @@ function useTypingIndicator(options = {}) {
     onTypingStart,
     onTypingStop
   } = options;
-  const [participants, setParticipants] = React14__namespace.useState(initialParticipants);
-  const [isLocalTyping, setIsLocalTyping] = React14__namespace.useState(false);
-  const typingTimeoutRef = React14__namespace.useRef(null);
-  React14__namespace.useEffect(() => {
+  const [participants, setParticipants] = React21__namespace.useState(initialParticipants);
+  const [isLocalTyping, setIsLocalTyping] = React21__namespace.useState(false);
+  const typingTimeoutRef = React21__namespace.useRef(null);
+  React21__namespace.useEffect(() => {
     setParticipants(initialParticipants);
   }, [initialParticipants]);
-  const startTyping = React14__namespace.useCallback(() => {
+  const startTyping = React21__namespace.useCallback(() => {
     if (!isLocalTyping) {
       setIsLocalTyping(true);
       onTypingStart?.();
@@ -5694,21 +7670,21 @@ function useTypingIndicator(options = {}) {
       onTypingStop?.();
     }, debounceTime);
   }, [isLocalTyping, debounceTime, onTypingStart, onTypingStop]);
-  const stopTyping = React14__namespace.useCallback(() => {
+  const stopTyping = React21__namespace.useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     setIsLocalTyping(false);
     onTypingStop?.();
   }, [onTypingStop]);
-  React14__namespace.useEffect(() => {
+  React21__namespace.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
     };
   }, []);
-  const typingState = React14__namespace.useMemo(
+  const typingState = React21__namespace.useMemo(
     () => ({
       participants,
       lastUpdated: /* @__PURE__ */ new Date()
@@ -5724,11 +7700,11 @@ function useTypingIndicator(options = {}) {
 }
 function useMessageScroll(options) {
   const { messages, currentUserId, threshold = 100 } = options;
-  const scrollContainerRef = React14__namespace.useRef(null);
-  const bottomRef = React14__namespace.useRef(null);
-  const [isScrolledUp, setIsScrolledUp] = React14__namespace.useState(false);
-  const prevMessageCountRef = React14__namespace.useRef(messages.length);
-  React14__namespace.useEffect(() => {
+  const scrollContainerRef = React21__namespace.useRef(null);
+  const bottomRef = React21__namespace.useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = React21__namespace.useState(false);
+  const prevMessageCountRef = React21__namespace.useRef(messages.length);
+  React21__namespace.useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     const handleScroll = () => {
@@ -5739,12 +7715,12 @@ function useMessageScroll(options) {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [threshold]);
-  const scrollToBottom = React14__namespace.useCallback((smooth = true) => {
+  const scrollToBottom = React21__namespace.useCallback((smooth = true) => {
     bottomRef.current?.scrollIntoView({
       behavior: smooth ? "smooth" : "auto"
     });
   }, []);
-  React14__namespace.useEffect(() => {
+  React21__namespace.useEffect(() => {
     const messageCountChanged = messages.length !== prevMessageCountRef.current;
     prevMessageCountRef.current = messages.length;
     if (!messageCountChanged) return;
@@ -5763,9 +7739,9 @@ function useMessageScroll(options) {
 }
 function useReadReceipts(options) {
   const { currentUserId, onMarkRead, threshold = 0.5 } = options;
-  const observerRef = React14__namespace.useRef(null);
-  const observedMessagesRef = React14__namespace.useRef(/* @__PURE__ */ new Set());
-  React14__namespace.useEffect(() => {
+  const observerRef = React21__namespace.useRef(null);
+  const observedMessagesRef = React21__namespace.useRef(/* @__PURE__ */ new Set());
+  React21__namespace.useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -5784,7 +7760,7 @@ function useReadReceipts(options) {
       observerRef.current?.disconnect();
     };
   }, [onMarkRead, threshold]);
-  const observeMessage = React14__namespace.useCallback(
+  const observeMessage = React21__namespace.useCallback(
     (element, message) => {
       if (!element || !observerRef.current) return;
       if (message.sender.id !== currentUserId && message.status !== "read" && !observedMessagesRef.current.has(message.id)) {
@@ -5796,7 +7772,7 @@ function useReadReceipts(options) {
   );
   return { observeMessage };
 }
-var SidebarContext = React14.createContext(null);
+var SidebarContext = React21.createContext(null);
 function SidebarProvider({
   children,
   defaultCollapsed = false,
@@ -5806,7 +7782,7 @@ function SidebarProvider({
   mobileBreakpoint = "(max-width: 1023px)"
 }) {
   const isMobileViewport = chunkR4DM4635_cjs.useMediaQuery(mobileBreakpoint);
-  const [isCollapsed, setIsCollapsed] = React14.useState(() => {
+  const [isCollapsed, setIsCollapsed] = React21.useState(() => {
     if (typeof window !== "undefined" && persistCollapsed) {
       const stored = localStorage.getItem(storageKey);
       if (stored !== null) {
@@ -5815,39 +7791,39 @@ function SidebarProvider({
     }
     return defaultCollapsed;
   });
-  const [isMobileOpen, setIsMobileOpen] = React14.useState(false);
-  const [expandedGroup, setExpandedGroup] = React14.useState(
+  const [isMobileOpen, setIsMobileOpen] = React21.useState(false);
+  const [expandedGroup, setExpandedGroup] = React21.useState(
     defaultExpandedGroup
   );
-  React14.useEffect(() => {
+  React21.useEffect(() => {
     if (persistCollapsed && typeof window !== "undefined") {
       localStorage.setItem(storageKey, String(isCollapsed));
     }
   }, [isCollapsed, persistCollapsed, storageKey]);
-  React14.useEffect(() => {
+  React21.useEffect(() => {
     if (!isMobileViewport && isMobileOpen) {
       setIsMobileOpen(false);
     }
   }, [isMobileViewport, isMobileOpen]);
-  const toggleCollapsed = React14.useCallback(() => {
+  const toggleCollapsed = React21.useCallback(() => {
     setIsCollapsed((prev) => !prev);
   }, []);
-  const setCollapsed = React14.useCallback((collapsed) => {
+  const setCollapsed = React21.useCallback((collapsed) => {
     setIsCollapsed(collapsed);
   }, []);
-  const openMobile = React14.useCallback(() => {
+  const openMobile = React21.useCallback(() => {
     setIsMobileOpen(true);
   }, []);
-  const closeMobile = React14.useCallback(() => {
+  const closeMobile = React21.useCallback(() => {
     setIsMobileOpen(false);
   }, []);
-  const toggleMobile = React14.useCallback(() => {
+  const toggleMobile = React21.useCallback(() => {
     setIsMobileOpen((prev) => !prev);
   }, []);
-  const toggleGroup = React14.useCallback((group) => {
+  const toggleGroup = React21.useCallback((group) => {
     setExpandedGroup((prev) => prev === group ? null : group);
   }, []);
-  const contextValue = React14.useMemo(
+  const contextValue = React21.useMemo(
     () => ({
       isCollapsed,
       toggleCollapsed,
@@ -5877,7 +7853,7 @@ function SidebarProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(SidebarContext.Provider, { value: contextValue, children });
 }
 function useSidebar() {
-  const context = React14.useContext(SidebarContext);
+  const context = React21.useContext(SidebarContext);
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider");
   }
@@ -6095,9 +8071,9 @@ function SidebarNavGroup({
   const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
-  const [localExpanded, setLocalExpanded] = React14.useState(defaultExpanded);
+  const [localExpanded, setLocalExpanded] = React21.useState(defaultExpanded);
   const effectiveExpanded = groupId ? isExpanded : localExpanded;
-  const handleToggle = React14.useCallback(() => {
+  const handleToggle = React21.useCallback(() => {
     if (groupId) {
       toggleGroup(groupId);
     } else {
@@ -6168,7 +8144,7 @@ function SidebarNavItem({
 }) {
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
-  const handleClick = React14.useCallback(() => {
+  const handleClick = React21.useCallback(() => {
     if (disabled) return;
     onClick?.();
     if (isMobileViewport) {
@@ -6288,9 +8264,9 @@ function SidebarSearch({
   "data-testid": testId = "sidebar-search"
 }) {
   const { isCollapsed, isMobileViewport, setCollapsed } = useSidebar();
-  const inputRef = React14.useRef(null);
+  const inputRef = React21.useRef(null);
   const showCollapsed = !isMobileViewport && isCollapsed;
-  React14.useEffect(() => {
+  React21.useEffect(() => {
     const handleKeyDown = (e) => {
       const target = e.target;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
@@ -6514,7 +8490,7 @@ function ToastContainer({
     }
   );
 }
-var ToastContext = React14.createContext(null);
+var ToastContext = React21.createContext(null);
 var toastIdCounter = 0;
 function generateToastId() {
   return `toast-${++toastIdCounter}-${Date.now()}`;
@@ -6524,8 +8500,8 @@ function ToastProvider({
   maxToasts = 5,
   defaultDuration = 5e3
 }) {
-  const [toasts, setToasts] = React14.useState([]);
-  const dismiss = React14.useCallback((id) => {
+  const [toasts, setToasts] = React21.useState([]);
+  const dismiss = React21.useCallback((id) => {
     setToasts((prev) => {
       const toast2 = prev.find((t) => t.id === id);
       if (toast2?.onDismiss) {
@@ -6534,13 +8510,13 @@ function ToastProvider({
       return prev.filter((t) => t.id !== id);
     });
   }, []);
-  const dismissAll = React14.useCallback(() => {
+  const dismissAll = React21.useCallback(() => {
     setToasts((prev) => {
       prev.forEach((t) => t.onDismiss?.());
       return [];
     });
   }, []);
-  const toast = React14.useCallback(
+  const toast = React21.useCallback(
     (options) => {
       const id = generateToastId();
       const duration = options.duration ?? defaultDuration;
@@ -6567,13 +8543,13 @@ function ToastProvider({
     },
     [maxToasts, defaultDuration, dismiss]
   );
-  const success = React14.useCallback(
+  const success = React21.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "success" });
     },
     [toast]
   );
-  const error = React14.useCallback(
+  const error = React21.useCallback(
     (message, options) => {
       return toast({
         ...options,
@@ -6585,19 +8561,19 @@ function ToastProvider({
     },
     [toast]
   );
-  const warning = React14.useCallback(
+  const warning = React21.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "warning" });
     },
     [toast]
   );
-  const info = React14.useCallback(
+  const info = React21.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "info" });
     },
     [toast]
   );
-  const contextValue = React14.useMemo(
+  const contextValue = React21.useMemo(
     () => ({
       toasts,
       toast,
@@ -6613,7 +8589,7 @@ function ToastProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(ToastContext.Provider, { value: contextValue, children });
 }
 function useToast() {
-  const context = React14.useContext(ToastContext);
+  const context = React21.useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
   }
@@ -6870,7 +8846,7 @@ Object.defineProperty(exports, "paginationButtonVariants", {
 });
 Object.defineProperty(exports, "PhoneInput", {
   enumerable: true,
-  get: function () { return chunkG4IYKDQ2_cjs.PhoneInput; }
+  get: function () { return chunk43WUKHJZ_cjs.PhoneInput; }
 });
 Object.defineProperty(exports, "CircularProgress", {
   enumerable: true,
@@ -6926,19 +8902,19 @@ Object.defineProperty(exports, "radioVariants", {
 });
 Object.defineProperty(exports, "RecordButton", {
   enumerable: true,
-  get: function () { return chunkZJIXG4RV_cjs.RecordButton; }
+  get: function () { return chunkHLW3XD5R_cjs.RecordButton; }
 });
 Object.defineProperty(exports, "formatDuration", {
   enumerable: true,
-  get: function () { return chunkZJIXG4RV_cjs.formatDuration; }
+  get: function () { return chunkHLW3XD5R_cjs.formatDuration; }
 });
 Object.defineProperty(exports, "recordButtonVariants", {
   enumerable: true,
-  get: function () { return chunkZJIXG4RV_cjs.recordButtonVariants; }
+  get: function () { return chunkHLW3XD5R_cjs.recordButtonVariants; }
 });
 Object.defineProperty(exports, "recordingIndicatorVariants", {
   enumerable: true,
-  get: function () { return chunkZJIXG4RV_cjs.recordingIndicatorVariants; }
+  get: function () { return chunkHLW3XD5R_cjs.recordingIndicatorVariants; }
 });
 Object.defineProperty(exports, "DateButton", {
   enumerable: true,
@@ -6994,55 +8970,83 @@ Object.defineProperty(exports, "BreadcrumbSlash", {
 });
 Object.defineProperty(exports, "Button", {
   enumerable: true,
-  get: function () { return chunkGCCKT63N_cjs.Button; }
+  get: function () { return chunkJYPDL2HB_cjs.Button; }
 });
 Object.defineProperty(exports, "buttonVariants", {
   enumerable: true,
-  get: function () { return chunkGCCKT63N_cjs.buttonVariants; }
+  get: function () { return chunkJYPDL2HB_cjs.buttonVariants; }
 });
 Object.defineProperty(exports, "Card", {
   enumerable: true,
-  get: function () { return chunkZENVEUAE_cjs.Card; }
+  get: function () { return chunkHRA4FUO6_cjs.Card; }
+});
+Object.defineProperty(exports, "CardActions", {
+  enumerable: true,
+  get: function () { return chunkHRA4FUO6_cjs.CardActions; }
+});
+Object.defineProperty(exports, "CardBadge", {
+  enumerable: true,
+  get: function () { return chunkHRA4FUO6_cjs.CardBadge; }
+});
+Object.defineProperty(exports, "CardCollapsible", {
+  enumerable: true,
+  get: function () { return chunkHRA4FUO6_cjs.CardCollapsible; }
 });
 Object.defineProperty(exports, "CardContent", {
   enumerable: true,
-  get: function () { return chunkZENVEUAE_cjs.CardContent; }
+  get: function () { return chunkHRA4FUO6_cjs.CardContent; }
 });
 Object.defineProperty(exports, "CardDescription", {
   enumerable: true,
-  get: function () { return chunkZENVEUAE_cjs.CardDescription; }
+  get: function () { return chunkHRA4FUO6_cjs.CardDescription; }
+});
+Object.defineProperty(exports, "CardDivider", {
+  enumerable: true,
+  get: function () { return chunkHRA4FUO6_cjs.CardDivider; }
 });
 Object.defineProperty(exports, "CardFooter", {
   enumerable: true,
-  get: function () { return chunkZENVEUAE_cjs.CardFooter; }
+  get: function () { return chunkHRA4FUO6_cjs.CardFooter; }
 });
 Object.defineProperty(exports, "CardHeader", {
   enumerable: true,
-  get: function () { return chunkZENVEUAE_cjs.CardHeader; }
+  get: function () { return chunkHRA4FUO6_cjs.CardHeader; }
+});
+Object.defineProperty(exports, "CardMedia", {
+  enumerable: true,
+  get: function () { return chunkHRA4FUO6_cjs.CardMedia; }
+});
+Object.defineProperty(exports, "CardStat", {
+  enumerable: true,
+  get: function () { return chunkHRA4FUO6_cjs.CardStat; }
 });
 Object.defineProperty(exports, "CardTitle", {
   enumerable: true,
-  get: function () { return chunkZENVEUAE_cjs.CardTitle; }
+  get: function () { return chunkHRA4FUO6_cjs.CardTitle; }
+});
+Object.defineProperty(exports, "cardAccentVariants", {
+  enumerable: true,
+  get: function () { return chunkHRA4FUO6_cjs.cardAccentVariants; }
 });
 Object.defineProperty(exports, "cardVariants", {
   enumerable: true,
-  get: function () { return chunkZENVEUAE_cjs.cardVariants; }
+  get: function () { return chunkHRA4FUO6_cjs.cardVariants; }
 });
 Object.defineProperty(exports, "Checkbox", {
   enumerable: true,
-  get: function () { return chunkL7TTMKLJ_cjs.Checkbox; }
+  get: function () { return chunkQYJ7RQJ2_cjs.Checkbox; }
 });
 Object.defineProperty(exports, "CheckboxGroup", {
   enumerable: true,
-  get: function () { return chunkL7TTMKLJ_cjs.CheckboxGroup; }
+  get: function () { return chunkQYJ7RQJ2_cjs.CheckboxGroup; }
 });
 Object.defineProperty(exports, "checkboxVariants", {
   enumerable: true,
-  get: function () { return chunkL7TTMKLJ_cjs.checkboxVariants; }
+  get: function () { return chunkQYJ7RQJ2_cjs.checkboxVariants; }
 });
 Object.defineProperty(exports, "DateInput", {
   enumerable: true,
-  get: function () { return chunkJGADLLQW_cjs.DateInput; }
+  get: function () { return chunkKVSUL3EW_cjs.DateInput; }
 });
 Object.defineProperty(exports, "Dropdown", {
   enumerable: true,
@@ -7070,11 +9074,11 @@ Object.defineProperty(exports, "DropdownSeparator", {
 });
 Object.defineProperty(exports, "Input", {
   enumerable: true,
-  get: function () { return chunkDQTQ4AQQ_cjs.Input; }
+  get: function () { return chunkVV4N4WY6_cjs.Input; }
 });
 Object.defineProperty(exports, "inputVariants", {
   enumerable: true,
-  get: function () { return chunkDQTQ4AQQ_cjs.inputVariants; }
+  get: function () { return chunkVV4N4WY6_cjs.inputVariants; }
 });
 Object.defineProperty(exports, "useCommandK", {
   enumerable: true,
@@ -7182,11 +9186,11 @@ Object.defineProperty(exports, "parseDateValue", {
 });
 Object.defineProperty(exports, "miewebUIPreset", {
   enumerable: true,
-  get: function () { return chunkYDA3J724_cjs.miewebUIPreset; }
+  get: function () { return chunk2PZGSRKB_cjs.miewebUIPreset; }
 });
 Object.defineProperty(exports, "miewebUISafelist", {
   enumerable: true,
-  get: function () { return chunkYDA3J724_cjs.miewebUISafelist; }
+  get: function () { return chunk2PZGSRKB_cjs.miewebUISafelist; }
 });
 Object.defineProperty(exports, "Alert", {
   enumerable: true,
@@ -7303,11 +9307,16 @@ exports.ConversationListSkeleton = ConversationListSkeleton;
 exports.CurrencyRenderer = CurrencyRenderer;
 exports.DateRenderer = DateRenderer;
 exports.DateSeparator = DateSeparator;
+exports.DocumentDetectionOverlay = DocumentDetectionOverlay;
+exports.DocumentScanner = DocumentScanner;
+exports.DocumentScannerModal = DocumentScannerModal;
 exports.DomainRenderer = DomainRenderer;
 exports.DragDropZone = DragDropZone;
+exports.DropZone = DropZone;
 exports.EmailRenderer = EmailRenderer;
 exports.EmptyState = EmptyState;
 exports.EngagementScoreRenderer = EngagementScoreRenderer;
+exports.FilePreview = FilePreview;
 exports.FloatingAIChat = FloatingAIChat;
 exports.LightboxModal = LightboxModal;
 exports.LinkedInRenderer = LinkedInRenderer;
@@ -7364,6 +9373,7 @@ exports.ToastContainer = ToastContainer;
 exports.ToastProvider = ToastProvider;
 exports.ToolStatusIcon = ToolStatusIcon;
 exports.TypingIndicator = TypingIndicator;
+exports.WebcamModal = WebcamModal;
 exports.bubbleVariants = bubbleVariants2;
 exports.formatDateLabel = formatDateLabel;
 exports.formatFileSize = formatFileSize2;
@@ -7379,7 +9389,10 @@ exports.headerVariants = headerVariants;
 exports.isSameSenderGroup = isSameSenderGroup;
 exports.sendButtonVariants = sendButtonVariants;
 exports.statusColors = statusColors;
+exports.useCamera = useCamera;
 exports.useCommandPalette = useCommandPalette;
+exports.useDocumentDetection = useDocumentDetection;
+exports.useFileUpload = useFileUpload;
 exports.useMessageScroll = useMessageScroll;
 exports.useMessages = useMessages;
 exports.useReadReceipts = useReadReceipts;

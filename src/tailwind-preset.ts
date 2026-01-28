@@ -102,6 +102,38 @@ export const miewebUISafelist = [
   'overflow-hidden',
   // Select component
   'truncate',
+  // Modal size classes
+  'max-w-sm',
+  'max-w-md',
+  'max-w-lg',
+  'max-w-xl',
+  'max-w-2xl',
+  'max-w-3xl',
+  'max-w-4xl',
+  'max-w-[calc(100vw-2rem)]',
+  // Modal overlay classes
+  'bg-black/50',
+  'backdrop-blur-sm',
+  'backdrop-blur',
+  'inset-0',
+  // DropZone states
+  'border-dashed',
+  'border-2',
+  'border-neutral-300',
+  'dark:border-neutral-600',
+  'bg-neutral-50',
+  'dark:bg-neutral-800/50',
+  'hover:border-primary-400',
+  'hover:bg-primary-50/50',
+  'dark:hover:border-primary-500',
+  'dark:hover:bg-primary-900/20',
+  'border-primary-500',
+  'bg-primary-50',
+  'dark:border-primary-400',
+  'dark:bg-primary-900/30',
+  'bg-primary-500/10',
+  'text-primary-600',
+  'dark:text-primary-400',
 ];
 
 export interface MiewebUIPreset {

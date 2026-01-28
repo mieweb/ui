@@ -41,6 +41,7 @@
  */
 
 export { DocumentScanner } from './DocumentScanner';
+export { DocumentScannerModal } from './DocumentScannerModal';
 export { DropZone } from './DropZone';
 export { FilePreview } from './FilePreview';
 export { WebcamModal } from './WebcamModal';
@@ -49,6 +50,7 @@ export { useFileUpload } from './useFileUpload';
 export { useCamera } from './useCamera';
 export { useDocumentDetection } from './useDocumentDetection';
 export type * from './types';
+export type { DocumentScannerModalProps } from './DocumentScannerModal';
 export type {
   Point,
   DocumentBoundary,
