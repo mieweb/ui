@@ -126,6 +126,38 @@ html, body {
   border-color: var(--mieweb-border, #3f3f46) !important;
 }
 
+/* Boolean toggle controls (False/True toggle) */
+/* Structure: label[for^="control-"] > input[role="switch"] + span("False") + span("True") */
+/* The input is position:absolute and covers the spans, so it MUST be transparent */
+[data-theme="dark"] label[for^="control-"] {
+  background-color: var(--mieweb-card, #27272a) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* Input must be transparent to show text underneath */
+[data-theme="dark"] label[for^="control-"] > input[role="switch"],
+[data-theme="dark"] input[id^="control-"][role="switch"] {
+  background-color: transparent !important;
+}
+
+/* All spans: white text, transparent background by default */
+[data-theme="dark"] label[for^="control-"] > span {
+  color: #fafafa !important;
+  background-color: transparent !important;
+}
+
+/* When UNCHECKED: highlight "False" span (first span = input + span) */
+[data-theme="dark"] label[for^="control-"] > input[role="switch"]:not(:checked) + span {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+/* When CHECKED: highlight "True" span (second span = input + span + span) */
+[data-theme="dark"] label[for^="control-"] > input[role="switch"]:checked + span + span {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
 /* Buttons in controls */
 [data-theme="dark"] .docblock-argstable button {
   background-color: var(--mieweb-card, #27272a) !important;
