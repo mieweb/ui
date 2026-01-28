@@ -276,34 +276,6 @@ export const OnIconButton: Story = {
   ),
 };
 
-export const DarkMode: Story = {
-  name: 'Dark Mode',
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
-  decorators: [
-    (Story) => (
-      <div className="dark rounded-lg bg-neutral-900 p-8">
-        <Story />
-      </div>
-    ),
-  ],
-  render: () => (
-    <div className="flex flex-col items-center gap-8">
-      <Tooltip content="Tooltip in dark mode" placement="top">
-        <Button>Hover me</Button>
-      </Tooltip>
-      <Tooltip
-        content="Multi-line tooltip content that wraps nicely in dark mode as well."
-        maxWidth={200}
-        placement="bottom"
-      >
-        <Button variant="outline">Multi-line tooltip</Button>
-      </Tooltip>
-    </div>
-  ),
-};
-
 export const Toolbar: Story = {
   name: 'Toolbar Example',
   render: () => (

@@ -2138,18 +2138,6 @@ export const Dashboard: StoryObj = {
 };
 
 // ============================================================================
-// Dashboard Dark Story
-// ============================================================================
-
-export const DashboardDark: StoryObj = {
-  render: () => (
-    <ThemeProvider defaultTheme="dark" storageKey="mieweb-dashboard-dark-theme">
-      <AppShell />
-    </ThemeProvider>
-  ),
-};
-
-// ============================================================================
 // All Components Story
 // ============================================================================
 
@@ -2318,89 +2306,6 @@ export const AllComponents: StoryObj = {
         <div className="space-y-4">
           <Pagination page={1} totalPages={10} onPageChange={() => {}} />
           <SimplePagination page={1} totalPages={10} onPageChange={() => {}} />
-        </div>
-      </section>
-    </div>
-  ),
-};
-
-// ============================================================================
-// All Components Dark Story
-// ============================================================================
-
-export const AllComponentsDark: StoryObj = {
-  render: () => (
-    <div className="dark bg-background min-h-screen p-8">
-      <Text as="h1" size="3xl" weight="bold" className="mb-2">
-        Component Showcase (Dark Mode)
-      </Text>
-      <Text variant="muted" className="mb-8">
-        All components automatically adapt to the dark theme. Use the theme
-        toggle in the toolbar to switch themes.
-      </Text>
-
-      {/* Sample Components in Dark Mode */}
-      <section className="mb-8">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Sample Components
-        </Text>
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dark Mode Card</CardTitle>
-              <CardDescription>
-                Cards and other components automatically adapt their colors.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                <Button>Primary</Button>
-                <Button variant="secondary">Secondary</Button>
-                <Button variant="outline">Outline</Button>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Form Elements</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Input label="Input" placeholder="Enter text..." />
-              <Select
-                label="Select"
-                placeholder="Choose..."
-                options={[{ value: '1', label: 'Option 1' }]}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Alerts in Dark Mode */}
-      <section className="mb-8">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Alerts
-        </Text>
-        <div className="space-y-2">
-          <Alert variant="info">Info alert in dark mode.</Alert>
-          <Alert variant="success">Success alert in dark mode.</Alert>
-          <Alert variant="warning">Warning alert in dark mode.</Alert>
-          <Alert variant="danger">Danger alert in dark mode.</Alert>
-        </div>
-      </section>
-
-      {/* Typography in Dark Mode */}
-      <section className="mb-8">
-        <Text as="h2" size="2xl" weight="bold" className="mb-4">
-          Typography
-        </Text>
-        <div className="space-y-3">
-          <Text>Default foreground text adapts to dark theme.</Text>
-          <Text variant="muted">Muted text remains readable.</Text>
-          <Text variant="primary">Primary text uses brand colors.</Text>
-          <Text variant="success">Success text stays green.</Text>
-          <Text variant="warning">Warning text stays amber.</Text>
-          <Text variant="destructive">Destructive text stays red.</Text>
         </div>
       </section>
     </div>

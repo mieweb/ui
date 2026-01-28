@@ -598,20 +598,6 @@ export const CustomIcons: Story = {
 };
 
 // ============================================================================
-// Dark Mode
-// ============================================================================
-
-export const DarkModePreview: Story = {
-  render: () => (
-    <div className="dark flex items-center gap-4 rounded-xl bg-neutral-900 p-6">
-      <RecordButton variant="default" />
-      <RecordButton variant="filled" />
-      <RecordButton variant="primary" />
-    </div>
-  ),
-};
-
-// ============================================================================
 // Transcription Examples
 // ============================================================================
 

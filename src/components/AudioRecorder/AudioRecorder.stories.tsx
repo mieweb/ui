@@ -550,23 +550,8 @@ export const InlineRecorder: Story = {
 };
 
 // ============================================================================
-// Theme Examples
+// Size Comparison
 // ============================================================================
-
-export const DarkModePreview: Story = {
-  render: () => (
-    <div className="dark rounded-xl bg-neutral-900 p-6">
-      <AudioRecorder variant="elevated" />
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Preview of the recorder in dark mode.',
-      },
-    },
-  },
-};
 
 export const AllSizeComparison: Story = {
   render: () => (

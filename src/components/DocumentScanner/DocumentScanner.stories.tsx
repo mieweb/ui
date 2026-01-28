@@ -324,36 +324,6 @@ export const ProcessingState: Story = {
 };
 
 /**
- * Dark mode variant
- */
-export const DarkMode: Story = {
-  args: {
-    onScan: mockScanSuccess,
-    onResult: (data: unknown) => console.log('Result:', data),
-    title: "Scan your driver's license",
-    description: 'Component automatically adapts to dark mode',
-  },
-  decorators: [
-    (Story) => (
-      <ThemeProvider defaultTheme="dark">
-        <div className="dark w-full max-w-2xl rounded-xl bg-neutral-900 p-8">
-          <Story />
-        </div>
-      </ThemeProvider>
-    ),
-  ],
-  parameters: {
-    backgrounds: { default: 'dark' },
-    docs: {
-      description: {
-        story:
-          'The DocumentScanner automatically adapts to dark mode using the mieweb/ui theming system.',
-      },
-    },
-  },
-};
-
-/**
  * With validation error callback
  */
 export const WithValidationCallback: Story = {

@@ -11,29 +11,33 @@ export { defaultBrand } from './chunk-4LTN2LEN.js';
 export { enterpriseHealthBrand } from './chunk-MTZPVOP6.js';
 export { Select, selectTriggerVariants } from './chunk-KJOFWJHV.js';
 export { Skeleton, SkeletonCard, SkeletonTable, SkeletonText, skeletonVariants } from './chunk-6OCIIIAI.js';
+import { SpinnerWithLabel, Spinner } from './chunk-GV5JQBPX.js';
 export { FullPageSpinner, Spinner, SpinnerWithLabel, spinnerVariants } from './chunk-GV5JQBPX.js';
 export { Switch, switchThumbVariants, switchTrackVariants } from './chunk-TTSLBOAO.js';
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './chunk-AWIULTJW.js';
 export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants, tabsTriggerVariants } from './chunk-JFAXLE2J.js';
+import { Text } from './chunk-RCMF6KZA.js';
 export { SmallMuted, Text, textVariants } from './chunk-RCMF6KZA.js';
 export { Textarea, textareaVariants } from './chunk-4AWW5WPF.js';
+import { Modal, ModalHeader, ModalTitle, ModalClose, ModalBody, ModalFooter } from './chunk-D5IBXXF2.js';
 export { Modal, ModalBody, ModalClose, ModalFooter, ModalHeader, ModalTitle, modalContentVariants, modalOverlayVariants } from './chunk-D5IBXXF2.js';
 export { Pagination, SimplePagination, paginationButtonVariants } from './chunk-ONWOB76P.js';
-export { PhoneInput } from './chunk-J23CSBQG.js';
+export { PhoneInput } from './chunk-YOE5LZZJ.js';
 export { CircularProgress, Progress, circularProgressVariants, progressBarFillVariants, progressBarTrackVariants } from './chunk-4MHTSFPX.js';
 export { QuickAction, QuickActionGroup, QuickActionIcons, quickActionIconVariants, quickActionVariants } from './chunk-VO3RBR4B.js';
 export { Radio, RadioGroup, radioVariants } from './chunk-BC7YQKHJ.js';
-export { RecordButton, formatDuration, recordButtonVariants, recordingIndicatorVariants } from './chunk-QK4R7ISY.js';
+export { RecordButton, formatDuration, recordButtonVariants, recordingIndicatorVariants } from './chunk-FQ5G7J24.js';
 export { DateButton, DatePicker, RadioOption, SchedulePicker, TimeButton, TimePicker, dateButtonVariants, radioOptionVariants, timeButtonVariants } from './chunk-DMA74PZ7.js';
 export { Badge, badgeVariants } from './chunk-3NJ72QU6.js';
 export { Breadcrumb, BreadcrumbSlash } from './chunk-B3L43JGH.js';
-export { Button, buttonVariants } from './chunk-ZH2ST6EC.js';
-export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, cardVariants } from './chunk-XVNFVSOS.js';
-export { Checkbox, CheckboxGroup, checkboxVariants } from './chunk-VW7ZJHOM.js';
-export { DateInput } from './chunk-HK4M7Z6D.js';
+import { Button } from './chunk-N5EKL4DH.js';
+export { Button, buttonVariants } from './chunk-N5EKL4DH.js';
+export { Card, CardActions, CardBadge, CardCollapsible, CardContent, CardDescription, CardDivider, CardFooter, CardHeader, CardMedia, CardStat, CardTitle, cardAccentVariants, cardVariants } from './chunk-XXOBTAKA.js';
+export { Checkbox, CheckboxGroup, checkboxVariants } from './chunk-G2DOD34H.js';
+export { DateInput } from './chunk-Q6P5XXUI.js';
 export { Dropdown, DropdownContent, DropdownHeader, DropdownItem, DropdownLabel, DropdownSeparator } from './chunk-265CFCCX.js';
-export { Input, inputVariants } from './chunk-LIYX5CYL.js';
-import { useCommandK, useMediaQuery } from './chunk-CP7NPDQW.js';
+export { Input, inputVariants } from './chunk-NXRLGHEC.js';
+import { useCommandK, useIsMobile, useMediaQuery } from './chunk-CP7NPDQW.js';
 export { useCommandK, useIsDesktop, useIsLargeDesktop, useIsMobile, useIsMobileOrTablet, useIsSmallTablet, useIsTablet, useKeyboardShortcut, useMediaQuery } from './chunk-CP7NPDQW.js';
 export { useTheme } from './chunk-KJZNEVYM.js';
 export { usePrefersReducedMotion } from './chunk-HB7C7NB5.js';
@@ -46,21 +50,22 @@ export { useEscapeKey } from './chunk-T4ME7QCT.js';
 import './chunk-ZQ4XMJH7.js';
 export { formatPhoneNumber, isPhoneNumberEmpty, isValidPhoneNumber, unformatPhoneNumber } from './chunk-CEHWXAAI.js';
 export { calculateAge, formatDateValue, isDateEmpty, isDateInFuture, isDateInPast, isValidDate, isValidDrivingAge, parseDateValue } from './chunk-SN52QMRT.js';
-export { miewebUIPreset, miewebUISafelist } from './chunk-D2UGT5OL.js';
-export { Alert, AlertDescription, AlertTitle, alertVariants } from './chunk-I4BGJZ7J.js';
+export { miewebUIPreset, miewebUISafelist } from './chunk-O7WRE2WX.js';
+import { Alert, AlertTitle, AlertDescription } from './chunk-B26RIQ5R.js';
+export { Alert, AlertDescription, AlertTitle, alertVariants } from './chunk-B26RIQ5R.js';
 export { AudioPlayer, ProgressBar, audioPlayerVariants, formatTime as formatAudioTime, playButtonVariants } from './chunk-S64LP3CR.js';
 export { AudioRecorder, audioRecorderVariants, controlButtonVariants, formatTime, waveformContainerVariants } from './chunk-QZLRB3UG.js';
-export { Avatar, AvatarGroup, avatarVariants, getInitials } from './chunk-DKOQSOJC.js';
+export { Avatar, AvatarGroup, avatarVariants, getInitials } from './chunk-NIHESA7O.js';
 import { cn } from './chunk-F3SOEIN2.js';
 export { cn } from './chunk-F3SOEIN2.js';
-import * as React14 from 'react';
-import React14__default, { memo, createContext, useState, useCallback, useMemo, useContext, useRef, useEffect } from 'react';
+import * as React20 from 'react';
+import React20__default, { memo, createContext, useState, useCallback, useMemo, useContext, useRef, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 export { AgGridReact } from 'ag-grid-react';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { cva } from 'class-variance-authority';
 import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
-import { Mail, Phone, Linkedin, Globe, CheckCircle, Clock } from 'lucide-react';
+import { Mail, Phone, Linkedin, Globe, CheckCircle, Clock, AlertCircle, Upload, Trash2, Scan, Camera, ScanLine, RefreshCw, FileText, Image, X, Check } from 'lucide-react';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 var agGridVariants = cva("ag-theme-custom w-full", {
@@ -71,32 +76,52 @@ var agGridVariants = cva("ag-theme-custom w-full", {
     variant: {
       default: "",
       bordered: "[&_.ag-root-wrapper]:border [&_.ag-root-wrapper]:border-border [&_.ag-root-wrapper]:rounded-lg",
-      striped: "[&_.ag-row-odd]:bg-muted/50"
+      striped: "[&_.ag-row-odd]:bg-muted/50",
+      card: "[&_.ag-root-wrapper]:shadow-card [&_.ag-root-wrapper]:rounded-lg [&_.ag-root-wrapper]:border-0"
     },
     /**
      * Size/density of the grid rows
      */
     size: {
-      sm: "[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs",
-      md: "[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm",
-      lg: "[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base"
+      xs: "[&_.ag-row]:h-7 [&_.ag-header-row]:h-7 text-xs [&_.ag-cell]:px-2",
+      sm: "[&_.ag-row]:h-8 [&_.ag-header-row]:h-8 text-xs [&_.ag-cell]:px-3",
+      md: "[&_.ag-row]:h-10 [&_.ag-header-row]:h-10 text-sm [&_.ag-cell]:px-4",
+      lg: "[&_.ag-row]:h-12 [&_.ag-header-row]:h-12 text-base [&_.ag-cell]:px-4",
+      xl: "[&_.ag-row]:h-14 [&_.ag-header-row]:h-14 text-base [&_.ag-cell]:px-6"
+    },
+    /**
+     * Brand theme variant
+     */
+    brand: {
+      default: "",
+      mieweb: "ag-brand-mieweb",
+      bluehive: "ag-brand-bluehive",
+      waggleline: "ag-brand-waggleline",
+      webchart: "ag-brand-webchart",
+      "enterprise-health": "ag-brand-enterprise-health"
     }
   },
   defaultVariants: {
     variant: "default",
-    size: "md"
+    size: "md",
+    brand: "default"
   }
 });
-var defaultColDef = {
-  sortable: true,
-  filter: true,
-  resizable: true,
-  minWidth: 100
-};
+var getDefaultColDef = (sortable, filterable, resizable) => ({
+  sortable,
+  filter: filterable,
+  resizable,
+  minWidth: 100,
+  flex: 1,
+  suppressMovable: false,
+  headerClass: "ag-header-cell-custom",
+  cellClass: "ag-cell-custom"
+});
 function AGGridInner({
   className,
   variant,
   size,
+  brand,
   height = 400,
   loading = false,
   columnDefs,
@@ -106,32 +131,39 @@ function AGGridInner({
   onRowClick,
   gridRef,
   rowSelection,
+  brandConfig,
+  pagination = false,
+  resizable = true,
+  sortable = true,
+  filterable = true,
+  noDataMessage = "No data to display",
+  loadingMessage = "Loading...",
   ...props
 }, ref) {
-  const internalRef = React14.useRef(null);
-  const gridApiRef = React14.useRef(null);
+  const internalRef = React20.useRef(null);
+  const gridApiRef = React20.useRef(null);
   const resolvedRef = gridRef || ref || internalRef;
-  const handleGridReady = React14.useCallback(
+  const handleGridReady = React20.useCallback(
     (event) => {
       gridApiRef.current = event.api;
       onGridReady?.(event);
     },
     [onGridReady]
   );
-  const handleRowClicked = React14.useCallback(
+  const handleRowClicked = React20.useCallback(
     (event) => {
       onRowClick?.(event);
     },
     [onRowClick]
   );
-  const mergedDefaultColDef = React14.useMemo(
+  const mergedDefaultColDef = React20.useMemo(
     () => ({
-      ...defaultColDef,
+      ...getDefaultColDef(sortable, filterable, resizable),
       ...userDefaultColDef
     }),
-    [userDefaultColDef]
+    [userDefaultColDef, sortable, filterable, resizable]
   );
-  const resolvedRowSelection = React14.useMemo(() => {
+  const resolvedRowSelection = React20.useMemo(() => {
     if (!rowSelection) return void 0;
     if (typeof rowSelection === "object") {
       return rowSelection;
@@ -150,7 +182,7 @@ function AGGridInner({
     }
     return void 0;
   }, [rowSelection]);
-  React14.useEffect(() => {
+  React20.useEffect(() => {
     if (gridApiRef.current) {
       if (loading) {
         gridApiRef.current.showLoadingOverlay();
@@ -162,8 +194,15 @@ function AGGridInner({
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: cn(agGridVariants({ variant, size }), className),
-      style: { height: typeof height === "number" ? `${height}px` : height },
+      className: cn(agGridVariants({ variant, size, brand }), className),
+      style: {
+        height: typeof height === "number" ? `${height}px` : height,
+        ...brandConfig && {
+          "--ag-primary-color": brandConfig.colors.primary[600],
+          "--ag-font-family": brandConfig.typography.fontFamily.sans.join(", ")
+        }
+      },
+      "data-brand": brand,
       children: /* @__PURE__ */ jsx(
         AgGridReact,
         {
@@ -173,8 +212,14 @@ function AGGridInner({
           defaultColDef: mergedDefaultColDef,
           onGridReady: handleGridReady,
           onRowClicked: handleRowClicked,
-          animateRows: false,
+          animateRows: true,
+          enableBrowserTooltips: true,
           rowSelection: resolvedRowSelection,
+          pagination,
+          paginationPageSize: pagination ? 50 : void 0,
+          paginationPageSizeSelector: pagination ? [25, 50, 100, 200] : void 0,
+          noRowsOverlayComponent: () => /* @__PURE__ */ jsx("div", { className: "text-muted-foreground py-8 text-center", children: noDataMessage }),
+          loadingOverlayComponent: () => /* @__PURE__ */ jsx("div", { className: "text-muted-foreground py-8 text-center", children: loadingMessage }),
           theme: "legacy",
           ...props
         }
@@ -182,7 +227,7 @@ function AGGridInner({
     }
   );
 }
-var AGGrid = React14.forwardRef(AGGridInner);
+var AGGrid = React20.forwardRef(AGGridInner);
 AGGrid.displayName = "AGGrid";
 function getNestedValue(obj, path) {
   if (!obj || !path) return void 0;
@@ -1273,7 +1318,7 @@ function ToolResultDisplay({
   showRawData = false,
   className
 }) {
-  const [showJson, setShowJson] = React14.useState(false);
+  const [showJson, setShowJson] = React20.useState(false);
   if (result.type === "error") {
     return /* @__PURE__ */ jsx(
       "div",
@@ -1427,7 +1472,7 @@ function MCPToolCallDisplay({
   onLinkClick,
   className
 }) {
-  const [showDetails, setShowDetails] = React14.useState(!defaultCollapsed);
+  const [showDetails, setShowDetails] = React20.useState(!defaultCollapsed);
   const formatDuration2 = (ms) => {
     if (!ms) return null;
     if (ms < 1e3) return `${ms}ms`;
@@ -1641,7 +1686,7 @@ function AITypingIndicator({ className }) {
   );
 }
 function ContentBlock({ content, onLinkClick }) {
-  const [isCollapsed, setIsCollapsed] = React14.useState(
+  const [isCollapsed, setIsCollapsed] = React20.useState(
     content.collapsed ?? false
   );
   if (content.type === "text" && content.text) {
@@ -2013,7 +2058,7 @@ function AttachmentPreviewItem({
   );
 }
 AttachmentPreviewItem.displayName = "AttachmentPreviewItem";
-var AttachmentPicker = React14.forwardRef(
+var AttachmentPicker = React20.forwardRef(
   ({
     onFilesSelected,
     acceptedTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
@@ -2026,8 +2071,8 @@ var AttachmentPicker = React14.forwardRef(
     className,
     children
   }, ref) => {
-    const inputRef = React14.useRef(null);
-    React14.useImperativeHandle(ref, () => inputRef.current);
+    const inputRef = React20.useRef(null);
+    React20.useImperativeHandle(ref, () => inputRef.current);
     const handleClick = () => {
       inputRef.current?.click();
     };
@@ -2117,8 +2162,8 @@ function DragDropZone({
   children,
   className
 }) {
-  const [isDragging, setIsDragging] = React14.useState(false);
-  const dragCounterRef = React14.useRef(0);
+  const [isDragging, setIsDragging] = React20.useState(false);
+  const dragCounterRef = React20.useRef(0);
   const handleDragEnter = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -2219,7 +2264,7 @@ function CameraButton({
   disabled = false,
   className
 }) {
-  const inputRef = React14.useRef(null);
+  const inputRef = React20.useRef(null);
   const handleClick = () => {
     inputRef.current?.click();
   };
@@ -2356,7 +2401,7 @@ var sendButtonVariants = cva(
     }
   }
 );
-var SendButton = React14.forwardRef(
+var SendButton = React20.forwardRef(
   ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
     return /* @__PURE__ */ jsx(
       "button",
@@ -2410,7 +2455,7 @@ var SendButton = React14.forwardRef(
   }
 );
 SendButton.displayName = "SendButton";
-var MessageComposer = React14.forwardRef(
+var MessageComposer = React20.forwardRef(
   ({
     onSend,
     onTypingStart,
@@ -2432,22 +2477,22 @@ var MessageComposer = React14.forwardRef(
     variant = "default",
     className
   }, ref) => {
-    const textareaRef = React14.useRef(null);
-    const [content, setContent] = React14.useState("");
-    const [attachments, setAttachments] = React14.useState(
+    const textareaRef = React20.useRef(null);
+    const [content, setContent] = React20.useState("");
+    const [attachments, setAttachments] = React20.useState(
       []
     );
-    const [isTyping, setIsTyping] = React14.useState(false);
-    const typingTimeoutRef = React14.useRef(null);
-    React14.useImperativeHandle(ref, () => textareaRef.current);
-    React14.useEffect(() => {
+    const [isTyping, setIsTyping] = React20.useState(false);
+    const typingTimeoutRef = React20.useRef(null);
+    React20.useImperativeHandle(ref, () => textareaRef.current);
+    React20.useEffect(() => {
       const textarea = textareaRef.current;
       if (textarea) {
         textarea.style.height = "auto";
         textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
       }
     }, [content]);
-    React14.useEffect(() => {
+    React20.useEffect(() => {
       if (content.length > 0 && !isTyping) {
         setIsTyping(true);
         onTypingStart?.();
@@ -2467,12 +2512,12 @@ var MessageComposer = React14.forwardRef(
         }
       };
     }, [content, isTyping, onTypingStart, onTypingStop]);
-    React14.useEffect(() => {
+    React20.useEffect(() => {
       if (autoFocus) {
         textareaRef.current?.focus();
       }
     }, [autoFocus]);
-    React14.useEffect(() => {
+    React20.useEffect(() => {
       if (replyTo) {
         textareaRef.current?.focus();
       }
@@ -2536,7 +2581,7 @@ var MessageComposer = React14.forwardRef(
         return prev.filter((a) => a.id !== attachmentId);
       });
     };
-    React14.useEffect(() => {
+    React20.useEffect(() => {
       const currentAttachments = attachments;
       return () => {
         currentAttachments.forEach((a) => {
@@ -3065,7 +3110,7 @@ function defaultFormatTimestamp(timestamp) {
     minute: "2-digit"
   });
 }
-var MessageBubble = React14.forwardRef(
+var MessageBubble = React20.forwardRef(
   ({
     className,
     message,
@@ -3499,7 +3544,7 @@ function LoadMoreButton({
   ) });
 }
 LoadMoreButton.displayName = "LoadMoreButton";
-var MessageList = React14.forwardRef(
+var MessageList = React20.forwardRef(
   ({
     messages,
     currentUser,
@@ -3518,19 +3563,19 @@ var MessageList = React14.forwardRef(
     className,
     autoScroll = "onNewMessage"
   }, ref) => {
-    const scrollContainerRef = React14.useRef(null);
-    const bottomRef = React14.useRef(null);
-    const [isUserScrolled, setIsUserScrolled] = React14.useState(false);
-    const prevMessageCountRef = React14.useRef(messages.length);
-    React14.useImperativeHandle(ref, () => scrollContainerRef.current);
-    const handleScroll = React14.useCallback(() => {
+    const scrollContainerRef = React20.useRef(null);
+    const bottomRef = React20.useRef(null);
+    const [isUserScrolled, setIsUserScrolled] = React20.useState(false);
+    const prevMessageCountRef = React20.useRef(messages.length);
+    React20.useImperativeHandle(ref, () => scrollContainerRef.current);
+    const handleScroll = React20.useCallback(() => {
       const container = scrollContainerRef.current;
       if (!container) return;
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       setIsUserScrolled(!isAtBottom);
     }, []);
-    React14.useEffect(() => {
+    React20.useEffect(() => {
       const container = scrollContainerRef.current;
       const bottom = bottomRef.current;
       if (!container || !bottom) return;
@@ -3546,7 +3591,7 @@ var MessageList = React14.forwardRef(
         }
       }
     }, [messages, currentUser.id, autoScroll, isUserScrolled]);
-    React14.useEffect(() => {
+    React20.useEffect(() => {
       const bottom = bottomRef.current;
       if (bottom && !isLoading) {
         bottom.scrollIntoView();
@@ -3592,7 +3637,7 @@ var MessageList = React14.forwardRef(
         "aria-live": "polite",
         children: [
           hasMore && onLoadMore && /* @__PURE__ */ jsx(LoadMoreButton, { isLoading: isLoadingMore, onClick: onLoadMore }),
-          /* @__PURE__ */ jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxs(React14.Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxs(React20.Fragment, { children: [
             groupByDate && group.label && /* @__PURE__ */ jsx(DateSeparator, { label: group.label }),
             group.messages.map((message, index) => {
               const prevMessage = group.messages[index - 1];
@@ -3871,13 +3916,13 @@ function AIChat({
   onClear,
   onClose
 }) {
-  const messagesEndRef = React14.useRef(null);
-  const messages = React14.useMemo(
+  const messagesEndRef = React20.useRef(null);
+  const messages = React20.useMemo(
     () => session?.messages || messagesProp || [],
     [session?.messages, messagesProp]
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
-  React14.useEffect(() => {
+  React20.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   const handleSend = async (message) => {
@@ -4103,7 +4148,7 @@ function FloatingAIChat({
   pulse = false,
   ...chatProps
 }) {
-  const [internalOpen, setInternalOpen] = React14.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React20.useState(defaultOpen);
   const isControlled = controlledOpen !== void 0;
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const handleOpenChange = (open) => {
@@ -4401,7 +4446,7 @@ function CommandPaletteProvider({
     }
   }, [isOpen, open, close]);
   useCommandK(toggle, enableShortcut);
-  React14__default.useEffect(() => {
+  React20__default.useEffect(() => {
     if (!customEventName) return;
     const handler = () => open();
     document.addEventListener(customEventName, handler);
@@ -4890,6 +4935,1587 @@ function CommandPaletteTrigger({
     }
   );
 }
+function DropZone({
+  onFilesSelected,
+  acceptedFileTypes,
+  multiple,
+  disabled = false,
+  className,
+  children
+}) {
+  const [isDragging, setIsDragging] = React20.useState(false);
+  const inputRef = React20.useRef(null);
+  const dropZoneRef = React20.useRef(null);
+  const dragCounter = React20.useRef(0);
+  const handleDragEnter = React20.useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (disabled) return;
+      dragCounter.current++;
+      if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+        setIsDragging(true);
+      }
+    },
+    [disabled]
+  );
+  const handleDragLeave = React20.useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (disabled) return;
+      dragCounter.current--;
+      if (dragCounter.current === 0) {
+        setIsDragging(false);
+      }
+    },
+    [disabled]
+  );
+  const handleDragOver = React20.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+  const handleDrop = React20.useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (disabled) return;
+      setIsDragging(false);
+      dragCounter.current = 0;
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        onFilesSelected(e.dataTransfer.files);
+      }
+    },
+    [disabled, onFilesSelected]
+  );
+  const handleClick = React20.useCallback(() => {
+    if (!disabled) {
+      inputRef.current?.click();
+    }
+  }, [disabled]);
+  const handleKeyDown = React20.useCallback(
+    (e) => {
+      if ((e.key === "Enter" || e.key === " ") && !disabled) {
+        e.preventDefault();
+        inputRef.current?.click();
+      }
+    },
+    [disabled]
+  );
+  const handleInputChange = React20.useCallback(
+    (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        onFilesSelected(e.target.files);
+        e.target.value = "";
+      }
+    },
+    [onFilesSelected]
+  );
+  const acceptString = acceptedFileTypes.join(",");
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      ref: dropZoneRef,
+      role: "button",
+      tabIndex: disabled ? -1 : 0,
+      "aria-label": "Drop files here or click to browse",
+      "aria-disabled": disabled,
+      onClick: handleClick,
+      onKeyDown: handleKeyDown,
+      onDragEnter: handleDragEnter,
+      onDragLeave: handleDragLeave,
+      onDragOver: handleDragOver,
+      onDrop: handleDrop,
+      className: cn(
+        // Base styles
+        "relative flex flex-col items-center justify-center",
+        "min-h-[200px] w-full p-6",
+        "rounded-xl border-2 border-dashed",
+        "transition-all duration-200",
+        "cursor-pointer",
+        // Default state
+        "border-neutral-300 bg-neutral-50",
+        "dark:border-neutral-600 dark:bg-neutral-800/50",
+        // Hover state
+        "hover:border-primary-400 hover:bg-primary-50/50",
+        "dark:hover:border-primary-500 dark:hover:bg-primary-900/20",
+        // Focus state
+        "focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        // Dragging state
+        isDragging && [
+          "border-primary-500 bg-primary-50",
+          "dark:border-primary-400 dark:bg-primary-900/30",
+          "scale-[1.01]"
+        ],
+        // Disabled state
+        disabled && [
+          "cursor-not-allowed opacity-50",
+          "hover:border-neutral-300 hover:bg-neutral-50",
+          "dark:hover:border-neutral-600 dark:hover:bg-neutral-800/50"
+        ],
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            ref: inputRef,
+            type: "file",
+            accept: acceptString,
+            multiple,
+            onChange: handleInputChange,
+            disabled,
+            className: "sr-only",
+            "aria-hidden": "true",
+            tabIndex: -1
+          }
+        ),
+        children,
+        isDragging && /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: cn(
+              "absolute inset-0 flex items-center justify-center",
+              "bg-primary-500/10 rounded-xl",
+              "pointer-events-none"
+            ),
+            children: /* @__PURE__ */ jsx("span", { className: "text-primary-600 dark:text-primary-400 text-lg font-medium", children: "Drop files here" })
+          }
+        )
+      ]
+    }
+  );
+}
+DropZone.displayName = "DropZone";
+function FilePreviewItem({ file, onRemove, disabled }) {
+  const isPdf = file.file.type === "application/pdf";
+  const isImage = file.file.type.startsWith("image/");
+  const handleRemove = React20.useCallback(() => {
+    onRemove(file.id);
+  }, [file.id, onRemove]);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      role: "group",
+      "aria-label": `File: ${file.file.name}`,
+      className: cn(
+        "group relative overflow-hidden rounded-lg",
+        "border-border bg-card border",
+        "focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2"
+      ),
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800", children: [
+          isImage ? /* @__PURE__ */ jsx(
+            "img",
+            {
+              src: file.previewUrl,
+              alt: `Preview of ${file.file.name}`,
+              className: "h-full w-full object-cover"
+            }
+          ) : isPdf ? /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col items-center justify-center gap-2", children: [
+            /* @__PURE__ */ jsx(FileText, { className: "text-muted-foreground h-12 w-12" }),
+            /* @__PURE__ */ jsx("span", { className: "text-muted-foreground text-xs", children: "PDF Document" })
+          ] }) : /* @__PURE__ */ jsxs("div", { className: "flex h-full w-full flex-col items-center justify-center gap-2", children: [
+            /* @__PURE__ */ jsx(Image, { className: "text-muted-foreground h-12 w-12" }),
+            /* @__PURE__ */ jsx("span", { className: "text-muted-foreground text-xs", children: "File" })
+          ] }),
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: cn(
+                "absolute inset-0 flex items-center justify-center",
+                "bg-black/0 transition-all duration-200",
+                "group-hover:bg-black/30",
+                disabled && "pointer-events-none"
+              ),
+              children: /* @__PURE__ */ jsx(
+                Button,
+                {
+                  variant: "danger",
+                  size: "icon",
+                  onClick: handleRemove,
+                  disabled,
+                  className: cn(
+                    "h-8 w-8 rounded-full",
+                    "opacity-0 transition-all duration-200",
+                    "group-hover:opacity-100",
+                    "focus-visible:opacity-100"
+                  ),
+                  "aria-label": `Remove ${file.file.name}`,
+                  children: /* @__PURE__ */ jsx(X, { className: "h-4 w-4" })
+                }
+              )
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "span",
+            {
+              className: cn(
+                "absolute bottom-2 left-2 px-2 py-0.5",
+                "rounded-full text-xs font-medium",
+                "bg-black/50 text-white",
+                "capitalize"
+              ),
+              children: file.source
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "p-2", children: [
+          /* @__PURE__ */ jsx(
+            "p",
+            {
+              className: "text-foreground truncate text-sm font-medium",
+              title: file.file.name,
+              children: file.file.name
+            }
+          ),
+          /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-xs", children: formatFileSize3(file.file.size) })
+        ] })
+      ]
+    }
+  );
+}
+function formatFileSize3(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+function FilePreview({ files, onRemove, disabled }) {
+  if (files.length === 0) {
+    return null;
+  }
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: cn(
+        "grid gap-4",
+        files.length === 1 && "mx-auto max-w-xs grid-cols-1",
+        files.length === 2 && "grid-cols-2",
+        files.length >= 3 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+      ),
+      role: "list",
+      "aria-label": "Selected files",
+      children: files.map((file) => /* @__PURE__ */ jsx(
+        FilePreviewItem,
+        {
+          file,
+          onRemove,
+          disabled
+        },
+        file.id
+      ))
+    }
+  );
+}
+FilePreview.displayName = "FilePreview";
+function hasCameraSupport() {
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+async function checkCameraPermission() {
+  if (!hasCameraSupport()) {
+    return "unavailable";
+  }
+  try {
+    if (navigator.permissions) {
+      const result = await navigator.permissions.query({
+        name: "camera"
+      });
+      return result.state;
+    }
+    return "prompt";
+  } catch {
+    return "prompt";
+  }
+}
+function useCamera({
+  facingMode: initialFacingMode = "environment",
+  width = 1920,
+  height = 1080
+} = {}) {
+  const [permission, setPermission] = React20.useState("prompt");
+  const [stream, setStream] = React20.useState(null);
+  const [isReady, setIsReady] = React20.useState(false);
+  const [error, setError] = React20.useState(null);
+  const [currentFacingMode, setCurrentFacingMode] = React20.useState(initialFacingMode);
+  const videoRef = React20.useRef(null);
+  const canvasRef = React20.useRef(null);
+  React20.useEffect(() => {
+    checkCameraPermission().then(setPermission);
+  }, []);
+  React20.useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
+  const startCamera = React20.useCallback(async () => {
+    if (!hasCameraSupport()) {
+      setPermission("unavailable");
+      setError(new Error("Camera is not supported on this device"));
+      return;
+    }
+    try {
+      setError(null);
+      const constraints = {
+        video: {
+          facingMode: currentFacingMode,
+          width: { ideal: width },
+          height: { ideal: height }
+        },
+        audio: false
+      };
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(mediaStream);
+      setPermission("granted");
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        await videoRef.current.play();
+        setIsReady(true);
+      }
+    } catch (err) {
+      const error2 = err;
+      setError(error2);
+      if (error2.name === "NotAllowedError" || error2.name === "PermissionDeniedError") {
+        setPermission("denied");
+      } else if (error2.name === "NotFoundError" || error2.name === "DevicesNotFoundError") {
+        setPermission("unavailable");
+      }
+    }
+  }, [currentFacingMode, width, height]);
+  const stopCamera = React20.useCallback(() => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+    setIsReady(false);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, [stream]);
+  const shouldRestartRef = React20.useRef(false);
+  const switchCamera = React20.useCallback(() => {
+    const newFacingMode = currentFacingMode === "user" ? "environment" : "user";
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+      setIsReady(false);
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      shouldRestartRef.current = true;
+    }
+    setCurrentFacingMode(newFacingMode);
+  }, [currentFacingMode, stream]);
+  React20.useEffect(() => {
+    if (shouldRestartRef.current && !stream) {
+      shouldRestartRef.current = false;
+      startCamera();
+    }
+  }, [currentFacingMode, stream, startCamera]);
+  const capturePhoto = React20.useCallback(() => {
+    if (!videoRef.current || !isReady) {
+      return null;
+    }
+    const video = videoRef.current;
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement("canvas");
+    }
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return null;
+    }
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    const byteString = atob(dataUrl.split(",")[1]);
+    const mimeType = dataUrl.split(",")[0].split(":")[1].split(";")[0];
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([arrayBuffer], { type: mimeType });
+    const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
+    const filename = `capture-${timestamp}.jpg`;
+    return new File([blob], filename, { type: "image/jpeg" });
+  }, [isReady]);
+  return {
+    permission,
+    stream,
+    videoRef,
+    isReady,
+    error,
+    startCamera,
+    stopCamera,
+    capturePhoto,
+    switchCamera,
+    currentFacingMode
+  };
+}
+var DEFAULT_CONFIG = {
+  minFocusScore: 15,
+  minBrightness: 30,
+  maxBrightness: 240,
+  minDocumentCoverage: 10,
+  maxDocumentCoverage: 95,
+  stabilityDuration: 500,
+  captureCountdown: 2,
+  detectionFps: 5,
+  enableAutoCapture: true
+};
+var INITIAL_METRICS = {
+  focusScore: 0,
+  isInFocus: false,
+  brightness: 0,
+  isBrightnessOk: false,
+  boundary: null,
+  isDocumentDetected: false,
+  documentCoverage: 0,
+  isStable: false,
+  stabilityDuration: 0
+};
+var INITIAL_STATE = {
+  isDetecting: false,
+  metrics: INITIAL_METRICS,
+  isReadyForCapture: false,
+  captureCountdown: 0,
+  error: null
+};
+function calculateLaplacianVariance(imageData) {
+  const { data, width, height } = imageData;
+  let sum = 0;
+  let sumSq = 0;
+  let count = 0;
+  const step = 4;
+  for (let y = step; y < height - step; y += step) {
+    for (let x = step; x < width - step; x += step) {
+      const getGray = (px, py) => {
+        const idx = (py * width + px) * 4;
+        return 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+      };
+      const center = getGray(x, y);
+      const neighbors = (getGray(x, y - step) + getGray(x - step, y) + getGray(x + step, y) + getGray(x, y + step)) / 4;
+      const laplacian = center - neighbors;
+      sum += laplacian;
+      sumSq += laplacian * laplacian;
+      count++;
+    }
+  }
+  if (count === 0) return 0;
+  const mean = sum / count;
+  const variance = sumSq / count - mean * mean;
+  return Math.abs(variance);
+}
+function calculateBrightness(imageData) {
+  const { data } = imageData;
+  let sum = 0;
+  let count = 0;
+  for (let i = 0; i < data.length; i += 64) {
+    sum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    count++;
+  }
+  return count > 0 ? sum / count : 0;
+}
+function calculateFrameFingerprint(imageData) {
+  const { data, width, height } = imageData;
+  const gridSize = 8;
+  const cellWidth = Math.floor(width / gridSize);
+  const cellHeight = Math.floor(height / gridSize);
+  const values = [];
+  for (let gy = 0; gy < gridSize; gy++) {
+    for (let gx = 0; gx < gridSize; gx++) {
+      let sum = 0;
+      let count = 0;
+      const startX = gx * cellWidth;
+      const startY = gy * cellHeight;
+      for (let y = startY; y < startY + cellHeight; y += 4) {
+        for (let x = startX; x < startX + cellWidth; x += 4) {
+          const idx = (y * width + x) * 4;
+          if (idx < data.length - 2) {
+            sum += 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+            count++;
+          }
+        }
+      }
+      values.push(count > 0 ? sum / count : 0);
+    }
+  }
+  return values;
+}
+function compareFingerprints(fp1, fp2) {
+  if (fp1.length !== fp2.length || fp1.length === 0) return 0;
+  let totalDiff = 0;
+  for (let i = 0; i < fp1.length; i++) {
+    totalDiff += Math.abs(fp1[i] - fp2[i]) / 255;
+  }
+  const avgDiff = totalDiff / fp1.length;
+  return Math.max(0, Math.min(100, (1 - avgDiff * 5) * 100));
+}
+function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
+  const mergedConfig = useMemo(
+    () => ({ ...DEFAULT_CONFIG, ...config }),
+    // Intentionally depend on individual properties to avoid unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      config.minFocusScore,
+      config.minBrightness,
+      config.maxBrightness,
+      config.minDocumentCoverage,
+      config.maxDocumentCoverage,
+      config.stabilityDuration,
+      config.captureCountdown,
+      config.detectionFps,
+      config.enableAutoCapture
+    ]
+  );
+  const [state, setState] = useState(INITIAL_STATE);
+  const canvasRef = useRef(null);
+  const ctxRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const lastFingerprintRef = useRef([]);
+  const stabilityStartRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
+  const isDetectingRef = useRef(false);
+  const STABILITY_THRESHOLD = 85;
+  useEffect(() => {
+    canvasRef.current = document.createElement("canvas");
+    ctxRef.current = canvasRef.current.getContext("2d", {
+      willReadFrequently: true
+    });
+    return () => {
+      canvasRef.current = null;
+      ctxRef.current = null;
+    };
+  }, []);
+  const processFrame = useCallback(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+    if (!video || !canvas || !ctx || !isDetectingRef.current) {
+      return;
+    }
+    if (video.readyState < 2) {
+      animationFrameRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+    const scale = 0.15;
+    const width = Math.floor(video.videoWidth * scale);
+    const height = Math.floor(video.videoHeight * scale);
+    if (width === 0 || height === 0) {
+      animationFrameRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+    canvas.width = width;
+    canvas.height = height;
+    ctx.drawImage(video, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const focusScore = calculateLaplacianVariance(imageData);
+    const brightness = calculateBrightness(imageData);
+    const fingerprint = calculateFrameFingerprint(imageData);
+    const now = Date.now();
+    const similarity = compareFingerprints(
+      fingerprint,
+      lastFingerprintRef.current
+    );
+    const isSimilarFrame = similarity >= STABILITY_THRESHOLD;
+    if (isSimilarFrame && lastFingerprintRef.current.length > 0) {
+      if (!stabilityStartRef.current) {
+        stabilityStartRef.current = now;
+      }
+    } else {
+      stabilityStartRef.current = now;
+    }
+    lastFingerprintRef.current = fingerprint;
+    const stabilityDuration = stabilityStartRef.current ? now - stabilityStartRef.current : 0;
+    const isStable = stabilityDuration >= mergedConfig.stabilityDuration;
+    const isInFocus = focusScore >= mergedConfig.minFocusScore;
+    const isBrightnessOk = brightness >= mergedConfig.minBrightness && brightness <= mergedConfig.maxBrightness;
+    const isDocumentDetected = isInFocus && isBrightnessOk;
+    const isReadyForCapture = isInFocus && isBrightnessOk && isStable;
+    const metrics = {
+      focusScore: Math.round(focusScore),
+      isInFocus,
+      brightness: Math.round(brightness),
+      isBrightnessOk,
+      boundary: null,
+      // No longer doing boundary detection
+      isDocumentDetected,
+      documentCoverage: isDocumentDetected ? 50 : 0,
+      // Dummy value
+      isStable,
+      stabilityDuration
+    };
+    setState((prev) => ({
+      ...prev,
+      metrics,
+      isReadyForCapture
+    }));
+    const frameDelay = 1e3 / mergedConfig.detectionFps;
+    setTimeout(() => {
+      if (isDetectingRef.current) {
+        animationFrameRef.current = requestAnimationFrame(processFrame);
+      }
+    }, frameDelay);
+  }, [videoRef, mergedConfig]);
+  useEffect(() => {
+    if (state.isReadyForCapture && mergedConfig.enableAutoCapture && state.captureCountdown === 0 && !countdownIntervalRef.current) {
+      let countdown = mergedConfig.captureCountdown;
+      setState((prev) => ({ ...prev, captureCountdown: countdown }));
+      countdownIntervalRef.current = setInterval(() => {
+        countdown -= 1;
+        if (countdown <= 0) {
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          setState((prev) => ({ ...prev, captureCountdown: 0 }));
+          onAutoCapture?.();
+        } else {
+          setState((prev) => ({ ...prev, captureCountdown: countdown }));
+        }
+      }, 1e3);
+    } else if (!state.isReadyForCapture && countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+      setState((prev) => ({ ...prev, captureCountdown: 0 }));
+    }
+  }, [
+    state.isReadyForCapture,
+    mergedConfig.enableAutoCapture,
+    mergedConfig.captureCountdown,
+    onAutoCapture,
+    state.captureCountdown
+  ]);
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
+  const startDetection = useCallback(() => {
+    isDetectingRef.current = true;
+    setState((prev) => ({ ...prev, isDetecting: true, error: null }));
+    processFrame();
+  }, [processFrame]);
+  const stopDetection = useCallback(() => {
+    isDetectingRef.current = false;
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setState((prev) => ({ ...prev, isDetecting: false }));
+  }, []);
+  const resetDetection = useCallback(() => {
+    stopDetection();
+    lastFingerprintRef.current = [];
+    stabilityStartRef.current = null;
+    setState(INITIAL_STATE);
+  }, [stopDetection]);
+  return {
+    ...state,
+    startDetection,
+    stopDetection,
+    resetDetection
+  };
+}
+function StatusPill({
+  label,
+  isOk,
+  value
+}) {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: `inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${isOk ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"} `,
+      children: [
+        /* @__PURE__ */ jsx(
+          "span",
+          {
+            className: `h-2 w-2 rounded-full ${isOk ? "bg-green-400" : "bg-red-400"}`
+          }
+        ),
+        /* @__PURE__ */ jsx("span", { children: label }),
+        value !== void 0 && /* @__PURE__ */ jsxs("span", { className: "opacity-70", children: [
+          "(",
+          value,
+          ")"
+        ] })
+      ]
+    }
+  );
+}
+function CountdownDisplay({ seconds }) {
+  if (seconds <= 0) return null;
+  return /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "relative", children: [
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 animate-ping rounded-full bg-green-500 opacity-25" }),
+    /* @__PURE__ */ jsx("div", { className: "relative flex h-24 w-24 items-center justify-center rounded-full bg-green-500/90", children: /* @__PURE__ */ jsx("span", { className: "text-4xl font-bold text-white", children: seconds }) })
+  ] }) });
+}
+function StabilityBar({
+  stabilityDuration,
+  targetDuration
+}) {
+  const progress = Math.min(stabilityDuration / targetDuration * 100, 100);
+  const isComplete = progress >= 100;
+  return /* @__PURE__ */ jsxs("div", { className: "w-full", children: [
+    /* @__PURE__ */ jsxs("div", { className: "mb-1 flex justify-between text-xs text-white/70", children: [
+      /* @__PURE__ */ jsx("span", { children: "Stability" }),
+      /* @__PURE__ */ jsx("span", { children: isComplete ? "Stable!" : "Hold steady..." })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "h-1.5 overflow-hidden rounded-full bg-white/20", children: /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: `h-full transition-all duration-100 ${isComplete ? "bg-green-400" : "bg-yellow-400"}`,
+        style: { width: `${progress}%` }
+      }
+    ) })
+  ] });
+}
+function DocumentDetectionOverlay({
+  metrics,
+  isReadyForCapture,
+  captureCountdown,
+  videoDimensions: _videoDimensions,
+  showDetailedMetrics = false
+}) {
+  const {
+    focusScore,
+    isInFocus,
+    brightness,
+    isBrightnessOk,
+    isDocumentDetected,
+    isStable,
+    stabilityDuration
+  } = metrics;
+  const borderColor = isReadyForCapture ? "border-green-500" : isDocumentDetected ? "border-yellow-400" : "border-white/40";
+  return /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute inset-0", children: [
+    /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: `absolute inset-4 rounded-lg border-4 transition-colors duration-300 ${borderColor}`,
+        children: [
+          /* @__PURE__ */ jsx("div", { className: "absolute -top-1 -left-1 h-6 w-6 rounded-tl border-t-4 border-l-4 border-current" }),
+          /* @__PURE__ */ jsx("div", { className: "absolute -top-1 -right-1 h-6 w-6 rounded-tr border-t-4 border-r-4 border-current" }),
+          /* @__PURE__ */ jsx("div", { className: "absolute -bottom-1 -left-1 h-6 w-6 rounded-bl border-b-4 border-l-4 border-current" }),
+          /* @__PURE__ */ jsx("div", { className: "absolute -right-1 -bottom-1 h-6 w-6 rounded-br border-r-4 border-b-4 border-current" })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsx(CountdownDisplay, { seconds: captureCountdown }),
+    /* @__PURE__ */ jsxs("div", { className: "absolute top-3 right-3 left-3", children: [
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: `mb-2 rounded-lg px-4 py-2 text-center backdrop-blur-sm ${isReadyForCapture ? "bg-green-500/80 text-white" : "bg-black/60 text-white"} `,
+          children: isReadyForCapture ? /* @__PURE__ */ jsx("span", { className: "font-medium", children: captureCountdown > 0 ? `Capturing in ${captureCountdown}...` : "\u2713 Ready to capture!" }) : /* @__PURE__ */ jsx("span", { children: !isInFocus ? "\u{1F50D} Hold camera steady" : !isBrightnessOk ? brightness < 40 ? "\u{1F4A1} Need more light" : "\u{1F4A1} Too bright" : !isStable ? "\u270B Hold steady..." : "\u{1F4C4} Position document in frame" })
+        }
+      ),
+      isDocumentDetected && !isStable && /* @__PURE__ */ jsx("div", { className: "px-2", children: /* @__PURE__ */ jsx(
+        StabilityBar,
+        {
+          stabilityDuration,
+          targetDuration: 500
+        }
+      ) })
+    ] }),
+    showDetailedMetrics && /* @__PURE__ */ jsx("div", { className: "absolute right-3 bottom-3 left-3", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap justify-center gap-2 rounded-lg bg-black/60 p-2 backdrop-blur-sm", children: [
+      /* @__PURE__ */ jsx(StatusPill, { label: "Focus", isOk: isInFocus, value: focusScore }),
+      /* @__PURE__ */ jsx(
+        StatusPill,
+        {
+          label: "Brightness",
+          isOk: isBrightnessOk,
+          value: brightness
+        }
+      ),
+      /* @__PURE__ */ jsx(StatusPill, { label: "Stable", isOk: isStable })
+    ] }) })
+  ] });
+}
+function CameraViewfinder({
+  videoRef,
+  isReady,
+  detectionOverlay
+}) {
+  return /* @__PURE__ */ jsxs("div", { className: "relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black", children: [
+    /* @__PURE__ */ jsx(
+      "video",
+      {
+        ref: videoRef,
+        autoPlay: true,
+        playsInline: true,
+        muted: true,
+        className: cn(
+          "h-full w-full object-cover",
+          "transition-opacity duration-300",
+          isReady ? "opacity-100" : "opacity-0"
+        )
+      }
+    ),
+    !isReady && /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center gap-3", children: [
+      /* @__PURE__ */ jsx(Spinner, { size: "lg" }),
+      /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-400", children: "Starting camera..." })
+    ] }),
+    isReady && detectionOverlay,
+    isReady && !detectionOverlay && /* @__PURE__ */ jsxs("div", { className: "pointer-events-none absolute inset-0", children: [
+      /* @__PURE__ */ jsxs("div", { className: "absolute inset-8 rounded-lg border-2 border-white/30", children: [
+        /* @__PURE__ */ jsx("div", { className: "absolute -top-0.5 -left-0.5 h-6 w-6 rounded-tl-lg border-t-4 border-l-4 border-white" }),
+        /* @__PURE__ */ jsx("div", { className: "absolute -top-0.5 -right-0.5 h-6 w-6 rounded-tr-lg border-t-4 border-r-4 border-white" }),
+        /* @__PURE__ */ jsx("div", { className: "absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-lg border-b-4 border-l-4 border-white" }),
+        /* @__PURE__ */ jsx("div", { className: "absolute -right-0.5 -bottom-0.5 h-6 w-6 rounded-br-lg border-r-4 border-b-4 border-white" })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "absolute right-0 bottom-4 left-0 text-center", children: /* @__PURE__ */ jsx("span", { className: "rounded-full bg-black/50 px-3 py-1 text-sm text-white", children: "Position document within the frame" }) })
+    ] })
+  ] });
+}
+function PermissionDeniedMessage({ onRetry }) {
+  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-8", children: [
+    /* @__PURE__ */ jsxs(Alert, { variant: "warning", className: "w-full", children: [
+      /* @__PURE__ */ jsx(AlertCircle, { className: "h-5 w-5" }),
+      /* @__PURE__ */ jsx(AlertTitle, { children: "Camera access denied" }),
+      /* @__PURE__ */ jsx(AlertDescription, { children: "Please allow camera access in your browser settings to use this feature. You may need to refresh the page after changing permissions." })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 text-center", children: [
+      /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-sm", children: "To enable camera access:" }),
+      /* @__PURE__ */ jsxs("ol", { className: "text-muted-foreground list-inside list-decimal space-y-1 text-left text-sm", children: [
+        /* @__PURE__ */ jsx("li", { children: "Click the camera/lock icon in your browser's address bar" }),
+        /* @__PURE__ */ jsx("li", { children: "Allow camera access for this site" }),
+        /* @__PURE__ */ jsx("li", { children: "Click the button below to try again" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx(Button, { onClick: onRetry, leftIcon: /* @__PURE__ */ jsx(RefreshCw, { className: "h-4 w-4" }), children: "Try again" })
+  ] });
+}
+function CameraUnavailableMessage() {
+  return /* @__PURE__ */ jsx("div", { className: "flex flex-col items-center justify-center gap-4 py-8", children: /* @__PURE__ */ jsxs(Alert, { variant: "danger", children: [
+    /* @__PURE__ */ jsx(AlertCircle, { className: "h-5 w-5" }),
+    /* @__PURE__ */ jsx(AlertTitle, { children: "Camera unavailable" }),
+    /* @__PURE__ */ jsx(AlertDescription, { children: "No camera was detected on this device. Please ensure your camera is connected and not in use by another application." })
+  ] }) });
+}
+function PhotoPreview({
+  previewUrl,
+  onConfirm,
+  onRetake
+}) {
+  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-4", children: [
+    /* @__PURE__ */ jsx("div", { className: "relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-black", children: /* @__PURE__ */ jsx(
+      "img",
+      {
+        src: previewUrl,
+        alt: "Captured document",
+        className: "h-full w-full object-cover"
+      }
+    ) }),
+    /* @__PURE__ */ jsxs("div", { className: "flex justify-center gap-3", children: [
+      /* @__PURE__ */ jsx(
+        Button,
+        {
+          variant: "secondary",
+          onClick: onRetake,
+          leftIcon: /* @__PURE__ */ jsx(RefreshCw, { className: "h-4 w-4" }),
+          children: "Retake"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        Button,
+        {
+          variant: "primary",
+          onClick: onConfirm,
+          leftIcon: /* @__PURE__ */ jsx(Check, { className: "h-4 w-4" }),
+          children: "Use this photo"
+        }
+      )
+    ] })
+  ] });
+}
+function WebcamModal({
+  open,
+  onOpenChange,
+  onCapture,
+  enableAutoCapture = true
+}) {
+  const {
+    permission,
+    videoRef,
+    isReady,
+    startCamera,
+    stopCamera,
+    capturePhoto,
+    switchCamera,
+    currentFacingMode
+  } = useCamera({
+    facingMode: "environment",
+    width: 1920,
+    height: 1080
+  });
+  const [capturedFile, setCapturedFile] = React20.useState(null);
+  const [previewUrl, setPreviewUrl] = React20.useState(null);
+  const [autoDetectEnabled, setAutoDetectEnabled] = React20.useState(enableAutoCapture);
+  const [videoDimensions, setVideoDimensions] = React20.useState({
+    width: 0,
+    height: 0
+  });
+  const handleAutoCapture = React20.useCallback(() => {
+    const file = capturePhoto();
+    if (file) {
+      setCapturedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      stopCamera();
+    }
+  }, [capturePhoto, stopCamera]);
+  const detection = useDocumentDetection(
+    videoRef,
+    {
+      enableAutoCapture: autoDetectEnabled,
+      minFocusScore: 15,
+      // Very forgiving focus threshold
+      stabilityDuration: 500,
+      // 0.5 seconds of stability
+      captureCountdown: 2
+      // 2 second countdown
+    },
+    handleAutoCapture
+  );
+  const hasStartedRef = React20.useRef(false);
+  React20.useEffect(() => {
+    const video = videoRef.current;
+    if (video && isReady) {
+      const updateDimensions = () => {
+        setVideoDimensions({
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+      };
+      updateDimensions();
+      video.addEventListener("resize", updateDimensions);
+      return () => video.removeEventListener("resize", updateDimensions);
+    }
+  }, [isReady, videoRef]);
+  React20.useEffect(() => {
+    if (open && permission !== "denied" && permission !== "unavailable") {
+      if (!hasStartedRef.current) {
+        hasStartedRef.current = true;
+        startCamera();
+      }
+    } else if (!open) {
+      hasStartedRef.current = false;
+      stopCamera();
+      detection.stopDetection();
+      setCapturedFile(null);
+      setPreviewUrl((prev) => {
+        if (prev) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
+    }
+  }, [open, permission]);
+  React20.useEffect(() => {
+    if (isReady && autoDetectEnabled && !capturedFile) {
+      detection.startDetection();
+    }
+    return () => {
+      detection.stopDetection();
+    };
+  }, [isReady, autoDetectEnabled, capturedFile]);
+  const handleCapture = React20.useCallback(() => {
+    const file = capturePhoto();
+    if (file) {
+      setCapturedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      stopCamera();
+    }
+  }, [capturePhoto, stopCamera]);
+  const handleRetake = React20.useCallback(() => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setCapturedFile(null);
+    setPreviewUrl(null);
+    detection.resetDetection();
+    startCamera();
+  }, [previewUrl, startCamera, detection]);
+  const handleConfirm = React20.useCallback(() => {
+    if (capturedFile) {
+      onCapture(capturedFile);
+      onOpenChange(false);
+    }
+  }, [capturedFile, onCapture, onOpenChange]);
+  const handleClose = React20.useCallback(() => {
+    stopCamera();
+    detection.stopDetection();
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setCapturedFile(null);
+    setPreviewUrl(null);
+    onOpenChange(false);
+  }, [stopCamera, detection, previewUrl, onOpenChange]);
+  const renderContent = () => {
+    if (permission === "denied") {
+      return /* @__PURE__ */ jsx(PermissionDeniedMessage, { onRetry: startCamera });
+    }
+    if (permission === "unavailable") {
+      return /* @__PURE__ */ jsx(CameraUnavailableMessage, {});
+    }
+    if (capturedFile && previewUrl) {
+      return /* @__PURE__ */ jsx(
+        PhotoPreview,
+        {
+          previewUrl,
+          onConfirm: handleConfirm,
+          onRetake: handleRetake
+        }
+      );
+    }
+    return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-4", children: [
+      /* @__PURE__ */ jsx(
+        CameraViewfinder,
+        {
+          videoRef,
+          isReady,
+          detectionOverlay: autoDetectEnabled && isReady ? /* @__PURE__ */ jsx(
+            DocumentDetectionOverlay,
+            {
+              metrics: detection.metrics,
+              isReadyForCapture: detection.isReadyForCapture,
+              captureCountdown: detection.captureCountdown,
+              videoDimensions,
+              showDetailedMetrics: false
+            }
+          ) : void 0
+        }
+      ),
+      /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3", children: [
+        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center gap-2", children: /* @__PURE__ */ jsx(
+          Button,
+          {
+            variant: autoDetectEnabled ? "primary" : "secondary",
+            size: "sm",
+            onClick: () => {
+              setAutoDetectEnabled(!autoDetectEnabled);
+              if (!autoDetectEnabled) {
+                detection.startDetection();
+              } else {
+                detection.stopDetection();
+              }
+            },
+            leftIcon: /* @__PURE__ */ jsx(ScanLine, { className: "h-4 w-4" }),
+            children: autoDetectEnabled ? "Auto-capture ON" : "Auto-capture OFF"
+          }
+        ) }),
+        /* @__PURE__ */ jsxs("div", { className: "flex justify-center gap-3", children: [
+          /* @__PURE__ */ jsx(
+            Button,
+            {
+              variant: "secondary",
+              size: "icon",
+              onClick: switchCamera,
+              disabled: !isReady,
+              "aria-label": `Switch to ${currentFacingMode === "user" ? "back" : "front"} camera`,
+              children: /* @__PURE__ */ jsx(RefreshCw, { className: "h-5 w-5" })
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Button,
+            {
+              variant: "primary",
+              size: "lg",
+              onClick: handleCapture,
+              disabled: !isReady,
+              leftIcon: /* @__PURE__ */ jsx(Camera, { className: "h-5 w-5" }),
+              children: autoDetectEnabled ? "Manual Capture" : "Capture"
+            }
+          )
+        ] })
+      ] })
+    ] });
+  };
+  return /* @__PURE__ */ jsxs(
+    Modal,
+    {
+      open,
+      onOpenChange: handleClose,
+      size: "lg",
+      "aria-label": "Webcam capture",
+      children: [
+        /* @__PURE__ */ jsxs(ModalHeader, { children: [
+          /* @__PURE__ */ jsx(ModalTitle, { children: "Take a Photo" }),
+          /* @__PURE__ */ jsx(ModalClose, {})
+        ] }),
+        /* @__PURE__ */ jsx(ModalBody, { children: renderContent() }),
+        permission !== "denied" && permission !== "unavailable" && !capturedFile && /* @__PURE__ */ jsx(ModalFooter, { children: /* @__PURE__ */ jsx(Button, { variant: "secondary", onClick: handleClose, children: "Cancel" }) })
+      ]
+    }
+  );
+}
+WebcamModal.displayName = "WebcamModal";
+
+// src/components/DocumentScanner/types.ts
+var DEFAULT_ACCEPTED_FILE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/heic",
+  "image/webp",
+  "application/pdf"
+];
+var DEFAULT_MAX_FILE_SIZE_MB = 10;
+
+// src/components/DocumentScanner/useFileUpload.ts
+function generateFileId() {
+  return `file-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+function validateFile2(file, acceptedTypes, maxSizeMb) {
+  if (!acceptedTypes.includes(file.type)) {
+    return {
+      file,
+      type: "type",
+      message: `File type "${file.type || "unknown"}" is not supported. Accepted types: ${acceptedTypes.join(", ")}`
+    };
+  }
+  const maxSizeBytes = maxSizeMb * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    return {
+      file,
+      type: "size",
+      message: `File size (${(file.size / 1024 / 1024).toFixed(2)} MB) exceeds the maximum allowed size of ${maxSizeMb} MB`
+    };
+  }
+  return null;
+}
+function createPreviewUrl(file) {
+  return URL.createObjectURL(file);
+}
+function useFileUpload({
+  acceptedFileTypes = [...DEFAULT_ACCEPTED_FILE_TYPES],
+  maxFileSizeMb = DEFAULT_MAX_FILE_SIZE_MB,
+  multiple = false,
+  onValidationError
+} = {}) {
+  const [files, setFiles] = React20.useState([]);
+  React20.useEffect(() => {
+    return () => {
+      files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+    };
+  }, []);
+  const addFiles = React20.useCallback(
+    (fileList, source = "upload") => {
+      const newFiles = [];
+      const errors = [];
+      Array.from(fileList).forEach((file) => {
+        const error = validateFile2(file, acceptedFileTypes, maxFileSizeMb);
+        if (error) {
+          errors.push(error);
+        } else {
+          newFiles.push({
+            file,
+            previewUrl: createPreviewUrl(file),
+            source,
+            id: generateFileId()
+          });
+        }
+      });
+      if (errors.length > 0) {
+        onValidationError?.(errors);
+      }
+      if (newFiles.length > 0) {
+        setFiles((prev) => {
+          if (!multiple) {
+            prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+            return newFiles.slice(0, 1);
+          }
+          return [...prev, ...newFiles];
+        });
+      }
+    },
+    [acceptedFileTypes, maxFileSizeMb, multiple, onValidationError]
+  );
+  const addFile = React20.useCallback(
+    (file, source = "upload") => {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      addFiles(dataTransfer.files, source);
+    },
+    [addFiles]
+  );
+  const removeFile = React20.useCallback((id) => {
+    setFiles((prev) => {
+      const fileToRemove = prev.find((f) => f.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.previewUrl);
+      }
+      return prev.filter((f) => f.id !== id);
+    });
+  }, []);
+  const clearFiles = React20.useCallback(() => {
+    setFiles((prev) => {
+      prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+      return [];
+    });
+  }, []);
+  const getFiles = React20.useCallback(() => {
+    return files.map((f) => f.file);
+  }, [files]);
+  return {
+    files,
+    addFiles,
+    addFile,
+    removeFile,
+    clearFiles,
+    getFiles,
+    hasFiles: files.length > 0
+  };
+}
+function DocumentScanner({
+  onScan,
+  onResult,
+  multiple = false,
+  acceptedFileTypes = [...DEFAULT_ACCEPTED_FILE_TYPES],
+  maxFileSizeMb = DEFAULT_MAX_FILE_SIZE_MB,
+  disabled = false,
+  enableWebcam = true,
+  enableCamera = true,
+  title = "Scan your document",
+  description = "Upload a file, take a photo, or use your webcam",
+  className,
+  onValidationError,
+  onStateChange
+}) {
+  const [state, setState] = React20.useState("idle");
+  const [error, setError] = React20.useState(null);
+  const [isWebcamOpen, setIsWebcamOpen] = React20.useState(false);
+  const [validationErrors, setValidationErrors] = React20.useState([]);
+  const isMobile = useIsMobile();
+  const cameraInputRef = React20.useRef(null);
+  const {
+    files,
+    addFiles,
+    addFile,
+    removeFile,
+    clearFiles,
+    getFiles,
+    hasFiles
+  } = useFileUpload({
+    acceptedFileTypes,
+    maxFileSizeMb,
+    multiple,
+    onValidationError: (errors) => {
+      setValidationErrors(errors);
+      onValidationError?.(errors);
+    }
+  });
+  React20.useEffect(() => {
+    onStateChange?.(state);
+  }, [state, onStateChange]);
+  React20.useEffect(() => {
+    if (hasFiles && state === "idle") {
+      setState("preview");
+    } else if (!hasFiles && state === "preview") {
+      setState("idle");
+    }
+  }, [hasFiles, state]);
+  const handleFilesSelected = React20.useCallback(
+    (fileList) => {
+      setError(null);
+      setValidationErrors([]);
+      addFiles(fileList, "upload");
+    },
+    [addFiles]
+  );
+  const handleCameraCapture = React20.useCallback(() => {
+    cameraInputRef.current?.click();
+  }, []);
+  const handleCameraInputChange = React20.useCallback(
+    (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        setError(null);
+        setValidationErrors([]);
+        addFiles(e.target.files, "camera");
+        e.target.value = "";
+      }
+    },
+    [addFiles]
+  );
+  const handleWebcamCapture = React20.useCallback(
+    (file) => {
+      setError(null);
+      setValidationErrors([]);
+      addFile(file, "webcam");
+    },
+    [addFile]
+  );
+  const handleScan = React20.useCallback(async () => {
+    if (!hasFiles) return;
+    try {
+      setState("processing");
+      setError(null);
+      const filesToScan = getFiles();
+      const result = await onScan(filesToScan);
+      setState("success");
+      onResult(result);
+      setTimeout(() => {
+        clearFiles();
+        setState("idle");
+      }, 2e3);
+    } catch (err) {
+      setState("error");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred while processing your document. Please try again.";
+      setError(errorMessage);
+    }
+  }, [hasFiles, getFiles, onScan, onResult, clearFiles]);
+  const handleRetry = React20.useCallback(() => {
+    setState("preview");
+    setError(null);
+  }, []);
+  const handleClearAll = React20.useCallback(() => {
+    clearFiles();
+    setError(null);
+    setValidationErrors([]);
+    setState("idle");
+  }, [clearFiles]);
+  const cameraAcceptString = acceptedFileTypes.filter((type) => type.startsWith("image/")).join(",");
+  const renderContent = () => {
+    if (state === "processing") {
+      return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
+        /* @__PURE__ */ jsx(
+          SpinnerWithLabel,
+          {
+            size: "xl",
+            label: "Analyzing your document...",
+            labelPosition: "bottom"
+          }
+        ),
+        /* @__PURE__ */ jsx(Text, { variant: "muted", size: "sm", className: "max-w-xs text-center", children: "Our AI is extracting information from your document. This usually takes a few seconds." })
+      ] });
+    }
+    if (state === "success") {
+      return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
+        /* @__PURE__ */ jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsx(CheckCircle, { className: "h-8 w-8 text-green-600 dark:text-green-400" }) }),
+        /* @__PURE__ */ jsx(Text, { weight: "semibold", size: "lg", children: "Document scanned successfully!" }),
+        /* @__PURE__ */ jsx(Text, { variant: "muted", size: "sm", children: "The extracted data has been processed." })
+      ] });
+    }
+    if (state === "error") {
+      return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-4 py-8", children: [
+        /* @__PURE__ */ jsxs(Alert, { variant: "danger", className: "w-full", children: [
+          /* @__PURE__ */ jsx(AlertCircle, { className: "h-5 w-5" }),
+          /* @__PURE__ */ jsx(AlertTitle, { children: "Processing failed" }),
+          /* @__PURE__ */ jsx(AlertDescription, { children: error })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex gap-3", children: [
+          /* @__PURE__ */ jsx(Button, { variant: "secondary", onClick: handleClearAll, children: "Start over" }),
+          /* @__PURE__ */ jsx(Button, { variant: "primary", onClick: handleRetry, children: "Try again" })
+        ] })
+      ] });
+    }
+    if (state === "preview" && hasFiles) {
+      return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6", children: [
+        /* @__PURE__ */ jsx(
+          FilePreview,
+          {
+            files,
+            onRemove: removeFile,
+            disabled
+          }
+        ),
+        validationErrors.length > 0 && /* @__PURE__ */ jsxs(
+          Alert,
+          {
+            variant: "warning",
+            dismissible: true,
+            onDismiss: () => setValidationErrors([]),
+            children: [
+              /* @__PURE__ */ jsx(AlertCircle, { className: "h-5 w-5" }),
+              /* @__PURE__ */ jsx(AlertTitle, { children: "Some files were not added" }),
+              /* @__PURE__ */ jsx(AlertDescription, { children: /* @__PURE__ */ jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxs("li", { className: "text-sm", children: [
+                /* @__PURE__ */ jsxs("strong", { children: [
+                  err.file.name,
+                  ":"
+                ] }),
+                " ",
+                err.message
+              ] }, index)) }) })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap items-center justify-center gap-3", children: [
+          multiple && /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsx(
+            Button,
+            {
+              variant: "secondary",
+              onClick: () => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = acceptedFileTypes.join(",");
+                input.multiple = multiple;
+                input.onchange = (e) => {
+                  const files2 = e.target.files;
+                  if (files2) addFiles(files2, "upload");
+                };
+                input.click();
+              },
+              leftIcon: /* @__PURE__ */ jsx(Upload, { className: "h-4 w-4" }),
+              disabled,
+              children: "Add more files"
+            }
+          ) }),
+          /* @__PURE__ */ jsx(
+            Button,
+            {
+              variant: "secondary",
+              onClick: handleClearAll,
+              leftIcon: /* @__PURE__ */ jsx(Trash2, { className: "h-4 w-4" }),
+              disabled,
+              children: "Clear all"
+            }
+          ),
+          /* @__PURE__ */ jsxs(
+            Button,
+            {
+              variant: "primary",
+              onClick: handleScan,
+              leftIcon: /* @__PURE__ */ jsx(Scan, { className: "h-4 w-4" }),
+              disabled,
+              children: [
+                "Scan ",
+                files.length > 1 ? `${files.length} documents` : "document"
+              ]
+            }
+          )
+        ] })
+      ] });
+    }
+    return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-6", children: [
+      /* @__PURE__ */ jsx(
+        DropZone,
+        {
+          onFilesSelected: handleFilesSelected,
+          acceptedFileTypes,
+          multiple,
+          disabled,
+          className: "min-h-[240px]",
+          children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-4 text-center", children: [
+            /* @__PURE__ */ jsx("div", { className: "bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full", children: /* @__PURE__ */ jsx(Upload, { className: "text-primary-600 dark:text-primary-400 h-7 w-7" }) }),
+            /* @__PURE__ */ jsxs("div", { className: "space-y-1", children: [
+              /* @__PURE__ */ jsx(Text, { weight: "medium", children: "Drag and drop your files here" }),
+              /* @__PURE__ */ jsx(Text, { variant: "muted", size: "sm", children: "or click to browse" })
+            ] }),
+            /* @__PURE__ */ jsxs(Text, { variant: "muted", size: "xs", className: "max-w-xs", children: [
+              "Supported formats: JPEG, PNG, HEIC, WebP, PDF",
+              /* @__PURE__ */ jsx("br", {}),
+              "Max size: ",
+              maxFileSizeMb,
+              " MB"
+            ] })
+          ] })
+        }
+      ),
+      (enableCamera || enableWebcam) && /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex w-full max-w-xs items-center gap-3", children: [
+          /* @__PURE__ */ jsx("div", { className: "bg-border h-px flex-1" }),
+          /* @__PURE__ */ jsx(Text, { variant: "muted", size: "sm", children: "or" }),
+          /* @__PURE__ */ jsx("div", { className: "bg-border h-px flex-1" })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap justify-center gap-3", children: [
+          enableCamera && isMobile && /* @__PURE__ */ jsx(
+            Button,
+            {
+              variant: "secondary",
+              onClick: handleCameraCapture,
+              leftIcon: /* @__PURE__ */ jsx(Camera, { className: "h-4 w-4" }),
+              disabled,
+              children: "Take a photo"
+            }
+          ),
+          enableWebcam && !isMobile && /* @__PURE__ */ jsx(
+            Button,
+            {
+              variant: "secondary",
+              onClick: () => setIsWebcamOpen(true),
+              leftIcon: /* @__PURE__ */ jsx(Camera, { className: "h-4 w-4" }),
+              disabled,
+              children: "Use webcam"
+            }
+          )
+        ] })
+      ] }),
+      validationErrors.length > 0 && /* @__PURE__ */ jsxs(
+        Alert,
+        {
+          variant: "warning",
+          dismissible: true,
+          onDismiss: () => setValidationErrors([]),
+          children: [
+            /* @__PURE__ */ jsx(AlertCircle, { className: "h-5 w-5" }),
+            /* @__PURE__ */ jsx(AlertTitle, { children: "Invalid files" }),
+            /* @__PURE__ */ jsx(AlertDescription, { children: /* @__PURE__ */ jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxs("li", { className: "text-sm", children: [
+              /* @__PURE__ */ jsxs("strong", { children: [
+                err.file.name,
+                ":"
+              ] }),
+              " ",
+              err.message
+            ] }, index)) }) })
+          ]
+        }
+      )
+    ] });
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: cn(
+        "border-border bg-card w-full rounded-xl border p-6",
+        "shadow-sm",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "mb-6 text-center", children: [
+          /* @__PURE__ */ jsx(Text, { as: "h2", size: "xl", weight: "semibold", className: "mb-1", children: title }),
+          /* @__PURE__ */ jsx(Text, { variant: "muted", size: "sm", children: description })
+        ] }),
+        renderContent(),
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            ref: cameraInputRef,
+            type: "file",
+            accept: cameraAcceptString,
+            capture: "environment",
+            onChange: handleCameraInputChange,
+            className: "sr-only",
+            "aria-hidden": "true",
+            tabIndex: -1
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          WebcamModal,
+          {
+            open: isWebcamOpen,
+            onOpenChange: setIsWebcamOpen,
+            onCapture: handleWebcamCapture
+          }
+        )
+      ]
+    }
+  );
+}
+DocumentScanner.displayName = "DocumentScanner";
 var headerVariants = cva(
   [
     "flex items-center gap-3 px-4 py-3",
@@ -4949,7 +6575,7 @@ function formatLastSeen(date) {
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString();
 }
-var ConversationHeader = React14.forwardRef(
+var ConversationHeader = React20.forwardRef(
   ({
     className,
     size,
@@ -5061,7 +6687,7 @@ var ConversationHeader = React14.forwardRef(
   }
 );
 ConversationHeader.displayName = "ConversationHeader";
-var ConversationListItem = React14.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
+var ConversationListItem = React20.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
   const participant = conversation.participants.find((p) => !p.isCurrentUser);
   const title = getConversationTitle(conversation, participant);
   const avatarUrl = conversation.avatarUrl || participant?.avatarUrl;
@@ -5251,7 +6877,7 @@ function ConversationListSkeleton({
 }
 ConversationListSkeleton.displayName = "ConversationListSkeleton";
 function LightboxModal({ attachment, onClose }) {
-  React14.useEffect(() => {
+  React20.useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
@@ -5346,7 +6972,7 @@ function LightboxModal({ attachment, onClose }) {
   );
 }
 LightboxModal.displayName = "LightboxModal";
-var MessageThread = React14.forwardRef(
+var MessageThread = React20.forwardRef(
   ({
     conversation,
     messages,
@@ -5377,8 +7003,8 @@ var MessageThread = React14.forwardRef(
     onError,
     className
   }, ref) => {
-    const [lightboxAttachment, setLightboxAttachment] = React14.useState(null);
-    const [replyTo, setReplyTo] = React14.useState(null);
+    const [lightboxAttachment, setLightboxAttachment] = React20.useState(null);
+    const [replyTo, setReplyTo] = React20.useState(null);
     const participant = conversation?.type === "direct" ? conversation.participants.find((p) => p.id !== currentUser.id) : void 0;
     const handleAttachmentClick = (attachment, message) => {
       if (attachment.type === "image" || attachment.type === "video") {
@@ -5546,13 +7172,13 @@ function useMessages(options) {
     onRetry,
     onLoadMore
   } = options;
-  const [messages, setMessages] = React14.useState(initialMessages);
-  const [isSending, setIsSending] = React14.useState(false);
-  const [isLoadingMore, setIsLoadingMore] = React14.useState(false);
-  React14.useEffect(() => {
+  const [messages, setMessages] = React20.useState(initialMessages);
+  const [isSending, setIsSending] = React20.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React20.useState(false);
+  React20.useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
-  const addMessage = React14.useCallback((message) => {
+  const addMessage = React20.useCallback((message) => {
     setMessages((prev) => {
       if (prev.some((m) => m.id === message.id)) {
         return prev;
@@ -5560,7 +7186,7 @@ function useMessages(options) {
       return [...prev, message];
     });
   }, []);
-  const updateMessage = React14.useCallback(
+  const updateMessage = React20.useCallback(
     (messageId, updates) => {
       setMessages(
         (prev) => prev.map((m) => m.id === messageId ? { ...m, ...updates } : m)
@@ -5568,22 +7194,22 @@ function useMessages(options) {
     },
     []
   );
-  const removeMessage = React14.useCallback((messageId) => {
+  const removeMessage = React20.useCallback((messageId) => {
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
-  const updateStatus = React14.useCallback(
+  const updateStatus = React20.useCallback(
     (messageId, status) => {
       updateMessage(messageId, { status });
     },
     [updateMessage]
   );
-  const markAsRead = React14.useCallback(
+  const markAsRead = React20.useCallback(
     (messageId) => {
       updateStatus(messageId, "read");
     },
     [updateStatus]
   );
-  const sendMessage = React14.useCallback(
+  const sendMessage = React20.useCallback(
     async (newMessage) => {
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticMessage = {
@@ -5615,7 +7241,7 @@ function useMessages(options) {
     },
     [currentUser, onSend, addMessage, updateStatus]
   );
-  const retryMessage = React14.useCallback(
+  const retryMessage = React20.useCallback(
     async (messageId) => {
       updateStatus(messageId, "sending");
       try {
@@ -5629,7 +7255,7 @@ function useMessages(options) {
     },
     [onRetry, updateStatus]
   );
-  const loadMore = React14.useCallback(async () => {
+  const loadMore = React20.useCallback(async () => {
     if (isLoadingMore || !onLoadMore) return;
     setIsLoadingMore(true);
     try {
@@ -5660,13 +7286,13 @@ function useTypingIndicator(options = {}) {
     onTypingStart,
     onTypingStop
   } = options;
-  const [participants, setParticipants] = React14.useState(initialParticipants);
-  const [isLocalTyping, setIsLocalTyping] = React14.useState(false);
-  const typingTimeoutRef = React14.useRef(null);
-  React14.useEffect(() => {
+  const [participants, setParticipants] = React20.useState(initialParticipants);
+  const [isLocalTyping, setIsLocalTyping] = React20.useState(false);
+  const typingTimeoutRef = React20.useRef(null);
+  React20.useEffect(() => {
     setParticipants(initialParticipants);
   }, [initialParticipants]);
-  const startTyping = React14.useCallback(() => {
+  const startTyping = React20.useCallback(() => {
     if (!isLocalTyping) {
       setIsLocalTyping(true);
       onTypingStart?.();
@@ -5679,21 +7305,21 @@ function useTypingIndicator(options = {}) {
       onTypingStop?.();
     }, debounceTime);
   }, [isLocalTyping, debounceTime, onTypingStart, onTypingStop]);
-  const stopTyping = React14.useCallback(() => {
+  const stopTyping = React20.useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     setIsLocalTyping(false);
     onTypingStop?.();
   }, [onTypingStop]);
-  React14.useEffect(() => {
+  React20.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
     };
   }, []);
-  const typingState = React14.useMemo(
+  const typingState = React20.useMemo(
     () => ({
       participants,
       lastUpdated: /* @__PURE__ */ new Date()
@@ -5709,11 +7335,11 @@ function useTypingIndicator(options = {}) {
 }
 function useMessageScroll(options) {
   const { messages, currentUserId, threshold = 100 } = options;
-  const scrollContainerRef = React14.useRef(null);
-  const bottomRef = React14.useRef(null);
-  const [isScrolledUp, setIsScrolledUp] = React14.useState(false);
-  const prevMessageCountRef = React14.useRef(messages.length);
-  React14.useEffect(() => {
+  const scrollContainerRef = React20.useRef(null);
+  const bottomRef = React20.useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = React20.useState(false);
+  const prevMessageCountRef = React20.useRef(messages.length);
+  React20.useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     const handleScroll = () => {
@@ -5724,12 +7350,12 @@ function useMessageScroll(options) {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [threshold]);
-  const scrollToBottom = React14.useCallback((smooth = true) => {
+  const scrollToBottom = React20.useCallback((smooth = true) => {
     bottomRef.current?.scrollIntoView({
       behavior: smooth ? "smooth" : "auto"
     });
   }, []);
-  React14.useEffect(() => {
+  React20.useEffect(() => {
     const messageCountChanged = messages.length !== prevMessageCountRef.current;
     prevMessageCountRef.current = messages.length;
     if (!messageCountChanged) return;
@@ -5748,9 +7374,9 @@ function useMessageScroll(options) {
 }
 function useReadReceipts(options) {
   const { currentUserId, onMarkRead, threshold = 0.5 } = options;
-  const observerRef = React14.useRef(null);
-  const observedMessagesRef = React14.useRef(/* @__PURE__ */ new Set());
-  React14.useEffect(() => {
+  const observerRef = React20.useRef(null);
+  const observedMessagesRef = React20.useRef(/* @__PURE__ */ new Set());
+  React20.useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -5769,7 +7395,7 @@ function useReadReceipts(options) {
       observerRef.current?.disconnect();
     };
   }, [onMarkRead, threshold]);
-  const observeMessage = React14.useCallback(
+  const observeMessage = React20.useCallback(
     (element, message) => {
       if (!element || !observerRef.current) return;
       if (message.sender.id !== currentUserId && message.status !== "read" && !observedMessagesRef.current.has(message.id)) {
@@ -6605,6 +8231,6 @@ function useToast() {
   return context;
 }
 
-export { AGGrid, AIChat, AIChatModal, AIChatTrigger, AILogoIcon, AIMessageDisplay, AITypingIndicator, AppHeader, AppHeaderActions, AppHeaderDivider, AppHeaderIconButton, AppHeaderSearch, AppHeaderSection, AppHeaderTitle, AppHeaderUserMenu, AttachmentPicker, AttachmentPreview, AttachmentPreviewItem, AvatarNameRenderer, BooleanRenderer, CameraButton, CellRenderers, CharacterCounter, ChevronIcon, CloseIcon, CommandPalette, CommandPaletteProvider, CommandPaletteTrigger, CompanyRenderer, ConversationHeader, ConversationListItem, ConversationListSkeleton, CurrencyRenderer, DateRenderer, DateSeparator, DomainRenderer, DragDropZone, EmailRenderer, EmptyState, EngagementScoreRenderer, FloatingAIChat, LightboxModal, LinkedInRenderer, LoadMoreButton, MCPToolCallDisplay, MemoizedAvatarNameRenderer, MemoizedBooleanRenderer, MemoizedCompanyRenderer, MemoizedCurrencyRenderer, MemoizedDateRenderer, MemoizedDomainRenderer, MemoizedEmailRenderer, MemoizedEngagementScoreRenderer, MemoizedLinkedInRenderer, MemoizedNumberRenderer, MemoizedPhoneRenderer, MemoizedProgressRenderer, MemoizedStatusBadgeRenderer, MemoizedTagsRenderer, MessageAvatar, MessageBubble, MessageComposer, MessageList, MessageStatusIcon, MessageThread, MessagingSplitView, NumberRenderer, PhoneRenderer, ProgressRenderer, ReadReceiptIndicator, RefreshIcon, ResourceLink, SendButton, SendIcon, Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMobileToggle, SidebarNav, SidebarNavGroup, SidebarNavItem, SidebarProvider, SidebarSearch, SidebarToggle, SkeletonMessage, SparklesIcon, SpinnerIcon, StatusBadgeRenderer, SuggestedActions, TagsRenderer, Toast, ToastContainer, ToastProvider, ToolStatusIcon, TypingIndicator, bubbleVariants2 as bubbleVariants, formatDateLabel, formatFileSize2 as formatFileSize, formatLastSeen, formatPhoneDisplay, generateAttachmentId, getConversationSubtitle, getConversationTitle, getFileType, getToolIcon, groupMessagesByDate, headerVariants, isSameSenderGroup, sendButtonVariants, statusColors, useCommandPalette, useMessageScroll, useMessages, useReadReceipts, useSidebar, useToast, useTypingIndicator, validateFile };
+export { AGGrid, AIChat, AIChatModal, AIChatTrigger, AILogoIcon, AIMessageDisplay, AITypingIndicator, AppHeader, AppHeaderActions, AppHeaderDivider, AppHeaderIconButton, AppHeaderSearch, AppHeaderSection, AppHeaderTitle, AppHeaderUserMenu, AttachmentPicker, AttachmentPreview, AttachmentPreviewItem, AvatarNameRenderer, BooleanRenderer, CameraButton, CellRenderers, CharacterCounter, ChevronIcon, CloseIcon, CommandPalette, CommandPaletteProvider, CommandPaletteTrigger, CompanyRenderer, ConversationHeader, ConversationListItem, ConversationListSkeleton, CurrencyRenderer, DateRenderer, DateSeparator, DocumentDetectionOverlay, DocumentScanner, DomainRenderer, DragDropZone, DropZone, EmailRenderer, EmptyState, EngagementScoreRenderer, FilePreview, FloatingAIChat, LightboxModal, LinkedInRenderer, LoadMoreButton, MCPToolCallDisplay, MemoizedAvatarNameRenderer, MemoizedBooleanRenderer, MemoizedCompanyRenderer, MemoizedCurrencyRenderer, MemoizedDateRenderer, MemoizedDomainRenderer, MemoizedEmailRenderer, MemoizedEngagementScoreRenderer, MemoizedLinkedInRenderer, MemoizedNumberRenderer, MemoizedPhoneRenderer, MemoizedProgressRenderer, MemoizedStatusBadgeRenderer, MemoizedTagsRenderer, MessageAvatar, MessageBubble, MessageComposer, MessageList, MessageStatusIcon, MessageThread, MessagingSplitView, NumberRenderer, PhoneRenderer, ProgressRenderer, ReadReceiptIndicator, RefreshIcon, ResourceLink, SendButton, SendIcon, Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMobileToggle, SidebarNav, SidebarNavGroup, SidebarNavItem, SidebarProvider, SidebarSearch, SidebarToggle, SkeletonMessage, SparklesIcon, SpinnerIcon, StatusBadgeRenderer, SuggestedActions, TagsRenderer, Toast, ToastContainer, ToastProvider, ToolStatusIcon, TypingIndicator, WebcamModal, bubbleVariants2 as bubbleVariants, formatDateLabel, formatFileSize2 as formatFileSize, formatLastSeen, formatPhoneDisplay, generateAttachmentId, getConversationSubtitle, getConversationTitle, getFileType, getToolIcon, groupMessagesByDate, headerVariants, isSameSenderGroup, sendButtonVariants, statusColors, useCamera, useCommandPalette, useDocumentDetection, useFileUpload, useMessageScroll, useMessages, useReadReceipts, useSidebar, useToast, useTypingIndicator, validateFile };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
