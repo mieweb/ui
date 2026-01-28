@@ -2,6 +2,30 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Pagination, SimplePagination } from './Pagination';
 
+// Wrapper component that manages state while passing through all props
+function PaginationWithState({
+  page: initialPage = 1,
+  totalPages = 10,
+  onPageChange,
+  ...props
+}: React.ComponentProps<typeof Pagination>) {
+  const [page, setPage] = React.useState(initialPage);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    onPageChange?.(newPage);
+  };
+
+  return (
+    <Pagination
+      page={page}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
+      {...props}
+    />
+  );
+}
+
 const meta: Meta<typeof Pagination> = {
   title: 'Components/Pagination',
   component: Pagination,
@@ -10,160 +34,223 @@ const meta: Meta<typeof Pagination> = {
   },
   tags: ['autodocs'],
   argTypes: {
+    page: {
+      control: { type: 'number', min: 1 },
+      description: 'Current page (1-indexed)',
+    },
+    totalPages: {
+      control: { type: 'number', min: 1 },
+      description: 'Total number of pages',
+    },
     variant: {
       control: 'select',
       options: ['default', 'outline', 'ghost'],
+      description: 'Visual style variant',
     },
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg'],
+      description: 'Size of pagination buttons',
     },
     showFirstLast: {
       control: 'boolean',
+      description: 'Show first/last page buttons',
     },
     showPrevNext: {
       control: 'boolean',
+      description: 'Show previous/next buttons',
+    },
+    siblingCount: {
+      control: { type: 'number', min: 0, max: 5 },
+      description: 'Number of sibling pages to show on each side',
+    },
+    onPageChange: {
+      action: 'pageChanged',
+      description: 'Callback when page changes',
     },
   },
+  // Use render function that wraps with state management
+  render: (args) => <PaginationWithState {...args} />,
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function PaginationDemo(
-  props: Partial<React.ComponentProps<typeof Pagination>>
-) {
-  const [page, setPage] = React.useState(1);
-  return (
-    <Pagination page={page} totalPages={10} onPageChange={setPage} {...props} />
-  );
-}
-
 export const Default: Story = {
-  render: () => <PaginationDemo />,
+  args: {
+    page: 1,
+    totalPages: 10,
+    variant: 'default',
+    size: 'md',
+    showFirstLast: true,
+    showPrevNext: true,
+    siblingCount: 1,
+  },
 };
 
 export const Outline: Story = {
-  render: () => <PaginationDemo variant="outline" />,
+  args: {
+    ...Default.args,
+    variant: 'outline',
+  },
 };
 
 export const Ghost: Story = {
-  render: () => <PaginationDemo variant="ghost" />,
+  args: {
+    ...Default.args,
+    variant: 'ghost',
+  },
 };
 
 export const Small: Story = {
-  render: () => <PaginationDemo size="sm" />,
+  args: {
+    ...Default.args,
+    size: 'sm',
+  },
 };
 
 export const Large: Story = {
-  render: () => <PaginationDemo size="lg" />,
+  args: {
+    ...Default.args,
+    size: 'lg',
+  },
 };
-
-function ManyPagesDemo() {
-  const [page, setPage] = React.useState(15);
-  return <Pagination page={page} totalPages={50} onPageChange={setPage} />;
-}
 
 export const ManyPages: Story = {
-  render: () => <ManyPagesDemo />,
+  args: {
+    ...Default.args,
+    page: 15,
+    totalPages: 50,
+  },
 };
 
-function FewPagesDemo() {
-  const [page, setPage] = React.useState(1);
-  return <Pagination page={page} totalPages={3} onPageChange={setPage} />;
-}
-
 export const FewPages: Story = {
-  render: () => <FewPagesDemo />,
+  args: {
+    ...Default.args,
+    totalPages: 3,
+  },
 };
 
 export const WithoutFirstLast: Story = {
-  render: () => <PaginationDemo showFirstLast={false} />,
+  args: {
+    ...Default.args,
+    showFirstLast: false,
+  },
 };
 
 export const WithoutPrevNext: Story = {
-  render: () => <PaginationDemo showPrevNext={false} />,
+  args: {
+    ...Default.args,
+    showPrevNext: false,
+  },
 };
 
 export const MinimalNavigation: Story = {
-  render: () => <PaginationDemo showFirstLast={false} showPrevNext={false} />,
+  args: {
+    ...Default.args,
+    showFirstLast: false,
+    showPrevNext: false,
+  },
 };
-
-function MoreSiblingsDemo() {
-  const [page, setPage] = React.useState(10);
-  return (
-    <Pagination
-      page={page}
-      totalPages={20}
-      onPageChange={setPage}
-      siblingCount={2}
-    />
-  );
-}
 
 export const MoreSiblings: Story = {
-  render: () => <MoreSiblingsDemo />,
+  args: {
+    ...Default.args,
+    page: 10,
+    totalPages: 20,
+    siblingCount: 2,
+  },
 };
 
-function SimplePaginationDemo(
-  props: Partial<React.ComponentProps<typeof SimplePagination>>
-) {
-  const [page, setPage] = React.useState(1);
+// SimplePagination stories
+function SimplePaginationWithState({
+  page: initialPage = 1,
+  totalPages = 10,
+  onPageChange,
+  ...props
+}: React.ComponentProps<typeof SimplePagination>) {
+  const [page, setPage] = React.useState(initialPage);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    onPageChange?.(newPage);
+  };
+
   return (
     <SimplePagination
       page={page}
-      totalPages={10}
-      onPageChange={setPage}
+      totalPages={totalPages}
+      onPageChange={handlePageChange}
       {...props}
     />
   );
 }
 
 export const Simple: Story = {
-  render: () => <SimplePaginationDemo />,
+  args: {
+    page: 1,
+    totalPages: 10,
+    variant: 'default',
+    size: 'md',
+  },
+  render: (args) => <SimplePaginationWithState {...args} />,
 };
 
 export const SimpleOutline: Story = {
-  render: () => <SimplePaginationDemo variant="outline" />,
+  args: {
+    ...Simple.args,
+    variant: 'outline',
+  },
+  render: (args) => <SimplePaginationWithState {...args} />,
 };
 
 export const SimpleWithoutPageInfo: Story = {
-  render: () => <SimplePaginationDemo showPageInfo={false} />,
+  args: {
+    ...Simple.args,
+  },
+  render: (args) => <SimplePaginationWithState {...args} showPageInfo={false} />,
 };
 
+// Showcase stories with custom render
 export const AllVariants: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => (
     <div className="space-y-6">
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Default</p>
-        <PaginationDemo variant="default" />
+        <PaginationWithState page={5} totalPages={10} variant="default" />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Outline</p>
-        <PaginationDemo variant="outline" />
+        <PaginationWithState page={5} totalPages={10} variant="outline" />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Ghost</p>
-        <PaginationDemo variant="ghost" />
+        <PaginationWithState page={5} totalPages={10} variant="ghost" />
       </div>
     </div>
   ),
 };
 
 export const AllSizes: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => (
     <div className="space-y-6">
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Small</p>
-        <PaginationDemo size="sm" />
+        <PaginationWithState page={5} totalPages={10} size="sm" />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Medium</p>
-        <PaginationDemo size="md" />
+        <PaginationWithState page={5} totalPages={10} size="md" />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Large</p>
-        <PaginationDemo size="lg" />
+        <PaginationWithState page={5} totalPages={10} size="lg" />
       </div>
     </div>
   ),
