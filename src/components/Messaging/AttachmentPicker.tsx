@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import type { AttachmentType, AttachmentState } from './types';

@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /**
  * Messaging Component Types
  *

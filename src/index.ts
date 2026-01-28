@@ -13,6 +13,7 @@ export * from './components/Card';
 export * from './components/Checkbox';
 export * from './components/CommandPalette';
 export * from './components/DateInput';
+export * from './components/DocumentScanner';
 export * from './components/Dropdown';
 export * from './components/Input';
 export * from './components/Messaging';
