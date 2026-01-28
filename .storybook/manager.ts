@@ -314,6 +314,42 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       border-color: ${borderColor} !important;
       background-color: ${borderColor} !important;
     }
+    
+    /* ============================================
+       BOOLEAN TOGGLE CONTROL FIX
+       The toggle has dark bg that hides text
+       ============================================ */
+    /* Toggle switch background */
+    label[for^="control-"] {
+      background-color: #52525b !important;
+    }
+    
+    /* "False" span (left side, selected by default) */
+    label[for^="control-"] > span:first-of-type {
+      color: #e4e4e7 !important;
+      background-color: #71717a !important;
+    }
+    
+    /* "True" span (right side, unselected by default) */
+    label[for^="control-"] > span:last-of-type {
+      color: #a1a1aa !important;
+    }
+    
+    /* When checked: "True" becomes active */
+    label[for^="control-"] input:checked ~ span:last-of-type {
+      color: #e4e4e7 !important;
+      background-color: #71717a !important;
+    }
+    
+    label[for^="control-"] input:checked ~ span:first-of-type {
+      background-color: transparent !important;
+      color: #a1a1aa !important;
+    }
+    
+    /* Make checkbox input transparent so it doesn't cover text */
+    label[for^="control-"] input[type="checkbox"] {
+      background: transparent !important;
+    }
     ` : ''}
   `;
   
