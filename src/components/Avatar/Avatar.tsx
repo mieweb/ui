@@ -44,7 +44,7 @@ export interface AvatarProps
   /** Name to generate initials from (used as fallback when no src) */
   name?: string;
   /** Custom fallback content (overrides name initials) */
-  fallback?: React.ReactNode;
+  fallback?: React.ReactElement | null;
 }
 
 /**
@@ -99,7 +99,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             className="h-full w-full object-cover"
             onError={() => setImageError(true)}
           />
-        ) : fallback ? (
+        ) : React.isValidElement(fallback) ? (
           fallback
         ) : initials ? (
           initials
