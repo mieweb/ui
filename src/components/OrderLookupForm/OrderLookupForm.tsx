@@ -189,12 +189,12 @@ export function OrderLookupForm({
 
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-6">
             Need help?{' '}
-            <a
-              href="#"
+            <button
+              type="button"
               className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
             >
               Contact Support
-            </a>
+            </button>
           </p>
         </div>
       </div>

@@ -121,7 +121,7 @@ export function OnboardingWizard({
       {showHeader && (
         <nav className="flex items-center bg-primary px-4 py-3">
           <div className="flex items-center">
-            <a href="#" className="flex items-center text-white no-underline">
+            <span className="flex items-center text-white">
               {logoUrl && (
                 <img src={logoUrl} alt={`${brandName} Logo`} className="h-8" />
               )}
@@ -131,7 +131,7 @@ export function OnboardingWizard({
                   <span className="text-sm opacity-90">{brandSubname}</span>
                 )}
               </div>
-            </a>
+            </span>
           </div>
           {headerContent}
         </nav>

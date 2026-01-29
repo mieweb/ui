@@ -173,9 +173,9 @@ export const InCheckoutFooter: Story = {
       <div className="text-muted-foreground flex items-center gap-4 text-xs">
         <span>256-bit SSL encryption</span>
         <span>•</span>
-        <a href="#" className="hover:underline">
+        <button type="button" className="hover:underline">
           Privacy Policy
-        </a>
+        </button>
       </div>
     </div>
   ),
