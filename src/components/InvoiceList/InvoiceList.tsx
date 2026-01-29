@@ -132,15 +132,15 @@ export function InvoiceList({
   if (isLoading) {
     return (
       <div className={`space-y-4 ${className}`}>
-        <div className="flex gap-3 animate-pulse">
-          <div className="flex-1 h-10 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="w-24 h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+        <div className="flex animate-pulse gap-3">
+          <div className="h-10 flex-1 rounded bg-gray-200 dark:bg-gray-700" />
+          <div className="h-10 w-24 rounded bg-gray-200 dark:bg-gray-700" />
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+              className="h-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
             />
           ))}
         </div>
@@ -151,10 +151,10 @@ export function InvoiceList({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1 relative">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -176,19 +176,16 @@ export function InvoiceList({
         </div>
         <div className="flex gap-2">
           {/* Status filter tabs */}
-          <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
             {statusOptions.slice(0, 4).map((option) => (
               <button
                 key={option.value}
                 onClick={() => onFilterStatus?.(option.value)}
-                className={`
-                  px-3 py-2 text-sm font-medium transition-colors
-                  ${
-                    statusFilter === option.value
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }
-                `}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  statusFilter === option.value
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                } `}
               >
                 {option.label}
               </button>
@@ -197,7 +194,7 @@ export function InvoiceList({
           {onCreateInvoice && (
             <Button onClick={onCreateInvoice} size="sm">
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -217,19 +214,19 @@ export function InvoiceList({
 
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
           <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
           <p className="text-lg font-bold text-gray-900 dark:text-white">
             {formatCurrency(totals.total)}
           </p>
         </div>
-        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+        <div className="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
           <p className="text-xs text-green-600 dark:text-green-400">Paid</p>
           <p className="text-lg font-bold text-green-600 dark:text-green-400">
             {formatCurrency(totals.paid)}
           </p>
         </div>
-        <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+        <div className="rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
           <p className="text-xs text-orange-600 dark:text-orange-400">
             Outstanding
           </p>
@@ -241,9 +238,9 @@ export function InvoiceList({
 
       {/* List */}
       {filteredInvoices.length === 0 ? (
-        <div className="text-center py-12 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+        <div className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700">
           <svg
-            className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3"
+            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -255,7 +252,7 @@ export function InvoiceList({
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <p className="text-gray-500 dark:text-gray-400 mb-3">
+          <p className="mb-3 text-gray-500 dark:text-gray-400">
             {searchQuery || statusFilter !== 'all'
               ? 'No invoices match your filters'
               : 'No invoices yet'}
@@ -267,26 +264,26 @@ export function InvoiceList({
           )}
         </div>
       ) : (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                   Invoice
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
+                <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400">
                   Employer
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
+                <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
                   Issued
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
+                <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
                   Due
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                   Status
                 </th>
               </tr>
@@ -296,32 +293,29 @@ export function InvoiceList({
                 <tr
                   key={invoice.id}
                   onClick={() => onInvoiceClick?.(invoice)}
-                  className={`
-                    bg-white dark:bg-gray-900
-                    ${onInvoiceClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''}
-                  `}
+                  className={`bg-white dark:bg-gray-900 ${onInvoiceClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
                 >
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-900 dark:text-white">
                       {invoice.invoiceNumber}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+                    <p className="text-xs text-gray-500 sm:hidden dark:text-gray-400">
                       {invoice.employerName}
                     </p>
                   </td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
+                  <td className="hidden px-4 py-3 sm:table-cell">
                     <p className="text-sm text-gray-700 dark:text-gray-300">
                       {invoice.employerName}
                     </p>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
+                  <td className="hidden px-4 py-3 md:table-cell">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {formatDate(invoice.issuedDate)}
                     </p>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
+                  <td className="hidden px-4 py-3 md:table-cell">
                     <p
-                      className={`text-sm ${invoice.status === 'overdue' ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}
+                      className={`text-sm ${invoice.status === 'overdue' ? 'font-medium text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}
                     >
                       {formatDate(invoice.dueDate)}
                     </p>

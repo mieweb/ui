@@ -382,10 +382,7 @@ export function AddressInline(props: AddressInlineProps) {
 // AddressCompact - Convenience component for compact addresses
 // =============================================================================
 
-export type AddressCompactProps = Omit<
-  AddressProps,
-  'format' | 'hideStreet'
->;
+export type AddressCompactProps = Omit<AddressProps, 'format' | 'hideStreet'>;
 
 /**
  * Convenience component for compact city/state display.

@@ -62,52 +62,44 @@ export function OrderLookupForm({
     formData.lastName.trim();
 
   return (
-    <div
-      className={`min-h-screen flex flex-col md:flex-row ${className}`}
-    >
+    <div className={`flex min-h-screen flex-col md:flex-row ${className}`}>
       {/* Left side - Provider branding */}
-      <div className="md:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-950 p-8 flex flex-col items-center justify-center text-white">
+      <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white md:w-1/2 dark:from-blue-800 dark:to-blue-950">
         {providerLogo ? (
           <img
             src={providerLogo}
             alt={providerName || 'Provider'}
-            className="max-w-[200px] max-h-[100px] object-contain mb-6"
+            className="mb-6 max-h-[100px] max-w-[200px] object-contain"
           />
         ) : (
-          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6">
-            <svg
-              className="w-10 h-10"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20">
+            <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
             </svg>
           </div>
         )}
         {providerName && (
-          <h1 className="text-2xl font-bold text-center mb-2">
+          <h1 className="mb-2 text-center text-2xl font-bold">
             {providerName}
           </h1>
         )}
-        <p className="text-blue-100 text-center max-w-xs">
-          {welcomeMessage}
-        </p>
+        <p className="max-w-xs text-center text-blue-100">{welcomeMessage}</p>
       </div>
 
       {/* Right side - Lookup form */}
-      <div className="md:w-1/2 p-8 flex items-center justify-center bg-white dark:bg-gray-900">
+      <div className="flex items-center justify-center bg-white p-8 md:w-1/2 dark:bg-gray-900">
         <div className="w-full max-w-md">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
             Order Lookup
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="mb-6 text-gray-600 dark:text-gray-400">
             Enter your order details to view your information.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Error message */}
             {(errorMessage || notFound) && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
                 <p className="text-sm text-red-600 dark:text-red-400">
                   {errorMessage ||
                     'Order not found. Please check your information and try again.'}
@@ -161,7 +153,7 @@ export function OrderLookupForm({
               {isSubmitting ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -187,7 +179,7 @@ export function OrderLookupForm({
             </Button>
           </form>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-6">
+          <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
             Need help?{' '}
             <button
               type="button"

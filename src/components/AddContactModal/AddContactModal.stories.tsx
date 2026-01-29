@@ -48,14 +48,18 @@ export default meta;
 type Story = StoryObj<typeof AddContactModal>;
 
 // Interactive wrapper for stories
-function AddContactModalWrapper(props: Partial<React.ComponentProps<typeof AddContactModal>>) {
+function AddContactModalWrapper(
+  props: Partial<React.ComponentProps<typeof AddContactModal>>
+) {
   const [open, setOpen] = useState(false);
-  const [savedContact, setSavedContact] = useState<ContactFormData | null>(null);
+  const [savedContact, setSavedContact] = useState<ContactFormData | null>(
+    null
+  );
 
   return (
     <div className="space-y-4">
       <Button onClick={() => setOpen(true)}>Add Contact</Button>
-      
+
       <AddContactModal
         open={open}
         onOpenChange={setOpen}
@@ -68,9 +72,9 @@ function AddContactModalWrapper(props: Partial<React.ComponentProps<typeof AddCo
       />
 
       {savedContact && (
-        <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <h4 className="font-medium mb-2">Saved Contact:</h4>
-          <pre className="text-sm overflow-auto">
+        <div className="mt-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+          <h4 className="mb-2 font-medium">Saved Contact:</h4>
+          <pre className="overflow-auto text-sm">
             {JSON.stringify(savedContact, null, 2)}
           </pre>
         </div>

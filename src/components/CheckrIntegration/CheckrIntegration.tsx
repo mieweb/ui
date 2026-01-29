@@ -50,7 +50,10 @@ export interface CheckrIntegrationProps {
   /** Callback to disconnect Checkr */
   onDisconnect?: () => void;
   /** Callback to invite a candidate */
-  onInviteCandidate?: (candidate: Omit<BackgroundCheckCandidate, 'id'>, packageId: string) => void;
+  onInviteCandidate?: (
+    candidate: Omit<BackgroundCheckCandidate, 'id'>,
+    packageId: string
+  ) => void;
   /** Callback to view a report */
   onViewReport?: (report: BackgroundCheckReport) => void;
   /** Callback to refresh reports */
@@ -128,7 +131,9 @@ export function CheckrIntegration({
   const [candidateName, setCandidateName] = React.useState('');
   const [candidateEmail, setCandidateEmail] = React.useState('');
   const [candidatePhone, setCandidatePhone] = React.useState('');
-  const [selectedPackage, setSelectedPackage] = React.useState(packages[0]?.id || '');
+  const [selectedPackage, setSelectedPackage] = React.useState(
+    packages[0]?.id || ''
+  );
 
   const statusLabels: Record<string, string> = {
     pending,
@@ -162,7 +167,11 @@ export function CheckrIntegration({
     e.preventDefault();
     if (candidateName && candidateEmail && selectedPackage) {
       onInviteCandidate?.(
-        { name: candidateName, email: candidateEmail, phone: candidatePhone || undefined },
+        {
+          name: candidateName,
+          email: candidateEmail,
+          phone: candidatePhone || undefined,
+        },
         selectedPackage
       );
       setShowInviteModal(false);
@@ -189,9 +198,11 @@ export function CheckrIntegration({
           <div>
             <h3 className="text-lg font-semibold">Checkr</h3>
             {connected && account?.name && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {account.name}
-                {account.plan && <span className="ml-2 text-xs">({account.plan})</span>}
+                {account.plan && (
+                  <span className="ml-2 text-xs">({account.plan})</span>
+                )}
               </p>
             )}
           </div>
@@ -233,7 +244,7 @@ export function CheckrIntegration({
             <button
               type="button"
               onClick={() => setShowInviteModal(true)}
-              className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
             >
               <i className="fas fa-user-plus mr-2" />
               {inviteCandidate}
@@ -256,7 +267,7 @@ export function CheckrIntegration({
 
             {loading ? (
               <div className="flex items-center justify-center p-8">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
               </div>
             ) : reports.length > 0 ? (
               <div className="divide-y">
@@ -268,9 +279,13 @@ export function CheckrIntegration({
                     <div className="flex items-center gap-4">
                       <div>
                         <p className="font-medium">{report.candidate.name}</p>
-                        <p className="text-sm text-muted-foreground">{report.candidate.email}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {report.candidate.email}
+                        </p>
                         {report.packageName && (
-                          <p className="text-xs text-muted-foreground">{report.packageName}</p>
+                          <p className="text-muted-foreground text-xs">
+                            {report.packageName}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -294,7 +309,7 @@ export function CheckrIntegration({
                             {resultLabels[report.result] || report.result}
                           </p>
                         )}
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {formatDate(report.completedAt || report.createdAt)}
                         </p>
                       </div>
@@ -313,7 +328,7 @@ export function CheckrIntegration({
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-muted-foreground">
+              <div className="text-muted-foreground py-8 text-center">
                 <i className="fas fa-clipboard-list mb-2 text-3xl text-gray-300" />
                 <p>{noReports}</p>
               </div>
@@ -326,7 +341,7 @@ export function CheckrIntegration({
       {!connected && !error && (
         <div className="rounded-lg border border-dashed p-8 text-center">
           <i className="fas fa-link-slash mb-4 text-4xl text-gray-300" />
-          <p className="mb-4 text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             Connect your Checkr account to run background checks on candidates
           </p>
           <button
@@ -357,7 +372,9 @@ export function CheckrIntegration({
             <form onSubmit={handleInviteSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium">{name}</label>
+                  <label className="mb-1 block text-sm font-medium">
+                    {name}
+                  </label>
                   <input
                     type="text"
                     value={candidateName}
@@ -368,7 +385,9 @@ export function CheckrIntegration({
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium">{email}</label>
+                  <label className="mb-1 block text-sm font-medium">
+                    {email}
+                  </label>
                   <input
                     type="email"
                     value={candidateEmail}
@@ -379,7 +398,9 @@ export function CheckrIntegration({
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium">{phone}</label>
+                  <label className="mb-1 block text-sm font-medium">
+                    {phone}
+                  </label>
                   <input
                     type="tel"
                     value={candidatePhone}
@@ -389,7 +410,9 @@ export function CheckrIntegration({
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium">{packageLabel}</label>
+                  <label className="mb-1 block text-sm font-medium">
+                    {packageLabel}
+                  </label>
                   <select
                     value={selectedPackage}
                     onChange={(e) => setSelectedPackage(e.target.value)}
@@ -415,7 +438,7 @@ export function CheckrIntegration({
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+                  className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
                 >
                   {submit}
                 </button>

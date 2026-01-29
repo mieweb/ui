@@ -104,7 +104,10 @@ export const WithLogos: Story = {
   args: {
     employers: mockEmployers.map((emp, i) => ({
       ...emp,
-      logoUrl: i % 2 === 0 ? `https://via.placeholder.com/40x40?text=${emp.name.charAt(0)}` : undefined,
+      logoUrl:
+        i % 2 === 0
+          ? `https://via.placeholder.com/40x40?text=${emp.name.charAt(0)}`
+          : undefined,
     })),
     onEmployerClick: (employer) => console.log('Clicked:', employer),
   },

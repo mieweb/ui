@@ -13,10 +13,10 @@ import 'ag-grid-community/styles/agGridQuartzFont.css';
 
 const columnDefs = [
   { headerName: 'Name', field: 'name' },
-  { 
-    headerName: 'Status', 
-    field: 'status', 
-    cellRenderer: EnhancedStatusBadgeRenderer 
+  {
+    headerName: 'Status',
+    field: 'status',
+    cellRenderer: EnhancedStatusBadgeRenderer
   },
   {
     headerName: 'Actions',
@@ -68,8 +68,9 @@ const BrandAwareGrid = ({ brand = 'mieweb' }) => {
 ## 🎨 Brand Support
 
 ### Available Brands
+
 - `mieweb` - Medical Informatics Engineering (Green #27ae60)
-- `bluehive` - BlueHive (Blue #17aeed) 
+- `bluehive` - BlueHive (Blue #17aeed)
 - `waggleline` - Waggleline (Green #009c4e)
 - `webchart` - WebChart (Blue #3b82f6)
 - `enterprise-health` - Enterprise Health (Emerald #059669)
@@ -88,6 +89,7 @@ const switchBrand = (brandConfig) => {
 ## 📊 Enhanced Cell Renderers
 
 ### Status Badge Renderer
+
 ```typescript
 {
   headerName: 'Status',
@@ -98,6 +100,7 @@ const switchBrand = (brandConfig) => {
 ```
 
 ### Avatar Name Renderer
+
 ```typescript
 {
   headerName: 'User',
@@ -107,6 +110,7 @@ const switchBrand = (brandConfig) => {
 ```
 
 ### Actions Renderer
+
 ```typescript
 {
   headerName: 'Actions',
@@ -130,6 +134,7 @@ const switchBrand = (brandConfig) => {
 ```
 
 ### Currency Renderer
+
 ```typescript
 {
   headerName: 'Salary',
@@ -140,18 +145,20 @@ const switchBrand = (brandConfig) => {
 ```
 
 ### Date Renderer
+
 ```typescript
 {
   headerName: 'Created',
   field: 'createdAt',
   cellRenderer: EnhancedDateRenderer,
-  cellRendererParams: { 
+  cellRendererParams: {
     format: 'medium' // 'short', 'medium', 'long', 'time'
   },
 }
 ```
 
 ### Progress Renderer
+
 ```typescript
 {
   headerName: 'Progress',
@@ -161,6 +168,7 @@ const switchBrand = (brandConfig) => {
 ```
 
 ### Boolean Renderer
+
 ```typescript
 {
   headerName: 'Active',
@@ -170,6 +178,7 @@ const switchBrand = (brandConfig) => {
 ```
 
 ### Tags Renderer
+
 ```typescript
 {
   headerName: 'Skills',
@@ -181,6 +190,7 @@ const switchBrand = (brandConfig) => {
 ## 🎛️ Component Variants
 
 ### Visual Variants
+
 ```typescript
 // Default - clean, minimal styling
 <AGGrid variant="default" />
@@ -196,6 +206,7 @@ const switchBrand = (brandConfig) => {
 ```
 
 ### Size Variants
+
 ```typescript
 // Extra small - very compact
 <AGGrid size="xs" />
@@ -216,13 +227,16 @@ const switchBrand = (brandConfig) => {
 ## 📱 Responsive Features
 
 ### Mobile Optimization
+
 The grid automatically adjusts for mobile devices:
+
 - Touch-friendly row heights (56px)
 - Larger font size (16px) to prevent iOS zoom
 - Optimized scrollbars
 - Reduced padding on smaller screens
 
 ### Column Priority System
+
 ```typescript
 import { createResponsiveColumn } from '@mieweb/ui';
 
@@ -245,6 +259,7 @@ const responsiveColumns = [
 ## 🔧 Advanced Customization
 
 ### Custom Theme CSS Variables
+
 ```css
 .my-custom-ag-grid {
   --ag-primary-color: #your-brand-color;
@@ -255,8 +270,12 @@ const responsiveColumns = [
 ```
 
 ### Brand-Aware Column Definitions
+
 ```typescript
-import { createBrandAwareColumnDef, applyBrandThemeToColumns } from '@mieweb/ui';
+import {
+  createBrandAwareColumnDef,
+  applyBrandThemeToColumns,
+} from '@mieweb/ui';
 
 // Single column
 const brandColumn = createBrandAwareColumnDef(
@@ -269,6 +288,7 @@ const brandColumns = applyBrandThemeToColumns(columnDefs, brandConfig);
 ```
 
 ### Performance Optimization
+
 ```typescript
 // Pre-load cell renderers for better performance
 import { enhancedCellRenderers } from '@mieweb/ui';
@@ -288,17 +308,22 @@ const frameworkComponents = {
 ## ♿ Accessibility
 
 ### High Contrast Mode
+
 Automatically detected via `prefers-contrast: high`:
+
 - Stronger border colors
 - Increased focus indicator thickness
 - Better color contrast ratios
 
 ### Reduced Motion
+
 Respects `prefers-reduced-motion: reduce`:
+
 - Disables animations
 - Reduces transition durations
 
 ### Keyboard Navigation
+
 - Full keyboard navigation support
 - Focus indicators with brand colors
 - Screen reader friendly labels
@@ -306,6 +331,7 @@ Respects `prefers-reduced-motion: reduce`:
 ## 🎯 Best Practices
 
 ### 1. Always Import Required Styles
+
 ```typescript
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/agGridQuartzFont.css';
@@ -313,6 +339,7 @@ import 'ag-grid-community/styles/agGridQuartzFont.css';
 ```
 
 ### 2. Use Memoized Renderers
+
 ```typescript
 // ✅ Good - uses React.memo
 import { EnhancedStatusBadgeRenderer } from '@mieweb/ui';
@@ -322,6 +349,7 @@ const StatusRenderer = (params) => <Badge>{params.value}</Badge>;
 ```
 
 ### 3. Set Appropriate Column Widths
+
 ```typescript
 const columnDefs = [
   { field: 'id', width: 80, flex: 0 }, // Fixed width
@@ -331,6 +359,7 @@ const columnDefs = [
 ```
 
 ### 4. Handle Loading States
+
 ```typescript
 <AGGrid
   loading={isLoading}
@@ -341,6 +370,7 @@ const columnDefs = [
 ```
 
 ### 5. Use Brand Context
+
 ```typescript
 const MyApp = () => (
   <BrandProvider brand="mieweb">
@@ -356,26 +386,28 @@ const MyApp = () => (
 ## 🚧 Migration from Basic AG Grid
 
 ### Step 1: Update Imports
+
 ```typescript
 // Before
 import { AGGrid } from '@mieweb/ui';
 
 // After
-import { 
-  AGGrid, 
+import {
+  AGGrid,
   EnhancedStatusBadgeRenderer,
-  useAGGridBrandTheme 
+  useAGGridBrandTheme,
 } from '@mieweb/ui';
 ```
 
 ### Step 2: Add Brand Support
+
 ```typescript
 // Before
 <AGGrid columnDefs={columns} rowData={data} />
 
 // After
-<AGGrid 
-  columnDefs={columns} 
+<AGGrid
+  columnDefs={columns}
   rowData={data}
   brand="mieweb"
   variant="bordered"
@@ -383,6 +415,7 @@ import {
 ```
 
 ### Step 3: Replace Custom Renderers
+
 ```typescript
 // Before - custom implementation
 const StatusCell = ({ value }) => (

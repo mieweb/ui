@@ -88,7 +88,9 @@ function InteractiveInventoryManager() {
     memo: string;
   }) => {
     const newInventory =
-      data.type === 'credit' ? inventory + data.amount : inventory - data.amount;
+      data.type === 'credit'
+        ? inventory + data.amount
+        : inventory - data.amount;
     setInventory(newInventory);
 
     const newLog = {

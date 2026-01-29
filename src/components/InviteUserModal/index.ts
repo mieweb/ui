@@ -1,1 +1,5 @@
-export { InviteUserModal, type InviteUserModalProps, type Role } from './InviteUserModal';
+export {
+  InviteUserModal,
+  type InviteUserModalProps,
+  type Role,
+} from './InviteUserModal';

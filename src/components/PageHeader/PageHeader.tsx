@@ -49,14 +49,10 @@ export function PageHeader({
 
   return (
     <div
-      className={`
-        ${sizeClasses[size]}
-        ${bordered ? 'border-b border-gray-200 dark:border-gray-700' : ''}
-        ${className}
-      `.trim()}
+      className={` ${sizeClasses[size]} ${bordered ? 'border-b border-gray-200 dark:border-gray-700' : ''} ${className} `.trim()}
     >
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           {icon && (
             <div className="flex-shrink-0 text-gray-500 dark:text-gray-400">
               {icon}
@@ -64,19 +60,19 @@ export function PageHeader({
           )}
           <div className="min-w-0">
             <h1
-              className={`${titleSizeClasses[size]} text-gray-900 dark:text-white truncate`}
+              className={`${titleSizeClasses[size]} truncate text-gray-900 dark:text-white`}
             >
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate">
+              <p className="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">
                 {subtitle}
               </p>
             )}
           </div>
         </div>
         {actions && (
-          <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>
+          <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>
         )}
       </div>
       {children && <div className="mt-4">{children}</div>}

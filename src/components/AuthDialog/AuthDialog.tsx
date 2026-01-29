@@ -316,8 +316,8 @@ export function AuthDialog({
             <div className="py-4 text-center">
               <MailIcon className="text-primary-600 mx-auto mb-4 h-12 w-12" />
               <p className="mb-4 text-gray-600 dark:text-gray-400">
-                We&apos;ve sent a verification email to your inbox. Please click the
-                link to verify your account.
+                We&apos;ve sent a verification email to your inbox. Please click
+                the link to verify your account.
               </p>
               <button
                 type="button"

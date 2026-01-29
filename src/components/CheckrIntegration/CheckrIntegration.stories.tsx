@@ -15,16 +15,37 @@ export default meta;
 type Story = StoryObj<typeof CheckrIntegration>;
 
 const samplePackages = [
-  { id: 'basic', name: 'Basic Package', description: 'Criminal background check' },
-  { id: 'standard', name: 'Standard Package', description: 'Criminal + Employment verification' },
-  { id: 'professional', name: 'Professional Package', description: 'Criminal + Employment + Education verification' },
-  { id: 'dot', name: 'DOT Compliant', description: 'Full DOT-compliant background check' },
+  {
+    id: 'basic',
+    name: 'Basic Package',
+    description: 'Criminal background check',
+  },
+  {
+    id: 'standard',
+    name: 'Standard Package',
+    description: 'Criminal + Employment verification',
+  },
+  {
+    id: 'professional',
+    name: 'Professional Package',
+    description: 'Criminal + Employment + Education verification',
+  },
+  {
+    id: 'dot',
+    name: 'DOT Compliant',
+    description: 'Full DOT-compliant background check',
+  },
 ];
 
 const sampleReports: BackgroundCheckReport[] = [
   {
     id: '1',
-    candidate: { id: 'c1', name: 'John Doe', email: 'john.doe@example.com', phone: '555-1234' },
+    candidate: {
+      id: 'c1',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      phone: '555-1234',
+    },
     status: 'complete',
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
@@ -34,14 +55,22 @@ const sampleReports: BackgroundCheckReport[] = [
   },
   {
     id: '2',
-    candidate: { id: 'c2', name: 'Jane Smith', email: 'jane.smith@example.com' },
+    candidate: {
+      id: 'c2',
+      name: 'Jane Smith',
+      email: 'jane.smith@example.com',
+    },
     status: 'running',
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     packageName: 'DOT Compliant',
   },
   {
     id: '3',
-    candidate: { id: 'c3', name: 'Bob Wilson', email: 'bob.wilson@example.com' },
+    candidate: {
+      id: 'c3',
+      name: 'Bob Wilson',
+      email: 'bob.wilson@example.com',
+    },
     status: 'complete',
     createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
     completedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
@@ -51,7 +80,11 @@ const sampleReports: BackgroundCheckReport[] = [
   },
   {
     id: '4',
-    candidate: { id: 'c4', name: 'Alice Johnson', email: 'alice.j@example.com' },
+    candidate: {
+      id: 'c4',
+      name: 'Alice Johnson',
+      email: 'alice.j@example.com',
+    },
     status: 'pending',
     createdAt: new Date(),
     packageName: 'Basic Package',
@@ -136,7 +169,11 @@ export const WithAdverseAction: Story = {
     reports: [
       {
         id: '1',
-        candidate: { id: 'c1', name: 'Problem Candidate', email: 'problem@example.com' },
+        candidate: {
+          id: 'c1',
+          name: 'Problem Candidate',
+          email: 'problem@example.com',
+        },
         status: 'complete',
         createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
@@ -154,11 +191,57 @@ export const MixedStatuses: Story = {
     connected: true,
     account: { name: 'BlueHive Inc.' },
     reports: [
-      { id: '1', candidate: { id: 'c1', name: 'Pending Person', email: 'pending@example.com' }, status: 'pending', createdAt: new Date() },
-      { id: '2', candidate: { id: 'c2', name: 'Running Person', email: 'running@example.com' }, status: 'running', createdAt: new Date() },
-      { id: '3', candidate: { id: 'c3', name: 'Complete Person', email: 'complete@example.com' }, status: 'complete', result: 'clear', createdAt: new Date() },
-      { id: '4', candidate: { id: 'c4', name: 'Failed Person', email: 'failed@example.com' }, status: 'failed', createdAt: new Date() },
-      { id: '5', candidate: { id: 'c5', name: 'Expired Person', email: 'expired@example.com' }, status: 'expired', createdAt: new Date() },
+      {
+        id: '1',
+        candidate: {
+          id: 'c1',
+          name: 'Pending Person',
+          email: 'pending@example.com',
+        },
+        status: 'pending',
+        createdAt: new Date(),
+      },
+      {
+        id: '2',
+        candidate: {
+          id: 'c2',
+          name: 'Running Person',
+          email: 'running@example.com',
+        },
+        status: 'running',
+        createdAt: new Date(),
+      },
+      {
+        id: '3',
+        candidate: {
+          id: 'c3',
+          name: 'Complete Person',
+          email: 'complete@example.com',
+        },
+        status: 'complete',
+        result: 'clear',
+        createdAt: new Date(),
+      },
+      {
+        id: '4',
+        candidate: {
+          id: 'c4',
+          name: 'Failed Person',
+          email: 'failed@example.com',
+        },
+        status: 'failed',
+        createdAt: new Date(),
+      },
+      {
+        id: '5',
+        candidate: {
+          id: 'c5',
+          name: 'Expired Person',
+          email: 'expired@example.com',
+        },
+        status: 'expired',
+        createdAt: new Date(),
+      },
     ],
     packages: samplePackages,
   },

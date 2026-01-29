@@ -116,16 +116,21 @@ export function OnboardingWizard({
   };
 
   return (
-    <div className={cn('onboarding-wizard fixed inset-0 z-50 flex flex-col bg-white', className)}>
+    <div
+      className={cn(
+        'onboarding-wizard fixed inset-0 z-50 flex flex-col bg-white',
+        className
+      )}
+    >
       {/* Header */}
       {showHeader && (
-        <nav className="flex items-center bg-primary px-4 py-3">
+        <nav className="bg-primary flex items-center px-4 py-3">
           <div className="flex items-center">
             <span className="flex items-center text-white">
               {logoUrl && (
                 <img src={logoUrl} alt={`${brandName} Logo`} className="h-8" />
               )}
-              <div className="ml-3 hidden lg:flex flex-col">
+              <div className="ml-3 hidden flex-col lg:flex">
                 <span className="text-lg font-semibold">{brandName}</span>
                 {brandSubname && (
                   <span className="text-sm opacity-90">{brandSubname}</span>
@@ -140,14 +145,16 @@ export function OnboardingWizard({
       {/* Loading State */}
       {loading ? (
         <div className="flex flex-1 flex-col items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="mt-4 text-center text-lg text-muted-foreground">{loadingMessage}</p>
+          <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+          <p className="text-muted-foreground mt-4 text-center text-lg">
+            {loadingMessage}
+          </p>
         </div>
       ) : (
         <div className="container mx-auto flex flex-1 flex-col p-4">
           {/* Error Alert */}
           {error && (
-            <div className="mb-4 rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+            <div className="border-destructive bg-destructive/10 text-destructive mb-4 rounded-lg border p-4">
               {error}
             </div>
           )}
@@ -212,7 +219,7 @@ export function OnboardingWizard({
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="rounded-lg bg-primary px-6 py-3 text-white hover:bg-primary/90"
+                  className="bg-primary hover:bg-primary/90 rounded-lg px-6 py-3 text-white"
                 >
                   {finish}
                 </button>
@@ -283,7 +290,9 @@ export function OnboardingStepQuestion({
         )}
         <div>
           <h3 className="mb-2 text-2xl font-bold">{title}</h3>
-          {description && <p className="text-muted-foreground">{description}</p>}
+          {description && (
+            <p className="text-muted-foreground">{description}</p>
+          )}
         </div>
       </div>
 
@@ -298,7 +307,7 @@ export function OnboardingStepQuestion({
                 'rounded-full border-2 px-4 py-2 transition-colors',
                 option.selected
                   ? 'border-primary bg-primary text-white'
-                  : 'border-gray-300 bg-white text-gray-700 hover:border-primary'
+                  : 'hover:border-primary border-gray-300 bg-white text-gray-700'
               )}
             >
               {option.icon && <i className={cn(option.icon, 'mr-2')} />}
@@ -345,7 +354,8 @@ export function OnboardingCompletion({
             Setup complete!
           </p>
           <p className="text-muted-foreground">
-            You&apos;re all set up! You can now start using BlueHive to manage your employees.
+            You&apos;re all set up! You can now start using BlueHive to manage
+            your employees.
           </p>
         </div>
 
@@ -353,7 +363,7 @@ export function OnboardingCompletion({
           <button
             type="button"
             onClick={onStartOrder}
-            className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
           >
             <i className="fas fa-shopping-cart mr-2" />
             Start your first order
@@ -384,8 +394,9 @@ export function OnboardingCompletion({
       <div className="mb-4">
         <h3 className="mb-2 text-2xl font-bold">Some steps not completed</h3>
         <p className="text-muted-foreground">
-          You still need to complete some steps to finish the full guided onboarding.
-          If you&apos;re in a hurry, you can skip them for now and come back later.
+          You still need to complete some steps to finish the full guided
+          onboarding. If you&apos;re in a hurry, you can skip them for now and
+          come back later.
         </p>
       </div>
 
@@ -395,9 +406,10 @@ export function OnboardingCompletion({
             key={step}
             type="button"
             onClick={() => onGoToStep?.(step)}
-            className="rounded-full border border-primary px-4 py-2 text-primary hover:bg-primary/10"
+            className="border-primary text-primary hover:bg-primary/10 rounded-full border px-4 py-2"
           >
-            Step {step}{label && `: ${label}`}
+            Step {step}
+            {label && `: ${label}`}
           </button>
         ))}
       </div>

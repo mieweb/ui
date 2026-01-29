@@ -86,8 +86,19 @@ export const Loading: Story = {
 export const NoPhones: Story = {
   args: {
     contacts: [
-      { id: '1', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'HR Manager', isPrimary: true },
-      { id: '2', name: 'Mike Williams', email: 'mike@company.com', role: 'Safety Director' },
+      {
+        id: '1',
+        name: 'Sarah Johnson',
+        email: 'sarah@company.com',
+        role: 'HR Manager',
+        isPrimary: true,
+      },
+      {
+        id: '2',
+        name: 'Mike Williams',
+        email: 'mike@company.com',
+        role: 'Safety Director',
+      },
     ],
     onEmail: (contact) => console.log('Email:', contact.email),
   },

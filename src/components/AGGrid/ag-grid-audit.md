@@ -13,7 +13,7 @@ This document provides a comprehensive audit of AG Grid styling capabilities and
 
 2. **Component Architecture**
    - Good TypeScript integration with proper props
-   - Size variants (sm, md, lg) 
+   - Size variants (sm, md, lg)
    - Visual variants (default, bordered, striped)
    - Proper ref forwarding and API access
 
@@ -44,16 +44,24 @@ This document provides a comprehensive audit of AG Grid styling capabilities and
 ### 1. Brand System Integration
 
 #### A. Dynamic Brand Color Support
+
 ```typescript
 // Add brand context support
 export interface AGGridProps<TData = unknown> {
-  brand?: 'mieweb' | 'bluehive' | 'waggleline' | 'webchart' | 'enterprise-health';
+  brand?:
+    | 'mieweb'
+    | 'bluehive'
+    | 'waggleline'
+    | 'webchart'
+    | 'enterprise-health';
   // ... existing props
 }
 ```
 
 #### B. CSS Variable Integration
+
 Replace hardcoded colors with brand-aware CSS variables:
+
 ```css
 /* Current */
 --ag-range-selection-border-color: var(--color-primary, #17aeed);
@@ -65,6 +73,7 @@ Replace hardcoded colors with brand-aware CSS variables:
 ### 2. Enhanced Theme System
 
 #### A. Brand-Specific Theme Variants
+
 ```typescript
 const agGridVariants = cva('ag-theme-custom w-full', {
   variants: {
@@ -75,11 +84,12 @@ const agGridVariants = cva('ag-theme-custom w-full', {
       // etc.
     },
     // ... existing variants
-  }
+  },
 });
 ```
 
 #### B. Advanced Styling Hooks
+
 ```css
 /* Brand-specific overrides */
 .ag-brand-mieweb {
@@ -96,6 +106,7 @@ const agGridVariants = cva('ag-theme-custom w-full', {
 ### 3. Missing AG Grid Features Coverage
 
 #### A. Advanced Components
+
 - **Context Menus**: Custom styling for right-click menus
 - **Tool Panels**: Column/filter panel theming
 - **Status Bar**: Statistics display customization
@@ -103,15 +114,18 @@ const agGridVariants = cva('ag-theme-custom w-full', {
 - **Chart Integration**: For Enterprise users
 
 #### B. Interactive Elements
+
 - **Resize Handles**: Column resize indicators
-- **Drag Indicators**: Row/column drag styling  
+- **Drag Indicators**: Row/column drag styling
 - **Loading States**: Better spinner/skeleton integration
 - **Empty States**: Custom no-data illustrations
 
 ### 4. Enhanced Cell Renderers
 
 #### A. Design System Components
+
 Integrate AG Grid cells with existing mieweb-ui components:
+
 ```typescript
 // Use actual Badge component instead of custom implementation
 import { Badge } from '../Badge';
@@ -126,11 +140,12 @@ export const StatusBadgeRenderer: ICellRendererComp = (params) => {
 ```
 
 #### B. Brand-Aware Renderers
+
 ```typescript
 export const BrandAwareAvatarRenderer = (params: ICellRendererParams) => {
   const { brand } = useBrandContext();
   return (
-    <Avatar 
+    <Avatar
       brandColors={brand.colors}
       // ... other props
     />
@@ -141,6 +156,7 @@ export const BrandAwareAvatarRenderer = (params: ICellRendererParams) => {
 ### 5. Accessibility & Responsive Improvements
 
 #### A. Better Mobile Experience
+
 ```css
 @media (max-width: 640px) {
   .ag-theme-custom {
@@ -153,6 +169,7 @@ export const BrandAwareAvatarRenderer = (params: ICellRendererParams) => {
 ```
 
 #### B. High Contrast Support
+
 ```css
 @media (prefers-contrast: high) {
   .ag-theme-custom {
@@ -165,6 +182,7 @@ export const BrandAwareAvatarRenderer = (params: ICellRendererParams) => {
 ### 6. Performance Optimizations
 
 #### A. CSS-in-JS Integration
+
 ```typescript
 import { generateBrandCSS } from '../../brands';
 
@@ -174,6 +192,7 @@ export const useAGGridTheme = (brand: BrandConfig) => {
 ```
 
 #### B. Tree-Shakable Renderers
+
 ```typescript
 // Lazy-load cell renderers
 export const cellRenderers = {
@@ -186,18 +205,21 @@ export const cellRenderers = {
 ## Implementation Priority
 
 ### Phase 1: Core Brand Integration (High Priority)
+
 1. Add brand prop to AGGrid component
 2. Create brand-specific CSS variable mappings
 3. Update existing colors to use design tokens
 4. Test with all brand themes
 
 ### Phase 2: Enhanced Features (Medium Priority)
+
 1. Add missing AG Grid component styling
 2. Improve mobile/responsive experience
 3. Add accessibility enhancements
 4. Create advanced cell renderers
 
 ### Phase 3: Advanced Customization (Low Priority)
+
 1. CSS-in-JS integration
 2. Dynamic theme switching
 3. Performance optimizations
@@ -206,6 +228,7 @@ export const cellRenderers = {
 ## Design Token Mapping
 
 ### Colors
+
 ```typescript
 // Current approach
 --ag-range-selection-border-color: var(--color-primary, #17aeed);
@@ -220,6 +243,7 @@ export const cellRenderers = {
 ```
 
 ### Typography
+
 ```css
 .ag-theme-custom {
   --ag-font-family: var(--mieweb-font-sans);
@@ -229,6 +253,7 @@ export const cellRenderers = {
 ```
 
 ### Spacing & Layout
+
 ```css
 .ag-theme-custom {
   --ag-border-radius: var(--mieweb-radius-md);

@@ -119,7 +119,7 @@ export function CreateReferralModal({
         <div className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
               <p className="text-sm text-red-600 dark:text-red-400">
                 {errorMessage}
               </p>
@@ -128,8 +128,8 @@ export function CreateReferralModal({
 
           {/* Employee info */}
           {employee && (
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+              <p className="mb-1 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
                 Employee
               </p>
               <p className="font-medium text-gray-900 dark:text-white">
@@ -150,15 +150,15 @@ export function CreateReferralModal({
 
           {/* Services selection */}
           <div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Select Services
             </p>
             {services.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
+              <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
                 No services available
               </p>
             ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
+              <div className="max-h-60 space-y-2 overflow-y-auto">
                 {services.map((service) => {
                   const isSelected = selectedServices.has(service.id);
                   return (
@@ -166,30 +166,24 @@ export function CreateReferralModal({
                       key={service.id}
                       type="button"
                       onClick={() => toggleService(service.id)}
-                      className={`
-                        w-full p-3 rounded-lg border text-left transition-colors
-                        ${
-                          isSelected
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                        }
-                      `}
+                      className={`w-full rounded-lg border p-3 text-left transition-colors ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                      } `}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`
-                            w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
-                            ${
+                            className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
                               isSelected
                                 ? 'border-blue-500 bg-blue-500'
                                 : 'border-gray-300 dark:border-gray-600'
-                            }
-                          `}
+                            } `}
                           >
                             {isSelected && (
                               <svg
-                                className="w-3 h-3 text-white"
+                                className="h-3 w-3 text-white"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -228,7 +222,7 @@ export function CreateReferralModal({
 
           {/* Priority */}
           <div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Priority
             </p>
             <div className="flex gap-2">
@@ -237,18 +231,15 @@ export function CreateReferralModal({
                   key={p}
                   type="button"
                   onClick={() => setPriority(p)}
-                  className={`
-                    px-3 py-1.5 rounded-full text-sm font-medium transition-colors
-                    ${
-                      priority === p
-                        ? p === 'stat'
-                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                          : p === 'urgent'
-                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    }
-                  `}
+                  className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                    priority === p
+                      ? p === 'stat'
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        : p === 'urgent'
+                          ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                  } `}
                 >
                   {p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
@@ -258,12 +249,15 @@ export function CreateReferralModal({
 
           {/* Notes */}
           <div>
-            <label htmlFor="referral-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="referral-notes"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Notes (Optional)
             </label>
             <textarea
               id="referral-notes"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -273,7 +267,7 @@ export function CreateReferralModal({
 
           {/* Cost summary */}
           {selectedServices.size > 0 && (
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -308,7 +302,7 @@ export function CreateReferralModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

@@ -104,25 +104,20 @@ export function OrderSidebar({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+        className="fixed inset-0 z-40 bg-black/50 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Sidebar */}
       <aside
-        className={`
-          fixed top-0 right-0 h-full w-full max-w-md bg-white dark:bg-gray-900
-          shadow-xl z-50 transform transition-transform duration-300
-          ${open ? 'translate-x-0' : 'translate-x-full'}
-          ${className}
-        `}
+        className={`fixed top-0 right-0 z-50 h-full w-full max-w-md transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${open ? 'translate-x-0' : 'translate-x-full'} ${className} `}
         role="dialog"
         aria-modal="true"
         aria-label="Order details"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Order Details
@@ -135,11 +130,11 @@ export function OrderSidebar({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             aria-label="Close sidebar"
           >
             <svg
-              className="w-5 h-5 text-gray-500"
+              className="h-5 w-5 text-gray-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -155,14 +150,16 @@ export function OrderSidebar({
         </div>
 
         {/* Content */}
-        <div className="p-4 overflow-y-auto h-[calc(100%-8rem)]">
+        <div className="h-[calc(100%-8rem)] overflow-y-auto p-4">
           {/* Status & Priority */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4 flex items-center gap-2">
             {status && (
               <Badge variant={getStatusVariant(status)}>{status}</Badge>
             )}
             {priority !== 'normal' && (
-              <span className={`text-xs font-medium uppercase ${getPriorityColor()}`}>
+              <span
+                className={`text-xs font-medium uppercase ${getPriorityColor()}`}
+              >
                 {priority}
               </span>
             )}
@@ -172,7 +169,7 @@ export function OrderSidebar({
           <dl className="space-y-4">
             {patientName && (
               <div>
-                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Patient
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -183,7 +180,7 @@ export function OrderSidebar({
 
             {employerName && (
               <div>
-                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Employer
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -194,7 +191,7 @@ export function OrderSidebar({
 
             {serviceName && (
               <div>
-                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Service
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -205,7 +202,7 @@ export function OrderSidebar({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Created
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -213,7 +210,7 @@ export function OrderSidebar({
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Scheduled
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -224,10 +221,10 @@ export function OrderSidebar({
 
             {notes && (
               <div>
-                <dt className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Notes
                 </dt>
-                <dd className="mt-1 text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <dd className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                   {notes}
                 </dd>
               </div>
@@ -240,7 +237,7 @@ export function OrderSidebar({
 
         {/* Actions */}
         {actions.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <div className="absolute right-0 bottom-0 left-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
             <div className="flex flex-wrap gap-2">
               {actions.map((action) => (
                 <Button

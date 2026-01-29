@@ -31,9 +31,21 @@ const sampleSteps = [
         description="This helps us customize your experience."
         options={[
           { id: 'healthcare', label: 'Healthcare', icon: 'fas fa-heartbeat' },
-          { id: 'construction', label: 'Construction', icon: 'fas fa-hard-hat' },
-          { id: 'transportation', label: 'Transportation', icon: 'fas fa-truck' },
-          { id: 'manufacturing', label: 'Manufacturing', icon: 'fas fa-industry' },
+          {
+            id: 'construction',
+            label: 'Construction',
+            icon: 'fas fa-hard-hat',
+          },
+          {
+            id: 'transportation',
+            label: 'Transportation',
+            icon: 'fas fa-truck',
+          },
+          {
+            id: 'manufacturing',
+            label: 'Manufacturing',
+            icon: 'fas fa-industry',
+          },
           { id: 'other', label: 'Other', icon: 'fas fa-ellipsis-h' },
         ]}
       />
@@ -71,7 +83,7 @@ const sampleSteps = [
         description="Import your employees from your existing HR / HCM / HRIS / payroll system or upload a CSV file."
       >
         <div className="mt-4 flex flex-wrap gap-2">
-          <button className="rounded-full border-2 border-primary bg-white px-4 py-2 text-primary">
+          <button className="border-primary text-primary rounded-full border-2 bg-white px-4 py-2">
             <i className="fas fa-file-import mr-2" />
             Import from HR Platform
           </button>
@@ -204,12 +216,7 @@ function IncompleteStepsWrapper() {
       ),
     },
   ];
-  return (
-    <OnboardingWizard
-      steps={incompleteSteps}
-      currentStep={4}
-    />
-  );
+  return <OnboardingWizard steps={incompleteSteps} currentStep={4} />;
 }
 
 export const IncompleteSteps: Story = {

@@ -19,8 +19,14 @@ const sampleRoles: UserRole[] = [
   {
     id: 'admin',
     name: 'Administrator',
-    description: 'Full access to all features and settings. Can manage users and system configuration.',
-    permissions: ['manage_users', 'manage_settings', 'view_reports', 'manage_billing'],
+    description:
+      'Full access to all features and settings. Can manage users and system configuration.',
+    permissions: [
+      'manage_users',
+      'manage_settings',
+      'view_reports',
+      'manage_billing',
+    ],
   },
   {
     id: 'manager',
@@ -50,7 +56,9 @@ const sampleUser = {
 };
 
 // Interactive wrapper
-function InteractiveDemo(props: Partial<React.ComponentProps<typeof EditUserRoleModal>>) {
+function InteractiveDemo(
+  props: Partial<React.ComponentProps<typeof EditUserRoleModal>>
+) {
   const [open, setOpen] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

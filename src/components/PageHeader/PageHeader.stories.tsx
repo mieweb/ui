@@ -42,7 +42,7 @@ export const WithIcon: Story = {
     subtitle: 'Overview of your provider activity',
     icon: (
       <svg
-        className="w-6 h-6"
+        className="h-6 w-6"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -81,16 +81,16 @@ export const WithChildren: Story = {
     subtitle: 'View and manage invoices',
     children: (
       <div className="flex gap-4 text-sm">
-        <button className="text-blue-600 dark:text-blue-400 font-medium border-b-2 border-blue-600 pb-2">
+        <button className="border-b-2 border-blue-600 pb-2 font-medium text-blue-600 dark:text-blue-400">
           All
         </button>
-        <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 pb-2">
+        <button className="pb-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">
           Draft
         </button>
-        <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 pb-2">
+        <button className="pb-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">
           Sent
         </button>
-        <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 pb-2">
+        <button className="pb-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">
           Paid
         </button>
       </div>
@@ -112,9 +112,9 @@ export const ProviderExample: Story = {
     title: 'Redimed Downtown',
     subtitle: '123 Main St, Indianapolis, IN 46202',
     icon: (
-      <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-content-center">
+      <div className="justify-content-center flex h-10 w-10 items-center rounded-full bg-blue-100 dark:bg-blue-900">
         <svg
-          className="w-6 h-6 text-blue-600 dark:text-blue-400"
+          className="h-6 w-6 text-blue-600 dark:text-blue-400"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

@@ -24,7 +24,8 @@ const mockInvoice = {
   providerPhone: '(555) 123-4567',
   providerEmail: 'billing@medcheck.com',
   employerName: 'ABC Trucking Company',
-  employerAddress: '456 Industrial Blvd\nWarehouse District\nSpringfield, IL 62702',
+  employerAddress:
+    '456 Industrial Blvd\nWarehouse District\nSpringfield, IL 62702',
   employerEmail: 'accounts@abctrucking.com',
   lineItems: [
     {

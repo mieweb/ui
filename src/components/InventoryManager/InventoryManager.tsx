@@ -82,7 +82,9 @@ export function InventoryManager({
   isLoading = false,
   className = '',
 }: InventoryManagerProps) {
-  const [updateType, setUpdateType] = React.useState<'credit' | 'debit'>('credit');
+  const [updateType, setUpdateType] = React.useState<'credit' | 'debit'>(
+    'credit'
+  );
   const [updateAmount, setUpdateAmount] = React.useState('');
   const [updateMemo, setUpdateMemo] = React.useState('');
 
@@ -113,21 +115,22 @@ export function InventoryManager({
   return (
     <div className={className}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Remaining Inventory
           </h3>
         </div>
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-          {currentInventory} <span className="text-sm font-normal text-gray-500">units</span>
+          {currentInventory}{' '}
+          <span className="text-sm font-normal text-gray-500">units</span>
         </div>
       </div>
 
-      <hr className="border-gray-200 dark:border-gray-700 mb-4" />
+      <hr className="mb-4 border-gray-200 dark:border-gray-700" />
 
       {/* Log Section Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h4 className="text-base font-semibold text-gray-900 dark:text-white">
           Inventory Log
         </h4>
@@ -135,11 +138,11 @@ export function InventoryManager({
           <button
             type="button"
             onClick={onUpdateClick}
-            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
+            className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Update Inventory
             <svg
-              className="w-4 h-4"
+              className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -155,7 +158,7 @@ export function InventoryManager({
         )}
       </div>
 
-      <hr className="border-gray-200 dark:border-gray-700 mb-4" />
+      <hr className="mb-4 border-gray-200 dark:border-gray-700" />
 
       {/* Log Table */}
       {logEntries.length > 0 ? (
@@ -163,16 +166,16 @@ export function InventoryManager({
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-2">
+                <th className="py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                   Date
                 </th>
-                <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-2">
+                <th className="py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                   User
                 </th>
-                <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-2">
+                <th className="py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                   Change
                 </th>
-                <th className="text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-2">
+                <th className="py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                   Quantity
                 </th>
               </tr>
@@ -193,7 +196,7 @@ export function InventoryManager({
                     <td className="py-2 text-sm text-gray-600 dark:text-gray-400">
                       {entry.type === 'credit' ? 'Added' : 'Removed'}
                     </td>
-                    <td className="py-2 text-sm text-right">
+                    <td className="py-2 text-right text-sm">
                       <span
                         className={`inline-flex items-center gap-1 ${
                           entry.type === 'credit'
@@ -203,7 +206,7 @@ export function InventoryManager({
                       >
                         {entry.type === 'credit' ? (
                           <svg
-                            className="w-3.5 h-3.5"
+                            className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -217,7 +220,7 @@ export function InventoryManager({
                           </svg>
                         ) : (
                           <svg
-                            className="w-3.5 h-3.5"
+                            className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -236,8 +239,8 @@ export function InventoryManager({
                   </tr>
                   {entry.memo && (
                     <tr className="bg-gray-50 dark:bg-gray-800/50">
-                      <td colSpan={4} className="py-1 px-2 text-right">
-                        <span className="text-xs text-gray-500 dark:text-gray-400 italic">
+                      <td colSpan={4} className="px-2 py-1 text-right">
+                        <span className="text-xs text-gray-500 italic dark:text-gray-400">
                           Memo: {entry.memo}
                         </span>
                       </td>
@@ -249,9 +252,9 @@ export function InventoryManager({
           </table>
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="py-8 text-center text-gray-500 dark:text-gray-400">
           <svg
-            className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600"
+            className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -288,10 +291,10 @@ export function InventoryManager({
           </div>
 
           <div>
-            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <h5 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Update Inventory
             </h5>
-            <hr className="border-gray-200 dark:border-gray-700 mb-3" />
+            <hr className="mb-3 border-gray-200 dark:border-gray-700" />
           </div>
 
           {/* Add/Remove Toggle */}
@@ -299,17 +302,14 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('debit')}
-              className={`
-                px-4 py-2 text-sm font-medium rounded-l-md border
-                ${
-                  updateType === 'debit'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }
-              `}
+              className={`rounded-l-md border px-4 py-2 text-sm font-medium ${
+                updateType === 'debit'
+                  ? 'border-blue-600 bg-blue-600 text-white'
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              } `}
             >
               <svg
-                className="w-4 h-4 inline-block mr-1"
+                className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -326,17 +326,14 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('credit')}
-              className={`
-                px-4 py-2 text-sm font-medium rounded-r-md border-t border-r border-b
-                ${
-                  updateType === 'credit'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }
-              `}
+              className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium ${
+                updateType === 'credit'
+                  ? 'border-blue-600 bg-blue-600 text-white'
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              } `}
             >
               <svg
-                className="w-4 h-4 inline-block mr-1"
+                className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -373,15 +370,17 @@ export function InventoryManager({
 
           {/* Preview */}
           {previewChange !== null && updateAmount && (
-            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-              <h5 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+            <div className="rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+              <h5 className="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
                 Description
               </h5>
-              <ul className="text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside">
+              <ul className="list-inside list-disc text-sm text-yellow-700 dark:text-yellow-300">
                 <li>
                   This will{' '}
                   {updateType === 'credit' ? (
-                    <span className="font-medium">add {updateAmount} units to</span>
+                    <span className="font-medium">
+                      add {updateAmount} units to
+                    </span>
                   ) : (
                     <span className="font-medium">
                       remove {updateAmount} units from
@@ -402,10 +401,7 @@ export function InventoryManager({
           <Button variant="outline" onClick={onUpdateModalClose}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!updateAmount || isLoading}
-          >
+          <Button onClick={handleSubmit} disabled={!updateAmount || isLoading}>
             {isLoading ? 'Saving...' : 'Save'}
           </Button>
         </ModalFooter>

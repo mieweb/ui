@@ -152,7 +152,11 @@ export function AddContactModal({
     }));
   };
 
-  const handleCustomFieldChange = (index: number, field: 'name' | 'value', value: string) => {
+  const handleCustomFieldChange = (
+    index: number,
+    field: 'name' | 'value',
+    value: string
+  ) => {
     setFormData((prev) => {
       const customFields = [...(prev.customFields || [])];
       customFields[index] = { ...customFields[index], [field]: value };
@@ -211,11 +215,11 @@ export function AddContactModal({
       <form onSubmit={handleSubmit}>
         <ModalBody className={cn('space-y-4', className)}>
           {/* Name Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label
                 htmlFor="contact-firstName"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 First Name <span className="text-red-500">*</span>
               </label>
@@ -234,7 +238,7 @@ export function AddContactModal({
             <div>
               <label
                 htmlFor="contact-lastName"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Last Name <span className="text-red-500">*</span>
               </label>
@@ -253,7 +257,7 @@ export function AddContactModal({
             <div>
               <label
                 htmlFor="contact-sex"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Sex
               </label>
@@ -270,11 +274,11 @@ export function AddContactModal({
           </div>
 
           {/* Position and Degree Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="contact-positionTitle"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Position Title
               </label>
@@ -289,7 +293,7 @@ export function AddContactModal({
             <div>
               <label
                 htmlFor="contact-degree"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Degree
               </label>
@@ -303,11 +307,11 @@ export function AddContactModal({
           </div>
 
           {/* Email Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="contact-email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Email <span className="text-red-500">*</span>
               </label>
@@ -328,7 +332,7 @@ export function AddContactModal({
               <div>
                 <label
                   htmlFor="contact-phone"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   Phone
                 </label>
@@ -349,12 +353,14 @@ export function AddContactModal({
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Address
               </h4>
-              
+
               <div>
                 <Input
                   id="contact-street1"
                   value={formData.address?.street1 || ''}
-                  onChange={(e) => handleAddressChange('street1', e.target.value)}
+                  onChange={(e) =>
+                    handleAddressChange('street1', e.target.value)
+                  }
                   placeholder="Street Address"
                 />
               </div>
@@ -363,17 +369,21 @@ export function AddContactModal({
                 <Input
                   id="contact-street2"
                   value={formData.address?.street2 || ''}
-                  onChange={(e) => handleAddressChange('street2', e.target.value)}
+                  onChange={(e) =>
+                    handleAddressChange('street2', e.target.value)
+                  }
                   placeholder="Apt, Suite, etc. (optional)"
                 />
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div className="col-span-2 sm:col-span-1">
                   <Input
                     id="contact-city"
                     value={formData.address?.city || ''}
-                    onChange={(e) => handleAddressChange('city', e.target.value)}
+                    onChange={(e) =>
+                      handleAddressChange('city', e.target.value)
+                    }
                     placeholder="City"
                   />
                 </div>
@@ -382,7 +392,9 @@ export function AddContactModal({
                   <Input
                     id="contact-state"
                     value={formData.address?.state || ''}
-                    onChange={(e) => handleAddressChange('state', e.target.value)}
+                    onChange={(e) =>
+                      handleAddressChange('state', e.target.value)
+                    }
                     placeholder="State"
                   />
                 </div>
@@ -391,7 +403,9 @@ export function AddContactModal({
                   <Input
                     id="contact-postalCode"
                     value={formData.address?.postalCode || ''}
-                    onChange={(e) => handleAddressChange('postalCode', e.target.value)}
+                    onChange={(e) =>
+                      handleAddressChange('postalCode', e.target.value)
+                    }
                     placeholder="ZIP"
                   />
                 </div>
@@ -412,7 +426,7 @@ export function AddContactModal({
                   size="sm"
                   onClick={handleAddCustomField}
                 >
-                  <PlusIcon className="h-4 w-4 mr-1" />
+                  <PlusIcon className="mr-1 h-4 w-4" />
                   Add Field
                 </Button>
               </div>
@@ -447,9 +461,11 @@ export function AddContactModal({
                 </div>
               ))}
 
-              {(!formData.customFields || formData.customFields.length === 0) && (
+              {(!formData.customFields ||
+                formData.customFields.length === 0) && (
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No custom fields added. Click &quot;Add Field&quot; to add custom information.
+                  No custom fields added. Click &quot;Add Field&quot; to add
+                  custom information.
                 </p>
               )}
             </div>
@@ -468,7 +484,7 @@ export function AddContactModal({
           <Button type="submit" disabled={isSaving}>
             {isSaving ? (
               <>
-                <SpinnerIcon className="h-4 w-4 mr-2 animate-spin" />
+                <SpinnerIcon className="mr-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : (

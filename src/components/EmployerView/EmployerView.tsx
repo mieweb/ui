@@ -134,9 +134,9 @@ export function EmployerView({
 
   if (isLoading) {
     return (
-      <div className={`space-y-4 animate-pulse ${className}`}>
-        <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      <div className={`animate-pulse space-y-4 ${className}`}>
+        <div className="h-32 rounded-lg bg-gray-200 dark:bg-gray-700" />
+        <div className="h-64 rounded-lg bg-gray-200 dark:bg-gray-700" />
       </div>
     );
   }
@@ -146,16 +146,16 @@ export function EmployerView({
       {/* Header */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div className="flex items-center gap-4">
               {employer.logoUrl ? (
                 <img
                   src={employer.logoUrl}
                   alt={employer.name}
-                  className="w-16 h-16 rounded-lg object-cover"
+                  className="h-16 w-16 rounded-lg object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
                   <span className="text-2xl font-bold text-gray-500 dark:text-gray-400">
                     {employer.name.charAt(0)}
                   </span>
@@ -189,7 +189,7 @@ export function EmployerView({
 
           {/* Stats */}
           {employer.stats && (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-200 pt-6 md:grid-cols-5 dark:border-gray-700">
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {employer.stats.totalOrders}
@@ -246,7 +246,7 @@ export function EmployerView({
 
         {/* Overview Tab */}
         <TabsContent value="overview">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             {/* Address Card */}
             {employer.address && (
               <Card>
@@ -254,7 +254,7 @@ export function EmployerView({
                   <CardTitle className="text-lg">Address</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <address className="not-italic text-gray-700 dark:text-gray-300">
+                  <address className="text-gray-700 not-italic dark:text-gray-300">
                     {employer.address.street}
                     {employer.address.street2 && (
                       <>
@@ -328,7 +328,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.recentOrders.length === 0 ? (
-                <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
                   No orders yet
                 </p>
               ) : (
@@ -336,7 +336,7 @@ export function EmployerView({
                   {employer.recentOrders.map((order) => (
                     <div
                       key={order.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                     >
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
@@ -353,7 +353,7 @@ export function EmployerView({
                         <Badge variant={getStatusVariant(order.status)}>
                           {order.status}
                         </Badge>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                           {formatDate(order.createdDate)}
                         </p>
                       </div>
@@ -387,7 +387,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.recentInvoices.length === 0 ? (
-                <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
                   No invoices yet
                 </p>
               ) : (
@@ -395,7 +395,7 @@ export function EmployerView({
                   {employer.recentInvoices.map((invoice) => (
                     <div
                       key={invoice.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                     >
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
@@ -438,7 +438,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.contacts.length === 0 ? (
-                <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
                   No contacts added
                 </p>
               ) : (
@@ -446,7 +446,7 @@ export function EmployerView({
                   {employer.contacts.map((contact) => (
                     <div
                       key={contact.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar name={contact.name} size="sm" />

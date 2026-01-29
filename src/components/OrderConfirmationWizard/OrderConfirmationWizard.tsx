@@ -92,7 +92,7 @@ export function OrderConfirmationWizard({
   const canComplete = canProceedStep1 && canProceedStep2;
 
   return (
-    <div className={`max-w-2xl mx-auto ${className}`}>
+    <div className={`mx-auto max-w-2xl ${className}`}>
       {/* Progress indicator */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -105,20 +105,17 @@ export function OrderConfirmationWizard({
               <React.Fragment key={stepNum}>
                 <div className="flex flex-col items-center">
                   <div
-                    className={`
-                      w-10 h-10 rounded-full flex items-center justify-center font-medium
-                      ${
-                        isComplete
-                          ? 'bg-green-500 text-white'
-                          : isActive
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                      }
-                    `}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full font-medium ${
+                      isComplete
+                        ? 'bg-green-500 text-white'
+                        : isActive
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                    } `}
                   >
                     {isComplete ? (
                       <svg
-                        className="w-5 h-5"
+                        className="h-5 w-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -135,20 +132,14 @@ export function OrderConfirmationWizard({
                     )}
                   </div>
                   <span
-                    className={`
-                      mt-2 text-xs font-medium text-center
-                      ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}
-                    `}
+                    className={`mt-2 text-center text-xs font-medium ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} `}
                   >
                     {title}
                   </span>
                 </div>
                 {index < stepTitles.length - 1 && (
                   <div
-                    className={`
-                      flex-1 h-0.5 mx-4
-                      ${step > stepNum ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}
-                    `}
+                    className={`mx-4 h-0.5 flex-1 ${step > stepNum ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'} `}
                   />
                 )}
               </React.Fragment>
@@ -188,7 +179,7 @@ export function OrderConfirmationWizard({
                 present.
               </p>
 
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Employee Name
@@ -237,12 +228,15 @@ export function OrderConfirmationWizard({
               </label>
 
               <div>
-                <label htmlFor="verification-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="verification-notes"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Notes (Optional)
                 </label>
                 <textarea
                   id="verification-notes"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   rows={2}
                   value={verificationNotes}
                   onChange={(e) => setVerificationNotes(e.target.value)}
@@ -262,7 +256,10 @@ export function OrderConfirmationWizard({
                 Obtain consent and verify government-issued identification.
               </p>
 
-              <label aria-label="Consent Obtained" className="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <label
+                aria-label="Consent Obtained"
+                className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+              >
                 <input
                   type="checkbox"
                   checked={consentObtained}
@@ -280,7 +277,7 @@ export function OrderConfirmationWizard({
                 </div>
               </label>
 
-              <label className="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
                 <input
                   type="checkbox"
                   checked={idVerified}
@@ -291,7 +288,7 @@ export function OrderConfirmationWizard({
                   <p className="font-medium text-gray-900 dark:text-white">
                     Photo ID Verified
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
                     Government-issued photo ID matches employee information
                   </p>
                   {idVerified && (
@@ -318,10 +315,10 @@ export function OrderConfirmationWizard({
               </p>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
                   <div className="flex items-center gap-3">
                     <svg
-                      className="w-5 h-5 text-green-600 dark:text-green-400"
+                      className="h-5 w-5 text-green-600 dark:text-green-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -340,10 +337,10 @@ export function OrderConfirmationWizard({
                   <span className="text-green-600 dark:text-green-400">✓</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
                   <div className="flex items-center gap-3">
                     <svg
-                      className="w-5 h-5 text-green-600 dark:text-green-400"
+                      className="h-5 w-5 text-green-600 dark:text-green-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -362,10 +359,10 @@ export function OrderConfirmationWizard({
                   <span className="text-green-600 dark:text-green-400">✓</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
                   <div className="flex items-center gap-3">
                     <svg
-                      className="w-5 h-5 text-green-600 dark:text-green-400"
+                      className="h-5 w-5 text-green-600 dark:text-green-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -386,12 +383,15 @@ export function OrderConfirmationWizard({
               </div>
 
               <div>
-                <label htmlFor="confirmation-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="confirmation-notes"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Additional Notes (Optional)
                 </label>
                 <textarea
                   id="confirmation-notes"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   rows={3}
                   value={confirmationNotes}
                   onChange={(e) => setConfirmationNotes(e.target.value)}
@@ -413,7 +413,7 @@ export function OrderConfirmationWizard({
               disabled={isSubmitting}
             >
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -431,7 +431,11 @@ export function OrderConfirmationWizard({
         </div>
         <div className="flex gap-2">
           {onCancel && (
-            <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
           )}
@@ -442,7 +446,7 @@ export function OrderConfirmationWizard({
             >
               Continue
               <svg
-                className="w-4 h-4 ml-1"
+                className="ml-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -456,11 +460,14 @@ export function OrderConfirmationWizard({
               </svg>
             </Button>
           ) : (
-            <Button onClick={handleComplete} disabled={!canComplete || isSubmitting}>
+            <Button
+              onClick={handleComplete}
+              disabled={!canComplete || isSubmitting}
+            >
               {isSubmitting ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -484,7 +491,7 @@ export function OrderConfirmationWizard({
                 <>
                   Start Service
                   <svg
-                    className="w-4 h-4 ml-1"
+                    className="ml-1 h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

@@ -81,7 +81,7 @@ export function EditUserRoleModal({
       <div className="space-y-4">
         {/* User info */}
         {user && (
-          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
             <p className="font-medium text-gray-900 dark:text-white">
               {user.name}
             </p>
@@ -93,10 +93,10 @@ export function EditUserRoleModal({
 
         {/* Error message */}
         {errorMessage && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
             <div className="flex items-center gap-2">
               <svg
-                className="w-5 h-5 text-red-500"
+                className="h-5 w-5 text-red-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -129,7 +129,7 @@ export function EditUserRoleModal({
 
         {/* Role description */}
         {selectedRole?.description && (
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
             <p className="text-sm text-blue-700 dark:text-blue-300">
               {selectedRole.description}
             </p>
@@ -139,14 +139,14 @@ export function EditUserRoleModal({
         {/* Role permissions preview */}
         {selectedRole?.permissions && selectedRole.permissions.length > 0 && (
           <div>
-            <span className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <span className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Permissions
             </span>
             <div className="flex flex-wrap gap-2">
               {selectedRole.permissions.map((permission) => (
                 <span
                   key={permission}
-                  className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                 >
                   {permission}
                 </span>
@@ -173,7 +173,7 @@ export function EditUserRoleModal({
           {isSubmitting ? (
             <>
               <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4"
+                className="mr-2 -ml-1 h-4 w-4 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"
               >

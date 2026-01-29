@@ -134,14 +134,14 @@ export function InvoicePaymentPage({
   if (isLoading) {
     return (
       <div
-        className={`min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-8 ${className}`}
+        className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
-            <div className="grid lg:grid-cols-2 gap-6">
-              <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-              <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+            <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="h-64 rounded-lg bg-gray-200 dark:bg-gray-700" />
+              <div className="h-96 rounded-lg bg-gray-200 dark:bg-gray-700" />
             </div>
           </div>
         </div>
@@ -152,12 +152,12 @@ export function InvoicePaymentPage({
   if (!invoice) {
     return (
       <div
-        className={`min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 ${className}`}
+        className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
-        <Card className="max-w-md w-full text-center">
+        <Card className="w-full max-w-md text-center">
           <CardContent className="py-12">
             <svg
-              className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4"
+              className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-gray-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -169,11 +169,12 @@ export function InvoicePaymentPage({
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Invoice Not Found
             </h2>
             <p className="text-gray-500 dark:text-gray-400">
-              The invoice you&apos;re looking for doesn&apos;t exist or has expired.
+              The invoice you&apos;re looking for doesn&apos;t exist or has
+              expired.
             </p>
           </CardContent>
         </Card>
@@ -184,13 +185,13 @@ export function InvoicePaymentPage({
   if (successMessage || invoice.status === 'paid') {
     return (
       <div
-        className={`min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 ${className}`}
+        className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
-        <Card className="max-w-md w-full text-center">
+        <Card className="w-full max-w-md text-center">
           <CardContent className="py-12">
-            <div className="w-16 h-16 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
               <svg
-                className="w-8 h-8 text-green-600 dark:text-green-400"
+                className="h-8 w-8 text-green-600 dark:text-green-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -203,10 +204,10 @@ export function InvoicePaymentPage({
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Payment Successful
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">
+            <p className="mb-4 text-gray-500 dark:text-gray-400">
               {successMessage ||
                 'Thank you! Your payment has been processed successfully.'}
             </p>
@@ -221,11 +222,11 @@ export function InvoicePaymentPage({
 
   return (
     <div
-      className={`min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-8 ${className}`}
+      className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="mb-8 flex items-center gap-4">
           {invoice.providerLogoUrl ? (
             <img
               src={invoice.providerLogoUrl}
@@ -239,7 +240,7 @@ export function InvoicePaymentPage({
           )}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* Invoice Summary */}
           <div>
             <Card>
@@ -252,12 +253,12 @@ export function InvoicePaymentPage({
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                   <p>Issued: {formatDate(invoice.issuedDate)}</p>
                   <p
                     className={
                       invoice.status === 'overdue'
-                        ? 'text-red-600 dark:text-red-400 font-medium'
+                        ? 'font-medium text-red-600 dark:text-red-400'
                         : ''
                     }
                   >
@@ -266,12 +267,12 @@ export function InvoicePaymentPage({
                   <p>Bill to: {invoice.employerName}</p>
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-gray-500 dark:text-gray-400">
-                        <th className="text-left font-medium pb-2">Item</th>
-                        <th className="text-right font-medium pb-2">Amount</th>
+                        <th className="pb-2 text-left font-medium">Item</th>
+                        <th className="pb-2 text-right font-medium">Amount</th>
                       </tr>
                     </thead>
                     <tbody className="text-gray-700 dark:text-gray-300">
@@ -287,7 +288,7 @@ export function InvoicePaymentPage({
                   </table>
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+                <div className="space-y-2 border-t border-gray-200 pt-4 dark:border-gray-700">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
                       Subtotal
@@ -320,7 +321,7 @@ export function InvoicePaymentPage({
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {errorMessage && (
-                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
                       <p className="text-sm text-red-600 dark:text-red-400">
                         {errorMessage}
                       </p>
@@ -329,19 +330,16 @@ export function InvoicePaymentPage({
 
                   {/* Payment method toggle */}
                   {acceptedMethods.length > 1 && (
-                    <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
                       {acceptedMethods.includes('card') && (
                         <button
                           type="button"
                           onClick={() => setPaymentMethod('card')}
-                          className={`
-                            flex-1 px-4 py-2 text-sm font-medium transition-colors
-                            ${
-                              paymentMethod === 'card'
-                                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }
-                          `}
+                          className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                            paymentMethod === 'card'
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                          } `}
                         >
                           Credit Card
                         </button>
@@ -350,14 +348,11 @@ export function InvoicePaymentPage({
                         <button
                           type="button"
                           onClick={() => setPaymentMethod('ach')}
-                          className={`
-                            flex-1 px-4 py-2 text-sm font-medium transition-colors
-                            ${
-                              paymentMethod === 'ach'
-                                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                            }
-                          `}
+                          className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                            paymentMethod === 'ach'
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                          } `}
                         >
                           Bank Transfer
                         </button>
@@ -435,7 +430,7 @@ export function InvoicePaymentPage({
                     {isProcessing ? (
                       <>
                         <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4"
+                          className="mr-2 -ml-1 h-4 w-4 animate-spin"
                           fill="none"
                           viewBox="0 0 24 24"
                         >
@@ -461,7 +456,7 @@ export function InvoicePaymentPage({
                   </Button>
 
                   {showStripeBranding && (
-                    <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+                    <p className="text-center text-xs text-gray-400 dark:text-gray-500">
                       Secured by Stripe
                     </p>
                   )}

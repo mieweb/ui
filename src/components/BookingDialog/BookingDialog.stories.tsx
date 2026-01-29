@@ -59,7 +59,9 @@ function BookingDialogWrapper(args: Story['args']) {
         provider={args?.provider || mockProvider}
         services={args?.services || mockServices}
         onSubmit={(data) => {
-          window.alert(`Booking requested for ${data.firstName} ${data.lastName}`);
+          window.alert(
+            `Booking requested for ${data.firstName} ${data.lastName}`
+          );
           setIsOpen(false);
         }}
         onCall={(phone) => window.alert(`Calling ${phone}...`)}

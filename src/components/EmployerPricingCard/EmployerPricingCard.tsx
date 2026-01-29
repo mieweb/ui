@@ -68,9 +68,7 @@ export function EmployerPricingCard({
   };
 
   return (
-    <Card
-      className={`${className} ${!isActive ? 'opacity-60' : ''}`}
-    >
+    <Card className={`${className} ${!isActive ? 'opacity-60' : ''}`}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div className="flex-1">
           <CardTitle className="text-base font-semibold">
@@ -94,14 +92,14 @@ export function EmployerPricingCard({
         {/* Pricing tiers */}
         {tiers.length > 0 && (
           <div className="mt-3 space-y-2">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <p className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
               Volume Pricing
             </p>
             <div className="space-y-1">
               {tiers.map((tier) => (
                 <div
                   key={tier.id}
-                  className="flex items-center justify-between py-1.5 px-2 rounded bg-gray-50 dark:bg-gray-800/50"
+                  className="flex items-center justify-between rounded bg-gray-50 px-2 py-1.5 dark:bg-gray-800/50"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600 dark:text-gray-300">
@@ -127,7 +125,7 @@ export function EmployerPricingCard({
 
         {/* Notes */}
         {notes && (
-          <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+          <div className="mt-3 rounded border border-yellow-200 bg-yellow-50 p-2 dark:border-yellow-800 dark:bg-yellow-900/20">
             <p className="text-xs text-yellow-800 dark:text-yellow-200">
               <span className="font-medium">Note:</span> {notes}
             </p>
@@ -140,7 +138,7 @@ export function EmployerPricingCard({
             {onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <svg
-                  className="w-3.5 h-3.5 mr-1"
+                  className="mr-1 h-3.5 w-3.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -158,7 +156,7 @@ export function EmployerPricingCard({
             {onRemove && (
               <Button variant="ghost" size="sm" onClick={onRemove}>
                 <svg
-                  className="w-3.5 h-3.5 mr-1 text-red-500"
+                  className="mr-1 h-3.5 w-3.5 text-red-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

@@ -65,10 +65,10 @@ function BusinessHoursEditorWrapper(
         showDescription={true}
         {...props}
       />
-      
-      <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-        <h4 className="font-medium mb-2 text-sm">Current Schedule:</h4>
-        <pre className="text-xs overflow-auto max-h-48">
+
+      <div className="mt-6 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+        <h4 className="mb-2 text-sm font-medium">Current Schedule:</h4>
+        <pre className="max-h-48 overflow-auto text-xs">
           {JSON.stringify(schedule, null, 2)}
         </pre>
       </div>
@@ -126,26 +126,51 @@ export const WithDescriptions: Story = {
       {
         day: 1,
         hours: [
-          { id: '1', start: '08:00', end: '12:00', description: 'Morning shift' },
-          { id: '2', start: '13:00', end: '17:00', description: 'Afternoon shift' },
+          {
+            id: '1',
+            start: '08:00',
+            end: '12:00',
+            description: 'Morning shift',
+          },
+          {
+            id: '2',
+            start: '13:00',
+            end: '17:00',
+            description: 'Afternoon shift',
+          },
         ],
       },
       {
         day: 2,
         hours: [
-          { id: '3', start: '09:00', end: '17:00', description: 'Regular hours' },
+          {
+            id: '3',
+            start: '09:00',
+            end: '17:00',
+            description: 'Regular hours',
+          },
         ],
       },
       {
         day: 3,
         hours: [
-          { id: '4', start: '09:00', end: '17:00', description: 'Regular hours' },
+          {
+            id: '4',
+            start: '09:00',
+            end: '17:00',
+            description: 'Regular hours',
+          },
         ],
       },
       {
         day: 4,
         hours: [
-          { id: '5', start: '09:00', end: '17:00', description: 'Regular hours' },
+          {
+            id: '5',
+            start: '09:00',
+            end: '17:00',
+            description: 'Regular hours',
+          },
         ],
       },
       {
@@ -190,7 +215,17 @@ export const ComplexSchedule: Story = {
   render: (args) => <BusinessHoursEditorWrapper {...args} />,
   args: {
     value: [
-      { day: 0, hours: [{ id: '1', start: '10:00', end: '14:00', description: 'Sunday brunch' }] },
+      {
+        day: 0,
+        hours: [
+          {
+            id: '1',
+            start: '10:00',
+            end: '14:00',
+            description: 'Sunday brunch',
+          },
+        ],
+      },
       {
         day: 1,
         hours: [
@@ -228,14 +263,24 @@ export const ComplexSchedule: Story = {
         hours: [
           { id: '14', start: '07:00', end: '10:00', description: 'Breakfast' },
           { id: '15', start: '11:00', end: '14:00', description: 'Lunch' },
-          { id: '16', start: '17:00', end: '23:00', description: 'Dinner & Late Night' },
+          {
+            id: '16',
+            start: '17:00',
+            end: '23:00',
+            description: 'Dinner & Late Night',
+          },
         ],
       },
       {
         day: 6,
         hours: [
           { id: '17', start: '09:00', end: '15:00', description: 'Brunch' },
-          { id: '18', start: '17:00', end: '23:00', description: 'Dinner & Late Night' },
+          {
+            id: '18',
+            start: '17:00',
+            end: '23:00',
+            description: 'Dinner & Late Night',
+          },
         ],
       },
     ],

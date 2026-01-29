@@ -19,7 +19,8 @@ type Story = StoryObj<typeof OrderLookupForm>;
 export const Default: Story = {
   args: {
     providerName: 'ABC Medical Center',
-    welcomeMessage: 'Welcome! Look up your order by entering your information below.',
+    welcomeMessage:
+      'Welcome! Look up your order by entering your information below.',
   },
 };
 
