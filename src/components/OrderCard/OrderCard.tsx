@@ -75,16 +75,19 @@ export interface OrderCardProps {
 
 const statusConfig: Record<
   OrderStatus,
-  { label: string; variant: 'default' | 'success' | 'warning' | 'error' | 'info' }
+  {
+    label: string;
+    variant: 'default' | 'success' | 'warning' | 'danger' | 'secondary';
+  }
 > = {
   pending: { label: 'Pending', variant: 'warning' },
-  active: { label: 'Active', variant: 'info' },
-  scheduled: { label: 'Scheduled', variant: 'info' },
-  'in-progress': { label: 'In Progress', variant: 'info' },
+  active: { label: 'Active', variant: 'default' },
+  scheduled: { label: 'Scheduled', variant: 'default' },
+  'in-progress': { label: 'In Progress', variant: 'default' },
   completed: { label: 'Completed', variant: 'success' },
-  rejected: { label: 'Rejected', variant: 'error' },
+  rejected: { label: 'Rejected', variant: 'danger' },
   invoiced: { label: 'Invoiced', variant: 'success' },
-  cancelled: { label: 'Cancelled', variant: 'default' },
+  cancelled: { label: 'Cancelled', variant: 'secondary' },
 };
 
 function formatDate(date: Date): string {
@@ -169,17 +172,12 @@ export function OrderCard({
 
   return (
     <Card
-      className={`
-        transition-all duration-200
-        ${onClick ? 'cursor-pointer hover:shadow-md' : ''}
-        ${selected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}
-        ${className}
-      `.trim()}
+      className={`transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-md' : ''} ${selected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''} ${className} `.trim()}
       onClick={onClick ? handleCardClick : undefined}
     >
       <div className="p-4">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-3">
+        <div className="mb-3 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-gray-900 dark:text-white">
@@ -188,14 +186,14 @@ export function OrderCard({
               <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
             </div>
             <p
-              className="text-sm text-gray-500 dark:text-gray-400 mt-1"
+              className="mt-1 text-sm text-gray-500 dark:text-gray-400"
               title={formatDate(createdAt)}
             >
               {formatRelativeTime(createdAt)}
             </p>
           </div>
           {totalAmount !== undefined && (
-            <div className="text-right flex-shrink-0">
+            <div className="flex-shrink-0 text-right">
               <p className="font-semibold text-gray-900 dark:text-white">
                 {formatCurrency(totalAmount, currency)}
               </p>
@@ -206,18 +204,18 @@ export function OrderCard({
         {/* Employee Info */}
         <div className="mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
               <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                 {employee.firstName[0]}
                 {employee.lastName[0]}
               </span>
             </div>
             <div className="min-w-0">
-              <p className="font-medium text-gray-900 dark:text-white truncate">
+              <p className="truncate font-medium text-gray-900 dark:text-white">
                 {employee.firstName} {employee.lastName}
               </p>
               {employer && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                <p className="truncate text-sm text-gray-500 dark:text-gray-400">
                   {employer.name}
                 </p>
               )}
@@ -227,20 +225,20 @@ export function OrderCard({
 
         {/* Services */}
         <div className="mb-3">
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+          <p className="mb-1 text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
             Services ({services.length})
           </p>
           <div className="flex flex-wrap gap-1">
             {services.slice(0, 3).map((service) => (
               <span
                 key={service.id}
-                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300"
               >
                 {service.name}
               </span>
             ))}
             {services.length > 3 && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              <span className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                 +{services.length - 3} more
               </span>
             )}
@@ -251,7 +249,7 @@ export function OrderCard({
         {scheduledDate && (
           <div className="mb-3 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <svg
-              className="w-4 h-4"
+              className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -269,29 +267,29 @@ export function OrderCard({
 
         {/* Rejection Reason */}
         {status === 'rejected' && rejectionReason && (
-          <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm text-red-700 dark:text-red-300">
+          <div className="mb-3 rounded bg-red-50 p-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
             <span className="font-medium">Reason:</span> {rejectionReason}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between border-t border-gray-100 pt-3 dark:border-gray-800">
           {onView && (
             <button
               type="button"
               onClick={handleViewClick}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               View Details
             </button>
           )}
           {showActions && (
-            <div className="flex gap-2 ml-auto">
+            <div className="ml-auto flex gap-2">
               {onReject && (
                 <button
                   type="button"
                   onClick={handleRejectClick}
-                  className="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                  className="rounded-md px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                 >
                   Reject
                 </button>
@@ -300,7 +298,7 @@ export function OrderCard({
                 <button
                   type="button"
                   onClick={handleAcceptClick}
-                  className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                  className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 >
                   Accept
                 </button>

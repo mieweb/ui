@@ -30,7 +30,13 @@ export * from './components/Dropdown';
 export * from './components/DropzoneOverlay';
 export * from './components/ClaimProviderForm';
 export * from './components/CreateInvoiceModal';
-export * from './components/CreateReferralModal';
+// CreateReferralModal exports ServiceOption which conflicts with ProviderSearchFilters
+export {
+  CreateReferralModal,
+  type CreateReferralModalProps,
+  type Employee,
+  type ReferralData,
+} from './components/CreateReferralModal';
 export * from './components/EditUserRoleModal';
 export * from './components/EmployeeForm';
 export * from './components/EmployeeProfile';
@@ -48,7 +54,8 @@ export * from './components/InventoryManager';
 export * from './components/InviteUserModal';
 export * from './components/InvoiceList';
 export * from './components/InvoicePaymentPage';
-export * from './components/InvoiceView';
+// InvoiceView exports InvoiceLineItem which conflicts with InvoicePaymentPage
+export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
 export * from './components/LoadingPage';
 export * from './components/Messaging';
@@ -57,7 +64,13 @@ export * from './components/NotificationCenter';
 export * from './components/OnboardingWizard';
 export * from './components/OrderCard';
 export * from './components/OrderConfirmationWizard';
-export * from './components/OrderList';
+// OrderList exports OrderStatus which conflicts with OrderCard
+export {
+  OrderList,
+  defaultOrderTabs,
+  type OrderListProps,
+  type OrderListTab,
+} from './components/OrderList';
 export * from './components/OrderLookupForm';
 export * from './components/OrderSidebar';
 export * from './components/PageHeader';
@@ -71,7 +84,13 @@ export * from './components/ProductVersion';
 export * from './components/Progress';
 export * from './components/ProviderCard';
 export * from './components/ProviderDetailHeader';
-export * from './components/ProviderOverview';
+// ProviderOverview exports QuickAction type which conflicts with QuickAction component
+export {
+  ProviderOverview,
+  type ProviderOverviewProps,
+  type ProviderStats,
+  type RecentActivity,
+} from './components/ProviderOverview';
 export * from './components/ProviderSearchBar';
 export * from './components/ProviderSearchFilters';
 export * from './components/ProviderSelector';
@@ -96,7 +115,12 @@ export * from './components/ServiceGrid';
 export * from './components/ServicePicker';
 export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
-export * from './components/SetupServiceModal';
+// SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
+export {
+  SetupServiceModal,
+  type SetupServiceModalProps,
+  type ServiceFormData,
+} from './components/SetupServiceModal';
 export * from './components/Sidebar';
 export * from './components/SiteFooter';
 export * from './components/SiteHeader';
@@ -115,7 +139,15 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Tooltip';
 export * from './components/VisuallyHidden';
-export * from './components/WebChartReportViewer';
+// WebChartReportViewer exports DateRange which conflicts with DateRangePicker
+export {
+  WebChartReportViewer,
+  ReportDatePicker,
+  type WebChartReportViewerProps,
+  type SystemReport,
+  type ReportResult,
+  type ReportDatePickerProps,
+} from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
 
 // Hooks

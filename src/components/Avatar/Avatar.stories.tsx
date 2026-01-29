@@ -104,7 +104,7 @@ export const Initials: Story = {
 // Custom Fallback
 export const CustomFallback: Story = {
   args: {
-    fallback: '👤',
+    fallback: <span>👤</span>,
     size: 'lg',
   },
 };

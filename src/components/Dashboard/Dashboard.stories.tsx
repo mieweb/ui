@@ -1277,7 +1277,7 @@ function OrdersPage() {
                 (status) => (
                   <Button
                     key={status}
-                    variant={filter === status ? 'default' : 'outline'}
+                    variant={filter === status ? 'primary' : 'outline'}
                     size="sm"
                     onClick={() => setFilter(status)}
                   >
