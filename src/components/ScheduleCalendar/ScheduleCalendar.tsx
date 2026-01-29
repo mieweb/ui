@@ -267,9 +267,18 @@ export function ScheduleCalendar({
                   {hours.map((hour) => (
                     <div
                       key={hour}
+                      role={onAddAppointment ? 'button' : undefined}
+                      tabIndex={onAddAppointment ? 0 : undefined}
                       className="h-16 border-b border-gray-100 dark:border-gray-800"
                       onClick={() => {
                         if (onAddAppointment) {
+                          const clickDate = new Date(date);
+                          clickDate.setHours(hour, 0, 0, 0);
+                          onAddAppointment(clickDate, `${hour}:00`);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && onAddAppointment) {
                           const clickDate = new Date(date);
                           clickDate.setHours(hour, 0, 0, 0);
                           onAddAppointment(clickDate, `${hour}:00`);
@@ -284,6 +293,8 @@ export function ScheduleCalendar({
                     return (
                       <div
                         key={appointment.id}
+                        role="button"
+                        tabIndex={0}
                         className={`absolute left-1 right-1 px-2 py-1 rounded text-white text-xs cursor-pointer overflow-hidden border-l-4 ${getStatusColor(appointment.status)}`}
                         style={{
                           top: position.top,
@@ -291,6 +302,7 @@ export function ScheduleCalendar({
                           minHeight: '1.5rem',
                         }}
                         onClick={() => onAppointmentClick?.(appointment)}
+                        onKeyDown={(e) => e.key === 'Enter' && onAppointmentClick?.(appointment)}
                       >
                         <p className="font-medium truncate">
                           {appointment.patientName || appointment.title}

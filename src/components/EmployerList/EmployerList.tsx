@@ -178,7 +178,10 @@ export function EmployerList({
           {filteredEmployers.map((employer) => (
             <div
               key={employer.id}
+              role={onEmployerClick ? 'button' : undefined}
+              tabIndex={onEmployerClick ? 0 : undefined}
               onClick={() => onEmployerClick?.(employer)}
+              onKeyDown={(e) => e.key === 'Enter' && onEmployerClick?.(employer)}
               className={`
                 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg
                 ${onEmployerClick ? 'cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all' : ''}

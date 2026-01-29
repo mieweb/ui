@@ -130,11 +130,14 @@ export function EmployerContactCard({
             {contacts.map((contact) => (
               <div
                 key={contact.id}
+                role={onContactClick ? 'button' : undefined}
+                tabIndex={onContactClick ? 0 : undefined}
                 className={`
                   flex items-center gap-3 p-2 rounded-lg
                   ${onContactClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''}
                 `}
                 onClick={() => onContactClick?.(contact)}
+                onKeyDown={(e) => e.key === 'Enter' && onContactClick?.(contact)}
               >
                 <Avatar name={contact.name} size="sm" />
                 <div className="flex-1 min-w-0">

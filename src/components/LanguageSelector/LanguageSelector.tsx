@@ -227,6 +227,7 @@ export function LanguageSelector({
                 role="option"
                 aria-selected={language.code === value}
                 onClick={() => handleSelect(language)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSelect(language)}
                 className={cn(
                   'flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors',
                   language.code === value

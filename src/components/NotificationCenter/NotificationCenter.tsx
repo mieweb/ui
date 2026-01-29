@@ -204,6 +204,8 @@ export function NotificationCenter({
           {visibleNotifications.map((notification) => (
             <div
               key={notification.id}
+              role="button"
+              tabIndex={0}
               className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer ${
                 !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
               }`}
@@ -213,6 +215,16 @@ export function NotificationCenter({
                 }
                 if (onMarkRead && !notification.isRead) {
                   onMarkRead(notification.id);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (onNotificationClick) {
+                    onNotificationClick(notification);
+                  }
+                  if (onMarkRead && !notification.isRead) {
+                    onMarkRead(notification.id);
+                  }
                 }
               }}
             >

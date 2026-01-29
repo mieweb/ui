@@ -160,6 +160,7 @@ export function AuthDialog({
       aria-labelledby="auth-dialog-title"
       className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm duration-200"
       onClick={(e) => e.target === e.currentTarget && onClose()}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
       <div
         className={cn(

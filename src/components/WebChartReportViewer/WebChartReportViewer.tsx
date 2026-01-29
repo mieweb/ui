@@ -202,8 +202,12 @@ export function WebChartReportViewer({
         <div className="fixed inset-0 z-50 flex">
           {/* Backdrop */}
           <div
+            role="button"
+            tabIndex={0}
+            aria-label="Close panel"
             className="fixed inset-0 bg-black/50"
             onClick={handleClose}
+            onKeyDown={(e) => e.key === 'Enter' && handleClose()}
           />
 
           {/* Offcanvas Panel */}

@@ -259,7 +259,10 @@ export function ProviderOverview({
               {recentActivity.map((activity) => (
                 <div
                   key={activity.id}
+                  role={onActivityClick ? 'button' : undefined}
+                  tabIndex={onActivityClick ? 0 : undefined}
                   onClick={() => onActivityClick?.(activity)}
+                  onKeyDown={(e) => e.key === 'Enter' && onActivityClick?.(activity)}
                   className={`
                     flex items-start gap-3 p-2 rounded-lg
                     ${onActivityClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''}
@@ -324,7 +327,10 @@ function StatCard({ label, value, icon, color, onClick }: StatCardProps) {
 
   return (
     <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
+      onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
       className={`
         p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700
         ${onClick ? 'cursor-pointer hover:border-gray-300 dark:hover:border-gray-600' : ''}

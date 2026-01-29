@@ -344,8 +344,12 @@ export function CheckrIntegration({
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
+            role="button"
+            tabIndex={0}
+            aria-label="Close modal"
             className="fixed inset-0 bg-black/50"
             onClick={() => setShowInviteModal(false)}
+            onKeyDown={(e) => e.key === 'Enter' && setShowInviteModal(false)}
           />
           <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <h3 className="mb-4 text-lg font-semibold">{inviteCandidate}</h3>
