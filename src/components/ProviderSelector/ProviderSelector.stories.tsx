@@ -92,22 +92,24 @@ export const WithSearch: Story = {
   render: () => <InteractiveDemo searchable label="Select Provider" />,
 };
 
-export const NoSelection: Story = {
-  render: () => {
-    const [selected, setSelected] = useState<ProviderOption | null>(null);
+function NoSelectionWrapper() {
+  const [selected, setSelected] = useState<ProviderOption | null>(null);
 
-    return (
-      <div className="w-80">
-        <ProviderSelector
-          selectedProvider={selected}
-          providers={sampleProviders}
-          onSelect={setSelected}
-          label="Provider"
-          placeholder="Choose a provider..."
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="w-80">
+      <ProviderSelector
+        selectedProvider={selected}
+        providers={sampleProviders}
+        onSelect={setSelected}
+        label="Provider"
+        placeholder="Choose a provider..."
+      />
+    </div>
+  );
+}
+
+export const NoSelection: Story = {
+  render: () => <NoSelectionWrapper />,
 };
 
 export const Loading: Story = {
@@ -143,116 +145,122 @@ export const LargeSize: Story = {
   render: () => <InteractiveDemo size="lg" label="Provider" />,
 };
 
-export const WithLogos: Story = {
-  render: () => {
-    const providersWithLogos: ProviderOption[] = [
-      {
-        id: '1',
-        name: 'MedCare Health',
-        logoUrl: 'https://placehold.co/40x40/0066cc/white?text=MC',
-        location: 'Fort Wayne, IN',
-      },
-      {
-        id: '2',
-        name: 'Wellness First',
-        logoUrl: 'https://placehold.co/40x40/00cc66/white?text=WF',
-        location: 'Indianapolis, IN',
-      },
-      {
-        id: '3',
-        name: 'Health Partners',
-        logoUrl: 'https://placehold.co/40x40/cc6600/white?text=HP',
-        location: 'South Bend, IN',
-      },
-    ];
-
-    const [selected, setSelected] = useState<ProviderOption>(
-      providersWithLogos[0]
-    );
-
-    return (
-      <div className="w-80">
-        <ProviderSelector
-          selectedProvider={selected}
-          providers={providersWithLogos}
-          onSelect={setSelected}
-          searchable
-          label="Provider"
-        />
-      </div>
-    );
+const providersWithLogos: ProviderOption[] = [
+  {
+    id: '1',
+    name: 'MedCare Health',
+    logoUrl: 'https://placehold.co/40x40/0066cc/white?text=MC',
+    location: 'Fort Wayne, IN',
   },
+  {
+    id: '2',
+    name: 'Wellness First',
+    logoUrl: 'https://placehold.co/40x40/00cc66/white?text=WF',
+    location: 'Indianapolis, IN',
+  },
+  {
+    id: '3',
+    name: 'Health Partners',
+    logoUrl: 'https://placehold.co/40x40/cc6600/white?text=HP',
+    location: 'South Bend, IN',
+  },
+];
+
+function WithLogosWrapper() {
+  const [selected, setSelected] = useState<ProviderOption>(
+    providersWithLogos[0]
+  );
+
+  return (
+    <div className="w-80">
+      <ProviderSelector
+        selectedProvider={selected}
+        providers={providersWithLogos}
+        onSelect={setSelected}
+        searchable
+        label="Provider"
+      />
+    </div>
+  );
+}
+
+export const WithLogos: Story = {
+  render: () => <WithLogosWrapper />,
 };
+
+const manyProviders: ProviderOption[] = Array.from(
+  { length: 20 },
+  (_, i) => ({
+    id: String(i + 1),
+    name: `Provider ${i + 1}`,
+    code: `PRV${String(i + 1).padStart(3, '0')}`,
+    location: `City ${i + 1}, State`,
+    type: i % 3 === 0 ? 'Type A' : i % 3 === 1 ? 'Type B' : 'Type C',
+  })
+);
+
+function ManyProvidersWrapper() {
+  const [selected, setSelected] = useState<ProviderOption>(manyProviders[0]);
+
+  return (
+    <div className="w-80">
+      <ProviderSelector
+        selectedProvider={selected}
+        providers={manyProviders}
+        onSelect={setSelected}
+        searchable
+        label="Provider (Searchable)"
+      />
+    </div>
+  );
+}
 
 export const ManyProviders: Story = {
-  render: () => {
-    const manyProviders: ProviderOption[] = Array.from(
-      { length: 20 },
-      (_, i) => ({
-        id: String(i + 1),
-        name: `Provider ${i + 1}`,
-        code: `PRV${String(i + 1).padStart(3, '0')}`,
-        location: `City ${i + 1}, State`,
-        type: i % 3 === 0 ? 'Type A' : i % 3 === 1 ? 'Type B' : 'Type C',
-      })
-    );
-
-    const [selected, setSelected] = useState<ProviderOption>(manyProviders[0]);
-
-    return (
-      <div className="w-80">
-        <ProviderSelector
-          selectedProvider={selected}
-          providers={manyProviders}
-          onSelect={setSelected}
-          searchable
-          label="Provider (Searchable)"
-        />
-      </div>
-    );
-  },
+  render: () => <ManyProvidersWrapper />,
 };
 
-export const InactiveProviders: Story = {
-  render: () => {
-    const providers: ProviderOption[] = [
-      {
-        id: '1',
-        name: 'Active Provider A',
-        location: 'Location A',
-        isActive: true,
-      },
-      {
-        id: '2',
-        name: 'Active Provider B',
-        location: 'Location B',
-        isActive: true,
-      },
-      {
-        id: '3',
-        name: 'Inactive Provider C',
-        location: 'Location C',
-        isActive: false,
-      },
-      {
-        id: '4',
-        name: 'Inactive Provider D',
-        location: 'Location D',
-        isActive: false,
-      },
-    ];
-
-    const [selected, setSelected] = useState<ProviderOption>(providers[0]);
-
-    return (
-      <div className="w-80">
-        <ProviderSelector
-          selectedProvider={selected}
-          providers={providers}
-          onSelect={setSelected}
-          label="Provider"
-        />
-      </div>
-    );
+const inactiveProvidersList: ProviderOption[] = [
+  {
+    id: '1',
+    name: 'Active Provider A',
+    location: 'Location A',
+    isActive: true,
   },
+  {
+    id: '2',
+    name: 'Active Provider B',
+    location: 'Location B',
+    isActive: true,
+  },
+  {
+    id: '3',
+    name: 'Inactive Provider C',
+    location: 'Location C',
+    isActive: false,
+  },
+  {
+    id: '4',
+    name: 'Inactive Provider D',
+    location: 'Location D',
+    isActive: false,
+  },
+];
+
+function InactiveProvidersWrapper() {
+  const [selected, setSelected] = useState<ProviderOption>(inactiveProvidersList[0]);
+
+  return (
+    <div className="w-80">
+      <ProviderSelector
+        selectedProvider={selected}
+        providers={inactiveProvidersList}
+        onSelect={setSelected}
+        label="Provider"
+      />
+    </div>
+  );
+}
+
+export const InactiveProviders: Story = {
+  render: () => <InactiveProvidersWrapper />,
 };

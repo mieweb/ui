@@ -83,25 +83,27 @@ export const AllSizes: Story = {
 };
 
 // Removable badge
-export const Removable: Story = {
-  render: () => {
-    const [visible, setVisible] = React.useState(true);
-    if (!visible) {
-      return (
-        <button
-          onClick={() => setVisible(true)}
-          className="text-primary-600 underline"
-        >
-          Reset
-        </button>
-      );
-    }
+function RemovableWrapper() {
+  const [visible, setVisible] = React.useState(true);
+  if (!visible) {
     return (
-      <ServiceBadge removable onRemove={() => setVisible(false)}>
-        Remove Me
-      </ServiceBadge>
+      <button
+        onClick={() => setVisible(true)}
+        className="text-primary-600 underline"
+      >
+        Reset
+      </button>
     );
-  },
+  }
+  return (
+    <ServiceBadge removable onRemove={() => setVisible(false)}>
+      Remove Me
+    </ServiceBadge>
+  );
+}
+
+export const Removable: Story = {
+  render: () => <RemovableWrapper />,
 };
 
 // Badge group for provider cards
@@ -135,18 +137,20 @@ export const CategoryBadges: StoryObj<typeof ServiceCategoryBadge> = {
 };
 
 // Selected services (filter chips)
+function SelectedServicesWrapper() {
+  const [services, setServices] = React.useState(mockServices.slice(0, 2));
+  return (
+    <SelectedServicesBadges
+      services={services}
+      onRemove={(slug) =>
+        setServices(services.filter((s) => s.slug !== slug))
+      }
+    />
+  );
+}
+
 export const SelectedServices: StoryObj<typeof SelectedServicesBadges> = {
-  render: () => {
-    const [services, setServices] = React.useState(mockServices.slice(0, 2));
-    return (
-      <SelectedServicesBadges
-        services={services}
-        onRemove={(slug) =>
-          setServices(services.filter((s) => s.slug !== slug))
-        }
-      />
-    );
-  },
+  render: () => <SelectedServicesWrapper />,
 };
 
 // DOT compliance badge

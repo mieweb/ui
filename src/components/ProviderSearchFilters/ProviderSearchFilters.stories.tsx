@@ -90,65 +90,71 @@ export const Compact: Story = {
 };
 
 // Sub-component: Service Multi-Select
+function ServiceSelectDemoWrapper() {
+  const [selected, setSelected] = React.useState<string[]>([]);
+  return (
+    <div className="w-80">
+      <ServiceMultiSelect
+        services={mockServices}
+        selectedServices={selected}
+        onSelectionChange={setSelected}
+        showCounts
+      />
+    </div>
+  );
+}
+
 export const ServiceSelectDemo: StoryObj<typeof ServiceMultiSelect> = {
-  render: () => {
-    const [selected, setSelected] = React.useState<string[]>([]);
-    return (
-      <div className="w-80">
-        <ServiceMultiSelect
-          services={mockServices}
-          selectedServices={selected}
-          onSelectionChange={setSelected}
-          showCounts
-        />
-      </div>
-    );
-  },
+  render: () => <ServiceSelectDemoWrapper />,
 };
 
 // Sub-component: Active Filters chips
+function ActiveFiltersDemoWrapper() {
+  const [filters, setFilters] = React.useState<ProviderFilters>({
+    services: ['drug-testing', 'dot-physical'],
+    radius: 10,
+    zipCode: '46220',
+  });
+  return (
+    <ActiveFilters
+      filters={filters}
+      services={mockServices}
+      onClearFilter={(field, value) => {
+        if (field === 'services' && value) {
+          setFilters({
+            ...filters,
+            services: filters.services.filter((s) => s !== value),
+          });
+        } else if (field === 'zipCode') {
+          setFilters({ ...filters, zipCode: undefined });
+        } else if (field === 'radius') {
+          setFilters({ ...filters, radius: 25 });
+        }
+      }}
+      onClearAll={() => setFilters({ services: [], radius: 25 })}
+    />
+  );
+}
+
 export const ActiveFiltersDemo: StoryObj<typeof ActiveFilters> = {
-  render: () => {
-    const [filters, setFilters] = React.useState<ProviderFilters>({
-      services: ['drug-testing', 'dot-physical'],
-      radius: 10,
-      zipCode: '46220',
-    });
-    return (
-      <ActiveFilters
-        filters={filters}
-        services={mockServices}
-        onClearFilter={(field, value) => {
-          if (field === 'services' && value) {
-            setFilters({
-              ...filters,
-              services: filters.services.filter((s) => s !== value),
-            });
-          } else if (field === 'zipCode') {
-            setFilters({ ...filters, zipCode: undefined });
-          } else if (field === 'radius') {
-            setFilters({ ...filters, radius: 25 });
-          }
-        }}
-        onClearAll={() => setFilters({ services: [], radius: 25 })}
-      />
-    );
-  },
+  render: () => <ActiveFiltersDemoWrapper />,
 };
 
 // Sub-component: Compact filter bar
+function CompactFilterBarDemoWrapper() {
+  const [filters, setFilters] = React.useState<ProviderFilters>({
+    radius: 25,
+    services: [],
+  });
+  return (
+    <CompactFilterBar
+      filters={filters}
+      onFiltersChange={setFilters}
+      services={mockServices}
+    />
+  );
+}
+
 export const CompactFilterBarDemo: StoryObj<typeof CompactFilterBar> = {
-  render: () => {
-    const [filters, setFilters] = React.useState<ProviderFilters>({
-      radius: 25,
-      services: [],
-    });
-    return (
-      <CompactFilterBar
-        filters={filters}
-        onFiltersChange={setFilters}
-        services={mockServices}
-      />
-    );
-  },
+  render: () => <CompactFilterBarDemoWrapper />,
 };

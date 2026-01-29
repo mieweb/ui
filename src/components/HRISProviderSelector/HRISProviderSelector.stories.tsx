@@ -29,20 +29,22 @@ const sampleProviders: HRISProvider[] = [
   { id: 'zenefits', displayName: 'Zenefits', logoUrl: 'https://finchdata.io/integrations/zenefits.svg' },
 ];
 
-export const Default: Story = {
-  render: () => {
-    const [search, setSearch] = useState('');
+function DefaultWrapper() {
+  const [search, setSearch] = useState('');
 
-    return (
-      <HRISProviderSelector
-        providers={sampleProviders}
-        searchQuery={search}
-        onSearchChange={setSearch}
-        onProviderSelect={(p) => alert(`Selected: ${p.displayName}`)}
-        onCSVImport={() => alert('CSV Import clicked')}
-      />
-    );
-  },
+  return (
+    <HRISProviderSelector
+      providers={sampleProviders}
+      searchQuery={search}
+      onSearchChange={setSearch}
+      onProviderSelect={(p) => window.alert(`Selected: ${p.displayName}`)}
+      onCSVImport={() => window.alert('CSV Import clicked')}
+    />
+  );
+}
+
+export const Default: Story = {
+  render: () => <DefaultWrapper />,
 };
 
 export const Connected: Story = {

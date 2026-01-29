@@ -41,7 +41,7 @@ export const Default: Story = {
   args: {
     isVisible: true,
     connection: { status: 'disconnected' },
-    onReload: () => alert('Reloading...'),
+    onReload: () => window.alert('Reloading...'),
   },
 };
 
@@ -62,7 +62,7 @@ export const WaitingToRetry: Story = {
       retryCount: 3,
       retryTime: Date.now() + 15000,
     },
-    onReload: () => alert('Reloading...'),
+    onReload: () => window.alert('Reloading...'),
   },
 };
 
@@ -72,8 +72,8 @@ export const UpdateAvailable: StoryObj<typeof UpdateAvailableOverlay> = {
     <UpdateAvailableOverlay
       isVisible={true}
       update={{ available: true, version: '2.5.0' }}
-      onUpdateNow={() => alert('Updating...')}
-      onLater={() => alert('Dismissed')}
+      onUpdateNow={() => window.alert('Updating...')}
+      onLater={() => window.alert('Dismissed')}
       appName="BlueHive"
     />
   ),

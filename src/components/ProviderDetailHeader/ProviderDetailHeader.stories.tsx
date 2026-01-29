@@ -74,9 +74,9 @@ export const Default: Story = {
   args: {
     provider: mockProvider,
     breadcrumbs: mockBreadcrumbs,
-    onShare: () => alert('Share'),
-    onCall: () => alert('Call'),
-    onBook: () => alert('Book'),
+    onShare: () => window.alert('Share'),
+    onCall: () => window.alert('Call'),
+    onBook: () => window.alert('Book'),
   },
 };
 
@@ -182,7 +182,7 @@ export const CompactHeader: StoryObj<typeof CompactProviderHeader> = {
   render: () => (
     <CompactProviderHeader
       provider={mockProvider}
-      onBook={() => alert('Book clicked')}
+      onBook={() => window.alert('Book clicked')}
     />
   ),
 };
@@ -198,9 +198,9 @@ export const FullPageDemo: Story = {
       <ProviderDetailHeader
         provider={mockProvider}
         breadcrumbs={mockBreadcrumbs}
-        onShare={() => alert('Share')}
-        onCall={() => alert('Call')}
-        onBook={() => alert('Book')}
+        onShare={() => window.alert('Share')}
+        onCall={() => window.alert('Call')}
+        onBook={() => window.alert('Book')}
       />
       <div className="container mx-auto px-4 py-6">
         <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">

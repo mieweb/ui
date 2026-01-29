@@ -59,10 +59,10 @@ function BookingDialogWrapper(args: Story['args']) {
         provider={args?.provider || mockProvider}
         services={args?.services || mockServices}
         onSubmit={(data) => {
-          alert(`Booking requested for ${data.firstName} ${data.lastName}`);
+          window.alert(`Booking requested for ${data.firstName} ${data.lastName}`);
           setIsOpen(false);
         }}
-        onCall={(phone) => alert(`Calling ${phone}...`)}
+        onCall={(phone) => window.alert(`Calling ${phone}...`)}
       />
     </div>
   );
@@ -106,23 +106,26 @@ export const FloatingInputDemo: StoryObj<typeof FloatingInput> = {
   ),
 };
 
+// Wrapper for ServiceSelectDemo
+function ServiceSelectDemoWrapper() {
+  const [selected, setSelected] = React.useState<string[]>([]);
+  return (
+    <div className="w-80">
+      <ServiceSelect
+        services={mockServices}
+        selectedServices={selected}
+        onChange={setSelected}
+        placeholder="Select services..."
+      />
+      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Selected: {selected.join(', ') || 'None'}
+      </p>
+    </div>
+  );
+}
+
 export const ServiceSelectDemo: StoryObj<typeof ServiceSelect> = {
-  render: () => {
-    const [selected, setSelected] = React.useState<string[]>([]);
-    return (
-      <div className="w-80">
-        <ServiceSelect
-          services={mockServices}
-          selectedServices={selected}
-          onChange={setSelected}
-          placeholder="Select services..."
-        />
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Selected: {selected.join(', ') || 'None'}
-        </p>
-      </div>
-    );
-  },
+  render: () => <ServiceSelectDemoWrapper />,
 };
 
 export const InlineForm: StoryObj<typeof InlineBookingForm> = {
@@ -131,7 +134,7 @@ export const InlineForm: StoryObj<typeof InlineBookingForm> = {
       <InlineBookingForm
         provider={mockProvider}
         services={mockServices}
-        onSubmit={(data) => alert(`Booking for ${data.firstName}`)}
+        onSubmit={(data) => window.alert(`Booking for ${data.firstName}`)}
       />
     </div>
   ),
@@ -142,8 +145,8 @@ export const QuickBook: StoryObj<typeof QuickBookCard> = {
     <div className="w-80">
       <QuickBookCard
         provider={mockProvider}
-        onBook={() => alert('Opening booking...')}
-        onCall={(phone) => alert(`Calling ${phone}`)}
+        onBook={() => window.alert('Opening booking...')}
+        onCall={(phone) => window.alert(`Calling ${phone}`)}
       />
     </div>
   ),

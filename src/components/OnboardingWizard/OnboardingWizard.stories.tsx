@@ -112,27 +112,29 @@ const sampleSteps = [
     content: (
       <OnboardingCompletion
         completed={true}
-        onStartOrder={() => alert('Start order!')}
-        onGoToDashboard={() => alert('Go to dashboard!')}
-        onGoToEmployees={() => alert('Go to employees!')}
+        onStartOrder={() => window.alert('Start order!')}
+        onGoToDashboard={() => window.alert('Go to dashboard!')}
+        onGoToEmployees={() => window.alert('Go to employees!')}
       />
     ),
   },
 ];
 
+function DefaultWrapper() {
+  const [currentStep, setCurrentStep] = useState(0);
+  return (
+    <OnboardingWizard
+      steps={sampleSteps}
+      currentStep={currentStep}
+      onStepChange={setCurrentStep}
+      onComplete={() => window.alert('Onboarding complete!')}
+      onSkip={(step) => console.log('Skipped step:', step)}
+    />
+  );
+}
+
 export const Default: Story = {
-  render: () => {
-    const [currentStep, setCurrentStep] = useState(0);
-    return (
-      <OnboardingWizard
-        steps={sampleSteps}
-        currentStep={currentStep}
-        onStepChange={setCurrentStep}
-        onComplete={() => alert('Onboarding complete!')}
-        onSkip={(step) => console.log('Skipped step:', step)}
-      />
-    );
-  },
+  render: () => <DefaultWrapper />,
 };
 
 export const Loading: Story = {
@@ -184,32 +186,34 @@ export const NextDisabled: Story = {
   },
 };
 
+function IncompleteStepsWrapper() {
+  const incompleteSteps = [
+    ...sampleSteps.slice(0, 4),
+    {
+      id: 'step5',
+      title: 'Complete',
+      content: (
+        <OnboardingCompletion
+          completed={false}
+          incompleteSteps={[
+            { step: 2, label: 'Import Employees' },
+            { step: 4, label: 'Payment' },
+          ]}
+          onGoToStep={(step) => window.alert(`Go to step ${step}`)}
+        />
+      ),
+    },
+  ];
+  return (
+    <OnboardingWizard
+      steps={incompleteSteps}
+      currentStep={4}
+    />
+  );
+}
+
 export const IncompleteSteps: Story = {
-  render: () => {
-    const incompleteSteps = [
-      ...sampleSteps.slice(0, 4),
-      {
-        id: 'step5',
-        title: 'Complete',
-        content: (
-          <OnboardingCompletion
-            completed={false}
-            incompleteSteps={[
-              { step: 2, label: 'Import Employees' },
-              { step: 4, label: 'Payment' },
-            ]}
-            onGoToStep={(step) => alert(`Go to step ${step}`)}
-          />
-        ),
-      },
-    ];
-    return (
-      <OnboardingWizard
-        steps={incompleteSteps}
-        currentStep={4}
-      />
-    );
-  },
+  render: () => <IncompleteStepsWrapper />,
 };
 
 export const NoHeader: Story = {

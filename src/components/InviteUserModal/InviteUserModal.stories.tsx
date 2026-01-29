@@ -131,58 +131,67 @@ export const WithDefaultRole: Story = {
   ),
 };
 
-export const WithError: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
+// Wrapper for WithError story
+function WithErrorWrapper() {
+  const [open, setOpen] = useState(true);
 
-    return (
-      <>
-        <Button onClick={() => setOpen(true)}>Show Modal with Error</Button>
-        <InviteUserModal
-          open={open}
-          onOpenChange={setOpen}
-          roles={sampleRoles}
-          errorMessage="User with this email already has an account"
-        />
-      </>
-    );
-  },
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Show Modal with Error</Button>
+      <InviteUserModal
+        open={open}
+        onOpenChange={setOpen}
+        roles={sampleRoles}
+        errorMessage="User with this email already has an account"
+      />
+    </>
+  );
+}
+
+// Wrapper for WithSuccess story
+function WithSuccessWrapper() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Show Modal with Success</Button>
+      <InviteUserModal
+        open={open}
+        onOpenChange={setOpen}
+        roles={sampleRoles}
+        successMessage="Invitation sent to john@example.com"
+      />
+    </>
+  );
+}
+
+// Wrapper for Submitting story
+function SubmittingWrapper() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Show Submitting State</Button>
+      <InviteUserModal
+        open={open}
+        onOpenChange={setOpen}
+        roles={sampleRoles}
+        isSubmitting={true}
+      />
+    </>
+  );
+}
+
+export const WithError: Story = {
+  render: () => <WithErrorWrapper />,
 };
 
 export const WithSuccess: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
-
-    return (
-      <>
-        <Button onClick={() => setOpen(true)}>Show Modal with Success</Button>
-        <InviteUserModal
-          open={open}
-          onOpenChange={setOpen}
-          roles={sampleRoles}
-          successMessage="Invitation sent to john@example.com"
-        />
-      </>
-    );
-  },
+  render: () => <WithSuccessWrapper />,
 };
 
 export const Submitting: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
-
-    return (
-      <>
-        <Button onClick={() => setOpen(true)}>Show Submitting State</Button>
-        <InviteUserModal
-          open={open}
-          onOpenChange={setOpen}
-          roles={sampleRoles}
-          isSubmitting={true}
-        />
-      </>
-    );
-  },
+  render: () => <SubmittingWrapper />,
 };
 
 export const MinimalRoles: Story = {

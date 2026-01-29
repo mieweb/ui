@@ -58,47 +58,75 @@ export const Default: Story = {
   render: () => <LanguageSelectorDemo />,
 };
 
+// Wrapper for AllVariantsComparison story
+function AllVariantsComparisonWrapper() {
+  const [value, setValue] = React.useState('en');
+  const handleChange = (lang: Language) => setValue(lang.code);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+          Custom Dropdown
+        </p>
+        <LanguageSelector
+          value={value}
+          onChange={handleChange}
+          languages={limitedLanguages}
+        />
+      </div>
+      <div>
+        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+          Native Select
+        </p>
+        <LanguageSelectorNative
+          value={value}
+          onChange={handleChange}
+          languages={limitedLanguages}
+        />
+      </div>
+      <div>
+        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+          Inline Buttons
+        </p>
+        <LanguageSelectorInline
+          value={value}
+          onChange={handleChange}
+          languages={limitedLanguages}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Wrapper for InHeader story
+function InHeaderWrapper() {
+  const [value, setValue] = React.useState('en');
+
+  return (
+    <header className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+      <div className="font-semibold text-gray-900 dark:text-white">
+        BlueHive
+      </div>
+      <div className="flex items-center gap-4">
+        <LanguageSelector
+          value={value}
+          onChange={(lang) => setValue(lang.code)}
+          variant="ghost"
+          size="sm"
+          languages={limitedLanguages}
+        />
+        <button className="bg-primary-600 rounded-lg px-3 py-1.5 text-sm text-white">
+          Sign In
+        </button>
+      </div>
+    </header>
+  );
+}
+
 // All three selector types comparison
 export const AllVariantsComparison: Story = {
-  render: () => {
-    const [value, setValue] = React.useState('en');
-    const handleChange = (lang: Language) => setValue(lang.code);
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-            Custom Dropdown
-          </p>
-          <LanguageSelector
-            value={value}
-            onChange={handleChange}
-            languages={limitedLanguages}
-          />
-        </div>
-        <div>
-          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-            Native Select
-          </p>
-          <LanguageSelectorNative
-            value={value}
-            onChange={handleChange}
-            languages={limitedLanguages}
-          />
-        </div>
-        <div>
-          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-            Inline Buttons
-          </p>
-          <LanguageSelectorInline
-            value={value}
-            onChange={handleChange}
-            languages={limitedLanguages}
-          />
-        </div>
-      </div>
-    );
-  },
+  render: () => <AllVariantsComparisonWrapper />,
 };
 
 // Visual variants (default, ghost, minimal)
@@ -133,27 +161,5 @@ export const Disabled: Story = {
 
 // In header context
 export const InHeader: Story = {
-  render: () => {
-    const [value, setValue] = React.useState('en');
-
-    return (
-      <header className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-        <div className="font-semibold text-gray-900 dark:text-white">
-          BlueHive
-        </div>
-        <div className="flex items-center gap-4">
-          <LanguageSelector
-            value={value}
-            onChange={(lang) => setValue(lang.code)}
-            variant="ghost"
-            size="sm"
-            languages={limitedLanguages}
-          />
-          <button className="bg-primary-600 rounded-lg px-3 py-1.5 text-sm text-white">
-            Sign In
-          </button>
-        </div>
-      </header>
-    );
-  },
+  render: () => <InHeaderWrapper />,
 };

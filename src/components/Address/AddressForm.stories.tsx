@@ -150,21 +150,23 @@ export const WithErrors: Story = {
 };
 
 // Disabled state
-export const Disabled: Story = {
-  render: () => {
-    const [address] = useState<Partial<AddressFormData>>({
-      street1: '123 Healthcare Way',
-      street2: 'Suite 500',
-      city: 'Indianapolis',
-      state: 'IN',
-      postalCode: '46220',
-      country: 'US',
-    });
+function DisabledWrapper() {
+  const [address] = useState<Partial<AddressFormData>>({
+    street1: '123 Healthcare Way',
+    street2: 'Suite 500',
+    city: 'Indianapolis',
+    state: 'IN',
+    postalCode: '46220',
+    country: 'US',
+  });
 
-    return (
-      <AddressForm value={address} onChange={() => {}} disabled showCountry />
-    );
-  },
+  return (
+    <AddressForm value={address} onChange={() => {}} disabled showCountry />
+  );
+}
+
+export const Disabled: Story = {
+  render: () => <DisabledWrapper />,
   parameters: {
     docs: {
       description: {
@@ -234,25 +236,24 @@ export const Mobile: Story = {
 };
 
 // Google Places note
-export const GooglePlacesInfo: Story = {
-  render: () => {
-    const [address, setAddress] = useState<Partial<AddressFormData>>({});
+function GooglePlacesInfoWrapper() {
+  const [address, setAddress] = useState<Partial<AddressFormData>>({});
 
-    return (
-      <div className="space-y-4">
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
-          <h4 className="mb-2 font-medium text-blue-800 dark:text-blue-200">
-            Google Places Autocomplete
-          </h4>
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            To enable Google Places autocomplete, pass the{' '}
-            <code className="rounded bg-blue-100 px-1 dark:bg-blue-800">
-              googlePlaces
-            </code>{' '}
-            prop:
-          </p>
-          <pre className="mt-2 overflow-auto rounded bg-blue-100 p-2 text-xs dark:bg-blue-800">
-            {`<AddressForm
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+        <h4 className="mb-2 font-medium text-blue-800 dark:text-blue-200">
+          Google Places Autocomplete
+        </h4>
+        <p className="text-sm text-blue-700 dark:text-blue-300">
+          To enable Google Places autocomplete, pass the{' '}
+          <code className="rounded bg-blue-100 px-1 dark:bg-blue-800">
+            googlePlaces
+          </code>{' '}
+          prop:
+        </p>
+        <pre className="mt-2 overflow-auto rounded bg-blue-100 p-2 text-xs dark:bg-blue-800">
+          {`<AddressForm
   value={address}
   onChange={setAddress}
   googlePlaces={{
@@ -261,16 +262,19 @@ export const GooglePlacesInfo: Story = {
     onPlaceSelect: (place) => console.log(place),
   }}
 />`}
-          </pre>
-          <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
-            Note: Requires Google Maps JavaScript API with Places library loaded
-            in your app.
-          </p>
-        </div>
-        <AddressForm value={address} onChange={setAddress} required />
+        </pre>
+        <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+          Note: Requires Google Maps JavaScript API with Places library loaded
+          in your app.
+        </p>
       </div>
-    );
-  },
+      <AddressForm value={address} onChange={setAddress} required />
+    </div>
+  );
+}
+
+export const GooglePlacesInfo: Story = {
+  render: () => <GooglePlacesInfoWrapper />,
   parameters: {
     docs: {
       description: {

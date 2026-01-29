@@ -81,7 +81,7 @@ export const CustomError: Story = {
     type: 'generic',
     title: 'Unable to Process Request',
     description: 'Please try again or contact support.',
-    primaryAction: { label: 'Try Again', onClick: () => alert('Retry') },
+    primaryAction: { label: 'Try Again', onClick: () => window.alert('Retry') },
     secondaryAction: { label: 'Contact Support', href: '/support' },
     showHomeButton: false,
     showBackButton: false,

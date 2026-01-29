@@ -50,39 +50,41 @@ const sampleResult: ReportResult = {
   `,
 };
 
+function DefaultWrapper() {
+  const [currentReport, setCurrentReport] = useState<SystemReport | undefined>();
+  const [reportResult, setReportResult] = useState<ReportResult | undefined>();
+  const [loadingReport, setLoadingReport] = useState(false);
+
+  const handleReportSelect = (report: SystemReport) => {
+    setCurrentReport(report);
+    setLoadingReport(true);
+    // Simulate loading
+    setTimeout(() => {
+      setReportResult(sampleResult);
+      setLoadingReport(false);
+    }, 1500);
+  };
+
+  return (
+    <WebChartReportViewer
+      reports={sampleReports}
+      currentReport={currentReport}
+      reportResult={reportResult}
+      loadingReport={loadingReport}
+      onReportSelect={handleReportSelect}
+      onRefreshReports={() => console.log('Refresh reports')}
+      onRefreshReport={() => console.log('Refresh report')}
+      dateRange={{
+        start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        end: new Date(),
+      }}
+      onDateRangeChange={(start, end) => console.log('Date range:', start, end)}
+    />
+  );
+}
+
 export const Default: Story = {
-  render: () => {
-    const [currentReport, setCurrentReport] = useState<SystemReport | undefined>();
-    const [reportResult, setReportResult] = useState<ReportResult | undefined>();
-    const [loadingReport, setLoadingReport] = useState(false);
-
-    const handleReportSelect = (report: SystemReport) => {
-      setCurrentReport(report);
-      setLoadingReport(true);
-      // Simulate loading
-      setTimeout(() => {
-        setReportResult(sampleResult);
-        setLoadingReport(false);
-      }, 1500);
-    };
-
-    return (
-      <WebChartReportViewer
-        reports={sampleReports}
-        currentReport={currentReport}
-        reportResult={reportResult}
-        loadingReport={loadingReport}
-        onReportSelect={handleReportSelect}
-        onRefreshReports={() => console.log('Refresh reports')}
-        onRefreshReport={() => console.log('Refresh report')}
-        dateRange={{
-          start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          end: new Date(),
-        }}
-        onDateRangeChange={(start, end) => console.log('Date range:', start, end)}
-      />
-    );
-  },
+  render: () => <DefaultWrapper />,
 };
 
 export const Loading: Story = {
@@ -117,26 +119,28 @@ export const ReportWithError: Story = {
   },
 };
 
-export const DatePicker: StoryObj<typeof ReportDatePicker> = {
-  render: () => {
-    const [range, setRange] = useState({
-      start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-      end: new Date(),
-    });
+function DatePickerWrapper() {
+  const [range, setRange] = useState({
+    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    end: new Date(),
+  });
 
-    return (
-      <ReportDatePicker
-        startDate={range.start}
-        endDate={range.end}
-        onChange={(start, end) => {
-          setRange({
-            start: typeof start === 'string' ? new Date(start) : start,
-            end: typeof end === 'string' ? new Date(end) : end,
-          });
-        }}
-      />
-    );
-  },
+  return (
+    <ReportDatePicker
+      startDate={range.start}
+      endDate={range.end}
+      onChange={(start, end) => {
+        setRange({
+          start: typeof start === 'string' ? new Date(start) : start,
+          end: typeof end === 'string' ? new Date(end) : end,
+        });
+      }}
+    />
+  );
+}
+
+export const DatePicker: StoryObj<typeof ReportDatePicker> = {
+  render: () => <DatePickerWrapper />,
 };
 
 export const CustomBranding: Story = {

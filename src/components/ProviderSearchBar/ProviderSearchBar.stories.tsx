@@ -56,24 +56,26 @@ export const AllVariants: Story = {
 };
 
 // With geolocation button
+function WithGeolocationWrapper() {
+  const [status, setStatus] = React.useState<GeolocationStatus>('idle');
+
+  const handleGeolocate = () => {
+    setStatus('loading');
+    setTimeout(() => setStatus('success'), 1500);
+  };
+
+  return (
+    <ProviderSearchBar
+      onSearch={(zip) => console.log('Search:', zip)}
+      onGeolocate={handleGeolocate}
+      geoStatus={status}
+      providerCount={17500}
+    />
+  );
+}
+
 export const WithGeolocation: Story = {
-  render: () => {
-    const [status, setStatus] = React.useState<GeolocationStatus>('idle');
-
-    const handleGeolocate = () => {
-      setStatus('loading');
-      setTimeout(() => setStatus('success'), 1500);
-    };
-
-    return (
-      <ProviderSearchBar
-        onSearch={(zip) => console.log('Search:', zip)}
-        onGeolocate={handleGeolocate}
-        geoStatus={status}
-        providerCount={17500}
-      />
-    );
-  },
+  render: () => <WithGeolocationWrapper />,
 };
 
 // With search results

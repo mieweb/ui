@@ -240,7 +240,7 @@ export const Clickable: Story = {
     name: 'BlueHive',
     version: '2.1.0',
     variant: 'minimal',
-    onClick: () => alert('Version clicked! (Could show debug info)'),
+    onClick: () => window.alert('Version clicked! (Could show debug info)'),
   },
   parameters: {
     docs: {

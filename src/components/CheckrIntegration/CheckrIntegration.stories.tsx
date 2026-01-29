@@ -58,37 +58,40 @@ const sampleReports: BackgroundCheckReport[] = [
   },
 ];
 
-export const Default: Story = {
-  render: () => {
-    const [connected, setConnected] = useState(true);
-    const [reports, setReports] = useState(sampleReports);
+// Wrapper for Default story with interactive state
+function CheckrIntegrationWrapper() {
+  const [connected, setConnected] = useState(true);
+  const [reports, setReports] = useState(sampleReports);
 
-    return (
-      <CheckrIntegration
-        connected={connected}
-        account={{ name: 'BlueHive Inc.', plan: 'Enterprise' }}
-        reports={reports}
-        packages={samplePackages}
-        onConnect={() => setConnected(true)}
-        onDisconnect={() => setConnected(false)}
-        onInviteCandidate={(candidate, packageId) => {
-          console.log('Invite:', candidate, packageId);
-          setReports([
-            ...reports,
-            {
-              id: String(Date.now()),
-              candidate: { id: String(Date.now()), ...candidate },
-              status: 'pending',
-              createdAt: new Date(),
-              packageName: samplePackages.find((p) => p.id === packageId)?.name,
-            },
-          ]);
-        }}
-        onViewReport={(report) => window.open(report.reportUrl, '_blank')}
-        onRefresh={() => console.log('Refresh')}
-      />
-    );
-  },
+  return (
+    <CheckrIntegration
+      connected={connected}
+      account={{ name: 'BlueHive Inc.', plan: 'Enterprise' }}
+      reports={reports}
+      packages={samplePackages}
+      onConnect={() => setConnected(true)}
+      onDisconnect={() => setConnected(false)}
+      onInviteCandidate={(candidate, packageId) => {
+        console.log('Invite:', candidate, packageId);
+        setReports([
+          ...reports,
+          {
+            id: String(Date.now()),
+            candidate: { id: String(Date.now()), ...candidate },
+            status: 'pending',
+            createdAt: new Date(),
+            packageName: samplePackages.find((p) => p.id === packageId)?.name,
+          },
+        ]);
+      }}
+      onViewReport={(report) => window.open(report.reportUrl, '_blank')}
+      onRefresh={() => console.log('Refresh')}
+    />
+  );
+}
+
+export const Default: Story = {
+  render: () => <CheckrIntegrationWrapper />,
 };
 
 export const NotConnected: Story = {

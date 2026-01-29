@@ -79,6 +79,78 @@ function AddContactModalWrapper(props: Partial<React.ComponentProps<typeof AddCo
   );
 }
 
+// Wrapper for EditMode story
+function EditModeWrapper() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <AddContactModal
+      open={open}
+      onOpenChange={setOpen}
+      onSave={(contact) => {
+        console.log('Updated contact:', contact);
+        setOpen(false);
+      }}
+      contact={{
+        id: '123',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        sex: 'F',
+        positionTitle: 'Office Manager',
+        degree: 'MBA',
+        email: 'jane.smith@example.com',
+        phone: '(555) 123-4567',
+        address: {
+          street1: '123 Main St',
+          street2: 'Suite 100',
+          city: 'Fort Wayne',
+          state: 'IN',
+          postalCode: '46802',
+        },
+        customFields: [
+          { name: 'Extension', value: '1234' },
+          { name: 'Department', value: 'Administration' },
+        ],
+      }}
+    />
+  );
+}
+
+// Wrapper for SavingState story
+function SavingStateWrapper() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <AddContactModal
+      open={open}
+      onOpenChange={setOpen}
+      onSave={() => {}}
+      isSaving={true}
+    />
+  );
+}
+
+// Wrapper for WithValidationErrors story
+function WithValidationErrorsWrapper() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <AddContactModal
+      open={open}
+      onOpenChange={setOpen}
+      onSave={(contact) => {
+        console.log('Saved contact:', contact);
+        setOpen(false);
+      }}
+      contact={{
+        firstName: '',
+        lastName: '',
+        email: 'invalid-email',
+      }}
+    />
+  );
+}
+
 export const Default: Story = {
   render: (args) => <AddContactModalWrapper {...args} />,
   args: {
@@ -90,41 +162,7 @@ export const Default: Story = {
 };
 
 export const EditMode: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
-
-    return (
-      <AddContactModal
-        open={open}
-        onOpenChange={setOpen}
-        onSave={(contact) => {
-          console.log('Updated contact:', contact);
-          setOpen(false);
-        }}
-        contact={{
-          id: '123',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          sex: 'F',
-          positionTitle: 'Office Manager',
-          degree: 'MBA',
-          email: 'jane.smith@example.com',
-          phone: '(555) 123-4567',
-          address: {
-            street1: '123 Main St',
-            street2: 'Suite 100',
-            city: 'Fort Wayne',
-            state: 'IN',
-            postalCode: '46802',
-          },
-          customFields: [
-            { name: 'Extension', value: '1234' },
-            { name: 'Department', value: 'Administration' },
-          ],
-        }}
-      />
-    );
-  },
+  render: () => <EditModeWrapper />,
 };
 
 export const MinimalFields: Story = {
@@ -148,40 +186,11 @@ export const WithPhoneOnly: Story = {
 };
 
 export const SavingState: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
-
-    return (
-      <AddContactModal
-        open={open}
-        onOpenChange={setOpen}
-        onSave={() => {}}
-        isSaving={true}
-      />
-    );
-  },
+  render: () => <SavingStateWrapper />,
 };
 
 export const WithValidationErrors: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
-
-    return (
-      <AddContactModal
-        open={open}
-        onOpenChange={setOpen}
-        onSave={(contact) => {
-          console.log('Saved contact:', contact);
-          setOpen(false);
-        }}
-        contact={{
-          firstName: '',
-          lastName: '',
-          email: 'invalid-email',
-        }}
-      />
-    );
-  },
+  render: () => <WithValidationErrorsWrapper />,
   parameters: {
     docs: {
       description: {

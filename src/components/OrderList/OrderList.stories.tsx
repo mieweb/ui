@@ -215,74 +215,80 @@ export const SimpleTabs: Story = {
   ),
 };
 
-export const Loading: Story = {
-  render: () => {
-    const [activeTab, setActiveTab] = useState('all');
+function LoadingWrapper() {
+  const [activeTab, setActiveTab] = useState('all');
 
-    return (
-      <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-        <OrderList<SampleOrder>
-          orders={[]}
-          activeTab={activeTab}
-          tabs={defaultOrderTabs}
-          onTabChange={setActiveTab}
-          renderOrder={() => null}
-          isLoading
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+      <OrderList<SampleOrder>
+        orders={[]}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={() => null}
+        isLoading
+      />
+    </div>
+  );
+}
+
+export const Loading: Story = {
+  render: () => <LoadingWrapper />,
 };
+
+function EmptyWrapper() {
+  const [activeTab, setActiveTab] = useState('all');
+
+  return (
+    <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+      <OrderList<SampleOrder>
+        orders={[]}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={() => null}
+        emptyMessage="No orders yet. Create your first order to get started."
+      />
+    </div>
+  );
+}
 
 export const Empty: Story = {
-  render: () => {
-    const [activeTab, setActiveTab] = useState('all');
-
-    return (
-      <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-        <OrderList<SampleOrder>
-          orders={[]}
-          activeTab={activeTab}
-          tabs={defaultOrderTabs}
-          onTabChange={setActiveTab}
-          renderOrder={() => null}
-          emptyMessage="No orders yet. Create your first order to get started."
-        />
-      </div>
-    );
-  },
+  render: () => <EmptyWrapper />,
 };
 
-export const CustomEmptyIcon: Story = {
-  render: () => {
-    const [activeTab, setActiveTab] = useState('all');
+function CustomEmptyIconWrapper() {
+  const [activeTab, setActiveTab] = useState('all');
 
-    return (
-      <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-        <OrderList<SampleOrder>
-          orders={[]}
-          activeTab={activeTab}
-          tabs={defaultOrderTabs}
-          onTabChange={setActiveTab}
-          renderOrder={() => null}
-          emptyMessage="All caught up! No pending orders."
-          emptyIcon={
-            <svg
-              className="w-12 h-12 text-green-400 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          }
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+      <OrderList<SampleOrder>
+        orders={[]}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={() => null}
+        emptyMessage="All caught up! No pending orders."
+        emptyIcon={
+          <svg
+            className="w-12 h-12 text-green-400 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        }
+      />
+    </div>
+  );
+}
+
+export const CustomEmptyIcon: Story = {
+  render: () => <CustomEmptyIconWrapper />,
 };

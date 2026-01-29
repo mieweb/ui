@@ -168,21 +168,23 @@ export const NonDangerVariant: Story = {
   ),
 };
 
-export const Submitting: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
+function SubmittingWrapper() {
+  const [open, setOpen] = useState(true);
 
-    return (
-      <>
-        <Button variant="danger" onClick={() => setOpen(true)}>
-          Show Submitting State
-        </Button>
-        <RejectionModal
-          open={open}
-          onOpenChange={setOpen}
-          isSubmitting={true}
-        />
-      </>
-    );
-  },
+  return (
+    <>
+      <Button variant="danger" onClick={() => setOpen(true)}>
+        Show Submitting State
+      </Button>
+      <RejectionModal
+        open={open}
+        onOpenChange={setOpen}
+        isSubmitting={true}
+      />
+    </>
+  );
+}
+
+export const Submitting: Story = {
+  render: () => <SubmittingWrapper />,
 };
