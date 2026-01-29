@@ -368,7 +368,7 @@ export function AddressCard({
 // AddressInline - Convenience component for inline addresses
 // =============================================================================
 
-export interface AddressInlineProps extends Omit<AddressProps, 'format'> {}
+export type AddressInlineProps = Omit<AddressProps, 'format'>;
 
 /**
  * Convenience component for inline address display.
@@ -382,10 +382,10 @@ export function AddressInline(props: AddressInlineProps) {
 // AddressCompact - Convenience component for compact addresses
 // =============================================================================
 
-export interface AddressCompactProps extends Omit<
+export type AddressCompactProps = Omit<
   AddressProps,
   'format' | 'hideStreet'
-> {}
+>;
 
 /**
  * Convenience component for compact city/state display.

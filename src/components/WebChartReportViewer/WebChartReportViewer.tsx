@@ -357,10 +357,11 @@ export function ReportDatePicker({
       case 'this-month':
         start = new Date(now.getFullYear(), now.getMonth(), 1);
         break;
-      case 'this-quarter':
+      case 'this-quarter': {
         const quarter = Math.floor(now.getMonth() / 3);
         start = new Date(now.getFullYear(), quarter * 3, 1);
         break;
+      }
       case 'this-year':
         start = new Date(now.getFullYear(), 0, 1);
         break;
