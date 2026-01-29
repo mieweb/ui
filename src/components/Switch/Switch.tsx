@@ -147,19 +147,32 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
       </button>
     );
 
+    const labelSizeClasses = {
+      sm: 'text-xs',
+      md: 'text-sm',
+      lg: 'text-base',
+    };
+
+    const descriptionSizeClasses = {
+      sm: 'text-[10px]',
+      md: 'text-xs',
+      lg: 'text-sm',
+    };
+
     const labelElement = label && (
       <div className="flex flex-col gap-0.5">
         <label
           htmlFor={switchId}
           className={cn(
-            'text-foreground cursor-pointer text-sm font-medium select-none',
+            'text-foreground cursor-pointer font-medium select-none',
+            labelSizeClasses[size || 'md'],
             disabled && 'cursor-not-allowed opacity-50'
           )}
         >
           {label}
         </label>
         {description && (
-          <p id={descriptionId} className="text-muted-foreground text-xs">
+          <p id={descriptionId} className={cn('text-muted-foreground', descriptionSizeClasses[size || 'md'])}>
             {description}
           </p>
         )}
