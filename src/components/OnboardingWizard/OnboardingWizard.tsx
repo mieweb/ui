@@ -270,7 +270,7 @@ export function OnboardingStepQuestion({
   description,
   options = [],
   onSelect,
-  multiple = false,
+  multiple: _multiple = false,
   children,
 }: OnboardingStepQuestionProps) {
   return (

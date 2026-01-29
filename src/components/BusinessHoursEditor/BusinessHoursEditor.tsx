@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { cn } from '../../utils/cn';
@@ -94,7 +94,7 @@ export function BusinessHoursEditor({
   onChange,
   disabled = false,
   showDescription = true,
-  use24Hour = false,
+  use24Hour: _use24Hour = false,
   weekStartsOn = 0,
   className,
   addHoursLabel = 'Add Hours',

@@ -103,7 +103,6 @@ export function WebChartReportViewer({
     refreshReport = 'Refresh',
     reconnect = 'Reconnect',
     noReports = 'No reports available',
-    loadingReports = 'Loading reports...',
     loadingData = 'Fetching latest data from Enterprise Health...',
     close = 'Close',
     dateFrom = 'From',

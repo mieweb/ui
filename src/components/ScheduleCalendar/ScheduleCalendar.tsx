@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 
 export interface CalendarAppointment {
@@ -61,14 +60,6 @@ export function ScheduleCalendar({
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-    });
-  };
-
-  const formatDateHeader = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
     });
   };
 

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
+import { Card, CardContent } from '../Card/Card';
 
 export interface InvoiceLineItem {
   id: string;

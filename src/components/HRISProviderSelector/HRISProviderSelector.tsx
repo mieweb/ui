@@ -72,7 +72,6 @@ export function HRISProviderSelector({
   const {
     search = 'Search HR Providers...',
     importCSV = 'Import from CSV',
-    connected = 'Connected',
     lastSync = 'Last HRIS Sync',
     disconnect = 'Disconnect',
     refreshSync = 'Update Employees',

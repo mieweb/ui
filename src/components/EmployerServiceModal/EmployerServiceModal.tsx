@@ -4,7 +4,6 @@ import * as React from 'react';
 import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
-import { Select } from '../Select/Select';
 import { Switch } from '../Switch/Switch';
 
 export interface EmployerServiceModalProps {

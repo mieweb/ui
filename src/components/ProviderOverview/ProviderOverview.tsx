@@ -67,7 +67,7 @@ export function ProviderOverview({
   onStatClick,
   onQuickActionClick,
   onActivityClick,
-  currency = '$',
+  currency: _currency = '$',
   isLoading = false,
   className = '',
 }: ProviderOverviewProps) {

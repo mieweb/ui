@@ -47,7 +47,7 @@ export function ServicePricingManager({
   onBulkUpdate,
   isSaving = false,
   isLoading = false,
-  categories = [],
+  categories: _categories = [],
   className = '',
 }: ServicePricingManagerProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -64,12 +64,6 @@ export function ServicePricingManager({
       style: 'currency',
       currency: 'USD',
     }).format(amount);
-  };
-
-  const formatDate = (date?: Date | string) => {
-    if (!date) return 'Never';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString();
   };
 
   // Filter services

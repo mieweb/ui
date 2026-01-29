@@ -204,7 +204,7 @@ interface CSVColumnCardProps {
 
 function CSVColumnCard({
   column,
-  index,
+  index: _index,
   fieldOptions,
   childFieldOptions,
   onMappingChange,
@@ -354,7 +354,6 @@ export function CSVFileUpload({
 }: CSVFileUploadProps) {
   const {
     selectFile = 'Select a file to upload or drag and drop',
-    dragAndDrop = 'Drag and drop your CSV file here',
     selectButton = 'Select File to Upload',
   } = labels;
 

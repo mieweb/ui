@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
 import { DocumentScanner } from './DocumentScanner';
-import { ThemeProvider } from '../ThemeProvider';
 
 /**
  * The DocumentScanner component provides a comprehensive solution for scanning

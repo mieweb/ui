@@ -105,7 +105,7 @@ export function ConnectionStatusOverlay({
   animate = true,
   onReload,
   message,
-  logoUrl,
+  logoUrl: _logoUrl,
   className,
 }: ConnectionStatusOverlayProps) {
   if (!isVisible || connection.status === 'connected') return null;

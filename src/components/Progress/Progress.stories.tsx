@@ -193,39 +193,7 @@ export const CustomMax: Story = {
 };
 
 // Circular Progress stories
-const circularMeta: Meta<typeof CircularProgress> = {
-  component: CircularProgress,
-  argTypes: {
-    value: {
-      control: { type: 'range', min: 0, max: 100 },
-      description: 'Current progress value (0-100)',
-    },
-    size: {
-      control: 'select',
-      options: ['sm', 'md', 'lg', 'xl'],
-      description: 'Size of the circular progress',
-    },
-    variant: {
-      control: 'select',
-      options: ['default', 'success', 'warning', 'danger'],
-      description: 'Visual style variant',
-    },
-    showValue: {
-      control: 'boolean',
-      description: 'Show the percentage value in the center',
-    },
-    indeterminate: {
-      control: 'boolean',
-      description: 'Show indeterminate spinning state',
-    },
-    strokeWidth: {
-      control: { type: 'number', min: 1, max: 20 },
-      description: 'Width of the progress stroke',
-    },
-  },
-};
-
-type CircularStory = StoryObj<typeof circularMeta>;
+type CircularStory = StoryObj<typeof CircularProgress>;
 
 export const CircularDefault: CircularStory = {
   args: {

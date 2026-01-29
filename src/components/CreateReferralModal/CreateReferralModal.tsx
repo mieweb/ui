@@ -3,8 +3,6 @@
 import * as React from 'react';
 import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
 import { Button } from '../Button/Button';
-import { Input } from '../Input/Input';
-import { Badge } from '../Badge/Badge';
 
 export interface Employee {
   id: string;

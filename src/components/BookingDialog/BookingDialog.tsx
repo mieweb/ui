@@ -588,7 +588,7 @@ export interface InlineBookingFormProps {
 }
 
 export function InlineBookingForm({
-  provider,
+  provider: _provider,
   services = [],
   onSubmit,
   defaultValues,

@@ -51,7 +51,7 @@ export function InviteUserModal({
   roles,
   defaultRoleId,
   isSubmitting = false,
-  entityName = 'provider',
+  entityName: _entityName = 'provider',
   entityDisplayName,
   errorMessage,
   successMessage,

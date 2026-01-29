@@ -294,7 +294,7 @@ function CategoryAccordionItem({
   basePath,
   onServiceClick,
   index,
-  allowMultiple = true,
+  allowMultiple: _allowMultiple = true,
   expandedCategories,
   onExpandChange,
 }: CategoryAccordionItemProps) {
