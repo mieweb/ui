@@ -10,13 +10,13 @@ const quickActionIconVariants = cva(
         primary:
           'bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400',
         green:
-          'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400',
+          'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400',
         purple:
-          'bg-secondary-100 text-secondary-600 dark:bg-secondary-900/50 dark:text-secondary-400',
+          'bg-violet-100 text-violet-600 dark:bg-violet-900/50 dark:text-violet-400',
         orange:
           'bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-400',
-        blue: 'bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400',
-        red: 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400',
+        blue: 'bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400',
+        red: 'bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400',
         amber:
           'bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400',
         neutral:
