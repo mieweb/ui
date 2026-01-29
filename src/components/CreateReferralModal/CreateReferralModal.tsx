@@ -258,10 +258,11 @@ export function CreateReferralModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="referral-notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes (Optional)
             </label>
             <textarea
+              id="referral-notes"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               rows={2}
               value={notes}

@@ -311,10 +311,11 @@ export function ServicePricingManager({
             {editingService?.serviceName}
           </p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="edit-base-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Base Price
             </label>
             <Input
+              id="edit-base-price"
               type="number"
               step="0.01"
               min="0"
@@ -323,10 +324,11 @@ export function ServicePricingManager({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="edit-employer-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Employer Price (optional)
             </label>
             <Input
+              id="edit-employer-price"
               type="number"
               step="0.01"
               min="0"

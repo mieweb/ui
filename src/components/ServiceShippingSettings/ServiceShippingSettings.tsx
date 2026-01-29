@@ -273,10 +273,11 @@ export function ServiceShippingSettings({
 
           {/* Special instructions */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="shipping-instructions" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Special Instructions
             </label>
             <textarea
+              id="shipping-instructions"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               rows={3}
               value={instructions || ''}

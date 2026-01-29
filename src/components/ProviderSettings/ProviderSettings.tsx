@@ -198,19 +198,21 @@ export function ProviderSettings({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="provider-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Provider Name
                   </label>
                   <Input
+                    id="provider-name"
                     value={settings.general.name}
                     onChange={(e) => updateGeneral('name', e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="provider-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Description
                   </label>
                   <Textarea
+                    id="provider-description"
                     value={settings.general.description || ''}
                     onChange={(e) =>
                       updateGeneral('description', e.target.value)
@@ -220,19 +222,21 @@ export function ProviderSettings({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-npi" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       NPI Number
                     </label>
                     <Input
+                      id="provider-npi"
                       value={settings.general.npi || ''}
                       onChange={(e) => updateGeneral('npi', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-tax-id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Tax ID
                     </label>
                     <Input
+                      id="provider-tax-id"
                       value={settings.general.taxId || ''}
                       onChange={(e) => updateGeneral('taxId', e.target.value)}
                     />
@@ -248,30 +252,33 @@ export function ProviderSettings({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="provider-phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Phone
                   </label>
                   <Input
+                    id="provider-phone"
                     type="tel"
                     value={settings.general.phone || ''}
                     onChange={(e) => updateGeneral('phone', e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="provider-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Email
                   </label>
                   <Input
+                    id="provider-email"
                     type="email"
                     value={settings.general.email || ''}
                     onChange={(e) => updateGeneral('email', e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="provider-website" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Website
                   </label>
                   <Input
+                    id="provider-website"
                     type="url"
                     value={settings.general.website || ''}
                     onChange={(e) => updateGeneral('website', e.target.value)}
@@ -288,19 +295,21 @@ export function ProviderSettings({
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-street" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Street Address
                     </label>
                     <Input
+                      id="provider-street"
                       value={settings.address.street}
                       onChange={(e) => updateAddress('street', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-street2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Street Address 2
                     </label>
                     <Input
+                      id="provider-street2"
                       value={settings.address.street2 || ''}
                       onChange={(e) => updateAddress('street2', e.target.value)}
                     />
@@ -308,37 +317,41 @@ export function ProviderSettings({
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       City
                     </label>
                     <Input
+                      id="provider-city"
                       value={settings.address.city}
                       onChange={(e) => updateAddress('city', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-state" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       State
                     </label>
                     <Input
+                      id="provider-state"
                       value={settings.address.state}
                       onChange={(e) => updateAddress('state', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-zip" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       ZIP Code
                     </label>
                     <Input
+                      id="provider-zip"
                       value={settings.address.zip}
                       onChange={(e) => updateAddress('zip', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="provider-country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Country
                     </label>
                     <Input
+                      id="provider-country"
                       value={settings.address.country || 'USA'}
                       onChange={(e) => updateAddress('country', e.target.value)}
                     />
@@ -499,10 +512,11 @@ export function ProviderSettings({
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-6 grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="appointment-buffer" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Appointment Buffer (minutes)
                   </label>
                   <Input
+                    id="appointment-buffer"
                     type="number"
                     min={0}
                     value={settings.scheduling.appointmentBuffer}
@@ -515,10 +529,11 @@ export function ProviderSettings({
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="max-daily-appointments" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Max Daily Appointments
                   </label>
                   <Input
+                    id="max-daily-appointments"
                     type="number"
                     min={1}
                     value={settings.scheduling.maxDailyAppointments}
@@ -659,10 +674,11 @@ export function ProviderSettings({
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                 <div className="max-w-xs">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="payment-terms" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Payment Terms (days)
                   </label>
                   <Input
+                    id="payment-terms"
                     type="number"
                     min={0}
                     value={settings.payments.paymentTerms}

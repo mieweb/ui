@@ -146,9 +146,9 @@ export function RejectionModal({
 
           {/* Reason selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <span className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Reason for rejection
-            </label>
+            </span>
             <div className="space-y-2">
               {reasons.map((reason) => (
                 <label

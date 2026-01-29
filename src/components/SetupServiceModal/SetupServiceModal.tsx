@@ -151,10 +151,11 @@ export function SetupServiceModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="setup-service-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Description
             </label>
             <textarea
+              id="setup-service-description"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               rows={3}
               value={formData.description}
@@ -183,7 +184,7 @@ export function SetupServiceModal({
 
           {/* Price */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="setup-service-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Base Price
             </label>
             <div className="relative">
@@ -191,6 +192,7 @@ export function SetupServiceModal({
                 $
               </span>
               <input
+                id="setup-service-price"
                 type="number"
                 min="0"
                 step="0.01"

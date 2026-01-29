@@ -242,10 +242,11 @@ export function HelpSupportPanel({
                 )}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="support-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Your Email
                     </label>
                     <Input
+                      id="support-email"
                       type="email"
                       required
                       value={formData.email}
@@ -259,10 +260,11 @@ export function HelpSupportPanel({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="support-subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Subject
                     </label>
                     <Input
+                      id="support-subject"
                       required
                       value={formData.subject}
                       onChange={(e) =>
@@ -275,10 +277,11 @@ export function HelpSupportPanel({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="support-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Message
                     </label>
                     <Textarea
+                      id="support-message"
                       required
                       rows={4}
                       value={formData.message}

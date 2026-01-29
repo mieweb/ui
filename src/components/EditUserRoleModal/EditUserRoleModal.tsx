@@ -139,9 +139,9 @@ export function EditUserRoleModal({
         {/* Role permissions preview */}
         {selectedRole?.permissions && selectedRole.permissions.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <span className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Permissions
-            </label>
+            </span>
             <div className="flex flex-wrap gap-2">
               {selectedRole.permissions.map((permission) => (
                 <span
