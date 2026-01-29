@@ -1,19 +1,41 @@
-import { cn } from './chunk-F3SOEIN2.js';
-import * as React from 'react';
-import { cva } from 'class-variance-authority';
-import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
+'use strict';
 
-var quickActionIconVariants = cva(
+var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
+var React = require('react');
+var classVarianceAuthority = require('class-variance-authority');
+var jsxRuntime = require('react/jsx-runtime');
+
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () { return e[k]; }
+        });
+      }
+    });
+  }
+  n.default = e;
+  return Object.freeze(n);
+}
+
+var React__namespace = /*#__PURE__*/_interopNamespace(React);
+
+var quickActionIconVariants = classVarianceAuthority.cva(
   ["flex items-center justify-center rounded-xl", "h-10 w-10"],
   {
     variants: {
       color: {
         primary: "bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400",
-        green: "bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400",
-        purple: "bg-secondary-100 text-secondary-600 dark:bg-secondary-900/50 dark:text-secondary-400",
+        green: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400",
+        purple: "bg-violet-100 text-violet-600 dark:bg-violet-900/50 dark:text-violet-400",
         orange: "bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-400",
-        blue: "bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400",
-        red: "bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400",
+        blue: "bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400",
+        red: "bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400",
         amber: "bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400",
         neutral: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
       }
@@ -23,7 +45,7 @@ var quickActionIconVariants = cva(
     }
   }
 );
-var quickActionVariants = cva(
+var quickActionVariants = classVarianceAuthority.cva(
   [
     "flex items-center gap-3 rounded-xl border p-4 text-left",
     "transition-colors duration-200",
@@ -50,7 +72,7 @@ var quickActionVariants = cva(
     }
   }
 );
-var QuickAction = React.forwardRef(
+var QuickAction = React__namespace.forwardRef(
   ({
     className,
     title,
@@ -62,32 +84,32 @@ var QuickAction = React.forwardRef(
     href,
     ...props
   }, ref) => {
-    const content = /* @__PURE__ */ jsxs(Fragment, { children: [
-      /* @__PURE__ */ jsx("div", { className: cn(quickActionIconVariants({ color })), children: icon }),
-      /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("div", { className: "font-medium text-neutral-900 dark:text-white", children: title }),
-        /* @__PURE__ */ jsx("div", { className: "text-xs text-neutral-500 dark:text-neutral-400", children: subtitle })
+    const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(quickActionIconVariants({ color })), children: icon }),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "font-medium text-neutral-900 dark:text-white", children: title }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-xs text-neutral-500 dark:text-neutral-400", children: subtitle })
       ] })
     ] });
     if (as === "a" && href) {
-      return /* @__PURE__ */ jsx(
+      return /* @__PURE__ */ jsxRuntime.jsx(
         "a",
         {
           href,
-          className: cn(quickActionVariants({ disabled }), className),
+          className: chunkOR5DRJCW_cjs.cn(quickActionVariants({ disabled }), className),
           "aria-disabled": disabled,
           ...props,
           children: content
         }
       );
     }
-    return /* @__PURE__ */ jsx(
+    return /* @__PURE__ */ jsxRuntime.jsx(
       "button",
       {
         ref,
         type: "button",
         disabled: disabled ?? void 0,
-        className: cn(quickActionVariants({ disabled }), className),
+        className: chunkOR5DRJCW_cjs.cn(quickActionVariants({ disabled }), className),
         ...props,
         children: content
       }
@@ -96,7 +118,7 @@ var QuickAction = React.forwardRef(
 );
 QuickAction.displayName = "QuickAction";
 var QuickActionIcons = {
-  Calendar: (props) => /* @__PURE__ */ jsx(
+  Calendar: (props) => /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className: "h-5 w-5",
@@ -105,7 +127,7 @@ var QuickActionIcons = {
       viewBox: "0 0 24 24",
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
-      children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsx(
         "path",
         {
           strokeLinecap: "round",
@@ -116,7 +138,7 @@ var QuickActionIcons = {
       )
     }
   ),
-  Clipboard: (props) => /* @__PURE__ */ jsx(
+  Clipboard: (props) => /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className: "h-5 w-5",
@@ -125,7 +147,7 @@ var QuickActionIcons = {
       viewBox: "0 0 24 24",
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
-      children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsx(
         "path",
         {
           strokeLinecap: "round",
@@ -136,7 +158,7 @@ var QuickActionIcons = {
       )
     }
   ),
-  User: (props) => /* @__PURE__ */ jsx(
+  User: (props) => /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className: "h-5 w-5",
@@ -145,7 +167,7 @@ var QuickActionIcons = {
       viewBox: "0 0 24 24",
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
-      children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsx(
         "path",
         {
           strokeLinecap: "round",
@@ -156,7 +178,7 @@ var QuickActionIcons = {
       )
     }
   ),
-  Document: (props) => /* @__PURE__ */ jsx(
+  Document: (props) => /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className: "h-5 w-5",
@@ -165,7 +187,7 @@ var QuickActionIcons = {
       viewBox: "0 0 24 24",
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
-      children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsx(
         "path",
         {
           strokeLinecap: "round",
@@ -176,7 +198,7 @@ var QuickActionIcons = {
       )
     }
   ),
-  Settings: (props) => /* @__PURE__ */ jsxs(
+  Settings: (props) => /* @__PURE__ */ jsxRuntime.jsxs(
     "svg",
     {
       className: "h-5 w-5",
@@ -186,7 +208,7 @@ var QuickActionIcons = {
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
       children: [
-        /* @__PURE__ */ jsx(
+        /* @__PURE__ */ jsxRuntime.jsx(
           "path",
           {
             strokeLinecap: "round",
@@ -195,7 +217,7 @@ var QuickActionIcons = {
             d: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
           }
         ),
-        /* @__PURE__ */ jsx(
+        /* @__PURE__ */ jsxRuntime.jsx(
           "path",
           {
             strokeLinecap: "round",
@@ -207,7 +229,7 @@ var QuickActionIcons = {
       ]
     }
   ),
-  Help: (props) => /* @__PURE__ */ jsx(
+  Help: (props) => /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className: "h-5 w-5",
@@ -216,7 +238,7 @@ var QuickActionIcons = {
       viewBox: "0 0 24 24",
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
-      children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsx(
         "path",
         {
           strokeLinecap: "round",
@@ -227,7 +249,7 @@ var QuickActionIcons = {
       )
     }
   ),
-  Search: (props) => /* @__PURE__ */ jsx(
+  Search: (props) => /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className: "h-5 w-5",
@@ -236,7 +258,7 @@ var QuickActionIcons = {
       viewBox: "0 0 24 24",
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
-      children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsx(
         "path",
         {
           strokeLinecap: "round",
@@ -247,7 +269,7 @@ var QuickActionIcons = {
       )
     }
   ),
-  Bell: (props) => /* @__PURE__ */ jsx(
+  Bell: (props) => /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className: "h-5 w-5",
@@ -256,7 +278,7 @@ var QuickActionIcons = {
       viewBox: "0 0 24 24",
       xmlns: "http://www.w3.org/2000/svg",
       ...props,
-      children: /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsx(
         "path",
         {
           strokeLinecap: "round",
@@ -268,7 +290,7 @@ var QuickActionIcons = {
     }
   )
 };
-var QuickActionGroup = React.forwardRef(
+var QuickActionGroup = React__namespace.forwardRef(
   ({
     className,
     title,
@@ -276,7 +298,7 @@ var QuickActionGroup = React.forwardRef(
     children,
     ...props
   }, ref) => {
-    const gridCols = cn(
+    const gridCols = chunkOR5DRJCW_cjs.cn(
       "grid gap-4",
       // Base (mobile)
       columns.base === 1 ? "grid-cols-1" : "grid-cols-2",
@@ -287,14 +309,18 @@ var QuickActionGroup = React.forwardRef(
       // Large screens
       columns.lg === 2 ? "lg:grid-cols-2" : columns.lg === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
     );
-    return /* @__PURE__ */ jsxs("div", { ref, className, ...props, children: [
-      title && /* @__PURE__ */ jsx("h2", { className: "mb-4 text-lg font-semibold text-neutral-900 dark:text-white", children: title }),
-      /* @__PURE__ */ jsx("div", { className: gridCols, children })
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className, ...props, children: [
+      title && /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "mb-4 text-lg font-semibold text-neutral-900 dark:text-white", children: title }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: gridCols, children })
     ] });
   }
 );
 QuickActionGroup.displayName = "QuickActionGroup";
 
-export { QuickAction, QuickActionGroup, QuickActionIcons, quickActionIconVariants, quickActionVariants };
-//# sourceMappingURL=chunk-VO3RBR4B.js.map
-//# sourceMappingURL=chunk-VO3RBR4B.js.map
+exports.QuickAction = QuickAction;
+exports.QuickActionGroup = QuickActionGroup;
+exports.QuickActionIcons = QuickActionIcons;
+exports.quickActionIconVariants = quickActionIconVariants;
+exports.quickActionVariants = quickActionVariants;
+//# sourceMappingURL=chunk-AU5ADTYD.cjs.map
+//# sourceMappingURL=chunk-AU5ADTYD.cjs.map

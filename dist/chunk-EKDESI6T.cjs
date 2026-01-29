@@ -1,9 +1,31 @@
-import { cn } from './chunk-F3SOEIN2.js';
-import * as React from 'react';
-import { cva } from 'class-variance-authority';
-import { jsx, jsxs } from 'react/jsx-runtime';
+'use strict';
 
-var switchTrackVariants = cva(
+var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
+var React = require('react');
+var classVarianceAuthority = require('class-variance-authority');
+var jsxRuntime = require('react/jsx-runtime');
+
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () { return e[k]; }
+        });
+      }
+    });
+  }
+  n.default = e;
+  return Object.freeze(n);
+}
+
+var React__namespace = /*#__PURE__*/_interopNamespace(React);
+
+var switchTrackVariants = classVarianceAuthority.cva(
   [
     "relative inline-flex shrink-0",
     "cursor-pointer rounded-full",
@@ -26,7 +48,7 @@ var switchTrackVariants = cva(
     }
   }
 );
-var switchThumbVariants = cva(
+var switchThumbVariants = classVarianceAuthority.cva(
   [
     "pointer-events-none inline-block rounded-full",
     "bg-white shadow-lg",
@@ -45,7 +67,7 @@ var switchThumbVariants = cva(
     }
   }
 );
-var Switch = React.forwardRef(
+var Switch = React__namespace.forwardRef(
   ({
     className,
     size,
@@ -59,13 +81,13 @@ var Switch = React.forwardRef(
     id,
     ...props
   }, ref) => {
-    const [uncontrolledChecked, setUncontrolledChecked] = React.useState(defaultChecked);
-    const generatedId = React.useId();
+    const [uncontrolledChecked, setUncontrolledChecked] = React__namespace.useState(defaultChecked);
+    const generatedId = React__namespace.useId();
     const switchId = id || generatedId;
     const descriptionId = `${switchId}-description`;
     const isControlled = controlledChecked !== void 0;
     const isChecked = isControlled ? controlledChecked : uncontrolledChecked;
-    const handleToggle = React.useCallback(() => {
+    const handleToggle = React__namespace.useCallback(() => {
       if (disabled) return;
       const newValue = !isChecked;
       if (!isControlled) {
@@ -73,7 +95,7 @@ var Switch = React.forwardRef(
       }
       onCheckedChange?.(newValue);
     }, [disabled, isChecked, isControlled, onCheckedChange]);
-    const handleKeyDown = React.useCallback(
+    const handleKeyDown = React__namespace.useCallback(
       (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -82,7 +104,7 @@ var Switch = React.forwardRef(
       },
       [handleToggle]
     );
-    const switchElement = /* @__PURE__ */ jsx(
+    const switchElement = /* @__PURE__ */ jsxRuntime.jsx(
       "button",
       {
         ref,
@@ -95,9 +117,9 @@ var Switch = React.forwardRef(
         disabled,
         onClick: handleToggle,
         onKeyDown: handleKeyDown,
-        className: cn(switchTrackVariants({ size }), "items-center", className),
+        className: chunkOR5DRJCW_cjs.cn(switchTrackVariants({ size }), "items-center", className),
         ...props,
-        children: /* @__PURE__ */ jsx(
+        children: /* @__PURE__ */ jsxRuntime.jsx(
           "span",
           {
             "data-state": isChecked ? "checked" : "unchecked",
@@ -106,24 +128,35 @@ var Switch = React.forwardRef(
         )
       }
     );
-    const labelElement = label && /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-0.5", children: [
-      /* @__PURE__ */ jsx(
+    const labelSizeClasses = {
+      sm: "text-xs",
+      md: "text-sm",
+      lg: "text-base"
+    };
+    const descriptionSizeClasses = {
+      sm: "text-[10px]",
+      md: "text-xs",
+      lg: "text-sm"
+    };
+    const labelElement = label && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-0.5", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
         "label",
         {
           htmlFor: switchId,
-          className: cn(
-            "text-foreground cursor-pointer text-sm font-medium select-none",
+          className: chunkOR5DRJCW_cjs.cn(
+            "text-foreground cursor-pointer font-medium select-none",
+            labelSizeClasses[size || "md"],
             disabled && "cursor-not-allowed opacity-50"
           ),
           children: label
         }
       ),
-      description && /* @__PURE__ */ jsx("p", { id: descriptionId, className: "text-muted-foreground text-xs", children: description })
+      description && /* @__PURE__ */ jsxRuntime.jsx("p", { id: descriptionId, className: chunkOR5DRJCW_cjs.cn("text-muted-foreground", descriptionSizeClasses[size || "md"]), children: description })
     ] });
-    return /* @__PURE__ */ jsxs(
+    return /* @__PURE__ */ jsxRuntime.jsxs(
       "div",
       {
-        className: cn(
+        className: chunkOR5DRJCW_cjs.cn(
           "flex items-center gap-3",
           labelPosition === "left" && "flex-row-reverse"
         ),
@@ -137,6 +170,8 @@ var Switch = React.forwardRef(
 );
 Switch.displayName = "Switch";
 
-export { Switch, switchThumbVariants, switchTrackVariants };
-//# sourceMappingURL=chunk-TTSLBOAO.js.map
-//# sourceMappingURL=chunk-TTSLBOAO.js.map
+exports.Switch = Switch;
+exports.switchThumbVariants = switchThumbVariants;
+exports.switchTrackVariants = switchTrackVariants;
+//# sourceMappingURL=chunk-EKDESI6T.cjs.map
+//# sourceMappingURL=chunk-EKDESI6T.cjs.map

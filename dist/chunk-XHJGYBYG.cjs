@@ -99,8 +99,31 @@ function RadioGroup({
           className: chunkOR5DRJCW_cjs.cn("flex flex-col gap-2", className),
           "aria-describedby": [description ? descriptionId : null, error ? errorId : null].filter(Boolean).join(" ") || void 0,
           children: [
-            label && /* @__PURE__ */ jsxRuntime.jsx("legend", { className: "text-foreground text-sm font-medium", children: label }),
-            description && /* @__PURE__ */ jsxRuntime.jsx("p", { id: descriptionId, className: "text-muted-foreground text-xs", children: description }),
+            label && /* @__PURE__ */ jsxRuntime.jsx(
+              "legend",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "text-foreground font-medium",
+                  size === "sm" && "text-xs",
+                  size === "md" && "text-sm",
+                  size === "lg" && "text-base"
+                ),
+                children: label
+              }
+            ),
+            description && /* @__PURE__ */ jsxRuntime.jsx(
+              "p",
+              {
+                id: descriptionId,
+                className: chunkOR5DRJCW_cjs.cn(
+                  "text-muted-foreground",
+                  size === "sm" && "text-[10px]",
+                  size === "md" && "text-xs",
+                  size === "lg" && "text-sm"
+                ),
+                children: description
+              }
+            ),
             /* @__PURE__ */ jsxRuntime.jsx(
               "div",
               {
@@ -111,7 +134,20 @@ function RadioGroup({
                 children
               }
             ),
-            error && /* @__PURE__ */ jsxRuntime.jsx("p", { id: errorId, className: "text-destructive text-sm", role: "alert", children: error })
+            error && /* @__PURE__ */ jsxRuntime.jsx(
+              "p",
+              {
+                id: errorId,
+                className: chunkOR5DRJCW_cjs.cn(
+                  "text-destructive",
+                  size === "sm" && "text-xs",
+                  size === "md" && "text-sm",
+                  size === "lg" && "text-base"
+                ),
+                role: "alert",
+                children: error
+              }
+            )
           ]
         }
       )
@@ -179,13 +215,28 @@ var Radio = React__namespace.forwardRef(
         {
           htmlFor: radioId,
           className: chunkOR5DRJCW_cjs.cn(
-            "text-foreground cursor-pointer text-sm font-medium select-none",
+            "text-foreground cursor-pointer font-medium select-none",
+            size === "sm" && "text-xs",
+            size === "md" && "text-sm",
+            size === "lg" && "text-base",
             isDisabled && "cursor-not-allowed opacity-50"
           ),
           children: label
         }
       ),
-      description && /* @__PURE__ */ jsxRuntime.jsx("p", { id: descriptionId, className: "text-muted-foreground text-xs", children: description })
+      description && /* @__PURE__ */ jsxRuntime.jsx(
+        "p",
+        {
+          id: descriptionId,
+          className: chunkOR5DRJCW_cjs.cn(
+            "text-muted-foreground",
+            size === "sm" && "text-[10px]",
+            size === "md" && "text-xs",
+            size === "lg" && "text-sm"
+          ),
+          children: description
+        }
+      )
     ] });
     return /* @__PURE__ */ jsxRuntime.jsxs(
       "div",
@@ -207,5 +258,5 @@ Radio.displayName = "Radio";
 exports.Radio = Radio;
 exports.RadioGroup = RadioGroup;
 exports.radioVariants = radioVariants;
-//# sourceMappingURL=chunk-XZB73CF4.cjs.map
-//# sourceMappingURL=chunk-XZB73CF4.cjs.map
+//# sourceMappingURL=chunk-XHJGYBYG.cjs.map
+//# sourceMappingURL=chunk-XHJGYBYG.cjs.map

@@ -219,6 +219,7 @@ function ProgressBar({
 function Waveform({
   src,
   isPlaying,
+  playbackRate = 1,
   onReady,
   onTimeUpdate,
   onFinish,
@@ -287,6 +288,10 @@ function Waveform({
       wavesurferRef.current.pause();
     }
   }, [isPlaying, isLoaded]);
+  React__namespace.useEffect(() => {
+    if (!wavesurferRef.current || !isLoaded) return;
+    wavesurferRef.current.setPlaybackRate(playbackRate);
+  }, [playbackRate, isLoaded]);
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
@@ -393,6 +398,11 @@ function AudioPlayer({
   }, [playbackRate]);
   const handlePlay = React__namespace.useCallback(() => {
     if (disabled) return;
+    if (variant === "waveform") {
+      if (isLoading) return;
+      updateState(isPlaying ? "paused" : "playing");
+      return;
+    }
     if (!audioInitialized && !isLoading) {
       const audio = initAudio();
       if (audio) {
@@ -428,6 +438,7 @@ function AudioPlayer({
     }
   }, [
     disabled,
+    variant,
     audioInitialized,
     isLoading,
     isPlaying,
@@ -533,6 +544,7 @@ function AudioPlayer({
       {
         src,
         isPlaying,
+        playbackRate,
         onReady: handleWaveformReady,
         onTimeUpdate: handleWaveformTimeUpdate,
         onFinish: handleWaveformFinish,
@@ -558,5 +570,5 @@ exports.ProgressBar = ProgressBar;
 exports.audioPlayerVariants = audioPlayerVariants;
 exports.formatTime = formatTime;
 exports.playButtonVariants = playButtonVariants;
-//# sourceMappingURL=chunk-OIUNIDUY.cjs.map
-//# sourceMappingURL=chunk-OIUNIDUY.cjs.map
+//# sourceMappingURL=chunk-VWXGUNBR.cjs.map
+//# sourceMappingURL=chunk-VWXGUNBR.cjs.map
