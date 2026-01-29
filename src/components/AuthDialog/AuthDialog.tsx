@@ -314,7 +314,7 @@ export function AuthDialog({
             <div className="py-4 text-center">
               <MailIcon className="text-primary-600 mx-auto mb-4 h-12 w-12" />
               <p className="mb-4 text-gray-600 dark:text-gray-400">
-                We've sent a verification email to your inbox. Please click the
+                We&apos;ve sent a verification email to your inbox. Please click the
                 link to verify your account.
               </p>
               <button
@@ -360,7 +360,7 @@ export function AuthDialog({
             <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
               {mode === 'login' ? (
                 <>
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <button
                     type="button"
                     onClick={() => setMode('signup')}
@@ -663,7 +663,7 @@ function ForgotPasswordForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <p className="text-sm text-gray-600 dark:text-gray-400">
-        Enter your email address and we'll send you a link to reset your
+        Enter your email address and we&apos;ll send you a link to reset your
         password.
       </p>
       <div>

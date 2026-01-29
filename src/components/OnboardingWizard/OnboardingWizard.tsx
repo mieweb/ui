@@ -345,7 +345,7 @@ export function OnboardingCompletion({
             Setup complete!
           </p>
           <p className="text-muted-foreground">
-            You're all set up! You can now start using BlueHive to manage your employees.
+            You&apos;re all set up! You can now start using BlueHive to manage your employees.
           </p>
         </div>
 
@@ -385,7 +385,7 @@ export function OnboardingCompletion({
         <h3 className="mb-2 text-2xl font-bold">Some steps not completed</h3>
         <p className="text-muted-foreground">
           You still need to complete some steps to finish the full guided onboarding.
-          If you're in a hurry, you can skip them for now and come back later.
+          If you&apos;re in a hurry, you can skip them for now and come back later.
         </p>
       </div>
 

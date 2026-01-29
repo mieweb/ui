@@ -449,7 +449,7 @@ export function AddContactModal({
 
               {(!formData.customFields || formData.customFields.length === 0) && (
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No custom fields added. Click "Add Field" to add custom information.
+                  No custom fields added. Click &quot;Add Field&quot; to add custom information.
                 </p>
               )}
             </div>

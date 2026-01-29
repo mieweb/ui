@@ -28,6 +28,7 @@ export default [
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        // DOM Elements
         HTMLElement: 'readonly',
         HTMLInputElement: 'readonly',
         HTMLButtonElement: 'readonly',
@@ -45,6 +46,12 @@ export default [
         HTMLCanvasElement: 'readonly',
         HTMLImageElement: 'readonly',
         HTMLVideoElement: 'readonly',
+        HTMLFormElement: 'readonly',
+        HTMLSelectElement: 'readonly',
+        HTMLAnchorElement: 'readonly',
+        SVGSVGElement: 'readonly',
+        Node: 'readonly',
+        // Events
         KeyboardEvent: 'readonly',
         MouseEvent: 'readonly',
         FocusEvent: 'readonly',
@@ -52,6 +59,10 @@ export default [
         MediaQueryList: 'readonly',
         MediaQueryListEvent: 'readonly',
         NodeJS: 'readonly',
+        // Browser APIs
+        confirm: 'readonly',
+        // Google Maps API (loaded externally)
+        google: 'readonly',
         // Audio/Media APIs
         Blob: 'readonly',
         URL: 'readonly',

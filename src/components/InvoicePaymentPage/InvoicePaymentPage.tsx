@@ -173,7 +173,7 @@ export function InvoicePaymentPage({
               Invoice Not Found
             </h2>
             <p className="text-gray-500 dark:text-gray-400">
-              The invoice you're looking for doesn't exist or has expired.
+              The invoice you&apos;re looking for doesn&apos;t exist or has expired.
             </p>
           </CardContent>
         </Card>
