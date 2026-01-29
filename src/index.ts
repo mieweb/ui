@@ -1,4 +1,5 @@
 // Components
+export * from './components/AddContactModal';
 export * from './components/AdditionalFields';
 export * from './components/Address';
 export * from './components/AGGrid';
@@ -13,6 +14,7 @@ export * from './components/Badge';
 export * from './components/BookingDialog';
 export * from './components/Breadcrumb';
 export * from './components/BusinessHours';
+export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/Card';
 export * from './components/Checkbox';

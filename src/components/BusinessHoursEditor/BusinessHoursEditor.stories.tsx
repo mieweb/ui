@@ -1,0 +1,257 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
+import {
+  BusinessHoursEditor,
+  DaySchedule,
+  createDefaultSchedule,
+  create24HourSchedule,
+  createWeekdaySchedule,
+} from './BusinessHoursEditor';
+
+const meta: Meta<typeof BusinessHoursEditor> = {
+  title: 'Components/BusinessHoursEditor',
+  component: BusinessHoursEditor,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component:
+          'An editable interface for managing business hours with support for multiple time slots per day, descriptions, and copy functionality.',
+      },
+    },
+  },
+  argTypes: {
+    disabled: {
+      control: 'boolean',
+      description: 'Whether the editor is disabled',
+    },
+    showDescription: {
+      control: 'boolean',
+      description: 'Whether to show description field for each time slot',
+    },
+    use24Hour: {
+      control: 'boolean',
+      description: 'Use 24-hour format',
+    },
+    weekStartsOn: {
+      control: 'radio',
+      options: [0, 1],
+      description: 'Starting day of week (0 = Sunday, 1 = Monday)',
+    },
+    addHoursLabel: {
+      control: 'text',
+      description: 'Label for add hours button',
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof BusinessHoursEditor>;
+
+// Interactive wrapper
+function BusinessHoursEditorWrapper(
+  props: Partial<React.ComponentProps<typeof BusinessHoursEditor>>
+) {
+  const [schedule, setSchedule] = useState<DaySchedule[]>(
+    props.value || createDefaultSchedule()
+  );
+
+  return (
+    <div className="max-w-2xl">
+      <BusinessHoursEditor
+        value={schedule}
+        onChange={setSchedule}
+        showDescription={true}
+        {...props}
+      />
+      
+      <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+        <h4 className="font-medium mb-2 text-sm">Current Schedule:</h4>
+        <pre className="text-xs overflow-auto max-h-48">
+          {JSON.stringify(schedule, null, 2)}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+export const Default: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    showDescription: true,
+    weekStartsOn: 0,
+    addHoursLabel: 'Add Hours',
+  },
+};
+
+export const Empty: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: [],
+    showDescription: true,
+  },
+};
+
+export const WeekdaysOnly: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: createWeekdaySchedule('08:00', '18:00'),
+    showDescription: true,
+  },
+};
+
+export const TwentyFourSeven: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: create24HourSchedule(),
+    showDescription: false,
+  },
+};
+
+export const MondayStart: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: createDefaultSchedule(),
+    weekStartsOn: 1,
+    showDescription: true,
+  },
+};
+
+export const WithDescriptions: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: [
+      { day: 0, hours: [] },
+      {
+        day: 1,
+        hours: [
+          { id: '1', start: '08:00', end: '12:00', description: 'Morning shift' },
+          { id: '2', start: '13:00', end: '17:00', description: 'Afternoon shift' },
+        ],
+      },
+      {
+        day: 2,
+        hours: [
+          { id: '3', start: '09:00', end: '17:00', description: 'Regular hours' },
+        ],
+      },
+      {
+        day: 3,
+        hours: [
+          { id: '4', start: '09:00', end: '17:00', description: 'Regular hours' },
+        ],
+      },
+      {
+        day: 4,
+        hours: [
+          { id: '5', start: '09:00', end: '17:00', description: 'Regular hours' },
+        ],
+      },
+      {
+        day: 5,
+        hours: [
+          { id: '6', start: '08:00', end: '15:00', description: 'Early close' },
+        ],
+      },
+      { day: 6, hours: [] },
+    ],
+    showDescription: true,
+  },
+};
+
+export const NoDescriptions: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: createDefaultSchedule(),
+    showDescription: false,
+  },
+};
+
+export const Disabled: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: createDefaultSchedule(),
+    disabled: true,
+    showDescription: true,
+  },
+};
+
+export const CustomLabel: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: [],
+    addHoursLabel: 'Add Time Slot',
+    showDescription: true,
+  },
+};
+
+export const ComplexSchedule: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: [
+      { day: 0, hours: [{ id: '1', start: '10:00', end: '14:00', description: 'Sunday brunch' }] },
+      {
+        day: 1,
+        hours: [
+          { id: '2', start: '07:00', end: '10:00', description: 'Breakfast' },
+          { id: '3', start: '11:00', end: '14:00', description: 'Lunch' },
+          { id: '4', start: '17:00', end: '22:00', description: 'Dinner' },
+        ],
+      },
+      {
+        day: 2,
+        hours: [
+          { id: '5', start: '07:00', end: '10:00', description: 'Breakfast' },
+          { id: '6', start: '11:00', end: '14:00', description: 'Lunch' },
+          { id: '7', start: '17:00', end: '22:00', description: 'Dinner' },
+        ],
+      },
+      {
+        day: 3,
+        hours: [
+          { id: '8', start: '07:00', end: '10:00', description: 'Breakfast' },
+          { id: '9', start: '11:00', end: '14:00', description: 'Lunch' },
+          { id: '10', start: '17:00', end: '22:00', description: 'Dinner' },
+        ],
+      },
+      {
+        day: 4,
+        hours: [
+          { id: '11', start: '07:00', end: '10:00', description: 'Breakfast' },
+          { id: '12', start: '11:00', end: '14:00', description: 'Lunch' },
+          { id: '13', start: '17:00', end: '22:00', description: 'Dinner' },
+        ],
+      },
+      {
+        day: 5,
+        hours: [
+          { id: '14', start: '07:00', end: '10:00', description: 'Breakfast' },
+          { id: '15', start: '11:00', end: '14:00', description: 'Lunch' },
+          { id: '16', start: '17:00', end: '23:00', description: 'Dinner & Late Night' },
+        ],
+      },
+      {
+        day: 6,
+        hours: [
+          { id: '17', start: '09:00', end: '15:00', description: 'Brunch' },
+          { id: '18', start: '17:00', end: '23:00', description: 'Dinner & Late Night' },
+        ],
+      },
+    ],
+    showDescription: true,
+  },
+};
+
+export const Mobile: Story = {
+  render: (args) => <BusinessHoursEditorWrapper {...args} />,
+  args: {
+    value: createDefaultSchedule(),
+    showDescription: true,
+  },
+  parameters: {
+    viewport: {
+      defaultViewport: 'mobile1',
+    },
+  },
+};
