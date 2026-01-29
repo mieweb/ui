@@ -96,7 +96,7 @@ export function ServiceGeneralSettings({
       <CardContent className="space-y-6">
         {/* Error message */}
         {errorMessage && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
             <p className="text-sm text-red-600 dark:text-red-400">
               {errorMessage}
             </p>
@@ -104,7 +104,7 @@ export function ServiceGeneralSettings({
         )}
 
         {/* Status toggles */}
-        <div className="flex flex-wrap gap-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap gap-6 border-b border-gray-200 pb-4 dark:border-gray-700">
           <div className="flex items-center gap-3">
             <Switch checked={isActive} onCheckedChange={onIsActiveChange} />
             <div>
@@ -141,12 +141,15 @@ export function ServiceGeneralSettings({
           />
 
           <div>
-            <label htmlFor="service-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="service-description"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Description
             </label>
             <textarea
               id="service-description"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               rows={3}
               value={description}
               onChange={(e) => onDescriptionChange?.(e.target.value)}
@@ -185,11 +188,14 @@ export function ServiceGeneralSettings({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="base-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="base-price"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Base Price
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
                   $
                 </span>
                 <input
@@ -197,7 +203,7 @@ export function ServiceGeneralSettings({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="w-full pl-7 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={basePrice}
                   onChange={(e) =>
                     onBasePriceChange?.(parseFloat(e.target.value) || 0)
@@ -208,7 +214,10 @@ export function ServiceGeneralSettings({
             </div>
 
             <div>
-              <label htmlFor="turnaround-days" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="turnaround-days"
+                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Turnaround Time
               </label>
               <div className="relative">
@@ -216,14 +225,14 @@ export function ServiceGeneralSettings({
                   id="turnaround-days"
                   type="number"
                   min="0"
-                  className="w-full pr-16 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 pr-16 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={turnaroundDays ?? ''}
                   onChange={(e) =>
                     onTurnaroundDaysChange?.(parseInt(e.target.value) || 0)
                   }
                   placeholder="0"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500">
                   days
                 </span>
               </div>
@@ -247,7 +256,7 @@ export function ServiceGeneralSettings({
 
         {/* Save button */}
         {onSave && (
-          <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">
             <Button onClick={onSave} disabled={isSaving}>
               {isSaving ? 'Saving...' : 'Save Settings'}
             </Button>

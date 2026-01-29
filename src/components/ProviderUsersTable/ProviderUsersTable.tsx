@@ -1,7 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../Table/Table';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../Table/Table';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Avatar } from '../Avatar/Avatar';
@@ -83,7 +90,7 @@ export function ProviderUsersTable({
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"
+            className="h-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800"
           />
         ))}
       </div>
@@ -93,7 +100,7 @@ export function ProviderUsersTable({
   if (users.length === 0) {
     return (
       <div
-        className={`text-center py-12 text-gray-500 dark:text-gray-400 ${className}`}
+        className={`py-12 text-center text-gray-500 dark:text-gray-400 ${className}`}
       >
         <svg
           className="mx-auto h-12 w-12 text-gray-400"
@@ -122,7 +129,9 @@ export function ProviderUsersTable({
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Last Active</TableHead>
-            {showActions && <TableHead className="text-right">Actions</TableHead>}
+            {showActions && (
+              <TableHead className="text-right">Actions</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -134,11 +143,7 @@ export function ProviderUsersTable({
               <TableRow key={user.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <Avatar
-                      src={user.avatarUrl}
-                      name={user.name}
-                      size="sm"
-                    />
+                    <Avatar src={user.avatarUrl} name={user.name} size="sm" />
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">
                         {user.name}
@@ -182,7 +187,7 @@ export function ProviderUsersTable({
                           title="Resend invitation"
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="h-4 w-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -204,7 +209,7 @@ export function ProviderUsersTable({
                           title="Edit role"
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="h-4 w-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -224,10 +229,10 @@ export function ProviderUsersTable({
                           size="sm"
                           onClick={() => onRemove(user)}
                           title="Remove user"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="h-4 w-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

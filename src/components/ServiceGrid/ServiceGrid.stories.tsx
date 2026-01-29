@@ -19,7 +19,7 @@ const sampleServices: ServiceGridProps['services'] = [
     id: '1',
     name: 'Drug Screen (5-Panel)',
     description: 'Standard 5-panel urine drug screening test',
-    price: 45.00,
+    price: 45.0,
     currentlyOffered: true,
     limitedInventory: true,
     inventoryCount: 15,
@@ -30,7 +30,7 @@ const sampleServices: ServiceGridProps['services'] = [
     id: '2',
     name: 'DOT Physical',
     description: 'Department of Transportation physical examination',
-    price: 125.00,
+    price: 125.0,
     currentlyOffered: true,
     customPricingCount: 3,
     category: 'Physicals',
@@ -39,7 +39,7 @@ const sampleServices: ServiceGridProps['services'] = [
     id: '3',
     name: 'Pre-Employment Physical',
     description: 'Comprehensive physical exam for employment clearance',
-    price: 85.00,
+    price: 85.0,
     currentlyOffered: true,
     category: 'Physicals',
   },
@@ -47,7 +47,7 @@ const sampleServices: ServiceGridProps['services'] = [
     id: '4',
     name: 'Hearing Test',
     description: 'Audiometric hearing evaluation',
-    price: 35.00,
+    price: 35.0,
     currentlyOffered: true,
     hasCustomAvailability: true,
     category: 'Testing',
@@ -56,7 +56,7 @@ const sampleServices: ServiceGridProps['services'] = [
     id: '5',
     name: 'Vision Screening',
     description: 'Basic vision acuity test',
-    price: 25.00,
+    price: 25.0,
     currentlyOffered: false,
     category: 'Testing',
   },
@@ -64,7 +64,7 @@ const sampleServices: ServiceGridProps['services'] = [
     id: '6',
     name: 'Breath Alcohol Test',
     description: 'Breathalyzer alcohol screening',
-    price: 35.00,
+    price: 35.0,
     currentlyOffered: true,
     limitedInventory: true,
     inventoryCount: 3,
@@ -85,7 +85,7 @@ function InteractiveDemo(props: Partial<ServiceGridProps>) {
         id: newId,
         name: `New Service ${newId}`,
         description: 'A newly added service',
-        price: 50.00,
+        price: 50.0,
         currentlyOffered: true,
       },
     ]);
@@ -140,23 +140,12 @@ export const WithoutAddCard: Story = {
 };
 
 export const Loading: Story = {
-  render: () => (
-    <ServiceGrid
-      services={[]}
-      isLoading
-      skeletonCount={6}
-    />
-  ),
+  render: () => <ServiceGrid services={[]} isLoading skeletonCount={6} />,
 };
 
 export const LoadingFourColumns: Story = {
   render: () => (
-    <ServiceGrid
-      services={[]}
-      isLoading
-      skeletonCount={8}
-      columns={4}
-    />
+    <ServiceGrid services={[]} isLoading skeletonCount={8} columns={4} />
   ),
 };
 
@@ -171,12 +160,7 @@ export const EmptyState: Story = {
 };
 
 export const EmptyWithAddCard: Story = {
-  render: () => (
-    <InteractiveDemo
-      services={[]}
-      showAddCard
-    />
-  ),
+  render: () => <InteractiveDemo services={[]} showAddCard />,
   args: {
     services: [],
     showAddCard: true,
@@ -184,11 +168,7 @@ export const EmptyWithAddCard: Story = {
 };
 
 export const FewServices: Story = {
-  render: () => (
-    <InteractiveDemo
-      services={sampleServices.slice(0, 2)}
-    />
-  ),
+  render: () => <InteractiveDemo services={sampleServices.slice(0, 2)} />,
 };
 
 export const ManyServices: Story = {
@@ -197,7 +177,7 @@ export const ManyServices: Story = {
       id: String(i + 1),
       name: `Service ${i + 1}`,
       description: `Description for service ${i + 1}`,
-      price: 25 + (i * 10),
+      price: 25 + i * 10,
       currentlyOffered: i % 4 !== 0,
       limitedInventory: i % 3 === 0,
       inventoryCount: i % 3 === 0 ? Math.floor(Math.random() * 20) : undefined,
@@ -209,10 +189,5 @@ export const ManyServices: Story = {
 };
 
 export const ReadOnly: Story = {
-  render: () => (
-    <ServiceGrid
-      services={sampleServices}
-      showAddCard={false}
-    />
-  ),
+  render: () => <ServiceGrid services={sampleServices} showAddCard={false} />,
 };

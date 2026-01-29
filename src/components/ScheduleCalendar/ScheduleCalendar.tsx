@@ -123,20 +123,27 @@ export function ScheduleCalendar({
 
   const getAppointmentsForDate = (date: Date) => {
     return appointments.filter((apt) => {
-      const aptDate = typeof apt.startTime === 'string' ? new Date(apt.startTime) : apt.startTime;
+      const aptDate =
+        typeof apt.startTime === 'string'
+          ? new Date(apt.startTime)
+          : apt.startTime;
       return isSameDay(aptDate, date);
     });
   };
 
   const getAppointmentPosition = (appointment: CalendarAppointment) => {
-    const start = typeof appointment.startTime === 'string' 
-      ? new Date(appointment.startTime) 
-      : appointment.startTime;
-    const end = appointment.endTime 
-      ? (typeof appointment.endTime === 'string' ? new Date(appointment.endTime) : appointment.endTime)
+    const start =
+      typeof appointment.startTime === 'string'
+        ? new Date(appointment.startTime)
+        : appointment.startTime;
+    const end = appointment.endTime
+      ? typeof appointment.endTime === 'string'
+        ? new Date(appointment.endTime)
+        : appointment.endTime
       : new Date(start.getTime() + 30 * 60 * 1000); // Default 30 min
 
-    const startMinutes = (start.getHours() - startHour) * 60 + start.getMinutes();
+    const startMinutes =
+      (start.getHours() - startHour) * 60 + start.getMinutes();
     const duration = (end.getTime() - start.getTime()) / (1000 * 60);
 
     return {
@@ -147,11 +154,16 @@ export function ScheduleCalendar({
 
   if (isLoading) {
     return (
-      <div className={`bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
-        <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-t-lg animate-pulse" />
-        <div className="p-4 space-y-2">
+      <div
+        className={`rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${className}`}
+      >
+        <div className="h-12 animate-pulse rounded-t-lg bg-gray-200 dark:bg-gray-700" />
+        <div className="space-y-2 p-4">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div
+              key={i}
+              className="h-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+            />
           ))}
         </div>
       </div>
@@ -161,18 +173,48 @@ export function ScheduleCalendar({
   const weekDates = view === 'week' ? getWeekDates(currentDate) : [currentDate];
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+    <div
+      className={`rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${className}`}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigateDate('prev')}>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigateDate('prev')}
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigateDate('next')}>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigateDate('next')}
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </Button>
           <Button variant="ghost" size="sm" onClick={goToToday}>
@@ -210,7 +252,7 @@ export function ScheduleCalendar({
               {weekDates.map((date, i) => (
                 <div
                   key={i}
-                  className={`flex-1 p-2 text-center border-l border-gray-200 dark:border-gray-700 ${
+                  className={`flex-1 border-l border-gray-200 p-2 text-center dark:border-gray-700 ${
                     isSameDay(date, new Date())
                       ? 'bg-blue-50 dark:bg-blue-900/20'
                       : ''
@@ -257,7 +299,7 @@ export function ScheduleCalendar({
               return (
                 <div
                   key={dayIndex}
-                  className={`flex-1 relative border-l border-gray-200 dark:border-gray-700 ${
+                  className={`relative flex-1 border-l border-gray-200 dark:border-gray-700 ${
                     view === 'week' && isSameDay(date, new Date())
                       ? 'bg-blue-50/50 dark:bg-blue-900/10'
                       : ''
@@ -295,19 +337,21 @@ export function ScheduleCalendar({
                         key={appointment.id}
                         role="button"
                         tabIndex={0}
-                        className={`absolute left-1 right-1 px-2 py-1 rounded text-white text-xs cursor-pointer overflow-hidden border-l-4 ${getStatusColor(appointment.status)}`}
+                        className={`absolute right-1 left-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
                         style={{
                           top: position.top,
                           height: position.height,
                           minHeight: '1.5rem',
                         }}
                         onClick={() => onAppointmentClick?.(appointment)}
-                        onKeyDown={(e) => e.key === 'Enter' && onAppointmentClick?.(appointment)}
+                        onKeyDown={(e) =>
+                          e.key === 'Enter' && onAppointmentClick?.(appointment)
+                        }
                       >
-                        <p className="font-medium truncate">
+                        <p className="truncate font-medium">
                           {appointment.patientName || appointment.title}
                         </p>
-                        <p className="opacity-80 truncate">
+                        <p className="truncate opacity-80">
                           {formatTime(appointment.startTime)}
                         </p>
                       </div>
@@ -321,21 +365,21 @@ export function ScheduleCalendar({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700 text-xs">
+      <div className="flex items-center gap-4 border-t border-gray-200 p-4 text-xs dark:border-gray-700">
         <div className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-blue-500" />
+          <span className="h-3 w-3 rounded bg-blue-500" />
           <span className="text-gray-600 dark:text-gray-400">Confirmed</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-yellow-500" />
+          <span className="h-3 w-3 rounded bg-yellow-500" />
           <span className="text-gray-600 dark:text-gray-400">Pending</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-green-500" />
+          <span className="h-3 w-3 rounded bg-green-500" />
           <span className="text-gray-600 dark:text-gray-400">Completed</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-gray-400" />
+          <span className="h-3 w-3 rounded bg-gray-400" />
           <span className="text-gray-600 dark:text-gray-400">Cancelled</span>
         </div>
       </div>

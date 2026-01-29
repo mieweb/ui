@@ -149,13 +149,15 @@ export const FullFeatured: Story = {
 
 // AddServiceCard story
 export const AddNew: StoryObj<typeof AddServiceCard> = {
-  render: () => <AddServiceCard onClick={() => console.log('Add new service')} />,
+  render: () => (
+    <AddServiceCard onClick={() => console.log('Add new service')} />
+  ),
 };
 
 // Grid layout example
 export const ServiceGrid: Story = {
   render: () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl">
+    <div className="grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       <AddServiceCard onClick={() => console.log('Add new service')} />
       <ServiceCard
         id="svc-1"

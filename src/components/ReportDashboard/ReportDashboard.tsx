@@ -105,7 +105,7 @@ export function ReportDashboard({
     if (trend === 'up') {
       return (
         <svg
-          className="w-4 h-4"
+          className="h-4 w-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -122,7 +122,7 @@ export function ReportDashboard({
     if (trend === 'down') {
       return (
         <svg
-          className="w-4 h-4"
+          className="h-4 w-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -147,17 +147,17 @@ export function ReportDashboard({
 
   if (isLoading) {
     return (
-      <div className={`space-y-6 animate-pulse ${className}`}>
-        <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/3" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className={`animate-pulse space-y-6 ${className}`}>
+        <div className="h-12 w-1/3 rounded-lg bg-gray-200 dark:bg-gray-700" />
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"
+              className="h-24 rounded-lg bg-gray-200 dark:bg-gray-700"
             />
           ))}
         </div>
-        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="h-64 rounded-lg bg-gray-200 dark:bg-gray-700" />
       </div>
     );
   }
@@ -165,7 +165,7 @@ export function ReportDashboard({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {title}
@@ -184,7 +184,7 @@ export function ReportDashboard({
           {onExport && (
             <Button variant="outline" onClick={onExport}>
               <svg
-                className="w-4 h-4 mr-2"
+                className="mr-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -203,14 +203,14 @@ export function ReportDashboard({
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {metrics.map((metric, index) => (
           <Card key={index}>
             <CardContent className="p-4">
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {metric.label}
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+              <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                 {typeof metric.value === 'number'
                   ? metric.label.toLowerCase().includes('revenue') ||
                     metric.label.toLowerCase().includes('amount')
@@ -220,7 +220,7 @@ export function ReportDashboard({
               </p>
               {(metric.change !== undefined || metric.changeLabel) && (
                 <div
-                  className={`flex items-center gap-1 mt-2 text-sm ${getTrendColor(metric.trend)}`}
+                  className={`mt-2 flex items-center gap-1 text-sm ${getTrendColor(metric.trend)}`}
                 >
                   {getTrendIcon(metric.trend)}
                   <span>
@@ -243,16 +243,16 @@ export function ReportDashboard({
             <CardTitle className="text-lg">Order Volume</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-48 flex items-end gap-1">
+            <div className="flex h-48 items-end gap-1">
               {chartData.map((point, index) => (
                 <div
                   key={index}
-                  className="flex-1 flex flex-col items-center gap-1"
+                  className="flex flex-1 flex-col items-center gap-1"
                 >
-                  <div className="w-full flex items-end gap-0.5 h-40">
+                  <div className="flex h-40 w-full items-end gap-0.5">
                     {point.previousValue !== undefined && (
                       <div
-                        className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-t"
+                        className="flex-1 rounded-t bg-gray-200 dark:bg-gray-700"
                         style={{
                           height: `${(point.previousValue / maxChartValue) * 100}%`,
                         }}
@@ -260,29 +260,29 @@ export function ReportDashboard({
                       />
                     )}
                     <div
-                      className="flex-1 bg-blue-500 dark:bg-blue-400 rounded-t"
+                      className="flex-1 rounded-t bg-blue-500 dark:bg-blue-400"
                       style={{
                         height: `${(point.value / maxChartValue) * 100}%`,
                       }}
                       title={`Current: ${point.value}`}
                     />
                   </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate w-full text-center">
+                  <span className="w-full truncate text-center text-xs text-gray-500 dark:text-gray-400">
                     {point.label}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-center gap-4 mt-4 text-sm">
+            <div className="mt-4 flex items-center justify-center gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded" />
+                <div className="h-3 w-3 rounded bg-blue-500 dark:bg-blue-400" />
                 <span className="text-gray-600 dark:text-gray-300">
                   Current Period
                 </span>
               </div>
               {chartData.some((d) => d.previousValue !== undefined) && (
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded" />
+                  <div className="h-3 w-3 rounded bg-gray-200 dark:bg-gray-700" />
                   <span className="text-gray-600 dark:text-gray-300">
                     Previous Period
                   </span>
@@ -294,7 +294,7 @@ export function ReportDashboard({
       )}
 
       {/* Top Lists */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Top Services */}
         {topServices.length > 0 && (
           <Card>
@@ -304,7 +304,7 @@ export function ReportDashboard({
             <CardContent className="space-y-3">
               {topServices.map((service, index) => (
                 <div key={service.id} className="flex items-center gap-3">
-                  <Badge variant="secondary" className="w-6 h-6 justify-center">
+                  <Badge variant="secondary" className="h-6 w-6 justify-center">
                     {index + 1}
                   </Badge>
                   <div className="flex-1">
@@ -317,9 +317,9 @@ export function ReportDashboard({
                       </p>
                     </div>
                     {service.percentage !== undefined && (
-                      <div className="mt-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
                         <div
-                          className="h-full bg-blue-500 dark:bg-blue-400 rounded-full"
+                          className="h-full rounded-full bg-blue-500 dark:bg-blue-400"
                           style={{ width: `${service.percentage}%` }}
                         />
                       </div>
@@ -340,7 +340,7 @@ export function ReportDashboard({
             <CardContent className="space-y-3">
               {topEmployers.map((employer, index) => (
                 <div key={employer.id} className="flex items-center gap-3">
-                  <Badge variant="secondary" className="w-6 h-6 justify-center">
+                  <Badge variant="secondary" className="h-6 w-6 justify-center">
                     {index + 1}
                   </Badge>
                   <div className="flex-1">
@@ -353,9 +353,9 @@ export function ReportDashboard({
                       </p>
                     </div>
                     {employer.percentage !== undefined && (
-                      <div className="mt-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
                         <div
-                          className="h-full bg-green-500 dark:bg-green-400 rounded-full"
+                          className="h-full rounded-full bg-green-500 dark:bg-green-400"
                           style={{ width: `${employer.percentage}%` }}
                         />
                       </div>

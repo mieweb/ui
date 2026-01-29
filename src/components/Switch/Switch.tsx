@@ -172,7 +172,13 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           {label}
         </label>
         {description && (
-          <p id={descriptionId} className={cn('text-muted-foreground', descriptionSizeClasses[size || 'md'])}>
+          <p
+            id={descriptionId}
+            className={cn(
+              'text-muted-foreground',
+              descriptionSizeClasses[size || 'md']
+            )}
+          >
             {description}
           </p>
         )}

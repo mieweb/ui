@@ -113,7 +113,7 @@ function SetupModalWrapper() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-primary px-4 py-2 text-white"
+        className="bg-primary rounded-lg px-4 py-2 text-white"
       >
         Open Modal
       </button>
@@ -142,7 +142,7 @@ function SetupModalBrandedPortalWrapper() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-primary px-4 py-2 text-white"
+        className="bg-primary rounded-lg px-4 py-2 text-white"
       >
         Open Modal
       </button>
@@ -160,7 +160,9 @@ function SetupModalBrandedPortalWrapper() {
   );
 }
 
-export const SetupModalBrandedPortal: StoryObj<typeof RecurringServiceSetupModal> = {
+export const SetupModalBrandedPortal: StoryObj<
+  typeof RecurringServiceSetupModal
+> = {
   render: () => <SetupModalBrandedPortalWrapper />,
 };
 
@@ -180,7 +182,9 @@ const gridServices = [
 function GridWrapper() {
   const [services, setServices] = useState(sampleServices);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingService, setEditingService] = useState<RecurringService | null>(null);
+  const [editingService, setEditingService] = useState<RecurringService | null>(
+    null
+  );
 
   const handleDelete = (service: RecurringService) => {
     if (confirm(`Delete ${service.serviceName}?`)) {

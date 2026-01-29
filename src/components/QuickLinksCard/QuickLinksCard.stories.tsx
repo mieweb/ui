@@ -21,7 +21,12 @@ export default meta;
 type Story = StoryObj<typeof QuickLinksCard>;
 
 const PlusIcon = (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -32,7 +37,12 @@ const PlusIcon = (
 );
 
 const UsersIcon = (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -43,7 +53,12 @@ const UsersIcon = (
 );
 
 const DocumentIcon = (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -54,7 +69,12 @@ const DocumentIcon = (
 );
 
 const ChartIcon = (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -65,7 +85,12 @@ const ChartIcon = (
 );
 
 const SettingsIcon = (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"

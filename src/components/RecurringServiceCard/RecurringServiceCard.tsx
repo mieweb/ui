@@ -70,14 +70,16 @@ export function RecurringServiceCard({
     if (!date) return '--';
     const d = typeof date === 'string' ? new Date(date) : date;
     const now = new Date();
-    
+
     // Check if date is in the past
     if (d < now) {
       return '--';
     }
-    
+
     // Format as relative time
-    const diffDays = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Tomorrow';
     if (diffDays < 7) return `In ${diffDays} days`;
@@ -184,7 +186,7 @@ export function RecurringServiceAddCard({
       type="button"
       onClick={onClick}
       className={cn(
-        'flex min-h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary',
+        'text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary flex min-h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 transition-colors',
         className
       )}
     >
@@ -289,9 +291,14 @@ export function RecurringServiceSetupModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className={cn('w-full max-w-lg rounded-lg bg-white shadow-xl', className)}>
+      <div
+        className={cn(
+          'w-full max-w-lg rounded-lg bg-white shadow-xl',
+          className
+        )}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b bg-primary p-4 text-white">
+        <div className="bg-primary flex items-center justify-between border-b p-4 text-white">
           <h4 className="text-lg font-semibold">{title}</h4>
           <button
             type="button"
@@ -307,10 +314,14 @@ export function RecurringServiceSetupModal({
           {/* Provider Select */}
           {showProviderSelector && (
             <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium">{provider}</label>
+              <label className="mb-1 block text-sm font-medium">
+                {provider}
+              </label>
               <select
                 value={formData.providerId}
-                onChange={(e) => setFormData({ ...formData, providerId: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, providerId: e.target.value })
+                }
                 className="w-full rounded-lg border border-gray-300 p-2"
                 required={showProviderSelector}
               >
@@ -329,7 +340,9 @@ export function RecurringServiceSetupModal({
             <label className="mb-1 block text-sm font-medium">{service}</label>
             <select
               value={formData.serviceId}
-              onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, serviceId: e.target.value })
+              }
               className="w-full rounded-lg border border-gray-300 p-2"
               required
             >
@@ -344,10 +357,14 @@ export function RecurringServiceSetupModal({
 
           {/* Occurrence Select */}
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">{occurrence}</label>
+            <label className="mb-1 block text-sm font-medium">
+              {occurrence}
+            </label>
             <select
               value={formData.occurrence}
-              onChange={(e) => setFormData({ ...formData, occurrence: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, occurrence: e.target.value })
+              }
               className="w-full rounded-lg border border-gray-300 p-2"
               required
             >
@@ -364,12 +381,19 @@ export function RecurringServiceSetupModal({
               <input
                 type="checkbox"
                 checked={formData.overrideConsent}
-                onChange={(e) => setFormData({ ...formData, overrideConsent: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    overrideConsent: e.target.checked,
+                  })
+                }
                 className="h-4 w-4 rounded border-gray-300"
               />
               <span className="text-sm">{overrideConsent}</span>
             </label>
-            <p className="ml-6 text-xs text-muted-foreground">{overrideConsentNote}</p>
+            <p className="text-muted-foreground ml-6 text-xs">
+              {overrideConsentNote}
+            </p>
           </div>
 
           {/* Actions */}
@@ -384,7 +408,7 @@ export function RecurringServiceSetupModal({
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90 disabled:bg-gray-300"
+              className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white disabled:bg-gray-300"
             >
               {saving ? (
                 <span className="flex items-center gap-2">

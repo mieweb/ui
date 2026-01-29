@@ -70,20 +70,13 @@ export function QuickLinksCard({
             <Button
               key={link.id}
               variant="ghost"
-              className={`
-                justify-start h-auto py-2 px-3
-                ${link.disabled ? 'opacity-50 cursor-not-allowed' : ''}
-                ${layout === 'grid' ? 'flex-col items-center text-center h-20' : ''}
-              `}
+              className={`h-auto justify-start px-3 py-2 ${link.disabled ? 'cursor-not-allowed opacity-50' : ''} ${layout === 'grid' ? 'h-20 flex-col items-center text-center' : ''} `}
               onClick={() => handleClick(link)}
               disabled={link.disabled}
             >
               {link.icon && (
                 <span
-                  className={`
-                  text-gray-500 dark:text-gray-400
-                  ${layout === 'grid' ? 'mb-1' : 'mr-3'}
-                `}
+                  className={`text-gray-500 dark:text-gray-400 ${layout === 'grid' ? 'mb-1' : 'mr-3'} `}
                 >
                   {link.icon}
                 </span>
@@ -99,13 +92,13 @@ export function QuickLinksCard({
                 )}
               </span>
               {link.badge !== undefined && (
-                <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-full">
+                <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900 dark:text-blue-400">
                   {link.badge}
                 </span>
               )}
               {!link.badge && layout !== 'grid' && (
                 <svg
-                  className="w-4 h-4 text-gray-400"
+                  className="h-4 w-4 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

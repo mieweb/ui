@@ -241,7 +241,9 @@ function PhoneInputGroup({
 
           {/* Type selector */}
           <div className="w-32 shrink-0">
-            <label htmlFor={`phone-type-${index}`} className="sr-only">Phone type</label>
+            <label htmlFor={`phone-type-${index}`} className="sr-only">
+              Phone type
+            </label>
             <select
               id={`phone-type-${index}`}
               value={phone.type}

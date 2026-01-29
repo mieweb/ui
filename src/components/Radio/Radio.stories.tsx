@@ -5,7 +5,12 @@ import { RadioGroup, Radio } from './Radio';
 // Wrapper component to handle controlled state for stories
 function RadioGroupWithState(
   props: Omit<React.ComponentProps<typeof RadioGroup>, 'children'> & {
-    options?: Array<{ value: string; label: string; description?: string; disabled?: boolean }>;
+    options?: Array<{
+      value: string;
+      label: string;
+      description?: string;
+      disabled?: boolean;
+    }>;
   }
 ) {
   const {
@@ -45,7 +50,12 @@ type RadioGroupStoryArgs = Omit<
   React.ComponentProps<typeof RadioGroup>,
   'children' | 'onValueChange'
 > & {
-  options?: Array<{ value: string; label: string; description?: string; disabled?: boolean }>;
+  options?: Array<{
+    value: string;
+    label: string;
+    description?: string;
+    disabled?: boolean;
+  }>;
   onValueChange?: (value: string) => void;
 };
 
@@ -139,9 +149,21 @@ export const WithDescriptions: Story = {
     label: 'Choose your subscription',
     defaultValue: 'monthly',
     options: [
-      { value: 'monthly', label: 'Monthly', description: '$9.99 per month, cancel anytime' },
-      { value: 'yearly', label: 'Yearly', description: '$99.99 per year, save 17%' },
-      { value: 'lifetime', label: 'Lifetime', description: '$299.99 one-time payment' },
+      {
+        value: 'monthly',
+        label: 'Monthly',
+        description: '$9.99 per month, cancel anytime',
+      },
+      {
+        value: 'yearly',
+        label: 'Yearly',
+        description: '$99.99 per year, save 17%',
+      },
+      {
+        value: 'lifetime',
+        label: 'Lifetime',
+        description: '$299.99 one-time payment',
+      },
     ],
   },
 };
@@ -202,8 +224,16 @@ export const WithGroupDescription: Story = {
     defaultValue: 'email',
     options: [
       { value: 'email', label: 'Email', description: 'Get notified via email' },
-      { value: 'sms', label: 'SMS', description: 'Get notified via text message' },
-      { value: 'push', label: 'Push', description: 'Get notified via push notification' },
+      {
+        value: 'sms',
+        label: 'SMS',
+        description: 'Get notified via text message',
+      },
+      {
+        value: 'push',
+        label: 'Push',
+        description: 'Get notified via push notification',
+      },
     ],
   },
 };
@@ -219,7 +249,12 @@ export const AllSizes: Story = {
         <Radio value="a" label="Option A" />
         <Radio value="b" label="Option B" />
       </RadioGroup>
-      <RadioGroup name="size-md" label="Medium (default)" size="md" defaultValue="a">
+      <RadioGroup
+        name="size-md"
+        label="Medium (default)"
+        size="md"
+        defaultValue="a"
+      >
         <Radio value="a" label="Option A" />
         <Radio value="b" label="Option B" />
       </RadioGroup>

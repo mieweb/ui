@@ -133,7 +133,7 @@ export function ProviderSelector({
   return (
     <div className={cn('relative', className)} ref={containerRef}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
         </label>
       )}
@@ -144,18 +144,18 @@ export function ProviderSelector({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          'w-full flex items-center gap-3 px-3 border rounded-lg bg-white dark:bg-gray-800 text-left transition-colors',
+          'flex w-full items-center gap-3 rounded-lg border bg-white px-3 text-left transition-colors dark:bg-gray-800',
           'border-gray-300 dark:border-gray-600',
           'hover:border-gray-400 dark:hover:border-gray-500',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
+          'focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none',
+          'disabled:cursor-not-allowed disabled:opacity-50',
           sizeStyles[size]
         )}
       >
         {isLoading ? (
-          <div className="flex items-center gap-2 flex-1">
+          <div className="flex flex-1 items-center gap-2">
             <svg
-              className="animate-spin h-5 w-5 text-gray-400"
+              className="h-5 w-5 animate-spin text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -182,19 +182,19 @@ export function ProviderSelector({
               <img
                 src={selectedProvider.logoUrl}
                 alt={selectedProvider.name}
-                className="w-6 h-6 rounded object-cover"
+                className="h-6 w-6 rounded object-cover"
               />
             ) : (
-              <div className="w-6 h-6 rounded bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center text-xs font-medium">
+              <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-medium text-blue-600 dark:bg-blue-900 dark:text-blue-300">
                 {getInitials(selectedProvider.name)}
               </div>
             )}
-            <div className="flex-1 min-w-0">
-              <div className="font-medium text-gray-900 dark:text-white truncate">
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-medium text-gray-900 dark:text-white">
                 {selectedProvider.name}
               </div>
               {selectedProvider.location && (
-                <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <div className="truncate text-xs text-gray-500 dark:text-gray-400">
                   {selectedProvider.location}
                 </div>
               )}
@@ -209,7 +209,7 @@ export function ProviderSelector({
         {/* Dropdown arrow */}
         <svg
           className={cn(
-            'w-4 h-4 text-gray-400 transition-transform flex-shrink-0',
+            'h-4 w-4 flex-shrink-0 text-gray-400 transition-transform',
             isOpen && 'rotate-180'
           )}
           fill="none"
@@ -227,13 +227,13 @@ export function ProviderSelector({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
           {/* Search */}
           {searchable && (
-            <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="border-b border-gray-200 p-2 dark:border-gray-700">
               <div className="relative">
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -250,7 +250,7 @@ export function ProviderSelector({
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 bg-white py-2 pr-4 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                   // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                 />
@@ -271,7 +271,7 @@ export function ProviderSelector({
                   type="button"
                   onClick={() => handleSelect(provider)}
                   className={cn(
-                    'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
+                    'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
                     'hover:bg-gray-50 dark:hover:bg-gray-700',
                     selectedProvider?.id === provider.id &&
                       'bg-blue-50 dark:bg-blue-900/30'
@@ -282,15 +282,15 @@ export function ProviderSelector({
                     <img
                       src={provider.logoUrl}
                       alt={provider.name}
-                      className="w-8 h-8 rounded object-cover"
+                      className="h-8 w-8 rounded object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-sm font-medium">
+                    <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-100 text-sm font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                       {getInitials(provider.name)}
                     </div>
                   )}
 
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-900 dark:text-white">
                         {provider.name}
@@ -301,13 +301,13 @@ export function ProviderSelector({
                         </span>
                       )}
                       {provider.isActive === false && (
-                        <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                        <span className="rounded bg-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
                           Inactive
                         </span>
                       )}
                     </div>
                     {(provider.location || provider.type) && (
-                      <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      <div className="truncate text-sm text-gray-500 dark:text-gray-400">
                         {[provider.type, provider.location]
                           .filter(Boolean)
                           .join(' • ')}
@@ -318,7 +318,7 @@ export function ProviderSelector({
                   {/* Selected checkmark */}
                   {selectedProvider?.id === provider.id && (
                     <svg
-                      className="w-5 h-5 text-blue-500 flex-shrink-0"
+                      className="h-5 w-5 flex-shrink-0 text-blue-500"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

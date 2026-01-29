@@ -17,15 +17,47 @@ export default meta;
 type Story = StoryObj<typeof WebChartReportViewer>;
 
 const sampleReports: SystemReport[] = [
-  { id: '1', name: 'Active Employees', description: 'List of all active employees' },
-  { id: '2', name: 'DOT Physicals Due', description: 'Employees with upcoming DOT physicals' },
-  { id: '3', name: 'Drug Screen History', description: 'Drug screening results by date range' },
-  { id: '4', name: 'Immunization Status', description: 'Employee immunization records' },
+  {
+    id: '1',
+    name: 'Active Employees',
+    description: 'List of all active employees',
+  },
+  {
+    id: '2',
+    name: 'DOT Physicals Due',
+    description: 'Employees with upcoming DOT physicals',
+  },
+  {
+    id: '3',
+    name: 'Drug Screen History',
+    description: 'Drug screening results by date range',
+  },
+  {
+    id: '4',
+    name: 'Immunization Status',
+    description: 'Employee immunization records',
+  },
   { id: '5', name: 'Injury Log', description: 'Workplace injury reports' },
-  { id: '6', name: 'Compliance Dashboard', description: 'Overall compliance metrics' },
-  { id: '7', name: 'Hearing Conservation', description: 'Hearing test results and trends' },
-  { id: '8', name: 'Respiratory Fit Test', description: 'Respiratory fit test records' },
-  { id: '9', name: 'Work Restrictions', description: 'Active work restrictions' },
+  {
+    id: '6',
+    name: 'Compliance Dashboard',
+    description: 'Overall compliance metrics',
+  },
+  {
+    id: '7',
+    name: 'Hearing Conservation',
+    description: 'Hearing test results and trends',
+  },
+  {
+    id: '8',
+    name: 'Respiratory Fit Test',
+    description: 'Respiratory fit test records',
+  },
+  {
+    id: '9',
+    name: 'Work Restrictions',
+    description: 'Active work restrictions',
+  },
 ];
 
 const sampleResult: ReportResult = {
@@ -51,7 +83,9 @@ const sampleResult: ReportResult = {
 };
 
 function DefaultWrapper() {
-  const [currentReport, setCurrentReport] = useState<SystemReport | undefined>();
+  const [currentReport, setCurrentReport] = useState<
+    SystemReport | undefined
+  >();
   const [reportResult, setReportResult] = useState<ReportResult | undefined>();
   const [loadingReport, setLoadingReport] = useState(false);
 
@@ -97,7 +131,8 @@ export const Loading: Story = {
 export const WithError: Story = {
   args: {
     reports: sampleReports,
-    error: 'Unable to connect to Enterprise Health. The server may be unavailable.',
+    error:
+      'Unable to connect to Enterprise Health. The server may be unavailable.',
   },
 };
 

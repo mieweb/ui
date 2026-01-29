@@ -70,7 +70,7 @@ function InteractiveDemo(
         {...props}
       />
       {selected && (
-        <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+        <div className="mt-4 rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Selected: <strong>{selected.name}</strong>
           </p>
@@ -115,11 +115,7 @@ export const NoSelection: Story = {
 export const Loading: Story = {
   render: () => (
     <div className="w-80">
-      <ProviderSelector
-        providers={[]}
-        isLoading
-        label="Provider"
-      />
+      <ProviderSelector providers={[]} isLoading label="Provider" />
     </div>
   ),
 };
@@ -188,16 +184,13 @@ export const WithLogos: Story = {
   render: () => <WithLogosWrapper />,
 };
 
-const manyProviders: ProviderOption[] = Array.from(
-  { length: 20 },
-  (_, i) => ({
-    id: String(i + 1),
-    name: `Provider ${i + 1}`,
-    code: `PRV${String(i + 1).padStart(3, '0')}`,
-    location: `City ${i + 1}, State`,
-    type: i % 3 === 0 ? 'Type A' : i % 3 === 1 ? 'Type B' : 'Type C',
-  })
-);
+const manyProviders: ProviderOption[] = Array.from({ length: 20 }, (_, i) => ({
+  id: String(i + 1),
+  name: `Provider ${i + 1}`,
+  code: `PRV${String(i + 1).padStart(3, '0')}`,
+  location: `City ${i + 1}, State`,
+  type: i % 3 === 0 ? 'Type A' : i % 3 === 1 ? 'Type B' : 'Type C',
+}));
 
 function ManyProvidersWrapper() {
   const [selected, setSelected] = useState<ProviderOption>(manyProviders[0]);
@@ -247,7 +240,9 @@ const inactiveProvidersList: ProviderOption[] = [
 ];
 
 function InactiveProvidersWrapper() {
-  const [selected, setSelected] = useState<ProviderOption>(inactiveProvidersList[0]);
+  const [selected, setSelected] = useState<ProviderOption>(
+    inactiveProvidersList[0]
+  );
 
   return (
     <div className="w-80">

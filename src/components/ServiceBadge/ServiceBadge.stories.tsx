@@ -142,9 +142,7 @@ function SelectedServicesWrapper() {
   return (
     <SelectedServicesBadges
       services={services}
-      onRemove={(slug) =>
-        setServices(services.filter((s) => s.slug !== slug))
-      }
+      onRemove={(slug) => setServices(services.filter((s) => s.slug !== slug))}
     />
   );
 }

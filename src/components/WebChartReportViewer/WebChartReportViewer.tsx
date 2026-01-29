@@ -136,7 +136,8 @@ export function WebChartReportViewer({
             <div className="flex-1">
               <span className="font-medium text-yellow-800">{error}</span>
               <p className="mt-1 text-sm text-yellow-700">
-                If this error persists, you can try reconnecting {webchartBrand.name}.
+                If this error persists, you can try reconnecting{' '}
+                {webchartBrand.name}.
               </p>
               {onReconnect && (
                 <button
@@ -158,7 +159,7 @@ export function WebChartReportViewer({
         <button
           type="button"
           onClick={onRefreshReports}
-          className="mb-4 rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+          className="bg-primary hover:bg-primary/90 mb-4 rounded-lg px-4 py-2 text-white"
           title={refreshReports}
         >
           <i className="fas fa-sync-alt mr-2" />
@@ -184,14 +185,18 @@ export function WebChartReportViewer({
               key={report.id}
               type="button"
               onClick={() => handleReportClick(report)}
-              className="w-full truncate rounded-lg border border-primary bg-white p-3 text-left text-primary hover:bg-primary hover:text-white"
-              title={report.description ? `${report.name}: ${report.description}` : report.name}
+              className="border-primary text-primary hover:bg-primary w-full truncate rounded-lg border bg-white p-3 text-left hover:text-white"
+              title={
+                report.description
+                  ? `${report.name}: ${report.description}`
+                  : report.name
+              }
             >
               {report.name}
             </button>
           ))
         ) : (
-          <div className="col-span-full py-8 text-center text-muted-foreground">
+          <div className="text-muted-foreground col-span-full py-8 text-center">
             {noReports}
           </div>
         )}
@@ -211,7 +216,7 @@ export function WebChartReportViewer({
           />
 
           {/* Offcanvas Panel */}
-          <div className="fixed bottom-0 left-0 right-0 flex h-3/4 flex-col rounded-t-xl bg-white shadow-xl">
+          <div className="fixed right-0 bottom-0 left-0 flex h-3/4 flex-col rounded-t-xl bg-white shadow-xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b p-4">
               <div className="flex items-center gap-3">
@@ -243,18 +248,26 @@ export function WebChartReportViewer({
               {/* Date Range */}
               {onDateRangeChange && dateRange && (
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-muted-foreground">{dateFrom}:</label>
+                  <label className="text-muted-foreground text-sm">
+                    {dateFrom}:
+                  </label>
                   <input
                     type="date"
                     value={formatDate(dateRange.start)}
-                    onChange={(e) => onDateRangeChange(e.target.value, dateRange.end)}
+                    onChange={(e) =>
+                      onDateRangeChange(e.target.value, dateRange.end)
+                    }
                     className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
                   />
-                  <label className="text-sm text-muted-foreground">{dateTo}:</label>
+                  <label className="text-muted-foreground text-sm">
+                    {dateTo}:
+                  </label>
                   <input
                     type="date"
                     value={formatDate(dateRange.end)}
-                    onChange={(e) => onDateRangeChange(dateRange.start, e.target.value)}
+                    onChange={(e) =>
+                      onDateRangeChange(dateRange.start, e.target.value)
+                    }
                     className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
                   />
                 </div>
@@ -264,7 +277,7 @@ export function WebChartReportViewer({
               <button
                 type="button"
                 onClick={onRefreshReport}
-                className="rounded-lg bg-primary px-3 py-1.5 text-white hover:bg-primary/90"
+                className="bg-primary hover:bg-primary/90 rounded-lg px-3 py-1.5 text-white"
                 title={refreshReport}
               >
                 <i className="fas fa-sync-alt" />
@@ -275,8 +288,10 @@ export function WebChartReportViewer({
             <div className="flex-1 overflow-auto p-4">
               {loadingReport ? (
                 <div className="flex h-full flex-col items-center justify-center">
-                  <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                  <span className="mt-4 text-muted-foreground">{loadingData}</span>
+                  <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+                  <span className="text-muted-foreground mt-4">
+                    {loadingData}
+                  </span>
                 </div>
               ) : reportResult?.error ? (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
@@ -295,7 +310,7 @@ export function WebChartReportViewer({
                   </pre>
                 )
               ) : (
-                <div className="py-8 text-center text-muted-foreground">
+                <div className="text-muted-foreground py-8 text-center">
                   No data available
                 </div>
               )}
@@ -402,7 +417,9 @@ export function ReportDatePicker({
           <input
             type="date"
             value={formatDate(endDate)}
-            onChange={(e) => onChange?.(startDate || new Date(), e.target.value)}
+            onChange={(e) =>
+              onChange?.(startDate || new Date(), e.target.value)
+            }
             className="rounded-lg border border-gray-300 px-3 py-2"
           />
         </>

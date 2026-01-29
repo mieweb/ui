@@ -133,17 +133,32 @@ export const InPaymentForm: Story = {
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="card-number" className="mb-1 block text-sm font-medium">Card Number</label>
+          <label
+            htmlFor="card-number"
+            className="mb-1 block text-sm font-medium"
+          >
+            Card Number
+          </label>
           <Input id="card-number" placeholder="4242 4242 4242 4242" />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="card-expiry" className="mb-1 block text-sm font-medium">Expiry</label>
+            <label
+              htmlFor="card-expiry"
+              className="mb-1 block text-sm font-medium"
+            >
+              Expiry
+            </label>
             <Input id="card-expiry" placeholder="MM / YY" />
           </div>
           <div>
-            <label htmlFor="card-cvc" className="mb-1 block text-sm font-medium">CVC</label>
+            <label
+              htmlFor="card-cvc"
+              className="mb-1 block text-sm font-medium"
+            >
+              CVC
+            </label>
             <Input id="card-cvc" placeholder="123" />
           </div>
         </div>

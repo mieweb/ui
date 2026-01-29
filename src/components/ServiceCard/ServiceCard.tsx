@@ -109,24 +109,18 @@ export function ServiceCard({
 
   return (
     <Card
-      className={`
-        h-full transition-all duration-200
-        ${onClick ? 'cursor-pointer hover:shadow-md' : ''}
-        ${selected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}
-        ${!currentlyOffered ? 'opacity-60' : ''}
-        ${className}
-      `.trim()}
+      className={`h-full transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-md' : ''} ${selected ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''} ${!currentlyOffered ? 'opacity-60' : ''} ${className} `.trim()}
       onClick={onClick ? handleCardClick : undefined}
     >
-      <div className="p-4 flex flex-col h-full">
+      <div className="flex h-full flex-col p-4">
         {/* Header */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-semibold text-gray-900 dark:text-white">
               {name}
             </h3>
             {category && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 {category}
               </p>
             )}
@@ -140,18 +134,18 @@ export function ServiceCard({
 
         {/* Description */}
         {description && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+          <p className="mb-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
             {description}
           </p>
         )}
 
         {/* Tags */}
         {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="mb-3 flex flex-wrap gap-1">
             {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400"
               >
                 {tag}
               </span>
@@ -168,8 +162,8 @@ export function ServiceCard({
         <div className="mt-auto">
           {/* Price */}
           {price !== undefined && (
-            <div className="flex items-baseline justify-between mb-2">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+            <div className="mb-2 flex items-baseline justify-between">
+              <span className="text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
                 Base Price
               </span>
               <span className="text-lg font-bold text-gray-900 dark:text-white">
@@ -180,8 +174,10 @@ export function ServiceCard({
 
           {/* Inventory */}
           {showInventory && (
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-gray-500 dark:text-gray-400">Inventory</span>
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="text-gray-500 dark:text-gray-400">
+                Inventory
+              </span>
               <span
                 className={`font-medium ${isLowInventory ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}
               >
@@ -193,9 +189,9 @@ export function ServiceCard({
 
           {/* Custom Pricing Indicator */}
           {(hasCustomAvailability || customPricingCount > 0) && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
+            <div className="mb-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               <svg
-                className="w-3.5 h-3.5"
+                className="h-3.5 w-3.5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -217,16 +213,16 @@ export function ServiceCard({
 
           {/* Actions */}
           {(onEdit || onManage || onDelete) && (
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-end gap-2 border-t border-gray-100 pt-2 dark:border-gray-800">
               {onDelete && (
                 <button
                   type="button"
                   onClick={handleDeleteClick}
-                  className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                  className="p-1.5 text-gray-400 transition-colors hover:text-red-500 dark:hover:text-red-400"
                   title="Delete service"
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -244,11 +240,11 @@ export function ServiceCard({
                 <button
                   type="button"
                   onClick={handleEditClick}
-                  className="p-1.5 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                  className="p-1.5 text-gray-400 transition-colors hover:text-blue-500 dark:hover:text-blue-400"
                   title="Edit service"
                 >
                   <svg
-                    className="w-4 h-4"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -266,7 +262,7 @@ export function ServiceCard({
                 <button
                   type="button"
                   onClick={handleManageClick}
-                  className="px-3 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                  className="rounded px-3 py-1 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
                 >
                   Manage
                 </button>
@@ -289,23 +285,19 @@ export interface AddServiceCardProps {
   className?: string;
 }
 
-export function AddServiceCard({ onClick, className = '' }: AddServiceCardProps) {
+export function AddServiceCard({
+  onClick,
+  className = '',
+}: AddServiceCardProps) {
   return (
     <Card
-      className={`
-        h-full border-2 border-dashed border-gray-300 dark:border-gray-600
-        bg-gray-50 dark:bg-gray-800/50
-        hover:border-blue-400 dark:hover:border-blue-500
-        hover:bg-gray-100 dark:hover:bg-gray-800
-        transition-all duration-200 cursor-pointer
-        ${className}
-      `.trim()}
+      className={`h-full cursor-pointer border-2 border-dashed border-gray-300 bg-gray-50 transition-all duration-200 hover:border-blue-400 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800/50 dark:hover:border-blue-500 dark:hover:bg-gray-800 ${className} `.trim()}
       onClick={onClick}
     >
-      <div className="p-4 flex flex-col items-center justify-center h-full min-h-[160px]">
-        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-3">
+      <div className="flex h-full min-h-[160px] flex-col items-center justify-center p-4">
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
           <svg
-            className="w-6 h-6 text-gray-500 dark:text-gray-400"
+            className="h-6 w-6 text-gray-500 dark:text-gray-400"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
