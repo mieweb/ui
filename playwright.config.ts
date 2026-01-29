@@ -20,6 +20,9 @@ export default defineConfig({
     ['list'],
     ['html', { outputFolder: 'playwright-report' }],
   ],
+  /* Snapshot path template - use platform-agnostic names for cross-platform CI */
+  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}{ext}',
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -30,6 +33,13 @@ export default defineConfig({
 
     /* Take screenshot on failure */
     screenshot: 'only-on-failure',
+  },
+
+  /* Configure screenshot comparison to allow for cross-platform rendering differences */
+  expect: {
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.05, // Allow 5% pixel difference for cross-platform tolerance
+    },
   },
 
   /* Configure projects for major browsers */
