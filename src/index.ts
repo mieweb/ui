@@ -78,6 +78,7 @@ export * from './components/RecordButton';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
+export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
 export * from './components/Select';
 export * from './components/ServiceAccordion';
