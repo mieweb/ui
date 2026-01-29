@@ -147,12 +147,27 @@ function RadioGroup({
         }
       >
         {label && (
-          <legend className="text-foreground text-sm font-medium">
+          <legend
+            className={cn(
+              'text-foreground font-medium',
+              size === 'sm' && 'text-xs',
+              size === 'md' && 'text-sm',
+              size === 'lg' && 'text-base'
+            )}
+          >
             {label}
           </legend>
         )}
         {description && (
-          <p id={descriptionId} className="text-muted-foreground text-xs">
+          <p
+            id={descriptionId}
+            className={cn(
+              'text-muted-foreground',
+              size === 'sm' && 'text-[10px]',
+              size === 'md' && 'text-xs',
+              size === 'lg' && 'text-sm'
+            )}
+          >
             {description}
           </p>
         )}
@@ -165,7 +180,16 @@ function RadioGroup({
           {children}
         </div>
         {error && (
-          <p id={errorId} className="text-destructive text-sm" role="alert">
+          <p
+            id={errorId}
+            className={cn(
+              'text-destructive',
+              size === 'sm' && 'text-xs',
+              size === 'md' && 'text-sm',
+              size === 'lg' && 'text-base'
+            )}
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -266,14 +290,25 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         <label
           htmlFor={radioId}
           className={cn(
-            'text-foreground cursor-pointer text-sm font-medium select-none',
+            'text-foreground cursor-pointer font-medium select-none',
+            size === 'sm' && 'text-xs',
+            size === 'md' && 'text-sm',
+            size === 'lg' && 'text-base',
             isDisabled && 'cursor-not-allowed opacity-50'
           )}
         >
           {label}
         </label>
         {description && (
-          <p id={descriptionId} className="text-muted-foreground text-xs">
+          <p
+            id={descriptionId}
+            className={cn(
+              'text-muted-foreground',
+              size === 'sm' && 'text-[10px]',
+              size === 'md' && 'text-xs',
+              size === 'lg' && 'text-sm'
+            )}
+          >
             {description}
           </p>
         )}
