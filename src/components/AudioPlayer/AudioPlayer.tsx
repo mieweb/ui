@@ -264,6 +264,7 @@ function ProgressBar({
 interface WaveformProps {
   src: string;
   isPlaying: boolean;
+  playbackRate?: number;
   onReady: (duration: number) => void;
   onTimeUpdate: (time: number) => void;
   onFinish: () => void;
@@ -276,6 +277,7 @@ interface WaveformProps {
 function Waveform({
   src,
   isPlaying,
+  playbackRate = 1,
   onReady,
   onTimeUpdate,
   onFinish,
@@ -362,6 +364,12 @@ function Waveform({
       wavesurferRef.current.pause();
     }
   }, [isPlaying, isLoaded]);
+
+  // Handle playback rate changes
+  React.useEffect(() => {
+    if (!wavesurferRef.current || !isLoaded) return;
+    wavesurferRef.current.setPlaybackRate(playbackRate);
+  }, [playbackRate, isLoaded]);
 
   return (
     <div
@@ -504,6 +512,13 @@ function AudioPlayer({
   const handlePlay = React.useCallback(() => {
     if (disabled) return;
 
+    // Waveform variant uses WaveSurfer for playback - just toggle state
+    if (variant === 'waveform') {
+      if (isLoading) return;
+      updateState(isPlaying ? 'paused' : 'playing');
+      return;
+    }
+
     // Lazy initialize audio on first play
     if (!audioInitialized && !isLoading) {
       const audio = initAudio();
@@ -542,6 +557,7 @@ function AudioPlayer({
     }
   }, [
     disabled,
+    variant,
     audioInitialized,
     isLoading,
     isPlaying,
@@ -690,6 +706,7 @@ function AudioPlayer({
       <Waveform
         src={src}
         isPlaying={isPlaying}
+        playbackRate={playbackRate}
         onReady={handleWaveformReady}
         onTimeUpdate={handleWaveformTimeUpdate}
         onFinish={handleWaveformFinish}
