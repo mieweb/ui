@@ -190,7 +190,8 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 function InputField({ label, icon, className, id, ...props }: InputFieldProps) {
-  const inputId = id || React.useId();
+  const generatedId = React.useId();
+  const inputId = id || generatedId;
 
   return (
     <div className="relative">
@@ -227,7 +228,8 @@ function SelectField({
   id,
   ...props
 }: SelectFieldProps) {
-  const selectId = id || React.useId();
+  const generatedId = React.useId();
+  const selectId = id || generatedId;
 
   return (
     <div>

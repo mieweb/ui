@@ -204,7 +204,8 @@ export function AddressForm({
   className,
   googlePlaces,
 }: AddressFormProps) {
-  const idPrefix = id || React.useId();
+  const generatedId = React.useId();
+  const idPrefix = id || generatedId;
   const autocompleteRef = React.useRef<google.maps.places.Autocomplete | null>(
     null
   );
@@ -308,6 +309,7 @@ export function AddressForm({
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only re-init when enabled flag changes; other deps are stable refs
   }, [googlePlaces?.enabled]);
 
   return (
