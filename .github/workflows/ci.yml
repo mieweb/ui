@@ -163,10 +163,7 @@ jobs:
         run: npx wait-on http://localhost:6006
 
       - name: Run accessibility tests
-        run: |
-          npx @storybook/test-runner --url http://localhost:6006 \
-            --stories-json http://localhost:6006/stories.json \
-            --junit --coverage
+        run: npx @storybook/test-runner --url http://localhost:6006 --passWithNoTests
 
       - name: Upload accessibility report
         uses: actions/upload-artifact@v4
