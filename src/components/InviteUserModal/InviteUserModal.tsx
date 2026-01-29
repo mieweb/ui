@@ -163,6 +163,7 @@ export function InviteUserModal({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="user@example.com"
             required
+            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
           />
 

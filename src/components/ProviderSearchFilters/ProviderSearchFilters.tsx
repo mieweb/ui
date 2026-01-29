@@ -445,6 +445,7 @@ export function ServiceMultiSelect({
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search services..."
               className={cn(inputVariants({ hasIcon: true }), 'pl-8')}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
             <SearchIcon className="absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400" />
