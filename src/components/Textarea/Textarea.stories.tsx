@@ -27,6 +27,27 @@ const meta: Meta<typeof Textarea> = {
     disabled: {
       control: 'boolean',
     },
+    hasError: {
+      control: 'boolean',
+    },
+    label: {
+      control: 'text',
+    },
+    placeholder: {
+      control: 'text',
+    },
+    helperText: {
+      control: 'text',
+    },
+    error: {
+      control: 'text',
+    },
+    maxLength: {
+      control: 'number',
+    },
+    rows: {
+      control: 'number',
+    },
   },
 };
 
@@ -34,11 +55,26 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => (
-    <div className="w-80">
-      <Textarea label="Description" placeholder="Enter a description..." />
-    </div>
-  ),
+  args: {
+    label: 'Description',
+    placeholder: 'Enter a description...',
+    size: 'md',
+    resize: 'vertical',
+    showCount: false,
+    autoResize: false,
+    disabled: false,
+    hasError: false,
+    helperText: '',
+    error: '',
+    maxLength: undefined,
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-80">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export const WithHelperText: Story = {
