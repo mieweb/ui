@@ -68,7 +68,10 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 // Extended args type that includes our custom iconName prop
-type QuickActionStoryArgs = Omit<React.ComponentProps<typeof QuickAction>, 'icon'> & {
+type QuickActionStoryArgs = Omit<
+  React.ComponentProps<typeof QuickAction>,
+  'icon'
+> & {
   iconName?: keyof typeof iconMap;
 };
 
@@ -128,7 +131,9 @@ const meta: Meta<typeof QuickAction> = {
   // Convert iconName to actual icon element in render
   render: ({ iconName = 'calendar', ...args }: QuickActionStoryArgs) => {
     const IconComponent = iconMap[iconName];
-    return <QuickAction {...args} icon={<IconComponent className="h-5 w-5" />} />;
+    return (
+      <QuickAction {...args} icon={<IconComponent className="h-5 w-5" />} />
+    );
   },
 };
 

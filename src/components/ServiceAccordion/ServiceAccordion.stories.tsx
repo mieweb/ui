@@ -111,18 +111,20 @@ export const AllVariants: Story = {
 };
 
 // With controlled expanded state
+function ControlledExpandedWrapper() {
+  const [expanded, setExpanded] = React.useState(['Drug & Alcohol Testing']);
+  return (
+    <ServiceAccordion
+      categories={mockCategories}
+      expandedCategories={expanded}
+      onExpandedChange={setExpanded}
+      onServiceClick={(service) => console.log('Clicked:', service.slug)}
+    />
+  );
+}
+
 export const ControlledExpanded: Story = {
-  render: () => {
-    const [expanded, setExpanded] = React.useState(['Drug & Alcohol Testing']);
-    return (
-      <ServiceAccordion
-        categories={mockCategories}
-        expandedCategories={expanded}
-        onExpandedChange={setExpanded}
-        onServiceClick={(service) => console.log('Clicked:', service.slug)}
-      />
-    );
-  },
+  render: () => <ControlledExpandedWrapper />,
 };
 
 // Sub-component: Tag Cloud

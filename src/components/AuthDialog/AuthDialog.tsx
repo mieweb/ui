@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -155,12 +154,14 @@ export function AuthDialog({
   };
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-dialog-title"
       className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm duration-200"
       onClick={(e) => e.target === e.currentTarget && onClose()}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
       <div
         className={cn(
@@ -315,8 +316,8 @@ export function AuthDialog({
             <div className="py-4 text-center">
               <MailIcon className="text-primary-600 mx-auto mb-4 h-12 w-12" />
               <p className="mb-4 text-gray-600 dark:text-gray-400">
-                We've sent a verification email to your inbox. Please click the
-                link to verify your account.
+                We&apos;ve sent a verification email to your inbox. Please click
+                the link to verify your account.
               </p>
               <button
                 type="button"
@@ -361,7 +362,7 @@ export function AuthDialog({
             <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
               {mode === 'login' ? (
                 <>
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <button
                     type="button"
                     onClick={() => setMode('signup')}
@@ -664,7 +665,7 @@ function ForgotPasswordForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <p className="text-sm text-gray-600 dark:text-gray-400">
-        Enter your email address and we'll send you a link to reset your
+        Enter your email address and we&apos;ll send you a link to reset your
         password.
       </p>
       <div>

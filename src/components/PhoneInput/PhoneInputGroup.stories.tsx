@@ -105,22 +105,24 @@ export const WithValidation: Story = {
 };
 
 // Disabled state
-export const Disabled: Story = {
-  render: () => {
-    const [phones] = useState<PhoneEntry[]>([
-      { number: '(555) 123-4567', type: 'cell' },
-      { number: '(555) 987-6543', type: 'work' },
-    ]);
+function DisabledWrapper() {
+  const [phones] = useState<PhoneEntry[]>([
+    { number: '(555) 123-4567', type: 'cell' },
+    { number: '(555) 987-6543', type: 'work' },
+  ]);
 
-    return (
-      <PhoneInputGroup
-        value={phones}
-        onChange={() => {}}
-        disabled
-        label="Phone Numbers"
-      />
-    );
-  },
+  return (
+    <PhoneInputGroup
+      value={phones}
+      onChange={() => {}}
+      disabled
+      label="Phone Numbers"
+    />
+  );
+}
+
+export const Disabled: Story = {
+  render: () => <DisabledWrapper />,
   parameters: {
     docs: {
       description: {

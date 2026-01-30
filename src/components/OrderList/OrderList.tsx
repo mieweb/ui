@@ -108,7 +108,7 @@ export function OrderList<T>({
     <div className={cn('flex flex-col', className)}>
       {/* Header with tabs and actions */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 pb-4">
+        <div className="flex flex-col gap-4 px-4 pb-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs */}
           <div className="flex gap-1 overflow-x-auto">
             {tabs.map((tab) => {
@@ -118,17 +118,17 @@ export function OrderList<T>({
                   key={tab.id}
                   onClick={() => onTabChange?.(tab.id)}
                   className={cn(
-                    'px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors',
+                    'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
                     activeTab === tab.id
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
                   )}
                 >
                   {tab.label}
                   {count !== undefined && (
                     <span
                       className={cn(
-                        'ml-2 px-2 py-0.5 text-xs rounded-full',
+                        'ml-2 rounded-full px-2 py-0.5 text-xs',
                         activeTab === tab.id
                           ? 'bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200'
                           : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
@@ -147,7 +147,7 @@ export function OrderList<T>({
             {showSearch && (
               <div className="relative">
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -164,7 +164,7 @@ export function OrderList<T>({
                   placeholder={searchPlaceholder}
                   value={searchValue}
                   onChange={(e) => onSearchChange?.(e.target.value)}
-                  className="pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
                 />
               </div>
             )}
@@ -178,7 +178,7 @@ export function OrderList<T>({
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <svg
-              className="animate-spin h-8 w-8 text-blue-500"
+              className="h-8 w-8 animate-spin text-blue-500"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -198,10 +198,10 @@ export function OrderList<T>({
             </svg>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+          <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
             {emptyIcon || (
               <svg
-                className="w-12 h-12 text-gray-400 mb-4"
+                className="mb-4 h-12 w-12 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -232,7 +232,11 @@ export function OrderList<T>({
 export const defaultOrderTabs: OrderListTab[] = [
   { id: 'all', label: 'All' },
   { id: 'pending', label: 'Pending', statuses: ['pending'] },
-  { id: 'active', label: 'Active', statuses: ['active', 'scheduled', 'in-progress'] },
+  {
+    id: 'active',
+    label: 'Active',
+    statuses: ['active', 'scheduled', 'in-progress'],
+  },
   { id: 'completed', label: 'Completed', statuses: ['completed'] },
   { id: 'invoiced', label: 'Invoiced', statuses: ['invoiced'] },
   { id: 'rejected', label: 'Rejected', statuses: ['rejected', 'cancelled'] },

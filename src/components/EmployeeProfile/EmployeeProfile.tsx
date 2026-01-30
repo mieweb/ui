@@ -12,7 +12,6 @@ import {
   Check,
   X,
   Clock,
-  DollarSign,
   Edit2,
 } from 'lucide-react';
 

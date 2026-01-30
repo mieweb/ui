@@ -4,7 +4,6 @@ import * as React from 'react';
 import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
-import { Select } from '../Select/Select';
 import { Switch } from '../Switch/Switch';
 
 export interface EmployerServiceModalProps {
@@ -106,7 +105,7 @@ export function EmployerServiceModal({
         <div className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
               <p className="text-sm text-red-600 dark:text-red-400">
                 {errorMessage}
               </p>
@@ -115,7 +114,7 @@ export function EmployerServiceModal({
 
           {/* Service info */}
           {service && (
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
               <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                 {service.name}
               </p>
@@ -130,7 +129,7 @@ export function EmployerServiceModal({
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Pricing
             </p>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-900 dark:text-white">
@@ -153,19 +152,23 @@ export function EmployerServiceModal({
             </div>
 
             {!config.useBasePrice && (
-              <div className="ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <div className="ml-4 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
+                <label
+                  htmlFor="custom-price"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Custom Price
                 </label>
                 <div className="relative w-40">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
                     $
                   </span>
                   <input
+                    id="custom-price"
                     type="number"
                     min="0"
                     step="0.01"
-                    className="w-full pl-7 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     value={config.customPrice ?? ''}
                     onChange={(e) =>
                       setConfig((prev) => ({
@@ -255,7 +258,7 @@ export function EmployerServiceModal({
             </div>
 
             {config.notifyOnOrder && (
-              <div className="ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+              <div className="ml-4 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
                 <Input
                   label="Notification Email"
                   type="email"
@@ -274,11 +277,15 @@ export function EmployerServiceModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="employer-service-notes"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Internal Notes
             </label>
             <textarea
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              id="employer-service-notes"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               rows={3}
               value={config.notes || ''}
               onChange={(e) =>
@@ -302,7 +309,7 @@ export function EmployerServiceModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

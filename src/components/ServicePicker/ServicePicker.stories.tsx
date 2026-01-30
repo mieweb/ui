@@ -207,19 +207,21 @@ export const NoSearch: Story = {
 };
 
 // Loading state
+function LoadingWrapper() {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  return (
+    <ServicePicker
+      groups={[]}
+      selectedIds={selectedIds}
+      onSelectionChange={setSelectedIds}
+      loading
+      fullWidth
+    />
+  );
+}
+
 export const Loading: Story = {
-  render: () => {
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    return (
-      <ServicePicker
-        groups={[]}
-        selectedIds={selectedIds}
-        onSelectionChange={setSelectedIds}
-        loading
-        fullWidth
-      />
-    );
-  },
+  render: () => <LoadingWrapper />,
   parameters: {
     docs: {
       description: { story: 'Service picker in loading state.' },
@@ -228,19 +230,21 @@ export const Loading: Story = {
 };
 
 // Error state
+function ErrorWrapper() {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  return (
+    <ServicePicker
+      groups={[]}
+      selectedIds={selectedIds}
+      onSelectionChange={setSelectedIds}
+      error="Failed to load services. Please try again."
+      fullWidth
+    />
+  );
+}
+
 export const Error: Story = {
-  render: () => {
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    return (
-      <ServicePicker
-        groups={[]}
-        selectedIds={selectedIds}
-        onSelectionChange={setSelectedIds}
-        error="Failed to load services. Please try again."
-        fullWidth
-      />
-    );
-  },
+  render: () => <ErrorWrapper />,
   parameters: {
     docs: {
       description: { story: 'Service picker showing an error state.' },
@@ -249,19 +253,21 @@ export const Error: Story = {
 };
 
 // Empty state
+function EmptyWrapper() {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  return (
+    <ServicePicker
+      groups={[]}
+      selectedIds={selectedIds}
+      onSelectionChange={setSelectedIds}
+      emptyMessage="No services available for this location."
+      fullWidth
+    />
+  );
+}
+
 export const Empty: Story = {
-  render: () => {
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    return (
-      <ServicePicker
-        groups={[]}
-        selectedIds={selectedIds}
-        onSelectionChange={setSelectedIds}
-        emptyMessage="No services available for this location."
-        fullWidth
-      />
-    );
-  },
+  render: () => <EmptyWrapper />,
   parameters: {
     docs: {
       description: { story: 'Service picker with no available services.' },

@@ -86,7 +86,7 @@ export const Default: Story = {
   args: {
     provider: sampleProvider,
     variant: 'compact',
-    onClick: (provider) => alert(`Clicked ${provider.name}`),
+    onClick: (provider) => window.alert(`Clicked ${provider.name}`),
   },
   decorators: [
     (Story) => (
@@ -151,7 +151,7 @@ export const Grid: StoryObj<typeof ProviderCardGrid> = {
       <ProviderCardGrid
         providers={sampleProviders}
         variant="compact"
-        onProviderClick={(provider) => alert(`Clicked ${provider.name}`)}
+        onProviderClick={(provider) => window.alert(`Clicked ${provider.name}`)}
       />
     </div>
   ),

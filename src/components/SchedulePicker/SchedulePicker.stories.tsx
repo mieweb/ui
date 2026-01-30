@@ -45,7 +45,12 @@ const sampleTimes = [
 function SchedulePickerWithState(
   props: Omit<
     React.ComponentProps<typeof SchedulePicker>,
-    'dates' | 'times' | 'selectedDate' | 'selectedTime' | 'onDateSelect' | 'onTimeSelect'
+    | 'dates'
+    | 'times'
+    | 'selectedDate'
+    | 'selectedTime'
+    | 'onDateSelect'
+    | 'onTimeSelect'
   > & {
     dateCount?: number;
     times?: string[];
@@ -88,7 +93,12 @@ function SchedulePickerWithState(
 // Extended args type
 type SchedulePickerStoryArgs = Omit<
   React.ComponentProps<typeof SchedulePicker>,
-  'dates' | 'times' | 'selectedDate' | 'selectedTime' | 'onDateSelect' | 'onTimeSelect'
+  | 'dates'
+  | 'times'
+  | 'selectedDate'
+  | 'selectedTime'
+  | 'onDateSelect'
+  | 'onTimeSelect'
 > & {
   dateCount?: number;
 };
@@ -126,7 +136,9 @@ const meta = {
     onDateSelect: { table: { disable: true } },
     onTimeSelect: { table: { disable: true } },
   },
-  render: (args: SchedulePickerStoryArgs) => <SchedulePickerWithState {...args} />,
+  render: (args: SchedulePickerStoryArgs) => (
+    <SchedulePickerWithState {...args} />
+  ),
 } satisfies Meta<typeof SchedulePicker>;
 
 export default meta;

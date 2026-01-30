@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { OrderList, OrderStatus, OrderListTab, defaultOrderTabs } from './OrderList';
+import {
+  OrderList,
+  OrderStatus,
+  OrderListTab,
+  defaultOrderTabs,
+} from './OrderList';
 import { Button } from '../Button/Button';
 
 const meta: Meta<typeof OrderList> = {
@@ -88,26 +93,31 @@ const sampleOrders: SampleOrder[] = [
 // Simple order item renderer
 function OrderItem({ order }: { order: SampleOrder }) {
   const statusColors: Record<OrderStatus, string> = {
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+    pending:
+      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
     active: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    scheduled: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
-    'in-progress': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
-    completed: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+    scheduled:
+      'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
+    'in-progress':
+      'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
+    completed:
+      'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
     rejected: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-    invoiced: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
+    invoiced:
+      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
     cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   };
 
   return (
-    <div className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+    <div className="cursor-pointer p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="mb-1 flex items-center gap-2">
             <span className="font-medium text-gray-900 dark:text-white">
               {order.orderNumber}
             </span>
             <span
-              className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[order.status]}`}
+              className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[order.status]}`}
             >
               {order.status.replace('-', ' ')}
             </span>
@@ -115,7 +125,7 @@ function OrderItem({ order }: { order: SampleOrder }) {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {order.employeeName}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
             {order.services.join(' • ')}
           </p>
         </div>
@@ -151,7 +161,7 @@ function InteractiveDemo({
     : orders;
 
   return (
-    <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
       <OrderList
         orders={filteredBySearch}
         activeTab={activeTab}
@@ -166,7 +176,7 @@ function InteractiveDemo({
           showActions ? (
             <Button size="sm">
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -208,81 +218,95 @@ export const SimpleTabs: Story = {
     <InteractiveDemo
       tabs={[
         { id: 'all', label: 'All Orders' },
-        { id: 'active', label: 'Active', statuses: ['active', 'scheduled', 'in-progress'] },
-        { id: 'closed', label: 'Closed', statuses: ['completed', 'invoiced', 'rejected', 'cancelled'] },
+        {
+          id: 'active',
+          label: 'Active',
+          statuses: ['active', 'scheduled', 'in-progress'],
+        },
+        {
+          id: 'closed',
+          label: 'Closed',
+          statuses: ['completed', 'invoiced', 'rejected', 'cancelled'],
+        },
       ]}
     />
   ),
 };
 
-export const Loading: Story = {
-  render: () => {
-    const [activeTab, setActiveTab] = useState('all');
+function LoadingWrapper() {
+  const [activeTab, setActiveTab] = useState('all');
 
-    return (
-      <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-        <OrderList<SampleOrder>
-          orders={[]}
-          activeTab={activeTab}
-          tabs={defaultOrderTabs}
-          onTabChange={setActiveTab}
-          renderOrder={() => null}
-          isLoading
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <OrderList<SampleOrder>
+        orders={[]}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={() => null}
+        isLoading
+      />
+    </div>
+  );
+}
+
+export const Loading: Story = {
+  render: () => <LoadingWrapper />,
 };
+
+function EmptyWrapper() {
+  const [activeTab, setActiveTab] = useState('all');
+
+  return (
+    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <OrderList<SampleOrder>
+        orders={[]}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={() => null}
+        emptyMessage="No orders yet. Create your first order to get started."
+      />
+    </div>
+  );
+}
 
 export const Empty: Story = {
-  render: () => {
-    const [activeTab, setActiveTab] = useState('all');
-
-    return (
-      <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-        <OrderList<SampleOrder>
-          orders={[]}
-          activeTab={activeTab}
-          tabs={defaultOrderTabs}
-          onTabChange={setActiveTab}
-          renderOrder={() => null}
-          emptyMessage="No orders yet. Create your first order to get started."
-        />
-      </div>
-    );
-  },
+  render: () => <EmptyWrapper />,
 };
 
-export const CustomEmptyIcon: Story = {
-  render: () => {
-    const [activeTab, setActiveTab] = useState('all');
+function CustomEmptyIconWrapper() {
+  const [activeTab, setActiveTab] = useState('all');
 
-    return (
-      <div className="h-[500px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-        <OrderList<SampleOrder>
-          orders={[]}
-          activeTab={activeTab}
-          tabs={defaultOrderTabs}
-          onTabChange={setActiveTab}
-          renderOrder={() => null}
-          emptyMessage="All caught up! No pending orders."
-          emptyIcon={
-            <svg
-              className="w-12 h-12 text-green-400 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          }
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <OrderList<SampleOrder>
+        orders={[]}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={() => null}
+        emptyMessage="All caught up! No pending orders."
+        emptyIcon={
+          <svg
+            className="mb-4 h-12 w-12 text-green-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        }
+      />
+    </div>
+  );
+}
+
+export const CustomEmptyIcon: Story = {
+  render: () => <CustomEmptyIconWrapper />,
 };

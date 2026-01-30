@@ -90,26 +90,66 @@ export function PaymentHistoryTable({
     switch (method) {
       case 'credit_card':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+            />
           </svg>
         );
       case 'ach':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"
+            />
           </svg>
         );
       case 'check':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
         );
       default:
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         );
     }
@@ -121,7 +161,7 @@ export function PaymentHistoryTable({
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+            className="h-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
           />
         ))}
       </div>
@@ -131,10 +171,10 @@ export function PaymentHistoryTable({
   if (payments.length === 0) {
     return (
       <div
-        className={`text-center py-12 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg ${className}`}
+        className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
-          className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3"
+          className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -153,31 +193,31 @@ export function PaymentHistoryTable({
 
   return (
     <div
-      className={`border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden ${className}`}
+      className={`overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}
     >
       <table className="w-full">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
               Date
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
+            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400">
               Invoice
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
+            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
               Employer
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
+            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase lg:table-cell dark:text-gray-400">
               Method
             </th>
-            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
               Amount
             </th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
               Status
             </th>
             {onRefund && (
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Action
               </th>
             )}
@@ -188,27 +228,24 @@ export function PaymentHistoryTable({
             <tr
               key={payment.id}
               onClick={() => onPaymentClick?.(payment)}
-              className={`
-                bg-white dark:bg-gray-900
-                ${onPaymentClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''}
-              `}
+              className={`bg-white dark:bg-gray-900 ${onPaymentClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
             >
               <td className="px-4 py-3">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatDate(payment.date)}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+                <p className="text-xs text-gray-500 sm:hidden dark:text-gray-400">
                   {payment.invoiceNumber}
                 </p>
               </td>
-              <td className="px-4 py-3 hidden sm:table-cell">
+              <td className="hidden px-4 py-3 sm:table-cell">
                 {payment.invoiceId && onInvoiceClick ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onInvoiceClick(payment.invoiceId!);
                     }}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-sm text-blue-600 hover:underline dark:text-blue-400"
                   >
                     {payment.invoiceNumber}
                   </button>
@@ -218,12 +255,12 @@ export function PaymentHistoryTable({
                   </p>
                 )}
               </td>
-              <td className="px-4 py-3 hidden md:table-cell">
-                <p className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]">
+              <td className="hidden px-4 py-3 md:table-cell">
+                <p className="max-w-[150px] truncate text-sm text-gray-700 dark:text-gray-300">
                   {payment.employerName}
                 </p>
               </td>
-              <td className="px-4 py-3 hidden lg:table-cell">
+              <td className="hidden px-4 py-3 lg:table-cell">
                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                   {getMethodIcon(payment.method)}
                   <span className="text-sm">
@@ -234,7 +271,7 @@ export function PaymentHistoryTable({
               </td>
               <td className="px-4 py-3 text-right">
                 <p
-                  className={`font-medium ${payment.status === 'refunded' ? 'text-gray-500 dark:text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}
+                  className={`font-medium ${payment.status === 'refunded' ? 'text-gray-500 line-through dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}
                 >
                   {formatCurrency(payment.amount)}
                 </p>

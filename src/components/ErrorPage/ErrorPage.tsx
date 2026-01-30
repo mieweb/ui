@@ -227,7 +227,7 @@ export function ErrorPage({
 // NotFoundPage Component
 // =============================================================================
 
-export interface NotFoundPageProps extends Omit<ErrorPageProps, 'type'> {}
+export type NotFoundPageProps = Omit<ErrorPageProps, 'type'>;
 
 /**
  * A pre-configured 404 Not Found page.

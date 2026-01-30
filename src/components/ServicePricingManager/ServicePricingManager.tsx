@@ -5,7 +5,13 @@ import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 import { Input } from '../Input/Input';
-import { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 
 export interface ServicePrice {
   id: string;
@@ -22,11 +28,21 @@ export interface ServicePricingManagerProps {
   /** List of service prices */
   services: ServicePrice[];
   /** Handler for updating a service price */
-  onUpdatePrice?: (serviceId: string, newPrice: number, priceType: 'base' | 'employer') => void;
+  onUpdatePrice?: (
+    serviceId: string,
+    newPrice: number,
+    priceType: 'base' | 'employer'
+  ) => void;
   /** Handler for toggling service status */
   onToggleStatus?: (serviceId: string, isActive: boolean) => void;
   /** Handler for bulk update */
-  onBulkUpdate?: (updates: { serviceId: string; price: number; priceType: 'base' | 'employer' }[]) => void;
+  onBulkUpdate?: (
+    updates: {
+      serviceId: string;
+      price: number;
+      priceType: 'base' | 'employer';
+    }[]
+  ) => void;
   /** Whether changes are being saved */
   isSaving?: boolean;
   /** Whether data is loading */
@@ -47,29 +63,28 @@ export function ServicePricingManager({
   onBulkUpdate,
   isSaving = false,
   isLoading = false,
-  categories = [],
+  categories: _categories = [],
   className = '',
 }: ServicePricingManagerProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
-  const [editingService, setEditingService] = React.useState<ServicePrice | null>(null);
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
+    null
+  );
+  const [editingService, setEditingService] =
+    React.useState<ServicePrice | null>(null);
   const [editPrice, setEditPrice] = React.useState<string>('');
   const [editEmployerPrice, setEditEmployerPrice] = React.useState<string>('');
   const [showBulkModal, setShowBulkModal] = React.useState(false);
   const [bulkAdjustment, setBulkAdjustment] = React.useState<string>('');
-  const [bulkAdjustmentType, setBulkAdjustmentType] = React.useState<'percent' | 'fixed'>('percent');
+  const [bulkAdjustmentType, setBulkAdjustmentType] = React.useState<
+    'percent' | 'fixed'
+  >('percent');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
-  };
-
-  const formatDate = (date?: Date | string) => {
-    if (!date) return 'Never';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString();
   };
 
   // Filter services
@@ -85,7 +100,9 @@ export function ServicePricingManager({
   // Unique categories from services
   const uniqueCategories = Array.from(
     new Set(
-      services.map((s) => s.category).filter((c): c is string => c !== undefined)
+      services
+        .map((s) => s.category)
+        .filter((c): c is string => c !== undefined)
     )
   );
 
@@ -104,7 +121,10 @@ export function ServicePricingManager({
     }
 
     const newEmployerPrice = parseFloat(editEmployerPrice);
-    if (!isNaN(newEmployerPrice) && newEmployerPrice !== editingService.employerPrice) {
+    if (
+      !isNaN(newEmployerPrice) &&
+      newEmployerPrice !== editingService.employerPrice
+    ) {
       onUpdatePrice(editingService.id, newEmployerPrice, 'employer');
     }
 
@@ -138,13 +158,13 @@ export function ServicePricingManager({
 
   if (isLoading) {
     return (
-      <div className={`space-y-4 animate-pulse ${className}`}>
-        <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2" />
-        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      <div className={`animate-pulse space-y-4 ${className}`}>
+        <div className="h-12 w-1/2 rounded-lg bg-gray-200 dark:bg-gray-700" />
+        <div className="h-10 rounded-lg bg-gray-200 dark:bg-gray-700" />
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"
+            className="h-16 rounded-lg bg-gray-200 dark:bg-gray-700"
           />
         ))}
       </div>
@@ -154,7 +174,7 @@ export function ServicePricingManager({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Service Pricing
@@ -173,7 +193,7 @@ export function ServicePricingManager({
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="flex-1">
               <Input
                 placeholder="Search services..."
@@ -193,7 +213,9 @@ export function ServicePricingManager({
                 {uniqueCategories.map((category) => (
                   <Button
                     key={category}
-                    variant={selectedCategory === category ? 'primary' : 'ghost'}
+                    variant={
+                      selectedCategory === category ? 'primary' : 'ghost'
+                    }
                     size="sm"
                     onClick={() => setSelectedCategory(category)}
                   >
@@ -215,13 +237,13 @@ export function ServicePricingManager({
         </CardHeader>
         <CardContent>
           {filteredServices.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            <p className="py-8 text-center text-gray-500 dark:text-gray-400">
               No services found
             </p>
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {/* Desktop header */}
-              <div className="hidden md:grid md:grid-cols-6 gap-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+              <div className="hidden gap-4 py-3 text-xs font-medium text-gray-500 uppercase md:grid md:grid-cols-6 dark:text-gray-400">
                 <div className="col-span-2">Service</div>
                 <div className="text-right">Base Price</div>
                 <div className="text-right">Employer Price</div>
@@ -232,7 +254,7 @@ export function ServicePricingManager({
               {filteredServices.map((service) => (
                 <div
                   key={service.id}
-                  className="py-4 md:grid md:grid-cols-6 gap-4 items-center"
+                  className="items-center gap-4 py-4 md:grid md:grid-cols-6"
                 >
                   {/* Service info */}
                   <div className="col-span-2 mb-2 md:mb-0">
@@ -240,7 +262,9 @@ export function ServicePricingManager({
                       {service.serviceName}
                     </p>
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                      {service.serviceCode && <span>{service.serviceCode}</span>}
+                      {service.serviceCode && (
+                        <span>{service.serviceCode}</span>
+                      )}
                       {service.category && (
                         <Badge variant="secondary">{service.category}</Badge>
                       )}
@@ -248,19 +272,21 @@ export function ServicePricingManager({
                   </div>
 
                   {/* Base price */}
-                  <div className="flex md:block justify-between items-center mb-2 md:mb-0">
-                    <span className="md:hidden text-sm text-gray-500">Base:</span>
-                    <p className="font-semibold text-gray-900 dark:text-white text-right">
+                  <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
+                    <span className="text-sm text-gray-500 md:hidden">
+                      Base:
+                    </span>
+                    <p className="text-right font-semibold text-gray-900 dark:text-white">
                       {formatCurrency(service.basePrice)}
                     </p>
                   </div>
 
                   {/* Employer price */}
-                  <div className="flex md:block justify-between items-center mb-2 md:mb-0">
-                    <span className="md:hidden text-sm text-gray-500">
+                  <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
+                    <span className="text-sm text-gray-500 md:hidden">
                       Employer:
                     </span>
-                    <p className="text-gray-600 dark:text-gray-300 text-right">
+                    <p className="text-right text-gray-600 dark:text-gray-300">
                       {service.employerPrice
                         ? formatCurrency(service.employerPrice)
                         : '—'}
@@ -268,8 +294,8 @@ export function ServicePricingManager({
                   </div>
 
                   {/* Status */}
-                  <div className="flex md:justify-center items-center mb-2 md:mb-0">
-                    <span className="md:hidden text-sm text-gray-500 mr-2">
+                  <div className="mb-2 flex items-center md:mb-0 md:justify-center">
+                    <span className="mr-2 text-sm text-gray-500 md:hidden">
                       Status:
                     </span>
                     <Badge variant={service.isActive ? 'success' : 'secondary'}>
@@ -308,7 +334,10 @@ export function ServicePricingManager({
       </Card>
 
       {/* Edit Price Modal */}
-      <Modal open={!!editingService} onOpenChange={() => setEditingService(null)}>
+      <Modal
+        open={!!editingService}
+        onOpenChange={() => setEditingService(null)}
+      >
         <ModalHeader>
           <ModalTitle>Edit Service Price</ModalTitle>
         </ModalHeader>
@@ -317,10 +346,14 @@ export function ServicePricingManager({
             {editingService?.serviceName}
           </p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="edit-base-price"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Base Price
             </label>
             <Input
+              id="edit-base-price"
               type="number"
               step="0.01"
               min="0"
@@ -329,10 +362,14 @@ export function ServicePricingManager({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="edit-employer-price"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Employer Price (optional)
             </label>
             <Input
+              id="edit-employer-price"
               type="number"
               step="0.01"
               min="0"
@@ -378,7 +415,7 @@ export function ServicePricingManager({
             </Button>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {bulkAdjustmentType === 'percent'
                 ? 'Percentage Change (%)'
                 : 'Amount Change ($)'}
@@ -388,9 +425,11 @@ export function ServicePricingManager({
               step={bulkAdjustmentType === 'percent' ? '1' : '0.01'}
               value={bulkAdjustment}
               onChange={(e) => setBulkAdjustment(e.target.value)}
-              placeholder={bulkAdjustmentType === 'percent' ? 'e.g., 5' : 'e.g., 10.00'}
+              placeholder={
+                bulkAdjustmentType === 'percent' ? 'e.g., 5' : 'e.g., 10.00'
+              }
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Use negative values to decrease prices
             </p>
           </div>

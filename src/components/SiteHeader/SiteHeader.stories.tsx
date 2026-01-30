@@ -51,8 +51,8 @@ export const Default: Story = {
   args: {
     logo: { name: 'BlueHive' },
     links: defaultLinks,
-    onLogin: () => alert('Login clicked'),
-    onSignUp: () => alert('Sign up clicked'),
+    onLogin: () => window.alert('Login clicked'),
+    onSignUp: () => window.alert('Sign up clicked'),
   },
 };
 
@@ -62,8 +62,8 @@ export const LoggedIn: Story = {
     logo: { name: 'BlueHive' },
     links: defaultLinks,
     user: sampleUser,
-    onLogout: () => alert('Logout clicked'),
-    onProfile: () => alert('Profile clicked'),
+    onLogout: () => window.alert('Logout clicked'),
+    onProfile: () => window.alert('Profile clicked'),
   },
 };
 

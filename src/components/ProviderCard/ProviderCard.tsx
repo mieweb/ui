@@ -2,7 +2,6 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge';
-import { Button } from '../Button';
 import { Tooltip } from '../Tooltip';
 
 // ============================================================================

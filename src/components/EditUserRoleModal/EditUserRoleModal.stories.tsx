@@ -19,8 +19,14 @@ const sampleRoles: UserRole[] = [
   {
     id: 'admin',
     name: 'Administrator',
-    description: 'Full access to all features and settings. Can manage users and system configuration.',
-    permissions: ['manage_users', 'manage_settings', 'view_reports', 'manage_billing'],
+    description:
+      'Full access to all features and settings. Can manage users and system configuration.',
+    permissions: [
+      'manage_users',
+      'manage_settings',
+      'view_reports',
+      'manage_billing',
+    ],
   },
   {
     id: 'manager',
@@ -50,7 +56,9 @@ const sampleUser = {
 };
 
 // Interactive wrapper
-function InteractiveDemo(props: Partial<React.ComponentProps<typeof EditUserRoleModal>>) {
+function InteractiveDemo(
+  props: Partial<React.ComponentProps<typeof EditUserRoleModal>>
+) {
   const [open, setOpen] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -108,42 +116,48 @@ export const NewUser: Story = {
   ),
 };
 
-export const WithError: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
+// Wrapper for WithError story
+function WithErrorWrapper() {
+  const [open, setOpen] = useState(true);
 
-    return (
-      <>
-        <Button onClick={() => setOpen(true)}>Show Error State</Button>
-        <EditUserRoleModal
-          open={open}
-          onOpenChange={setOpen}
-          user={sampleUser}
-          roles={sampleRoles}
-          errorMessage="Unable to change role. User has pending tasks that must be reassigned first."
-        />
-      </>
-    );
-  },
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Show Error State</Button>
+      <EditUserRoleModal
+        open={open}
+        onOpenChange={setOpen}
+        user={sampleUser}
+        roles={sampleRoles}
+        errorMessage="Unable to change role. User has pending tasks that must be reassigned first."
+      />
+    </>
+  );
+}
+
+// Wrapper for Submitting story
+function SubmittingWrapper() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Show Submitting State</Button>
+      <EditUserRoleModal
+        open={open}
+        onOpenChange={setOpen}
+        user={sampleUser}
+        roles={sampleRoles}
+        isSubmitting={true}
+      />
+    </>
+  );
+}
+
+export const WithError: Story = {
+  render: () => <WithErrorWrapper />,
 };
 
 export const Submitting: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
-
-    return (
-      <>
-        <Button onClick={() => setOpen(true)}>Show Submitting State</Button>
-        <EditUserRoleModal
-          open={open}
-          onOpenChange={setOpen}
-          user={sampleUser}
-          roles={sampleRoles}
-          isSubmitting={true}
-        />
-      </>
-    );
-  },
+  render: () => <SubmittingWrapper />,
 };
 
 export const SimpleRoles: Story = {

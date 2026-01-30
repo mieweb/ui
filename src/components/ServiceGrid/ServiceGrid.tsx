@@ -2,7 +2,11 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import { ServiceCard, AddServiceCard, ServiceCardProps } from '../ServiceCard/ServiceCard';
+import {
+  ServiceCard,
+  AddServiceCard,
+  ServiceCardProps,
+} from '../ServiceCard/ServiceCard';
 
 export interface ServiceGridProps {
   /** Array of services to display */
@@ -33,18 +37,18 @@ export interface ServiceGridProps {
 
 function ServiceSkeleton() {
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 animate-pulse">
-      <div className="flex items-start justify-between mb-3">
-        <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
-        <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+    <div className="animate-pulse rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+      <div className="mb-3 flex items-start justify-between">
+        <div className="h-5 w-32 rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-5 w-16 rounded bg-gray-200 dark:bg-gray-700" />
       </div>
-      <div className="space-y-2 mb-4">
-        <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded" />
-        <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded" />
+      <div className="mb-4 space-y-2">
+        <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
       </div>
       <div className="flex gap-2">
-        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded-full" />
-        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded-full" />
+        <div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700" />
+        <div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700" />
       </div>
     </div>
   );
@@ -82,7 +86,14 @@ export function ServiceGrid({
 
   if (isLoading) {
     return (
-      <div className={cn('grid', columnClasses[columns], gapClasses[gap], className)}>
+      <div
+        className={cn(
+          'grid',
+          columnClasses[columns],
+          gapClasses[gap],
+          className
+        )}
+      >
         {Array.from({ length: skeletonCount }).map((_, index) => (
           <ServiceSkeleton key={index} />
         ))}
@@ -94,7 +105,7 @@ export function ServiceGrid({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <svg
-          className="w-12 h-12 text-gray-400 mb-4"
+          className="mb-4 h-12 w-12 text-gray-400"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -112,11 +123,11 @@ export function ServiceGrid({
   }
 
   return (
-    <div className={cn('grid', columnClasses[columns], gapClasses[gap], className)}>
+    <div
+      className={cn('grid', columnClasses[columns], gapClasses[gap], className)}
+    >
       {/* Add card first if enabled */}
-      {showAddCard && onAdd && (
-        <AddServiceCard onClick={onAdd} />
-      )}
+      {showAddCard && onAdd && <AddServiceCard onClick={onAdd} />}
 
       {/* Service cards */}
       {services.map((service) => (

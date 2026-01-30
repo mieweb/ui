@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
+import { Card, CardContent } from '../Card/Card';
 
 export interface InvoiceLineItem {
   id: string;
@@ -118,12 +118,12 @@ export function InvoiceView({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           {onBack && (
             <Button variant="ghost" size="sm" onClick={onBack}>
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -163,7 +163,7 @@ export function InvoiceView({
               disabled={actionsDisabled}
             >
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -186,7 +186,7 @@ export function InvoiceView({
               disabled={actionsDisabled}
             >
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -219,7 +219,7 @@ export function InvoiceView({
               disabled={actionsDisabled}
             >
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -237,7 +237,7 @@ export function InvoiceView({
           {onSend && canSend && (
             <Button size="sm" onClick={onSend} disabled={actionsDisabled}>
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -256,24 +256,24 @@ export function InvoiceView({
       </div>
 
       {/* Invoice document */}
-      <Card className="print:shadow-none print:border-0">
+      <Card className="print:border-0 print:shadow-none">
         <CardContent className="p-6 sm:p-8">
           {/* Provider and Invoice Info */}
-          <div className="flex flex-col sm:flex-row justify-between gap-6 mb-8">
+          <div className="mb-8 flex flex-col justify-between gap-6 sm:flex-row">
             <div>
               {providerLogoUrl ? (
                 <img
                   src={providerLogoUrl}
                   alt={invoice.providerName}
-                  className="h-12 mb-2 object-contain"
+                  className="mb-2 h-12 object-contain"
                 />
               ) : (
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h2 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
                   {invoice.providerName}
                 </h2>
               )}
               {invoice.providerAddress && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
+                <p className="text-sm whitespace-pre-line text-gray-600 dark:text-gray-400">
                   {invoice.providerAddress}
                 </p>
               )}
@@ -295,7 +295,7 @@ export function InvoiceView({
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {invoice.invoiceNumber}
               </p>
-              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <p>
                   <span className="font-medium">Issue Date:</span>{' '}
                   {formatDate(invoice.issuedDate)}
@@ -316,14 +316,14 @@ export function InvoiceView({
 
           {/* Bill To */}
           <div className="mb-8">
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">
+            <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
               Bill To
             </p>
             <p className="font-medium text-gray-900 dark:text-white">
               {invoice.employerName}
             </p>
             {invoice.employerAddress && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
+              <p className="text-sm whitespace-pre-line text-gray-600 dark:text-gray-400">
                 {invoice.employerAddress}
               </p>
             )}
@@ -335,20 +335,20 @@ export function InvoiceView({
           </div>
 
           {/* Line Items */}
-          <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden mb-6">
+          <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
                     Description
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">
+                  <th className="hidden px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400">
                     Qty
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">
+                  <th className="hidden px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400">
                     Unit Price
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
                     Total
                   </th>
                 </tr>
@@ -367,10 +367,10 @@ export function InvoiceView({
                         </p>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-center text-gray-700 dark:text-gray-300 hidden sm:table-cell">
+                    <td className="hidden px-4 py-3 text-center text-gray-700 sm:table-cell dark:text-gray-300">
                       {item.quantity}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 hidden sm:table-cell">
+                    <td className="hidden px-4 py-3 text-right text-gray-700 sm:table-cell dark:text-gray-300">
                       {formatCurrency(item.unitPrice)}
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
@@ -384,7 +384,7 @@ export function InvoiceView({
 
           {/* Totals */}
           <div className="flex justify-end">
-            <div className="w-full sm:w-64 space-y-2">
+            <div className="w-full space-y-2 sm:w-64">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">
                   Subtotal
@@ -403,7 +403,7 @@ export function InvoiceView({
                   </span>
                 </div>
               )}
-              <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
                 <span className="font-semibold text-gray-900 dark:text-white">
                   Total
                 </span>
@@ -416,10 +416,10 @@ export function InvoiceView({
 
           {/* Notes / Payment Terms */}
           {(invoice.notes || invoice.paymentTerms) && (
-            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
+            <div className="mt-8 space-y-4 border-t border-gray-200 pt-6 dark:border-gray-700">
               {invoice.paymentTerms && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">
+                  <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
                     Payment Terms
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -429,10 +429,10 @@ export function InvoiceView({
               )}
               {invoice.notes && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">
+                  <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
                     Notes
                   </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                  <p className="text-sm whitespace-pre-line text-gray-700 dark:text-gray-300">
                     {invoice.notes}
                   </p>
                 </div>

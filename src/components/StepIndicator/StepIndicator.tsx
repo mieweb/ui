@@ -125,11 +125,7 @@ export function StepIndicator({
 
   return (
     <nav
-      className={`
-        ${orientation === 'horizontal' ? 'flex items-center' : 'flex flex-col'}
-        ${sizes.gap}
-        ${className}
-      `.trim()}
+      className={` ${orientation === 'horizontal' ? 'flex items-center' : 'flex flex-col'} ${sizes.gap} ${className} `.trim()}
       aria-label="Progress"
     >
       {steps.map((step, index) => {
@@ -140,39 +136,28 @@ export function StepIndicator({
         return (
           <React.Fragment key={step.id}>
             <div
-              className={`
-                flex items-center
-                ${orientation === 'vertical' ? 'flex-row' : 'flex-col'}
-                ${sizes.gap}
-              `.trim()}
+              className={`flex items-center ${orientation === 'vertical' ? 'flex-row' : 'flex-col'} ${sizes.gap} `.trim()}
             >
               {/* Step Circle */}
               <button
                 type="button"
                 onClick={() => handleStepClick(index)}
                 disabled={!clickable}
-                className={`
-                  ${sizes.circle}
-                  rounded-full flex items-center justify-center
-                  font-medium transition-all duration-200
-                  focus:outline-none focus:ring-2 focus:ring-offset-2
-                  ${clickable ? 'cursor-pointer' : 'cursor-default'}
-                  ${
-                    step.hasError
-                      ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 focus:ring-red-500'
-                      : status === 'completed'
-                        ? 'bg-blue-600 text-white dark:bg-blue-500 focus:ring-blue-500'
-                        : status === 'current'
-                          ? 'bg-blue-600 text-white dark:bg-blue-500 ring-2 ring-blue-600 dark:ring-blue-500 ring-offset-2 focus:ring-blue-500'
-                          : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 focus:ring-gray-400'
-                  }
-                `.trim()}
+                className={` ${sizes.circle} flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
+                  step.hasError
+                    ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
+                    : status === 'completed'
+                      ? 'bg-blue-600 text-white focus:ring-blue-500 dark:bg-blue-500'
+                      : status === 'current'
+                        ? 'bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:ring-blue-500'
+                        : 'bg-gray-200 text-gray-500 focus:ring-gray-400 dark:bg-gray-700 dark:text-gray-400'
+                } `.trim()}
                 aria-current={status === 'current' ? 'step' : undefined}
               >
                 {step.hasError ? (
-                  <ErrorIcon className="w-4 h-4" />
+                  <ErrorIcon className="h-4 w-4" />
                 ) : status === 'completed' ? (
-                  step.icon || <CheckIcon className="w-4 h-4" />
+                  step.icon || <CheckIcon className="h-4 w-4" />
                 ) : (
                   step.icon || <span>{index + 1}</span>
                 )}
@@ -180,22 +165,16 @@ export function StepIndicator({
 
               {/* Step Label */}
               <div
-                className={`
-                  ${orientation === 'horizontal' ? 'text-center' : 'flex-1'}
-                  ${sizes.text}
-                `.trim()}
+                className={` ${orientation === 'horizontal' ? 'text-center' : 'flex-1'} ${sizes.text} `.trim()}
               >
                 <p
-                  className={`
-                    font-medium
-                    ${
-                      step.hasError
-                        ? 'text-red-600 dark:text-red-400'
-                        : status === 'completed' || status === 'current'
-                          ? 'text-gray-900 dark:text-white'
-                          : 'text-gray-500 dark:text-gray-400'
-                    }
-                  `.trim()}
+                  className={`font-medium ${
+                    step.hasError
+                      ? 'text-red-600 dark:text-red-400'
+                      : status === 'completed' || status === 'current'
+                        ? 'text-gray-900 dark:text-white'
+                        : 'text-gray-500 dark:text-gray-400'
+                  } `.trim()}
                 >
                   {step.label}
                   {step.optional && (
@@ -206,7 +185,7 @@ export function StepIndicator({
                   )}
                 </p>
                 {step.description && (
-                  <p className="text-gray-500 dark:text-gray-400 mt-0.5">
+                  <p className="mt-0.5 text-gray-500 dark:text-gray-400">
                     {step.description}
                   </p>
                 )}
@@ -216,22 +195,15 @@ export function StepIndicator({
             {/* Connector Line */}
             {!isLast && (
               <div
-                className={`
-                  ${orientation === 'horizontal' ? 'flex-1 min-w-8' : 'ml-4 min-h-4'}
-                  flex items-center justify-center
-                `.trim()}
+                className={` ${orientation === 'horizontal' ? 'min-w-8 flex-1' : 'ml-4 min-h-4'} flex items-center justify-center`.trim()}
                 aria-hidden="true"
               >
                 <div
-                  className={`
-                    ${orientation === 'horizontal' ? 'w-full' : 'h-full min-h-4'}
-                    ${sizes.line}
-                    ${
-                      index < currentStep
-                        ? 'bg-blue-600 dark:bg-blue-500'
-                        : 'bg-gray-200 dark:bg-gray-700'
-                    }
-                  `.trim()}
+                  className={` ${orientation === 'horizontal' ? 'w-full' : 'h-full min-h-4'} ${sizes.line} ${
+                    index < currentStep
+                      ? 'bg-blue-600 dark:bg-blue-500'
+                      : 'bg-gray-200 dark:bg-gray-700'
+                  } `.trim()}
                 />
               </div>
             )}

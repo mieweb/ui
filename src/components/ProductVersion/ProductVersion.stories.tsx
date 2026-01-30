@@ -148,15 +148,15 @@ export const InFooter: Story = {
           size="sm"
         />
         <div className="text-muted-foreground flex gap-4 text-xs">
-          <a href="#" className="hover:underline">
+          <button type="button" className="hover:underline">
             Privacy Policy
-          </a>
-          <a href="#" className="hover:underline">
+          </button>
+          <button type="button" className="hover:underline">
             Terms of Service
-          </a>
-          <a href="#" className="hover:underline">
+          </button>
+          <button type="button" className="hover:underline">
             Help
-          </a>
+          </button>
         </div>
       </div>
     </footer>
@@ -240,7 +240,7 @@ export const Clickable: Story = {
     name: 'BlueHive',
     version: '2.1.0',
     variant: 'minimal',
-    onClick: () => alert('Version clicked! (Could show debug info)'),
+    onClick: () => window.alert('Version clicked! (Could show debug info)'),
   },
   parameters: {
     docs: {

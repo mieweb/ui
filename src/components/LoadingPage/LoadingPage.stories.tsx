@@ -27,6 +27,52 @@ const meta: Meta<typeof LoadingPage> = {
 export default meta;
 type Story = StoryObj<typeof LoadingPage>;
 
+// Wrapper for WithProgress story
+function WithProgressWrapper() {
+  const [progress, setProgress] = React.useState(0);
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((p) => (p >= 100 ? 0 : p + 10));
+    }, 500);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <LoadingPage
+      message="Uploading..."
+      subMessage={`${progress}% complete`}
+      indicator="bar"
+      progress={progress}
+    />
+  );
+}
+
+// Wrapper for Overlay story
+function OverlayWrapper() {
+  const [loading, setLoading] = React.useState(false);
+  return (
+    <div className="p-8">
+      <LoadingOverlay isLoading={loading} message="Saving...">
+        <div className="max-w-md rounded-lg border bg-white p-6 dark:bg-gray-800">
+          <h3 className="mb-4 text-lg font-semibold">Edit Profile</h3>
+          <input
+            placeholder="Name"
+            className="mb-4 w-full rounded border px-3 py-2"
+          />
+          <button
+            onClick={() => {
+              setLoading(true);
+              setTimeout(() => setLoading(false), 2000);
+            }}
+            className="bg-primary-600 w-full rounded px-4 py-2 text-white"
+          >
+            Save
+          </button>
+        </div>
+      </LoadingOverlay>
+    </div>
+  );
+}
+
 /** Default full-page loading state */
 export const Default: Story = {
   args: {
@@ -37,52 +83,12 @@ export const Default: Story = {
 
 /** Loading with progress bar */
 export const WithProgress: Story = {
-  render: () => {
-    const [progress, setProgress] = React.useState(0);
-    React.useEffect(() => {
-      const timer = setInterval(() => {
-        setProgress((p) => (p >= 100 ? 0 : p + 10));
-      }, 500);
-      return () => clearInterval(timer);
-    }, []);
-    return (
-      <LoadingPage
-        message="Uploading..."
-        subMessage={`${progress}% complete`}
-        indicator="bar"
-        progress={progress}
-      />
-    );
-  },
+  render: () => <WithProgressWrapper />,
 };
 
 /** Overlay on content */
 export const Overlay: Story = {
-  render: () => {
-    const [loading, setLoading] = React.useState(false);
-    return (
-      <div className="p-8">
-        <LoadingOverlay isLoading={loading} message="Saving...">
-          <div className="max-w-md rounded-lg border bg-white p-6 dark:bg-gray-800">
-            <h3 className="mb-4 text-lg font-semibold">Edit Profile</h3>
-            <input
-              placeholder="Name"
-              className="mb-4 w-full rounded border px-3 py-2"
-            />
-            <button
-              onClick={() => {
-                setLoading(true);
-                setTimeout(() => setLoading(false), 2000);
-              }}
-              className="bg-primary-600 w-full rounded px-4 py-2 text-white"
-            >
-              Save
-            </button>
-          </div>
-        </LoadingOverlay>
-      </div>
-    );
-  },
+  render: () => <OverlayWrapper />,
 };
 
 /** Skeleton placeholders */

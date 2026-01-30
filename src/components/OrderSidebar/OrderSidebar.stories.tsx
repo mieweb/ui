@@ -64,9 +64,7 @@ export const StatOrder: Story = {
     createdAt: new Date(),
     priority: 'stat',
     notes: 'URGENT: Post-accident screening required immediately.',
-    actions: [
-      { id: '1', label: 'Process Now', onClick: () => {} },
-    ],
+    actions: [{ id: '1', label: 'Process Now', onClick: () => {} }],
   },
 };
 

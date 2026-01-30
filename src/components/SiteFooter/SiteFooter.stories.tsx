@@ -92,7 +92,7 @@ export const WithNewsletter: Story = {
     linkGroups: defaultLinkGroups,
     socialLinks: defaultSocialLinks,
     showNewsletter: true,
-    onNewsletterSubmit: (email) => alert(`Subscribed: ${email}`),
+    onNewsletterSubmit: (email) => window.alert(`Subscribed: ${email}`),
   },
 };
 
@@ -133,13 +133,13 @@ export const NewsletterDemo: StoryObj<typeof NewsletterForm> = {
       <div className="bg-primary-600 rounded-lg p-6">
         <NewsletterForm
           variant="light"
-          onSubmit={(email) => alert(`Subscribed: ${email}`)}
+          onSubmit={(email) => window.alert(`Subscribed: ${email}`)}
         />
       </div>
       <div className="rounded-lg bg-gray-100 p-6 dark:bg-gray-900">
         <NewsletterForm
           variant="dark"
-          onSubmit={(email) => alert(`Subscribed: ${email}`)}
+          onSubmit={(email) => window.alert(`Subscribed: ${email}`)}
         />
       </div>
     </div>

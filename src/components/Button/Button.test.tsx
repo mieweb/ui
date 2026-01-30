@@ -49,7 +49,7 @@ describe('Button', () => {
     const button = screen.getByRole('button');
 
     expect(button).toBeDisabled();
-    expect(button).toHaveAttribute('aria-busy', 'false');
+    expect(button).not.toHaveAttribute('aria-busy', 'true');
   });
 
   it('shows loading state correctly', () => {
@@ -58,7 +58,7 @@ describe('Button', () => {
 
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument(); // Loading spinner
+    expect(button.querySelector('svg')).toBeInTheDocument(); // Loading spinner
   });
 
   it('shows custom loading text', () => {

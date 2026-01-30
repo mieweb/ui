@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Card } from '../Card/Card';
-import { Button } from '../Button/Button';
 import { Progress } from '../Progress/Progress';
 
 export interface FileItem {
@@ -64,7 +63,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['pdf'].includes(ext)) {
     return (
       <svg
-        className="w-5 h-5 text-red-500"
+        className="h-5 w-5 text-red-500"
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -80,7 +79,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['doc', 'docx'].includes(ext)) {
     return (
       <svg
-        className="w-5 h-5 text-blue-500"
+        className="h-5 w-5 text-blue-500"
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -96,7 +95,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['xls', 'xlsx', 'csv'].includes(ext)) {
     return (
       <svg
-        className="w-5 h-5 text-green-500"
+        className="h-5 w-5 text-green-500"
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -113,7 +112,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
     return (
       <svg
-        className="w-5 h-5 text-purple-500"
+        className="h-5 w-5 text-purple-500"
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -129,7 +128,7 @@ function getFileIcon(extension: string): React.ReactNode {
   // Default file icon
   return (
     <svg
-      className="w-5 h-5 text-gray-400"
+      className="h-5 w-5 text-gray-400"
       fill="currentColor"
       viewBox="0 0 20 20"
     >
@@ -198,29 +197,26 @@ export function FileManager({
       {/* Dropzone */}
       {showDropzone && (
         <Card
-          className={`
-            mb-4 border-2 border-dashed transition-all duration-200 cursor-pointer
-            ${
-              isDragging
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-            }
-          `.trim()}
+          className={`mb-4 cursor-pointer border-2 border-dashed transition-all duration-200 ${
+            isDragging
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              : 'border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500'
+          } `.trim()}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={handleUploadClick}
         >
-          <div className="p-6 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center p-6">
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+              className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full ${
                 isDragging
                   ? 'bg-blue-100 dark:bg-blue-800'
                   : 'bg-gray-100 dark:bg-gray-800'
               }`}
             >
               <svg
-                className={`w-6 h-6 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`}
+                className={`h-6 w-6 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -236,7 +232,7 @@ export function FileManager({
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
               {isDragging ? 'Drop files here' : 'Add File'}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
               Click or drag and drop
             </p>
             <input
@@ -254,7 +250,7 @@ export function FileManager({
       {/* Upload Progress */}
       {isUploading && uploadProgress !== undefined && (
         <div className="mb-4">
-          <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+          <div className="mb-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <span>Uploading...</span>
             <span>{uploadProgress}%</span>
           </div>
@@ -264,21 +260,26 @@ export function FileManager({
 
       {/* Error Message */}
       {errorMessage && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+          <p className="text-sm text-red-600 dark:text-red-400">
+            {errorMessage}
+          </p>
         </div>
       )}
 
       {/* Storage Usage */}
       {totalStorageUsed !== undefined && (
-        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+        <div className="mb-4 rounded-lg bg-gray-50 p-3 text-center dark:bg-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Used Storage:{' '}
             <span className="font-semibold text-gray-900 dark:text-white">
               {formatFileSize(totalStorageUsed)}
             </span>
             {storageLimit && (
-              <span className="text-gray-500"> / {formatFileSize(storageLimit)}</span>
+              <span className="text-gray-500">
+                {' '}
+                / {formatFileSize(storageLimit)}
+              </span>
             )}
           </p>
         </div>
@@ -289,16 +290,16 @@ export function FileManager({
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3">
+              <th className="py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Filename
               </th>
-              <th className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3">
+              <th className="py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Extension
               </th>
-              <th className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3">
+              <th className="py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Size
               </th>
-              <th className="text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3">
+              <th className="py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Actions
               </th>
             </tr>
@@ -306,17 +307,20 @@ export function FileManager({
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {files.length > 0 ? (
               files.map((file) => (
-                <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <tr
+                  key={file.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                >
                   <td className="py-3">
                     <div className="flex items-center gap-2">
                       {getFileIcon(file.fileExtension)}
-                      <span className="text-sm text-gray-900 dark:text-white truncate max-w-xs">
+                      <span className="max-w-xs truncate text-sm text-gray-900 dark:text-white">
                         {file.filename}
                       </span>
                     </div>
                   </td>
                   <td className="py-3 text-center">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                    <span className="text-xs text-gray-500 uppercase dark:text-gray-400">
                       {file.fileExtension.replace('.', '')}
                     </span>
                   </td>
@@ -331,11 +335,11 @@ export function FileManager({
                         <button
                           type="button"
                           onClick={() => onPreview(file.id)}
-                          className="p-1.5 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                          className="p-1.5 text-gray-400 transition-colors hover:text-blue-500 dark:hover:text-blue-400"
                           title="Preview"
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="h-4 w-4"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -359,11 +363,11 @@ export function FileManager({
                         <button
                           type="button"
                           onClick={() => onDownload(file.id)}
-                          className="p-1.5 text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors"
+                          className="p-1.5 text-gray-400 transition-colors hover:text-green-500 dark:hover:text-green-400"
                           title="Download"
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="h-4 w-4"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -381,11 +385,11 @@ export function FileManager({
                         <button
                           type="button"
                           onClick={() => onDelete(file.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                          className="p-1.5 text-gray-400 transition-colors hover:text-red-500 dark:hover:text-red-400"
                           title="Delete"
                         >
                           <svg
-                            className="w-4 h-4"
+                            className="h-4 w-4"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -408,7 +412,7 @@ export function FileManager({
                 <td colSpan={4} className="py-8">
                   <div className="text-center">
                     <svg
-                      className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600"
+                      className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -420,10 +424,10 @@ export function FileManager({
                         d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                       />
                     </svg>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       No Files
                     </p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                       Upload files to get started
                     </p>
                   </div>

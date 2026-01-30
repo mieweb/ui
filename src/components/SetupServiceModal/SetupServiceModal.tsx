@@ -22,7 +22,11 @@ export interface SetupServiceModalProps {
   /** Available service categories */
   categories?: ServiceCategory[];
   /** Available services to select from */
-  availableServices?: Array<{ id: string; name: string; defaultPrice?: number }>;
+  availableServices?: Array<{
+    id: string;
+    name: string;
+    defaultPrice?: number;
+  }>;
   /** Whether to show service picker (vs free-form entry) */
   showServicePicker?: boolean;
   /** Whether submission is in progress */
@@ -116,7 +120,7 @@ export function SetupServiceModal({
         <div className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
               <p className="text-sm text-red-600 dark:text-red-400">
                 {errorMessage}
               </p>
@@ -151,15 +155,22 @@ export function SetupServiceModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="setup-service-description"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Description
             </label>
             <textarea
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+              id="setup-service-description"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               rows={3}
               value={formData.description}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, description: e.target.value }))
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
               }
               placeholder="Describe the service..."
             />
@@ -183,18 +194,22 @@ export function SetupServiceModal({
 
           {/* Price */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="setup-service-price"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Base Price
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
                 $
               </span>
               <input
+                id="setup-service-price"
                 type="number"
                 min="0"
                 step="0.01"
-                className="w-full pl-7 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                 value={formData.price}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -222,7 +237,10 @@ export function SetupServiceModal({
               <Switch
                 checked={formData.currentlyOffered}
                 onCheckedChange={(checked) =>
-                  setFormData((prev) => ({ ...prev, currentlyOffered: checked }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    currentlyOffered: checked,
+                  }))
                 }
               />
             </div>
@@ -239,13 +257,16 @@ export function SetupServiceModal({
               <Switch
                 checked={formData.limitedInventory}
                 onCheckedChange={(checked) =>
-                  setFormData((prev) => ({ ...prev, limitedInventory: checked }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    limitedInventory: checked,
+                  }))
                 }
               />
             </div>
 
             {formData.limitedInventory && (
-              <div className="ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+              <div className="ml-4 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
                 <Input
                   label="Initial Inventory"
                   type="number"
@@ -274,7 +295,10 @@ export function SetupServiceModal({
               <Switch
                 checked={formData.autoAcceptReferrals}
                 onCheckedChange={(checked) =>
-                  setFormData((prev) => ({ ...prev, autoAcceptReferrals: checked }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    autoAcceptReferrals: checked,
+                  }))
                 }
               />
             </div>
@@ -294,7 +318,7 @@ export function SetupServiceModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

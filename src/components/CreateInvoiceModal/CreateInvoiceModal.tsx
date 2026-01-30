@@ -169,7 +169,7 @@ export function CreateInvoiceModal({
         <div className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
               <p className="text-sm text-red-600 dark:text-red-400">
                 {errorMessage}
               </p>
@@ -203,7 +203,7 @@ export function CreateInvoiceModal({
                   <button
                     type="button"
                     onClick={toggleAllOrders}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-sm text-blue-600 hover:underline dark:text-blue-400"
                   >
                     {selectedOrders.size === orders.length
                       ? 'Deselect All'
@@ -217,14 +217,14 @@ export function CreateInvoiceModal({
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
+                      className="h-16 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"
                     />
                   ))}
                 </div>
               ) : orders.length === 0 ? (
-                <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+                <div className="rounded-lg border border-dashed border-gray-300 py-8 text-center dark:border-gray-700">
                   <svg
-                    className="w-10 h-10 mx-auto text-gray-400 dark:text-gray-600 mb-2"
+                    className="mx-auto mb-2 h-10 w-10 text-gray-400 dark:text-gray-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -241,7 +241,7 @@ export function CreateInvoiceModal({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 max-h-60 overflow-y-auto">
+                <div className="max-h-60 space-y-2 overflow-y-auto">
                   {orders.map((order) => {
                     const isSelected = selectedOrders.has(order.id);
                     return (
@@ -249,29 +249,23 @@ export function CreateInvoiceModal({
                         key={order.id}
                         type="button"
                         onClick={() => toggleOrder(order.id)}
-                        className={`
-                          w-full p-3 rounded-lg border text-left transition-colors
-                          ${
-                            isSelected
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                          }
-                        `}
+                        className={`w-full rounded-lg border p-3 text-left transition-colors ${
+                          isSelected
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                        } `}
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className={`
-                              w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
-                              ${
-                                isSelected
-                                  ? 'border-blue-500 bg-blue-500'
-                                  : 'border-gray-300 dark:border-gray-600'
-                              }
-                            `}
+                            className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
+                              isSelected
+                                ? 'border-blue-500 bg-blue-500'
+                                : 'border-gray-300 dark:border-gray-600'
+                            } `}
                           >
                             {isSelected && (
                               <svg
-                                className="w-3 h-3 text-white"
+                                className="h-3 w-3 text-white"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -285,7 +279,7 @@ export function CreateInvoiceModal({
                               </svg>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
                               <p className="font-medium text-gray-900 dark:text-white">
                                 {order.orderNumber}
@@ -308,7 +302,7 @@ export function CreateInvoiceModal({
 
               {/* Selected summary */}
               {selectedOrders.size > 0 && (
-                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                   <span className="text-sm text-gray-600 dark:text-gray-400">
                     {selectedOrders.size} order
                     {selectedOrders.size > 1 ? 's' : ''} selected
@@ -329,7 +323,7 @@ export function CreateInvoiceModal({
               </p>
 
               {/* Summary */}
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+              <div className="space-y-2 rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     Employer
@@ -346,7 +340,7 @@ export function CreateInvoiceModal({
                     {selectedOrders.size} items
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
                   <span className="font-medium text-gray-900 dark:text-white">
                     Total
                   </span>
@@ -365,11 +359,15 @@ export function CreateInvoiceModal({
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="invoice-notes"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Notes (Optional)
                 </label>
                 <textarea
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  id="invoice-notes"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -381,7 +379,7 @@ export function CreateInvoiceModal({
         </div>
 
         <ModalFooter>
-          <div className="flex justify-between w-full">
+          <div className="flex w-full justify-between">
             <div>
               {step > 1 && (
                 <Button
@@ -416,7 +414,7 @@ export function CreateInvoiceModal({
                   {isSubmitting ? (
                     <>
                       <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4"
+                        className="mr-2 -ml-1 h-4 w-4 animate-spin"
                         fill="none"
                         viewBox="0 0 24 24"
                       >

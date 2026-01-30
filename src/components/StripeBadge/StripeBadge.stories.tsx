@@ -133,18 +133,33 @@ export const InPaymentForm: Story = {
 
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Card Number</label>
-          <Input placeholder="4242 4242 4242 4242" />
+          <label
+            htmlFor="card-number"
+            className="mb-1 block text-sm font-medium"
+          >
+            Card Number
+          </label>
+          <Input id="card-number" placeholder="4242 4242 4242 4242" />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Expiry</label>
-            <Input placeholder="MM / YY" />
+            <label
+              htmlFor="card-expiry"
+              className="mb-1 block text-sm font-medium"
+            >
+              Expiry
+            </label>
+            <Input id="card-expiry" placeholder="MM / YY" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">CVC</label>
-            <Input placeholder="123" />
+            <label
+              htmlFor="card-cvc"
+              className="mb-1 block text-sm font-medium"
+            >
+              CVC
+            </label>
+            <Input id="card-cvc" placeholder="123" />
           </div>
         </div>
 
@@ -173,9 +188,9 @@ export const InCheckoutFooter: Story = {
       <div className="text-muted-foreground flex items-center gap-4 text-xs">
         <span>256-bit SSL encryption</span>
         <span>•</span>
-        <a href="#" className="hover:underline">
+        <button type="button" className="hover:underline">
           Privacy Policy
-        </a>
+        </button>
       </div>
     </div>
   ),

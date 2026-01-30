@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { CSVColumnMapper, CSVFileUpload, type CSVColumn } from './CSVColumnMapper';
+import {
+  CSVColumnMapper,
+  CSVFileUpload,
+  type CSVColumn,
+} from './CSVColumnMapper';
 
 const meta: Meta<typeof CSVColumnMapper> = {
   title: 'Components/CSVColumnMapper',
@@ -14,7 +18,11 @@ type Story = StoryObj<typeof CSVColumnMapper>;
 const sampleColumns: CSVColumn[] = [
   { name: 'First Name', sampleValue: 'John', mappedTo: 'firstName' },
   { name: 'Last Name', sampleValue: 'Doe', mappedTo: 'lastName' },
-  { name: 'Email Address', sampleValue: 'john.doe@example.com', mappedTo: 'email' },
+  {
+    name: 'Email Address',
+    sampleValue: 'john.doe@example.com',
+    mappedTo: 'email',
+  },
   { name: 'Phone', sampleValue: '555-123-4567' },
   { name: 'Street', sampleValue: '123 Main St' },
   { name: 'City', sampleValue: 'Anytown' },
@@ -50,54 +58,95 @@ const childFieldOptions = {
   ],
 };
 
-export const Default: Story = {
-  render: () => {
-    const [columns, setColumns] = useState(sampleColumns);
+// Wrapper for Default story with interactive state
+function CSVColumnMapperWrapper() {
+  const [columns, setColumns] = useState(sampleColumns);
 
-    const handleColumnChange = (index: number, mappedTo: string, childField?: string) => {
-      setColumns((prev) =>
-        prev.map((col, i) =>
-          i === index ? { ...col, mappedTo, childField } : col
-        )
-      );
-    };
-
-    const handleIgnoreToggle = (index: number, ignored: boolean) => {
-      setColumns((prev) =>
-        prev.map((col, i) => (i === index ? { ...col, ignored } : col))
-      );
-    };
-
-    const handleBulkAction = (action: 'ignoreAll' | 'includeAll' | 'ignoreUncompleted') => {
-      setColumns((prev) =>
-        prev.map((col) => {
-          if (action === 'ignoreAll') return { ...col, ignored: true };
-          if (action === 'includeAll') return { ...col, ignored: false };
-          if (action === 'ignoreUncompleted' && !col.mappedTo) return { ...col, ignored: true };
-          return col;
-        })
-      );
-    };
-
-    return (
-      <CSVColumnMapper
-        columns={columns}
-        fieldOptions={fieldOptions}
-        childFieldOptions={childFieldOptions}
-        onColumnChange={handleColumnChange}
-        onIgnoreToggle={handleIgnoreToggle}
-        onBulkAction={handleBulkAction}
-        onImport={() => alert('Import triggered!')}
-      />
+  const handleColumnChange = (
+    index: number,
+    mappedTo: string,
+    childField?: string
+  ) => {
+    setColumns((prev) =>
+      prev.map((col, i) =>
+        i === index ? { ...col, mappedTo, childField } : col
+      )
     );
-  },
+  };
+
+  const handleIgnoreToggle = (index: number, ignored: boolean) => {
+    setColumns((prev) =>
+      prev.map((col, i) => (i === index ? { ...col, ignored } : col))
+    );
+  };
+
+  const handleBulkAction = (
+    action: 'ignoreAll' | 'includeAll' | 'ignoreUncompleted'
+  ) => {
+    setColumns((prev) =>
+      prev.map((col) => {
+        if (action === 'ignoreAll') return { ...col, ignored: true };
+        if (action === 'includeAll') return { ...col, ignored: false };
+        if (action === 'ignoreUncompleted' && !col.mappedTo)
+          return { ...col, ignored: true };
+        return col;
+      })
+    );
+  };
+
+  return (
+    <CSVColumnMapper
+      columns={columns}
+      fieldOptions={fieldOptions}
+      childFieldOptions={childFieldOptions}
+      onColumnChange={handleColumnChange}
+      onIgnoreToggle={handleIgnoreToggle}
+      onBulkAction={handleBulkAction}
+      onImport={() => window.alert('Import triggered!')}
+    />
+  );
+}
+
+// Wrapper for FileUpload story
+function FileUploadWrapper() {
+  const [file, setFile] = useState<File | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <CSVFileUpload
+        onFileSelect={(f) => {
+          setFile(f);
+          window.alert(`Selected: ${f.name}`);
+        }}
+      />
+      {file && (
+        <p className="text-muted-foreground text-center">
+          Selected file: {file.name}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export const Default: Story = {
+  render: () => <CSVColumnMapperWrapper />,
 };
 
 export const WithPhoneMapping: Story = {
   args: {
     columns: [
-      { name: 'Mobile Phone', sampleValue: '555-123-4567', mappedTo: 'phone', childField: 'mobile' },
-      { name: 'Work Phone', sampleValue: '555-987-6543', mappedTo: 'phone', childField: 'work' },
+      {
+        name: 'Mobile Phone',
+        sampleValue: '555-123-4567',
+        mappedTo: 'phone',
+        childField: 'mobile',
+      },
+      {
+        name: 'Work Phone',
+        sampleValue: '555-987-6543',
+        mappedTo: 'phone',
+        childField: 'work',
+      },
     ],
     fieldOptions,
     childFieldOptions,
@@ -132,25 +181,7 @@ export const AllIgnored: Story = {
 };
 
 export const FileUpload: StoryObj<typeof CSVFileUpload> = {
-  render: () => {
-    const [file, setFile] = useState<File | null>(null);
-
-    return (
-      <div className="space-y-4">
-        <CSVFileUpload
-          onFileSelect={(f) => {
-            setFile(f);
-            alert(`Selected: ${f.name}`);
-          }}
-        />
-        {file && (
-          <p className="text-center text-muted-foreground">
-            Selected file: {file.name}
-          </p>
-        )}
-      </div>
-    );
-  },
+  render: () => <FileUploadWrapper />,
 };
 
 export const FileUploadProcessing: StoryObj<typeof CSVFileUpload> = {
@@ -181,7 +212,8 @@ export const CustomLabels: Story = {
       incomingSample: 'Sample Data',
       fieldType: 'Map To',
       ensureAccurateData: 'Data Validation',
-      ensureAccurateDataDescription: 'Matching records will be updated automatically.',
+      ensureAccurateDataDescription:
+        'Matching records will be updated automatically.',
       instructions: 'Match your CSV columns to employee fields below.',
     },
   },

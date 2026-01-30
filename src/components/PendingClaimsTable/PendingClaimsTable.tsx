@@ -69,7 +69,7 @@ export function PendingClaimsTable({
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
+            className="h-20 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"
           />
         ))}
       </div>
@@ -79,10 +79,10 @@ export function PendingClaimsTable({
   if (claims.length === 0) {
     return (
       <div
-        className={`text-center py-12 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg ${className}`}
+        className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
-          className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3"
+          className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -101,26 +101,26 @@ export function PendingClaimsTable({
 
   return (
     <div
-      className={`border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden ${className}`}
+      className={`overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}
     >
       {/* Desktop table */}
       <div className="hidden md:block">
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Claimant
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Role
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Submitted
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Actions
               </th>
             </tr>
@@ -199,9 +199,9 @@ export function PendingClaimsTable({
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="divide-y divide-gray-200 md:hidden dark:divide-gray-700">
         {claims.map((claim) => (
-          <div key={claim.id} className="p-4 bg-white dark:bg-gray-900">
+          <div key={claim.id} className="bg-white p-4 dark:bg-gray-900">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Avatar name={claim.claimantName} size="sm" />

@@ -218,7 +218,7 @@ function calculateDateRange(presetKey: string): DateRange {
   }
 }
 
-function formatDateRange(range: DateRange, format?: string): string {
+function formatDateRange(range: DateRange, _format?: string): string {
   if (!range.start && !range.end) return '';
   const formatDate = (d: Date | null) => {
     if (!d) return '';
@@ -396,7 +396,7 @@ export interface DateRangeFilterProps {
  * ```
  */
 export function DateRangeFilter({
-  value,
+  value: _value,
   onChange,
   presets,
   activePreset,

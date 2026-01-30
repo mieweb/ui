@@ -85,7 +85,13 @@ export function ClaimProviderForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.role || !formData.agreedToTerms) {
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.role ||
+      !formData.agreedToTerms
+    ) {
       return;
     }
     onSubmit?.(formData);
@@ -103,12 +109,12 @@ export function ClaimProviderForm({
       <CardHeader>
         <CardTitle className="text-lg">Claim Provider Listing</CardTitle>
         {providerName && (
-          <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
             <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
               {providerName}
             </p>
             {providerAddress && (
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+              <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">
                 {providerAddress}
               </p>
             )}
@@ -120,7 +126,7 @@ export function ClaimProviderForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
               <p className="text-sm text-red-600 dark:text-red-400">
                 {errorMessage}
               </p>
@@ -138,7 +144,10 @@ export function ClaimProviderForm({
                 label="First Name"
                 value={formData.firstName}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, firstName: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    firstName: e.target.value,
+                  }))
                 }
                 placeholder="John"
                 required
@@ -177,7 +186,7 @@ export function ClaimProviderForm({
           </div>
 
           {/* Role Selection */}
-          <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700">
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Your Role
             </p>
@@ -197,7 +206,10 @@ export function ClaimProviderForm({
                 label="Please specify your role"
                 value={formData.occupation || ''}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, occupation: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    occupation: e.target.value,
+                  }))
                 }
                 placeholder="e.g., Consultant"
               />
@@ -205,7 +217,7 @@ export function ClaimProviderForm({
           </div>
 
           {/* Language Preference */}
-          <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700">
             <Select
               label="Preferred Language"
               value={formData.preferredLanguage || 'en'}
@@ -217,8 +229,8 @@ export function ClaimProviderForm({
           </div>
 
           {/* Terms Agreement */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-            <label className="flex items-start gap-3 cursor-pointer">
+          <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
+            <label className="flex cursor-pointer items-start gap-3">
               <Checkbox
                 checked={formData.agreedToTerms}
                 onChange={(e) =>
@@ -235,7 +247,7 @@ export function ClaimProviderForm({
                   href={termsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                  className="text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Terms of Service
                 </a>{' '}
@@ -264,7 +276,7 @@ export function ClaimProviderForm({
               {isSubmitting ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >

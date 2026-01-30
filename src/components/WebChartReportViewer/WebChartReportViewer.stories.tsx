@@ -17,15 +17,47 @@ export default meta;
 type Story = StoryObj<typeof WebChartReportViewer>;
 
 const sampleReports: SystemReport[] = [
-  { id: '1', name: 'Active Employees', description: 'List of all active employees' },
-  { id: '2', name: 'DOT Physicals Due', description: 'Employees with upcoming DOT physicals' },
-  { id: '3', name: 'Drug Screen History', description: 'Drug screening results by date range' },
-  { id: '4', name: 'Immunization Status', description: 'Employee immunization records' },
+  {
+    id: '1',
+    name: 'Active Employees',
+    description: 'List of all active employees',
+  },
+  {
+    id: '2',
+    name: 'DOT Physicals Due',
+    description: 'Employees with upcoming DOT physicals',
+  },
+  {
+    id: '3',
+    name: 'Drug Screen History',
+    description: 'Drug screening results by date range',
+  },
+  {
+    id: '4',
+    name: 'Immunization Status',
+    description: 'Employee immunization records',
+  },
   { id: '5', name: 'Injury Log', description: 'Workplace injury reports' },
-  { id: '6', name: 'Compliance Dashboard', description: 'Overall compliance metrics' },
-  { id: '7', name: 'Hearing Conservation', description: 'Hearing test results and trends' },
-  { id: '8', name: 'Respiratory Fit Test', description: 'Respiratory fit test records' },
-  { id: '9', name: 'Work Restrictions', description: 'Active work restrictions' },
+  {
+    id: '6',
+    name: 'Compliance Dashboard',
+    description: 'Overall compliance metrics',
+  },
+  {
+    id: '7',
+    name: 'Hearing Conservation',
+    description: 'Hearing test results and trends',
+  },
+  {
+    id: '8',
+    name: 'Respiratory Fit Test',
+    description: 'Respiratory fit test records',
+  },
+  {
+    id: '9',
+    name: 'Work Restrictions',
+    description: 'Active work restrictions',
+  },
 ];
 
 const sampleResult: ReportResult = {
@@ -50,39 +82,43 @@ const sampleResult: ReportResult = {
   `,
 };
 
+function DefaultWrapper() {
+  const [currentReport, setCurrentReport] = useState<
+    SystemReport | undefined
+  >();
+  const [reportResult, setReportResult] = useState<ReportResult | undefined>();
+  const [loadingReport, setLoadingReport] = useState(false);
+
+  const handleReportSelect = (report: SystemReport) => {
+    setCurrentReport(report);
+    setLoadingReport(true);
+    // Simulate loading
+    setTimeout(() => {
+      setReportResult(sampleResult);
+      setLoadingReport(false);
+    }, 1500);
+  };
+
+  return (
+    <WebChartReportViewer
+      reports={sampleReports}
+      currentReport={currentReport}
+      reportResult={reportResult}
+      loadingReport={loadingReport}
+      onReportSelect={handleReportSelect}
+      onRefreshReports={() => console.log('Refresh reports')}
+      onRefreshReport={() => console.log('Refresh report')}
+      dateRange={{
+        start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        end: new Date(),
+      }}
+      onDateRangeChange={(start, end) => console.log('Date range:', start, end)}
+    />
+  );
+}
+
 export const Default: Story = {
-  render: () => {
-    const [currentReport, setCurrentReport] = useState<SystemReport | undefined>();
-    const [reportResult, setReportResult] = useState<ReportResult | undefined>();
-    const [loadingReport, setLoadingReport] = useState(false);
-
-    const handleReportSelect = (report: SystemReport) => {
-      setCurrentReport(report);
-      setLoadingReport(true);
-      // Simulate loading
-      setTimeout(() => {
-        setReportResult(sampleResult);
-        setLoadingReport(false);
-      }, 1500);
-    };
-
-    return (
-      <WebChartReportViewer
-        reports={sampleReports}
-        currentReport={currentReport}
-        reportResult={reportResult}
-        loadingReport={loadingReport}
-        onReportSelect={handleReportSelect}
-        onRefreshReports={() => console.log('Refresh reports')}
-        onRefreshReport={() => console.log('Refresh report')}
-        dateRange={{
-          start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          end: new Date(),
-        }}
-        onDateRangeChange={(start, end) => console.log('Date range:', start, end)}
-      />
-    );
-  },
+  render: () => <DefaultWrapper />,
 };
 
 export const Loading: Story = {
@@ -95,7 +131,8 @@ export const Loading: Story = {
 export const WithError: Story = {
   args: {
     reports: sampleReports,
-    error: 'Unable to connect to Enterprise Health. The server may be unavailable.',
+    error:
+      'Unable to connect to Enterprise Health. The server may be unavailable.',
   },
 };
 
@@ -117,26 +154,28 @@ export const ReportWithError: Story = {
   },
 };
 
-export const DatePicker: StoryObj<typeof ReportDatePicker> = {
-  render: () => {
-    const [range, setRange] = useState({
-      start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-      end: new Date(),
-    });
+function DatePickerWrapper() {
+  const [range, setRange] = useState({
+    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    end: new Date(),
+  });
 
-    return (
-      <ReportDatePicker
-        startDate={range.start}
-        endDate={range.end}
-        onChange={(start, end) => {
-          setRange({
-            start: typeof start === 'string' ? new Date(start) : start,
-            end: typeof end === 'string' ? new Date(end) : end,
-          });
-        }}
-      />
-    );
-  },
+  return (
+    <ReportDatePicker
+      startDate={range.start}
+      endDate={range.end}
+      onChange={(start, end) => {
+        setRange({
+          start: typeof start === 'string' ? new Date(start) : start,
+          end: typeof end === 'string' ? new Date(end) : end,
+        });
+      }}
+    />
+  );
+}
+
+export const DatePicker: StoryObj<typeof ReportDatePicker> = {
+  render: () => <DatePickerWrapper />,
 };
 
 export const CustomBranding: Story = {

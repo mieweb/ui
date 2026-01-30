@@ -1,8 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-  NotificationCenter,
-  type Notification,
-} from './NotificationCenter';
+import { NotificationCenter, type Notification } from './NotificationCenter';
 
 const meta: Meta<typeof NotificationCenter> = {
   title: 'Provider/NotificationCenter',
@@ -29,7 +26,8 @@ const mockNotifications: Notification[] = [
     id: '1',
     type: 'order',
     title: 'New Order Received',
-    message: 'Acme Corporation has submitted a new order for DOT Physical services.',
+    message:
+      'Acme Corporation has submitted a new order for DOT Physical services.',
     timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
     isRead: false,
     actionLabel: 'View Order',
@@ -39,7 +37,8 @@ const mockNotifications: Notification[] = [
     id: '2',
     type: 'invoice',
     title: 'Invoice Paid',
-    message: 'Invoice #INV-2024-042 for $1,250.00 has been paid by TransCo Logistics.',
+    message:
+      'Invoice #INV-2024-042 for $1,250.00 has been paid by TransCo Logistics.',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
     isRead: false,
     actionLabel: 'View Invoice',
@@ -48,7 +47,8 @@ const mockNotifications: Notification[] = [
     id: '3',
     type: 'claim',
     title: 'Provider Claim Pending',
-    message: 'Dr. Sarah Johnson has submitted a claim request to join your organization.',
+    message:
+      'Dr. Sarah Johnson has submitted a claim request to join your organization.',
     timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
     isRead: false,
     actionLabel: 'Review Claim',
@@ -58,7 +58,8 @@ const mockNotifications: Notification[] = [
     id: '4',
     type: 'message',
     title: 'New Message',
-    message: 'You have a new message from Jane Smith regarding order #ORD-2024-156.',
+    message:
+      'You have a new message from Jane Smith regarding order #ORD-2024-156.',
     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
     isRead: true,
     senderName: 'Jane Smith',
@@ -68,7 +69,8 @@ const mockNotifications: Notification[] = [
     id: '5',
     type: 'alert',
     title: 'Invoice Overdue',
-    message: 'Invoice #INV-2024-028 is now 15 days past due. Total outstanding: $850.00',
+    message:
+      'Invoice #INV-2024-028 is now 15 days past due. Total outstanding: $850.00',
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
     isRead: true,
     actionLabel: 'Send Reminder',
@@ -78,7 +80,8 @@ const mockNotifications: Notification[] = [
     id: '6',
     type: 'system',
     title: 'System Maintenance',
-    message: 'Scheduled maintenance will occur on Saturday from 2:00 AM - 4:00 AM EST.',
+    message:
+      'Scheduled maintenance will occur on Saturday from 2:00 AM - 4:00 AM EST.',
     timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
     isRead: true,
   },
@@ -105,7 +108,7 @@ export const AllRead: Story = {
 export const Empty: Story = {
   args: {
     notifications: [],
-    emptyMessage: 'You\'re all caught up!',
+    emptyMessage: "You're all caught up!",
   },
 };
 
@@ -130,7 +133,8 @@ export const UrgentNotifications: Story = {
         id: '1',
         type: 'alert',
         title: 'Critical: Multiple Invoices Overdue',
-        message: '5 invoices totaling $4,250.00 are now past due and require immediate attention.',
+        message:
+          '5 invoices totaling $4,250.00 are now past due and require immediate attention.',
         timestamp: new Date(Date.now() - 30 * 60 * 1000),
         isRead: false,
         actionLabel: 'View Invoices',
@@ -140,7 +144,8 @@ export const UrgentNotifications: Story = {
         id: '2',
         type: 'claim',
         title: 'Action Required: Provider Verification',
-        message: 'Your NPI verification is expiring in 3 days. Please update your credentials.',
+        message:
+          'Your NPI verification is expiring in 3 days. Please update your credentials.',
         timestamp: new Date(Date.now() - 60 * 60 * 1000),
         isRead: false,
         actionLabel: 'Update Now',
@@ -173,8 +178,16 @@ export const WithSenderAvatars: Story = {
   args: {
     notifications: mockNotifications.map((n, i) => ({
       ...n,
-      senderName: ['John Doe', 'Jane Smith', 'Bob Wilson', 'Sarah Johnson', 'Mike Brown', 'System'][i],
-      senderAvatar: i % 2 === 0 ? undefined : `https://i.pravatar.cc/100?img=${i + 10}`,
+      senderName: [
+        'John Doe',
+        'Jane Smith',
+        'Bob Wilson',
+        'Sarah Johnson',
+        'Mike Brown',
+        'System',
+      ][i],
+      senderAvatar:
+        i % 2 === 0 ? undefined : `https://i.pravatar.cc/100?img=${i + 10}`,
     })),
   },
 };

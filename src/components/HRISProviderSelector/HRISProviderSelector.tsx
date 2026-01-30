@@ -72,7 +72,6 @@ export function HRISProviderSelector({
   const {
     search = 'Search HR Providers...',
     importCSV = 'Import from CSV',
-    connected = 'Connected',
     lastSync = 'Last HRIS Sync',
     disconnect = 'Disconnect',
     refreshSync = 'Update Employees',
@@ -84,9 +83,7 @@ export function HRISProviderSelector({
   const filteredProviders = React.useMemo(() => {
     if (!searchQuery.trim()) return providers;
     const query = searchQuery.toLowerCase();
-    return providers.filter((p) =>
-      p.displayName.toLowerCase().includes(query)
-    );
+    return providers.filter((p) => p.displayName.toLowerCase().includes(query));
   }, [providers, searchQuery]);
 
   const formatLastSync = (date?: Date | string) => {
@@ -114,14 +111,21 @@ export function HRISProviderSelector({
 
             {/* Provider Info */}
             <div className="flex-1">
-              <h4 className="text-lg font-bold">{currentProvider.displayName}</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="text-lg font-bold">
+                {currentProvider.displayName}
+              </h4>
+              <p className="text-muted-foreground text-sm">
                 Your data will automatically sync as we receive updates from{' '}
                 {currentProvider.displayName}. For issues, change requests, or
-                additional information regarding your HRIS connection, please email{' '}
-                <a href={`mailto:${supportEmail}`} className="text-primary hover:underline">
+                additional information regarding your HRIS connection, please
+                email{' '}
+                <a
+                  href={`mailto:${supportEmail}`}
+                  className="text-primary hover:underline"
+                >
                   {supportEmail}
-                </a>.
+                </a>
+                .
               </p>
 
               <div className="mt-2 text-sm">
@@ -153,7 +157,7 @@ export function HRISProviderSelector({
             <button
               type="button"
               onClick={onRefreshSync}
-              className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
             >
               <i className="fas fa-rotate mr-2" />
               {refreshSync}
@@ -170,7 +174,7 @@ export function HRISProviderSelector({
       {/* Search Input */}
       <div className="mb-4">
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400">
             <i className="fas fa-search" />
           </span>
           <input
@@ -178,7 +182,7 @@ export function HRISProviderSelector({
             placeholder={search}
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="focus:border-primary focus:ring-primary w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:ring-1 focus:outline-none"
           />
         </div>
       </div>
@@ -199,7 +203,9 @@ export function HRISProviderSelector({
                 className="h-12 w-12 object-contain"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  e.currentTarget.nextElementSibling?.classList.remove(
+                    'hidden'
+                  );
                 }}
               />
               <i className="fas fa-file-csv hidden text-4xl text-gray-400" />
@@ -243,13 +249,15 @@ export function HRISProviderSelector({
                   <i className="fas fa-building text-4xl text-gray-400" />
                 )}
               </div>
-              <span className="text-center text-sm font-medium">{provider.displayName}</span>
+              <span className="text-center text-sm font-medium">
+                {provider.displayName}
+              </span>
             </button>
           ))}
 
         {/* No Results */}
         {!loading && filteredProviders.length === 0 && (
-          <div className="col-span-full py-8 text-center text-muted-foreground">
+          <div className="text-muted-foreground col-span-full py-8 text-center">
             {noProviders}
           </div>
         )}

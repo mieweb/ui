@@ -166,24 +166,6 @@ function MapPinIcon({ className }: { className?: string }) {
   );
 }
 
-function MapIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className={cn('h-5 w-5', className)}
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        d="M8.157 2.176a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.25v10.877a1.5 1.5 0 002.074 1.386l3.51-1.452 4.26 1.762a1.5 1.5 0 001.146 0l4.083-1.69A1.5 1.5 0 0018 14.75V3.873a1.5 1.5 0 00-2.073-1.386l-3.51 1.452-4.26-1.763zM7.58 5a.75.75 0 01.75.75v6.5a.75.75 0 01-1.5 0v-6.5A.75.75 0 017.58 5zm5.59 2.75a.75.75 0 00-1.5 0v6.5a.75.75 0 001.5 0v-6.5z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
-
 function XMarkIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -198,24 +180,6 @@ function XMarkIcon({ className }: { className?: string }) {
   );
 }
 
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className={cn('h-5 w-5', className)}
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
-
 // ============================================================================
 // Sub-components
 // ============================================================================
@@ -226,7 +190,8 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 function InputField({ label, icon, className, id, ...props }: InputFieldProps) {
-  const inputId = id || React.useId();
+  const generatedId = React.useId();
+  const inputId = id || generatedId;
 
   return (
     <div className="relative">
@@ -263,7 +228,8 @@ function SelectField({
   id,
   ...props
 }: SelectFieldProps) {
-  const selectId = id || React.useId();
+  const generatedId = React.useId();
+  const selectId = id || generatedId;
 
   return (
     <div>
@@ -481,6 +447,7 @@ export function ServiceMultiSelect({
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search services..."
               className={cn(inputVariants({ hasIcon: true }), 'pl-8')}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
             <SearchIcon className="absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400" />

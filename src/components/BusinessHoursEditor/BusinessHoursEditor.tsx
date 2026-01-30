@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { cn } from '../../utils/cn';
@@ -94,7 +94,7 @@ export function BusinessHoursEditor({
   onChange,
   disabled = false,
   showDescription = true,
-  use24Hour = false,
+  use24Hour: _use24Hour = false,
   weekStartsOn = 0,
   className,
   addHoursLabel = 'Add Hours',
@@ -182,7 +182,8 @@ export function BusinessHoursEditor({
       const weekdays = [1, 2, 3, 4, 5]; // Monday to Friday
 
       const newSchedule = schedule.map((day) => {
-        if (day.day === sourceDayIndex || !weekdays.includes(day.day)) return day;
+        if (day.day === sourceDayIndex || !weekdays.includes(day.day))
+          return day;
         return {
           ...day,
           hours: sourceDay.hours.map((slot) => ({
@@ -206,16 +207,16 @@ export function BusinessHoursEditor({
         return (
           <div
             key={dayIndex}
-            className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0"
+            className="border-b border-gray-200 pb-4 last:border-0 dark:border-gray-700"
           >
             {/* Day Header */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3 flex items-center justify-between">
               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {DAY_NAMES[dayIndex]}
               </h4>
               <div className="flex items-center gap-2">
                 {hours.length > 0 && (
-                  <div className="relative group">
+                  <div className="group relative">
                     <Button
                       type="button"
                       variant="ghost"
@@ -223,13 +224,13 @@ export function BusinessHoursEditor({
                       disabled={disabled}
                       className="text-xs"
                     >
-                      <CopyIcon className="h-3 w-3 mr-1" />
+                      <CopyIcon className="mr-1 h-3 w-3" />
                       Copy
                     </Button>
-                    <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                    <div className="invisible absolute top-full right-0 z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800">
                       <button
                         type="button"
-                        className="block w-full px-3 py-2 text-xs text-left hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap"
+                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => handleCopyToAll(dayIndex)}
                         disabled={disabled}
                       >
@@ -237,7 +238,7 @@ export function BusinessHoursEditor({
                       </button>
                       <button
                         type="button"
-                        className="block w-full px-3 py-2 text-xs text-left hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap"
+                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => handleCopyToWeekdays(dayIndex)}
                         disabled={disabled}
                       >
@@ -254,7 +255,7 @@ export function BusinessHoursEditor({
                   disabled={disabled}
                   className="text-xs"
                 >
-                  <PlusIcon className="h-3 w-3 mr-1" />
+                  <PlusIcon className="mr-1 h-3 w-3" />
                   {addHoursLabel}
                 </Button>
               </div>
@@ -262,7 +263,7 @@ export function BusinessHoursEditor({
 
             {/* Time Slots */}
             {hours.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+              <p className="text-sm text-gray-500 italic dark:text-gray-400">
                 Closed
               </p>
             ) : (
@@ -270,7 +271,7 @@ export function BusinessHoursEditor({
                 {hours.map((slot, slotIndex) => (
                   <div
                     key={slot.id || slotIndex}
-                    className="flex items-center gap-2 flex-wrap sm:flex-nowrap"
+                    className="flex flex-wrap items-center gap-2 sm:flex-nowrap"
                   >
                     {/* Start Time */}
                     <div className="w-24 sm:w-28">
@@ -314,7 +315,7 @@ export function BusinessHoursEditor({
 
                     {/* Description */}
                     {showDescription && (
-                      <div className="flex-1 min-w-[120px]">
+                      <div className="min-w-[120px] flex-1">
                         <Input
                           type="text"
                           value={slot.description || ''}
@@ -341,7 +342,7 @@ export function BusinessHoursEditor({
                       size="sm"
                       onClick={() => handleRemoveTimeSlot(dayIndex, slotIndex)}
                       disabled={disabled}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                       aria-label={`Remove ${DAY_NAMES_SHORT[dayIndex]} time slot`}
                     >
                       <XIcon className="h-4 w-4" />
@@ -386,10 +387,7 @@ export function createWeekdaySchedule(
 ): DaySchedule[] {
   return Array.from({ length: 7 }, (_, day) => ({
     day,
-    hours:
-      day >= 1 && day <= 5
-        ? [{ id: generateId(), start, end }]
-        : [],
+    hours: day >= 1 && day <= 5 ? [{ id: generateId(), start, end }] : [],
   }));
 }
 

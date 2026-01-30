@@ -212,7 +212,9 @@ export const SimpleWithoutPageInfo: Story = {
   args: {
     ...Simple.args,
   },
-  render: (args) => <SimplePaginationWithState {...args} showPageInfo={false} />,
+  render: (args) => (
+    <SimplePaginationWithState {...args} showPageInfo={false} />
+  ),
 };
 
 // Showcase stories with custom render

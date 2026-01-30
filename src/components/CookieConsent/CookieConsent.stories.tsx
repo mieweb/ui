@@ -47,7 +47,7 @@ type Story = StoryObj<typeof CookieConsentBanner>;
 export const Default: Story = {
   args: {
     isVisible: true,
-    onAccept: () => alert('Cookies accepted!'),
+    onAccept: () => window.alert('Cookies accepted!'),
     termsLink: { label: 'Terms and Conditions', href: '/terms' },
     privacyLink: { label: 'Privacy Policy', href: '/privacy' },
   },
@@ -57,9 +57,9 @@ export const Default: Story = {
 export const WithAllOptions: Story = {
   args: {
     isVisible: true,
-    onAccept: () => alert('Accepted'),
-    onDecline: () => alert('Declined'),
-    onCustomize: () => alert('Customize'),
+    onAccept: () => window.alert('Accepted'),
+    onDecline: () => window.alert('Declined'),
+    onCustomize: () => window.alert('Customize'),
     showDecline: true,
     showCustomize: true,
     termsLink: { label: 'Terms', href: '/terms' },
@@ -73,7 +73,7 @@ export const CornerCard: Story = {
   args: {
     isVisible: true,
     position: 'bottom-right',
-    onAccept: () => alert('Accepted'),
+    onAccept: () => window.alert('Accepted'),
     termsLink: { label: 'Terms', href: '/terms' },
     privacyLink: { label: 'Privacy', href: '/privacy' },
   },
@@ -84,7 +84,7 @@ export const Compact: StoryObj<typeof CompactCookieBanner> = {
   render: () => (
     <CompactCookieBanner
       isVisible={true}
-      onAccept={() => alert('Accepted')}
+      onAccept={() => window.alert('Accepted')}
       privacyHref="/privacy"
     />
   ),

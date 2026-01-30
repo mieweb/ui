@@ -1,8 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-  EmployerView,
-  type EmployerDetails,
-} from './EmployerView';
+import { EmployerView, type EmployerDetails } from './EmployerView';
 
 const meta: Meta<typeof EmployerView> = {
   title: 'Provider/EmployerView',

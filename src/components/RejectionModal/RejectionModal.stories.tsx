@@ -16,7 +16,9 @@ export default meta;
 type Story = StoryObj<typeof RejectionModal>;
 
 // Interactive wrapper
-function InteractiveDemo(props: Partial<React.ComponentProps<typeof RejectionModal>>) {
+function InteractiveDemo(
+  props: Partial<React.ComponentProps<typeof RejectionModal>>
+) {
   const [open, setOpen] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -133,11 +135,23 @@ export const SimpleReasons: Story = {
 export const CustomReasons: Story = {
   render: () => {
     const customReasons: RejectionReason[] = [
-      { id: 'quality', label: 'Quality does not meet standards', requiresDetails: true },
+      {
+        id: 'quality',
+        label: 'Quality does not meet standards',
+        requiresDetails: true,
+      },
       { id: 'late', label: 'Submitted past deadline' },
       { id: 'format', label: 'Incorrect format or structure' },
-      { id: 'incomplete', label: 'Missing required sections', requiresDetails: true },
-      { id: 'plagiarism', label: 'Potential plagiarism detected', requiresDetails: true },
+      {
+        id: 'incomplete',
+        label: 'Missing required sections',
+        requiresDetails: true,
+      },
+      {
+        id: 'plagiarism',
+        label: 'Potential plagiarism detected',
+        requiresDetails: true,
+      },
       { id: 'other', label: 'Other', requiresDetails: true },
     ];
 
@@ -168,21 +182,19 @@ export const NonDangerVariant: Story = {
   ),
 };
 
-export const Submitting: Story = {
-  render: () => {
-    const [open, setOpen] = useState(true);
+function SubmittingWrapper() {
+  const [open, setOpen] = useState(true);
 
-    return (
-      <>
-        <Button variant="danger" onClick={() => setOpen(true)}>
-          Show Submitting State
-        </Button>
-        <RejectionModal
-          open={open}
-          onOpenChange={setOpen}
-          isSubmitting={true}
-        />
-      </>
-    );
-  },
+  return (
+    <>
+      <Button variant="danger" onClick={() => setOpen(true)}>
+        Show Submitting State
+      </Button>
+      <RejectionModal open={open} onOpenChange={setOpen} isSubmitting={true} />
+    </>
+  );
+}
+
+export const Submitting: Story = {
+  render: () => <SubmittingWrapper />,
 };

@@ -51,8 +51,8 @@ export const WithPrintExport: Story = {
         activePreset={preset}
         showPrint
         showExport
-        onPrint={() => alert('Print clicked!')}
-        onExport={() => alert('Export clicked!')}
+        onPrint={() => window.alert('Print clicked!')}
+        onExport={() => window.alert('Export clicked!')}
       />
     );
   },

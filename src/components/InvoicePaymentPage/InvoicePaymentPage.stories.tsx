@@ -21,10 +21,34 @@ const mockInvoice = {
   providerName: 'MedCheck Occupational Health',
   employerName: 'ABC Trucking Company',
   lineItems: [
-    { id: '1', description: 'DOT Physical - John Smith', quantity: 1, unitPrice: 125, total: 125 },
-    { id: '2', description: 'DOT Physical - Jane Doe', quantity: 1, unitPrice: 125, total: 125 },
-    { id: '3', description: '5-Panel Drug Screen - John Smith', quantity: 1, unitPrice: 45, total: 45 },
-    { id: '4', description: '5-Panel Drug Screen - Jane Doe', quantity: 1, unitPrice: 45, total: 45 },
+    {
+      id: '1',
+      description: 'DOT Physical - John Smith',
+      quantity: 1,
+      unitPrice: 125,
+      total: 125,
+    },
+    {
+      id: '2',
+      description: 'DOT Physical - Jane Doe',
+      quantity: 1,
+      unitPrice: 125,
+      total: 125,
+    },
+    {
+      id: '3',
+      description: '5-Panel Drug Screen - John Smith',
+      quantity: 1,
+      unitPrice: 45,
+      total: 45,
+    },
+    {
+      id: '4',
+      description: '5-Panel Drug Screen - Jane Doe',
+      quantity: 1,
+      unitPrice: 45,
+      total: 45,
+    },
   ],
   subtotal: 340,
   tax: 25.5,
@@ -86,7 +110,8 @@ export const Processing: Story = {
 export const WithError: Story = {
   args: {
     invoice: mockInvoice,
-    errorMessage: 'Your card was declined. Please try a different payment method.',
+    errorMessage:
+      'Your card was declined. Please try a different payment method.',
     onSubmitPayment: (data) => console.log('Payment submitted:', data),
   },
 };
@@ -103,7 +128,8 @@ export const Paid: Story = {
 export const PaymentSuccess: Story = {
   args: {
     invoice: mockInvoice,
-    successMessage: 'Your payment of $365.50 was successful! A receipt has been sent to your email.',
+    successMessage:
+      'Your payment of $365.50 was successful! A receipt has been sent to your email.',
   },
 };
 

@@ -112,7 +112,7 @@ export function ProviderSettings({
   };
 
   const updateNotifications = <
-    K extends keyof ProviderSettingsData['notifications']
+    K extends keyof ProviderSettingsData['notifications'],
   >(
     field: K,
     value: ProviderSettingsData['notifications'][K]
@@ -154,9 +154,9 @@ export function ProviderSettings({
 
   if (isLoading) {
     return (
-      <div className={`space-y-4 animate-pulse ${className}`}>
-        <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      <div className={`animate-pulse space-y-4 ${className}`}>
+        <div className="h-12 rounded-lg bg-gray-200 dark:bg-gray-700" />
+        <div className="h-64 rounded-lg bg-gray-200 dark:bg-gray-700" />
       </div>
     );
   }
@@ -169,9 +169,7 @@ export function ProviderSettings({
           Provider Settings
         </h1>
         <div className="flex items-center gap-3">
-          {hasChanges && (
-            <Badge variant="warning">Unsaved changes</Badge>
-          )}
+          {hasChanges && <Badge variant="warning">Unsaved changes</Badge>}
           {onSave && (
             <Button onClick={handleSave} disabled={isSaving || !hasChanges}>
               {isSaving ? 'Saving...' : 'Save Changes'}
@@ -198,19 +196,27 @@ export function ProviderSettings({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="provider-name"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Provider Name
                   </label>
                   <Input
+                    id="provider-name"
                     value={settings.general.name}
                     onChange={(e) => updateGeneral('name', e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="provider-description"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Description
                   </label>
                   <Textarea
+                    id="provider-description"
                     value={settings.general.description || ''}
                     onChange={(e) =>
                       updateGeneral('description', e.target.value)
@@ -220,19 +226,27 @@ export function ProviderSettings({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-npi"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       NPI Number
                     </label>
                     <Input
+                      id="provider-npi"
                       value={settings.general.npi || ''}
                       onChange={(e) => updateGeneral('npi', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-tax-id"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       Tax ID
                     </label>
                     <Input
+                      id="provider-tax-id"
                       value={settings.general.taxId || ''}
                       onChange={(e) => updateGeneral('taxId', e.target.value)}
                     />
@@ -248,30 +262,42 @@ export function ProviderSettings({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="provider-phone"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Phone
                   </label>
                   <Input
+                    id="provider-phone"
                     type="tel"
                     value={settings.general.phone || ''}
                     onChange={(e) => updateGeneral('phone', e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="provider-email"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Email
                   </label>
                   <Input
+                    id="provider-email"
                     type="email"
                     value={settings.general.email || ''}
                     onChange={(e) => updateGeneral('email', e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="provider-website"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Website
                   </label>
                   <Input
+                    id="provider-website"
                     type="url"
                     value={settings.general.website || ''}
                     onChange={(e) => updateGeneral('website', e.target.value)}
@@ -286,59 +312,83 @@ export function ProviderSettings({
                 <CardTitle className="text-lg">Address</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-street"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       Street Address
                     </label>
                     <Input
+                      id="provider-street"
                       value={settings.address.street}
                       onChange={(e) => updateAddress('street', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-street2"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       Street Address 2
                     </label>
                     <Input
+                      id="provider-street2"
                       value={settings.address.street2 || ''}
                       onChange={(e) => updateAddress('street2', e.target.value)}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-city"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       City
                     </label>
                     <Input
+                      id="provider-city"
                       value={settings.address.city}
                       onChange={(e) => updateAddress('city', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-state"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       State
                     </label>
                     <Input
+                      id="provider-state"
                       value={settings.address.state}
                       onChange={(e) => updateAddress('state', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-zip"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       ZIP Code
                     </label>
                     <Input
+                      id="provider-zip"
                       value={settings.address.zip}
                       onChange={(e) => updateAddress('zip', e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                      htmlFor="provider-country"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                       Country
                     </label>
                     <Input
+                      id="provider-country"
                       value={settings.address.country || 'USA'}
                       onChange={(e) => updateAddress('country', e.target.value)}
                     />
@@ -353,11 +403,13 @@ export function ProviderSettings({
         <TabsContent value="notifications">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Notification Preferences</CardTitle>
+              <CardTitle className="text-lg">
+                Notification Preferences
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="font-medium text-gray-900 dark:text-white mb-4">
+                <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
                   Email Notifications
                 </h3>
                 <div className="space-y-4">
@@ -412,8 +464,8 @@ export function ProviderSettings({
                 </div>
               </div>
 
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-4">
+              <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
+                <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
                   SMS Notifications
                 </h3>
                 <div className="space-y-4">
@@ -497,28 +549,39 @@ export function ProviderSettings({
                 </div>
               </div>
 
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6 grid md:grid-cols-2 gap-4">
+              <div className="grid gap-4 border-t border-gray-200 pt-6 md:grid-cols-2 dark:border-gray-700">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="appointment-buffer"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Appointment Buffer (minutes)
                   </label>
                   <Input
+                    id="appointment-buffer"
                     type="number"
                     min={0}
                     value={settings.scheduling.appointmentBuffer}
                     onChange={(e) =>
-                      updateScheduling('appointmentBuffer', parseInt(e.target.value) || 0)
+                      updateScheduling(
+                        'appointmentBuffer',
+                        parseInt(e.target.value) || 0
+                      )
                     }
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Minimum time between appointments
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="max-daily-appointments"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Max Daily Appointments
                   </label>
                   <Input
+                    id="max-daily-appointments"
                     type="number"
                     min={1}
                     value={settings.scheduling.maxDailyAppointments}
@@ -529,7 +592,7 @@ export function ProviderSettings({
                       )
                     }
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Maximum appointments allowed per day
                   </p>
                 </div>
@@ -546,14 +609,14 @@ export function ProviderSettings({
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="font-medium text-gray-900 dark:text-white mb-4">
+                <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
                   Accepted Payment Methods
                 </h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                     <div className="flex items-center gap-3">
                       <svg
-                        className="w-8 h-8 text-gray-600 dark:text-gray-300"
+                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -576,10 +639,10 @@ export function ProviderSettings({
                       }
                     />
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                     <div className="flex items-center gap-3">
                       <svg
-                        className="w-8 h-8 text-gray-600 dark:text-gray-300"
+                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -602,10 +665,10 @@ export function ProviderSettings({
                       }
                     />
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                     <div className="flex items-center gap-3">
                       <svg
-                        className="w-8 h-8 text-gray-600 dark:text-gray-300"
+                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -628,10 +691,10 @@ export function ProviderSettings({
                       }
                     />
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                     <div className="flex items-center gap-3">
                       <svg
-                        className="w-8 h-8 text-gray-600 dark:text-gray-300"
+                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -657,20 +720,27 @@ export function ProviderSettings({
                 </div>
               </div>
 
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
                 <div className="max-w-xs">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="payment-terms"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Payment Terms (days)
                   </label>
                   <Input
+                    id="payment-terms"
                     type="number"
                     min={0}
                     value={settings.payments.paymentTerms}
                     onChange={(e) =>
-                      updatePayments('paymentTerms', parseInt(e.target.value) || 0)
+                      updatePayments(
+                        'paymentTerms',
+                        parseInt(e.target.value) || 0
+                      )
                     }
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Number of days until invoice is due (e.g., Net 30)
                   </p>
                 </div>
