@@ -1,4 +1,5 @@
 import { useEffect, useRef, type RefObject } from 'react';
+import { isStorybookDocsMode } from '../utils/environment';
 
 /**
  * Hook that traps focus within a container element.
@@ -26,7 +27,8 @@ export function useFocusTrap<T extends HTMLElement>(
   const containerRef = useRef<T>(null);
 
   useEffect(() => {
-    if (!enabled || !containerRef.current) return;
+    // Skip focus trap in Storybook docs mode to prevent auto-scroll
+    if (!enabled || !containerRef.current || isStorybookDocsMode()) return;
 
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll<HTMLElement>(

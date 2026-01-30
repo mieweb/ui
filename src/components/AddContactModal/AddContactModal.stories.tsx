@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AddContactModal, ContactFormData } from './AddContactModal';
 import { Button } from '../Button/Button';
 
@@ -8,11 +8,15 @@ const meta: Meta<typeof AddContactModal> = {
   component: AddContactModal,
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
     docs: {
       description: {
         component:
           'A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields.',
+      },
+      story: {
+        inline: true,
+        iframeHeight: 700,
       },
     },
   },
@@ -41,138 +45,119 @@ const meta: Meta<typeof AddContactModal> = {
       control: 'boolean',
       description: 'Whether save is in progress',
     },
+    contact: {
+      control: 'object',
+      description: 'Existing contact data for editing',
+    },
+    onOpenChange: {
+      action: 'onOpenChange',
+    },
+    onSave: {
+      action: 'onSave',
+    },
+  },
+  args: {
+    open: true,
+    title: 'Add Contact',
+    showAddress: true,
+    showCustomFields: true,
+    showPhone: true,
+    isSaving: false,
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof AddContactModal>;
 
-// Interactive wrapper for stories
-function AddContactModalWrapper(
-  props: Partial<React.ComponentProps<typeof AddContactModal>>
-) {
-  const [open, setOpen] = useState(false);
+// Interactive wrapper that syncs with args.open
+function InteractiveWrapper({
+  open: argOpen,
+  onOpenChange,
+  onSave,
+  ...props
+}: React.ComponentProps<typeof AddContactModal>) {
+  const [open, setOpen] = useState(argOpen);
   const [savedContact, setSavedContact] = useState<ContactFormData | null>(
     null
   );
 
+  // Sync with args when they change
+  useEffect(() => {
+    setOpen(argOpen);
+  }, [argOpen]);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    onOpenChange?.(newOpen);
+  };
+
+  const handleSave = (contact: ContactFormData) => {
+    console.log('Saved contact:', contact);
+    setSavedContact(contact);
+    setOpen(false);
+    onSave?.(contact);
+  };
+
   return (
-    <div className="space-y-4">
-      <Button onClick={() => setOpen(true)}>Add Contact</Button>
-
-      <AddContactModal
-        open={open}
-        onOpenChange={setOpen}
-        onSave={(contact) => {
-          console.log('Saved contact:', contact);
-          setSavedContact(contact);
-          setOpen(false);
-        }}
-        {...props}
-      />
-
-      {savedContact && (
-        <div className="mt-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-          <h4 className="mb-2 font-medium">Saved Contact:</h4>
-          <pre className="overflow-auto text-sm">
-            {JSON.stringify(savedContact, null, 2)}
-          </pre>
+    <div className="relative min-h-[700px] w-full">
+      {!open && (
+        <div className="space-y-4 p-4">
+          <Button onClick={() => setOpen(true)}>Open Modal</Button>
+          {savedContact && (
+            <div className="mt-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+              <h4 className="mb-2 font-medium">Saved Contact:</h4>
+              <pre className="overflow-auto text-sm">
+                {JSON.stringify(savedContact, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
       )}
+      <AddContactModal
+        {...props}
+        open={open}
+        onOpenChange={handleOpenChange}
+        onSave={handleSave}
+      />
     </div>
   );
 }
 
-// Wrapper for EditMode story
-function EditModeWrapper() {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <AddContactModal
-      open={open}
-      onOpenChange={setOpen}
-      onSave={(contact) => {
-        console.log('Updated contact:', contact);
-        setOpen(false);
-      }}
-      contact={{
-        id: '123',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        sex: 'F',
-        positionTitle: 'Office Manager',
-        degree: 'MBA',
-        email: 'jane.smith@example.com',
-        phone: '(555) 123-4567',
-        address: {
-          street1: '123 Main St',
-          street2: 'Suite 100',
-          city: 'Fort Wayne',
-          state: 'IN',
-          postalCode: '46802',
-        },
-        customFields: [
-          { name: 'Extension', value: '1234' },
-          { name: 'Department', value: 'Administration' },
-        ],
-      }}
-    />
-  );
-}
-
-// Wrapper for SavingState story
-function SavingStateWrapper() {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <AddContactModal
-      open={open}
-      onOpenChange={setOpen}
-      onSave={() => {}}
-      isSaving={true}
-    />
-  );
-}
-
-// Wrapper for WithValidationErrors story
-function WithValidationErrorsWrapper() {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <AddContactModal
-      open={open}
-      onOpenChange={setOpen}
-      onSave={(contact) => {
-        console.log('Saved contact:', contact);
-        setOpen(false);
-      }}
-      contact={{
-        firstName: '',
-        lastName: '',
-        email: 'invalid-email',
-      }}
-    />
-  );
-}
-
 export const Default: Story = {
-  render: (args) => <AddContactModalWrapper {...args} />,
-  args: {
-    title: 'Add Contact',
-    showAddress: true,
-    showCustomFields: true,
-    showPhone: true,
-  },
+  render: (args) => <InteractiveWrapper {...args} />,
 };
 
 export const EditMode: Story = {
-  render: () => <EditModeWrapper />,
+  render: (args) => <InteractiveWrapper {...args} />,
+  args: {
+    title: 'Edit Contact',
+    contact: {
+      id: '123',
+      firstName: 'Jane',
+      lastName: 'Smith',
+      sex: 'F',
+      positionTitle: 'Office Manager',
+      degree: 'MBA',
+      email: 'jane.smith@example.com',
+      phone: '(555) 123-4567',
+      address: {
+        street1: '123 Main St',
+        street2: 'Suite 100',
+        city: 'Fort Wayne',
+        state: 'IN',
+        postalCode: '46802',
+      },
+      customFields: [
+        { name: 'Extension', value: '1234' },
+        { name: 'Department', value: 'Administration' },
+      ],
+    },
+  },
 };
 
 export const MinimalFields: Story = {
-  render: (args) => <AddContactModalWrapper {...args} />,
+  render: (args) => <InteractiveWrapper {...args} />,
   args: {
-    title: 'Add Contact',
     showAddress: false,
     showCustomFields: false,
     showPhone: false,
@@ -180,9 +165,8 @@ export const MinimalFields: Story = {
 };
 
 export const WithPhoneOnly: Story = {
-  render: (args) => <AddContactModalWrapper {...args} />,
+  render: (args) => <InteractiveWrapper {...args} />,
   args: {
-    title: 'Add Contact',
     showAddress: false,
     showCustomFields: false,
     showPhone: true,
@@ -190,38 +174,39 @@ export const WithPhoneOnly: Story = {
 };
 
 export const SavingState: Story = {
-  render: () => <SavingStateWrapper />,
+  render: (args) => <InteractiveWrapper {...args} />,
+  args: {
+    isSaving: true,
+  },
 };
 
 export const WithValidationErrors: Story = {
-  render: () => <WithValidationErrorsWrapper />,
+  render: (args) => <InteractiveWrapper {...args} />,
+  args: {
+    contact: {
+      firstName: '',
+      lastName: '',
+      email: 'invalid-email',
+    },
+  },
   parameters: {
     docs: {
       description: {
-        story: 'Try clicking Save to see validation errors',
+        story: 'Click Save to see validation errors',
       },
     },
   },
 };
 
 export const ProviderContact: Story = {
-  render: (args) => <AddContactModalWrapper {...args} />,
+  render: (args) => <InteractiveWrapper {...args} />,
   args: {
     title: 'Provider Contact',
-    showAddress: true,
-    showCustomFields: true,
-    showPhone: true,
   },
 };
 
 export const Mobile: Story = {
-  render: (args) => <AddContactModalWrapper {...args} />,
-  args: {
-    title: 'Add Contact',
-    showAddress: true,
-    showCustomFields: true,
-    showPhone: true,
-  },
+  render: (args) => <InteractiveWrapper {...args} />,
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',

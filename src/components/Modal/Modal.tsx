@@ -1,8 +1,27 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { isStorybookDocsMode } from '../../utils/environment';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+
+/**
+ * Modal scroll lock state manager.
+ * Uses a singleton pattern with ref-like storage to track open modals
+ * and manage body scroll locking across multiple modal instances.
+ * Includes reset capability for testing environments.
+ */
+const scrollLockState = {
+  count: 0,
+  originalOverflow: null as string | null,
+  reset() {
+    this.count = 0;
+    this.originalOverflow = null;
+  },
+};
+
+// Export for testing environments
+export const __resetScrollLockState = () => scrollLockState.reset();
 
 const modalOverlayVariants = cva(
   [
@@ -126,15 +145,32 @@ function Modal({
     [closeOnOverlayClick, onOpenChange]
   );
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open (handles multiple modals)
+  // Skip scroll lock in Storybook docs mode where multiple stories render inline
   React.useEffect(() => {
-    if (open) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
+    // Skip scroll lock entirely in Storybook docs mode
+    if (!open || isStorybookDocsMode()) {
+      return undefined;
     }
+
+    scrollLockState.count++;
+    // Only capture and set overflow when first modal opens
+    if (scrollLockState.count === 1) {
+      scrollLockState.originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      scrollLockState.count--;
+      // Only restore overflow when last modal closes
+      if (
+        scrollLockState.count === 0 &&
+        scrollLockState.originalOverflow !== null
+      ) {
+        document.body.style.overflow = scrollLockState.originalOverflow;
+        scrollLockState.originalOverflow = null;
+      }
+    };
   }, [open]);
 
   if (!open) return null;
