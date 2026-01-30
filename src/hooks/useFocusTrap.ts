@@ -1,10 +1,5 @@
 import { useEffect, useRef, type RefObject } from 'react';
-
-// Check if we're in Storybook docs mode (multiple stories rendered inline)
-function isStorybookDocsMode(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.location.search.includes('viewMode=docs');
-}
+import { isStorybookDocsMode } from '../utils/environment';
 
 /**
  * Hook that traps focus within a container element.
