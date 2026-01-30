@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   prerelease:
@@ -67,7 +66,7 @@ jobs:
           npm version $PRERELEASE_VERSION --no-git-tag-version --allow-same-version
 
       - name: Publish prerelease to npm
-        run: npm publish --access public --provenance --tag next
+        run: npm publish --access public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_SECRET }}
 
