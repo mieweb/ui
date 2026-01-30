@@ -297,7 +297,7 @@ const rowData = [
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'bordered', 'striped'],
+      options: ['default', 'card', 'bordered', 'striped'],
       description: 'Visual variant of the grid',
       table: {
         defaultValue: { summary: 'default' },
@@ -305,7 +305,7 @@ const rowData = [
     },
     size: {
       control: 'select',
-      options: ['sm', 'md', 'lg'],
+      options: ['xs', 'sm', 'md', 'lg', 'xl'],
       description: 'Size/density of the grid rows',
       table: {
         defaultValue: { summary: 'md' },
@@ -325,6 +325,28 @@ const rowData = [
         defaultValue: { summary: 'false' },
       },
     },
+    pagination: {
+      control: 'boolean',
+      description: 'Show pagination controls',
+    },
+    resizable: {
+      control: 'boolean',
+      description: 'Enable column resizing',
+    },
+    sortable: {
+      control: 'boolean',
+      description: 'Enable sorting',
+    },
+    filterable: {
+      control: 'boolean',
+      description: 'Enable filtering',
+    },
+    // Disable controls for props that can't be edited via Storybook
+    gridRef: { control: false },
+    ref: { control: false },
+    onRowClick: { control: false },
+    brandConfig: { control: false },
+    rowSelection: { control: false },
   },
 };
 
@@ -340,6 +362,11 @@ export const Default: Story = {
     variant: 'default',
     size: 'md',
     height: 400,
+    loading: false,
+    pagination: false,
+    resizable: false,
+    sortable: false,
+    filterable: false,
     columnDefs: basicColumnDefs as ColDef[],
     rowData: userData,
   },
@@ -979,6 +1006,9 @@ export const CompanyAndLinksRenderers: Story = {
         cellRendererParams: {
           maxVisible: 2,
         },
+        // Provide valueFormatter for array data to prevent AG Grid warning #48
+        valueFormatter: (params) =>
+          Array.isArray(params.value) ? params.value.join(', ') : '',
       },
     ];
 

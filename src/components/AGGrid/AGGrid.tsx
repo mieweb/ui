@@ -101,6 +101,18 @@ export interface AGGridProps<TData = unknown>
 // Default Column Definitions
 // ============================================================================
 
+// Size to pixel height mapping for AG Grid (row heights + default container heights)
+const sizeToRowHeight: Record<
+  string,
+  { rowHeight: number; headerHeight: number; containerHeight: number }
+> = {
+  xs: { rowHeight: 28, headerHeight: 28, containerHeight: 280 },
+  sm: { rowHeight: 32, headerHeight: 32, containerHeight: 320 },
+  md: { rowHeight: 40, headerHeight: 40, containerHeight: 400 },
+  lg: { rowHeight: 48, headerHeight: 48, containerHeight: 480 },
+  xl: { rowHeight: 56, headerHeight: 56, containerHeight: 560 },
+};
+
 // Enhanced default column definitions with brand awareness
 const getDefaultColDef = (
   sortable: boolean,
@@ -158,7 +170,7 @@ function AGGridInner<TData = unknown>(
     variant,
     size,
     brand,
-    height = 400,
+    height,
     loading = false,
     columnDefs,
     rowData,
@@ -251,11 +263,20 @@ function AGGridInner<TData = unknown>(
     }
   }, [loading]);
 
+  // Get row/header heights based on size prop
+  const sizeConfig = sizeToRowHeight[size || 'md'];
+
+  // Use provided height or default based on size
+  const resolvedHeight = height ?? sizeConfig.containerHeight;
+
   return (
     <div
       className={cn(agGridVariants({ variant, size, brand }), className)}
       style={{
-        height: typeof height === 'number' ? `${height}px` : height,
+        height:
+          typeof resolvedHeight === 'number'
+            ? `${resolvedHeight}px`
+            : resolvedHeight,
         ...(brandConfig &&
           ({
             '--ag-primary-color': brandConfig.colors.primary[600],
@@ -278,6 +299,8 @@ function AGGridInner<TData = unknown>(
         pagination={pagination}
         paginationPageSize={pagination ? 50 : undefined}
         paginationPageSizeSelector={pagination ? [25, 50, 100, 200] : undefined}
+        rowHeight={sizeConfig.rowHeight}
+        headerHeight={sizeConfig.headerHeight}
         noRowsOverlayComponent={() => (
           <div className="text-muted-foreground py-8 text-center">
             {noDataMessage}
