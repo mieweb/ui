@@ -84,59 +84,41 @@ const MenuIcon = () => (
   </svg>
 );
 
+const XIcon = () => (
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18L18 6M6 6l12 12"
+    />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    />
+  </svg>
+);
+
 // =============================================================================
 // Demo Components
 // =============================================================================
-
-function FullHeaderDemo() {
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-  return (
-    <AppHeader className="w-full">
-      <AppHeaderSection align="left">
-        <button
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800"
-          aria-label="Open menu"
-        >
-          <MenuIcon />
-        </button>
-        <AppHeaderSearch
-          onClick={() => console.log('Open search')}
-          placeholder="Search everything..."
-        />
-      </AppHeaderSection>
-
-      <AppHeaderSection align="right">
-        <AppHeaderActions>
-          <AppHeaderIconButton
-            icon={<MessageIcon />}
-            label="Messages"
-            badge={3}
-            onClick={() => console.log('Messages')}
-          />
-          <AppHeaderIconButton
-            icon={<BellIcon />}
-            label="Notifications"
-            badge={5}
-            onClick={() => console.log('Notifications')}
-          />
-          <AppHeaderIconButton
-            icon={<CogIcon />}
-            label="Settings"
-            onClick={() => console.log('Settings')}
-          />
-          <AppHeaderDivider />
-          <AppHeaderUserMenu
-            name="John Doe"
-            email="john@example.com"
-            isOpen={isUserMenuOpen}
-            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-          />
-        </AppHeaderActions>
-      </AppHeaderSection>
-    </AppHeader>
-  );
-}
 
 function SimpleHeaderDemo() {
   return (
@@ -200,6 +182,69 @@ const meta: Meta<typeof AppHeader> = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    sticky: {
+      control: 'boolean',
+      description: 'Whether the header is sticky',
+    },
+    bordered: {
+      control: 'boolean',
+      description: 'Whether to show border',
+    },
+    height: {
+      control: 'text',
+      description: 'Custom height class',
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes',
+    },
+    children: {
+      control: false, // ReactNode can't be controlled
+    },
+    // Demo controls (not actual component props)
+    showBranding: {
+      control: 'boolean',
+      description: 'Show branding/logo',
+      table: { category: 'Demo Controls' },
+    },
+    showSearch: {
+      control: 'boolean',
+      description: 'Show search button',
+      table: { category: 'Demo Controls' },
+    },
+    showMessages: {
+      control: 'boolean',
+      description: 'Show messages icon',
+      table: { category: 'Demo Controls' },
+    },
+    showNotifications: {
+      control: 'boolean',
+      description: 'Show notifications icon',
+      table: { category: 'Demo Controls' },
+    },
+    showSettings: {
+      control: 'boolean',
+      description: 'Show settings icon',
+      table: { category: 'Demo Controls' },
+    },
+    showUserMenu: {
+      control: 'boolean',
+      description: 'Show user menu',
+      table: { category: 'Demo Controls' },
+    },
+  },
+  args: {
+    sticky: true,
+    bordered: true,
+    height: 'h-16',
+    showBranding: true,
+    showSearch: true,
+    showMessages: true,
+    showNotifications: true,
+    showSettings: true,
+    showUserMenu: true,
+  },
 };
 
 export default meta;
@@ -210,7 +255,234 @@ type Story = StoryObj<typeof meta>;
 // =============================================================================
 
 export const Default: Story = {
-  render: () => <FullHeaderDemo />,
+  render: ({
+    showBranding,
+    showSearch,
+    showMessages,
+    showNotifications,
+    showSettings,
+    showUserMenu,
+    ...args
+  }) => (
+    <AppHeader {...args}>
+      <AppHeaderSection align="left">
+        {showBranding && (
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white font-bold text-sm">
+              A
+            </div>
+            <span className="hidden font-semibold text-gray-900 dark:text-white sm:block">
+              Acme Inc
+            </span>
+          </div>
+        )}
+        <button
+          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800"
+          aria-label="Open menu"
+        >
+          <MenuIcon />
+        </button>
+        {showSearch && (
+          <AppHeaderSearch
+            onClick={() => console.log('Open search')}
+            placeholder="Search everything..."
+          />
+        )}
+      </AppHeaderSection>
+
+      <AppHeaderSection align="right">
+        <AppHeaderActions>
+          {showMessages && (
+            <AppHeaderIconButton
+              icon={<MessageIcon />}
+              label="Messages"
+              badge={3}
+              onClick={() => console.log('Messages')}
+            />
+          )}
+          {showNotifications && (
+            <AppHeaderIconButton
+              icon={<BellIcon />}
+              label="Notifications"
+              badge={5}
+              onClick={() => console.log('Notifications')}
+            />
+          )}
+          {showSettings && (
+            <AppHeaderIconButton
+              icon={<CogIcon />}
+              label="Settings"
+              onClick={() => console.log('Settings')}
+            />
+          )}
+          {showUserMenu && (
+            <>
+              <AppHeaderDivider />
+              <AppHeaderUserMenu name="John Doe" email="john@example.com" />
+            </>
+          )}
+        </AppHeaderActions>
+      </AppHeaderSection>
+    </AppHeader>
+  ),
+};
+
+/**
+ * Mobile header story - demonstrates a responsive header pattern where
+ * action icons collapse into a hamburger menu on mobile devices.
+ * The story is displayed at mobile width (375px) to simulate mobile view.
+ */
+export const Mobile: Story = {
+  render: function MobileDemo({ sticky, bordered, height }) {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    return (
+      <div className="relative w-full max-w-[375px] bg-gray-50 dark:bg-gray-950">
+        <AppHeader
+          sticky={sticky}
+          bordered={bordered}
+          height={height}
+          className="w-full"
+        >
+          <AppHeaderSection align="left">
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white font-bold text-sm">
+                A
+              </div>
+            </div>
+          </AppHeaderSection>
+
+          <AppHeaderSection align="right">
+            <AppHeaderActions>
+              {/* Mobile search button */}
+              <AppHeaderIconButton
+                icon={<SearchIcon />}
+                label="Search"
+                onClick={() => console.log('Search')}
+              />
+              {/* Hamburger menu button */}
+              <button
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {mobileMenuOpen ? <XIcon /> : <MenuIcon />}
+              </button>
+            </AppHeaderActions>
+          </AppHeaderSection>
+        </AppHeader>
+
+        {/* Mobile slide-out menu */}
+        {mobileMenuOpen && (
+          <div className="absolute top-16 right-0 left-0 z-40 border-b border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+            <div className="flex flex-col p-4 gap-2">
+              {/* User info at top */}
+              <div className="flex items-center gap-3 px-2 py-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 font-medium">
+                  JD
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    John Doe
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    john@example.com
+                  </div>
+                </div>
+              </div>
+
+              {/* Menu items */}
+              <button
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                onClick={() => console.log('Messages')}
+              >
+                <MessageIcon />
+                <span>Messages</span>
+                <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                  3
+                </span>
+              </button>
+
+              <button
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                onClick={() => console.log('Notifications')}
+              >
+                <BellIcon />
+                <span>Notifications</span>
+                <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                  5
+                </span>
+              </button>
+
+              <button
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                onClick={() => console.log('Settings')}
+              >
+                <CogIcon />
+                <span>Settings</span>
+              </button>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
+                <button
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                  onClick={() => console.log('Sign out')}
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                  <span>Sign out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mock page content */}
+        <div className="p-4">
+          <div className="h-8 w-3/4 rounded bg-gray-200 dark:bg-gray-800 mb-4" />
+          <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-800 mb-2" />
+          <div className="h-4 w-5/6 rounded bg-gray-200 dark:bg-gray-800 mb-2" />
+          <div className="h-4 w-4/6 rounded bg-gray-200 dark:bg-gray-800" />
+        </div>
+      </div>
+    );
+  },
+  args: {
+    sticky: true,
+    bordered: true,
+    height: 'h-16',
+  },
+  argTypes: {
+    // Only show the core component props, not the demo controls
+    showBranding: { table: { disable: true } },
+    showSearch: { table: { disable: true } },
+    showMessages: { table: { disable: true } },
+    showNotifications: { table: { disable: true } },
+    showSettings: { table: { disable: true } },
+    showUserMenu: { table: { disable: true } },
+  },
+  parameters: {
+    viewport: {
+      defaultViewport: 'mobile1',
+    },
+    docs: {
+      description: {
+        story:
+          'Mobile-optimized header with icons collapsed into a hamburger menu. Click the menu button to see the slide-out panel with all actions.',
+      },
+    },
+  },
 };
 
 export const Simple: Story = {
