@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0, v1.2.3-beta.1
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Build package
+        run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
+
+      - name: Set package version from tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Setting version to $VERSION"
+          npm version $VERSION --no-git-tag-version --allow-same-version
+
+      - name: Determine npm tag
+        id: npm-tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          if [[ "$VERSION" == *"-"* ]]; then
+            # Prerelease version (contains hyphen, e.g., 1.0.0-beta.1)
+            echo "tag=next" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            # Stable version
+            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance --tag ${{ steps.npm-tag.outputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_SECRET }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          prerelease: ${{ steps.npm-tag.outputs.prerelease == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

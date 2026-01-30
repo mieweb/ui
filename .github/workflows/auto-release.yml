@@ -1,0 +1,83 @@
+name: Auto Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '*.md'
+      - '.github/**'
+      - '!.github/workflows/auto-release.yml'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  prerelease:
+    name: Publish Prerelease
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Build package
+        run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
+
+      - name: Set prerelease version
+        id: version
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          # Remove any existing prerelease suffix
+          BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/-.*//')
+          # Create prerelease version with run number
+          PRERELEASE_VERSION="${BASE_VERSION}-dev.${GITHUB_RUN_NUMBER}"
+          echo "version=$PRERELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "Setting prerelease version to $PRERELEASE_VERSION"
+          npm version $PRERELEASE_VERSION --no-git-tag-version --allow-same-version
+
+      - name: Publish prerelease to npm
+        run: npm publish --access public --provenance --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_SECRET }}
+
+      - name: Summary
+        run: |
+          echo "## 📦 Prerelease Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Install with:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "npm install @mieweb/ui@next" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

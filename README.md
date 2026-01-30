@@ -25,6 +25,7 @@ A themeable, accessible React component library built with Tailwind CSS 4.
 - [Components](#components)
 - [Hooks](#hooks)
 - [Utilities](#utilities)
+- [Releases](#releases)
 - [Contributing](#contributing)
 
 ## Installation
@@ -589,6 +590,69 @@ All components are fully typed. Import types as needed:
 ```tsx
 import type { ButtonProps, InputProps, Theme } from '@mieweb/ui';
 ```
+
+## Releases
+
+This package uses automated releases via GitHub Actions. There are two release channels:
+
+### Release Channels
+
+| Channel | npm Tag | Install Command | Description |
+| ------- | ------- | --------------- | ----------- |
+| **Stable** | `latest` | `npm install @mieweb/ui` | Production-ready releases |
+| **Prerelease** | `next` | `npm install @mieweb/ui@next` | Latest from `main` branch |
+
+### Prerelease (Automatic)
+
+Every push to the `main` branch automatically publishes a prerelease version to npm:
+
+- **Version format:** `x.y.z-dev.{run_number}` (e.g., `0.1.0-dev.45`)
+- **npm tag:** `next`
+- **Install:** `npm install @mieweb/ui@next`
+
+This allows consumers to test the latest changes before a stable release.
+
+### Stable Release (Manual)
+
+To create a stable release:
+
+1. Go to the repository on GitHub
+2. Navigate to **Actions** → **Create Stable Release**
+3. Click **Run workflow**
+4. Select the version bump type:
+   - `patch` - Bug fixes (0.1.0 → 0.1.1)
+   - `minor` - New features (0.1.0 → 0.2.0)
+   - `major` - Breaking changes (0.1.0 → 1.0.0)
+5. Click **Run workflow**
+
+The workflow will:
+1. Bump the version in `package.json`
+2. Commit and push the change
+3. Create a git tag (e.g., `v0.2.0`)
+4. Trigger the release workflow which publishes to npm and creates a GitHub Release
+
+### Manual Tag Release
+
+You can also create a release by pushing a version tag directly:
+
+```bash
+# Create and push a tag
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The release workflow will automatically:
+- Run tests and build
+- Publish to npm with the appropriate tag (`latest` for stable, `next` for prereleases like `v1.0.0-beta.1`)
+- Create a GitHub Release with auto-generated release notes
+
+### Version Guidelines
+
+We follow [Semantic Versioning](https://semver.org/):
+
+- **MAJOR** version for incompatible API changes
+- **MINOR** version for backwards-compatible functionality additions
+- **PATCH** version for backwards-compatible bug fixes
 
 ## Contributing
 

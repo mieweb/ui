@@ -12,6 +12,10 @@
   "bugs": {
     "url": "https://github.com/mieweb/ui/issues"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "keywords": [
     "react",
     "components",

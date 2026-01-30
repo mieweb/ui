@@ -1,0 +1,76 @@
+name: Create Stable Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Stable Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bump version
+        id: bump
+        run: |
+          # Get current version and strip any prerelease suffix
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/-.*//')
+          
+          # Set to base version first (removes prerelease suffix)
+          npm version $BASE_VERSION --no-git-tag-version --allow-same-version
+          
+          # Now bump the version
+          NEW_VERSION=$(npm version ${{ inputs.version_type }} --no-git-tag-version | sed 's/v//')
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Commit version bump
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore: release v${{ steps.bump.outputs.new_version }}"
+          git push
+
+      - name: Create and push tag
+        run: |
+          git tag -a "v${{ steps.bump.outputs.new_version }}" -m "Release v${{ steps.bump.outputs.new_version }}"
+          git push origin "v${{ steps.bump.outputs.new_version }}"
+
+      - name: Summary
+        run: |
+          echo "## 🚀 Stable Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`v${{ steps.bump.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release workflow will now publish to npm." >> $GITHUB_STEP_SUMMARY
