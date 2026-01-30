@@ -43,8 +43,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    children: 'This is a paragraph of text.',
+    children:
+      'This is a paragraph of text that demonstrates how the Text component works with different options including truncation.',
+    variant: 'default',
+    size: 'base',
+    weight: 'normal',
+    align: 'left',
+    truncate: false,
   },
+  decorators: [
+    (Story) => (
+      <div style={{ width: '300px' }}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export const AllVariants: Story = {
