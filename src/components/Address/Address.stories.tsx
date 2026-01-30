@@ -30,6 +30,7 @@ const meta: Meta<typeof Address> = {
     showIcon: { control: 'boolean' },
     hideStreet: { control: 'boolean' },
     hidePostalCode: { control: 'boolean' },
+    icon: { control: false }, // ReactNode can't be controlled via Storybook
   },
 };
 
