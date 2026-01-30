@@ -129,7 +129,17 @@ var Switch = React.forwardRef(
           children: label
         }
       ),
-      description && /* @__PURE__ */ jsx("p", { id: descriptionId, className: cn("text-muted-foreground", descriptionSizeClasses[size || "md"]), children: description })
+      description && /* @__PURE__ */ jsx(
+        "p",
+        {
+          id: descriptionId,
+          className: cn(
+            "text-muted-foreground",
+            descriptionSizeClasses[size || "md"]
+          ),
+          children: description
+        }
+      )
     ] });
     return /* @__PURE__ */ jsxs(
       "div",
@@ -149,5 +159,5 @@ var Switch = React.forwardRef(
 Switch.displayName = "Switch";
 
 export { Switch, switchThumbVariants, switchTrackVariants };
-//# sourceMappingURL=chunk-FQ2FMI62.js.map
-//# sourceMappingURL=chunk-FQ2FMI62.js.map
+//# sourceMappingURL=chunk-QL2YTVTR.js.map
+//# sourceMappingURL=chunk-QL2YTVTR.js.map

@@ -1,6 +1,6 @@
 'use strict';
 
-var chunkKJUF2RJN_cjs = require('../../chunk-KJUF2RJN.cjs');
+var chunkCQCYXHCU_cjs = require('../../chunk-CQCYXHCU.cjs');
 require('../../chunk-VV4N4WY6.cjs');
 require('../../chunk-BTJHYGPI.cjs');
 require('../../chunk-OR5DRJCW.cjs');
@@ -9,11 +9,11 @@ require('../../chunk-OR5DRJCW.cjs');
 
 Object.defineProperty(exports, "PhoneInput", {
   enumerable: true,
-  get: function () { return chunkKJUF2RJN_cjs.PhoneInput; }
+  get: function () { return chunkCQCYXHCU_cjs.PhoneInput; }
 });
 Object.defineProperty(exports, "PhoneInputGroup", {
   enumerable: true,
-  get: function () { return chunkKJUF2RJN_cjs.PhoneInputGroup; }
+  get: function () { return chunkCQCYXHCU_cjs.PhoneInputGroup; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

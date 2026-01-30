@@ -4,6 +4,7 @@ import 'class-variance-authority/types';
 import 'class-variance-authority';
 
 type DateInputMode = 'default' | 'dob' | 'expiration' | 'past' | 'future';
+type DateInputWidth = 'full' | 'fit' | 'fixed';
 interface DateInputProps extends Omit<InputProps, 'type' | 'onChange' | 'value'> {
     /** The date value in MM/DD/YYYY format */
     value?: string;
@@ -17,6 +18,10 @@ interface DateInputProps extends Omit<InputProps, 'type' | 'onChange' | 'value'>
     maxAge?: number;
     /** Whether to validate on blur */
     validateOnBlur?: boolean;
+    /** Whether to show a calendar picker button */
+    showCalendar?: boolean;
+    /** Width behavior of the input */
+    width?: DateInputWidth;
 }
 /**
  * A date input that automatically formats to MM/DD/YYYY with validation modes.
@@ -29,6 +34,12 @@ interface DateInputProps extends Omit<InputProps, 'type' | 'onChange' | 'value'>
  *   mode="dob"
  *   minAge={18}
  *   validateOnBlur
+ * />
+ *
+ * // With calendar picker
+ * <DateInput
+ *   label="Select Date"
+ *   showCalendar
  * />
  *
  * // Expiration date

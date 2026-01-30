@@ -65,7 +65,7 @@ declare const waveformContainerVariants: (props?: ({
     state?: "paused" | "idle" | "listening" | "recording" | "stopped" | "playback" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const controlButtonVariants: (props?: ({
-    variant?: "primary" | "danger" | "secondary" | "ghost" | null | undefined;
+    variant?: "primary" | "secondary" | "ghost" | "danger" | null | undefined;
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare function formatTime(seconds: number): string;

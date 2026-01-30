@@ -3,7 +3,7 @@ import * as class_variance_authority_types from 'class-variance-authority/types'
 import * as React from 'react';
 
 declare const quickActionIconVariants: (props?: ({
-    color?: "blue" | "green" | "orange" | "purple" | "red" | "primary" | "amber" | "neutral" | null | undefined;
+    color?: "primary" | "blue" | "green" | "orange" | "purple" | "red" | "amber" | "neutral" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const quickActionVariants: (props?: ({
     disabled?: boolean | null | undefined;

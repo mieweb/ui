@@ -1,3 +1,4 @@
+import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
 import { InputProps } from '../Input/index.cjs';
 import 'class-variance-authority/types';
@@ -28,5 +29,52 @@ interface PhoneInputProps extends Omit<InputProps, 'type' | 'onChange' | 'value'
  * ```
  */
 declare const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps & React.RefAttributes<HTMLInputElement>>;
+type PhoneType = 'cell' | 'landline' | 'home' | 'work' | 'fax';
+interface PhoneEntry {
+    number: string;
+    type: PhoneType;
+}
+interface PhoneInputGroupProps {
+    /** Array of phone entries */
+    value: PhoneEntry[];
+    /** Callback when phone entries change */
+    onChange: (phones: PhoneEntry[]) => void;
+    /** Minimum number of phone entries (default: 1) */
+    minEntries?: number;
+    /** Maximum number of phone entries (default: 5) */
+    maxEntries?: number;
+    /** Whether the first entry is required */
+    required?: boolean;
+    /** Whether all inputs are disabled */
+    disabled?: boolean;
+    /** Validate on blur */
+    validateOnBlur?: boolean;
+    /** Label for the phone input */
+    label?: string;
+    /** Labels for type options (for i18n) */
+    typeLabels?: Record<PhoneType, string>;
+    /** Custom className */
+    className?: string;
+}
+/**
+ * A group of phone inputs with type selection and add/remove functionality.
+ *
+ * @example
+ * ```tsx
+ * const [phones, setPhones] = useState<PhoneEntry[]>([
+ *   { number: '', type: 'cell' }
+ * ]);
+ *
+ * <PhoneInputGroup
+ *   value={phones}
+ *   onChange={setPhones}
+ *   required
+ * />
+ * ```
+ */
+declare function PhoneInputGroup({ value, onChange, minEntries, maxEntries, required, disabled, validateOnBlur, label, typeLabels, className, }: PhoneInputGroupProps): react_jsx_runtime.JSX.Element;
+declare namespace PhoneInputGroup {
+    var displayName: string;
+}
 
-export { PhoneInput, type PhoneInputProps };
+export { type PhoneEntry, PhoneInput, PhoneInputGroup, type PhoneInputGroupProps, type PhoneInputProps, type PhoneType };

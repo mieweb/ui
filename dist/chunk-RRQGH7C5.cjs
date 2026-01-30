@@ -151,7 +151,17 @@ var Switch = React__namespace.forwardRef(
           children: label
         }
       ),
-      description && /* @__PURE__ */ jsxRuntime.jsx("p", { id: descriptionId, className: chunkOR5DRJCW_cjs.cn("text-muted-foreground", descriptionSizeClasses[size || "md"]), children: description })
+      description && /* @__PURE__ */ jsxRuntime.jsx(
+        "p",
+        {
+          id: descriptionId,
+          className: chunkOR5DRJCW_cjs.cn(
+            "text-muted-foreground",
+            descriptionSizeClasses[size || "md"]
+          ),
+          children: description
+        }
+      )
     ] });
     return /* @__PURE__ */ jsxRuntime.jsxs(
       "div",
@@ -173,5 +183,5 @@ Switch.displayName = "Switch";
 exports.Switch = Switch;
 exports.switchThumbVariants = switchThumbVariants;
 exports.switchTrackVariants = switchTrackVariants;
-//# sourceMappingURL=chunk-EKDESI6T.cjs.map
-//# sourceMappingURL=chunk-EKDESI6T.cjs.map
+//# sourceMappingURL=chunk-RRQGH7C5.cjs.map
+//# sourceMappingURL=chunk-RRQGH7C5.cjs.map

@@ -4,13 +4,13 @@ import { VariantProps } from 'class-variance-authority';
 
 declare const cardVariants: (props?: ({
     padding?: "sm" | "md" | "lg" | "xl" | "none" | null | undefined;
-    variant?: "default" | "filled" | "elevated" | "ghost" | "outlined" | null | undefined;
+    variant?: "ghost" | "default" | "filled" | "elevated" | "outlined" | null | undefined;
     interactive?: boolean | null | undefined;
     selected?: boolean | null | undefined;
     orientation?: "horizontal" | "vertical" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const cardAccentVariants: (props?: ({
-    color?: "success" | "info" | "warning" | "primary" | "destructive" | null | undefined;
+    color?: "primary" | "success" | "info" | "warning" | "destructive" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface CardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {
     /** Semantic HTML element to render as */

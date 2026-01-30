@@ -54,7 +54,7 @@ declare function useThemeContext(): ThemeProviderContextValue;
 
 declare const themeToggleVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
-    variant?: "default" | "ghost" | null | undefined;
+    variant?: "ghost" | "default" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const themeToggleIconVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;

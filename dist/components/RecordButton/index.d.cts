@@ -43,7 +43,7 @@ interface RecordButtonProps extends VariantProps<typeof recordButtonVariants> {
     showTranscriptionState?: boolean;
 }
 declare const recordButtonVariants: (props?: ({
-    variant?: "default" | "filled" | "primary" | null | undefined;
+    variant?: "primary" | "default" | "filled" | null | undefined;
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const recordingIndicatorVariants: (props?: ({

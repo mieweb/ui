@@ -1,10 +1,32 @@
-import { Input } from './chunk-NXRLGHEC.js';
-import { formatPhoneNumber, unformatPhoneNumber, isValidPhoneNumber } from './chunk-CEHWXAAI.js';
-import { cn } from './chunk-F3SOEIN2.js';
-import * as React from 'react';
-import { jsx, jsxs } from 'react/jsx-runtime';
+'use strict';
 
-var PhoneInput = React.forwardRef(
+var chunkVV4N4WY6_cjs = require('./chunk-VV4N4WY6.cjs');
+var chunkBTJHYGPI_cjs = require('./chunk-BTJHYGPI.cjs');
+var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
+var React = require('react');
+var jsxRuntime = require('react/jsx-runtime');
+
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () { return e[k]; }
+        });
+      }
+    });
+  }
+  n.default = e;
+  return Object.freeze(n);
+}
+
+var React__namespace = /*#__PURE__*/_interopNamespace(React);
+
+var PhoneInput = React__namespace.forwardRef(
   ({
     value = "",
     onChange,
@@ -16,17 +38,17 @@ var PhoneInput = React.forwardRef(
     error,
     ...props
   }, ref) => {
-    const [displayValue, setDisplayValue] = React.useState(
-      () => formatPhoneNumber(value)
+    const [displayValue, setDisplayValue] = React__namespace.useState(
+      () => chunkBTJHYGPI_cjs.formatPhoneNumber(value)
     );
-    const [localError, setLocalError] = React.useState();
-    React.useEffect(() => {
-      setDisplayValue(formatPhoneNumber(value));
+    const [localError, setLocalError] = React__namespace.useState();
+    React__namespace.useEffect(() => {
+      setDisplayValue(chunkBTJHYGPI_cjs.formatPhoneNumber(value));
     }, [value]);
     const handleChange = (e) => {
-      const formatted = formatPhoneNumber(e.target.value);
+      const formatted = chunkBTJHYGPI_cjs.formatPhoneNumber(e.target.value);
       setDisplayValue(formatted);
-      const unformatted = unformatPhoneNumber(formatted);
+      const unformatted = chunkBTJHYGPI_cjs.unformatPhoneNumber(formatted);
       onChange?.(unformatted);
       onFormattedChange?.(formatted);
       if (localError) {
@@ -36,16 +58,16 @@ var PhoneInput = React.forwardRef(
     const handleBlur = (e) => {
       onBlur?.(e);
       if (validateOnBlur) {
-        const unformatted = unformatPhoneNumber(displayValue);
-        if (unformatted.length > 0 && !isValidPhoneNumber(displayValue)) {
+        const unformatted = chunkBTJHYGPI_cjs.unformatPhoneNumber(displayValue);
+        if (unformatted.length > 0 && !chunkBTJHYGPI_cjs.isValidPhoneNumber(displayValue)) {
           setLocalError("Please enter a valid 10-digit phone number");
         } else {
           setLocalError(void 0);
         }
       }
     };
-    return /* @__PURE__ */ jsx(
-      Input,
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      chunkVV4N4WY6_cjs.Input,
       {
         ref,
         type: "tel",
@@ -57,7 +79,7 @@ var PhoneInput = React.forwardRef(
         onBlur: handleBlur,
         hasError: hasError || !!localError,
         error: error || localError,
-        className: cn(className),
+        className: chunkOR5DRJCW_cjs.cn(className),
         ...props
       }
     );
@@ -83,7 +105,7 @@ function PhoneInputGroup({
   typeLabels,
   className
 }) {
-  const phones = React.useMemo(() => {
+  const phones = React__namespace.useMemo(() => {
     if (value.length >= minEntries) return value;
     const padding = Array(minEntries - value.length).fill(null).map(() => ({ number: "", type: "cell" }));
     return [...value, ...padding];
@@ -114,8 +136,8 @@ function PhoneInputGroup({
   };
   const canAdd = phones.length < maxEntries;
   const canRemove = phones.length > minEntries;
-  return /* @__PURE__ */ jsx("div", { className: cn("space-y-3", className), children: phones.map((phone, index) => /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2", children: [
-    /* @__PURE__ */ jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("space-y-3", className), children: phones.map((phone, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-2", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
       PhoneInput,
       {
         label: index === 0 ? label : void 0,
@@ -126,15 +148,16 @@ function PhoneInputGroup({
         required: required && index === 0
       }
     ) }),
-    /* @__PURE__ */ jsxs("div", { className: "w-32 shrink-0", children: [
-      /* @__PURE__ */ jsx("label", { className: "sr-only", children: "Phone type" }),
-      /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-32 shrink-0", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("label", { htmlFor: `phone-type-${index}`, className: "sr-only", children: "Phone type" }),
+      /* @__PURE__ */ jsxRuntime.jsx(
         "select",
         {
+          id: `phone-type-${index}`,
           value: phone.type,
           onChange: (e) => handleTypeChange(index, e.target.value),
           disabled,
-          className: cn(
+          className: chunkOR5DRJCW_cjs.cn(
             "w-full rounded-md border px-3 py-2 text-sm",
             "border-gray-300 bg-white text-gray-900",
             "focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none",
@@ -143,24 +166,24 @@ function PhoneInputGroup({
             "dark:focus:border-brand-400 dark:focus:ring-brand-400/20",
             index === 0 && label ? "mt-6" : ""
           ),
-          children: PHONE_TYPES.map((type) => /* @__PURE__ */ jsx("option", { value: type.value, children: getTypeLabel(type.value) }, type.value))
+          children: PHONE_TYPES.map((type) => /* @__PURE__ */ jsxRuntime.jsx("option", { value: type.value, children: getTypeLabel(type.value) }, type.value))
         }
       )
     ] }),
-    /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        className: cn(
+        className: chunkOR5DRJCW_cjs.cn(
           "flex shrink-0 items-center",
           index === 0 && label ? "mt-6" : ""
         ),
-        children: index === 0 ? /* @__PURE__ */ jsx(
+        children: index === 0 ? /* @__PURE__ */ jsxRuntime.jsx(
           "button",
           {
             type: "button",
             onClick: handleAdd,
             disabled: disabled || !canAdd,
-            className: cn(
+            className: chunkOR5DRJCW_cjs.cn(
               "rounded-full p-2 transition-colors",
               "text-brand-600 hover:bg-brand-50",
               "disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent",
@@ -168,14 +191,14 @@ function PhoneInputGroup({
               "dark:disabled:text-gray-600"
             ),
             "aria-label": "Add phone number",
-            children: /* @__PURE__ */ jsx(
+            children: /* @__PURE__ */ jsxRuntime.jsx(
               "svg",
               {
                 className: "h-5 w-5",
                 fill: "none",
                 viewBox: "0 0 24 24",
                 stroke: "currentColor",
-                children: /* @__PURE__ */ jsx(
+                children: /* @__PURE__ */ jsxRuntime.jsx(
                   "path",
                   {
                     strokeLinecap: "round",
@@ -187,13 +210,13 @@ function PhoneInputGroup({
               }
             )
           }
-        ) : /* @__PURE__ */ jsx(
+        ) : /* @__PURE__ */ jsxRuntime.jsx(
           "button",
           {
             type: "button",
             onClick: () => handleRemove(index),
             disabled: disabled || !canRemove,
-            className: cn(
+            className: chunkOR5DRJCW_cjs.cn(
               "rounded-full p-2 transition-colors",
               "text-red-600 hover:bg-red-50",
               "disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent",
@@ -201,14 +224,14 @@ function PhoneInputGroup({
               "dark:disabled:text-gray-600"
             ),
             "aria-label": "Remove phone number",
-            children: /* @__PURE__ */ jsx(
+            children: /* @__PURE__ */ jsxRuntime.jsx(
               "svg",
               {
                 className: "h-5 w-5",
                 fill: "none",
                 viewBox: "0 0 24 24",
                 stroke: "currentColor",
-                children: /* @__PURE__ */ jsx(
+                children: /* @__PURE__ */ jsxRuntime.jsx(
                   "path",
                   {
                     strokeLinecap: "round",
@@ -227,6 +250,7 @@ function PhoneInputGroup({
 }
 PhoneInputGroup.displayName = "PhoneInputGroup";
 
-export { PhoneInput, PhoneInputGroup };
-//# sourceMappingURL=chunk-AKVRZRMF.js.map
-//# sourceMappingURL=chunk-AKVRZRMF.js.map
+exports.PhoneInput = PhoneInput;
+exports.PhoneInputGroup = PhoneInputGroup;
+//# sourceMappingURL=chunk-CQCYXHCU.cjs.map
+//# sourceMappingURL=chunk-CQCYXHCU.cjs.map
