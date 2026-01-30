@@ -1,5 +1,11 @@
 import { useEffect, useRef, type RefObject } from 'react';
 
+// Check if we're in Storybook docs mode (multiple stories rendered inline)
+function isStorybookDocsMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.location.search.includes('viewMode=docs');
+}
+
 /**
  * Hook that traps focus within a container element.
  * Essential for accessibility in modals and dialogs.
@@ -26,7 +32,8 @@ export function useFocusTrap<T extends HTMLElement>(
   const containerRef = useRef<T>(null);
 
   useEffect(() => {
-    if (!enabled || !containerRef.current) return;
+    // Skip focus trap in Storybook docs mode to prevent auto-scroll
+    if (!enabled || !containerRef.current || isStorybookDocsMode()) return;
 
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll<HTMLElement>(

@@ -4,6 +4,17 @@ import { cn } from '../../utils/cn';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
+// Track number of open modals to manage body scroll lock
+let openModalCount = 0;
+let originalBodyOverflow: string | null = null;
+
+// Check if we're in Storybook docs mode (multiple stories rendered inline)
+function isStorybookDocsMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  // Storybook docs mode renders in an iframe with viewMode=docs in the URL
+  return window.location.search.includes('viewMode=docs');
+}
+
 const modalOverlayVariants = cva(
   [
     'fixed inset-0 z-50',
@@ -126,13 +137,23 @@ function Modal({
     [closeOnOverlayClick, onOpenChange]
   );
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open (handles multiple modals)
+  // Skip scroll lock in Storybook docs mode where multiple stories render inline
   React.useEffect(() => {
-    if (open) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+    if (open && !isStorybookDocsMode()) {
+      openModalCount++;
+      // Only capture and set overflow when first modal opens
+      if (openModalCount === 1) {
+        originalBodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+      }
       return () => {
-        document.body.style.overflow = originalOverflow;
+        openModalCount--;
+        // Only restore overflow when last modal closes
+        if (openModalCount === 0 && originalBodyOverflow !== null) {
+          document.body.style.overflow = originalBodyOverflow;
+          originalBodyOverflow = null;
+        }
       };
     }
   }, [open]);
