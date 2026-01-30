@@ -693,4 +693,12 @@ We welcome contributions! Here's how to get started:
 
 ## License
 
-MIT © MIE Web Team
+Copyright © 2026 Medical Informatics Engineering, Inc. All rights reserved.
+
+This software is **source available** with the following terms:
+
+- ✅ **Free for open source projects** - Use, modify, and distribute freely in open source projects with attribution
+- ✅ **Free for non-commercial use** - Personal projects, education, research
+- 💼 **Commercial license required** - For proprietary products or commercial use, contact [licensing@mieweb.com](mailto:licensing@mieweb.com)
+
+See the [LICENSE](LICENSE) file for full details.

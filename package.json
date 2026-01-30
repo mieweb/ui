@@ -2,8 +2,8 @@
   "name": "@mieweb/ui",
   "version": "0.1.0",
   "description": "A themeable, accessible React component library built with Tailwind CSS",
-  "author": "MIE Web Team",
-  "license": "MIT",
+  "author": "Medical Informatics Engineering, Inc.",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/mieweb/ui.git"
