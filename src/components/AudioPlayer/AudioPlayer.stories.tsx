@@ -210,11 +210,11 @@ const meta: Meta<typeof AudioPlayer> = {
     variant: 'compact',
     size: 'md',
     showTime: true,
-    showDuration: false,
+    showDuration: true,
     showPlaybackRate: false,
     disabled: false,
     title: '',
-    waveformHeight: 80,
+    waveformHeight: 64,
   },
 };
 
