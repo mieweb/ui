@@ -62,20 +62,23 @@ type Story = StoryObj<typeof BusinessHoursEditor>;
 function BusinessHoursEditorWrapper(
   props: Partial<React.ComponentProps<typeof BusinessHoursEditor>>
 ) {
+  // Destructure value and onChange to prevent them from overriding controlled state
+  const { value: initialValue, onChange: _onChange, ...restProps } = props;
+
   const [schedule, setSchedule] = useState<DaySchedule[]>(
-    props.value || createDefaultSchedule()
+    initialValue || createDefaultSchedule()
   );
 
-  // Sync schedule state when props.value changes (e.g., from Storybook controls)
+  // Sync schedule state when initialValue changes (e.g., from Storybook controls)
   useEffect(() => {
-    if (props.value !== undefined) {
-      setSchedule(props.value);
+    if (initialValue !== undefined) {
+      setSchedule(initialValue);
     }
-  }, [props.value]);
+  }, [initialValue]);
 
   return (
     <div className="max-w-2xl">
-      <BusinessHoursEditor value={schedule} onChange={setSchedule} {...props} />
+      <BusinessHoursEditor {...restProps} value={schedule} onChange={setSchedule} />
 
       <div className="mt-6 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
         <h4 className="mb-2 text-sm font-medium">Current Schedule:</h4>
