@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BusinessHoursEditor,
   DaySchedule,
@@ -22,6 +22,13 @@ const meta: Meta<typeof BusinessHoursEditor> = {
     },
   },
   argTypes: {
+    // Hide props that are managed by the demo wrapper
+    value: { table: { disable: true } },
+    onChange: { table: { disable: true } },
+    className: { table: { disable: true } },
+    // use24Hour is not implemented in the component (native time inputs use browser locale)
+    use24Hour: { table: { disable: true } },
+
     disabled: {
       control: 'boolean',
       description: 'Whether the editor is disabled',
@@ -29,10 +36,6 @@ const meta: Meta<typeof BusinessHoursEditor> = {
     showDescription: {
       control: 'boolean',
       description: 'Whether to show description field for each time slot',
-    },
-    use24Hour: {
-      control: 'boolean',
-      description: 'Use 24-hour format',
     },
     weekStartsOn: {
       control: 'radio',
@@ -44,26 +47,40 @@ const meta: Meta<typeof BusinessHoursEditor> = {
       description: 'Label for add hours button',
     },
   },
+  args: {
+    disabled: false,
+    showDescription: true,
+    weekStartsOn: 0,
+    addHoursLabel: 'Add Hours',
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof BusinessHoursEditor>;
 
 // Interactive wrapper
-function BusinessHoursEditorWrapper(
-  props: Partial<React.ComponentProps<typeof BusinessHoursEditor>>
-) {
+function BusinessHoursEditorWrapper({
+  value: initialValue,
+  onChange: _,
+  ...restProps
+}: Partial<React.ComponentProps<typeof BusinessHoursEditor>>) {
   const [schedule, setSchedule] = useState<DaySchedule[]>(
-    props.value || createDefaultSchedule()
+    initialValue || createDefaultSchedule()
   );
+
+  // Sync schedule state when initialValue changes (e.g., from Storybook controls)
+  useEffect(() => {
+    if (initialValue !== undefined) {
+      setSchedule(initialValue);
+    }
+  }, [initialValue]);
 
   return (
     <div className="max-w-2xl">
       <BusinessHoursEditor
+        {...restProps}
         value={schedule}
         onChange={setSchedule}
-        showDescription={true}
-        {...props}
       />
 
       <div className="mt-6 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
@@ -78,18 +95,12 @@ function BusinessHoursEditorWrapper(
 
 export const Default: Story = {
   render: (args) => <BusinessHoursEditorWrapper {...args} />,
-  args: {
-    showDescription: true,
-    weekStartsOn: 0,
-    addHoursLabel: 'Add Hours',
-  },
 };
 
 export const Empty: Story = {
   render: (args) => <BusinessHoursEditorWrapper {...args} />,
   args: {
     value: [],
-    showDescription: true,
   },
 };
 
@@ -97,7 +108,6 @@ export const WeekdaysOnly: Story = {
   render: (args) => <BusinessHoursEditorWrapper {...args} />,
   args: {
     value: createWeekdaySchedule('08:00', '18:00'),
-    showDescription: true,
   },
 };
 
@@ -114,7 +124,6 @@ export const MondayStart: Story = {
   args: {
     value: createDefaultSchedule(),
     weekStartsOn: 1,
-    showDescription: true,
   },
 };
 
