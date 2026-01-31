@@ -13,6 +13,8 @@ const meta: Meta<typeof AuthDialog> = {
         component:
           'A comprehensive authentication dialog with login, signup, forgot password, and social auth flows.',
       },
+      // Render stories in an iframe to isolate the overflow:hidden side effect
+      story: { inline: false, iframeHeight: 600 },
     },
   },
 };
