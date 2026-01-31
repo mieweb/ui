@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BusinessHoursEditor,
   DaySchedule,
@@ -22,6 +22,13 @@ const meta: Meta<typeof BusinessHoursEditor> = {
     },
   },
   argTypes: {
+    // Hide props that are managed by the demo wrapper
+    value: { table: { disable: true } },
+    onChange: { table: { disable: true } },
+    className: { table: { disable: true } },
+    // use24Hour is not implemented in the component (native time inputs use browser locale)
+    use24Hour: { table: { disable: true } },
+
     disabled: {
       control: 'boolean',
       description: 'Whether the editor is disabled',
@@ -29,10 +36,6 @@ const meta: Meta<typeof BusinessHoursEditor> = {
     showDescription: {
       control: 'boolean',
       description: 'Whether to show description field for each time slot',
-    },
-    use24Hour: {
-      control: 'boolean',
-      description: 'Use 24-hour format',
     },
     weekStartsOn: {
       control: 'radio',
@@ -47,7 +50,6 @@ const meta: Meta<typeof BusinessHoursEditor> = {
   args: {
     disabled: false,
     showDescription: true,
-    use24Hour: false,
     weekStartsOn: 0,
     addHoursLabel: 'Add Hours',
   },
@@ -63,6 +65,13 @@ function BusinessHoursEditorWrapper(
   const [schedule, setSchedule] = useState<DaySchedule[]>(
     props.value || createDefaultSchedule()
   );
+
+  // Sync schedule state when props.value changes (e.g., from Storybook controls)
+  useEffect(() => {
+    if (props.value !== undefined) {
+      setSchedule(props.value);
+    }
+  }, [props.value]);
 
   return (
     <div className="max-w-2xl">
