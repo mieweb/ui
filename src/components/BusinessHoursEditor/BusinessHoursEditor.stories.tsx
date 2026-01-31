@@ -64,7 +64,6 @@ function BusinessHoursEditorWrapper({
   onChange: _,
   ...restProps
 }: Partial<React.ComponentProps<typeof BusinessHoursEditor>>) {
-
   const [schedule, setSchedule] = useState<DaySchedule[]>(
     initialValue || createDefaultSchedule()
   );
@@ -78,7 +77,11 @@ function BusinessHoursEditorWrapper({
 
   return (
     <div className="max-w-2xl">
-      <BusinessHoursEditor {...restProps} value={schedule} onChange={setSchedule} />
+      <BusinessHoursEditor
+        {...restProps}
+        value={schedule}
+        onChange={setSchedule}
+      />
 
       <div className="mt-6 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
         <h4 className="mb-2 text-sm font-medium">Current Schedule:</h4>
