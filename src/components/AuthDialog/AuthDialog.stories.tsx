@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import {
   AuthDialog,
-  AuthDialogProps,
   AuthMode,
   DEFAULT_SOCIAL_PROVIDERS,
 } from './AuthDialog';
@@ -25,91 +24,8 @@ interface DemoControls {
   requireEmailVerification: boolean;
 }
 
-type AuthDialogStoryProps = Partial<AuthDialogProps> & DemoControls;
-
-const meta: Meta<AuthDialogStoryProps> = {
-  title: 'Components/AuthDialog',
-  component: AuthDialog,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'fullscreen',
-    docs: {
-      description: {
-        component:
-          'A comprehensive authentication dialog with login, signup, forgot password, and social auth flows.',
-      },
-    },
-  },
-  argTypes: {
-    // Hide component props that are managed by the demo wrapper
-    isOpen: { table: { disable: true } },
-    onClose: { table: { disable: true } },
-    mode: { table: { disable: true } },
-    onModeChange: { table: { disable: true } },
-    onLogin: { table: { disable: true } },
-    onSignup: { table: { disable: true } },
-    onSocialLogin: { table: { disable: true } },
-    onForgotPassword: { table: { disable: true } },
-    onResetPassword: { table: { disable: true } },
-    socialProviders: { table: { disable: true } },
-    className: { table: { disable: true } },
-
-    // Demo Controls
-    initialMode: {
-      control: 'select',
-      options: ['login', 'signup', 'forgotPassword', 'resetPassword', 'verify'],
-      description: 'Initial auth mode to display',
-      table: { category: 'Demo Controls' },
-    },
-    showSocialProviders: {
-      control: 'boolean',
-      description: 'Show social login providers (Google, Microsoft, etc.)',
-      table: { category: 'Demo Controls' },
-    },
-    // Branding
-    appName: {
-      control: 'text',
-      description: 'App name displayed in the dialog header',
-      table: { category: 'Branding' },
-    },
-    logoUrl: {
-      control: 'text',
-      description: 'Logo URL for custom branding',
-      table: { category: 'Branding' },
-    },
-    // URLs
-    termsUrl: {
-      control: 'text',
-      description: 'Terms of service URL',
-      table: { category: 'URLs' },
-    },
-    privacyUrl: {
-      control: 'text',
-      description: 'Privacy policy URL',
-      table: { category: 'URLs' },
-    },
-    // Settings
-    requireEmailVerification: {
-      control: 'boolean',
-      description: 'Require email verification after signup',
-      table: { category: 'Settings' },
-    },
-  },
-  args: {
-    initialMode: 'login',
-    showSocialProviders: true,
-    appName: 'BlueHive',
-    logoUrl: '',
-    termsUrl: '/terms',
-    privacyUrl: '/privacy',
-    requireEmailVerification: false,
-  },
-};
-
-export default meta;
-type Story = StoryObj<AuthDialogStoryProps>;
-
 // Helper component for interactive stories
+// Defined before meta so it can be referenced as the component
 function AuthDialogDemo({
   initialMode = 'login',
   showSocialProviders = true,
@@ -197,6 +113,77 @@ function AuthDialogDemo({
     </div>
   );
 }
+
+type AuthDialogStoryProps = DemoControls;
+
+const meta: Meta<AuthDialogStoryProps> = {
+  title: 'Components/AuthDialog',
+  component: AuthDialogDemo,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'A comprehensive authentication dialog with login, signup, forgot password, and social auth flows.',
+      },
+    },
+  },
+  argTypes: {
+    // Demo Controls
+    initialMode: {
+      control: 'select',
+      options: ['login', 'signup', 'forgotPassword', 'resetPassword', 'verify'],
+      description: 'Initial auth mode to display',
+      table: { category: 'Demo Controls' },
+    },
+    showSocialProviders: {
+      control: 'boolean',
+      description: 'Show social login providers (Google, Microsoft, etc.)',
+      table: { category: 'Demo Controls' },
+    },
+    // Branding
+    appName: {
+      control: 'text',
+      description: 'App name displayed in the dialog header',
+      table: { category: 'Branding' },
+    },
+    logoUrl: {
+      control: 'text',
+      description: 'Logo URL for custom branding',
+      table: { category: 'Branding' },
+    },
+    // URLs
+    termsUrl: {
+      control: 'text',
+      description: 'Terms of service URL',
+      table: { category: 'URLs' },
+    },
+    privacyUrl: {
+      control: 'text',
+      description: 'Privacy policy URL',
+      table: { category: 'URLs' },
+    },
+    // Settings
+    requireEmailVerification: {
+      control: 'boolean',
+      description: 'Require email verification after signup',
+      table: { category: 'Settings' },
+    },
+  },
+  args: {
+    initialMode: 'login',
+    showSocialProviders: true,
+    appName: 'BlueHive',
+    logoUrl: '',
+    termsUrl: '/terms',
+    privacyUrl: '/privacy',
+    requireEmailVerification: false,
+  },
+};
+
+export default meta;
+type Story = StoryObj<AuthDialogStoryProps>;
 
 /** Default login state with all social providers */
 export const Default: Story = {
