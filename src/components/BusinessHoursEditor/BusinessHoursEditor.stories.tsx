@@ -44,6 +44,13 @@ const meta: Meta<typeof BusinessHoursEditor> = {
       description: 'Label for add hours button',
     },
   },
+  args: {
+    disabled: false,
+    showDescription: true,
+    use24Hour: false,
+    weekStartsOn: 0,
+    addHoursLabel: 'Add Hours',
+  },
 };
 
 export default meta;
@@ -59,12 +66,7 @@ function BusinessHoursEditorWrapper(
 
   return (
     <div className="max-w-2xl">
-      <BusinessHoursEditor
-        value={schedule}
-        onChange={setSchedule}
-        showDescription={true}
-        {...props}
-      />
+      <BusinessHoursEditor value={schedule} onChange={setSchedule} {...props} />
 
       <div className="mt-6 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
         <h4 className="mb-2 text-sm font-medium">Current Schedule:</h4>
@@ -78,18 +80,12 @@ function BusinessHoursEditorWrapper(
 
 export const Default: Story = {
   render: (args) => <BusinessHoursEditorWrapper {...args} />,
-  args: {
-    showDescription: true,
-    weekStartsOn: 0,
-    addHoursLabel: 'Add Hours',
-  },
 };
 
 export const Empty: Story = {
   render: (args) => <BusinessHoursEditorWrapper {...args} />,
   args: {
     value: [],
-    showDescription: true,
   },
 };
 
@@ -97,7 +93,6 @@ export const WeekdaysOnly: Story = {
   render: (args) => <BusinessHoursEditorWrapper {...args} />,
   args: {
     value: createWeekdaySchedule('08:00', '18:00'),
-    showDescription: true,
   },
 };
 
@@ -114,7 +109,6 @@ export const MondayStart: Story = {
   args: {
     value: createDefaultSchedule(),
     weekStartsOn: 1,
-    showDescription: true,
   },
 };
 
