@@ -142,9 +142,19 @@ const meta: Meta<typeof AudioPlayer> = {
   component: AudioPlayer,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component:
+          'A versatile audio player component with multiple variants, playback controls, and customizable appearance.',
+      },
+    },
   },
   tags: ['autodocs'],
   argTypes: {
+    src: {
+      control: false, // Can't easily control blob URLs
+      description: 'Audio source URL',
+    },
     variant: {
       control: 'select',
       options: ['inline', 'compact', 'waveform'],
@@ -154,6 +164,11 @@ const meta: Meta<typeof AudioPlayer> = {
       control: 'select',
       options: ['sm', 'md', 'lg'],
       description: 'Size of the player',
+    },
+    title: {
+      control: 'text',
+      description:
+        'Title/label for the audio (used for accessibility and display)',
     },
     showTime: {
       control: 'boolean',
@@ -171,6 +186,35 @@ const meta: Meta<typeof AudioPlayer> = {
       control: 'boolean',
       description: 'Disable the player',
     },
+    waveColor: {
+      control: 'color',
+      description: 'Waveform color (for waveform variant)',
+      if: { arg: 'variant', eq: 'waveform' },
+    },
+    progressColor: {
+      control: 'color',
+      description: 'Progress/played waveform color (for waveform variant)',
+      if: { arg: 'variant', eq: 'waveform' },
+    },
+    waveformHeight: {
+      control: { type: 'range', min: 40, max: 200, step: 10 },
+      description: 'Height of the waveform (for waveform variant)',
+      if: { arg: 'variant', eq: 'waveform' },
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes',
+    },
+  },
+  args: {
+    variant: 'compact',
+    size: 'md',
+    showTime: true,
+    showDuration: true,
+    showPlaybackRate: false,
+    disabled: false,
+    title: '',
+    waveformHeight: 64,
   },
 };
 
@@ -182,12 +226,10 @@ type Story = StoryObj<typeof AudioPlayer>;
 // ============================================================================
 
 export const Default: Story = {
-  render: () => (
-    <AudioPlayer src={getSampleAudio()} variant="compact" showTime />
-  ),
+  render: (args) => <AudioPlayer {...args} src={getSampleAudio()} />,
   decorators: [
     (Story) => (
-      <div className="w-80">
+      <div className="w-96">
         <Story />
       </div>
     ),
