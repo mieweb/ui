@@ -59,11 +59,11 @@ export default meta;
 type Story = StoryObj<typeof BusinessHoursEditor>;
 
 // Interactive wrapper
-function BusinessHoursEditorWrapper(
-  props: Partial<React.ComponentProps<typeof BusinessHoursEditor>>
-) {
-  // Destructure value and onChange to prevent them from overriding controlled state
-  const { value: initialValue, onChange: _onChange, ...restProps } = props;
+function BusinessHoursEditorWrapper({
+  value: initialValue,
+  onChange: _,
+  ...restProps
+}: Partial<React.ComponentProps<typeof BusinessHoursEditor>>) {
 
   const [schedule, setSchedule] = useState<DaySchedule[]>(
     initialValue || createDefaultSchedule()
