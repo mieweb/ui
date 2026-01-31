@@ -1,8 +1,33 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { AuthDialog, DEFAULT_SOCIAL_PROVIDERS } from './AuthDialog';
+import {
+  AuthDialog,
+  AuthDialogProps,
+  AuthMode,
+  DEFAULT_SOCIAL_PROVIDERS,
+} from './AuthDialog';
 
-const meta: Meta<typeof AuthDialog> = {
+// Demo-only controls interface
+interface DemoControls {
+  /** Initial auth mode to display */
+  initialMode: AuthMode;
+  /** Show social login providers */
+  showSocialProviders: boolean;
+  /** App name for branding */
+  appName: string;
+  /** Logo URL for custom branding */
+  logoUrl: string;
+  /** Terms of service URL */
+  termsUrl: string;
+  /** Privacy policy URL */
+  privacyUrl: string;
+  /** Require email verification after signup */
+  requireEmailVerification: boolean;
+}
+
+type AuthDialogStoryProps = Partial<AuthDialogProps> & DemoControls;
+
+const meta: Meta<AuthDialogStoryProps> = {
   title: 'Components/AuthDialog',
   component: AuthDialog,
   tags: ['autodocs'],
@@ -15,17 +40,112 @@ const meta: Meta<typeof AuthDialog> = {
       },
     },
   },
+  argTypes: {
+    // Hide component props that are managed by the demo wrapper
+    isOpen: { table: { disable: true } },
+    onClose: { table: { disable: true } },
+    mode: { table: { disable: true } },
+    onModeChange: { table: { disable: true } },
+    onLogin: { table: { disable: true } },
+    onSignup: { table: { disable: true } },
+    onSocialLogin: { table: { disable: true } },
+    onForgotPassword: { table: { disable: true } },
+    onResetPassword: { table: { disable: true } },
+    socialProviders: { table: { disable: true } },
+    className: { table: { disable: true } },
+
+    // Demo Controls
+    initialMode: {
+      control: 'select',
+      options: ['login', 'signup', 'forgotPassword', 'resetPassword', 'verify'],
+      description: 'Initial auth mode to display',
+      table: { category: 'Demo Controls' },
+    },
+    showSocialProviders: {
+      control: 'boolean',
+      description: 'Show social login providers (Google, Microsoft, etc.)',
+      table: { category: 'Demo Controls' },
+    },
+    // Branding
+    appName: {
+      control: 'text',
+      description: 'App name displayed in the dialog header',
+      table: { category: 'Branding' },
+    },
+    logoUrl: {
+      control: 'text',
+      description: 'Logo URL for custom branding',
+      table: { category: 'Branding' },
+    },
+    // URLs
+    termsUrl: {
+      control: 'text',
+      description: 'Terms of service URL',
+      table: { category: 'URLs' },
+    },
+    privacyUrl: {
+      control: 'text',
+      description: 'Privacy policy URL',
+      table: { category: 'URLs' },
+    },
+    // Settings
+    requireEmailVerification: {
+      control: 'boolean',
+      description: 'Require email verification after signup',
+      table: { category: 'Settings' },
+    },
+  },
+  args: {
+    initialMode: 'login',
+    showSocialProviders: true,
+    appName: 'BlueHive',
+    logoUrl: '',
+    termsUrl: '/terms',
+    privacyUrl: '/privacy',
+    requireEmailVerification: false,
+  },
 };
 
 export default meta;
-type Story = StoryObj<typeof AuthDialog>;
+type Story = StoryObj<AuthDialogStoryProps>;
 
 // Helper component for interactive stories
-function AuthDialogDemo(
-  props: Partial<React.ComponentProps<typeof AuthDialog>>
-) {
+function AuthDialogDemo({
+  initialMode = 'login',
+  showSocialProviders = true,
+  appName = 'BlueHive',
+  logoUrl,
+  termsUrl = '/terms',
+  privacyUrl = '/privacy',
+  requireEmailVerification = false,
+}: DemoControls) {
   const [isOpen, setIsOpen] = React.useState(true);
-  const [mode, setMode] = React.useState(props.mode || 'login');
+  const [mode, setMode] = React.useState<AuthMode>(initialMode);
+
+  // Sync mode with initialMode arg changes
+  React.useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  // Continuously prevent AuthDialog from locking body scroll in Storybook docs
+  // The AuthDialog sets overflow:hidden on body, which breaks docs page scrolling
+  React.useEffect(() => {
+    const observer = new window.MutationObserver(() => {
+      if (document.body.style.overflow === 'hidden') {
+        document.body.style.overflow = '';
+      }
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['style'],
+    });
+    // Also clear immediately in case it's already set
+    document.body.style.overflow = '';
+    return () => {
+      observer.disconnect();
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const handleLogin = async (email: string, password: string) => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -67,8 +187,12 @@ function AuthDialogDemo(
         onSignup={handleSignup}
         onSocialLogin={handleSocialLogin}
         onForgotPassword={handleForgotPassword}
-        socialProviders={DEFAULT_SOCIAL_PROVIDERS}
-        {...props}
+        socialProviders={showSocialProviders ? DEFAULT_SOCIAL_PROVIDERS : []}
+        appName={appName}
+        logoUrl={logoUrl || undefined}
+        termsUrl={termsUrl}
+        privacyUrl={privacyUrl}
+        requireEmailVerification={requireEmailVerification}
       />
     </div>
   );
@@ -76,30 +200,38 @@ function AuthDialogDemo(
 
 /** Default login state with all social providers */
 export const Default: Story = {
-  render: () => <AuthDialogDemo />,
+  render: (args) => <AuthDialogDemo {...args} />,
 };
 
 /** Signup form with terms acceptance */
 export const Signup: Story = {
-  render: () => <AuthDialogDemo mode="signup" />,
+  args: {
+    initialMode: 'signup',
+  },
+  render: (args) => <AuthDialogDemo {...args} />,
 };
 
 /** Forgot password flow */
 export const ForgotPassword: Story = {
-  render: () => <AuthDialogDemo mode="forgotPassword" />,
+  args: {
+    initialMode: 'forgotPassword',
+  },
+  render: (args) => <AuthDialogDemo {...args} />,
 };
 
 /** Email only authentication (no social providers) */
 export const NoSocialAuth: Story = {
-  render: () => <AuthDialogDemo socialProviders={[]} />,
+  args: {
+    showSocialProviders: false,
+  },
+  render: (args) => <AuthDialogDemo {...args} />,
 };
 
 /** Custom branding with logo */
 export const CustomBranding: Story = {
-  render: () => (
-    <AuthDialogDemo
-      appName="HealthCare Plus"
-      logoUrl="https://via.placeholder.com/150x40/4F46E5/ffffff?text=HealthCare+"
-    />
-  ),
+  args: {
+    appName: 'HealthCare Plus',
+    logoUrl: 'https://placehold.co/150x40/4F46E5/ffffff?text=HealthCare%2B',
+  },
+  render: (args) => <AuthDialogDemo {...args} />,
 };
