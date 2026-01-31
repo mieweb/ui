@@ -180,7 +180,8 @@ interface DemoControls {
   isSignedIn: boolean;
 }
 
-type AppHeaderStoryProps = React.ComponentProps<typeof AppHeader> & DemoControls;
+type AppHeaderStoryProps = React.ComponentProps<typeof AppHeader> &
+  DemoControls;
 
 // =============================================================================
 // Meta
@@ -305,10 +306,10 @@ export const Default: Story = {
           <AppHeaderSection align="left">
             {showBranding && (
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white font-bold text-sm">
+                <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white">
                   A
                 </div>
-                <span className="hidden font-semibold text-gray-900 dark:text-white sm:block">
+                <span className="hidden font-semibold text-gray-900 sm:block dark:text-white">
                   Acme Inc
                 </span>
               </div>
@@ -387,91 +388,91 @@ export const Default: Story = {
                           isOpen={userMenuOpen}
                           onClick={() => setUserMenuOpen(!userMenuOpen)}
                         />
-                      {/* User dropdown menu */}
-                      {userMenuOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              John Doe
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              john@example.com
-                            </p>
+                        {/* User dropdown menu */}
+                        {userMenuOpen && (
+                          <div className="absolute top-full right-0 mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                            <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                John Doe
+                              </p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                john@example.com
+                              </p>
+                            </div>
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                              onClick={() => console.log('Profile')}
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                              </svg>
+                              Your Profile
+                            </button>
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                              onClick={() => console.log('Settings')}
+                            >
+                              <CogIcon />
+                              Settings
+                            </button>
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                              onClick={() => console.log('Help')}
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              Help & Support
+                            </button>
+                            <div className="my-1 border-t border-gray-200 dark:border-gray-700" />
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                              onClick={() => console.log('Sign out')}
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                />
+                              </svg>
+                              Sign out
+                            </button>
                           </div>
-                          <button
-                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-                            onClick={() => console.log('Profile')}
-                          >
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                              />
-                            </svg>
-                            Your Profile
-                          </button>
-                          <button
-                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-                            onClick={() => console.log('Settings')}
-                          >
-                            <CogIcon />
-                            Settings
-                          </button>
-                          <button
-                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-                            onClick={() => console.log('Help')}
-                          >
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            Help & Support
-                          </button>
-                          <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
-                          <button
-                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-                            onClick={() => console.log('Sign out')}
-                          >
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                              />
-                            </svg>
-                            Sign out
-                          </button>
-                        </div>
-                      )}
+                        )}
                       </div>
                     </>
                   )}
                   {/* Sign In button when signed out */}
                   {!isSignedIn && (
                     <button
-                      className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 transition-colors"
+                      className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
                       onClick={() => console.log('Sign in')}
                     >
                       Sign in
@@ -486,11 +487,11 @@ export const Default: Story = {
         {/* Mobile slide-out menu */}
         {showMobileMenu && mobileMenuOpen && (
           <div className="absolute top-16 right-0 left-0 z-40 border-b border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-            <div className="flex flex-col p-4 gap-2">
+            <div className="flex flex-col gap-2 p-4">
               {/* User info at top (when signed in) */}
               {isSignedIn && showUserMenu && (
-                <div className="flex items-center gap-3 px-2 py-3 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 font-medium">
+                <div className="flex items-center gap-3 border-b border-gray-200 px-2 py-3 dark:border-gray-700">
+                  <div className="bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 flex h-10 w-10 items-center justify-center rounded-full font-medium">
                     JD
                   </div>
                   <div>
@@ -507,7 +508,7 @@ export const Default: Story = {
               {/* Signed out state - Sign In button */}
               {!isSignedIn && (
                 <button
-                  className="w-full rounded-lg bg-primary-500 px-4 py-3 text-sm font-medium text-white hover:bg-primary-600 transition-colors"
+                  className="bg-primary-500 hover:bg-primary-600 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors"
                   onClick={() => console.log('Sign in')}
                 >
                   Sign in
@@ -552,7 +553,7 @@ export const Default: Story = {
               )}
 
               {isSignedIn && showUserMenu && (
-                <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
+                <div className="mt-2 border-t border-gray-200 pt-2 dark:border-gray-700">
                   <button
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                     onClick={() => console.log('Sign out')}
