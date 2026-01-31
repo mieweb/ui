@@ -84,59 +84,41 @@ const MenuIcon = () => (
   </svg>
 );
 
+const XIcon = () => (
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18L18 6M6 6l12 12"
+    />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg
+    className="h-5 w-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    />
+  </svg>
+);
+
 // =============================================================================
 // Demo Components
 // =============================================================================
-
-function FullHeaderDemo() {
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-  return (
-    <AppHeader className="w-full">
-      <AppHeaderSection align="left">
-        <button
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800"
-          aria-label="Open menu"
-        >
-          <MenuIcon />
-        </button>
-        <AppHeaderSearch
-          onClick={() => console.log('Open search')}
-          placeholder="Search everything..."
-        />
-      </AppHeaderSection>
-
-      <AppHeaderSection align="right">
-        <AppHeaderActions>
-          <AppHeaderIconButton
-            icon={<MessageIcon />}
-            label="Messages"
-            badge={3}
-            onClick={() => console.log('Messages')}
-          />
-          <AppHeaderIconButton
-            icon={<BellIcon />}
-            label="Notifications"
-            badge={5}
-            onClick={() => console.log('Notifications')}
-          />
-          <AppHeaderIconButton
-            icon={<CogIcon />}
-            label="Settings"
-            onClick={() => console.log('Settings')}
-          />
-          <AppHeaderDivider />
-          <AppHeaderUserMenu
-            name="John Doe"
-            email="john@example.com"
-            isOpen={isUserMenuOpen}
-            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-          />
-        </AppHeaderActions>
-      </AppHeaderSection>
-    </AppHeader>
-  );
-}
 
 function SimpleHeaderDemo() {
   return (
@@ -184,10 +166,28 @@ function HeaderWithTitleDemo() {
 }
 
 // =============================================================================
+// Demo Props Interface
+// =============================================================================
+
+interface DemoControls {
+  showBranding: boolean;
+  showSearch: boolean;
+  showMessages: boolean;
+  showNotifications: boolean;
+  showSettings: boolean;
+  showUserMenu: boolean;
+  showMobileMenu: boolean;
+  isSignedIn: boolean;
+}
+
+type AppHeaderStoryProps = React.ComponentProps<typeof AppHeader> &
+  DemoControls;
+
+// =============================================================================
 // Meta
 // =============================================================================
 
-const meta: Meta<typeof AppHeader> = {
+const meta: Meta<AppHeaderStoryProps> = {
   title: 'Components/AppHeader',
   component: AppHeader,
   parameters: {
@@ -200,17 +200,387 @@ const meta: Meta<typeof AppHeader> = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    sticky: {
+      control: 'boolean',
+      description: 'Whether the header is sticky',
+    },
+    bordered: {
+      control: 'boolean',
+      description: 'Whether to show border',
+    },
+    height: {
+      control: 'text',
+      description: 'Custom height class',
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes',
+    },
+    children: {
+      control: false, // ReactNode can't be controlled
+    },
+    // Demo controls (not actual component props)
+    showBranding: {
+      control: 'boolean',
+      description: 'Show branding/logo',
+      table: { category: 'Demo Controls' },
+    },
+    showSearch: {
+      control: 'boolean',
+      description: 'Show search button',
+      table: { category: 'Demo Controls' },
+    },
+    showMessages: {
+      control: 'boolean',
+      description: 'Show messages icon',
+      table: { category: 'Demo Controls' },
+    },
+    showNotifications: {
+      control: 'boolean',
+      description: 'Show notifications icon',
+      table: { category: 'Demo Controls' },
+    },
+    showSettings: {
+      control: 'boolean',
+      description: 'Show settings icon',
+      table: { category: 'Demo Controls' },
+    },
+    showUserMenu: {
+      control: 'boolean',
+      description: 'Show user menu',
+      table: { category: 'Demo Controls' },
+    },
+    showMobileMenu: {
+      control: 'boolean',
+      description:
+        'Enable mobile menu mode (hides icons, shows hamburger menu)',
+      table: { category: 'Demo Controls' },
+    },
+    isSignedIn: {
+      control: 'boolean',
+      description: 'Toggle between signed in and signed out states',
+      table: { category: 'Demo Controls' },
+    },
+  },
+  args: {
+    sticky: true,
+    bordered: true,
+    height: 'h-16',
+    showBranding: true,
+    showSearch: true,
+    showMessages: true,
+    showNotifications: true,
+    showSettings: true,
+    showUserMenu: true,
+    showMobileMenu: false,
+    isSignedIn: true,
+  },
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<AppHeaderStoryProps>;
 
 // =============================================================================
 // Stories
 // =============================================================================
 
 export const Default: Story = {
-  render: () => <FullHeaderDemo />,
+  render: function DefaultDemo({
+    showBranding,
+    showSearch,
+    showMessages,
+    showNotifications,
+    showSettings,
+    showUserMenu,
+    showMobileMenu,
+    isSignedIn,
+    ...args
+  }) {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+    return (
+      <div className="relative w-full">
+        <AppHeader {...args}>
+          <AppHeaderSection align="left">
+            {showBranding && (
+              <div className="flex items-center gap-2">
+                <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white">
+                  A
+                </div>
+                <span className="hidden font-semibold text-gray-900 sm:block dark:text-white">
+                  Acme Inc
+                </span>
+              </div>
+            )}
+            {!showMobileMenu && (
+              <button
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800"
+                aria-label="Open menu"
+              >
+                <MenuIcon />
+              </button>
+            )}
+            {showSearch && !showMobileMenu && (
+              <AppHeaderSearch
+                onClick={() => console.log('Open search')}
+                placeholder="Search everything..."
+              />
+            )}
+          </AppHeaderSection>
+
+          <AppHeaderSection align="right">
+            <AppHeaderActions>
+              {/* Mobile mode: show search icon and hamburger */}
+              {showMobileMenu && (
+                <>
+                  {showSearch && (
+                    <AppHeaderIconButton
+                      icon={<SearchIcon />}
+                      label="Search"
+                      onClick={() => console.log('Search')}
+                    />
+                  )}
+                  <button
+                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                  >
+                    {mobileMenuOpen ? <XIcon /> : <MenuIcon />}
+                  </button>
+                </>
+              )}
+
+              {/* Desktop mode: show all icons */}
+              {!showMobileMenu && (
+                <>
+                  {isSignedIn && showMessages && (
+                    <AppHeaderIconButton
+                      icon={<MessageIcon />}
+                      label="Messages"
+                      badge={3}
+                      onClick={() => console.log('Messages')}
+                    />
+                  )}
+                  {isSignedIn && showNotifications && (
+                    <AppHeaderIconButton
+                      icon={<BellIcon />}
+                      label="Notifications"
+                      badge={5}
+                      onClick={() => console.log('Notifications')}
+                    />
+                  )}
+                  {isSignedIn && showSettings && (
+                    <AppHeaderIconButton
+                      icon={<CogIcon />}
+                      label="Settings"
+                      onClick={() => console.log('Settings')}
+                    />
+                  )}
+                  {isSignedIn && showUserMenu && (
+                    <>
+                      <AppHeaderDivider />
+                      <div className="relative">
+                        <AppHeaderUserMenu
+                          name="John Doe"
+                          email="john@example.com"
+                          isOpen={userMenuOpen}
+                          onClick={() => setUserMenuOpen(!userMenuOpen)}
+                        />
+                        {/* User dropdown menu */}
+                        {userMenuOpen && (
+                          <div className="absolute top-full right-0 mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                            <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                John Doe
+                              </p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                john@example.com
+                              </p>
+                            </div>
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                              onClick={() => console.log('Profile')}
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                              </svg>
+                              Your Profile
+                            </button>
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                              onClick={() => console.log('Settings')}
+                            >
+                              <CogIcon />
+                              Settings
+                            </button>
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                              onClick={() => console.log('Help')}
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              Help & Support
+                            </button>
+                            <div className="my-1 border-t border-gray-200 dark:border-gray-700" />
+                            <button
+                              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                              onClick={() => console.log('Sign out')}
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                />
+                              </svg>
+                              Sign out
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                  {/* Sign In button when signed out */}
+                  {!isSignedIn && (
+                    <button
+                      className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+                      onClick={() => console.log('Sign in')}
+                    >
+                      Sign in
+                    </button>
+                  )}
+                </>
+              )}
+            </AppHeaderActions>
+          </AppHeaderSection>
+        </AppHeader>
+
+        {/* Mobile slide-out menu */}
+        {showMobileMenu && mobileMenuOpen && (
+          <div className="absolute top-16 right-0 left-0 z-40 border-b border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+            <div className="flex flex-col gap-2 p-4">
+              {/* User info at top (when signed in) */}
+              {isSignedIn && showUserMenu && (
+                <div className="flex items-center gap-3 border-b border-gray-200 px-2 py-3 dark:border-gray-700">
+                  <div className="bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 flex h-10 w-10 items-center justify-center rounded-full font-medium">
+                    JD
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      John Doe
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      john@example.com
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Signed out state - Sign In button */}
+              {!isSignedIn && (
+                <button
+                  className="bg-primary-500 hover:bg-primary-600 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors"
+                  onClick={() => console.log('Sign in')}
+                >
+                  Sign in
+                </button>
+              )}
+
+              {/* Menu items (when signed in) */}
+              {isSignedIn && showMessages && (
+                <button
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                  onClick={() => console.log('Messages')}
+                >
+                  <MessageIcon />
+                  <span>Messages</span>
+                  <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                    3
+                  </span>
+                </button>
+              )}
+
+              {isSignedIn && showNotifications && (
+                <button
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                  onClick={() => console.log('Notifications')}
+                >
+                  <BellIcon />
+                  <span>Notifications</span>
+                  <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                    5
+                  </span>
+                </button>
+              )}
+
+              {isSignedIn && showSettings && (
+                <button
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                  onClick={() => console.log('Settings')}
+                >
+                  <CogIcon />
+                  <span>Settings</span>
+                </button>
+              )}
+
+              {isSignedIn && showUserMenu && (
+                <div className="mt-2 border-t border-gray-200 pt-2 dark:border-gray-700">
+                  <button
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                    onClick={() => console.log('Sign out')}
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  },
 };
 
 export const Simple: Story = {
