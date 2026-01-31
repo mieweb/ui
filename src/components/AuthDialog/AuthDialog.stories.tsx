@@ -1,10 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import {
-  AuthDialog,
-  AuthMode,
-  DEFAULT_SOCIAL_PROVIDERS,
-} from './AuthDialog';
+import { AuthDialog, AuthMode, DEFAULT_SOCIAL_PROVIDERS } from './AuthDialog';
 
 // Demo-only controls interface
 interface DemoControls {
