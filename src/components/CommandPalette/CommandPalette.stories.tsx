@@ -231,6 +231,37 @@ const meta: Meta<typeof CommandPalette> = {
     },
   },
   tags: ['autodocs'],
+  argTypes: {
+    placeholder: {
+      control: 'text',
+      description: 'Placeholder text for search input',
+    },
+    isLoading: {
+      control: 'boolean',
+      description: 'Whether search is loading',
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes for the modal',
+    },
+    emptyState: {
+      control: false,
+      description: 'Custom empty state content (React node)',
+    },
+    renderItem: {
+      control: false,
+      description: 'Custom render function for items',
+    },
+    footer: {
+      control: false,
+      description: 'Custom footer content (React node)',
+    },
+    onSelect: { action: 'onSelect' },
+  },
+  args: {
+    placeholder: 'Search pages, users, settings...',
+    isLoading: false,
+  },
   decorators: [
     (Story) => (
       <CommandPaletteProvider>
@@ -244,6 +275,39 @@ const meta: Meta<typeof CommandPalette> = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+// =============================================================================
+// Playground Story (for Controls)
+// =============================================================================
+
+function PlaygroundDemo(props: React.ComponentProps<typeof CommandPalette>) {
+  const { setItems, setCategories } = useCommandPalette();
+
+  useEffect(() => {
+    setItems(sampleItems);
+    setCategories(sampleCategories);
+  }, [setItems, setCategories]);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        Press{' '}
+        <kbd className="rounded bg-gray-100 px-2 py-1 dark:bg-gray-700">⌘K</kbd>{' '}
+        or click the button below
+      </p>
+      <CommandPaletteTrigger placeholder={props.placeholder} />
+      <CommandPalette {...props} />
+    </div>
+  );
+}
+
+/**
+ * Interactive playground with all controls available.
+ * Use the Controls panel to adjust props dynamically.
+ */
+export const Playground: Story = {
+  render: (args) => <PlaygroundDemo {...args} />,
+};
 
 // =============================================================================
 // Stories
