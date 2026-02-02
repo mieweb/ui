@@ -247,10 +247,6 @@ export const CustomLabels: Story = {
       includeAll: 'Map All Columns',
       ignoreUncompleted: 'Skip Unmapped',
       import: 'Start Import',
-      ignore: 'Skip',
-      include: 'Map',
-      incomingSample: 'Sample Data',
-      fieldType: 'Map To',
       ensureAccurateData: 'Data Validation',
       ensureAccurateDataDescription:
         'Matching records will be updated automatically.',
