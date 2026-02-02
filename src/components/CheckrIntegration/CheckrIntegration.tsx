@@ -255,10 +255,10 @@ export function CheckrIntegration({
 
   const handleViewSelected = () => {
     const selected = reports.filter((r) => selectedReports.has(r.id));
-    if (selected.length === 1 && onViewReport) {
-      onViewReport(selected[0]);
-    } else if (onViewSelected) {
+    if (onViewSelected) {
       onViewSelected(selected);
+    } else if (selected.length === 1 && onViewReport) {
+      onViewReport(selected[0]);
     }
   };
 
@@ -436,7 +436,7 @@ export function CheckrIntegration({
                           type="button"
                           onClick={() => handleToggleReport(report.id)}
                           className={cn(
-                            'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+                            'flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors',
                             selectedReports.has(report.id)
                               ? 'border-primary bg-primary'
                               : 'border-muted-foreground/40 hover:border-muted-foreground'
