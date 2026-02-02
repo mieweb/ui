@@ -10,6 +10,33 @@ const meta: Meta<typeof CSVColumnMapper> = {
   title: 'Components/CSVColumnMapper',
   component: CSVColumnMapper,
   tags: ['autodocs'],
+  args: {
+    importing: false,
+    importProgress: 0,
+  },
+  argTypes: {
+    // Hide data props that are managed by interactive wrappers
+    columns: { table: { disable: true } },
+    fieldOptions: { table: { disable: true } },
+    childFieldOptions: { table: { disable: true } },
+    // Hide callback props
+    onColumnChange: { table: { disable: true } },
+    onIgnoreToggle: { table: { disable: true } },
+    onBulkAction: { table: { disable: true } },
+    onImport: { table: { disable: true } },
+    // Hide className and labels (complex object)
+    className: { table: { disable: true } },
+    labels: { table: { disable: true } },
+    // Configure visible controls
+    importing: {
+      control: 'boolean',
+      description: 'Whether import is in progress',
+    },
+    importProgress: {
+      control: { type: 'range', min: 0, max: 100, step: 1 },
+      description: 'Import progress (0-100)',
+    },
+  },
 };
 
 export default meta;
@@ -59,7 +86,13 @@ const childFieldOptions = {
 };
 
 // Wrapper for Default story with interactive state
-function CSVColumnMapperWrapper() {
+function CSVColumnMapperWrapper({
+  importing,
+  importProgress,
+}: {
+  importing?: boolean;
+  importProgress?: number;
+}) {
   const [columns, setColumns] = useState(sampleColumns);
 
   const handleColumnChange = (
@@ -103,6 +136,8 @@ function CSVColumnMapperWrapper() {
       onIgnoreToggle={handleIgnoreToggle}
       onBulkAction={handleBulkAction}
       onImport={() => window.alert('Import triggered!')}
+      importing={importing}
+      importProgress={importProgress}
     />
   );
 }
@@ -129,7 +164,12 @@ function FileUploadWrapper() {
 }
 
 export const Default: Story = {
-  render: () => <CSVColumnMapperWrapper />,
+  render: (args) => (
+    <CSVColumnMapperWrapper
+      importing={args.importing}
+      importProgress={args.importProgress}
+    />
+  ),
 };
 
 export const WithPhoneMapping: Story = {

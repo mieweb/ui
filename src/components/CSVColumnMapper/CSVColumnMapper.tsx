@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { cn } from '../../utils';
+import { Button } from '../Button';
+import { Select, type SelectOption } from '../Select';
 
 export interface CSVColumn {
   /** Original column name from CSV */
@@ -110,15 +112,15 @@ export function CSVColumnMapper({
     <div className={cn('csv-column-mapper', className)}>
       {/* Import Progress Modal */}
       {importing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
-            <div className="bg-primary p-4 text-white">
+        <div className="bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center">
+          <div className="bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl">
+            <div className="bg-primary text-primary-foreground p-4">
               <h4 className="text-lg font-semibold">Processing Employees</h4>
             </div>
             <div className="p-6">
-              <div className="h-4 w-full overflow-hidden rounded-full bg-gray-200">
+              <div className="bg-muted h-4 w-full overflow-hidden rounded-full">
                 <div
-                  className="h-full bg-green-500 transition-all duration-300"
+                  className="bg-success h-full transition-all duration-300"
                   style={{ width: `${importProgress}%` }}
                 />
               </div>
@@ -132,35 +134,37 @@ export function CSVColumnMapper({
 
       {/* Bulk Actions */}
       <div className="mb-4 flex flex-wrap gap-2">
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => onBulkAction?.('ignoreAll')}
-          className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
         >
           {ignoreAll}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => onBulkAction?.('ignoreUncompleted')}
-          className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
         >
           {ignoreUncompleted}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => onBulkAction?.('includeAll')}
-          className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
         >
           {includeAll}
-        </button>
+        </Button>
       </div>
 
       {/* Info Alert */}
-      <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
-        <h4 className="mb-1 font-semibold text-blue-800">
+      <div className="bg-primary/10 border-primary/30 mb-4 rounded-lg border p-4">
+        <h4 className="text-primary-800 dark:text-primary-200 mb-1 font-semibold">
           {ensureAccurateData}
         </h4>
-        <p className="text-sm text-blue-700">{ensureAccurateDataDescription}</p>
+        <p className="text-primary-700 dark:text-primary-300 text-sm">
+          {ensureAccurateDataDescription}
+        </p>
       </div>
 
       <p className="text-muted-foreground mb-4">{instructions}</p>
@@ -188,14 +192,9 @@ export function CSVColumnMapper({
 
       {/* Import Button */}
       <div className="mt-6 flex justify-end">
-        <button
-          type="button"
-          onClick={onImport}
-          disabled={importing}
-          className="rounded-lg bg-green-600 px-6 py-2 text-white hover:bg-green-700 disabled:bg-gray-300"
-        >
+        <Button variant="primary" onClick={onImport} disabled={importing}>
           {importLabel}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -225,130 +224,177 @@ function CSVColumnCard({
   onMappingChange,
   onIgnoreToggle,
   formatHtmlId,
-  labels,
+  labels: _labels,
 }: CSVColumnCardProps) {
   const needsMapping = !column.ignored && !column.mappedTo;
   const hasError = column.hasError || needsMapping;
 
+  // Convert fieldOptions to SelectOption format
+  const selectOptions: SelectOption[] = fieldOptions.map((opt) => ({
+    value: opt.value,
+    label: opt.label,
+    disabled: opt.disabled,
+  }));
+
+  // Convert childFieldOptions to SelectOption format
+  const childSelectOptions: SelectOption[] | undefined = childFieldOptions?.map(
+    (opt) => ({
+      value: opt.value,
+      label: opt.label,
+      disabled: opt.disabled,
+    })
+  );
+
+  const isMapped = !!column.mappedTo && !column.ignored;
+
   return (
     <div
       className={cn(
-        'rounded-lg border bg-white shadow-sm',
-        column.ignored && 'opacity-50',
-        hasError && !column.ignored && 'border-red-500'
+        'bg-card text-card-foreground overflow-hidden rounded-xl border-2 shadow-sm',
+        column.ignored
+          ? 'border-border opacity-50'
+          : isMapped
+            ? 'border-success/30'
+            : 'border-warning/30'
       )}
     >
       {/* Card Header */}
-      <div className="border-b bg-gray-50 p-3">
-        <h6
-          className="truncate text-center text-sm font-medium"
-          title={column.name}
-        >
+      <div className="flex items-center gap-2 px-4 py-3">
+        {!column.ignored &&
+          (isMapped ? (
+            <span className="bg-success flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white">
+              <svg
+                className="h-3 w-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </span>
+          ) : (
+            <span className="bg-warning flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white">
+              <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="currentColor" />
+                <circle cx="12" cy="12" r="4" fill="white" />
+              </svg>
+            </span>
+          ))}
+        <h6 className="truncate text-sm font-semibold" title={column.name}>
           {column.name}
         </h6>
       </div>
 
       {/* Card Body */}
-      <div className="p-4">
+      <div className="space-y-4 px-4 pb-4">
         {/* Sample Value */}
-        <div className="mb-3">
-          <span className="text-muted-foreground text-xs">
-            {labels.incomingSample}
+        <div>
+          <span className="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+            Sample Data
           </span>
-          <div className="truncate text-sm" title={column.sampleValue}>
+          <div
+            className="bg-muted truncate rounded-md px-3 py-2 font-mono text-sm"
+            title={column.sampleValue}
+          >
             {column.sampleValue || (
               <em className="text-muted-foreground">Empty</em>
             )}
           </div>
         </div>
 
-        <hr className="my-3" />
-
         {/* Field Type Select */}
-        <div className="mb-3">
-          <label htmlFor={formatHtmlId(column.name)} className="sr-only">
-            {labels.fieldType}
-          </label>
-          <select
-            id={formatHtmlId(column.name)}
-            value={column.mappedTo || ''}
-            onChange={(e) => onMappingChange(e.target.value, undefined)}
-            disabled={column.ignored}
+        <div>
+          <span className="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+            Map to Field
+          </span>
+          <div
             className={cn(
-              'w-full rounded-lg border p-2 text-sm',
-              column.ignored && 'cursor-not-allowed bg-gray-100'
+              'rounded-md',
+              hasError && !column.ignored && 'ring-warning/50 ring-2'
             )}
           >
-            <option value="" disabled>
-              Select field...
-            </option>
-            {fieldOptions.map((opt) => (
-              <option
-                key={opt.value}
-                value={opt.value}
-                disabled={opt.disabled}
-                className={opt.disabled ? 'text-red-500' : ''}
-              >
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            <Select
+              id={formatHtmlId(column.name)}
+              options={selectOptions}
+              value={column.mappedTo || ''}
+              onValueChange={(value) => onMappingChange(value, undefined)}
+              disabled={column.ignored}
+              placeholder="Select a field..."
+              size="sm"
+              hideLabel
+              className={cn(
+                hasError &&
+                  !column.ignored &&
+                  'border-warning text-warning placeholder:text-warning'
+              )}
+            />
+          </div>
         </div>
 
         {/* Child Field Select (for nested fields like phone.type) */}
-        {childFieldOptions &&
-          childFieldOptions.length > 0 &&
+        {childSelectOptions &&
+          childSelectOptions.length > 0 &&
           column.mappedTo && (
-            <div className="mb-3">
-              <label
-                htmlFor={formatHtmlId(column.name, column.mappedTo)}
-                className="sr-only"
-              >
+            <div>
+              <span className="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
                 Sub-field
-              </label>
-              <select
+              </span>
+              <Select
                 id={formatHtmlId(column.name, column.mappedTo)}
+                options={childSelectOptions}
                 value={column.childField || ''}
-                onChange={(e) =>
-                  onMappingChange(column.mappedTo!, e.target.value)
+                onValueChange={(value) =>
+                  onMappingChange(column.mappedTo!, value)
                 }
                 disabled={column.ignored}
-                className={cn(
-                  'w-full rounded-lg border p-2 text-sm',
-                  column.ignored && 'cursor-not-allowed bg-gray-100'
-                )}
-              >
-                <option value="" disabled>
-                  Select sub-field...
-                </option>
-                {childFieldOptions.map((opt) => (
-                  <option
-                    key={opt.value}
-                    value={opt.value}
-                    disabled={opt.disabled}
-                    className={opt.disabled ? 'text-red-500' : ''}
-                  >
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+                placeholder="Select sub-field..."
+                size="sm"
+                hideLabel
+              />
             </div>
           )}
-      </div>
 
-      {/* Card Footer */}
-      <div className="border-t bg-gray-50 p-3 text-center">
+        {/* Ignore/Include Link */}
         <button
           type="button"
           onClick={() => onIgnoreToggle(!column.ignored)}
-          className={cn(
-            'w-full rounded-lg px-4 py-2 text-sm font-medium',
-            column.ignored
-              ? 'bg-red-600 text-white hover:bg-red-700'
-              : 'bg-primary hover:bg-primary/90 text-white'
-          )}
+          className="text-muted-foreground hover:text-foreground mx-auto flex items-center gap-1 text-xs transition-colors"
         >
-          {column.ignored ? labels.include : labels.ignore}
+          {column.ignored ? (
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+          ) : (
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          )}
+          {column.ignored ? 'Include Column' : 'Ignore Column'}
         </button>
       </div>
     </div>
@@ -424,9 +470,7 @@ export function CSVFileUpload({
     <div
       className={cn(
         'flex min-h-[300px] flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-colors',
-        isDragging
-          ? 'border-primary bg-primary/5'
-          : 'border-gray-300 bg-gray-50',
+        isDragging ? 'border-primary bg-primary/5' : 'border-border bg-muted',
         className
       )}
       onDrop={handleDrop}
@@ -449,12 +493,12 @@ export function CSVFileUpload({
         </div>
       ) : (
         <>
-          <i className="fas fa-file-csv mb-4 text-5xl text-gray-400" />
+          <i className="fas fa-file-csv text-muted-foreground mb-4 text-5xl" />
           <p className="text-muted-foreground mb-4 text-lg">{selectFile}</p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="bg-primary hover:bg-primary/90 rounded-lg px-6 py-3 text-white"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-3"
           >
             {selectButton}
           </button>
