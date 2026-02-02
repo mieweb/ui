@@ -307,10 +307,6 @@ function PlaygroundDemo(props: React.ComponentProps<typeof CommandPalette>) {
  */
 export const Playground: Story = {
   render: (args) => <PlaygroundDemo {...args} />,
-  args: {
-    placeholder: 'Search pages, users, settings...',
-    isLoading: false,
-  },
 };
 
 // =============================================================================
