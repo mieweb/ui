@@ -626,7 +626,6 @@ export function CheckrIntegration({
                 options={packageOptions}
                 value={selectedPackage}
                 onValueChange={setSelectedPackage}
-                required
               />
             </div>
           </ModalBody>
