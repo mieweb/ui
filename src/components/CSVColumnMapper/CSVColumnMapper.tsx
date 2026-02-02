@@ -234,7 +234,7 @@ function CSVColumnCard({
   return (
     <div
       className={cn(
-        'bg-card text-card-foreground overflow-hidden rounded-xl border-2 shadow-sm',
+        'bg-card text-card-foreground rounded-xl border-2 shadow-sm',
         column.ignored
           ? 'border-border opacity-50'
           : isMapped
@@ -246,7 +246,7 @@ function CSVColumnCard({
       <div className="flex items-center gap-2 px-4 py-3">
         {!column.ignored &&
           (isMapped ? (
-            <span className="bg-success flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white">
+            <span className="bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
               <svg
                 className="h-3 w-3"
                 fill="none"
@@ -262,10 +262,10 @@ function CSVColumnCard({
               </svg>
             </span>
           ) : (
-            <span className="bg-warning flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white">
+            <span className="bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
               <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" fill="currentColor" />
-                <circle cx="12" cy="12" r="4" fill="white" />
+                <circle cx="12" cy="12" r="4" className="fill-warning" />
               </svg>
             </span>
           ))}
