@@ -64,10 +64,6 @@ export interface CSVColumnMapperProps {
     includeAll?: string;
     ignoreUncompleted?: string;
     import?: string;
-    ignore?: string;
-    include?: string;
-    incomingSample?: string;
-    fieldType?: string;
     ensureAccurateData?: string;
     ensureAccurateDataDescription?: string;
     instructions?: string;
@@ -92,10 +88,6 @@ export function CSVColumnMapper({
     includeAll = 'Include All',
     ignoreUncompleted = 'Ignore Uncompleted',
     import: importLabel = 'Import',
-    ignore = 'Ignore',
-    include = 'Include',
-    incomingSample = 'Incoming Sample',
-    fieldType = 'Field Type',
     ensureAccurateData = 'Ensure Accurate Employee Data',
     ensureAccurateDataDescription = 'Existing employee profiles will be automatically updated.',
     instructions = 'Map each column from your CSV to the corresponding employee field.',
@@ -185,7 +177,6 @@ export function CSVColumnMapper({
             }
             onIgnoreToggle={(ignored) => onIgnoreToggle?.(index, ignored)}
             formatHtmlId={formatHtmlId}
-            labels={{ ignore, include, incomingSample, fieldType }}
           />
         ))}
       </div>
@@ -208,12 +199,6 @@ interface CSVColumnCardProps {
   onMappingChange: (mappedTo: string, childField?: string) => void;
   onIgnoreToggle: (ignored: boolean) => void;
   formatHtmlId: (name: string, ...parts: string[]) => string;
-  labels: {
-    ignore: string;
-    include: string;
-    incomingSample: string;
-    fieldType: string;
-  };
 }
 
 function CSVColumnCard({
@@ -224,7 +209,6 @@ function CSVColumnCard({
   onMappingChange,
   onIgnoreToggle,
   formatHtmlId,
-  labels: _labels,
 }: CSVColumnCardProps) {
   const needsMapping = !column.ignored && !column.mappedTo;
   const hasError = column.hasError || needsMapping;
@@ -294,7 +278,7 @@ function CSVColumnCard({
       <div className="space-y-4 px-4 pb-4">
         {/* Sample Value */}
         <div>
-          <span className="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
             Sample Data
           </span>
           <div
@@ -309,7 +293,7 @@ function CSVColumnCard({
 
         {/* Field Type Select */}
         <div>
-          <span className="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
             Map to Field
           </span>
           <div
@@ -341,7 +325,7 @@ function CSVColumnCard({
           childSelectOptions.length > 0 &&
           column.mappedTo && (
             <div>
-              <span className="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+              <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
                 Sub-field
               </span>
               <Select
