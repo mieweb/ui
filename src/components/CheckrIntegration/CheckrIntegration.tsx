@@ -161,6 +161,12 @@ export function CheckrIntegration({
     new Set()
   );
 
+  // Reset selected reports when the available reports change
+  // or when the integration is disconnected to avoid stale selections.
+  React.useEffect(() => {
+    setSelectedReports(new Set());
+  }, [reports, connected]);
+
   const statusLabels: Record<string, string> = {
     pending,
     running,
@@ -431,7 +437,7 @@ export function CheckrIntegration({
                       className="hover:bg-muted/50 flex items-center justify-between px-4 py-4 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        {/* Selection Radio */}
+                        {/* Selection Checkbox */}
                         <button
                           type="button"
                           onClick={() => handleToggleReport(report.id)}
