@@ -278,9 +278,9 @@ export function CheckrIntegration({
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-success/10">
             <svg
-              className="text-success h-6 w-6"
+              className="h-6 w-6 text-success"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -442,6 +442,8 @@ export function CheckrIntegration({
                               : 'border-muted-foreground/40 hover:border-muted-foreground'
                           )}
                           aria-label={`Select ${report.candidate.name}`}
+                          aria-checked={selectedReports.has(report.id)}
+                          role="checkbox"
                         >
                           {selectedReports.has(report.id) && (
                             <svg
@@ -624,6 +626,7 @@ export function CheckrIntegration({
                 options={packageOptions}
                 value={selectedPackage}
                 onValueChange={setSelectedPackage}
+                required
               />
             </div>
           </ModalBody>
