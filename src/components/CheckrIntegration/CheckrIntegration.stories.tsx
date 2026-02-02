@@ -162,6 +162,18 @@ const meta: Meta<typeof CheckrIntegration> = {
 export default meta;
 type Story = StoryObj<typeof CheckrIntegration>;
 
+// Playground story that respects all Storybook controls
+export const Playground: Story = {
+  args: {
+    connected: true,
+    account: { name: 'BlueHive Inc.', plan: 'Enterprise' },
+    reports: sampleReports,
+    packages: samplePackages,
+    loading: false,
+    error: '',
+  },
+};
+
 // Wrapper for Default story with interactive state
 function CheckrIntegrationWrapper() {
   const [connected, setConnected] = useState(true);
@@ -199,7 +211,7 @@ function CheckrIntegrationWrapper() {
   );
 }
 
-export const Default: Story = {
+export const InteractiveDemo: Story = {
   render: () => <CheckrIntegrationWrapper />,
 };
 
