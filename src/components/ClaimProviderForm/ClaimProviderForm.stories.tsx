@@ -9,8 +9,47 @@ const meta: Meta<typeof ClaimProviderForm> = {
     layout: 'centered',
   },
   argTypes: {
+    providerName: {
+      control: 'text',
+      description: 'Provider name being claimed',
+    },
+    providerAddress: {
+      control: 'text',
+      description: 'Provider address being claimed',
+    },
+    roleOptions: {
+      control: false,
+      description: 'Available role options',
+    },
+    languageOptions: {
+      control: false,
+      description: 'Available language options',
+    },
+    isSubmitting: {
+      control: 'boolean',
+      description: 'Whether submission is in progress',
+    },
+    errorMessage: {
+      control: 'text',
+      description: 'Error message to display',
+    },
+    termsUrl: {
+      control: 'text',
+      description: 'Terms and conditions link URL',
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes',
+    },
     onSubmit: { action: 'onSubmit' },
     onCancel: { action: 'onCancel' },
+  },
+  args: {
+    providerName: '',
+    providerAddress: '',
+    isSubmitting: false,
+    errorMessage: '',
+    termsUrl: '/terms',
   },
   decorators: [
     (Story) => (
@@ -23,6 +62,20 @@ const meta: Meta<typeof ClaimProviderForm> = {
 
 export default meta;
 type Story = StoryObj<typeof ClaimProviderForm>;
+
+/**
+ * Interactive playground with all controls available.
+ * Use the Controls panel to adjust props dynamically.
+ */
+export const Playground: Story = {
+  args: {
+    providerName: 'ABC Medical Center',
+    providerAddress: '123 Healthcare Blvd, Fort Wayne, IN 46802',
+    isSubmitting: false,
+    errorMessage: '',
+    termsUrl: '/terms',
+  },
+};
 
 export const Default: Story = {
   args: {
