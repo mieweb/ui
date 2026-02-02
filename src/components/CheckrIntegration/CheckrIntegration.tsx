@@ -2,6 +2,17 @@
 
 import * as React from 'react';
 import { cn } from '../../utils';
+import { Button } from '../Button';
+import { Input } from '../Input';
+import { Select, type SelectOption } from '../Select';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalClose,
+  ModalBody,
+  ModalFooter,
+} from '../Modal';
 
 export interface BackgroundCheckCandidate {
   /** Candidate ID */
@@ -56,6 +67,10 @@ export interface CheckrIntegrationProps {
   ) => void;
   /** Callback to view a report */
   onViewReport?: (report: BackgroundCheckReport) => void;
+  /** Callback to view selected reports */
+  onViewSelected?: (reports: BackgroundCheckReport[]) => void;
+  /** Callback to export selected reports */
+  onExportSelected?: (reports: BackgroundCheckReport[]) => void;
   /** Callback to refresh reports */
   onRefresh?: () => void;
   /** Loading state */
@@ -86,6 +101,9 @@ export interface CheckrIntegrationProps {
     package?: string;
     submit?: string;
     cancel?: string;
+    exportSelected?: string;
+    viewDetails?: string;
+    noReportsSelected?: string;
   };
 }
 
@@ -98,6 +116,8 @@ export function CheckrIntegration({
   onDisconnect,
   onInviteCandidate,
   onViewReport,
+  onViewSelected,
+  onExportSelected,
   onRefresh,
   loading = false,
   error,
@@ -125,6 +145,9 @@ export function CheckrIntegration({
     package: packageLabel = 'Package',
     submit = 'Send Invitation',
     cancel = 'Cancel',
+    exportSelected = 'Export Selected',
+    viewDetails = 'View Details',
+    noReportsSelected = 'No reports selected',
   } = labels;
 
   const [showInviteModal, setShowInviteModal] = React.useState(false);
@@ -134,6 +157,15 @@ export function CheckrIntegration({
   const [selectedPackage, setSelectedPackage] = React.useState(
     packages[0]?.id || ''
   );
+  const [selectedReports, setSelectedReports] = React.useState<Set<string>>(
+    new Set()
+  );
+
+  // Reset selected reports when the available reports change
+  // or when the integration is disconnected to avoid stale selections.
+  React.useEffect(() => {
+    setSelectedReports(new Set());
+  }, [reports, connected]);
 
   const statusLabels: Record<string, string> = {
     pending,
@@ -149,19 +181,53 @@ export function CheckrIntegration({
     adverse_action: adverseAction,
   };
 
-  const statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    running: 'bg-blue-100 text-blue-800',
-    complete: 'bg-green-100 text-green-800',
-    failed: 'bg-red-100 text-red-800',
-    expired: 'bg-gray-100 text-gray-800',
+  // Status badge styles using design system tokens
+  const statusStyles: Record<string, string> = {
+    pending: 'border-warning text-warning bg-warning/10',
+    running: 'border-warning text-warning bg-warning/10',
+    complete: 'border-success text-success bg-success/10',
+    failed: 'border-destructive text-destructive bg-destructive/10',
+    expired: 'border-muted-foreground text-muted-foreground bg-muted',
   };
 
-  const resultColors: Record<string, string> = {
-    clear: 'text-green-600',
-    consider: 'text-yellow-600',
-    adverse_action: 'text-red-600',
+  // Result text colors using design system tokens
+  const resultStyles: Record<string, string> = {
+    clear: 'text-success',
+    consider: 'text-warning',
+    adverse_action: 'text-destructive',
   };
+
+  // Status dot colors for summary
+  const statusDotColors: Record<string, string> = {
+    pending: 'bg-warning',
+    running: 'bg-warning',
+    complete: 'bg-success',
+    failed: 'bg-destructive',
+    expired: 'bg-muted-foreground',
+  };
+
+  // Calculate status counts
+  const statusCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {
+      pending: 0,
+      running: 0,
+      complete: 0,
+      failed: 0,
+      expired: 0,
+    };
+    reports.forEach((report) => {
+      if (counts[report.status] !== undefined) {
+        counts[report.status]++;
+      }
+    });
+    return counts;
+  }, [reports]);
+
+  // Convert packages to SelectOption format
+  const packageOptions: SelectOption[] = packages.map((pkg) => ({
+    value: pkg.id,
+    label: pkg.name,
+  }));
 
   const handleInviteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,6 +247,32 @@ export function CheckrIntegration({
     }
   };
 
+  const handleToggleReport = (reportId: string) => {
+    setSelectedReports((prev) => {
+      const next = new Set(prev);
+      if (next.has(reportId)) {
+        next.delete(reportId);
+      } else {
+        next.add(reportId);
+      }
+      return next;
+    });
+  };
+
+  const handleViewSelected = () => {
+    const selected = reports.filter((r) => selectedReports.has(r.id));
+    if (onViewSelected) {
+      onViewSelected(selected);
+    } else if (selected.length === 1 && onViewReport) {
+      onViewReport(selected[0]);
+    }
+  };
+
+  const handleExportSelected = () => {
+    const selected = reports.filter((r) => selectedReports.has(r.id));
+    onExportSelected?.(selected);
+  };
+
   const formatDate = (date?: Date | string) => {
     if (!date) return '';
     const d = typeof date === 'string' ? new Date(date) : date;
@@ -192,11 +284,23 @@ export function CheckrIntegration({
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100">
-            <i className="fas fa-user-shield text-xl text-emerald-600" />
+          <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg">
+            <svg
+              className="text-success h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Checkr</h3>
+            <h3 className="text-foreground text-lg font-semibold">Checkr</h3>
             {connected && account?.name && (
               <p className="text-muted-foreground text-sm">
                 {account.name}
@@ -209,29 +313,45 @@ export function CheckrIntegration({
         </div>
 
         {connected ? (
-          <button
-            type="button"
-            onClick={onDisconnect}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-          >
+          <Button variant="outline" onClick={onDisconnect}>
             {disconnect}
-          </button>
+          </Button>
         ) : (
-          <button
-            type="button"
-            onClick={onConnect}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
-          >
-            <i className="fas fa-link mr-2" />
+          <Button variant="primary" onClick={onConnect}>
+            <svg
+              className="mr-2 h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+              />
+            </svg>
             {connect}
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Error State */}
       {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-          <i className="fas fa-exclamation-circle mr-2" />
+        <div className="bg-destructive/10 border-destructive/20 text-destructive mb-4 rounded-lg border p-4">
+          <svg
+            className="mr-2 inline-block h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
           {error}
         </div>
       )}
@@ -239,30 +359,69 @@ export function CheckrIntegration({
       {/* Connected State */}
       {connected && (
         <>
+          {/* Status Summary */}
+          {reports.length > 0 && (
+            <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm">
+              {Object.entries(statusCounts)
+                .filter(([, count]) => count > 0)
+                .map(([status, count]) => (
+                  <div key={status} className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        'h-2.5 w-2.5 rounded-full',
+                        statusDotColors[status]
+                      )}
+                    />
+                    <span>
+                      {count} {statusLabels[status]?.toLowerCase()}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="mb-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => setShowInviteModal(true)}
-              className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
-            >
-              <i className="fas fa-user-plus mr-2" />
+            <Button variant="primary" onClick={() => setShowInviteModal(true)}>
+              <svg
+                className="mr-2 h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                />
+              </svg>
               {inviteCandidate}
-            </button>
-            <button
-              type="button"
-              onClick={onRefresh}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-            >
-              <i className="fas fa-sync-alt mr-2" />
+            </Button>
+            <Button variant="outline" onClick={onRefresh}>
+              <svg
+                className="mr-2 h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
               {refresh}
-            </button>
+            </Button>
           </div>
 
-          {/* Reports List */}
-          <div className="rounded-lg border">
-            <div className="border-b bg-gray-50 px-4 py-3">
-              <h4 className="font-medium">{viewReports}</h4>
+          {/* Reports Card */}
+          <div className="bg-card border-border overflow-hidden rounded-lg border">
+            <div className="border-border border-b px-4 py-3">
+              <h4 className="text-card-foreground font-medium">
+                {viewReports}
+              </h4>
             </div>
 
             {loading ? (
@@ -270,31 +429,67 @@ export function CheckrIntegration({
                 <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
               </div>
             ) : reports.length > 0 ? (
-              <div className="divide-y">
-                {reports.map((report) => (
-                  <div
-                    key={report.id}
-                    className="flex items-center justify-between p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="font-medium">{report.candidate.name}</p>
-                        <p className="text-muted-foreground text-sm">
-                          {report.candidate.email}
-                        </p>
-                        {report.packageName && (
-                          <p className="text-muted-foreground text-xs">
-                            {report.packageName}
+              <>
+                <div className="divide-border divide-y">
+                  {reports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="hover:bg-muted/50 flex items-center justify-between px-4 py-4 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Selection Checkbox */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleReport(report.id)}
+                          className={cn(
+                            'flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors',
+                            selectedReports.has(report.id)
+                              ? 'border-primary bg-primary'
+                              : 'border-muted-foreground/40 hover:border-muted-foreground'
+                          )}
+                          aria-label={`Select ${report.candidate.name}`}
+                          aria-checked={selectedReports.has(report.id)}
+                          role="checkbox"
+                        >
+                          {selectedReports.has(report.id) && (
+                            <svg
+                              className="text-primary-foreground h-3 w-3"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </button>
+
+                        {/* Candidate Info */}
+                        <div>
+                          <p className="text-card-foreground font-medium">
+                            {report.candidate.name}
                           </p>
-                        )}
+                          <p className="text-muted-foreground text-sm">
+                            {report.candidate.email}
+                          </p>
+                          {report.packageName && (
+                            <p className="text-muted-foreground text-xs">
+                              {report.packageName}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
+
+                      {/* Status & Date */}
                       <div className="text-right">
                         <span
                           className={cn(
-                            'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-                            statusColors[report.status]
+                            'inline-block rounded-full border px-3 py-0.5 text-xs font-medium',
+                            statusStyles[report.status]
                           )}
                         >
                           {statusLabels[report.status] || report.status}
@@ -303,33 +498,62 @@ export function CheckrIntegration({
                           <p
                             className={cn(
                               'mt-1 text-sm font-medium',
-                              resultColors[report.result]
+                              resultStyles[report.result]
                             )}
                           >
                             {resultLabels[report.result] || report.result}
                           </p>
                         )}
-                        <p className="text-muted-foreground text-xs">
+                        <p className="text-muted-foreground mt-1 text-xs">
                           {formatDate(report.completedAt || report.createdAt)}
                         </p>
                       </div>
-                      {report.reportUrl && (
-                        <button
-                          type="button"
-                          onClick={() => onViewReport?.(report)}
-                          className="rounded-lg border border-gray-300 p-2 hover:bg-gray-100"
-                          title="View Report"
-                        >
-                          <i className="fas fa-external-link-alt text-gray-600" />
-                        </button>
-                      )}
                     </div>
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="border-border bg-muted/30 flex items-center justify-between border-t px-4 py-3">
+                  <span className="text-muted-foreground text-sm">
+                    {selectedReports.size > 0
+                      ? `${selectedReports.size} report${selectedReports.size > 1 ? 's' : ''} selected`
+                      : noReportsSelected}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportSelected}
+                      disabled={selectedReports.size === 0}
+                    >
+                      {exportSelected}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleViewSelected}
+                      disabled={selectedReports.size === 0}
+                    >
+                      {viewDetails}
+                    </Button>
                   </div>
-                ))}
-              </div>
+                </div>
+              </>
             ) : (
               <div className="text-muted-foreground py-8 text-center">
-                <i className="fas fa-clipboard-list mb-2 text-3xl text-gray-300" />
+                <svg
+                  className="text-muted-foreground/30 mx-auto mb-2 h-12 w-12"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
+                </svg>
                 <p>{noReports}</p>
               </div>
             )}
@@ -339,114 +563,92 @@ export function CheckrIntegration({
 
       {/* Not Connected State */}
       {!connected && !error && (
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <i className="fas fa-link-slash mb-4 text-4xl text-gray-300" />
+        <div className="border-border rounded-lg border border-dashed p-8 text-center">
+          <svg
+            className="text-muted-foreground/30 mx-auto mb-4 h-12 w-12"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+            />
+          </svg>
           <p className="text-muted-foreground mb-4">
             Connect your Checkr account to run background checks on candidates
           </p>
-          <button
-            type="button"
-            onClick={onConnect}
-            className="rounded-lg bg-emerald-600 px-6 py-2 text-white hover:bg-emerald-700"
-          >
-            <i className="fas fa-link mr-2" />
+          <Button variant="primary" onClick={onConnect}>
+            <svg
+              className="mr-2 h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+              />
+            </svg>
             {connect}
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Invite Modal */}
-      {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            role="button"
-            tabIndex={0}
-            aria-label="Close modal"
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setShowInviteModal(false)}
-            onKeyDown={(e) => e.key === 'Enter' && setShowInviteModal(false)}
-          />
-          <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-semibold">{inviteCandidate}</h3>
-
-            <form onSubmit={handleInviteSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    {name}
-                  </label>
-                  <input
-                    type="text"
-                    value={candidateName}
-                    onChange={(e) => setCandidateName(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    {email}
-                  </label>
-                  <input
-                    type="email"
-                    value={candidateEmail}
-                    onChange={(e) => setCandidateEmail(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    {phone}
-                  </label>
-                  <input
-                    type="tel"
-                    value={candidatePhone}
-                    onChange={(e) => setCandidatePhone(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    {packageLabel}
-                  </label>
-                  <select
-                    value={selectedPackage}
-                    onChange={(e) => setSelectedPackage(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                    required
-                  >
-                    {packages.map((pkg) => (
-                      <option key={pkg.id} value={pkg.id}>
-                        {pkg.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowInviteModal(false)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                >
-                  {cancel}
-                </button>
-                <button
-                  type="submit"
-                  className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
-                >
-                  {submit}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Modal open={showInviteModal} onOpenChange={setShowInviteModal} size="md">
+        <ModalHeader>
+          <ModalTitle>{inviteCandidate}</ModalTitle>
+          <ModalClose />
+        </ModalHeader>
+        <form onSubmit={handleInviteSubmit}>
+          <ModalBody>
+            <div className="space-y-4">
+              <Input
+                label={name}
+                value={candidateName}
+                onChange={(e) => setCandidateName(e.target.value)}
+                required
+              />
+              <Input
+                label={email}
+                type="email"
+                value={candidateEmail}
+                onChange={(e) => setCandidateEmail(e.target.value)}
+                required
+              />
+              <Input
+                label={phone}
+                type="tel"
+                value={candidatePhone}
+                onChange={(e) => setCandidatePhone(e.target.value)}
+              />
+              <Select
+                label={packageLabel}
+                options={packageOptions}
+                value={selectedPackage}
+                onValueChange={setSelectedPackage}
+              />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowInviteModal(false)}
+            >
+              {cancel}
+            </Button>
+            <Button type="submit" variant="primary">
+              {submit}
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -5,15 +5,6 @@ import {
   type BackgroundCheckReport,
 } from './CheckrIntegration';
 
-const meta: Meta<typeof CheckrIntegration> = {
-  title: 'Components/CheckrIntegration',
-  component: CheckrIntegration,
-  tags: ['autodocs'],
-};
-
-export default meta;
-type Story = StoryObj<typeof CheckrIntegration>;
-
 const samplePackages = [
   {
     id: 'basic',
@@ -91,6 +82,98 @@ const sampleReports: BackgroundCheckReport[] = [
   },
 ];
 
+const meta: Meta<typeof CheckrIntegration> = {
+  title: 'Components/CheckrIntegration',
+  component: CheckrIntegration,
+  tags: ['autodocs'],
+  argTypes: {
+    connected: {
+      control: 'boolean',
+      description: 'Whether Checkr is connected',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    account: {
+      control: 'object',
+      description: 'Account information (name, plan)',
+    },
+    reports: {
+      control: 'object',
+      description: 'Array of background check reports',
+    },
+    packages: {
+      control: 'object',
+      description: 'Available background check packages',
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Loading state',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    error: {
+      control: 'text',
+      description: 'Error message to display',
+    },
+    onConnect: {
+      action: 'connect',
+      description: 'Callback when Connect button is clicked',
+    },
+    onDisconnect: {
+      action: 'disconnect',
+      description: 'Callback when Disconnect button is clicked',
+    },
+    onInviteCandidate: {
+      action: 'inviteCandidate',
+      description: 'Callback when a candidate is invited',
+    },
+    onViewReport: {
+      action: 'viewReport',
+      description: 'Callback when a single report is viewed',
+    },
+    onViewSelected: {
+      action: 'viewSelected',
+      description: 'Callback when View Details is clicked for selected reports',
+    },
+    onExportSelected: {
+      action: 'exportSelected',
+      description: 'Callback when Export Selected is clicked',
+    },
+    onRefresh: {
+      action: 'refresh',
+      description: 'Callback when Refresh button is clicked',
+    },
+    labels: {
+      control: 'object',
+      description: 'Custom labels for UI text',
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS classes',
+    },
+  },
+  args: {
+    packages: samplePackages,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof CheckrIntegration>;
+
+// Playground story that respects all Storybook controls
+export const Playground: Story = {
+  args: {
+    connected: true,
+    account: { name: 'BlueHive Inc.', plan: 'Enterprise' },
+    reports: sampleReports,
+    packages: samplePackages,
+    loading: false,
+    error: '',
+  },
+};
+
 // Wrapper for Default story with interactive state
 function CheckrIntegrationWrapper() {
   const [connected, setConnected] = useState(true);
@@ -117,13 +200,18 @@ function CheckrIntegrationWrapper() {
           },
         ]);
       }}
-      onViewReport={(report) => window.open(report.reportUrl, '_blank')}
+      onViewReport={(report) => {
+        console.log('View report:', report);
+        if (report.reportUrl) window.open(report.reportUrl, '_blank');
+      }}
+      onViewSelected={(reports) => console.log('View selected:', reports)}
+      onExportSelected={(reports) => console.log('Export selected:', reports)}
       onRefresh={() => console.log('Refresh')}
     />
   );
 }
 
-export const Default: Story = {
+export const InteractiveDemo: Story = {
   render: () => <CheckrIntegrationWrapper />,
 };
 
