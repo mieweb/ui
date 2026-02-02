@@ -284,9 +284,9 @@ export function CheckrIntegration({
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-success/10">
+          <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg">
             <svg
-              className="h-6 w-6 text-success"
+              className="text-success h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
