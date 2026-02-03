@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import { Button } from '../Button/Button';
+import { Button, buttonVariants } from '../Button/Button';
 
 // =============================================================================
 // Types
@@ -440,15 +440,15 @@ interface ActionButtonProps {
 function ActionButton({ label, onClick, href, variant }: ActionButtonProps) {
   if (href) {
     return (
-      <Button
-        as="a"
+      <a
         href={href}
-        variant={variant}
-        size="md"
-        className="min-w-[140px]"
+        className={cn(
+          buttonVariants({ variant, size: 'md' }),
+          'min-w-[140px] text-center'
+        )}
       >
         {label}
-      </Button>
+      </a>
     );
   }
 
