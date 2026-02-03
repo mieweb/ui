@@ -64,7 +64,13 @@ export function OrderLookupForm({
   return (
     <div className={`flex min-h-screen flex-col md:flex-row ${className}`}>
       {/* Left side - Provider branding */}
-      <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white md:w-1/2 dark:from-blue-800 dark:to-blue-950">
+      <div
+        className="flex flex-col items-center justify-center p-8 text-white md:w-1/2"
+        style={{
+          background:
+            'linear-gradient(to bottom right, var(--mieweb-primary-600, #1f98ca), var(--mieweb-primary-900, #086285))',
+        }}
+      >
         {providerLogo ? (
           <img
             src={providerLogo}
