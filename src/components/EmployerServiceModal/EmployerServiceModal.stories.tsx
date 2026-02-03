@@ -6,11 +6,56 @@ const meta: Meta<typeof EmployerServiceModal> = {
   title: 'Components/EmployerServiceModal',
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
   },
+  decorators: [
+    (Story) => (
+      // Container with transform creates a new containing block for position:fixed
+      // This keeps the modal within this container in docs view
+      <div
+        className="relative flex items-center justify-center"
+        style={{
+          transform: 'translateZ(0)',
+          minHeight: '900px',
+          padding: '100px',
+        }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   argTypes: {
+    open: {
+      control: 'boolean',
+      description: 'Whether the modal is open',
+    },
+    isSubmitting: {
+      control: 'boolean',
+      description: 'Whether submission is in progress',
+    },
+    errorMessage: {
+      control: 'text',
+      description: 'Error message to display',
+    },
+    employer: {
+      control: false,
+      description: 'Employer information',
+    },
+    service: {
+      control: false,
+      description: 'Service being configured',
+    },
+    existingConfig: {
+      control: false,
+      description: 'Existing configuration (for editing)',
+    },
     onOpenChange: { action: 'onOpenChange' },
     onSave: { action: 'onSave' },
+  },
+  args: {
+    open: true,
+    isSubmitting: false,
+    errorMessage: '',
   },
 };
 
