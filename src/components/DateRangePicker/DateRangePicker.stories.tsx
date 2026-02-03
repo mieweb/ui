@@ -13,10 +13,120 @@ const meta: Meta<typeof DateRangePicker> = {
   parameters: {
     layout: 'centered',
   },
+  argTypes: {
+    showPrint: {
+      control: 'boolean',
+      description: 'Whether to show print button',
+    },
+    showExport: {
+      control: 'boolean',
+      description: 'Whether to show export button',
+    },
+    placeholder: {
+      control: 'text',
+      description: 'Placeholder text for the date input',
+    },
+    dateFormat: {
+      control: 'text',
+      description: 'Date format for display',
+    },
+    className: {
+      control: 'text',
+      description: 'Custom className',
+    },
+    value: {
+      control: false,
+      description: 'Current date range value',
+    },
+    activePreset: {
+      control: false,
+      description: 'Currently active preset key',
+    },
+    presets: {
+      control: false,
+      description: 'Custom presets (uses default if not provided)',
+    },
+    labels: {
+      control: false,
+      description: 'Labels for i18n',
+    },
+    onChange: { action: 'onChange' },
+    onPrint: { action: 'onPrint' },
+    onExport: { action: 'onExport' },
+  },
+  args: {
+    showPrint: false,
+    showExport: false,
+    placeholder: 'Select date range',
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof DateRangePicker>;
+
+// ============================================================================
+// Playground Story (for Controls)
+// ============================================================================
+
+interface PlaygroundProps {
+  showPrint?: boolean;
+  showExport?: boolean;
+  placeholder?: string;
+  dateFormat?: string;
+  className?: string;
+  onChange?: (range: DateRange, presetKey?: string) => void;
+  onPrint?: () => void;
+  onExport?: () => void;
+}
+
+function PlaygroundDemo({
+  showPrint,
+  showExport,
+  placeholder,
+  dateFormat,
+  className,
+  onChange,
+  onPrint,
+  onExport,
+}: PlaygroundProps) {
+  const [range, setRange] = useState<DateRange>({ start: null, end: null });
+  const [preset, setPreset] = useState<string>();
+
+  return (
+    <DateRangePicker
+      value={range}
+      onChange={(newRange, presetKey) => {
+        setRange(newRange);
+        setPreset(presetKey);
+        onChange?.(newRange, presetKey);
+      }}
+      activePreset={preset}
+      showPrint={showPrint}
+      showExport={showExport}
+      placeholder={placeholder}
+      dateFormat={dateFormat}
+      className={className}
+      onPrint={onPrint}
+      onExport={onExport}
+    />
+  );
+}
+
+/**
+ * Interactive playground with all controls available.
+ * Use the Controls panel to toggle showPrint, showExport, and other props.
+ */
+export const Playground: Story = {
+  render: (args) => <PlaygroundDemo {...args} />,
+  args: {
+    showPrint: true,
+    showExport: true,
+  },
+};
+
+// ============================================================================
+// Demo Stories
+// ============================================================================
 
 export const Default: Story = {
   render: function Render() {
