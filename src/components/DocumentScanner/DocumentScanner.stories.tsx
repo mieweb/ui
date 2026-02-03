@@ -81,7 +81,7 @@ function MyForm() {
     },
     acceptedFileTypes: {
       description: 'Accepted MIME types',
-      control: 'object',
+      control: false,
       table: {
         defaultValue: {
           summary:
