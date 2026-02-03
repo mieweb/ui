@@ -20,7 +20,16 @@ const meta: Meta<typeof OrderList> = {
         component:
           'A tabbed list view for orders with filtering, search, and customizable rendering. Supports loading states, empty states, and custom actions.',
       },
+      canvas: {
+        sourceState: 'shown',
+      },
     },
+  },
+  args: {
+    showSearch: true,
+    isLoading: false,
+    emptyMessage: 'No orders found',
+    searchPlaceholder: 'Search orders...',
   },
   argTypes: {
     orders: {
@@ -89,6 +98,47 @@ const meta: Meta<typeof OrderList> = {
 
 export default meta;
 type Story = StoryObj<typeof OrderList>;
+
+// Helper to render an order item
+function renderOrderItem(order: SampleOrder) {
+  const statusVariants: Record<
+    OrderStatus,
+    'default' | 'secondary' | 'success' | 'warning' | 'danger'
+  > = {
+    pending: 'warning',
+    active: 'default',
+    scheduled: 'default',
+    'in-progress': 'default',
+    completed: 'success',
+    rejected: 'danger',
+    invoiced: 'success',
+    cancelled: 'secondary',
+  };
+
+  return (
+    <div className="hover:bg-muted/50 cursor-pointer p-4 transition-colors">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="text-foreground font-medium">
+              {order.orderNumber}
+            </span>
+            <Badge variant={statusVariants[order.status]} size="sm">
+              {order.status.replace('-', ' ')}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground text-sm">{order.employeeName}</p>
+          <p className="text-muted-foreground/70 mt-1 text-xs">
+            {order.services.join(' • ')}
+          </p>
+        </div>
+        <span className="text-muted-foreground text-xs">
+          {order.createdAt.toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 // Sample order type
 interface SampleOrder {
@@ -244,21 +294,8 @@ function InteractiveDemo({
         emptyMessage={emptyMessage}
         actions={
           showActions ? (
-            <Button size="sm">
-              <svg
-                className="mr-1 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              New Order
+            <Button size="sm" variant="ghost" className="whitespace-nowrap">
+              + New
             </Button>
           ) : undefined
         }
@@ -267,12 +304,70 @@ function InteractiveDemo({
   );
 }
 
+/**
+ * Playground wrapper component for proper hook usage
+ */
+function PlaygroundDemo({
+  showSearch,
+  isLoading,
+  emptyMessage,
+  searchPlaceholder,
+}: {
+  showSearch?: boolean;
+  isLoading?: boolean;
+  emptyMessage?: string;
+  searchPlaceholder?: string;
+}) {
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchValue, setSearchValue] = useState('');
+
+  const filteredOrders = searchValue
+    ? sampleOrders.filter(
+        (o) =>
+          o.employeeName.toLowerCase().includes(searchValue.toLowerCase()) ||
+          o.orderNumber.toLowerCase().includes(searchValue.toLowerCase())
+      )
+    : sampleOrders;
+
+  return (
+    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
+      <OrderList
+        orders={isLoading ? [] : filteredOrders}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={renderOrderItem}
+        getOrderStatus={(order: SampleOrder) => order.status}
+        isLoading={isLoading}
+        showSearch={showSearch}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        searchPlaceholder={searchPlaceholder}
+        emptyMessage={emptyMessage}
+        actions={
+          <Button size="sm" variant="ghost" className="whitespace-nowrap">
+            + New
+          </Button>
+        }
+      />
+    </div>
+  );
+}
+
 export const Default: Story = {
-  render: () => <InteractiveDemo />,
+  render: (args) => (
+    <PlaygroundDemo
+      showSearch={args.showSearch}
+      isLoading={args.isLoading}
+      emptyMessage={args.emptyMessage}
+      searchPlaceholder={args.searchPlaceholder}
+    />
+  ),
   parameters: {
     docs: {
       description: {
-        story: 'Basic order list with tabs for filtering by status.',
+        story:
+          'Interactive demo - use controls to toggle showSearch, isLoading, and edit messages.',
       },
     },
   },

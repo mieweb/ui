@@ -105,10 +105,10 @@ export function OrderList<T>({
   }, [orders, tabs, getOrderStatus]);
 
   return (
-    <div className={cn('flex flex-col', className)}>
+    <div className={cn('flex h-full flex-col', className)}>
       {/* Header with tabs and actions */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col gap-4 px-4 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs */}
           <div className="flex gap-1 overflow-x-auto">
             {tabs.map((tab) => {
