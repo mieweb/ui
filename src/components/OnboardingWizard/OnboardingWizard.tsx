@@ -68,7 +68,7 @@ export function OnboardingWizard({
   onStepChange,
   onComplete,
   onSkip,
-  logoUrl = '/images/bluehive/logo-white.svg',
+  logoUrl = 'https://mieweb.org/wp-content/uploads/2024/03/MIE-NEW-1.png',
   brandName = 'BlueHive',
   brandSubname = 'for employers',
   loading = false,

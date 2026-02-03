@@ -1,22 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import * as React from 'react';
 import {
   OnboardingWizard,
   OnboardingStepQuestion,
   OnboardingCompletion,
 } from './OnboardingWizard';
 
-const meta: Meta<typeof OnboardingWizard> = {
-  title: 'Components/OnboardingWizard',
-  component: OnboardingWizard,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'fullscreen',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof OnboardingWizard>;
+// =============================================================================
+// Sample Steps Data
+// =============================================================================
 
 const sampleSteps = [
   {
@@ -80,20 +72,20 @@ const sampleSteps = [
       <OnboardingStepQuestion
         icon="fas fa-file-import"
         title="Import your employees"
-        description="Import your employees from your existing HR / HCM / HRIS / payroll system or upload a CSV file."
+        description="Import from your HR / HCM / HRIS / payroll system or upload a CSV."
       >
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button className="border-primary text-primary rounded-full border-2 bg-white px-4 py-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <button className="border-primary text-primary hover:bg-primary/5 rounded-full border-2 bg-white px-5 py-2.5 font-medium transition-colors">
             <i className="fas fa-file-import mr-2" />
             Import from HR Platform
           </button>
-          <button className="rounded-full border-2 border-gray-300 px-4 py-2 text-gray-700">
+          <button className="rounded-full border-2 border-gray-300 px-5 py-2.5 font-medium text-gray-700 transition-colors hover:bg-gray-50">
             <i className="fas fa-file-upload mr-2" />
             Upload CSV
           </button>
-          <button className="rounded-full border-2 border-gray-300 px-4 py-2 text-gray-700">
+          <button className="rounded-full border-2 border-gray-300 px-5 py-2.5 font-medium text-gray-700 transition-colors hover:bg-gray-50">
             <i className="fas fa-user-plus mr-2" />
-            Manually add employees
+            Add Manually
           </button>
         </div>
       </OnboardingStepQuestion>
@@ -110,8 +102,53 @@ const sampleSteps = [
         title="Set up payment"
         description="Add your payment method to start ordering services."
       >
-        <div className="mt-4 rounded-lg border border-gray-200 p-4">
-          <p className="text-muted-foreground">Payment form would go here...</p>
+        <div className="border-border bg-muted/30 mx-auto mt-6 max-w-md rounded-lg border p-6">
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="card-number"
+                className="text-foreground mb-1 block text-sm font-medium"
+              >
+                Card Number
+              </label>
+              <input
+                id="card-number"
+                type="text"
+                placeholder="4242 4242 4242 4242"
+                className="border-border bg-background w-full rounded-lg border px-3 py-2"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="card-expiry"
+                  className="text-foreground mb-1 block text-sm font-medium"
+                >
+                  Expiry
+                </label>
+                <input
+                  id="card-expiry"
+                  type="text"
+                  placeholder="MM/YY"
+                  className="border-border bg-background w-full rounded-lg border px-3 py-2"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="card-cvc"
+                  className="text-foreground mb-1 block text-sm font-medium"
+                >
+                  CVC
+                </label>
+                <input
+                  id="card-cvc"
+                  type="text"
+                  placeholder="123"
+                  className="border-border bg-background w-full rounded-lg border px-3 py-2"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </OnboardingStepQuestion>
     ),
@@ -132,124 +169,275 @@ const sampleSteps = [
   },
 ];
 
-function DefaultWrapper() {
-  const [currentStep, setCurrentStep] = useState(0);
+// =============================================================================
+// Demo Mode Types
+// =============================================================================
+
+type DemoMode =
+  | 'interactive'
+  | 'loading'
+  | 'error'
+  | 'customBranding'
+  | 'noHeader'
+  | 'incomplete';
+
+// =============================================================================
+// Interactive Demo Wrapper
+// =============================================================================
+
+interface OnboardingWizardDemoProps {
+  demoMode?: DemoMode;
+  currentStep?: number;
+  showHeader?: boolean;
+  loading?: boolean;
+  loadingMessage?: string;
+  error?: string;
+  brandName?: string;
+  brandSubname?: string;
+  nextEnabled?: boolean;
+  backEnabled?: boolean;
+}
+
+function OnboardingWizardDemo({
+  demoMode = 'interactive',
+  currentStep: initialStep = 0,
+  showHeader = true,
+  loading = false,
+  loadingMessage = 'Getting ready, one moment please...',
+  error,
+  brandName = 'BlueHive',
+  brandSubname = 'for employers',
+  nextEnabled = true,
+  backEnabled = true,
+}: OnboardingWizardDemoProps) {
+  const [currentStep, setCurrentStep] = React.useState(initialStep);
+
+  // Sync with Storybook controls
+  React.useEffect(() => {
+    setCurrentStep(initialStep);
+  }, [initialStep]);
+
+  // Get steps based on demo mode
+  const getSteps = () => {
+    if (demoMode === 'incomplete') {
+      return [
+        ...sampleSteps.slice(0, 4),
+        {
+          id: 'step5',
+          title: 'Complete',
+          description: 'Review',
+          icon: 'fas fa-check',
+          content: (
+            <OnboardingCompletion
+              completed={false}
+              incompleteSteps={[
+                { step: 2, label: 'Import Employees' },
+                { step: 3, label: 'Payment' },
+              ]}
+              onGoToStep={(step) => setCurrentStep(step)}
+            />
+          ),
+        },
+      ];
+    }
+    return sampleSteps;
+  };
+
+  // Demo-specific overrides
+  const getProps = () => {
+    const baseProps = {
+      steps: getSteps(),
+      currentStep,
+      onStepChange: setCurrentStep,
+      onComplete: () => window.alert('Onboarding complete!'),
+      onSkip: (step: number) => console.log('Skipped step:', step),
+      showHeader,
+      nextEnabled,
+      backEnabled,
+    };
+
+    switch (demoMode) {
+      case 'loading':
+        return { ...baseProps, loading: true, loadingMessage };
+      case 'error':
+        return {
+          ...baseProps,
+          error: error || 'Something went wrong. Please try again.',
+        };
+      case 'customBranding':
+        return {
+          ...baseProps,
+          brandName: 'Enterprise Health',
+          brandSubname: 'Occupational Health',
+          logoUrl:
+            'https://www.enterprisehealth.com/hs-fs/hubfs/CMS%20Site-24/EH-Logo-Refresh.png',
+        };
+      case 'noHeader':
+        return { ...baseProps, showHeader: false };
+      case 'incomplete':
+        return { ...baseProps, currentStep: 4 };
+      case 'interactive':
+      default:
+        return { ...baseProps, brandName, brandSubname, loading, error };
+    }
+  };
+
   return (
-    <OnboardingWizard
-      steps={sampleSteps}
-      currentStep={currentStep}
-      onStepChange={setCurrentStep}
-      onComplete={() => window.alert('Onboarding complete!')}
-      onSkip={(step) => console.log('Skipped step:', step)}
-    />
+    <div className="border-border relative h-[700px] overflow-hidden rounded-lg border shadow-lg">
+      <OnboardingWizard
+        {...getProps()}
+        className="!absolute !inset-0 !h-full"
+      />
+    </div>
   );
 }
 
-export const Default: Story = {
-  render: () => <DefaultWrapper />,
-};
+// =============================================================================
+// Meta Configuration
+// =============================================================================
 
-export const Loading: Story = {
+const meta: Meta<typeof OnboardingWizardDemo> = {
+  title: 'Components/OnboardingWizard',
+  component: OnboardingWizardDemo,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component:
+          'A multi-step onboarding wizard for guiding users through setup flows. Features include progress tracking, step navigation, loading states, error handling, and customizable branding. **Use the Demo Mode control** to explore different states.',
+      },
+    },
+  },
   args: {
-    steps: sampleSteps,
+    demoMode: 'interactive',
     currentStep: 0,
-    loading: true,
-    loadingMessage: 'Setting up your account...',
+    showHeader: true,
+    loading: false,
+    loadingMessage: 'Getting ready, one moment please...',
+    error: '',
+    brandName: 'BlueHive',
+    brandSubname: 'for employers',
+    nextEnabled: true,
+    backEnabled: true,
+  },
+  argTypes: {
+    demoMode: {
+      control: 'select',
+      options: [
+        'interactive',
+        'loading',
+        'error',
+        'customBranding',
+        'noHeader',
+        'incomplete',
+      ],
+      description: 'Switch between different demo scenarios',
+      table: { category: 'Demo' },
+    },
+    currentStep: {
+      control: { type: 'range', min: 0, max: 4, step: 1 },
+      description: 'Current step index (0-4)',
+      if: { arg: 'demoMode', eq: 'interactive' },
+    },
+    showHeader: {
+      control: 'boolean',
+      description: 'Show the header with branding',
+      if: { arg: 'demoMode', eq: 'interactive' },
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Show loading state',
+      if: { arg: 'demoMode', eq: 'interactive' },
+    },
+    loadingMessage: {
+      control: 'text',
+      description: 'Message shown during loading',
+      if: { arg: 'demoMode', eq: 'loading' },
+    },
+    error: {
+      control: 'text',
+      description: 'Error message to display',
+      if: { arg: 'demoMode', eq: 'error' },
+    },
+    brandName: {
+      control: 'text',
+      description: 'Brand name in header',
+      if: { arg: 'demoMode', eq: 'interactive' },
+    },
+    brandSubname: {
+      control: 'text',
+      description: 'Brand subname in header',
+      if: { arg: 'demoMode', eq: 'interactive' },
+    },
+    nextEnabled: {
+      control: 'boolean',
+      description: 'Enable/disable Next button',
+      if: { arg: 'demoMode', eq: 'interactive' },
+    },
+    backEnabled: {
+      control: 'boolean',
+      description: 'Enable/disable Back button',
+      if: { arg: 'demoMode', eq: 'interactive' },
+    },
   },
 };
 
+export default meta;
+type Story = StoryObj<typeof OnboardingWizardDemo>;
+
+// =============================================================================
+// Stories
+// =============================================================================
+
+/** Interactive demo - use controls to navigate and customize */
+export const Default: Story = {};
+
+/** Loading state with customizable message */
+export const Loading: Story = {
+  args: { demoMode: 'loading', loadingMessage: 'Setting up your account...' },
+};
+
+/** Error state with alert banner */
 export const WithError: Story = {
   args: {
-    steps: sampleSteps,
-    currentStep: 0,
-    error: 'Something went wrong. Please try again.',
+    demoMode: 'error',
+    error: 'Unable to save your progress. Please check your connection.',
   },
 };
 
+/** Custom branding example (Enterprise Health) */
 export const CustomBranding: Story = {
-  args: {
-    steps: sampleSteps,
-    currentStep: 0,
-    brandName: 'Enterprise Health',
-    brandSubname: 'Occupational Health',
-    logoUrl: '/images/eh/logo-white.svg',
-  },
+  args: { demoMode: 'customBranding' },
 };
 
-export const MiddleStep: Story = {
-  args: {
-    steps: sampleSteps,
-    currentStep: 2,
-  },
-};
-
-export const LastStep: Story = {
-  args: {
-    steps: sampleSteps,
-    currentStep: 4,
-  },
-};
-
-export const NextDisabled: Story = {
-  args: {
-    steps: sampleSteps,
-    currentStep: 1,
-    nextEnabled: false,
-  },
-};
-
-function IncompleteStepsWrapper() {
-  const incompleteSteps = [
-    ...sampleSteps.slice(0, 4),
-    {
-      id: 'step5',
-      title: 'Complete',
-      content: (
-        <OnboardingCompletion
-          completed={false}
-          incompleteSteps={[
-            { step: 2, label: 'Import Employees' },
-            { step: 4, label: 'Payment' },
-          ]}
-          onGoToStep={(step) => window.alert(`Go to step ${step}`)}
-        />
-      ),
-    },
-  ];
-  return <OnboardingWizard steps={incompleteSteps} currentStep={4} />;
-}
-
-export const IncompleteSteps: Story = {
-  render: () => <IncompleteStepsWrapper />,
-};
-
+/** Wizard without header */
 export const NoHeader: Story = {
-  args: {
-    steps: sampleSteps,
-    currentStep: 0,
-    showHeader: false,
-  },
+  args: { demoMode: 'noHeader', currentStep: 1 },
 };
 
-export const CustomLabels: Story = {
-  args: {
-    steps: sampleSteps,
-    currentStep: 1,
-    labels: {
-      back: 'Previous',
-      next: 'Continue',
-      skip: 'Skip for now',
-      finish: 'Complete Setup',
-    },
-  },
+/** Completion step with incomplete items */
+export const IncompleteSteps: Story = {
+  args: { demoMode: 'incomplete' },
 };
 
+/** Import Employees step */
+export const ImportStep: Story = {
+  args: { demoMode: 'interactive', currentStep: 2 },
+};
+
+/** Payment step */
+export const PaymentStep: Story = {
+  args: { demoMode: 'interactive', currentStep: 3 },
+};
+
+/** Completion step (all complete) */
+export const CompletionStep: Story = {
+  args: { demoMode: 'interactive', currentStep: 4 },
+};
+
+/** Mobile viewport */
 export const Mobile: Story = {
-  args: {
-    steps: sampleSteps,
-    currentStep: 2,
-  },
-  parameters: {
-    viewport: { defaultViewport: 'mobile1' },
-  },
+  args: { demoMode: 'interactive', currentStep: 2 },
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
 };
