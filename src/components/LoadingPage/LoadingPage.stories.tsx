@@ -49,10 +49,15 @@ function LoadingPageDemo({
   const [animatedProgress, setAnimatedProgress] = React.useState(0);
   React.useEffect(() => {
     if (demoMode === 'withProgress') {
+      // Always start progress from 0 when entering the withProgress demo
+      setAnimatedProgress(0);
       const timer = setInterval(() => {
         setAnimatedProgress((p) => (p >= 100 ? 0 : p + 10));
       }, 500);
       return () => clearInterval(timer);
+    } else {
+      // Ensure progress is reset when leaving the withProgress demo
+      setAnimatedProgress(0);
     }
   }, [demoMode]);
 
@@ -75,7 +80,7 @@ function LoadingPageDemo({
       return (
         <div className="p-8">
           <LoadingOverlay isLoading={overlayLoading} message="Saving...">
-            <div className="bg-card max-w-md rounded-lg border p-6">
+            <div className="bg-card max-w-md rounded-lg border border-border p-6">
               <h3 className="text-foreground mb-4 text-lg font-semibold">
                 Edit Profile
               </h3>
@@ -90,7 +95,7 @@ function LoadingPageDemo({
                 }}
                 className="bg-primary text-primary-foreground w-full rounded px-4 py-2"
               >
-                Save (click to trigger loading)
+                Save
               </button>
             </div>
           </LoadingOverlay>
@@ -246,7 +251,7 @@ const meta: Meta<typeof LoadingPageDemo> = {
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg'],
-      description: 'Page container size',
+      description: 'Page container size (default and withProgress modes only)',
     },
     progress: {
       control: { type: 'range', min: 0, max: 100, step: 1 },
