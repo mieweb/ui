@@ -68,6 +68,11 @@ const audioPlayerVariants = cva('', {
         'rounded-xl border border-border',
         'bg-card text-card-foreground',
       ],
+      full: [
+        'flex flex-col gap-3 p-4',
+        'rounded-xl border border-border',
+        'bg-card text-card-foreground',
+      ],
     },
     size: {
       sm: '',
@@ -80,6 +85,8 @@ const audioPlayerVariants = cva('', {
     { variant: 'compact', size: 'lg', class: 'p-4 gap-4' },
     { variant: 'waveform', size: 'sm', class: 'p-3 gap-2' },
     { variant: 'waveform', size: 'lg', class: 'p-5 gap-4' },
+    { variant: 'full', size: 'sm', class: 'p-3 gap-2' },
+    { variant: 'full', size: 'lg', class: 'p-5 gap-4' },
   ],
   defaultVariants: {
     variant: 'compact',
@@ -108,6 +115,11 @@ const playButtonVariants = cva(
           'active:bg-primary-800',
         ],
         waveform: [
+          'bg-primary-600 text-white',
+          'hover:bg-primary-700',
+          'active:bg-primary-800',
+        ],
+        full: [
           'bg-primary-600 text-white',
           'hover:bg-primary-700',
           'active:bg-primary-800',
@@ -246,11 +258,11 @@ function ProgressBar({
       }}
     >
       <div
-        className="bg-primary-600 absolute inset-y-0 left-0 rounded-full transition-all"
+        className="bg-primary-600 absolute inset-y-0 left-0 rounded-full"
         style={{ width: `${progress}%` }}
       />
       <div
-        className="bg-primary-600 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all"
+        className="bg-primary-600 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm"
         style={{ left: `calc(${progress}% - 6px)` }}
       />
     </div>
@@ -260,6 +272,14 @@ function ProgressBar({
 // ============================================================================
 // Waveform Component (lazy-loaded WaveSurfer)
 // ============================================================================
+
+/** Handle for imperative control of the Waveform component */
+export interface WaveformHandle {
+  /** Seek to a specific time in seconds */
+  seekTo: (time: number) => void;
+  /** Get the current WaveSurfer instance (for advanced usage) */
+  getInstance: () => unknown | null;
+}
 
 interface WaveformProps {
   src: string;
@@ -274,22 +294,42 @@ interface WaveformProps {
   height?: number;
 }
 
-function Waveform({
-  src,
-  isPlaying,
-  playbackRate = 1,
+const Waveform = React.forwardRef<WaveformHandle, WaveformProps>(function Waveform(
+  {
+    src,
+    isPlaying,
+    playbackRate = 1,
   onReady,
   onTimeUpdate,
   onFinish,
   onSeek,
   waveColor,
   progressColor,
-  height = 64,
-}: WaveformProps) {
+    height = 64,
+  },
+  ref
+) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wavesurferRef = React.useRef<any>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const durationRef = React.useRef<number>(0);
+
+  // Expose imperative handle for seeking from parent
+  React.useImperativeHandle(ref, () => ({
+    seekTo: (time: number) => {
+      if (wavesurferRef.current) {
+        // Get current duration from WaveSurfer directly
+        const currentDuration = wavesurferRef.current.getDuration() || durationRef.current;
+        if (currentDuration > 0) {
+          // WaveSurfer seekTo uses a ratio (0-1), not seconds
+          const ratio = Math.max(0, Math.min(1, time / currentDuration));
+          wavesurferRef.current.seekTo(ratio);
+        }
+      }
+    },
+    getInstance: () => wavesurferRef.current,
+  }), [isLoaded]); // Re-create handle when loaded
 
   // Initialize WaveSurfer
   React.useEffect(() => {
@@ -318,7 +358,8 @@ function Waveform({
 
         wavesurferRef.current.on('ready', () => {
           setIsLoaded(true);
-          onReady(wavesurferRef.current.getDuration());
+          durationRef.current = wavesurferRef.current.getDuration();
+          onReady(durationRef.current);
         });
 
         wavesurferRef.current.on('audioprocess', () => {
@@ -326,11 +367,16 @@ function Waveform({
         });
 
         wavesurferRef.current.on('seeking', () => {
-          onTimeUpdate(wavesurferRef.current.getCurrentTime());
+          const time = wavesurferRef.current.getCurrentTime();
+          onTimeUpdate(time);
+          onSeek(time);
         });
 
-        wavesurferRef.current.on('interaction', () => {
-          onSeek(wavesurferRef.current.getCurrentTime());
+        // Handle seek events (fired after seeking is complete)
+        wavesurferRef.current.on('seek', () => {
+          const time = wavesurferRef.current.getCurrentTime();
+          onTimeUpdate(time);
+          onSeek(time);
         });
 
         wavesurferRef.current.on('finish', () => {
@@ -381,7 +427,9 @@ function Waveform({
       style={{ height }}
     />
   );
-}
+});
+
+Waveform.displayName = 'Waveform';
 
 // ============================================================================
 // Main AudioPlayer Component
@@ -432,6 +480,7 @@ function AudioPlayer({
   const [playbackRate, setPlaybackRate] = React.useState(1);
   const [audioInitialized, setAudioInitialized] = React.useState(false);
   const audioRef = React.useRef<globalThis.HTMLAudioElement | null>(null);
+  const waveformRef = React.useRef<WaveformHandle>(null);
 
   const isPlaying = state === 'playing';
   const isLoading = state === 'loading';
@@ -447,7 +496,7 @@ function AudioPlayer({
 
   // Initialize audio element (for non-waveform variants)
   const initAudio = React.useCallback(() => {
-    if (variant === 'waveform' || audioInitialized) return null;
+    if (variant === 'waveform' || variant === 'full' || audioInitialized) return null;
 
     const audio = new globalThis.Audio(src);
     audioRef.current = audio;
@@ -487,7 +536,7 @@ function AudioPlayer({
 
   // Auto-initialize if preload is true
   React.useEffect(() => {
-    if (preload && !audioInitialized && variant !== 'waveform') {
+    if (preload && !audioInitialized && variant !== 'waveform' && variant !== 'full') {
       initAudio();
     }
   }, [preload, audioInitialized, variant, initAudio]);
@@ -512,8 +561,8 @@ function AudioPlayer({
   const handlePlay = React.useCallback(() => {
     if (disabled) return;
 
-    // Waveform variant uses WaveSurfer for playback - just toggle state
-    if (variant === 'waveform') {
+    // Waveform and full variants use WaveSurfer for playback - just toggle state
+    if (variant === 'waveform' || variant === 'full') {
       if (isLoading) return;
       updateState(isPlaying ? 'paused' : 'playing');
       return;
@@ -595,6 +644,12 @@ function AudioPlayer({
 
   const handleWaveformSeek = React.useCallback((time: number) => {
     setCurrentTime(time);
+  }, []);
+
+  // Handle seek from progress bar (for full variant) - sync with WaveSurfer
+  const handleFullVariantSeek = React.useCallback((time: number) => {
+    setCurrentTime(time);
+    waveformRef.current?.seekTo(time);
   }, []);
 
   const iconSize =
@@ -696,6 +751,40 @@ function AudioPlayer({
   // ============================================================================
   // Waveform Variant
   // ============================================================================
+  if (variant === 'waveform') {
+    return (
+      <div className={cn(audioPlayerVariants({ variant, size }), className)}>
+        {title && (
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            {title}
+          </span>
+        )}
+        <Waveform
+          src={src}
+          isPlaying={isPlaying}
+          playbackRate={playbackRate}
+          onReady={handleWaveformReady}
+          onTimeUpdate={handleWaveformTimeUpdate}
+          onFinish={handleWaveformFinish}
+          onSeek={handleWaveformSeek}
+          waveColor={waveColor}
+          progressColor={progressColor}
+          height={waveformHeight}
+        />
+        <div className="flex items-center gap-3">
+          {renderPlayButton()}
+          <div className="flex flex-1 items-center justify-between">
+            {renderTime()}
+            {renderPlaybackRateControl()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================================
+  // Full Variant (Waveform + Progress Bar)
+  // ============================================================================
   return (
     <div className={cn(audioPlayerVariants({ variant, size }), className)}>
       {title && (
@@ -704,6 +793,7 @@ function AudioPlayer({
         </span>
       )}
       <Waveform
+        ref={waveformRef}
         src={src}
         isPlaying={isPlaying}
         playbackRate={playbackRate}
@@ -717,10 +807,14 @@ function AudioPlayer({
       />
       <div className="flex items-center gap-3">
         {renderPlayButton()}
-        <div className="flex flex-1 items-center justify-between">
-          {renderTime()}
-          {renderPlaybackRateControl()}
-        </div>
+        <ProgressBar
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={handleFullVariantSeek}
+          disabled={disabled}
+        />
+        {renderTime()}
+        {renderPlaybackRateControl()}
       </div>
     </div>
   );
@@ -732,4 +826,4 @@ AudioPlayer.displayName = 'AudioPlayer';
 // Exports
 // ============================================================================
 
-export { AudioPlayer, audioPlayerVariants, playButtonVariants, ProgressBar };
+export { AudioPlayer, audioPlayerVariants, playButtonVariants, ProgressBar, Waveform };

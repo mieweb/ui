@@ -157,7 +157,7 @@ const meta: Meta<typeof AudioPlayer> = {
     },
     variant: {
       control: 'select',
-      options: ['inline', 'compact', 'waveform'],
+      options: ['inline', 'compact', 'waveform', 'full'],
       description: 'Visual variant of the player',
     },
     size: {
@@ -291,6 +291,58 @@ export const WaveformWithTitle: Story = {
         title="Meeting Recording - January 2026"
         showTime
         showPlaybackRate
+      />
+    </div>
+  ),
+};
+
+// ============================================================================
+// Full Variant (Waveform + Progress Bar)
+// ============================================================================
+
+/**
+ * The Full variant combines a waveform visualization with a progress bar scrubber.
+ * Both are kept in sync - clicking on either one seeks to that position.
+ */
+export const Full: Story = {
+  render: () => (
+    <div className="w-96">
+      <AudioPlayer src={getSampleAudio()} variant="full" showTime />
+    </div>
+  ),
+};
+
+/**
+ * Full variant with title and playback rate control.
+ */
+export const FullWithTitle: Story = {
+  render: () => (
+    <div className="w-[500px]">
+      <AudioPlayer
+        src={getLongAudio()}
+        variant="full"
+        title="Podcast Episode - Tech Talk"
+        showTime
+        showPlaybackRate
+      />
+    </div>
+  ),
+};
+
+/**
+ * Full variant with custom waveform colors.
+ */
+export const FullCustomColors: Story = {
+  render: () => (
+    <div className="w-[500px]">
+      <AudioPlayer
+        src={getSampleAudio()}
+        variant="full"
+        title="Custom Styled Audio"
+        showTime
+        showPlaybackRate
+        waveColor="#cbd5e1"
+        progressColor="#8b5cf6"
       />
     </div>
   ),
