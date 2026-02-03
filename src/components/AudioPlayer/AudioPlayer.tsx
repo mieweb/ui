@@ -38,6 +38,10 @@ export interface AudioPlayerProps extends VariantProps<
   progressColor?: string;
   /** Height of the waveform (for waveform variant) */
   waveformHeight?: number;
+  /** Whether to show hover cursor on waveform for click-to-seek preview (for waveform variant) */
+  showWaveformHoverCursor?: boolean;
+  /** Color of the hover cursor line (for waveform variant) */
+  waveformCursorColor?: string;
   /** Whether the player is disabled */
   disabled?: boolean;
   /** Additional class name */
@@ -290,7 +294,7 @@ function Waveform({
   height = 64,
   showHoverCursor = false,
   onHoverTimeChange,
-  cursorColor = 'rgba(239, 68, 68, 0.8)',
+  cursorColor = 'var(--color-red-500, rgb(239, 68, 68))',
 }: WaveformProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -386,8 +390,8 @@ function Waveform({
     ? (e: React.MouseEvent<HTMLDivElement>) => {
         if (!containerRef.current || !wavesurferRef.current || !isLoaded) return;
         const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const percentage = x / rect.width;
         const duration = wavesurferRef.current.getDuration();
         setHoverPosition(percentage * 100);
         onHoverTimeChange?.(percentage * duration);
@@ -408,17 +412,44 @@ function Waveform({
     ? (e: React.MouseEvent<HTMLDivElement>) => {
         if (!containerRef.current || !wavesurferRef.current || !isLoaded) return;
         const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const percentage = x / rect.width;
         wavesurferRef.current.seekTo(percentage);
         onSeek(wavesurferRef.current.getDuration() * percentage);
         onHoverTimeChange?.(null);
       }
     : undefined;
 
+  const handleKeyDown = showHoverCursor
+    ? (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!wavesurferRef.current || !isLoaded) return;
+        const duration = wavesurferRef.current.getDuration();
+        const currentTime = wavesurferRef.current.getCurrentTime();
+        const step = duration * 0.05; // 5% steps
+        
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const newTime = Math.min(currentTime + step, duration);
+          wavesurferRef.current.seekTo(newTime / duration);
+          onSeek(newTime);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const newTime = Math.max(currentTime - step, 0);
+          wavesurferRef.current.seekTo(newTime / duration);
+          onSeek(newTime);
+        }
+      }
+    : undefined;
+
   return (
     <div
       ref={containerRef}
+      role={showHoverCursor ? 'slider' : undefined}
+      aria-label={showHoverCursor ? 'Audio progress' : undefined}
+      aria-valuemin={showHoverCursor ? 0 : undefined}
+      aria-valuemax={showHoverCursor && wavesurferRef.current ? wavesurferRef.current.getDuration() : undefined}
+      aria-valuenow={showHoverCursor && wavesurferRef.current ? wavesurferRef.current.getCurrentTime() : undefined}
+      tabIndex={showHoverCursor ? 0 : undefined}
       className={cn(
         'relative w-full rounded-lg bg-neutral-100 dark:bg-neutral-800',
         showHoverCursor && 'cursor-pointer',
@@ -429,6 +460,7 @@ function Waveform({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       {/* Hover cursor line */}
       {showHoverCursor && isHovering && isLoaded && (
@@ -474,6 +506,8 @@ function AudioPlayer({
   waveColor,
   progressColor,
   waveformHeight = 64,
+  showWaveformHoverCursor = true,
+  waveformCursorColor,
   disabled = false,
   className,
   'aria-label': ariaLabel,
@@ -784,8 +818,9 @@ function AudioPlayer({
         waveColor={waveColor}
         progressColor={progressColor}
         height={waveformHeight}
-        showHoverCursor
+        showHoverCursor={showWaveformHoverCursor}
         onHoverTimeChange={handleHoverTimeChange}
+        cursorColor={waveformCursorColor}
       />
       <div className="flex items-center gap-3">
         {renderPlayButton()}
