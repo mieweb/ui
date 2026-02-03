@@ -7,6 +7,7 @@ import {
   defaultOrderTabs,
 } from './OrderList';
 import { Button } from '../Button/Button';
+import { Badge } from '../Badge/Badge';
 
 const meta: Meta<typeof OrderList> = {
   title: 'Components/OrderList',
@@ -14,11 +15,130 @@ const meta: Meta<typeof OrderList> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    docs: {
+      description: {
+        component:
+          'A tabbed list view for orders with filtering, search, and customizable rendering. Supports loading states, empty states, and custom actions.',
+      },
+      canvas: {
+        sourceState: 'shown',
+      },
+    },
+  },
+  args: {
+    showSearch: true,
+    isLoading: false,
+    emptyMessage: 'No orders found',
+    searchPlaceholder: 'Search orders...',
+  },
+  argTypes: {
+    orders: {
+      description: 'Array of order items to display',
+      control: false,
+    },
+    activeTab: {
+      description: 'Currently selected tab ID',
+      control: 'text',
+    },
+    tabs: {
+      description:
+        'Array of tab configurations with id, label, count, and statuses',
+      control: false,
+    },
+    onTabChange: {
+      description: 'Callback when tab selection changes',
+      action: 'tab changed',
+    },
+    renderOrder: {
+      description: 'Render function for each order item',
+      control: false,
+    },
+    getOrderStatus: {
+      description: 'Function to extract status from order item for filtering',
+      control: false,
+    },
+    isLoading: {
+      description: 'Show loading spinner',
+      control: 'boolean',
+    },
+    emptyMessage: {
+      description: 'Message to display when no orders',
+      control: 'text',
+    },
+    emptyIcon: {
+      description: 'Custom icon for empty state',
+      control: false,
+    },
+    searchPlaceholder: {
+      description: 'Placeholder text for search input',
+      control: 'text',
+    },
+    searchValue: {
+      description: 'Controlled search input value',
+      control: 'text',
+    },
+    onSearchChange: {
+      description: 'Callback when search value changes',
+      action: 'search changed',
+    },
+    showSearch: {
+      description: 'Show the search input',
+      control: 'boolean',
+    },
+    actions: {
+      description: 'Slot for additional action buttons',
+      control: false,
+    },
+    className: {
+      description: 'Additional CSS class names',
+      control: 'text',
+    },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof OrderList>;
+
+// Helper to render an order item
+function renderOrderItem(order: SampleOrder) {
+  const statusVariants: Record<
+    OrderStatus,
+    'default' | 'secondary' | 'success' | 'warning' | 'danger'
+  > = {
+    pending: 'warning',
+    active: 'default',
+    scheduled: 'default',
+    'in-progress': 'default',
+    completed: 'success',
+    rejected: 'danger',
+    invoiced: 'success',
+    cancelled: 'secondary',
+  };
+
+  return (
+    <div className="hover:bg-muted/50 cursor-pointer p-4 transition-colors">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="text-foreground font-medium">
+              {order.orderNumber}
+            </span>
+            <Badge variant={statusVariants[order.status]} size="sm">
+              {order.status.replace('-', ' ')}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground text-sm">{order.employeeName}</p>
+          <p className="text-muted-foreground/70 mt-1 text-xs">
+            {order.services.join(' • ')}
+          </p>
+        </div>
+        <span className="text-muted-foreground text-xs">
+          {order.createdAt.toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 // Sample order type
 interface SampleOrder {
@@ -90,46 +210,40 @@ const sampleOrders: SampleOrder[] = [
   },
 ];
 
-// Simple order item renderer
+// Simple order item renderer using Badge component
 function OrderItem({ order }: { order: SampleOrder }) {
-  const statusColors: Record<OrderStatus, string> = {
-    pending:
-      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-    active: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    scheduled:
-      'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
-    'in-progress':
-      'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
-    completed:
-      'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    rejected: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-    invoiced:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
-    cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+  const statusVariants: Record<
+    OrderStatus,
+    'default' | 'secondary' | 'success' | 'warning' | 'danger'
+  > = {
+    pending: 'warning',
+    active: 'default',
+    scheduled: 'default',
+    'in-progress': 'default',
+    completed: 'success',
+    rejected: 'danger',
+    invoiced: 'success',
+    cancelled: 'secondary',
   };
 
   return (
-    <div className="cursor-pointer p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+    <div className="hover:bg-muted/50 cursor-pointer p-4 transition-colors">
       <div className="flex items-start justify-between">
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="font-medium text-gray-900 dark:text-white">
+            <span className="text-foreground font-medium">
               {order.orderNumber}
             </span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[order.status]}`}
-            >
+            <Badge variant={statusVariants[order.status]} size="sm">
               {order.status.replace('-', ' ')}
-            </span>
+            </Badge>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {order.employeeName}
-          </p>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+          <p className="text-muted-foreground text-sm">{order.employeeName}</p>
+          <p className="text-muted-foreground/70 mt-1 text-xs">
             {order.services.join(' • ')}
           </p>
         </div>
-        <span className="text-xs text-gray-500 dark:text-gray-400">
+        <span className="text-muted-foreground text-xs">
           {order.createdAt.toLocaleDateString()}
         </span>
       </div>
@@ -143,11 +257,15 @@ function InteractiveDemo({
   tabs = defaultOrderTabs,
   showSearch = false,
   showActions = false,
+  isLoading = false,
+  emptyMessage,
 }: {
   orders?: SampleOrder[];
   tabs?: OrderListTab[];
   showSearch?: boolean;
   showActions?: boolean;
+  isLoading?: boolean;
+  emptyMessage?: string;
 }) {
   const [activeTab, setActiveTab] = useState('all');
   const [searchValue, setSearchValue] = useState('');
@@ -161,7 +279,7 @@ function InteractiveDemo({
     : orders;
 
   return (
-    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
       <OrderList
         orders={filteredBySearch}
         activeTab={activeTab}
@@ -169,26 +287,15 @@ function InteractiveDemo({
         onTabChange={setActiveTab}
         renderOrder={(order) => <OrderItem order={order} />}
         getOrderStatus={(order) => order.status}
+        isLoading={isLoading}
         showSearch={showSearch}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
+        emptyMessage={emptyMessage}
         actions={
           showActions ? (
-            <Button size="sm">
-              <svg
-                className="mr-1 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              New Order
+            <Button size="sm" variant="ghost" className="whitespace-nowrap">
+              + New
             </Button>
           ) : undefined
         }
@@ -197,20 +304,107 @@ function InteractiveDemo({
   );
 }
 
+/**
+ * Playground wrapper component for proper hook usage
+ */
+function PlaygroundDemo({
+  showSearch,
+  isLoading,
+  emptyMessage,
+  searchPlaceholder,
+}: {
+  showSearch?: boolean;
+  isLoading?: boolean;
+  emptyMessage?: string;
+  searchPlaceholder?: string;
+}) {
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchValue, setSearchValue] = useState('');
+
+  const filteredOrders = searchValue
+    ? sampleOrders.filter(
+        (o) =>
+          o.employeeName.toLowerCase().includes(searchValue.toLowerCase()) ||
+          o.orderNumber.toLowerCase().includes(searchValue.toLowerCase())
+      )
+    : sampleOrders;
+
+  return (
+    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
+      <OrderList
+        orders={isLoading ? [] : filteredOrders}
+        activeTab={activeTab}
+        tabs={defaultOrderTabs}
+        onTabChange={setActiveTab}
+        renderOrder={renderOrderItem}
+        getOrderStatus={(order: SampleOrder) => order.status}
+        isLoading={isLoading}
+        showSearch={showSearch}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        searchPlaceholder={searchPlaceholder}
+        emptyMessage={emptyMessage}
+        actions={
+          <Button size="sm" variant="ghost" className="whitespace-nowrap">
+            + New
+          </Button>
+        }
+      />
+    </div>
+  );
+}
+
 export const Default: Story = {
-  render: () => <InteractiveDemo />,
+  render: (args) => (
+    <PlaygroundDemo
+      showSearch={args.showSearch}
+      isLoading={args.isLoading}
+      emptyMessage={args.emptyMessage}
+      searchPlaceholder={args.searchPlaceholder}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Interactive demo - use controls to toggle showSearch, isLoading, and edit messages.',
+      },
+    },
+  },
 };
 
 export const WithSearch: Story = {
   render: () => <InteractiveDemo showSearch />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Order list with search input for filtering by order number or employee name.',
+      },
+    },
+  },
 };
 
 export const WithActions: Story = {
   render: () => <InteractiveDemo showActions />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Order list with action buttons in the header area.',
+      },
+    },
+  },
 };
 
 export const WithSearchAndActions: Story = {
   render: () => <InteractiveDemo showSearch showActions />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Full-featured order list with both search and action buttons.',
+      },
+    },
+  },
 };
 
 export const SimpleTabs: Story = {
@@ -231,13 +425,21 @@ export const SimpleTabs: Story = {
       ]}
     />
   ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Order list with simplified tab configuration - fewer tabs for simpler workflows.',
+      },
+    },
+  },
 };
 
 function LoadingWrapper() {
   const [activeTab, setActiveTab] = useState('all');
 
   return (
-    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
       <OrderList<SampleOrder>
         orders={[]}
         activeTab={activeTab}
@@ -252,13 +454,20 @@ function LoadingWrapper() {
 
 export const Loading: Story = {
   render: () => <LoadingWrapper />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows a loading spinner while orders are being fetched.',
+      },
+    },
+  },
 };
 
 function EmptyWrapper() {
   const [activeTab, setActiveTab] = useState('all');
 
   return (
-    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
       <OrderList<SampleOrder>
         orders={[]}
         activeTab={activeTab}
@@ -273,13 +482,20 @@ function EmptyWrapper() {
 
 export const Empty: Story = {
   render: () => <EmptyWrapper />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows empty state message when no orders are available.',
+      },
+    },
+  },
 };
 
 function CustomEmptyIconWrapper() {
   const [activeTab, setActiveTab] = useState('all');
 
   return (
-    <div className="h-[500px] overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
       <OrderList<SampleOrder>
         orders={[]}
         activeTab={activeTab}
@@ -309,4 +525,12 @@ function CustomEmptyIconWrapper() {
 
 export const CustomEmptyIcon: Story = {
   render: () => <CustomEmptyIconWrapper />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Empty state with a custom success icon for "all caught up" scenarios.',
+      },
+    },
+  },
 };
