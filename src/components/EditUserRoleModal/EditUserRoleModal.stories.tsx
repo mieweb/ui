@@ -49,6 +49,12 @@ const meta: Meta<typeof EditUserRoleModal> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    docs: {
+      story: {
+        inline: false,
+        iframeHeight: 500,
+      },
+    },
   },
   argTypes: {
     open: {
