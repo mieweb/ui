@@ -1,21 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
-import { InviteUserModal, Role } from './InviteUserModal';
-import { Button } from '../Button/Button';
+import { InviteUserModal } from './InviteUserModal';
 
-const meta: Meta<typeof InviteUserModal> = {
-  title: 'Components/InviteUserModal',
-  component: InviteUserModal,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'centered',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof InviteUserModal>;
-
-const sampleRoles: Role[] = [
+const sampleRoles = [
   {
     id: 'admin',
     name: 'Administrator',
@@ -38,170 +24,117 @@ const sampleRoles: Role[] = [
   },
 ];
 
-// Interactive wrapper component
-function InteractiveDemo({
-  entityName,
-  entityDisplayName,
-  roles = sampleRoles,
-  defaultRoleId,
-}: {
-  entityName?: string;
-  entityDisplayName?: string;
-  roles?: Role[];
-  defaultRoleId?: string;
-}) {
-  const [open, setOpen] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
-
-  const handleSubmit = async (data: {
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    roleId: string;
-    message?: string;
-  }) => {
-    setIsSubmitting(true);
-    setError(undefined);
-    setSuccess(undefined);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Simulate success or error
-    if (data.email.includes('error')) {
-      setError('User with this email already exists');
-      setIsSubmitting(false);
-    } else {
-      setSuccess(`Invitation sent to ${data.email}`);
-      setIsSubmitting(false);
-      // Close after showing success briefly
-      setTimeout(() => setOpen(false), 2000);
-    }
-  };
-
-  return (
-    <div>
-      <Button onClick={() => setOpen(true)}>Invite User</Button>
-      <InviteUserModal
-        open={open}
-        onOpenChange={setOpen}
-        onSubmit={handleSubmit}
-        roles={roles}
-        defaultRoleId={defaultRoleId}
-        entityName={entityName}
-        entityDisplayName={entityDisplayName}
-        isSubmitting={isSubmitting}
-        errorMessage={error}
-        successMessage={success}
-      />
-    </div>
-  );
-}
-
-export const Default: Story = {
-  render: () => <InteractiveDemo />,
+const meta: Meta<typeof InviteUserModal> = {
+  title: 'Components/InviteUserModal',
+  component: InviteUserModal,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+  },
+  decorators: [
+    (Story) => (
+      // Container with transform creates a new containing block for position:fixed
+      // This keeps the modal within this container in docs view
+      <div
+        className="flex min-h-[700px] items-center justify-center"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    open: true,
+    roles: sampleRoles,
+  },
+  argTypes: {
+    open: {
+      control: 'boolean',
+      description: 'Whether the modal is open',
+    },
+    onOpenChange: { action: 'onOpenChange' },
+    onSubmit: { action: 'onSubmit' },
+    roles: {
+      control: 'object',
+      description: 'Available roles to assign',
+    },
+    defaultRoleId: {
+      control: 'text',
+      description: 'Default role ID',
+    },
+    isSubmitting: {
+      control: 'boolean',
+      description: 'Whether submission is in progress',
+    },
+    entityName: {
+      control: 'text',
+      description: 'Entity name (e.g., "provider" or "organization")',
+    },
+    entityDisplayName: {
+      control: 'text',
+      description: 'Entity display name',
+    },
+    errorMessage: {
+      control: 'text',
+      description: 'Error message to display',
+    },
+    successMessage: {
+      control: 'text',
+      description: 'Success message to display',
+    },
+  },
 };
 
+export default meta;
+type Story = StoryObj<typeof InviteUserModal>;
+
+export const Default: Story = {};
+
 export const WithProvider: Story = {
-  render: () => (
-    <InteractiveDemo
-      entityName="provider"
-      entityDisplayName="MedCare Health Services"
-    />
-  ),
+  args: {
+    entityName: 'provider',
+    entityDisplayName: 'MedCare Health Services',
+  },
 };
 
 export const WithEmployer: Story = {
-  render: () => (
-    <InteractiveDemo
-      entityName="employer"
-      entityDisplayName="Acme Corporation"
-    />
-  ),
+  args: {
+    entityName: 'employer',
+    entityDisplayName: 'Acme Corporation',
+  },
 };
 
 export const WithDefaultRole: Story = {
-  render: () => (
-    <InteractiveDemo
-      entityDisplayName="Healthcare Partners"
-      defaultRoleId="staff"
-    />
-  ),
+  args: {
+    entityDisplayName: 'Healthcare Partners',
+    defaultRoleId: 'staff',
+  },
 };
 
-// Wrapper for WithError story
-function WithErrorWrapper() {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <>
-      <Button onClick={() => setOpen(true)}>Show Modal with Error</Button>
-      <InviteUserModal
-        open={open}
-        onOpenChange={setOpen}
-        roles={sampleRoles}
-        errorMessage="User with this email already has an account"
-      />
-    </>
-  );
-}
-
-// Wrapper for WithSuccess story
-function WithSuccessWrapper() {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <>
-      <Button onClick={() => setOpen(true)}>Show Modal with Success</Button>
-      <InviteUserModal
-        open={open}
-        onOpenChange={setOpen}
-        roles={sampleRoles}
-        successMessage="Invitation sent to john@example.com"
-      />
-    </>
-  );
-}
-
-// Wrapper for Submitting story
-function SubmittingWrapper() {
-  const [open, setOpen] = useState(true);
-
-  return (
-    <>
-      <Button onClick={() => setOpen(true)}>Show Submitting State</Button>
-      <InviteUserModal
-        open={open}
-        onOpenChange={setOpen}
-        roles={sampleRoles}
-        isSubmitting={true}
-      />
-    </>
-  );
-}
-
 export const WithError: Story = {
-  render: () => <WithErrorWrapper />,
+  args: {
+    errorMessage: 'User with this email already has an account',
+  },
 };
 
 export const WithSuccess: Story = {
-  render: () => <WithSuccessWrapper />,
+  args: {
+    successMessage: 'Invitation sent to john@example.com',
+  },
 };
 
 export const Submitting: Story = {
-  render: () => <SubmittingWrapper />,
+  args: {
+    isSubmitting: true,
+  },
 };
 
 export const MinimalRoles: Story = {
-  render: () => (
-    <InteractiveDemo
-      entityDisplayName="Simple Provider"
-      roles={[
-        { id: 'admin', name: 'Admin' },
-        { id: 'user', name: 'User' },
-      ]}
-    />
-  ),
+  args: {
+    entityDisplayName: 'Simple Provider',
+    roles: [
+      { id: 'admin', name: 'Admin' },
+      { id: 'user', name: 'User' },
+    ],
+  },
 };

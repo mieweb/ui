@@ -103,10 +103,10 @@ export function InviteUserModal({
 
         <ModalBody className="space-y-4">
           {entityDisplayName && (
-            <div className="rounded-lg bg-muted p-3">
-              <p className="text-sm text-muted-foreground">
+            <div className="bg-muted rounded-lg p-3">
+              <p className="text-muted-foreground text-sm">
                 Inviting user to:{' '}
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   {entityDisplayName}
                 </span>
               </p>
@@ -208,13 +208,13 @@ export function InviteUserModal({
           <div>
             <label
               htmlFor="invite-message"
-              className="mb-1 block text-sm font-medium text-foreground"
+              className="text-foreground mb-1 block text-sm font-medium"
             >
               Personal Message (optional)
             </label>
             <textarea
               id="invite-message"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              className="border-input bg-background text-foreground focus:ring-primary w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -223,7 +223,7 @@ export function InviteUserModal({
           </div>
 
           {/* Info text */}
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             An email invitation will be sent to this address. If the user
             doesn&apos;t have an account, they&apos;ll be prompted to create
             one.
