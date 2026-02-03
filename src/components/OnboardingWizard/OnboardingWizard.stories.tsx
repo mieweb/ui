@@ -177,12 +177,18 @@ function OnboardingWizardDemo({
   nextEnabled = true,
   backEnabled = true,
 }: OnboardingWizardDemoProps) {
-  const [currentStep, setCurrentStep] = React.useState(initialStep);
+  // For incomplete mode, start at the completion step (4) if no initialStep specified
+  const effectiveInitialStep =
+    demoMode === 'incomplete' && initialStep === 0 ? 4 : initialStep;
+  const [currentStep, setCurrentStep] = React.useState(effectiveInitialStep);
 
   // Sync with Storybook controls
   React.useEffect(() => {
-    setCurrentStep(initialStep);
-  }, [initialStep]);
+    // For incomplete mode, default to completion step if control is at 0
+    const step =
+      demoMode === 'incomplete' && initialStep === 0 ? 4 : initialStep;
+    setCurrentStep(step);
+  }, [initialStep, demoMode]);
 
   // Get steps based on demo mode
   const getSteps = () => {
@@ -198,10 +204,10 @@ function OnboardingWizardDemo({
             <OnboardingCompletion
               completed={false}
               incompleteSteps={[
-                { step: 2, label: 'Import Employees' },
-                { step: 3, label: 'Payment' },
+                { step: 3, label: 'Import Employees' },
+                { step: 4, label: 'Payment' },
               ]}
-              onGoToStep={(step) => setCurrentStep(step)}
+              onGoToStep={(step) => setCurrentStep(step - 1)}
             />
           ),
         },
@@ -242,7 +248,7 @@ function OnboardingWizardDemo({
       case 'noHeader':
         return { ...baseProps, showHeader: false };
       case 'incomplete':
-        return { ...baseProps, currentStep: 4 };
+        return baseProps;
       case 'interactive':
       default:
         return { ...baseProps, brandName, brandSubname, loading, error };
