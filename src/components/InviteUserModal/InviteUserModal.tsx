@@ -1,7 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
@@ -95,12 +101,12 @@ export function InviteUserModal({
           <ModalTitle>Invite User</ModalTitle>
         </ModalHeader>
 
-        <div className="space-y-4">
+        <ModalBody className="space-y-4">
           {entityDisplayName && (
-            <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="rounded-lg bg-muted p-3">
+              <p className="text-sm text-muted-foreground">
                 Inviting user to:{' '}
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="font-medium text-foreground">
                   {entityDisplayName}
                 </span>
               </p>
@@ -202,13 +208,13 @@ export function InviteUserModal({
           <div>
             <label
               htmlFor="invite-message"
-              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="mb-1 block text-sm font-medium text-foreground"
             >
               Personal Message (optional)
             </label>
             <textarea
               id="invite-message"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -217,12 +223,12 @@ export function InviteUserModal({
           </div>
 
           {/* Info text */}
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             An email invitation will be sent to this address. If the user
             doesn&apos;t have an account, they&apos;ll be prompted to create
             one.
           </p>
-        </div>
+        </ModalBody>
 
         <ModalFooter>
           <Button
