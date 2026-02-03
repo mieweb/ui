@@ -80,7 +80,7 @@ function LoadingPageDemo({
       return (
         <div className="p-8">
           <LoadingOverlay isLoading={overlayLoading} message="Saving...">
-            <div className="bg-card max-w-md rounded-lg border border-border p-6">
+            <div className="bg-card border-border max-w-md rounded-lg border p-6">
               <h3 className="text-foreground mb-4 text-lg font-semibold">
                 Edit Profile
               </h3>
