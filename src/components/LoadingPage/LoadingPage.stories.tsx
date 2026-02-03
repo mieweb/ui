@@ -61,8 +61,18 @@ function LoadingPageDemo({
     }
   }, [demoMode]);
 
-  // State for overlay demo
+  // State for overlay demo with timeout cleanup
   const [overlayLoading, setOverlayLoading] = React.useState(false);
+  const overlayTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout when switching away from overlay mode or unmounting
+  React.useEffect(() => {
+    return () => {
+      if (overlayTimeoutRef.current) {
+        clearTimeout(overlayTimeoutRef.current);
+      }
+    };
+  }, [demoMode]);
 
   switch (demoMode) {
     case 'withProgress':
@@ -91,7 +101,10 @@ function LoadingPageDemo({
               <button
                 onClick={() => {
                   setOverlayLoading(true);
-                  setTimeout(() => setOverlayLoading(false), 2000);
+                  overlayTimeoutRef.current = setTimeout(
+                    () => setOverlayLoading(false),
+                    2000
+                  );
                 }}
                 className="bg-primary text-primary-foreground w-full rounded px-4 py-2"
               >
@@ -251,7 +264,11 @@ const meta: Meta<typeof LoadingPageDemo> = {
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg'],
-      description: 'Page container size (default and withProgress modes only)',
+      description:
+        'Page container size (only affects default and withProgress modes)',
+      table: {
+        category: 'Layout',
+      },
     },
     progress: {
       control: { type: 'range', min: 0, max: 100, step: 1 },
