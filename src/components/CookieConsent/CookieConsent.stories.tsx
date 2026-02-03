@@ -17,11 +17,71 @@ const meta: Meta<typeof CookieConsentBanner> = {
     position: {
       control: 'select',
       options: ['bottom', 'top', 'bottom-left', 'bottom-right'],
+      description: 'Position of the banner on the screen',
     },
     variant: {
       control: 'select',
       options: ['default', 'minimal', 'branded'],
+      description: 'Visual style variant',
     },
+    isVisible: {
+      control: 'boolean',
+      description: 'Whether the banner is visible',
+    },
+    showDecline: {
+      control: 'boolean',
+      description: 'Whether to show the decline button',
+    },
+    showCustomize: {
+      control: 'boolean',
+      description: 'Whether to show the customize button',
+    },
+    message: {
+      control: 'text',
+      description: 'Main message text',
+    },
+    acceptText: {
+      control: 'text',
+      description: 'Text for the accept button',
+    },
+    declineText: {
+      control: 'text',
+      description: 'Text for the decline button',
+    },
+    customizeText: {
+      control: 'text',
+      description: 'Text for the customize button',
+    },
+    appName: {
+      control: 'text',
+      description: 'App name to display in message',
+    },
+    isMobileApp: {
+      control: 'boolean',
+      description: 'Whether this is a mobile/app context',
+    },
+    termsLink: {
+      control: false,
+      description: 'Link to terms and conditions',
+    },
+    privacyLink: {
+      control: false,
+      description: 'Link to privacy policy',
+    },
+    cookieLink: {
+      control: false,
+      description: 'Link to cookie policy',
+    },
+    onAccept: { action: 'onAccept' },
+    onDecline: { action: 'onDecline' },
+    onCustomize: { action: 'onCustomize' },
+  },
+  args: {
+    isVisible: true,
+    showDecline: false,
+    showCustomize: false,
+    termsLink: { label: 'Terms and Conditions', href: '/terms' },
+    privacyLink: { label: 'Privacy Policy', href: '/privacy' },
   },
   decorators: [
     (Story) => (
@@ -43,27 +103,25 @@ const meta: Meta<typeof CookieConsentBanner> = {
 export default meta;
 type Story = StoryObj<typeof CookieConsentBanner>;
 
+/**
+ * Interactive playground with all controls available.
+ * Use the Controls panel to toggle showDecline and showCustomize.
+ */
+export const Playground: Story = {};
+
 // Default banner with controls
 export const Default: Story = {
   args: {
-    isVisible: true,
-    onAccept: () => window.alert('Cookies accepted!'),
-    termsLink: { label: 'Terms and Conditions', href: '/terms' },
-    privacyLink: { label: 'Privacy Policy', href: '/privacy' },
+    showDecline: false,
+    showCustomize: false,
   },
 };
 
 // Banner with all options (accept, decline, customize)
 export const WithAllOptions: Story = {
   args: {
-    isVisible: true,
-    onAccept: () => window.alert('Accepted'),
-    onDecline: () => window.alert('Declined'),
-    onCustomize: () => window.alert('Customize'),
     showDecline: true,
     showCustomize: true,
-    termsLink: { label: 'Terms', href: '/terms' },
-    privacyLink: { label: 'Privacy', href: '/privacy' },
     cookieLink: { label: 'Cookie Policy', href: '/cookies' },
   },
 };
@@ -71,11 +129,7 @@ export const WithAllOptions: Story = {
 // Corner position card
 export const CornerCard: Story = {
   args: {
-    isVisible: true,
     position: 'bottom-right',
-    onAccept: () => window.alert('Accepted'),
-    termsLink: { label: 'Terms', href: '/terms' },
-    privacyLink: { label: 'Privacy', href: '/privacy' },
   },
 };
 
