@@ -1,7 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Select } from '../Select/Select';
 
@@ -78,7 +84,7 @@ export function EditUserRoleModal({
         <ModalTitle>Edit User Role</ModalTitle>
       </ModalHeader>
 
-      <div className="space-y-4">
+      <ModalBody className="space-y-4">
         {/* User info */}
         {user && (
           <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
@@ -154,7 +160,7 @@ export function EditUserRoleModal({
             </div>
           </div>
         )}
-      </div>
+      </ModalBody>
 
       <ModalFooter>
         <Button
