@@ -1,11 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import * as React from 'react';
 import {
   LanguageSelector,
   LanguageSelectorNative,
   LanguageSelectorInline,
   type Language,
 } from './LanguageSelector';
+
+const limitedLanguages: Language[] = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+];
 
 const meta: Meta<typeof LanguageSelector> = {
   title: 'Components/LanguageSelector',
@@ -14,152 +19,133 @@ const meta: Meta<typeof LanguageSelector> = {
   parameters: {
     layout: 'centered',
   },
+  args: {
+    value: 'en',
+    languages: limitedLanguages,
+    showFlags: true,
+    flagOnly: false,
+    disabled: false,
+    size: 'md',
+    variant: 'default',
+  },
   argTypes: {
+    value: {
+      control: 'select',
+      options: ['en', 'es', 'fr'],
+      description: 'Currently selected language code',
+    },
     size: {
       control: 'select',
       options: ['sm', 'md', 'lg'],
+      description: 'Size of the selector',
     },
     variant: {
       control: 'select',
       options: ['default', 'ghost', 'minimal'],
+      description: 'Visual variant of the selector',
     },
-    showFlags: { control: 'boolean' },
-    flagOnly: { control: 'boolean' },
-    disabled: { control: 'boolean' },
+    showFlags: {
+      control: 'boolean',
+      description: 'Whether to show flag emojis',
+    },
+    flagOnly: {
+      control: 'boolean',
+      description: 'Show only the flag without text',
+    },
+    disabled: {
+      control: 'boolean',
+      description: 'Whether the selector is disabled',
+    },
+    languages: {
+      control: 'object',
+      description: 'Available languages',
+    },
+    onChange: { action: 'onChange' },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof LanguageSelector>;
 
-const limitedLanguages: Language[] = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-];
-
-// Interactive wrapper for stories
-function LanguageSelectorDemo(
-  props: Partial<React.ComponentProps<typeof LanguageSelector>>
-) {
-  const [value, setValue] = React.useState('en');
-  return (
-    <LanguageSelector
-      value={value}
-      onChange={(lang) => setValue(lang.code)}
-      languages={limitedLanguages}
-      {...props}
-    />
-  );
-}
-
 // Default dropdown selector
-export const Default: Story = {
-  render: () => <LanguageSelectorDemo />,
+export const Default: Story = {};
+
+// Visual variants (default, ghost, minimal)
+export const Ghost: Story = {
+  args: {
+    variant: 'ghost',
+  },
 };
 
-// Wrapper for AllVariantsComparison story
-function AllVariantsComparisonWrapper() {
-  const [value, setValue] = React.useState('en');
-  const handleChange = (lang: Language) => setValue(lang.code);
+export const Minimal: Story = {
+  args: {
+    variant: 'minimal',
+  },
+};
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          Custom Dropdown
-        </p>
-        <LanguageSelector
-          value={value}
-          onChange={handleChange}
-          languages={limitedLanguages}
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          Native Select
-        </p>
-        <LanguageSelectorNative
-          value={value}
-          onChange={handleChange}
-          languages={limitedLanguages}
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          Inline Buttons
-        </p>
-        <LanguageSelectorInline
-          value={value}
-          onChange={handleChange}
-          languages={limitedLanguages}
-        />
-      </div>
-    </div>
-  );
-}
+// Size variants
+export const Small: Story = {
+  args: {
+    size: 'sm',
+  },
+};
 
-// Wrapper for InHeader story
-function InHeaderWrapper() {
-  const [value, setValue] = React.useState('en');
+export const Large: Story = {
+  args: {
+    size: 'lg',
+  },
+};
 
-  return (
-    <header className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-      <div className="font-semibold text-gray-900 dark:text-white">
-        BlueHive
-      </div>
-      <div className="flex items-center gap-4">
-        <LanguageSelector
-          value={value}
-          onChange={(lang) => setValue(lang.code)}
-          variant="ghost"
-          size="sm"
-          languages={limitedLanguages}
-        />
-        <button className="bg-primary-600 rounded-lg px-3 py-1.5 text-sm text-white">
-          Sign In
-        </button>
-      </div>
-    </header>
-  );
-}
+// Flag-only display
+export const FlagOnly: Story = {
+  args: {
+    flagOnly: true,
+    showFlags: true,
+  },
+};
+
+// Disabled state
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+  },
+};
 
 // All three selector types comparison
 export const AllVariantsComparison: Story = {
-  render: () => <AllVariantsComparisonWrapper />,
-};
-
-// Visual variants (default, ghost, minimal)
-export const VisualVariants: Story = {
-  render: () => (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <span className="w-20 text-sm text-gray-500">Default</span>
-        <LanguageSelectorDemo variant="default" />
+  render: (args) => (
+    <div className="space-y-6">
+      <div>
+        <p className="text-muted-foreground mb-2 text-sm">Custom Dropdown</p>
+        <LanguageSelector {...args} />
       </div>
-      <div className="flex items-center gap-4">
-        <span className="w-20 text-sm text-gray-500">Ghost</span>
-        <LanguageSelectorDemo variant="ghost" />
+      <div>
+        <p className="text-muted-foreground mb-2 text-sm">Native Select</p>
+        <LanguageSelectorNative {...args} />
       </div>
-      <div className="flex items-center gap-4">
-        <span className="w-20 text-sm text-gray-500">Minimal</span>
-        <LanguageSelectorDemo variant="minimal" />
+      <div>
+        <p className="text-muted-foreground mb-2 text-sm">Inline Buttons</p>
+        <LanguageSelectorInline {...args} />
       </div>
     </div>
   ),
 };
 
-// Flag-only display
-export const FlagOnly: Story = {
-  render: () => <LanguageSelectorDemo flagOnly showFlags />,
-};
-
-// Disabled state
-export const Disabled: Story = {
-  render: () => <LanguageSelectorDemo disabled />,
-};
-
 // In header context
 export const InHeader: Story = {
-  render: () => <InHeaderWrapper />,
+  args: {
+    variant: 'ghost',
+    size: 'sm',
+  },
+  render: (args) => (
+    <header className="border-border bg-card flex items-center justify-between rounded-lg border px-4 py-3">
+      <div className="text-foreground font-semibold">BlueHive</div>
+      <div className="flex items-center gap-4">
+        <LanguageSelector {...args} />
+        <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm">
+          Sign In
+        </button>
+      </div>
+    </header>
+  ),
 };
