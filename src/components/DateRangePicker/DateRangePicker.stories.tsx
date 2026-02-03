@@ -74,6 +74,7 @@ interface PlaygroundProps {
   placeholder?: string;
   dateFormat?: string;
   className?: string;
+  onChange?: (range: DateRange, presetKey?: string) => void;
   onPrint?: () => void;
   onExport?: () => void;
 }
@@ -84,6 +85,7 @@ function PlaygroundDemo({
   placeholder,
   dateFormat,
   className,
+  onChange,
   onPrint,
   onExport,
 }: PlaygroundProps) {
@@ -96,6 +98,7 @@ function PlaygroundDemo({
       onChange={(newRange, presetKey) => {
         setRange(newRange);
         setPreset(presetKey);
+        onChange?.(newRange, presetKey);
       }}
       activePreset={preset}
       showPrint={showPrint}
