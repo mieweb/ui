@@ -1,3 +1,4 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   LanguageSelector,
@@ -12,9 +13,60 @@ const limitedLanguages: Language[] = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
 ];
 
-const meta: Meta<typeof LanguageSelector> = {
+// =============================================================================
+// Wrapper Component for State Management
+// =============================================================================
+
+interface LanguageSelectorWithStateProps {
+  value?: string;
+  languages?: Language[];
+  showFlags?: boolean;
+  flagOnly?: boolean;
+  disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'ghost' | 'minimal';
+  onChange?: (code: string) => void;
+}
+
+function LanguageSelectorWithState({
+  value: initialValue = 'en',
+  languages = limitedLanguages,
+  showFlags = true,
+  flagOnly = false,
+  disabled = false,
+  size = 'md',
+  variant = 'default',
+  onChange,
+}: LanguageSelectorWithStateProps) {
+  const [value, setValue] = React.useState(initialValue);
+
+  // Sync with Storybook controls when initialValue changes
+  React.useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  const handleChange = (code: string) => {
+    setValue(code);
+    onChange?.(code);
+  };
+
+  return (
+    <LanguageSelector
+      value={value}
+      onChange={handleChange}
+      languages={languages}
+      showFlags={showFlags}
+      flagOnly={flagOnly}
+      disabled={disabled}
+      size={size}
+      variant={variant}
+    />
+  );
+}
+
+const meta: Meta<typeof LanguageSelectorWithState> = {
   title: 'Components/LanguageSelector',
-  component: LanguageSelector,
+  component: LanguageSelectorWithState,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
@@ -65,7 +117,7 @@ const meta: Meta<typeof LanguageSelector> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof LanguageSelector>;
+type Story = StoryObj<typeof LanguageSelectorWithState>;
 
 // Default dropdown selector
 export const Default: Story = {};
@@ -111,41 +163,77 @@ export const Disabled: Story = {
   },
 };
 
-// All three selector types comparison
+// All three selector types comparison with state management
 export const AllVariantsComparison: Story = {
-  render: (args) => (
-    <div className="space-y-6">
-      <div>
-        <p className="text-muted-foreground mb-2 text-sm">Custom Dropdown</p>
-        <LanguageSelector {...args} />
+  render: function AllVariantsComparisonStory(args) {
+    const [dropdownValue, setDropdownValue] = React.useState(
+      args.value || 'en'
+    );
+    const [nativeValue, setNativeValue] = React.useState(args.value || 'en');
+    const [inlineValue, setInlineValue] = React.useState(args.value || 'en');
+
+    // Sync with Storybook controls
+    React.useEffect(() => {
+      setDropdownValue(args.value || 'en');
+      setNativeValue(args.value || 'en');
+      setInlineValue(args.value || 'en');
+    }, [args.value]);
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-muted-foreground mb-2 text-sm">Custom Dropdown</p>
+          <LanguageSelector
+            {...args}
+            value={dropdownValue}
+            onChange={setDropdownValue}
+          />
+        </div>
+        <div>
+          <p className="text-muted-foreground mb-2 text-sm">Native Select</p>
+          <LanguageSelectorNative
+            {...args}
+            value={nativeValue}
+            onChange={setNativeValue}
+          />
+        </div>
+        <div>
+          <p className="text-muted-foreground mb-2 text-sm">Inline Buttons</p>
+          <LanguageSelectorInline
+            {...args}
+            value={inlineValue}
+            onChange={setInlineValue}
+          />
+        </div>
       </div>
-      <div>
-        <p className="text-muted-foreground mb-2 text-sm">Native Select</p>
-        <LanguageSelectorNative {...args} />
-      </div>
-      <div>
-        <p className="text-muted-foreground mb-2 text-sm">Inline Buttons</p>
-        <LanguageSelectorInline {...args} />
-      </div>
-    </div>
-  ),
+    );
+  },
 };
 
-// In header context
+// In header context with state management
 export const InHeader: Story = {
   args: {
     variant: 'ghost',
     size: 'sm',
   },
-  render: (args) => (
-    <header className="border-border bg-card flex items-center justify-between rounded-lg border px-4 py-3">
-      <div className="text-foreground font-semibold">BlueHive</div>
-      <div className="flex items-center gap-4">
-        <LanguageSelector {...args} />
-        <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm">
-          Sign In
-        </button>
-      </div>
-    </header>
-  ),
+  render: function InHeaderStory(args) {
+    const [value, setValue] = React.useState(args.value || 'en');
+
+    // Sync with Storybook controls
+    React.useEffect(() => {
+      setValue(args.value || 'en');
+    }, [args.value]);
+
+    return (
+      <header className="border-border bg-card flex items-center justify-between rounded-lg border px-4 py-3">
+        <div className="text-foreground font-semibold">BlueHive</div>
+        <div className="flex items-center gap-4">
+          <LanguageSelector {...args} value={value} onChange={setValue} />
+          <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm">
+            Sign In
+          </button>
+        </div>
+      </header>
+    );
+  },
 };
