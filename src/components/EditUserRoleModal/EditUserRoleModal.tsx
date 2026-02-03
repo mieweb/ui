@@ -87,11 +87,11 @@ export function EditUserRoleModal({
       <ModalBody className="space-y-4">
         {/* User info */}
         {user && (
-          <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-            <p className="font-medium text-gray-900 dark:text-white">
+          <div className="rounded-lg bg-muted p-3">
+            <p className="font-medium text-foreground">
               {user.name}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               {user.email}
             </p>
           </div>
@@ -99,10 +99,10 @@ export function EditUserRoleModal({
 
         {/* Error message */}
         {errorMessage && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
             <div className="flex items-center gap-2">
               <svg
-                className="h-5 w-5 text-red-500"
+                className="h-5 w-5 text-destructive"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -114,7 +114,7 @@ export function EditUserRoleModal({
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="text-sm text-red-600 dark:text-red-400">
+              <p className="text-sm text-destructive">
                 {errorMessage}
               </p>
             </div>
@@ -135,8 +135,8 @@ export function EditUserRoleModal({
 
         {/* Role description */}
         {selectedRole?.description && (
-          <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="rounded-lg bg-primary/10 p-3">
+            <p className="text-sm text-primary">
               {selectedRole.description}
             </p>
           </div>
@@ -145,14 +145,14 @@ export function EditUserRoleModal({
         {/* Role permissions preview */}
         {selectedRole?.permissions && selectedRole.permissions.length > 0 && (
           <div>
-            <span className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span className="mb-2 block text-sm font-medium text-foreground">
               Permissions
             </span>
             <div className="flex flex-wrap gap-2">
               {selectedRole.permissions.map((permission) => (
                 <span
                   key={permission}
-                  className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                  className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground"
                 >
                   {permission}
                 </span>
