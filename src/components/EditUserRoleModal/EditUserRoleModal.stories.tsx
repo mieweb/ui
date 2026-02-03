@@ -48,14 +48,20 @@ const meta: Meta<typeof EditUserRoleModal> = {
   component: EditUserRoleModal,
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
-    docs: {
-      story: {
-        inline: false,
-        iframeHeight: 500,
-      },
-    },
+    layout: 'fullscreen',
   },
+  decorators: [
+    (Story) => (
+      // Container with transform creates a new containing block for position:fixed
+      // This keeps the modal within this container in docs view
+      <div
+        className="flex min-h-[500px] items-center justify-center"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   argTypes: {
     open: {
       control: 'boolean',
