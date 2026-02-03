@@ -388,7 +388,8 @@ function Waveform({
   // Hover cursor handlers
   const handleMouseMove = showHoverCursor
     ? (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!containerRef.current || !wavesurferRef.current || !isLoaded) return;
+        if (!containerRef.current || !wavesurferRef.current || !isLoaded)
+          return;
         const rect = containerRef.current.getBoundingClientRect();
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         const percentage = x / rect.width;
@@ -398,7 +399,9 @@ function Waveform({
       }
     : undefined;
 
-  const handleMouseEnter = showHoverCursor ? () => setIsHovering(true) : undefined;
+  const handleMouseEnter = showHoverCursor
+    ? () => setIsHovering(true)
+    : undefined;
 
   const handleMouseLeave = showHoverCursor
     ? () => {
@@ -410,7 +413,8 @@ function Waveform({
 
   const handleClick = showHoverCursor
     ? (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!containerRef.current || !wavesurferRef.current || !isLoaded) return;
+        if (!containerRef.current || !wavesurferRef.current || !isLoaded)
+          return;
         const rect = containerRef.current.getBoundingClientRect();
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         const percentage = x / rect.width;
@@ -426,7 +430,7 @@ function Waveform({
         const duration = wavesurferRef.current.getDuration();
         const currentTime = wavesurferRef.current.getCurrentTime();
         const step = duration * 0.05; // 5% steps
-        
+
         if (e.key === 'ArrowRight') {
           e.preventDefault();
           const newTime = Math.min(currentTime + step, duration);
@@ -447,8 +451,16 @@ function Waveform({
       role={showHoverCursor ? 'slider' : undefined}
       aria-label={showHoverCursor ? 'Audio progress' : undefined}
       aria-valuemin={showHoverCursor ? 0 : undefined}
-      aria-valuemax={showHoverCursor && wavesurferRef.current ? wavesurferRef.current.getDuration() : undefined}
-      aria-valuenow={showHoverCursor && wavesurferRef.current ? wavesurferRef.current.getCurrentTime() : undefined}
+      aria-valuemax={
+        showHoverCursor && wavesurferRef.current
+          ? wavesurferRef.current.getDuration()
+          : undefined
+      }
+      aria-valuenow={
+        showHoverCursor && wavesurferRef.current
+          ? wavesurferRef.current.getCurrentTime()
+          : undefined
+      }
       tabIndex={showHoverCursor ? 0 : undefined}
       className={cn(
         'relative w-full rounded-lg bg-neutral-100 dark:bg-neutral-800',
@@ -724,15 +736,18 @@ function AudioPlayer({
 
   const renderTime = (useHoverTime = false) => {
     if (!showTime) return null;
-    const displayTime = useHoverTime && hoverTime !== null ? hoverTime : currentTime;
+    const displayTime =
+      useHoverTime && hoverTime !== null ? hoverTime : currentTime;
     const isShowingHoverTime = useHoverTime && hoverTime !== null;
     return (
-      <span className={cn(
-        "font-mono text-xs tabular-nums",
-        isShowingHoverTime 
-          ? "text-primary-600 dark:text-primary-400" 
-          : "text-neutral-500 dark:text-neutral-400"
-      )}>
+      <span
+        className={cn(
+          'font-mono text-xs tabular-nums',
+          isShowingHoverTime
+            ? 'text-primary-600 dark:text-primary-400'
+            : 'text-neutral-500 dark:text-neutral-400'
+        )}
+      >
         {formatTime(displayTime)} / {formatTime(duration)}
       </span>
     );
