@@ -14,7 +14,8 @@ const limitedLanguages: Language[] = [
 ];
 
 // =============================================================================
-// Wrapper Component for State Management
+// Story Component Wrapper for State Management (primary Storybook component)
+// Wraps LanguageSelector to integrate with Storybook controls and local state
 // =============================================================================
 
 interface LanguageSelectorWithStateProps {
@@ -25,7 +26,7 @@ interface LanguageSelectorWithStateProps {
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'ghost' | 'minimal';
-  onChange?: (code: string) => void;
+  onChange?: (language: Language) => void;
 }
 
 function LanguageSelectorWithState({
@@ -45,9 +46,9 @@ function LanguageSelectorWithState({
     setValue(initialValue);
   }, [initialValue]);
 
-  const handleChange = (code: string) => {
-    setValue(code);
-    onChange?.(code);
+  const handleChange = (language: Language) => {
+    setValue(language.code);
+    onChange?.(language);
   };
 
   return (
@@ -186,7 +187,7 @@ export const AllVariantsComparison: Story = {
           <LanguageSelector
             {...args}
             value={dropdownValue}
-            onChange={setDropdownValue}
+            onChange={(language) => setDropdownValue(language.code)}
           />
         </div>
         <div>
@@ -194,7 +195,7 @@ export const AllVariantsComparison: Story = {
           <LanguageSelectorNative
             {...args}
             value={nativeValue}
-            onChange={setNativeValue}
+            onChange={(language) => setNativeValue(language.code)}
           />
         </div>
         <div>
@@ -202,7 +203,7 @@ export const AllVariantsComparison: Story = {
           <LanguageSelectorInline
             {...args}
             value={inlineValue}
-            onChange={setInlineValue}
+            onChange={(language) => setInlineValue(language.code)}
           />
         </div>
       </div>
@@ -228,7 +229,11 @@ export const InHeader: Story = {
       <header className="border-border bg-card flex items-center justify-between rounded-lg border px-4 py-3">
         <div className="text-foreground font-semibold">BlueHive</div>
         <div className="flex items-center gap-4">
-          <LanguageSelector {...args} value={value} onChange={setValue} />
+          <LanguageSelector
+            {...args}
+            value={value}
+            onChange={(language) => setValue(language.code)}
+          />
           <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm">
             Sign In
           </button>
