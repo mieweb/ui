@@ -3,18 +3,6 @@ import { useState } from 'react';
 import { EditUserRoleModal, UserRole } from './EditUserRoleModal';
 import { Button } from '../Button/Button';
 
-const meta: Meta<typeof EditUserRoleModal> = {
-  title: 'Components/EditUserRoleModal',
-  component: EditUserRoleModal,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'centered',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof EditUserRoleModal>;
-
 const sampleRoles: UserRole[] = [
   {
     id: 'admin',
@@ -53,6 +41,73 @@ const sampleUser = {
   name: 'John Smith',
   email: 'john.smith@example.com',
   currentRoleId: 'staff',
+};
+
+const meta: Meta<typeof EditUserRoleModal> = {
+  title: 'Components/EditUserRoleModal',
+  component: EditUserRoleModal,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+  },
+  decorators: [
+    (Story) => (
+      // Container with transform creates a new containing block for position:fixed
+      // This keeps the modal within this container in docs view
+      <div
+        className="flex min-h-[500px] items-center justify-center"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  argTypes: {
+    open: {
+      control: 'boolean',
+      description: 'Whether the modal is open',
+    },
+    isSubmitting: {
+      control: 'boolean',
+      description: 'Whether submission is in progress',
+    },
+    errorMessage: {
+      control: 'text',
+      description: 'Error message to display',
+    },
+    user: {
+      control: false,
+      description: 'User being edited',
+    },
+    roles: {
+      control: false,
+      description: 'Available roles',
+    },
+    onOpenChange: { action: 'onOpenChange' },
+    onSave: { action: 'onSave' },
+  },
+  args: {
+    open: true,
+    isSubmitting: false,
+    errorMessage: '',
+    user: sampleUser,
+    roles: sampleRoles,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof EditUserRoleModal>;
+
+/**
+ * Interactive playground with controls.
+ * Use the Controls panel to toggle open, isSubmitting, and errorMessage.
+ */
+export const Playground: Story = {
+  args: {
+    open: true,
+    isSubmitting: false,
+    errorMessage: '',
+  },
 };
 
 // Interactive wrapper
