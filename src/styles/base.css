@@ -11,7 +11,8 @@
 
 /* BlueHive brand colors - exposed as Tailwind utilities */
 @theme {
-  /* Primary Color Scale - Reference CSS custom properties for dynamic theming */
+  /* Primary Color - Default + Scale */
+  --color-primary: var(--mieweb-primary-500);
   --color-primary-50: var(--mieweb-primary-50);
   --color-primary-100: var(--mieweb-primary-100);
   --color-primary-200: var(--mieweb-primary-200);
