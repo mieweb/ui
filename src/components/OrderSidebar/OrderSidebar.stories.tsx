@@ -8,8 +8,19 @@ const meta: Meta<typeof OrderSidebar> = {
   parameters: {
     layout: 'fullscreen',
   },
+  decorators: [
+    (Story) => (
+      <div className="bg-background relative h-[700px] w-full">
+        <Story />
+      </div>
+    ),
+  ],
   argTypes: {
     onClose: { action: 'onClose' },
+    createdAt: { control: false },
+    scheduledDate: { control: false },
+    actions: { control: false },
+    children: { control: false },
   },
 };
 
