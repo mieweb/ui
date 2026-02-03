@@ -96,7 +96,7 @@ export function HRISProviderSelector({
   if (currentProvider) {
     return (
       <div className={cn('hris-provider-selector', className)}>
-        <div className="rounded-lg border bg-gray-50 p-4">
+        <div className="border-border bg-muted/50 rounded-lg border p-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             {/* Provider Logo */}
             {currentProvider.logoUrl && (
@@ -111,7 +111,7 @@ export function HRISProviderSelector({
 
             {/* Provider Info */}
             <div className="flex-1">
-              <h4 className="text-lg font-bold">
+              <h4 className="text-foreground text-lg font-bold">
                 {currentProvider.displayName}
               </h4>
               <p className="text-muted-foreground text-sm">
@@ -136,7 +136,7 @@ export function HRISProviderSelector({
               </div>
 
               {!currentProvider.lastSync && (
-                <div className="mt-3 flex items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-yellow-800">
+                <div className="mt-3 flex items-center gap-2 rounded-lg border border-yellow-400 bg-yellow-50 p-3 text-yellow-800 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300">
                   <i className="fas fa-exclamation-triangle text-lg" />
                   <span className="text-sm">{syncPending}</span>
                 </div>
@@ -149,7 +149,7 @@ export function HRISProviderSelector({
             <button
               type="button"
               onClick={onDisconnect}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100"
+              className="border-border bg-card text-foreground hover:bg-muted rounded-lg border px-4 py-2"
             >
               <i className="fas fa-link-slash mr-2" />
               {disconnect}
@@ -174,7 +174,7 @@ export function HRISProviderSelector({
       {/* Search Input */}
       <div className="mb-4">
         <div className="relative">
-          <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400">
+          <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
             <i className="fas fa-search" />
           </span>
           <input
@@ -182,7 +182,7 @@ export function HRISProviderSelector({
             placeholder={search}
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            className="focus:border-primary focus:ring-primary w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:ring-1 focus:outline-none"
+            className="focus:border-primary focus:ring-primary border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-1 focus:outline-none"
           />
         </div>
       </div>
@@ -194,7 +194,7 @@ export function HRISProviderSelector({
           <button
             type="button"
             onClick={onCSVImport}
-            className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+            className="border-border bg-card dark:hover:bg-muted/50 flex flex-col items-center justify-center rounded-lg border p-4 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="mb-3 flex h-16 w-16 items-center justify-center">
               <img
@@ -208,9 +208,11 @@ export function HRISProviderSelector({
                   );
                 }}
               />
-              <i className="fas fa-file-csv hidden text-4xl text-gray-400" />
+              <i className="fas fa-file-csv text-muted-foreground hidden text-4xl" />
             </div>
-            <span className="text-center text-sm font-medium">{importCSV}</span>
+            <span className="text-foreground text-center text-sm font-medium">
+              {importCSV}
+            </span>
           </button>
         )}
 
@@ -220,10 +222,10 @@ export function HRISProviderSelector({
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                className="border-border bg-card flex flex-col items-center justify-center rounded-lg border p-4 shadow-sm"
               >
-                <div className="mb-3 h-16 w-16 animate-pulse rounded-lg bg-gray-200" />
-                <div className="h-4 w-20 animate-pulse rounded bg-gray-200" />
+                <div className="bg-muted mb-3 h-16 w-16 animate-pulse rounded-lg" />
+                <div className="bg-muted h-4 w-20 animate-pulse rounded" />
               </div>
             ))}
           </>
@@ -236,20 +238,43 @@ export function HRISProviderSelector({
               key={provider.id}
               type="button"
               onClick={() => onProviderSelect?.(provider)}
-              className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+              className="border-border bg-card dark:hover:bg-muted/50 flex flex-col items-center justify-center rounded-lg border p-4 shadow-sm transition-shadow hover:shadow-md"
             >
               <div className="mb-3 flex h-16 w-16 items-center justify-center">
                 {provider.logoUrl ? (
-                  <img
-                    src={provider.logoUrl}
-                    alt={provider.displayName}
-                    className="max-h-full max-w-full object-contain"
-                  />
+                  <>
+                    <img
+                      src={provider.logoUrl}
+                      alt={provider.displayName}
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        // Hide broken image and show fallback
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling;
+                        if (fallback) fallback.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="bg-muted text-muted-foreground hidden h-12 w-12 items-center justify-center rounded-lg text-lg font-bold">
+                      {provider.displayName
+                        .split(' ')
+                        .map((w) => w[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </div>
+                  </>
                 ) : (
-                  <i className="fas fa-building text-4xl text-gray-400" />
+                  <div className="bg-muted text-muted-foreground flex h-12 w-12 items-center justify-center rounded-lg text-lg font-bold">
+                    {provider.displayName
+                      .split(' ')
+                      .map((w) => w[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </div>
                 )}
               </div>
-              <span className="text-center text-sm font-medium">
+              <span className="text-foreground text-center text-sm font-medium">
                 {provider.displayName}
               </span>
             </button>
