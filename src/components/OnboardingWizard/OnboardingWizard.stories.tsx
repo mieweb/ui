@@ -5,6 +5,8 @@ import {
   OnboardingStepQuestion,
   OnboardingCompletion,
 } from './OnboardingWizard';
+import { Button } from '../Button';
+import { Input } from '../Input';
 
 // =============================================================================
 // Sample Steps Data
@@ -75,18 +77,18 @@ const sampleSteps = [
         description="Import from your HR / HCM / HRIS / payroll system or upload a CSV."
       >
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <button className="border-primary text-primary hover:bg-primary/5 rounded-full border-2 bg-white px-5 py-2.5 font-medium transition-colors">
+          <Button variant="outline" className="rounded-full">
             <i className="fas fa-file-import mr-2" />
             Import from HR Platform
-          </button>
-          <button className="rounded-full border-2 border-gray-300 px-5 py-2.5 font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          </Button>
+          <Button variant="secondary" className="rounded-full">
             <i className="fas fa-file-upload mr-2" />
             Upload CSV
-          </button>
-          <button className="rounded-full border-2 border-gray-300 px-5 py-2.5 font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          </Button>
+          <Button variant="secondary" className="rounded-full">
             <i className="fas fa-user-plus mr-2" />
             Add Manually
-          </button>
+          </Button>
         </div>
       </OnboardingStepQuestion>
     ),
@@ -104,49 +106,14 @@ const sampleSteps = [
       >
         <div className="border-border bg-muted/30 mx-auto mt-6 max-w-md rounded-lg border p-6">
           <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="card-number"
-                className="text-foreground mb-1 block text-sm font-medium"
-              >
-                Card Number
-              </label>
-              <input
-                id="card-number"
-                type="text"
-                placeholder="4242 4242 4242 4242"
-                className="border-border bg-background w-full rounded-lg border px-3 py-2"
-              />
-            </div>
+            <Input
+              id="card-number"
+              label="Card Number"
+              placeholder="4242 4242 4242 4242"
+            />
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="card-expiry"
-                  className="text-foreground mb-1 block text-sm font-medium"
-                >
-                  Expiry
-                </label>
-                <input
-                  id="card-expiry"
-                  type="text"
-                  placeholder="MM/YY"
-                  className="border-border bg-background w-full rounded-lg border px-3 py-2"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="card-cvc"
-                  className="text-foreground mb-1 block text-sm font-medium"
-                >
-                  CVC
-                </label>
-                <input
-                  id="card-cvc"
-                  type="text"
-                  placeholder="123"
-                  className="border-border bg-background w-full rounded-lg border px-3 py-2"
-                />
-              </div>
+              <Input id="card-expiry" label="Expiry" placeholder="MM/YY" />
+              <Input id="card-cvc" label="CVC" placeholder="123" />
             </div>
           </div>
         </div>

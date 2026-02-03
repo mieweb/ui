@@ -2,6 +2,10 @@
 
 import * as React from 'react';
 import { cn } from '../../utils';
+import { Button } from '../Button';
+import { Alert } from '../Alert';
+import { Spinner } from '../Spinner';
+import { Progress } from '../Progress';
 
 export interface OnboardingStep {
   /** Unique step identifier */
@@ -118,7 +122,7 @@ export function OnboardingWizard({
   return (
     <div
       className={cn(
-        'onboarding-wizard fixed inset-0 z-50 flex flex-col bg-white',
+        'onboarding-wizard bg-background text-foreground fixed inset-0 z-50 flex flex-col',
         className
       )}
     >
@@ -145,7 +149,7 @@ export function OnboardingWizard({
       {/* Loading State */}
       {loading ? (
         <div className="flex flex-1 flex-col items-center justify-center">
-          <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+          <Spinner size="xl" />
           <p className="text-muted-foreground mt-4 text-center text-lg">
             {loadingMessage}
           </p>
@@ -154,9 +158,9 @@ export function OnboardingWizard({
         <div className="container mx-auto flex flex-1 flex-col p-4">
           {/* Error Alert */}
           {error && (
-            <div className="border-destructive bg-destructive/10 text-destructive mb-4 rounded-lg border p-4">
+            <Alert variant="danger" className="mb-4">
               {error}
-            </div>
+            </Alert>
           )}
 
           {/* Scrollable Content Area */}
@@ -165,80 +169,58 @@ export function OnboardingWizard({
           </div>
 
           {/* Footer Buttons */}
-          <div className="mt-auto border-t pt-4">
+          <div className="border-border mt-auto border-t pt-4">
             {/* Skip Button (top right of footer) */}
             {!isLastStep && currentStepData?.skippable !== false && (
               <div className="mb-3 flex justify-end">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleSkip}
-                  className="rounded-full bg-gray-800 px-4 py-1.5 text-sm text-white shadow hover:bg-gray-700"
+                  className="rounded-full"
                 >
                   {skip}
-                </button>
+                </Button>
               </div>
             )}
 
             {/* Navigation Row */}
-            <div className="flex w-full items-center gap-4 bg-white">
-              {/* Back Button */}
-              {backEnabled && !isFirstStep ? (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="rounded-lg border border-gray-300 px-6 py-3 text-gray-700 hover:bg-gray-50"
-                >
-                  <span className="hidden sm:inline">{back}</span>
-                  <i className="fas fa-chevron-left sm:hidden" />
-                </button>
-              ) : (
-                <div /> /* Spacer */
-              )}
+            <div className="bg-background flex w-full items-center gap-4">
+              {/* Back Button - always visible, disabled on first step */}
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={!backEnabled || isFirstStep}
+              >
+                <span className="hidden sm:inline">{back}</span>
+                <i className="fas fa-chevron-left sm:hidden" />
+              </Button>
 
               {/* Progress Bar */}
-              <div
-                className="flex-1"
-                role="progressbar"
-                aria-label={`Step ${currentStep + 1} of ${totalSteps}`}
-                aria-valuenow={progressPercent}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              >
-                <div className="h-5 w-full overflow-hidden rounded-full bg-gray-200">
-                  <div
-                    className="flex h-full items-center justify-center bg-green-500 text-xs font-medium text-white transition-all duration-300"
-                    style={{ width: `${progressPercent}%` }}
-                  >
-                    {currentStep + 1} of {totalSteps}
-                  </div>
-                </div>
+              <div className="flex-1">
+                <Progress
+                  value={progressPercent}
+                  size="lg"
+                  variant="success"
+                  showValue
+                  formatValue={() => `${currentStep + 1} of ${totalSteps}`}
+                  label={`Step ${currentStep + 1} of ${totalSteps}`}
+                />
               </div>
 
               {/* Next/Finish Button */}
-              {isLastStep ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="bg-primary hover:bg-primary/90 rounded-lg px-6 py-3 text-white"
-                >
-                  {finish}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={!nextEnabled}
-                  className={cn(
-                    'rounded-lg px-6 py-3 text-white',
-                    nextEnabled
-                      ? 'bg-primary hover:bg-primary/90'
-                      : 'cursor-not-allowed bg-gray-300'
-                  )}
-                >
-                  <span className="hidden sm:inline">{next}</span>
+              <Button
+                variant="primary"
+                onClick={handleNext}
+                disabled={!nextEnabled && !isLastStep}
+              >
+                <span className="hidden sm:inline">
+                  {isLastStep ? finish : next}
+                </span>
+                {!isLastStep && (
                   <i className="fas fa-chevron-right sm:hidden" />
-                </button>
-              )}
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -284,12 +266,12 @@ export function OnboardingStepQuestion({
     <div className="py-4">
       <div className="mb-4 flex items-start gap-3">
         {icon && (
-          <div className="hidden rounded-full bg-gray-800 p-3 text-white">
+          <div className="bg-muted text-muted-foreground hidden rounded-full p-3">
             <i className={cn(icon, 'text-lg')} />
           </div>
         )}
         <div>
-          <h3 className="mb-2 text-2xl font-bold">{title}</h3>
+          <h3 className="text-foreground mb-2 text-2xl font-bold">{title}</h3>
           {description && (
             <p className="text-muted-foreground">{description}</p>
           )}
@@ -299,20 +281,15 @@ export function OnboardingStepQuestion({
       {options.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {options.map((option) => (
-            <button
+            <Button
               key={option.id}
-              type="button"
+              variant={option.selected ? 'primary' : 'outline'}
               onClick={() => onSelect?.(option.id)}
-              className={cn(
-                'rounded-full border-2 px-4 py-2 transition-colors',
-                option.selected
-                  ? 'border-primary bg-primary text-white'
-                  : 'hover:border-primary border-gray-300 bg-white text-gray-700'
-              )}
+              className="rounded-full"
             >
               {option.icon && <i className={cn(option.icon, 'mr-2')} />}
               {option.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -349,7 +326,7 @@ export function OnboardingCompletion({
     return (
       <div className="py-4">
         <div className="mb-4">
-          <p className="mb-0 text-2xl">
+          <p className="text-foreground mb-0 text-2xl">
             <i className="fas fa-check-circle mr-2 text-green-500" />
             Setup complete!
           </p>
@@ -360,30 +337,18 @@ export function OnboardingCompletion({
         </div>
 
         <div className="my-6 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={onStartOrder}
-            className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
-          >
+          <Button variant="primary" onClick={onStartOrder}>
             <i className="fas fa-shopping-cart mr-2" />
             Start your first order
-          </button>
-          <button
-            type="button"
-            onClick={onGoToDashboard}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-          >
+          </Button>
+          <Button variant="outline" onClick={onGoToDashboard}>
             <i className="fas fa-tachometer-alt mr-2" />
             Go to Dashboard
-          </button>
-          <button
-            type="button"
-            onClick={onGoToEmployees}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-          >
+          </Button>
+          <Button variant="outline" onClick={onGoToEmployees}>
             <i className="fas fa-users mr-2" />
             Go to Employees
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -392,7 +357,9 @@ export function OnboardingCompletion({
   return (
     <div className="py-4">
       <div className="mb-4">
-        <h3 className="mb-2 text-2xl font-bold">Some steps not completed</h3>
+        <h3 className="text-foreground mb-2 text-2xl font-bold">
+          Some steps not completed
+        </h3>
         <p className="text-muted-foreground">
           You still need to complete some steps to finish the full guided
           onboarding. If you&apos;re in a hurry, you can skip them for now and
@@ -402,15 +369,15 @@ export function OnboardingCompletion({
 
       <div className="flex flex-wrap gap-3">
         {incompleteSteps.map(({ step, label }) => (
-          <button
+          <Button
             key={step}
-            type="button"
+            variant="outline"
             onClick={() => onGoToStep?.(step)}
-            className="border-primary text-primary hover:bg-primary/10 rounded-full border px-4 py-2"
+            className="rounded-full"
           >
             Step {step}
             {label && `: ${label}`}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
