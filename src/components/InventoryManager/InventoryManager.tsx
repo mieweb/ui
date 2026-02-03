@@ -2,7 +2,13 @@
 
 import * as React from 'react';
 import { Button } from '../Button/Button';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Input } from '../Input/Input';
 import { Textarea } from '../Textarea/Textarea';
 
@@ -117,28 +123,30 @@ export function InventoryManager({
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-foreground text-lg font-semibold">
             Remaining Inventory
           </h3>
         </div>
-        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="text-foreground text-2xl font-bold">
           {currentInventory}{' '}
-          <span className="text-sm font-normal text-gray-500">units</span>
+          <span className="text-muted-foreground text-sm font-normal">
+            units
+          </span>
         </div>
       </div>
 
-      <hr className="mb-4 border-gray-200 dark:border-gray-700" />
+      <hr className="border-border mb-4" />
 
       {/* Log Section Header */}
       <div className="mb-4 flex items-center justify-between">
-        <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+        <h4 className="text-foreground text-base font-semibold">
           Inventory Log
         </h4>
         {onUpdateClick && (
           <button
             type="button"
             onClick={onUpdateClick}
-            className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
           >
             Update Inventory
             <svg
@@ -158,42 +166,42 @@ export function InventoryManager({
         )}
       </div>
 
-      <hr className="mb-4 border-gray-200 dark:border-gray-700" />
+      <hr className="border-border mb-4" />
 
       {/* Log Table */}
       {logEntries.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <tr className="border-border border-b">
+                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
                   Date
                 </th>
-                <th className="py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
                   User
                 </th>
-                <th className="py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
                   Change
                 </th>
-                <th className="py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                <th className="text-muted-foreground py-2 text-right text-xs font-medium tracking-wider uppercase">
                   Quantity
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            <tbody className="divide-border/50 divide-y">
               {logEntries.map((entry) => (
                 <React.Fragment key={entry.id}>
                   <tr>
                     <td
-                      className="py-2 text-sm text-gray-600 dark:text-gray-400"
+                      className="text-muted-foreground py-2 text-sm"
                       title={formatDate(entry.createdAt)}
                     >
                       {formatRelativeTime(entry.createdAt)}
                     </td>
-                    <td className="py-2 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="text-muted-foreground py-2 text-sm">
                       {entry.createdBy.name}
                     </td>
-                    <td className="py-2 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="text-muted-foreground py-2 text-sm">
                       {entry.type === 'credit' ? 'Added' : 'Removed'}
                     </td>
                     <td className="py-2 text-right text-sm">
@@ -238,9 +246,9 @@ export function InventoryManager({
                     </td>
                   </tr>
                   {entry.memo && (
-                    <tr className="bg-gray-50 dark:bg-gray-800/50">
+                    <tr className="bg-muted/50">
                       <td colSpan={4} className="px-2 py-1 text-right">
-                        <span className="text-xs text-gray-500 italic dark:text-gray-400">
+                        <span className="text-muted-foreground text-xs italic">
                           Memo: {entry.memo}
                         </span>
                       </td>
@@ -252,9 +260,9 @@ export function InventoryManager({
           </table>
         </div>
       ) : (
-        <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+        <div className="text-muted-foreground py-8 text-center">
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
+            className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -283,18 +291,17 @@ export function InventoryManager({
         <ModalHeader>
           <ModalTitle>Inventory Manager</ModalTitle>
         </ModalHeader>
-        <div className="space-y-4">
-          <div className="mb-4">
-            <h4 className="font-semibold text-gray-900 dark:text-white">
+        <ModalBody className="space-y-4">
+          <div>
+            <h4 className="text-foreground text-lg font-semibold">
               {serviceName}
             </h4>
           </div>
 
           <div>
-            <h5 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <h5 className="text-muted-foreground mb-2 text-sm font-medium">
               Update Inventory
             </h5>
-            <hr className="mb-3 border-gray-200 dark:border-gray-700" />
           </div>
 
           {/* Add/Remove Toggle */}
@@ -302,10 +309,10 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('debit')}
-              className={`rounded-l-md border px-4 py-2 text-sm font-medium ${
+              className={`rounded-l-md border px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'debit'
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >
               <svg
@@ -326,10 +333,10 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('credit')}
-              className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium ${
+              className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'credit'
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >
               <svg
@@ -370,11 +377,11 @@ export function InventoryManager({
 
           {/* Preview */}
           {previewChange !== null && updateAmount && (
-            <div className="rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
-              <h5 className="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+              <h5 className="mb-2 text-sm font-medium text-amber-800 dark:text-amber-200">
                 Description
               </h5>
-              <ul className="list-inside list-disc text-sm text-yellow-700 dark:text-yellow-300">
+              <ul className="list-inside list-disc text-sm text-amber-700 dark:text-amber-300">
                 <li>
                   This will{' '}
                   {updateType === 'credit' ? (
@@ -395,7 +402,7 @@ export function InventoryManager({
               </ul>
             </div>
           )}
-        </div>
+        </ModalBody>
 
         <ModalFooter>
           <Button variant="outline" onClick={onUpdateModalClose}>

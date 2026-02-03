@@ -2,18 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { InventoryManager } from './InventoryManager';
 
-const meta: Meta<typeof InventoryManager> = {
-  title: 'Components/InventoryManager',
-  component: InventoryManager,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'padded',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof InventoryManager>;
-
 const mockLogEntries = [
   {
     id: '1',
@@ -49,21 +37,67 @@ const mockLogEntries = [
   },
 ];
 
-export const Default: Story = {
+const meta: Meta<typeof InventoryManager> = {
+  title: 'Components/InventoryManager',
+  component: InventoryManager,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+  },
   args: {
     serviceName: 'COVID-19 Rapid Test',
     currentInventory: 135,
     logEntries: mockLogEntries,
-    onUpdateClick: () => console.log('Update clicked'),
+    showUpdateModal: false,
+    isLoading: false,
+  },
+  argTypes: {
+    serviceName: {
+      description: 'Name of the service/product being managed',
+      control: 'text',
+    },
+    currentInventory: {
+      description: 'Current inventory count',
+      control: { type: 'number', min: 0 },
+    },
+    logEntries: {
+      description: 'Array of inventory log entries',
+      control: 'object',
+    },
+    showUpdateModal: {
+      description: 'Whether the update modal is visible',
+      control: 'boolean',
+    },
+    isLoading: {
+      description: 'Loading state for submit action',
+      control: 'boolean',
+    },
+    className: {
+      description: 'Additional CSS classes',
+      control: 'text',
+    },
+    onUpdateClick: {
+      action: 'update clicked',
+    },
+    onUpdateModalClose: {
+      action: 'modal closed',
+    },
+    onUpdateSubmit: {
+      action: 'update submitted',
+    },
   },
 };
+
+export default meta;
+type Story = StoryObj<typeof InventoryManager>;
+
+export const Default: Story = {};
 
 export const EmptyLog: Story = {
   args: {
     serviceName: 'Drug Screen (5 Panel)',
     currentInventory: 50,
     logEntries: [],
-    onUpdateClick: () => console.log('Update clicked'),
   },
 };
 
@@ -72,7 +106,6 @@ export const LowInventory: Story = {
     serviceName: 'Flu Vaccine',
     currentInventory: 8,
     logEntries: mockLogEntries.slice(0, 2),
-    onUpdateClick: () => console.log('Update clicked'),
   },
 };
 
@@ -126,12 +159,6 @@ export const Interactive: Story = {
 
 export const WithModalOpen: Story = {
   args: {
-    serviceName: 'COVID-19 Rapid Test',
-    currentInventory: 135,
-    logEntries: mockLogEntries,
     showUpdateModal: true,
-    onUpdateClick: () => console.log('Update clicked'),
-    onUpdateModalClose: () => console.log('Modal closed'),
-    onUpdateSubmit: (data) => console.log('Submit:', data),
   },
 };
