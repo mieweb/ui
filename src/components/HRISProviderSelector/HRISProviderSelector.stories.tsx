@@ -1,135 +1,173 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
 import {
   HRISProviderSelector,
   type HRISProvider,
 } from './HRISProviderSelector';
 
+// HRIS provider logos - stored in .storybook/public/hris-logos/
+// Some icons sourced from Simple Icons (ADP, Gusto, QuickBooks, Sage, Square)
+// Others are branded SVG placeholders with company initials
+const sampleProviders: HRISProvider[] = [
+  {
+    id: 'adp',
+    displayName: 'ADP',
+    logoUrl: '/hris-logos/adp.svg',
+  },
+  {
+    id: 'bamboo',
+    displayName: 'BambooHR',
+    logoUrl: '/hris-logos/bamboohr.svg',
+  },
+  {
+    id: 'gusto',
+    displayName: 'Gusto',
+    logoUrl: '/hris-logos/gusto.svg',
+  },
+  {
+    id: 'justworks',
+    displayName: 'Justworks',
+    logoUrl: '/hris-logos/justworks.svg',
+  },
+  {
+    id: 'paychex',
+    displayName: 'Paychex',
+    logoUrl: '/hris-logos/paychex.svg',
+  },
+  {
+    id: 'paycom',
+    displayName: 'Paycom',
+    logoUrl: '/hris-logos/paycom.svg',
+  },
+  {
+    id: 'paylocity',
+    displayName: 'Paylocity',
+    logoUrl: '/hris-logos/paylocity.svg',
+  },
+  {
+    id: 'quickbooks',
+    displayName: 'QuickBooks',
+    logoUrl: '/hris-logos/quickbooks.svg',
+  },
+  {
+    id: 'rippling',
+    displayName: 'Rippling',
+    logoUrl: '/hris-logos/rippling.svg',
+  },
+  {
+    id: 'sage',
+    displayName: 'Sage',
+    logoUrl: '/hris-logos/sage.svg',
+  },
+  {
+    id: 'square',
+    displayName: 'Square Payroll',
+    logoUrl: '/hris-logos/square.svg',
+  },
+  {
+    id: 'trinet',
+    displayName: 'TriNet',
+    logoUrl: '/hris-logos/trinet.svg',
+  },
+  {
+    id: 'ukg',
+    displayName: 'UKG',
+    logoUrl: '/hris-logos/ukg.svg',
+  },
+  {
+    id: 'workday',
+    displayName: 'Workday',
+    logoUrl: '/hris-logos/workday.svg',
+  },
+  {
+    id: 'zenefits',
+    displayName: 'Zenefits',
+    logoUrl: '/hris-logos/zenefits.svg',
+  },
+];
+
+const connectedProvider: HRISProvider = {
+  id: 'bamboo',
+  displayName: 'BambooHR',
+  logoUrl: '/hris-logos/bamboohr.svg',
+  connected: true,
+  lastSync: new Date().toISOString(),
+};
+
 const meta: Meta<typeof HRISProviderSelector> = {
   title: 'Components/HRISProviderSelector',
   component: HRISProviderSelector,
   tags: ['autodocs'],
+  args: {
+    providers: sampleProviders,
+    loading: false,
+    showCSVOption: true,
+    searchQuery: '',
+  },
+  argTypes: {
+    providers: {
+      description: 'Array of available HRIS providers to display',
+      control: 'object',
+    },
+    currentProvider: {
+      description:
+        'Currently connected provider (shows connection status view when set)',
+      control: 'object',
+    },
+    loading: {
+      description: 'Shows loading skeleton placeholders',
+      control: 'boolean',
+    },
+    showCSVOption: {
+      description: 'Whether to show the CSV import option in the grid',
+      control: 'boolean',
+    },
+    searchQuery: {
+      description: 'Current search query for filtering providers',
+      control: 'text',
+    },
+    className: {
+      description: 'Additional CSS classes',
+      control: 'text',
+    },
+    labels: {
+      description: 'Custom labels for internationalization',
+      control: 'object',
+    },
+    onProviderSelect: {
+      action: 'provider selected',
+    },
+    onCSVImport: {
+      action: 'CSV import clicked',
+    },
+    onDisconnect: {
+      action: 'disconnect clicked',
+    },
+    onRefreshSync: {
+      action: 'refresh sync clicked',
+    },
+    onSearchChange: {
+      action: 'search changed',
+    },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof HRISProviderSelector>;
 
-const sampleProviders: HRISProvider[] = [
-  {
-    id: 'adp',
-    displayName: 'ADP',
-    logoUrl: 'https://finchdata.io/integrations/adp.svg',
-  },
-  {
-    id: 'bamboo',
-    displayName: 'BambooHR',
-    logoUrl: 'https://finchdata.io/integrations/bamboohr.svg',
-  },
-  {
-    id: 'gusto',
-    displayName: 'Gusto',
-    logoUrl: 'https://finchdata.io/integrations/gusto.svg',
-  },
-  {
-    id: 'justworks',
-    displayName: 'Justworks',
-    logoUrl: 'https://finchdata.io/integrations/justworks.svg',
-  },
-  {
-    id: 'paychex',
-    displayName: 'Paychex',
-    logoUrl: 'https://finchdata.io/integrations/paychex.svg',
-  },
-  {
-    id: 'paycom',
-    displayName: 'Paycom',
-    logoUrl: 'https://finchdata.io/integrations/paycom.svg',
-  },
-  {
-    id: 'paylocity',
-    displayName: 'Paylocity',
-    logoUrl: 'https://finchdata.io/integrations/paylocity.svg',
-  },
-  {
-    id: 'quickbooks',
-    displayName: 'QuickBooks',
-    logoUrl: 'https://finchdata.io/integrations/quickbooks.svg',
-  },
-  {
-    id: 'rippling',
-    displayName: 'Rippling',
-    logoUrl: 'https://finchdata.io/integrations/rippling.svg',
-  },
-  {
-    id: 'sage',
-    displayName: 'Sage',
-    logoUrl: 'https://finchdata.io/integrations/sage.svg',
-  },
-  {
-    id: 'square',
-    displayName: 'Square Payroll',
-    logoUrl: 'https://finchdata.io/integrations/square.svg',
-  },
-  {
-    id: 'trinet',
-    displayName: 'TriNet',
-    logoUrl: 'https://finchdata.io/integrations/trinet.svg',
-  },
-  {
-    id: 'ukg',
-    displayName: 'UKG',
-    logoUrl: 'https://finchdata.io/integrations/ukg.svg',
-  },
-  {
-    id: 'workday',
-    displayName: 'Workday',
-    logoUrl: 'https://finchdata.io/integrations/workday.svg',
-  },
-  {
-    id: 'zenefits',
-    displayName: 'Zenefits',
-    logoUrl: 'https://finchdata.io/integrations/zenefits.svg',
-  },
-];
-
-function DefaultWrapper() {
-  const [search, setSearch] = useState('');
-
-  return (
-    <HRISProviderSelector
-      providers={sampleProviders}
-      searchQuery={search}
-      onSearchChange={setSearch}
-      onProviderSelect={(p) => window.alert(`Selected: ${p.displayName}`)}
-      onCSVImport={() => window.alert('CSV Import clicked')}
-    />
-  );
-}
-
-export const Default: Story = {
-  render: () => <DefaultWrapper />,
-};
+export const Default: Story = {};
 
 export const Connected: Story = {
   args: {
-    providers: sampleProviders,
-    currentProvider: {
-      id: 'bamboo',
-      displayName: 'BambooHR',
-      logoUrl: 'https://finchdata.io/integrations/bamboohr.svg',
-      connected: true,
-      lastSync: new Date().toISOString(),
-    },
+    currentProvider: connectedProvider,
   },
 };
 
 export const ConnectedPendingSync: Story = {
   args: {
-    providers: sampleProviders,
     currentProvider: {
       id: 'gusto',
       displayName: 'Gusto',
-      logoUrl: 'https://finchdata.io/integrations/gusto.svg',
+      logoUrl: '/hris-logos/gusto.svg',
       connected: true,
       lastSync: undefined,
     },
@@ -153,14 +191,12 @@ export const NoResults: Story = {
 
 export const WithoutCSVOption: Story = {
   args: {
-    providers: sampleProviders,
     showCSVOption: false,
   },
 };
 
 export const FilteredSearch: Story = {
   args: {
-    providers: sampleProviders,
     searchQuery: 'pay',
   },
 };
@@ -176,7 +212,6 @@ export const Mobile: Story = {
 
 export const CustomLabels: Story = {
   args: {
-    providers: sampleProviders,
     labels: {
       search: 'Find your HR system...',
       importCSV: 'Upload Spreadsheet',
