@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { Button, buttonVariants } from '../Button/Button';
 
 // =============================================================================
 // Types
@@ -437,18 +438,14 @@ interface ActionButtonProps {
 }
 
 function ActionButton({ label, onClick, href, variant }: ActionButtonProps) {
-  const baseClasses =
-    'px-6 py-2.5 rounded-lg font-medium transition-colors min-w-[140px]';
-  const variantClasses =
-    variant === 'primary'
-      ? 'bg-primary-600 text-white hover:bg-primary-700'
-      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600';
-
   if (href) {
     return (
       <a
         href={href}
-        className={cn(baseClasses, variantClasses, 'inline-block text-center')}
+        className={cn(
+          buttonVariants({ variant, size: 'md' }),
+          'min-w-[140px] text-center'
+        )}
       >
         {label}
       </a>
@@ -456,13 +453,15 @@ function ActionButton({ label, onClick, href, variant }: ActionButtonProps) {
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
-      className={cn(baseClasses, variantClasses)}
+      variant={variant}
+      size="md"
+      className="min-w-[140px]"
     >
       {label}
-    </button>
+    </Button>
   );
 }
 
