@@ -448,17 +448,57 @@ type Story = StoryObj<typeof RecordButton>;
 // Basic Examples
 // ============================================================================
 
+/**
+ * Default uncontrolled recording button. Click to start recording,
+ * click again to stop. Handles the full recording lifecycle automatically.
+ */
 export const Default: Story = {
+  render: function DefaultStory() {
+    const [lastRecording, setLastRecording] = React.useState<{
+      blob: Blob;
+      duration: number;
+      url: string;
+    } | null>(null);
+
+    const handleRecordingComplete = (blob: Blob, duration: number) => {
+      const url = URL.createObjectURL(blob);
+      setLastRecording({ blob, duration, url });
+    };
+
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <RecordButton
+          onRecordingComplete={handleRecordingComplete}
+          showWaveform
+          showPulse
+          showDuration
+        />
+        <p className="text-muted-foreground text-sm">
+          Click to start recording
+        </p>
+        {lastRecording && (
+          <div className="flex flex-col items-center gap-2 rounded-lg border p-4">
+            <p className="text-sm">
+              Recorded {lastRecording.duration.toFixed(1)}s
+            </p>
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <audio controls src={lastRecording.url} className="h-8" />
+          </div>
+        )}
+      </div>
+    );
+  },
+};
+
+/**
+ * Shows the recording state with waveform animation.
+ * This is a controlled/static preview of the recording state.
+ */
+export const RecordingState: Story = {
   args: {
     state: 'recording',
     showWaveform: true,
     showPulse: true,
-  },
-};
-
-export const Recording: Story = {
-  args: {
-    state: 'recording',
   },
 };
 
@@ -713,17 +753,40 @@ export const WithDuration: Story = {
 
 export const InInputField: Story = {
   render: function InInputFieldStory() {
+    const [inputValue, setInputValue] = React.useState('');
+
+    const handleRecordingComplete = (blob: Blob, duration: number) => {
+      // In a real app, you'd send the blob to a transcription service
+      setInputValue(
+        `[Voice message: ${duration.toFixed(1)}s, ${(blob.size / 1024).toFixed(1)}KB]`
+      );
+    };
+
     return (
-      <div className="w-80 space-y-4">
+      <div className="w-96 space-y-4">
         <p className="text-muted-foreground text-sm">
-          RecordButton embedded in an input field.
+          RecordButton embedded in an input field. Click the mic to record.
         </p>
         <div className="relative">
-          <Input placeholder="Type or record a message..." className="pr-14" />
+          <Input
+            placeholder="Type or record a message..."
+            className="pr-14"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
           <div className="absolute top-1/2 right-2 -translate-y-1/2">
-            <RecordButton size="sm" variant="ghost" />
+            <RecordButton
+              size="sm"
+              variant="ghost"
+              onRecordingComplete={handleRecordingComplete}
+            />
           </div>
         </div>
+        {inputValue && (
+          <p className="text-muted-foreground text-xs">
+            Value: <code className="bg-muted rounded px-1">{inputValue}</code>
+          </p>
+        )}
       </div>
     );
   },
