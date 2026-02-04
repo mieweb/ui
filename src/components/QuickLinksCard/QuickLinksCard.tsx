@@ -76,29 +76,29 @@ export function QuickLinksCard({
             >
               {link.icon && (
                 <span
-                  className={`text-gray-500 dark:text-gray-400 ${layout === 'grid' ? 'mb-1' : 'mr-3'} `}
+                  className={`text-muted-foreground ${layout === 'grid' ? 'mb-1' : 'mr-3'} `}
                 >
                   {link.icon}
                 </span>
               )}
               <span className="flex-1 text-left">
-                <span className="block text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-foreground block text-sm font-medium">
                   {link.label}
                 </span>
                 {link.description && layout !== 'grid' && (
-                  <span className="block text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-muted-foreground block text-xs">
                     {link.description}
                   </span>
                 )}
               </span>
               {link.badge !== undefined && (
-                <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900 dark:text-blue-400">
+                <span className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-[var(--mieweb-primary-700)] dark:text-[var(--mieweb-primary-400)]">
                   {link.badge}
                 </span>
               )}
               {!link.badge && layout !== 'grid' && (
                 <svg
-                  className="h-4 w-4 text-gray-400"
+                  className="text-muted-foreground h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
