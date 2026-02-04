@@ -1,11 +1,37 @@
-import { useFocusTrap } from './chunk-CLNOI5J7.js';
-import { useEscapeKey } from './chunk-T4ME7QCT.js';
-import { cn } from './chunk-F3SOEIN2.js';
-import * as React from 'react';
-import { cva } from 'class-variance-authority';
-import { jsx, jsxs } from 'react/jsx-runtime';
+'use strict';
 
-var modalOverlayVariants = cva(
+var chunkNNEFAUHV_cjs = require('./chunk-NNEFAUHV.cjs');
+var chunkFHY3K6PL_cjs = require('./chunk-FHY3K6PL.cjs');
+var chunkSCV7C55E_cjs = require('./chunk-SCV7C55E.cjs');
+var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
+var React = require('react');
+var classVarianceAuthority = require('class-variance-authority');
+var jsxRuntime = require('react/jsx-runtime');
+
+function _interopNamespace(e) {
+  if (e && e.__esModule) return e;
+  var n = Object.create(null);
+  if (e) {
+    Object.keys(e).forEach(function (k) {
+      if (k !== 'default') {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () { return e[k]; }
+        });
+      }
+    });
+  }
+  n.default = e;
+  return Object.freeze(n);
+}
+
+var React__namespace = /*#__PURE__*/_interopNamespace(React);
+
+var scrollLockState = {
+  count: 0,
+  originalOverflow: null};
+var modalOverlayVariants = classVarianceAuthority.cva(
   [
     "fixed inset-0 z-50",
     "bg-black/50 backdrop-blur-sm",
@@ -17,7 +43,7 @@ var modalOverlayVariants = cva(
     defaultVariants: {}
   }
 );
-var modalContentVariants = cva(
+var modalContentVariants = classVarianceAuthority.cva(
   [
     "fixed left-1/2 top-1/2 z-50",
     "-translate-x-1/2 -translate-y-1/2",
@@ -59,15 +85,15 @@ function Modal({
   "aria-labelledby": ariaLabelledBy,
   "aria-describedby": ariaDescribedBy
 }) {
-  const generatedId = React.useId();
+  const generatedId = React__namespace.useId();
   const modalId = id || generatedId;
-  const focusTrapRef = useFocusTrap(open);
-  useEscapeKey(() => {
+  const focusTrapRef = chunkNNEFAUHV_cjs.useFocusTrap(open);
+  chunkFHY3K6PL_cjs.useEscapeKey(() => {
     if (closeOnEscape && open) {
       onOpenChange(false);
     }
   }, open);
-  const handleOverlayClick = React.useCallback(
+  const handleOverlayClick = React__namespace.useCallback(
     (e) => {
       if (closeOnOverlayClick && e.target === e.currentTarget) {
         onOpenChange(false);
@@ -75,31 +101,39 @@ function Modal({
     },
     [closeOnOverlayClick, onOpenChange]
   );
-  React.useEffect(() => {
-    if (open) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
+  React__namespace.useEffect(() => {
+    if (!open || chunkSCV7C55E_cjs.isStorybookDocsMode()) {
+      return void 0;
     }
+    scrollLockState.count++;
+    if (scrollLockState.count === 1) {
+      scrollLockState.originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      scrollLockState.count--;
+      if (scrollLockState.count === 0 && scrollLockState.originalOverflow !== null) {
+        document.body.style.overflow = scrollLockState.originalOverflow;
+        scrollLockState.originalOverflow = null;
+      }
+    };
   }, [open]);
   if (!open) return null;
-  return /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsxRuntime.jsx(
     ModalContext.Provider,
     {
       value: { onClose: () => onOpenChange(false), modalId },
-      children: /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 z-50", children: [
-        /* @__PURE__ */ jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "fixed inset-0 z-50", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
           "div",
           {
-            className: cn(modalOverlayVariants()),
+            className: chunkOR5DRJCW_cjs.cn(modalOverlayVariants()),
             "data-state": open ? "open" : "closed",
             onClick: handleOverlayClick,
             "aria-hidden": "true"
           }
         ),
-        /* @__PURE__ */ jsx(
+        /* @__PURE__ */ jsxRuntime.jsx(
           "div",
           {
             ref: focusTrapRef,
@@ -111,7 +145,7 @@ function Modal({
             id: modalId,
             tabIndex: -1,
             "data-state": open ? "open" : "closed",
-            className: cn(modalContentVariants({ size }), className),
+            className: chunkOR5DRJCW_cjs.cn(modalContentVariants({ size }), className),
             children
           }
         )
@@ -120,22 +154,22 @@ function Modal({
   );
 }
 Modal.displayName = "Modal";
-var ModalContext = React.createContext(
+var ModalContext = React__namespace.createContext(
   void 0
 );
 function useModalContext() {
-  const context = React.useContext(ModalContext);
+  const context = React__namespace.useContext(ModalContext);
   if (!context) {
     throw new Error("Modal components must be used within a Modal");
   }
   return context;
 }
-var ModalHeader = React.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsx(
+var ModalHeader = React__namespace.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
       ref,
-      className: cn(
+      className: chunkOR5DRJCW_cjs.cn(
         "flex items-center justify-between",
         "border-border border-b px-6 py-4",
         className
@@ -145,15 +179,15 @@ var ModalHeader = React.forwardRef(
   )
 );
 ModalHeader.displayName = "ModalHeader";
-var ModalTitle = React.forwardRef(
+var ModalTitle = React__namespace.forwardRef(
   ({ className, children, ...props }, ref) => {
     const { modalId } = useModalContext();
-    return /* @__PURE__ */ jsx(
+    return /* @__PURE__ */ jsxRuntime.jsx(
       "h2",
       {
         ref,
         id: `${modalId}-title`,
-        className: cn(
+        className: chunkOR5DRJCW_cjs.cn(
           "text-lg leading-none font-semibold tracking-tight",
           className
         ),
@@ -164,10 +198,10 @@ var ModalTitle = React.forwardRef(
   }
 );
 ModalTitle.displayName = "ModalTitle";
-var ModalClose = React.forwardRef(
+var ModalClose = React__namespace.forwardRef(
   ({ className, children, onClick, ...props }, ref) => {
     const { onClose } = useModalContext();
-    const handleClick = React.useCallback(
+    const handleClick = React__namespace.useCallback(
       (e) => {
         onClick?.(e);
         if (!e.defaultPrevented) {
@@ -176,13 +210,13 @@ var ModalClose = React.forwardRef(
       },
       [onClick, onClose]
     );
-    return /* @__PURE__ */ jsx(
+    return /* @__PURE__ */ jsxRuntime.jsx(
       "button",
       {
         ref,
         type: "button",
         onClick: handleClick,
-        className: cn(
+        className: chunkOR5DRJCW_cjs.cn(
           "inline-flex h-8 w-8 items-center justify-center rounded-lg",
           "text-muted-foreground hover:text-foreground",
           "hover:bg-muted transition-colors",
@@ -191,22 +225,22 @@ var ModalClose = React.forwardRef(
         ),
         "aria-label": "Close",
         ...props,
-        children: children || /* @__PURE__ */ jsx(CloseIcon, {})
+        children: children || /* @__PURE__ */ jsxRuntime.jsx(CloseIcon, {})
       }
     );
   }
 );
 ModalClose.displayName = "ModalClose";
-var ModalBody = React.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsx("div", { ref, className: cn("px-6 py-4", className), ...props })
+var ModalBody = React__namespace.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: chunkOR5DRJCW_cjs.cn("px-6 py-4", className), ...props })
 );
 ModalBody.displayName = "ModalBody";
-var ModalFooter = React.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsx(
+var ModalFooter = React__namespace.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
       ref,
-      className: cn(
+      className: chunkOR5DRJCW_cjs.cn(
         "flex items-center justify-end gap-3",
         "border-border border-t px-6 py-4",
         className
@@ -217,7 +251,7 @@ var ModalFooter = React.forwardRef(
 );
 ModalFooter.displayName = "ModalFooter";
 function CloseIcon() {
-  return /* @__PURE__ */ jsxs(
+  return /* @__PURE__ */ jsxRuntime.jsxs(
     "svg",
     {
       xmlns: "http://www.w3.org/2000/svg",
@@ -231,13 +265,20 @@ function CloseIcon() {
       strokeLinejoin: "round",
       "aria-hidden": "true",
       children: [
-        /* @__PURE__ */ jsx("path", { d: "M18 6 6 18" }),
-        /* @__PURE__ */ jsx("path", { d: "m6 6 12 12" })
+        /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M18 6 6 18" }),
+        /* @__PURE__ */ jsxRuntime.jsx("path", { d: "m6 6 12 12" })
       ]
     }
   );
 }
 
-export { Modal, ModalBody, ModalClose, ModalFooter, ModalHeader, ModalTitle, modalContentVariants, modalOverlayVariants };
-//# sourceMappingURL=chunk-D5IBXXF2.js.map
-//# sourceMappingURL=chunk-D5IBXXF2.js.map
+exports.Modal = Modal;
+exports.ModalBody = ModalBody;
+exports.ModalClose = ModalClose;
+exports.ModalFooter = ModalFooter;
+exports.ModalHeader = ModalHeader;
+exports.ModalTitle = ModalTitle;
+exports.modalContentVariants = modalContentVariants;
+exports.modalOverlayVariants = modalOverlayVariants;
+//# sourceMappingURL=chunk-I7L6CQXR.cjs.map
+//# sourceMappingURL=chunk-I7L6CQXR.cjs.map

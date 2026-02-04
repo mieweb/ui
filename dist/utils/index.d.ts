@@ -70,4 +70,17 @@ declare function isDateInPast(value: string): boolean;
  */
 declare function isDateInFuture(value: string): boolean;
 
-export { calculateAge, cn, formatDateValue, formatPhoneNumber, isDateEmpty, isDateInFuture, isDateInPast, isPhoneNumberEmpty, isValidDate, isValidDrivingAge, isValidPhoneNumber, parseDateValue, unformatPhoneNumber };
+/**
+ * Environment detection utilities for handling special rendering contexts
+ * like Storybook, testing environments, etc.
+ */
+/**
+ * Check if we're in Storybook docs mode (multiple stories rendered inline).
+ * In docs mode, we need to disable certain behaviors like scroll locking
+ * and focus trapping that would interfere with the documentation page.
+ *
+ * @returns true if running in Storybook docs mode
+ */
+declare function isStorybookDocsMode(): boolean;
+
+export { calculateAge, cn, formatDateValue, formatPhoneNumber, isDateEmpty, isDateInFuture, isDateInPast, isPhoneNumberEmpty, isStorybookDocsMode, isValidDate, isValidDrivingAge, isValidPhoneNumber, parseDateValue, unformatPhoneNumber };

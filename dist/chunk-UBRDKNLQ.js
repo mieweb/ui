@@ -204,11 +204,16 @@ function Waveform({
   onSeek,
   waveColor,
   progressColor,
-  height = 64
+  height = 64,
+  showHoverCursor = false,
+  onHoverTimeChange,
+  cursorColor = "var(--color-red-500, rgb(239, 68, 68))"
 }) {
   const containerRef = React.useRef(null);
   const wavesurferRef = React.useRef(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isHovering, setIsHovering] = React.useState(false);
+  const [hoverPosition, setHoverPosition] = React.useState(0);
   React.useEffect(() => {
     if (!containerRef.current) return;
     const initWaveSurfer = async () => {
@@ -227,7 +232,7 @@ function Waveform({
           barRadius: 2,
           height,
           normalize: true,
-          interact: true
+          interact: !showHoverCursor
         });
         wavesurferRef.current.on("ready", () => {
           setIsLoaded(true);
@@ -239,9 +244,11 @@ function Waveform({
         wavesurferRef.current.on("seeking", () => {
           onTimeUpdate(wavesurferRef.current.getCurrentTime());
         });
-        wavesurferRef.current.on("interaction", () => {
-          onSeek(wavesurferRef.current.getCurrentTime());
-        });
+        if (!showHoverCursor) {
+          wavesurferRef.current.on("interaction", () => {
+            onSeek(wavesurferRef.current.getCurrentTime());
+          });
+        }
         wavesurferRef.current.on("finish", () => {
           onFinish();
         });
@@ -257,7 +264,7 @@ function Waveform({
         wavesurferRef.current = null;
       }
     };
-  }, [src]);
+  }, [src, showHoverCursor]);
   React.useEffect(() => {
     if (!wavesurferRef.current || !isLoaded) return;
     if (isPlaying) {
@@ -270,15 +277,77 @@ function Waveform({
     if (!wavesurferRef.current || !isLoaded) return;
     wavesurferRef.current.setPlaybackRate(playbackRate);
   }, [playbackRate, isLoaded]);
+  const handleMouseMove = showHoverCursor ? (e) => {
+    if (!containerRef.current || !wavesurferRef.current || !isLoaded)
+      return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percentage = x / rect.width;
+    const duration = wavesurferRef.current.getDuration();
+    setHoverPosition(percentage * 100);
+    onHoverTimeChange?.(percentage * duration);
+  } : void 0;
+  const handleMouseEnter = showHoverCursor ? () => setIsHovering(true) : void 0;
+  const handleMouseLeave = showHoverCursor ? () => {
+    setIsHovering(false);
+    setHoverPosition(0);
+    onHoverTimeChange?.(null);
+  } : void 0;
+  const handleClick = showHoverCursor ? (e) => {
+    if (!containerRef.current || !wavesurferRef.current || !isLoaded)
+      return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percentage = x / rect.width;
+    wavesurferRef.current.seekTo(percentage);
+    onSeek(wavesurferRef.current.getDuration() * percentage);
+    onHoverTimeChange?.(null);
+  } : void 0;
+  const handleKeyDown = showHoverCursor ? (e) => {
+    if (!wavesurferRef.current || !isLoaded) return;
+    const duration = wavesurferRef.current.getDuration();
+    const currentTime = wavesurferRef.current.getCurrentTime();
+    const step = duration * 0.05;
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const newTime = Math.min(currentTime + step, duration);
+      wavesurferRef.current.seekTo(newTime / duration);
+      onSeek(newTime);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const newTime = Math.max(currentTime - step, 0);
+      wavesurferRef.current.seekTo(newTime / duration);
+      onSeek(newTime);
+    }
+  } : void 0;
   return /* @__PURE__ */ jsx(
     "div",
     {
       ref: containerRef,
+      role: showHoverCursor ? "slider" : void 0,
+      "aria-label": showHoverCursor ? "Audio progress" : void 0,
+      "aria-valuemin": showHoverCursor ? 0 : void 0,
+      "aria-valuemax": showHoverCursor && wavesurferRef.current ? wavesurferRef.current.getDuration() : void 0,
+      "aria-valuenow": showHoverCursor && wavesurferRef.current ? wavesurferRef.current.getCurrentTime() : void 0,
+      tabIndex: showHoverCursor ? 0 : void 0,
       className: cn(
-        "w-full rounded-lg bg-neutral-100 dark:bg-neutral-800",
+        "relative w-full rounded-lg bg-neutral-100 dark:bg-neutral-800",
+        showHoverCursor && "cursor-pointer",
         !isLoaded && "animate-pulse"
       ),
-      style: { height }
+      style: { height },
+      onMouseMove: handleMouseMove,
+      onMouseEnter: handleMouseEnter,
+      onMouseLeave: handleMouseLeave,
+      onClick: handleClick,
+      onKeyDown: handleKeyDown,
+      children: showHoverCursor && isHovering && isLoaded && /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: "pointer-events-none absolute top-0 bottom-0 z-10 w-0.5",
+          style: { left: `${hoverPosition}%`, backgroundColor: cursorColor }
+        }
+      )
     }
   );
 }
@@ -296,6 +365,8 @@ function AudioPlayer({
   waveColor,
   progressColor,
   waveformHeight = 64,
+  showWaveformHoverCursor = true,
+  waveformCursorColor,
   disabled = false,
   className,
   "aria-label": ariaLabel,
@@ -311,6 +382,7 @@ function AudioPlayer({
   const [duration, setDuration] = React.useState(0);
   const [playbackRate, setPlaybackRate] = React.useState(1);
   const [audioInitialized, setAudioInitialized] = React.useState(false);
+  const [hoverTime, setHoverTime] = React.useState(null);
   const audioRef = React.useRef(null);
   const isPlaying = state === "playing";
   const isLoading = state === "loading";
@@ -449,6 +521,9 @@ function AudioPlayer({
   const handleWaveformSeek = React.useCallback((time) => {
     setCurrentTime(time);
   }, []);
+  const handleHoverTimeChange = React.useCallback((time) => {
+    setHoverTime(time);
+  }, []);
   const iconSize = size === "sm" ? "h-3.5 w-3.5" : size === "lg" ? "h-5 w-5" : "h-4 w-4";
   const getAriaLabel = () => {
     if (ariaLabel) return ariaLabel;
@@ -467,13 +542,24 @@ function AudioPlayer({
       children: isLoading ? /* @__PURE__ */ jsx(SpinnerIcon, { className: iconSize }) : isPlaying ? /* @__PURE__ */ jsx(PauseIcon, { className: iconSize }) : /* @__PURE__ */ jsx(PlayIcon, { className: iconSize })
     }
   );
-  const renderTime = () => {
+  const renderTime = (useHoverTime = false) => {
     if (!showTime) return null;
-    return /* @__PURE__ */ jsxs("span", { className: "font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400", children: [
-      formatTime(currentTime),
-      " / ",
-      formatTime(duration)
-    ] });
+    const displayTime = useHoverTime && hoverTime !== null ? hoverTime : currentTime;
+    const isShowingHoverTime = useHoverTime && hoverTime !== null;
+    return /* @__PURE__ */ jsxs(
+      "span",
+      {
+        className: cn(
+          "font-mono text-xs tabular-nums",
+          isShowingHoverTime ? "text-primary-600 dark:text-primary-400" : "text-neutral-500 dark:text-neutral-400"
+        ),
+        children: [
+          formatTime(displayTime),
+          " / ",
+          formatTime(duration)
+        ]
+      }
+    );
   };
   const renderPlaybackRateControl = () => {
     if (!showPlaybackRate) return null;
@@ -529,13 +615,16 @@ function AudioPlayer({
         onSeek: handleWaveformSeek,
         waveColor,
         progressColor,
-        height: waveformHeight
+        height: waveformHeight,
+        showHoverCursor: showWaveformHoverCursor,
+        onHoverTimeChange: handleHoverTimeChange,
+        cursorColor: waveformCursorColor
       }
     ),
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
       renderPlayButton(),
       /* @__PURE__ */ jsxs("div", { className: "flex flex-1 items-center justify-between", children: [
-        renderTime(),
+        renderTime(true),
         renderPlaybackRateControl()
       ] })
     ] })
@@ -544,5 +633,5 @@ function AudioPlayer({
 AudioPlayer.displayName = "AudioPlayer";
 
 export { AudioPlayer, ProgressBar, audioPlayerVariants, formatTime, playButtonVariants };
-//# sourceMappingURL=chunk-QBWVTJKF.js.map
-//# sourceMappingURL=chunk-QBWVTJKF.js.map
+//# sourceMappingURL=chunk-UBRDKNLQ.js.map
+//# sourceMappingURL=chunk-UBRDKNLQ.js.map

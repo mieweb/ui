@@ -30,7 +30,7 @@ export { PhoneEntry, PhoneInput, PhoneInputGroup, PhoneInputGroupProps, PhoneInp
 export { CircularProgress, CircularProgressProps, Progress, ProgressProps, circularProgressVariants, progressBarFillVariants, progressBarTrackVariants } from './components/Progress/index.cjs';
 export { QuickAction, QuickActionColor, QuickActionGroup, QuickActionGroupProps, QuickActionIcons, QuickActionProps, quickActionIconVariants, quickActionVariants } from './components/QuickAction/index.cjs';
 export { Radio, RadioGroup, RadioGroupProps, RadioProps, radioVariants } from './components/Radio/index.cjs';
-export { RecordButton, RecordButtonProps, RecordButtonState, TranscriptionResult, TranscriptionState, formatDuration, recordButtonVariants, recordingIndicatorVariants } from './components/RecordButton/index.cjs';
+export { RecordButton, RecordButtonProps, RecordButtonSize, RecordButtonState, RecordButtonVariant, TranscriptionResult, TranscriptionState, formatDuration, recordButtonVariants } from './components/RecordButton/index.cjs';
 export { DateButton, DateButtonProps, DatePicker, DatePickerProps, RadioOption, RadioOptionProps, SchedulePicker, SchedulePickerProps, TimeButton, TimeButtonProps, TimePicker, TimePickerProps, dateButtonVariants, radioOptionVariants, timeButtonVariants } from './components/SchedulePicker/index.cjs';
 export { Select, SelectGroup, SelectOption, SelectProps, selectTriggerVariants } from './components/Select/index.cjs';
 export { Skeleton, SkeletonCard, SkeletonCardProps, SkeletonProps, SkeletonTable, SkeletonTableProps, SkeletonText, SkeletonTextProps, skeletonVariants } from './components/Skeleton/index.cjs';
@@ -44,7 +44,7 @@ export { Tooltip, TooltipPlacement, TooltipProps } from './components/Tooltip/in
 export { VisuallyHidden, VisuallyHiddenProps } from './components/VisuallyHidden/index.cjs';
 export { R as ResolvedTheme, T as Theme, u as useTheme } from './useTheme-B9SWu6ui.cjs';
 export { KeyboardShortcutOptions, useClickOutside, useCommandK, useEscapeKey, useFocusTrap, useIsDesktop, useIsLargeDesktop, useIsMobile, useIsMobileOrTablet, useIsSmallTablet, useIsTablet, useKeyboardShortcut, useMediaQuery, usePrefersReducedMotion } from './hooks/index.cjs';
-export { calculateAge, cn, formatDateValue, formatPhoneNumber, isDateEmpty, isDateInFuture, isDateInPast, isPhoneNumberEmpty, isValidDate, isValidDrivingAge, isValidPhoneNumber, parseDateValue, unformatPhoneNumber } from './utils/index.cjs';
+export { calculateAge, cn, formatDateValue, formatPhoneNumber, isDateEmpty, isDateInFuture, isDateInPast, isPhoneNumberEmpty, isStorybookDocsMode, isValidDate, isValidDrivingAge, isValidPhoneNumber, parseDateValue, unformatPhoneNumber } from './utils/index.cjs';
 export { default as miewebUIPreset, miewebUISafelist } from './tailwind-preset.cjs';
 export { brands, defaultBrand, enterpriseHealthBrand, miewebBrand, wagglelineBrand, webchartBrand } from './brands/index.cjs';
 export { default as bluehiveBrand } from './brands/bluehive.cjs';
@@ -1802,6 +1802,10 @@ interface CheckrIntegrationProps {
     onInviteCandidate?: (candidate: Omit<BackgroundCheckCandidate, 'id'>, packageId: string) => void;
     /** Callback to view a report */
     onViewReport?: (report: BackgroundCheckReport) => void;
+    /** Callback to view selected reports */
+    onViewSelected?: (reports: BackgroundCheckReport[]) => void;
+    /** Callback to export selected reports */
+    onExportSelected?: (reports: BackgroundCheckReport[]) => void;
     /** Callback to refresh reports */
     onRefresh?: () => void;
     /** Loading state */
@@ -1832,9 +1836,12 @@ interface CheckrIntegrationProps {
         package?: string;
         submit?: string;
         cancel?: string;
+        exportSelected?: string;
+        viewDetails?: string;
+        noReportsSelected?: string;
     };
 }
-declare function CheckrIntegration({ connected, account, reports, packages, onConnect, onDisconnect, onInviteCandidate, onViewReport, onRefresh, loading, error, className, labels, }: CheckrIntegrationProps): react_jsx_runtime.JSX.Element;
+declare function CheckrIntegration({ connected, account, reports, packages, onConnect, onDisconnect, onInviteCandidate, onViewReport, onViewSelected, onExportSelected, onRefresh, loading, error, className, labels, }: CheckrIntegrationProps): react_jsx_runtime.JSX.Element;
 
 interface CommandPaletteItem {
     /** Unique identifier */
@@ -2255,10 +2262,6 @@ interface CSVColumnMapperProps {
         includeAll?: string;
         ignoreUncompleted?: string;
         import?: string;
-        ignore?: string;
-        include?: string;
-        incomingSample?: string;
-        fieldType?: string;
         ensureAccurateData?: string;
         ensureAccurateDataDescription?: string;
         instructions?: string;
@@ -5376,6 +5379,8 @@ interface PageHeaderProps {
     subtitle?: string;
     /** Optional icon to display before the title */
     icon?: React$1.ReactNode;
+    /** Vertical alignment of the icon */
+    iconAlign?: 'top' | 'center';
     /** Action buttons or controls to display on the right */
     actions?: React$1.ReactNode;
     /** Additional content below the title (e.g., breadcrumbs, tabs) */
@@ -5391,7 +5396,7 @@ interface PageHeaderProps {
  * PageHeader displays a section header with title, subtitle, and action buttons.
  * Used as a consistent header pattern across pages and sections.
  */
-declare function PageHeader({ title, subtitle, icon, actions, children, className, bordered, size, }: PageHeaderProps): react_jsx_runtime.JSX.Element;
+declare function PageHeader({ title, subtitle, icon, iconAlign, actions, children, className, bordered, size, }: PageHeaderProps): react_jsx_runtime.JSX.Element;
 
 interface Payment {
     id: string;

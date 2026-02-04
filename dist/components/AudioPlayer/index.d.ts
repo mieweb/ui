@@ -26,6 +26,10 @@ interface AudioPlayerProps extends VariantProps<typeof audioPlayerVariants> {
     progressColor?: string;
     /** Height of the waveform (for waveform variant) */
     waveformHeight?: number;
+    /** Whether to show hover cursor on waveform for click-to-seek preview (for waveform variant) */
+    showWaveformHoverCursor?: boolean;
+    /** Color of the hover cursor line (for waveform variant) */
+    waveformCursorColor?: string;
     /** Whether the player is disabled */
     disabled?: boolean;
     /** Additional class name */
@@ -68,7 +72,7 @@ declare function ProgressBar({ currentTime, duration, onSeek, disabled, }: Progr
  * <AudioPlayer src="/audio.mp3" variant="waveform" showTime />
  * ```
  */
-declare function AudioPlayer({ src, title, variant, size, onStateChange, onEnded, onError, onTimeUpdate, showTime, showDuration, waveColor, progressColor, waveformHeight, disabled, className, 'aria-label': ariaLabel, playbackRates, showPlaybackRate, 
+declare function AudioPlayer({ src, title, variant, size, onStateChange, onEnded, onError, onTimeUpdate, showTime, showDuration, waveColor, progressColor, waveformHeight, showWaveformHoverCursor, waveformCursorColor, disabled, className, 'aria-label': ariaLabel, playbackRates, showPlaybackRate, 
 /** Whether to preload audio (set to false for lists with many items) */
 preload, 
 /** Fallback duration in seconds to display before audio is loaded */

@@ -1,10 +1,12 @@
-import { useRef, useEffect } from 'react';
+'use strict';
 
-// src/hooks/useFocusTrap.ts
+var chunkSCV7C55E_cjs = require('./chunk-SCV7C55E.cjs');
+var react = require('react');
+
 function useFocusTrap(enabled = true) {
-  const containerRef = useRef(null);
-  useEffect(() => {
-    if (!enabled || !containerRef.current) return;
+  const containerRef = react.useRef(null);
+  react.useEffect(() => {
+    if (!enabled || !containerRef.current || chunkSCV7C55E_cjs.isStorybookDocsMode()) return;
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll(
       'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -33,6 +35,6 @@ function useFocusTrap(enabled = true) {
   return containerRef;
 }
 
-export { useFocusTrap };
-//# sourceMappingURL=chunk-CLNOI5J7.js.map
-//# sourceMappingURL=chunk-CLNOI5J7.js.map
+exports.useFocusTrap = useFocusTrap;
+//# sourceMappingURL=chunk-NNEFAUHV.cjs.map
+//# sourceMappingURL=chunk-NNEFAUHV.cjs.map
