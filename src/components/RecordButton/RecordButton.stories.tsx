@@ -445,15 +445,35 @@ export default meta;
 type Story = StoryObj<typeof RecordButton>;
 
 // ============================================================================
-// Basic Examples
+// Default (Controllable Preview)
 // ============================================================================
 
 /**
- * Default uncontrolled recording button. Click to start recording,
- * click again to stop. Handles the full recording lifecycle automatically.
+ * Use the controls panel to preview different states, variants, and sizes.
+ * This is a controlled preview - use the "Live Recording" story to test actual recording.
  */
 export const Default: Story = {
-  render: function DefaultStory() {
+  args: {
+    state: 'idle',
+    variant: 'default',
+    size: 'md',
+    showWaveform: true,
+    showPulse: true,
+    showDuration: false,
+    disabled: false,
+  },
+};
+
+// ============================================================================
+// Live Recording Demo
+// ============================================================================
+
+/**
+ * A fully functional recording button. Click to start recording,
+ * click again to stop. The recorded audio will play back below.
+ */
+export const LiveRecording: Story = {
+  render: function LiveRecordingStory() {
     const [lastRecording, setLastRecording] = React.useState<{
       blob: Blob;
       duration: number;
@@ -490,11 +510,11 @@ export const Default: Story = {
   },
 };
 
-/**
- * Shows the recording state with waveform animation.
- * This is a controlled/static preview of the recording state.
- */
-export const RecordingState: Story = {
+// ============================================================================
+// State Previews
+// ============================================================================
+
+export const Recording: Story = {
   args: {
     state: 'recording',
     showWaveform: true,
