@@ -171,3 +171,21 @@ kbd {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   Waveform Animation (for RecordButton)
+   ============================================ */
+
+@keyframes waveform {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-waveform {
+  animation: waveform 0.5s ease-in-out infinite;
+}
