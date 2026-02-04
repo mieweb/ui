@@ -2,18 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { ProviderSelector, ProviderOption } from './ProviderSelector';
 
-const meta: Meta<typeof ProviderSelector> = {
-  title: 'Components/ProviderSelector',
-  component: ProviderSelector,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'centered',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof ProviderSelector>;
-
 const sampleProviders: ProviderOption[] = [
   {
     id: '1',
@@ -53,7 +41,96 @@ const sampleProviders: ProviderOption[] = [
   },
 ];
 
-// Interactive wrapper
+const meta: Meta<typeof ProviderSelector> = {
+  title: 'Components/ProviderSelector',
+  component: ProviderSelector,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'centered',
+  },
+  args: {
+    label: 'Provider',
+    placeholder: 'Select provider...',
+    searchPlaceholder: 'Search providers...',
+    disabled: false,
+    searchable: false,
+    isLoading: false,
+    size: 'md',
+    className: '',
+  },
+  argTypes: {
+    label: {
+      control: 'text',
+      description: 'Label text displayed above the selector',
+    },
+    placeholder: {
+      control: 'text',
+      description: 'Placeholder when no provider selected',
+    },
+    searchPlaceholder: {
+      control: 'text',
+      description: 'Placeholder text for the search input',
+    },
+    disabled: {
+      control: 'boolean',
+      description: 'Whether the selector is disabled',
+    },
+    searchable: {
+      control: 'boolean',
+      description: 'Show search input in dropdown',
+    },
+    isLoading: {
+      control: 'boolean',
+      description: 'Show loading state',
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg'],
+      description: 'Size variant',
+    },
+    className: {
+      control: 'text',
+      description: 'Additional CSS class name',
+    },
+    // Disable complex props
+    selectedProvider: { control: false },
+    providers: { control: false },
+    onSelect: { control: false },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof ProviderSelector>;
+
+// Default story with args-driven controls
+export const Default: Story = {
+  render: function Render(args) {
+    const [selected, setSelected] = useState<ProviderOption | null>(
+      sampleProviders[0]
+    );
+
+    return (
+      <div className="w-80">
+        <ProviderSelector
+          {...args}
+          selectedProvider={selected}
+          providers={sampleProviders}
+          onSelect={setSelected}
+        />
+        {selected && (
+          <div className="bg-muted mt-4 rounded-lg p-3">
+            <p className="text-muted-foreground text-sm">
+              Selected:{' '}
+              <strong className="text-foreground">{selected.name}</strong>
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  },
+};
+
+// Interactive wrapper for other stories
 function InteractiveDemo(
   props: Partial<React.ComponentProps<typeof ProviderSelector>>
 ) {
@@ -70,19 +147,16 @@ function InteractiveDemo(
         {...props}
       />
       {selected && (
-        <div className="mt-4 rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Selected: <strong>{selected.name}</strong>
+        <div className="bg-muted mt-4 rounded-lg p-3">
+          <p className="text-muted-foreground text-sm">
+            Selected:{' '}
+            <strong className="text-foreground">{selected.name}</strong>
           </p>
         </div>
       )}
     </div>
   );
 }
-
-export const Default: Story = {
-  render: () => <InteractiveDemo />,
-};
 
 export const WithLabel: Story = {
   render: () => <InteractiveDemo label="Provider" />,

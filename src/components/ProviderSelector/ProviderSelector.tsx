@@ -133,7 +133,7 @@ export function ProviderSelector({
   return (
     <div className={cn('relative', className)} ref={containerRef}>
       {label && (
-        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="text-foreground mb-1 block text-sm font-medium">
           {label}
         </label>
       )}
@@ -144,10 +144,11 @@ export function ProviderSelector({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg border bg-white px-3 text-left transition-colors dark:bg-gray-800',
-          'border-gray-300 dark:border-gray-600',
-          'hover:border-gray-400 dark:hover:border-gray-500',
-          'focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none',
+          'flex w-full items-center gap-3 rounded-lg border px-3 text-left transition-colors',
+          'bg-background text-foreground',
+          'border-input',
+          'hover:border-muted-foreground/50',
+          'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
           'disabled:cursor-not-allowed disabled:opacity-50',
           sizeStyles[size]
         )}
@@ -155,7 +156,7 @@ export function ProviderSelector({
         {isLoading ? (
           <div className="flex flex-1 items-center gap-2">
             <svg
-              className="h-5 w-5 animate-spin text-gray-400"
+              className="text-muted-foreground h-5 w-5 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -173,7 +174,7 @@ export function ProviderSelector({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            <span className="text-gray-500 dark:text-gray-400">Loading...</span>
+            <span className="text-muted-foreground">Loading...</span>
           </div>
         ) : selectedProvider ? (
           <>
@@ -185,31 +186,29 @@ export function ProviderSelector({
                 className="h-6 w-6 rounded object-cover"
               />
             ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-100 text-xs font-medium text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+              <div className="bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 flex h-6 w-6 items-center justify-center rounded text-xs font-medium">
                 {getInitials(selectedProvider.name)}
               </div>
             )}
-            <div className="min-w-0 flex-1">
-              <div className="truncate font-medium text-gray-900 dark:text-white">
+            <div className="min-w-0 flex-1 leading-tight">
+              <div className="text-foreground truncate text-sm">
                 {selectedProvider.name}
               </div>
               {selectedProvider.location && (
-                <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                <div className="text-muted-foreground truncate text-[11px]">
                   {selectedProvider.location}
                 </div>
               )}
             </div>
           </>
         ) : (
-          <span className="flex-1 text-gray-500 dark:text-gray-400">
-            {placeholder}
-          </span>
+          <span className="text-muted-foreground flex-1">{placeholder}</span>
         )}
 
         {/* Dropdown arrow */}
         <svg
           className={cn(
-            'h-4 w-4 flex-shrink-0 text-gray-400 transition-transform',
+            'text-muted-foreground h-4 w-4 flex-shrink-0 transition-transform',
             isOpen && 'rotate-180'
           )}
           fill="none"
@@ -227,13 +226,13 @@ export function ProviderSelector({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+        <div className="border-border bg-card absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
           {/* Search */}
           {searchable && (
-            <div className="border-b border-gray-200 p-2 dark:border-gray-700">
+            <div className="border-border border-b p-2">
               <div className="relative">
                 <svg
-                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -250,7 +249,7 @@ export function ProviderSelector({
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 bg-white py-2 pr-4 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                  className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-1 focus:outline-none"
                   // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                 />
@@ -261,7 +260,7 @@ export function ProviderSelector({
           {/* Options list */}
           <div className="max-h-64 overflow-y-auto">
             {filteredProviders.length === 0 ? (
-              <div className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+              <div className="text-muted-foreground px-4 py-6 text-center">
                 No providers found
               </div>
             ) : (
@@ -272,9 +271,9 @@ export function ProviderSelector({
                   onClick={() => handleSelect(provider)}
                   className={cn(
                     'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
-                    'hover:bg-gray-50 dark:hover:bg-gray-700',
+                    'hover:bg-muted',
                     selectedProvider?.id === provider.id &&
-                      'bg-blue-50 dark:bg-blue-900/30'
+                      'bg-primary-50 dark:bg-primary-900/30'
                   )}
                 >
                   {/* Provider avatar/logo */}
@@ -285,29 +284,29 @@ export function ProviderSelector({
                       className="h-8 w-8 rounded object-cover"
                     />
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-100 text-sm font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                    <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded text-sm font-medium">
                       {getInitials(provider.name)}
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-foreground font-medium">
                         {provider.name}
                       </span>
                       {provider.code && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-muted-foreground text-xs">
                           ({provider.code})
                         </span>
                       )}
                       {provider.isActive === false && (
-                        <span className="rounded bg-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                        <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium">
                           Inactive
                         </span>
                       )}
                     </div>
                     {(provider.location || provider.type) && (
-                      <div className="truncate text-sm text-gray-500 dark:text-gray-400">
+                      <div className="text-muted-foreground truncate text-sm">
                         {[provider.type, provider.location]
                           .filter(Boolean)
                           .join(' • ')}
@@ -318,7 +317,7 @@ export function ProviderSelector({
                   {/* Selected checkmark */}
                   {selectedProvider?.id === provider.id && (
                     <svg
-                      className="h-5 w-5 flex-shrink-0 text-blue-500"
+                      className="text-primary h-5 w-5 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
