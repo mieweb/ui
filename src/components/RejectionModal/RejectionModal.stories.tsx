@@ -8,14 +8,65 @@ const meta: Meta<typeof RejectionModal> = {
   component: RejectionModal,
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
+  },
+  decorators: [
+    (Story) => (
+      // Container with transform creates a new containing block for position:fixed
+      // This keeps the modal within this container in docs view
+      <div
+        className="flex min-h-[700px] items-center justify-center p-8"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  argTypes: {
+    open: {
+      control: 'boolean',
+      description: 'Whether the modal is open',
+    },
+    title: {
+      control: 'text',
+      description: 'Title for the modal',
+    },
+    description: {
+      control: 'text',
+      description: 'Description text',
+    },
+    submitLabel: {
+      control: 'text',
+      description: 'Submit button text',
+    },
+    cancelLabel: {
+      control: 'text',
+      description: 'Cancel button text',
+    },
+    variant: {
+      control: 'select',
+      options: ['default', 'danger'],
+      description: 'Variant for styling',
+    },
+    showDetails: {
+      control: 'boolean',
+      description: 'Whether to show a free-form details field',
+    },
+    requireDetails: {
+      control: 'boolean',
+      description: 'Whether details are required',
+    },
+    isSubmitting: {
+      control: 'boolean',
+      description: 'Whether submission is in progress',
+    },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof RejectionModal>;
 
-// Interactive wrapper
+// Interactive wrapper that starts open (like InviteUserModal)
 function InteractiveDemo(
   props: Partial<React.ComponentProps<typeof RejectionModal>>
 ) {
@@ -31,10 +82,12 @@ function InteractiveDemo(
   };
 
   return (
-    <div>
-      <Button variant="danger" onClick={() => setOpen(true)}>
-        Reject Item
-      </Button>
+    <>
+      {!open && (
+        <Button variant="danger" onClick={() => setOpen(true)}>
+          {props.submitLabel || 'Reject Item'}
+        </Button>
+      )}
       <RejectionModal
         open={open}
         onOpenChange={setOpen}
@@ -42,12 +95,12 @@ function InteractiveDemo(
         isSubmitting={isSubmitting}
         {...props}
       />
-    </div>
+    </>
   );
 }
 
 export const Default: Story = {
-  render: () => <InteractiveDemo />,
+  render: (args) => <InteractiveDemo {...args} />,
 };
 
 export const RejectOrder: Story = {
@@ -187,9 +240,11 @@ function SubmittingWrapper() {
 
   return (
     <>
-      <Button variant="danger" onClick={() => setOpen(true)}>
-        Show Submitting State
-      </Button>
+      {!open && (
+        <Button variant="danger" onClick={() => setOpen(true)}>
+          Show Submitting State
+        </Button>
+      )}
       <RejectionModal open={open} onOpenChange={setOpen} isSubmitting={true} />
     </>
   );
