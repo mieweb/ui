@@ -186,7 +186,7 @@ export function ProviderSelector({
                 className="h-6 w-6 rounded object-cover"
               />
             ) : (
-              <div className="bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 flex h-6 w-6 items-center justify-center rounded text-xs font-medium">
+              <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium">
                 {getInitials(selectedProvider.name)}
               </div>
             )}
@@ -272,8 +272,7 @@ export function ProviderSelector({
                   className={cn(
                     'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
                     'hover:bg-muted',
-                    selectedProvider?.id === provider.id &&
-                      'bg-primary-50 dark:bg-primary-900/30'
+                    selectedProvider?.id === provider.id && 'bg-primary/10'
                   )}
                 >
                   {/* Provider avatar/logo */}
