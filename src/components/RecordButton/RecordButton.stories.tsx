@@ -430,7 +430,7 @@ Supports multiple visual variants, sizes, and interaction patterns.
     // Hide less commonly used props
     onRecordingComplete: { table: { disable: true } },
     onRecordingStart: { table: { disable: true } },
-    onError: { table: { disable: true } },
+    onRecordingError: { table: { disable: true } },
     mimeType: { table: { disable: true } },
     className: { table: { disable: true } },
     'aria-label': { table: { disable: true } },

@@ -67,8 +67,8 @@ export interface RecordButtonProps extends Omit<
   onRecordingComplete?: (blob: Blob, duration: number) => void;
   /** Callback when recording starts */
   onRecordingStart?: () => void;
-  /** Callback when an error occurs */
-  onError?: (error: Error) => void;
+  /** Callback when a recording error occurs */
+  onRecordingError?: (error: Error) => void;
   /** Maximum recording duration in seconds (0 for unlimited) */
   maxDuration?: number;
   /** Audio MIME type */
@@ -358,7 +358,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
       showTranscriptionState = false,
       onRecordingComplete,
       onRecordingStart,
-      onError,
+      onRecordingError,
       maxDuration = 0,
       mimeType = 'audio/webm',
       onClick,
@@ -491,7 +491,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
           }
         }, 100);
       } catch (error) {
-        onError?.(error as Error);
+        onRecordingError?.(error as Error);
         if (!isControlled) {
           setInternalState('error');
           // Reset to idle after showing error
@@ -510,7 +510,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
       duration,
       onRecordingComplete,
       onRecordingStart,
-      onError,
+      onRecordingError,
       stopRecording,
     ]);
 
