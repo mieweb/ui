@@ -1,11 +1,68 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { PageHeader } from './PageHeader';
 import { Button } from '../Button/Button';
+import {
+  HomeIcon,
+  SettingsIcon,
+  UserIcon,
+  UsersIcon,
+  CalendarIcon,
+  FileTextIcon,
+  BuildingIcon,
+  BriefcaseIcon,
+  ChartIcon,
+  ShieldIcon,
+  BellIcon,
+  SearchIcon,
+  StethoscopeIcon,
+  HospitalIcon,
+  ClipboardListIcon,
+} from '../Icons';
+import type { LucideIcon } from 'lucide-react';
+
+const iconMap: Record<string, LucideIcon> = {
+  Home: HomeIcon,
+  Settings: SettingsIcon,
+  User: UserIcon,
+  Users: UsersIcon,
+  Calendar: CalendarIcon,
+  FileText: FileTextIcon,
+  Building: BuildingIcon,
+  Briefcase: BriefcaseIcon,
+  Chart: ChartIcon,
+  Shield: ShieldIcon,
+  Bell: BellIcon,
+  Search: SearchIcon,
+  Stethoscope: StethoscopeIcon,
+  Hospital: HospitalIcon,
+  ClipboardList: ClipboardListIcon,
+};
 
 const meta: Meta<typeof PageHeader> = {
   title: 'Components/PageHeader',
   component: PageHeader,
   tags: ['autodocs'],
+  argTypes: {
+    actions: { control: false },
+    icon: {
+      control: 'select',
+      options: ['None', ...Object.keys(iconMap)],
+      mapping: {
+        None: undefined,
+        ...Object.fromEntries(
+          Object.entries(iconMap).map(([name, Icon]) => [
+            name,
+            <Icon key={name} className="h-6 w-6" />,
+          ])
+        ),
+      },
+    },
+    iconAlign: {
+      control: 'radio',
+      options: ['top', 'center'],
+    },
+    children: { control: false },
+  },
   parameters: {
     layout: 'padded',
   },
