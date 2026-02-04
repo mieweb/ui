@@ -15,8 +15,18 @@ const meta: Meta<typeof Modal> = {
   title: 'Components/Modal',
   component: Modal,
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
   },
+  decorators: [
+    (Story) => (
+      <div
+        className="flex min-h-[600px] items-center justify-center p-8"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   tags: ['autodocs'],
   argTypes: {
     size: {

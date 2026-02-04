@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import {
   ResultsEntryForm,
-  ResultsEntryCard,
+  ResultsEntryModal,
   ProviderContact,
 } from './ResultsEntryForm';
 import { Card } from '../Card';
@@ -190,37 +190,35 @@ export const NoProviderContacts: Story = {
   ),
 };
 
-// Card/Modal variant
-function CardVariantStory() {
-  const [isOpen, setIsOpen] = React.useState(true);
+// Modal variant
+function ModalVariantStory() {
+  const [open, setOpen] = React.useState(true);
 
   return (
     <div className="p-4">
-      {!isOpen && (
-        <Button onClick={() => setIsOpen(true)}>Open Results Entry</Button>
+      {!open && (
+        <Button onClick={() => setOpen(true)}>Open Results Entry</Button>
       )}
 
-      {isOpen && (
-        <ResultsEntryCard
-          isOpen={isOpen}
-          serviceName="Vision Screening"
-          employeeFirstName="Thomas"
-          employeeLastName="Anderson"
-          providerContacts={sampleContacts}
-          showFileUpload
-          onSubmit={(data) => {
-            console.log('Submitted:', data);
-            setIsOpen(false);
-          }}
-          onClose={() => setIsOpen(false)}
-        />
-      )}
+      <ResultsEntryModal
+        open={open}
+        onOpenChange={setOpen}
+        serviceName="Vision Screening"
+        employeeFirstName="Thomas"
+        employeeLastName="Anderson"
+        providerContacts={sampleContacts}
+        showFileUpload
+        onSubmit={(data) => {
+          console.log('Submitted:', data);
+          setOpen(false);
+        }}
+      />
     </div>
   );
 }
 
-export const CardVariant: Story = {
-  render: () => <CardVariantStory />,
+export const ModalVariant: Story = {
+  render: () => <ModalVariantStory />,
 };
 
 // Custom labels (i18n)

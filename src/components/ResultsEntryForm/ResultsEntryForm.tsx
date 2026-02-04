@@ -1,8 +1,15 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Input } from '../Input';
 import { Textarea } from '../Textarea';
-import { Radio } from '../Radio';
+import { RadioGroup, Radio } from '../Radio';
 import { Checkbox } from '../Checkbox';
 import { Button } from '../Button';
 import { FileUp, X, AlertCircle } from 'lucide-react';
@@ -223,29 +230,20 @@ export function ResultsEntryForm({
       {/* Test Results Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="sm:w-1/2">
-          <span className="mr-2 font-semibold">{testResults}</span>
-          <div className="mt-2 flex gap-4 sm:mt-0 sm:inline-flex">
-            <Radio
-              name="result"
-              value="passed"
-              label={passed}
-              checked={result === 'passed'}
-              onChange={() => {
-                setResult('passed');
-                setShowError(false);
-              }}
-            />
-            <Radio
-              name="result"
-              value="failed"
-              label={failed}
-              checked={result === 'failed'}
-              onChange={() => {
-                setResult('failed');
-                setShowError(false);
-              }}
-            />
-          </div>
+          <RadioGroup
+            name="result"
+            label={testResults}
+            value={result ?? ''}
+            onValueChange={(value) => {
+              setResult(value as ResultStatus);
+              setShowError(false);
+            }}
+            orientation="horizontal"
+            error={showError ? pleaseSelectResult : undefined}
+          >
+            <Radio value="passed" label={passed} />
+            <Radio value="failed" label={failed} />
+          </RadioGroup>
         </div>
         <div className="sm:w-1/2">
           <Input
@@ -442,77 +440,131 @@ export interface ResultsEntryModalProps extends Omit<
   'onCancel'
 > {
   /** Whether modal is open */
-  isOpen?: boolean;
-  /** Callback to close modal */
-  onClose: () => void;
+  open: boolean;
+  /** Handler for closing the modal */
+  onOpenChange: (open: boolean) => void;
+  /** Whether submission is in progress */
+  isSubmitting?: boolean;
 }
 
 /**
- * ResultsEntryForm wrapped in a modal-like container with header.
+ * ResultsEntryForm wrapped in a proper Modal component.
+ * Follows the same pattern as RejectionModal and InviteUserModal.
  */
-export function ResultsEntryCard({
+export function ResultsEntryModal({
   serviceName,
   employeeFirstName,
   employeeLastName,
-  isOpen = true,
-  onClose,
+  open,
+  onOpenChange,
   onSubmit,
+  isSubmitting = false,
   labels = {},
   ...props
 }: ResultsEntryModalProps) {
   const { submit = 'Submit', close = 'Close' } = labels;
+  const formRef = React.useRef<HTMLFormElement>(null);
+  const [formData, setFormData] = React.useState<ResultsEntryData | null>(null);
 
   const employeeName =
     employeeFirstName || employeeLastName
       ? `${employeeFirstName ?? ''} ${employeeLastName ?? ''}`.trim()
       : undefined;
 
-  if (!isOpen) return null;
+  // Handle form data from ResultsEntryForm
+  const handleFormSubmit = (data: ResultsEntryData) => {
+    setFormData(data);
+  };
 
-  const handleSubmit = (data: ResultsEntryData) => {
-    onSubmit(data);
-    onClose();
+  // Submit when formData is set
+  React.useEffect(() => {
+    if (formData) {
+      onSubmit(formData);
+      setFormData(null);
+    }
+  }, [formData, onSubmit]);
+
+  const handleSubmitClick = () => {
+    // Trigger form validation and submission
+    formRef.current?.requestSubmit();
   };
 
   return (
-    <div className="bg-background w-full max-w-2xl rounded-lg border shadow-lg">
-      {/* Header */}
-      <div className="bg-primary text-primary-foreground rounded-t-lg p-4">
-        <h4 className="text-lg font-semibold">{serviceName}</h4>
-        {employeeName && <p className="text-sm opacity-90">{employeeName}</p>}
-      </div>
+    <Modal open={open} onOpenChange={onOpenChange} size="2xl">
+      <ModalHeader>
+        <ModalTitle>{serviceName}</ModalTitle>
+      </ModalHeader>
 
-      {/* Body */}
-      <div className="p-6">
-        <ResultsEntryForm
-          serviceName={serviceName}
-          employeeFirstName={employeeFirstName}
-          employeeLastName={employeeLastName}
-          onSubmit={handleSubmit}
-          labels={labels}
-          {...props}
-        />
-      </div>
+      <ModalBody>
+        {employeeName && (
+          <div className="bg-muted mb-4 rounded-lg p-3">
+            <p className="text-muted-foreground text-sm">
+              Employee:{' '}
+              <span className="text-foreground font-medium">
+                {employeeName}
+              </span>
+            </p>
+          </div>
+        )}
+        <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
+          <ResultsEntryForm
+            serviceName={serviceName}
+            employeeFirstName={employeeFirstName}
+            employeeLastName={employeeLastName}
+            onSubmit={handleFormSubmit}
+            labels={labels}
+            {...props}
+          />
+        </form>
+      </ModalBody>
 
-      {/* Footer */}
-      <div className="flex justify-end gap-3 border-t p-4">
-        <Button variant="outline" onClick={onClose}>
+      <ModalFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isSubmitting}
+        >
           {close}
         </Button>
         <Button
-          onClick={() => {
-            // Trigger form submission via a hidden button or form ref
-            const form = document.querySelector('[data-results-form]');
-            if (form) {
-              form.dispatchEvent(new Event('submit', { bubbles: true }));
-            }
-          }}
+          type="button"
+          onClick={handleSubmitClick}
+          disabled={isSubmitting}
         >
-          {submit}
+          {isSubmitting ? (
+            <>
+              <svg
+                className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Processing...
+            </>
+          ) : (
+            submit
+          )}
         </Button>
-      </div>
-    </div>
+      </ModalFooter>
+    </Modal>
   );
 }
+
+// Legacy alias for backwards compatibility
+export const ResultsEntryCard = ResultsEntryModal;
 
 export default ResultsEntryForm;
