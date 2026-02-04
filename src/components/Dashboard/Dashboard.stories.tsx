@@ -1453,7 +1453,7 @@ function ProfilePage({ user }: ProfilePageProps) {
                 <div className="flex items-center gap-2">
                   <RecordButton
                     size="sm"
-                    variant="filled"
+                    variant="default"
                     transcriptionState={bioTranscriptionState}
                     showTranscriptionState
                     onRecordingComplete={handleBioRecording}
@@ -1641,7 +1641,7 @@ function VoiceNotesPage() {
               <div className="absolute right-3 bottom-3">
                 <RecordButton
                   size="md"
-                  variant="filled"
+                  variant="default"
                   transcriptionState={quickNoteState}
                   showDuration
                   onRecordingComplete={handleQuickNoteRecording}

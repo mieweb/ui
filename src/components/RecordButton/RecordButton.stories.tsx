@@ -219,7 +219,12 @@ function VariantRow({
 
 function InteractiveDemo() {
   const [state, setState] = React.useState<RecordButtonState>('idle');
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const timersRef = React.useRef<NodeJS.Timeout[]>([]);
+
+  const clearTimers = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  };
 
   const handleClick = () => {
     if (state === 'idle') {
@@ -227,25 +232,26 @@ function InteractiveDemo() {
       setState('recording');
     } else if (state === 'recording') {
       // Stop recording, start processing
+      clearTimers();
       setState('processing');
 
       // Simulate processing time
-      timerRef.current = setTimeout(() => {
+      const processingTimer = setTimeout(() => {
         setState('success');
 
         // Reset to idle after showing success
-        timerRef.current = setTimeout(() => {
+        const successTimer = setTimeout(() => {
           setState('idle');
         }, 1500);
+        timersRef.current.push(successTimer);
       }, 2000);
+      timersRef.current.push(processingTimer);
     }
   };
 
   React.useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
+      clearTimers();
     };
   }, []);
 
@@ -280,30 +286,37 @@ function InteractiveDemo() {
 
 function PressAndHoldDemo() {
   const [state, setState] = React.useState<RecordButtonState>('idle');
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const timersRef = React.useRef<NodeJS.Timeout[]>([]);
+
+  const clearTimers = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  };
 
   const handleMouseDown = () => {
+    clearTimers();
     setState('recording');
   };
 
   const handleMouseUp = () => {
     if (state === 'recording') {
+      clearTimers();
       setState('processing');
 
-      timerRef.current = setTimeout(() => {
+      const processingTimer = setTimeout(() => {
         setState('success');
-        timerRef.current = setTimeout(() => {
+        const successTimer = setTimeout(() => {
           setState('idle');
         }, 1000);
+        timersRef.current.push(successTimer);
       }, 1500);
+      timersRef.current.push(processingTimer);
     }
   };
 
   React.useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
+      clearTimers();
     };
   }, []);
 

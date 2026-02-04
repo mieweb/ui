@@ -37,7 +37,7 @@ export interface TranscriptionResult {
 
 export interface RecordButtonProps extends Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
-  'children' | 'disabled'
+  'children'
 > {
   /** Current state of the button */
   state?: RecordButtonState;
@@ -49,8 +49,6 @@ export interface RecordButtonProps extends Omit<
   showWaveform?: boolean;
   /** Show pulse rings when recording */
   showPulse?: boolean;
-  /** Whether the button is disabled */
-  disabled?: boolean;
   /** Show recording duration while recording */
   showDuration?: boolean;
   /** Custom idle icon */
@@ -273,7 +271,7 @@ function getStateStyles(
       processing: 'bg-primary/10 text-primary cursor-wait',
       disabled: 'bg-muted text-muted-foreground cursor-not-allowed opacity-50',
       error: 'bg-destructive/10 text-destructive',
-      success: 'bg-emerald-500/10 text-emerald-500',
+      success: 'bg-success/10 text-success',
     },
     outline: {
       idle: 'border-primary/50 text-primary bg-transparent hover:bg-primary/10 hover:border-primary',
@@ -283,7 +281,7 @@ function getStateStyles(
       disabled:
         'border-muted text-muted-foreground bg-transparent cursor-not-allowed opacity-50',
       error: 'border-destructive/50 text-destructive bg-transparent',
-      success: 'border-emerald-500/50 text-emerald-500 bg-transparent',
+      success: 'border-success/50 text-success bg-transparent',
     },
     ghost: {
       idle: 'text-primary hover:bg-primary/10',
@@ -291,7 +289,7 @@ function getStateStyles(
       processing: 'text-primary bg-primary/5 cursor-wait',
       disabled: 'text-muted-foreground cursor-not-allowed opacity-50',
       error: 'text-destructive',
-      success: 'text-emerald-500',
+      success: 'text-success',
     },
     minimal: {
       idle: 'text-primary hover:text-primary/80',
@@ -299,7 +297,7 @@ function getStateStyles(
       processing: 'text-primary cursor-wait',
       disabled: 'text-muted-foreground/40 cursor-not-allowed',
       error: 'text-destructive',
-      success: 'text-emerald-500',
+      success: 'text-success',
     },
   };
 
@@ -324,15 +322,34 @@ function formatDuration(seconds: number): string {
  * A voice recording button with 6 states and 4 visual variants.
  * Supports pulse animations, waveform visualization, and transcription integration.
  *
+ * ## Controlled vs Uncontrolled Mode
+ *
+ * **Uncontrolled mode** (default): The component manages its own recording state.
+ * Use `onRecordingComplete`, `onRecordingStart`, and `onRecordingError` callbacks.
+ *
+ * **Controlled mode**: When the `state` prop is provided, the component becomes
+ * controlled and you must manage state changes externally. Note: In controlled mode,
+ * the internal MediaRecorder functionality is disabled - you must implement your own
+ * recording logic.
+ *
+ * ## State Precedence
+ *
+ * When multiple state-controlling props are provided, they follow this precedence:
+ * 1. `disabled` prop (highest priority)
+ * 2. `transcriptionState` prop
+ * 3. `state` prop
+ * 4. Internal state (uncontrolled)
+ *
  * @example
  * ```tsx
- * // Controlled state
- * <RecordButton state="idle" onClick={handleClick} />
- *
- * // With recording callbacks (uncontrolled)
+ * // Uncontrolled with recording callbacks
  * <RecordButton
  *   onRecordingComplete={(blob, duration) => console.log('Recorded:', blob)}
+ *   onRecordingError={(error) => console.error('Recording failed:', error)}
  * />
+ *
+ * // Controlled state (requires external recording implementation)
+ * <RecordButton state="idle" onClick={handleClick} />
  *
  * // Different variants
  * <RecordButton variant="outline" size="lg" />
@@ -376,12 +393,30 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
     const chunksRef = React.useRef<Blob[]>([]);
     const timerRef = React.useRef<number | undefined>(undefined);
     const startTimeRef = React.useRef<number>(0);
+    const timeoutsRef = React.useRef<NodeJS.Timeout[]>([]);
+
+    // Helper to track and manage timeouts
+    const addTimeout = (callback: () => void, delay: number) => {
+      const id = setTimeout(() => {
+        callback();
+        // Remove from tracking after execution
+        timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id);
+      }, delay);
+      timeoutsRef.current.push(id);
+      return id;
+    };
+
+    const clearAllTimeouts = () => {
+      timeoutsRef.current.forEach(clearTimeout);
+      timeoutsRef.current = [];
+    };
 
     // Use controlled state if provided, otherwise internal state
     const isControlled = controlledState !== undefined;
     const currentState = isControlled ? controlledState : internalState;
 
     // Map transcription state to button state if provided
+    // Precedence: disabled prop → transcriptionState → state prop → internal state
     const effectiveState: RecordButtonState = disabled
       ? 'disabled'
       : transcriptionState === 'error'
@@ -393,9 +428,50 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
             ? 'success'
             : currentState;
 
+    // Dev mode warnings for conflicting states
+    React.useEffect(() => {
+      // Only warn in development
+      if (typeof window === 'undefined') return;
+
+      // Warn when disabled is true but other state props suggest a different visual state
+      if (
+        disabled &&
+        ((controlledState && controlledState !== 'disabled') ||
+          transcriptionState)
+      ) {
+        console.warn(
+          '[RecordButton]: `disabled` prop takes precedence over both `state` and `transcriptionState`. ' +
+            'When `disabled` is true, the button will always appear disabled.'
+        );
+      }
+
+      // Warn when both controlled state and transcriptionState are provided and conflict
+      if (controlledState !== undefined && transcriptionState !== undefined) {
+        const mappedTranscriptionState: RecordButtonState | undefined =
+          transcriptionState === 'error'
+            ? 'error'
+            : transcriptionState === 'transcribing' ||
+                transcriptionState === 'streaming'
+              ? 'processing'
+              : transcriptionState === 'complete'
+                ? 'success'
+                : undefined;
+
+        if (
+          mappedTranscriptionState !== undefined &&
+          mappedTranscriptionState !== controlledState
+        ) {
+          console.warn(
+            '[RecordButton]: `transcriptionState` takes precedence over `state`. ' +
+              `Received state="${controlledState}" and transcriptionState="${transcriptionState}". ` +
+              'This may lead to unexpected visual states.'
+          );
+        }
+      }
+    }, [disabled, controlledState, transcriptionState]);
+
     const iconSize = iconSizes[size];
     const isRecording = effectiveState === 'recording';
-    const isProcessing = effectiveState === 'processing';
     const isDisabled =
       effectiveState === 'disabled' || effectiveState === 'processing';
 
@@ -405,6 +481,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
         if (timerRef.current) {
           clearInterval(timerRef.current);
         }
+        clearAllTimeouts();
         if (streamRef.current) {
           streamRef.current.getTracks().forEach((track) => track.stop());
         }
@@ -429,7 +506,13 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
     }, []);
 
     const startRecording = React.useCallback(async () => {
-      if (disabled || isRecording || isProcessing) return;
+      // Guard: don't start if disabled, already recording, or processing
+      if (
+        disabled ||
+        effectiveState === 'recording' ||
+        effectiveState === 'processing'
+      )
+        return;
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -461,12 +544,12 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
           const finalDuration = duration;
 
           // Small delay to show processing state
-          setTimeout(() => {
+          addTimeout(() => {
             onRecordingComplete?.(blob, finalDuration);
             if (!isControlled) {
               setInternalState('success');
               // Reset to idle after showing success
-              setTimeout(() => {
+              addTimeout(() => {
                 setInternalState('idle');
               }, 1500);
             }
@@ -495,15 +578,14 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
         if (!isControlled) {
           setInternalState('error');
           // Reset to idle after showing error
-          setTimeout(() => {
+          addTimeout(() => {
             setInternalState('idle');
           }, 2000);
         }
       }
     }, [
       disabled,
-      isRecording,
-      isProcessing,
+      effectiveState,
       isControlled,
       mimeType,
       maxDuration,
@@ -521,21 +603,14 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
 
         // Handle internal recording logic only if not fully controlled
         if (!isControlled) {
-          if (isRecording) {
+          if (effectiveState === 'recording') {
             stopRecording();
           } else if (effectiveState === 'idle') {
             startRecording();
           }
         }
       },
-      [
-        onClick,
-        isControlled,
-        isRecording,
-        effectiveState,
-        startRecording,
-        stopRecording,
-      ]
+      [onClick, isControlled, effectiveState, startRecording, stopRecording]
     );
 
     // Determine which icon to show
@@ -588,14 +663,15 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
           type="button"
           disabled={isDisabled}
           onClick={handleClick}
+          {...props}
           className={cn(
             recordButtonVariants({ variant, size }),
             getStateStyles(effectiveState, variant),
             className
           )}
           aria-label={getAriaLabel()}
-          aria-pressed={isRecording}
-          {...props}
+          aria-pressed={effectiveState === 'recording' ? true : undefined}
+          aria-busy={effectiveState === 'processing' ? true : undefined}
         >
           {/* Pulse animation for recording state */}
           {effectiveState === 'recording' && showPulse && (
@@ -608,7 +684,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
 
         {/* Duration display */}
         {showDuration && isRecording && (
-          <span className="font-mono text-xs text-red-500 tabular-nums">
+          <span className="text-destructive font-mono text-xs tabular-nums">
             {formatDuration(duration)}
           </span>
         )}
