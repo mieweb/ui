@@ -38,6 +38,10 @@ export interface AudioPlayerProps extends VariantProps<
   progressColor?: string;
   /** Height of the waveform (for waveform variant) */
   waveformHeight?: number;
+  /** Whether to show hover cursor on waveform for click-to-seek preview (for waveform variant) */
+  showWaveformHoverCursor?: boolean;
+  /** Color of the hover cursor line (for waveform variant) */
+  waveformCursorColor?: string;
   /** Whether the player is disabled */
   disabled?: boolean;
   /** Additional class name */
@@ -272,6 +276,9 @@ interface WaveformProps {
   waveColor?: string;
   progressColor?: string;
   height?: number;
+  showHoverCursor?: boolean;
+  onHoverTimeChange?: (time: number | null) => void;
+  cursorColor?: string;
 }
 
 function Waveform({
@@ -285,11 +292,16 @@ function Waveform({
   waveColor,
   progressColor,
   height = 64,
+  showHoverCursor = false,
+  onHoverTimeChange,
+  cursorColor = 'var(--color-red-500, rgb(239, 68, 68))',
 }: WaveformProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wavesurferRef = React.useRef<any>(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isHovering, setIsHovering] = React.useState(false);
+  const [hoverPosition, setHoverPosition] = React.useState(0);
 
   // Initialize WaveSurfer
   React.useEffect(() => {
@@ -313,7 +325,7 @@ function Waveform({
           barRadius: 2,
           height,
           normalize: true,
-          interact: true,
+          interact: !showHoverCursor,
         });
 
         wavesurferRef.current.on('ready', () => {
@@ -329,9 +341,11 @@ function Waveform({
           onTimeUpdate(wavesurferRef.current.getCurrentTime());
         });
 
-        wavesurferRef.current.on('interaction', () => {
-          onSeek(wavesurferRef.current.getCurrentTime());
-        });
+        if (!showHoverCursor) {
+          wavesurferRef.current.on('interaction', () => {
+            onSeek(wavesurferRef.current.getCurrentTime());
+          });
+        }
 
         wavesurferRef.current.on('finish', () => {
           onFinish();
@@ -352,7 +366,7 @@ function Waveform({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]);
+  }, [src, showHoverCursor]);
 
   // Handle play/pause
   React.useEffect(() => {
@@ -371,15 +385,103 @@ function Waveform({
     wavesurferRef.current.setPlaybackRate(playbackRate);
   }, [playbackRate, isLoaded]);
 
+  // Hover cursor handlers
+  const handleMouseMove = showHoverCursor
+    ? (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!containerRef.current || !wavesurferRef.current || !isLoaded)
+          return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const percentage = x / rect.width;
+        const duration = wavesurferRef.current.getDuration();
+        setHoverPosition(percentage * 100);
+        onHoverTimeChange?.(percentage * duration);
+      }
+    : undefined;
+
+  const handleMouseEnter = showHoverCursor
+    ? () => setIsHovering(true)
+    : undefined;
+
+  const handleMouseLeave = showHoverCursor
+    ? () => {
+        setIsHovering(false);
+        setHoverPosition(0);
+        onHoverTimeChange?.(null);
+      }
+    : undefined;
+
+  const handleClick = showHoverCursor
+    ? (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!containerRef.current || !wavesurferRef.current || !isLoaded)
+          return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const percentage = x / rect.width;
+        wavesurferRef.current.seekTo(percentage);
+        onSeek(wavesurferRef.current.getDuration() * percentage);
+        onHoverTimeChange?.(null);
+      }
+    : undefined;
+
+  const handleKeyDown = showHoverCursor
+    ? (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!wavesurferRef.current || !isLoaded) return;
+        const duration = wavesurferRef.current.getDuration();
+        const currentTime = wavesurferRef.current.getCurrentTime();
+        const step = duration * 0.05; // 5% steps
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const newTime = Math.min(currentTime + step, duration);
+          wavesurferRef.current.seekTo(newTime / duration);
+          onSeek(newTime);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const newTime = Math.max(currentTime - step, 0);
+          wavesurferRef.current.seekTo(newTime / duration);
+          onSeek(newTime);
+        }
+      }
+    : undefined;
+
   return (
     <div
       ref={containerRef}
+      role={showHoverCursor ? 'slider' : undefined}
+      aria-label={showHoverCursor ? 'Audio progress' : undefined}
+      aria-valuemin={showHoverCursor ? 0 : undefined}
+      aria-valuemax={
+        showHoverCursor && wavesurferRef.current
+          ? wavesurferRef.current.getDuration()
+          : undefined
+      }
+      aria-valuenow={
+        showHoverCursor && wavesurferRef.current
+          ? wavesurferRef.current.getCurrentTime()
+          : undefined
+      }
+      tabIndex={showHoverCursor ? 0 : undefined}
       className={cn(
-        'w-full rounded-lg bg-neutral-100 dark:bg-neutral-800',
+        'relative w-full rounded-lg bg-neutral-100 dark:bg-neutral-800',
+        showHoverCursor && 'cursor-pointer',
         !isLoaded && 'animate-pulse'
       )}
       style={{ height }}
-    />
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      {/* Hover cursor line */}
+      {showHoverCursor && isHovering && isLoaded && (
+        <div
+          className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5"
+          style={{ left: `${hoverPosition}%`, backgroundColor: cursorColor }}
+        />
+      )}
+    </div>
   );
 }
 
@@ -416,6 +518,8 @@ function AudioPlayer({
   waveColor,
   progressColor,
   waveformHeight = 64,
+  showWaveformHoverCursor = true,
+  waveformCursorColor,
   disabled = false,
   className,
   'aria-label': ariaLabel,
@@ -431,6 +535,7 @@ function AudioPlayer({
   const [duration, setDuration] = React.useState(0);
   const [playbackRate, setPlaybackRate] = React.useState(1);
   const [audioInitialized, setAudioInitialized] = React.useState(false);
+  const [hoverTime, setHoverTime] = React.useState<number | null>(null);
   const audioRef = React.useRef<globalThis.HTMLAudioElement | null>(null);
 
   const isPlaying = state === 'playing';
@@ -597,6 +702,10 @@ function AudioPlayer({
     setCurrentTime(time);
   }, []);
 
+  const handleHoverTimeChange = React.useCallback((time: number | null) => {
+    setHoverTime(time);
+  }, []);
+
   const iconSize =
     size === 'sm' ? 'h-3.5 w-3.5' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4';
 
@@ -625,11 +734,21 @@ function AudioPlayer({
     </button>
   );
 
-  const renderTime = () => {
+  const renderTime = (useHoverTime = false) => {
     if (!showTime) return null;
+    const displayTime =
+      useHoverTime && hoverTime !== null ? hoverTime : currentTime;
+    const isShowingHoverTime = useHoverTime && hoverTime !== null;
     return (
-      <span className="font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400">
-        {formatTime(currentTime)} / {formatTime(duration)}
+      <span
+        className={cn(
+          'font-mono text-xs tabular-nums',
+          isShowingHoverTime
+            ? 'text-primary-600 dark:text-primary-400'
+            : 'text-neutral-500 dark:text-neutral-400'
+        )}
+      >
+        {formatTime(displayTime)} / {formatTime(duration)}
       </span>
     );
   };
@@ -714,11 +833,14 @@ function AudioPlayer({
         waveColor={waveColor}
         progressColor={progressColor}
         height={waveformHeight}
+        showHoverCursor={showWaveformHoverCursor}
+        onHoverTimeChange={handleHoverTimeChange}
+        cursorColor={waveformCursorColor}
       />
       <div className="flex items-center gap-3">
         {renderPlayButton()}
         <div className="flex flex-1 items-center justify-between">
-          {renderTime()}
+          {renderTime(true)}
           {renderPlaybackRateControl()}
         </div>
       </div>
