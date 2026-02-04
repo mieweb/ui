@@ -3,9 +3,10 @@
 var chunkR4DM4635_cjs = require('../chunk-R4DM4635.cjs');
 var chunk2O7D6F67_cjs = require('../chunk-2O7D6F67.cjs');
 var chunk6HFFWEM3_cjs = require('../chunk-6HFFWEM3.cjs');
-var chunkBR2XGATJ_cjs = require('../chunk-BR2XGATJ.cjs');
+var chunkNNEFAUHV_cjs = require('../chunk-NNEFAUHV.cjs');
 var chunkSWMRCGL4_cjs = require('../chunk-SWMRCGL4.cjs');
 var chunkFHY3K6PL_cjs = require('../chunk-FHY3K6PL.cjs');
+require('../chunk-SCV7C55E.cjs');
 
 
 
@@ -55,7 +56,7 @@ Object.defineProperty(exports, "usePrefersReducedMotion", {
 });
 Object.defineProperty(exports, "useFocusTrap", {
   enumerable: true,
-  get: function () { return chunkBR2XGATJ_cjs.useFocusTrap; }
+  get: function () { return chunkNNEFAUHV_cjs.useFocusTrap; }
 });
 Object.defineProperty(exports, "useClickOutside", {
   enumerable: true,

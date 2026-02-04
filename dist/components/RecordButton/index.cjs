@@ -1,25 +1,21 @@
 'use strict';
 
-var chunkHLW3XD5R_cjs = require('../../chunk-HLW3XD5R.cjs');
+var chunk5T3AWNHG_cjs = require('../../chunk-5T3AWNHG.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
 
 
 Object.defineProperty(exports, "RecordButton", {
   enumerable: true,
-  get: function () { return chunkHLW3XD5R_cjs.RecordButton; }
+  get: function () { return chunk5T3AWNHG_cjs.RecordButton; }
 });
 Object.defineProperty(exports, "formatDuration", {
   enumerable: true,
-  get: function () { return chunkHLW3XD5R_cjs.formatDuration; }
+  get: function () { return chunk5T3AWNHG_cjs.formatDuration; }
 });
 Object.defineProperty(exports, "recordButtonVariants", {
   enumerable: true,
-  get: function () { return chunkHLW3XD5R_cjs.recordButtonVariants; }
-});
-Object.defineProperty(exports, "recordingIndicatorVariants", {
-  enumerable: true,
-  get: function () { return chunkHLW3XD5R_cjs.recordingIndicatorVariants; }
+  get: function () { return chunk5T3AWNHG_cjs.recordButtonVariants; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

@@ -1,12 +1,10 @@
-'use strict';
+import { isStorybookDocsMode } from './chunk-VSQF22GL.js';
+import { useRef, useEffect } from 'react';
 
-var react = require('react');
-
-// src/hooks/useFocusTrap.ts
 function useFocusTrap(enabled = true) {
-  const containerRef = react.useRef(null);
-  react.useEffect(() => {
-    if (!enabled || !containerRef.current) return;
+  const containerRef = useRef(null);
+  useEffect(() => {
+    if (!enabled || !containerRef.current || isStorybookDocsMode()) return;
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll(
       'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -35,6 +33,6 @@ function useFocusTrap(enabled = true) {
   return containerRef;
 }
 
-exports.useFocusTrap = useFocusTrap;
-//# sourceMappingURL=chunk-BR2XGATJ.cjs.map
-//# sourceMappingURL=chunk-BR2XGATJ.cjs.map
+export { useFocusTrap };
+//# sourceMappingURL=chunk-4SMSH4OY.js.map
+//# sourceMappingURL=chunk-4SMSH4OY.js.map
