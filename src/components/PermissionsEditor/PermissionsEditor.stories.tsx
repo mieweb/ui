@@ -12,13 +12,40 @@ const meta: Meta<typeof PermissionsEditor> = {
   title: 'Components/PermissionsEditor',
   component: PermissionsEditor,
   tags: ['autodocs'],
+  argTypes: {
+    userName: {
+      control: 'text',
+      description: 'User name being edited',
+    },
+    showEmployerAccess: {
+      control: 'boolean',
+      description: 'Whether to show employer access section',
+    },
+    className: {
+      control: 'text',
+      description: 'Custom className',
+    },
+    groups: { control: false },
+    assignedPermissions: { control: false },
+    onPermissionsChange: { control: false },
+    employers: { control: false },
+    selectedEmployers: { control: false },
+    onEmployersChange: { control: false },
+    labels: { control: false },
+  },
   parameters: {
     docs: {
       description: {
         component:
           'A hierarchical permission editor for managing user roles with support for nested permissions, employer access control, and summary display.',
       },
+      story: { inline: true },
     },
+  },
+  args: {
+    userName: 'John Doe',
+    showEmployerAccess: false,
+    className: '',
   },
 };
 
@@ -120,6 +147,34 @@ const sampleEmployers: EmployerAccess[] = [
   },
 ];
 
+export const Default: Story = {
+  args: {
+    userName: 'John Doe',
+    showEmployerAccess: false,
+    className: '',
+  },
+  render: function Render(args) {
+    const [permissions, setPermissions] = React.useState<string[]>([]);
+    const [employers, setEmployers] = React.useState<string[]>([]);
+
+    return (
+      <Card className="max-w-2xl p-6">
+        <PermissionsEditor
+          userName={args.userName}
+          groups={sampleGroups}
+          assignedPermissions={permissions}
+          onPermissionsChange={setPermissions}
+          showEmployerAccess={args.showEmployerAccess}
+          employers={args.showEmployerAccess ? sampleEmployers : undefined}
+          selectedEmployers={employers}
+          onEmployersChange={setEmployers}
+          className={args.className}
+        />
+      </Card>
+    );
+  },
+};
+
 // Interactive demo
 function InteractiveDemo() {
   const [permissions, setPermissions] = React.useState<string[]>([
@@ -151,25 +206,6 @@ function InteractiveDemo() {
 
 export const Interactive: Story = {
   render: () => <InteractiveDemo />,
-};
-
-// Basic usage
-function DefaultDemo() {
-  const [permissions, setPermissions] = React.useState<string[]>([]);
-
-  return (
-    <Card className="max-w-2xl p-6">
-      <PermissionsEditor
-        groups={sampleGroups}
-        assignedPermissions={permissions}
-        onPermissionsChange={setPermissions}
-      />
-    </Card>
-  );
-}
-
-export const Default: Story = {
-  render: () => <DefaultDemo />,
 };
 
 // With pre-assigned permissions
