@@ -9,6 +9,7 @@ import {
 } from './RecordButton';
 import { Input } from '../Input';
 import { Textarea } from '../Textarea';
+import { AudioPlayer } from '../AudioPlayer';
 
 // ============================================================================
 // Mock Transcription Service
@@ -497,12 +498,14 @@ export const LiveRecording: Story = {
           Click to start recording
         </p>
         {lastRecording && (
-          <div className="flex flex-col items-center gap-2 rounded-lg border p-4">
-            <p className="text-sm">
-              Recorded {lastRecording.duration.toFixed(1)}s
-            </p>
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-            <audio controls src={lastRecording.url} className="h-8" />
+          <div className="w-72">
+            <AudioPlayer
+              src={lastRecording.url}
+              title={`Recording (${lastRecording.duration.toFixed(1)}s)`}
+              variant="compact"
+              size="sm"
+              showTime
+            />
           </div>
         )}
       </div>
