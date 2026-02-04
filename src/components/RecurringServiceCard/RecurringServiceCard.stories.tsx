@@ -7,12 +7,33 @@ import {
   RecurringServiceGrid,
   type RecurringService,
   type RecurringServiceFormData,
+  type RecurringServiceCardState,
 } from './RecurringServiceCard';
 
 const meta: Meta<typeof RecurringServiceCard> = {
   title: 'Components/RecurringServiceCard',
   component: RecurringServiceCard,
   tags: ['autodocs'],
+  argTypes: {
+    state: {
+      control: 'select',
+      options: [
+        undefined,
+        'default',
+        'success',
+        'primary',
+        'warning',
+        'error',
+        'disabled',
+      ] as (RecurringServiceCardState | undefined)[],
+      description:
+        'Card state - controls border color and status icon. If not set, uses neutral gray styling.',
+    },
+    showProvider: {
+      control: 'boolean',
+      description: 'Whether to show the provider name',
+    },
+  },
 };
 
 export default meta;
@@ -57,6 +78,47 @@ export const Default: Story = {
   args: {
     service: sampleService,
     showProvider: true,
+  },
+};
+
+// State variants
+export const SuccessState: Story = {
+  args: {
+    service: sampleService,
+    showProvider: true,
+    state: 'success',
+  },
+};
+
+export const PrimaryState: Story = {
+  args: {
+    service: sampleService,
+    showProvider: true,
+    state: 'primary',
+  },
+};
+
+export const WarningState: Story = {
+  args: {
+    service: sampleService,
+    showProvider: true,
+    state: 'warning',
+  },
+};
+
+export const ErrorState: Story = {
+  args: {
+    service: sampleService,
+    showProvider: true,
+    state: 'error',
+  },
+};
+
+export const DisabledState: Story = {
+  args: {
+    service: sampleService,
+    showProvider: true,
+    state: 'disabled',
   },
 };
 

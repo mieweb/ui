@@ -22,6 +22,15 @@ export interface RecurringService {
   overrideConsent?: boolean;
 }
 
+/** Card state variants */
+export type RecurringServiceCardState =
+  | 'default'
+  | 'success'
+  | 'primary'
+  | 'warning'
+  | 'error'
+  | 'disabled';
+
 export interface RecurringServiceCardProps {
   /** The recurring service data */
   service: RecurringService;
@@ -31,6 +40,8 @@ export interface RecurringServiceCardProps {
   onEdit?: (service: RecurringService) => void;
   /** Whether to show provider name */
   showProvider?: boolean;
+  /** Card state - controls border color and status icon */
+  state?: RecurringServiceCardState;
   /** Custom class name */
   className?: string;
   /** Labels */
@@ -55,9 +66,15 @@ export function RecurringServiceCard({
   onDelete,
   onEdit,
   showProvider = true,
+  state,
   className,
   labels = {},
 }: RecurringServiceCardProps) {
+  // Guard against undefined service
+  if (!service) {
+    return null;
+  }
+
   const {
     provider = 'Provider',
     occurrence = 'Occurrence',
@@ -91,75 +108,215 @@ export function RecurringServiceCard({
     return occurrenceLabels[occ] || occ;
   };
 
+  // Determine effective state - explicit state prop takes precedence
+  // Otherwise use neutral 'default' styling (gray, no icon)
+  const effectiveState: RecurringServiceCardState = state ?? 'default';
+
+  // State-based styling
+  const stateStyles: Record<
+    RecurringServiceCardState,
+    { border: string; icon: React.ReactNode; showNote: boolean }
+  > = {
+    default: {
+      border: 'border-border',
+      icon: null,
+      showNote: !service?.overrideConsent, // Still show consent note if needed
+    },
+    success: {
+      border: 'border-success/30',
+      icon: (
+        <span className="bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+          <svg
+            className="h-3 w-3"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </span>
+      ),
+      showNote: false,
+    },
+    primary: {
+      border: 'border-primary/30',
+      icon: (
+        <span className="bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+          <svg
+            className="h-3 w-3"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </span>
+      ),
+      showNote: false,
+    },
+    warning: {
+      border: 'border-warning/30',
+      icon: (
+        <span className="bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="currentColor" />
+            <circle cx="12" cy="12" r="4" className="fill-warning" />
+          </svg>
+        </span>
+      ),
+      showNote: true,
+    },
+    error: {
+      border: 'border-destructive/30',
+      icon: (
+        <span className="bg-destructive text-destructive-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+          <svg
+            className="h-3 w-3"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </span>
+      ),
+      showNote: true,
+    },
+    disabled: {
+      border: 'border-border',
+      icon: null,
+      showNote: false,
+    },
+  };
+
+  const currentStyle = stateStyles[effectiveState];
+  const isDisabled = effectiveState === 'disabled';
+
   return (
     <div
       className={cn(
-        'rounded-lg border bg-white shadow-sm',
-        onEdit && 'cursor-pointer transition-shadow hover:shadow-md',
+        'bg-card text-card-foreground rounded-xl border-2 shadow-sm',
+        currentStyle.border,
+        isDisabled && 'opacity-50',
+        onEdit &&
+          !isDisabled &&
+          'cursor-pointer transition-shadow hover:shadow-md',
         className
       )}
-      onClick={() => onEdit?.(service)}
-      role={onEdit ? 'button' : undefined}
-      tabIndex={onEdit ? 0 : undefined}
+      onClick={() => !isDisabled && onEdit?.(service)}
+      role={onEdit && !isDisabled ? 'button' : undefined}
+      tabIndex={onEdit && !isDisabled ? 0 : undefined}
       onKeyDown={(e) => {
-        if (onEdit && (e.key === 'Enter' || e.key === ' ')) {
+        if (onEdit && !isDisabled && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
           onEdit(service);
         }
       }}
     >
-      {/* Card Header */}
-      <div className="border-b bg-gray-50 px-4 py-3">
-        <h6 className="font-medium">{service.serviceName}</h6>
+      {/* Card Header - matches CSVColumnMapper style */}
+      <div className="flex items-center gap-2 px-4 py-3">
+        {/* Status Icon */}
+        {currentStyle.icon}
+        <h6
+          className="truncate text-sm font-semibold"
+          title={service.serviceName}
+        >
+          {service.serviceName}
+        </h6>
       </div>
 
-      {/* Card Body */}
-      <div className="p-4">
+      {/* Card Body - matches CSVColumnMapper style */}
+      <div className="space-y-4 px-4 pb-4">
         {/* Provider */}
         {showProvider && service.providerName && (
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{provider}</span>
-            <span>{service.providerName}</span>
+          <div>
+            <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+              {provider}
+            </span>
+            <div className="bg-muted truncate rounded-md px-3 py-2 text-sm">
+              {service.providerName}
+            </div>
           </div>
         )}
 
         {/* Occurrence */}
-        <div className="mb-2 flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{occurrence}</span>
-          <span>{getOccurrenceLabel(service.occurrence)}</span>
+        <div>
+          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+            {occurrence}
+          </span>
+          <div className="bg-muted rounded-md px-3 py-2 text-sm">
+            {getOccurrenceLabel(service.occurrence)}
+          </div>
         </div>
-
-        <hr className="my-3" />
 
         {/* Next Order */}
-        <div className="mb-2 flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{nextOrder}</span>
-          <span title={service.nextOrder?.toString()}>
-            {formatDate(service.nextOrder)}
+        <div>
+          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+            {nextOrder}
           </span>
+          <div
+            className="bg-muted rounded-md px-3 py-2 text-sm"
+            title={service.nextOrder?.toString()}
+          >
+            {formatDate(service.nextOrder)}
+          </div>
         </div>
 
-        {/* Consent Note */}
-        {!service.overrideConsent && (
-          <div className="mt-2 text-right text-xs text-red-600">
+        {/* State-based note */}
+        {effectiveState === 'warning' && (
+          <div className="bg-warning/10 text-warning-800 dark:text-warning-200 rounded-md px-3 py-2 text-xs">
+            <i className="fas fa-exclamation-triangle mr-1" />
             {consentNote}
           </div>
         )}
-      </div>
+        {effectiveState === 'error' && (
+          <div className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs">
+            <i className="fas fa-times-circle mr-1" />
+            {consentNote}
+          </div>
+        )}
 
-      {/* Card Footer */}
-      <div className="border-t bg-gray-50 px-4 py-3 text-right">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete?.(service);
-          }}
-          className="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
-        >
-          <i className="fas fa-trash mr-1" />
-          {deleteLabel}
-        </button>
+        {/* Delete Action - matches CSVColumnMapper "Ignore Column" style */}
+        {!isDisabled && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(service);
+            }}
+            className="text-muted-foreground hover:text-destructive mx-auto flex items-center gap-1 text-xs transition-colors"
+          >
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            {deleteLabel}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -186,7 +343,7 @@ export function RecurringServiceAddCard({
       type="button"
       onClick={onClick}
       className={cn(
-        'text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary flex min-h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 transition-colors',
+        'text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary border-border bg-muted/50 flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 transition-colors',
         className
       )}
     >
@@ -290,15 +447,15 @@ export function RecurringServiceSetupModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center">
       <div
         className={cn(
-          'w-full max-w-lg rounded-lg bg-white shadow-xl',
+          'bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl',
           className
         )}
       >
         {/* Header */}
-        <div className="bg-primary flex items-center justify-between border-b p-4 text-white">
+        <div className="bg-primary text-primary-foreground flex items-center justify-between p-4">
           <h4 className="text-lg font-semibold">{title}</h4>
           <button
             type="button"
@@ -314,7 +471,7 @@ export function RecurringServiceSetupModal({
           {/* Provider Select */}
           {showProviderSelector && (
             <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium">
+              <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
                 {provider}
               </label>
               <select
@@ -322,7 +479,7 @@ export function RecurringServiceSetupModal({
                 onChange={(e) =>
                   setFormData({ ...formData, providerId: e.target.value })
                 }
-                className="w-full rounded-lg border border-gray-300 p-2"
+                className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
                 required={showProviderSelector}
               >
                 <option value="">Select provider...</option>
@@ -337,13 +494,15 @@ export function RecurringServiceSetupModal({
 
           {/* Service Select */}
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">{service}</label>
+            <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+              {service}
+            </label>
             <select
               value={formData.serviceId}
               onChange={(e) =>
                 setFormData({ ...formData, serviceId: e.target.value })
               }
-              className="w-full rounded-lg border border-gray-300 p-2"
+              className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
               required
             >
               <option value="">Select service...</option>
@@ -357,7 +516,7 @@ export function RecurringServiceSetupModal({
 
           {/* Occurrence Select */}
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">
+            <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
               {occurrence}
             </label>
             <select
@@ -365,7 +524,7 @@ export function RecurringServiceSetupModal({
               onChange={(e) =>
                 setFormData({ ...formData, occurrence: e.target.value })
               }
-              className="w-full rounded-lg border border-gray-300 p-2"
+              className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
               required
             >
               <option value="monthly">Monthly</option>
@@ -387,7 +546,7 @@ export function RecurringServiceSetupModal({
                     overrideConsent: e.target.checked,
                   })
                 }
-                className="h-4 w-4 rounded border-gray-300"
+                className="border-input accent-primary h-4 w-4 rounded"
               />
               <span className="text-sm">{overrideConsent}</span>
             </label>
@@ -401,14 +560,14 @@ export function RecurringServiceSetupModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+              className="border-border text-muted-foreground hover:bg-muted rounded-lg border px-4 py-2 transition-colors"
             >
               {cancel}
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white disabled:bg-gray-300"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-lg px-4 py-2 transition-colors"
             >
               {saving ? (
                 <span className="flex items-center gap-2">

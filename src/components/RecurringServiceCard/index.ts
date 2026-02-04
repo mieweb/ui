@@ -4,6 +4,7 @@ export {
   RecurringServiceSetupModal,
   RecurringServiceGrid,
   type RecurringServiceCardProps,
+  type RecurringServiceCardState,
   type RecurringService,
   type RecurringServiceAddCardProps,
   type RecurringServiceSetupModalProps,
