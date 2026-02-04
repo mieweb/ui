@@ -9,6 +9,8 @@ export interface PageHeaderProps {
   subtitle?: string;
   /** Optional icon to display before the title */
   icon?: React.ReactNode;
+  /** Vertical alignment of the icon */
+  iconAlign?: 'top' | 'center';
   /** Action buttons or controls to display on the right */
   actions?: React.ReactNode;
   /** Additional content below the title (e.g., breadcrumbs, tabs) */
@@ -29,6 +31,7 @@ export function PageHeader({
   title,
   subtitle,
   icon,
+  iconAlign = 'center',
   actions,
   children,
   className = '',
@@ -51,10 +54,16 @@ export function PageHeader({
     <div
       className={` ${sizeClasses[size]} ${bordered ? 'border-b border-gray-200 dark:border-gray-700' : ''} ${className} `.trim()}
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <div
+        className={`flex justify-between gap-4 ${iconAlign === 'top' ? 'items-start' : 'items-center'}`}
+      >
+        <div
+          className={`flex min-w-0 gap-3 ${iconAlign === 'top' ? 'items-start' : 'items-center'}`}
+        >
           {icon && (
-            <div className="flex-shrink-0 text-gray-500 dark:text-gray-400">
+            <div
+              className={`flex-shrink-0 text-gray-500 dark:text-gray-400 ${iconAlign === 'top' ? 'mt-1' : ''}`}
+            >
               {icon}
             </div>
           )}
