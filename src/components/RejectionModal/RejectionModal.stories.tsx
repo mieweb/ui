@@ -100,7 +100,7 @@ function InteractiveDemo(
 }
 
 export const Default: Story = {
-  render: () => <InteractiveDemo />,
+  render: (args) => <InteractiveDemo {...args} />,
 };
 
 export const RejectOrder: Story = {
