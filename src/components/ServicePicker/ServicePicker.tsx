@@ -223,7 +223,11 @@ export function ServicePicker({
 
   return (
     <div
-      className={cn('flex flex-col', !fullWidth && 'lg:max-w-md', className)}
+      className={cn(
+        'bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border',
+        !fullWidth && 'lg:max-w-md',
+        className
+      )}
     >
       <div className="p-3">
         {!hideHeading && (

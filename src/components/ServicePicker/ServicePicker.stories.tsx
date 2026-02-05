@@ -125,8 +125,8 @@ function ServicePickerExample(
         onSelectionChange={setSelectedIds}
         fullWidth
       />
-      <div className="border-t bg-gray-50 p-3 dark:bg-gray-800">
-        <p className="text-xs text-gray-500">
+      <div className="border-border bg-muted/50 border-t p-3">
+        <p className="text-muted-foreground text-xs">
           Selected: {selectedIds.length > 0 ? selectedIds.join(', ') : 'None'}
         </p>
       </div>
