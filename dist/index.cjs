@@ -25093,9 +25093,13 @@ function RecurringServiceCard({
   onDelete,
   onEdit,
   showProvider = true,
+  state,
   className,
   labels = {}
 }) {
+  if (!service) {
+    return null;
+  }
   const {
     provider = "Provider",
     occurrence = "Occurrence",
@@ -25122,56 +25126,188 @@ function RecurringServiceCard({
   const getOccurrenceLabel = (occ) => {
     return occurrenceLabels[occ] || occ;
   };
+  const effectiveState = state ?? "default";
+  const stateStyles = {
+    default: {
+      border: "border-border",
+      icon: null,
+      showNote: !service?.overrideConsent
+      // Still show consent note if needed
+    },
+    success: {
+      border: "border-success/30",
+      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(
+        "svg",
+        {
+          className: "h-3 w-3",
+          fill: "none",
+          viewBox: "0 0 24 24",
+          stroke: "currentColor",
+          strokeWidth: 3,
+          children: /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              d: "M5 13l4 4L19 7"
+            }
+          )
+        }
+      ) }),
+      showNote: false
+    },
+    primary: {
+      border: "border-primary/30",
+      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(
+        "svg",
+        {
+          className: "h-3 w-3",
+          fill: "none",
+          viewBox: "0 0 24 24",
+          stroke: "currentColor",
+          strokeWidth: 2,
+          children: /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            }
+          )
+        }
+      ) }),
+      showNote: false
+    },
+    warning: {
+      border: "border-warning/30",
+      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-3 w-3", fill: "currentColor", viewBox: "0 0 24 24", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "10", fill: "currentColor" }),
+        /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "4", className: "fill-warning" })
+      ] }) }),
+      showNote: true
+    },
+    error: {
+      border: "border-destructive/30",
+      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-destructive text-destructive-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(
+        "svg",
+        {
+          className: "h-3 w-3",
+          fill: "none",
+          viewBox: "0 0 24 24",
+          stroke: "currentColor",
+          strokeWidth: 3,
+          children: /* @__PURE__ */ jsxRuntime.jsx(
+            "path",
+            {
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              d: "M6 18L18 6M6 6l12 12"
+            }
+          )
+        }
+      ) }),
+      showNote: true
+    },
+    disabled: {
+      border: "border-border",
+      icon: null,
+      showNote: false
+    }
+  };
+  const currentStyle = stateStyles[effectiveState];
+  const isDisabled = effectiveState === "disabled";
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "rounded-lg border bg-white shadow-sm",
-        onEdit && "cursor-pointer transition-shadow hover:shadow-md",
+        "bg-card text-card-foreground rounded-xl border-2 shadow-sm",
+        currentStyle.border,
+        isDisabled && "opacity-50",
+        onEdit && !isDisabled && "cursor-pointer transition-shadow hover:shadow-md",
         className
       ),
-      onClick: () => onEdit?.(service),
-      role: onEdit ? "button" : void 0,
-      tabIndex: onEdit ? 0 : void 0,
+      onClick: () => !isDisabled && onEdit?.(service),
+      role: onEdit && !isDisabled ? "button" : void 0,
+      tabIndex: onEdit && !isDisabled ? 0 : void 0,
       onKeyDown: (e) => {
-        if (onEdit && (e.key === "Enter" || e.key === " ")) {
+        if (onEdit && !isDisabled && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
           onEdit(service);
         }
       },
       children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-b bg-gray-50 px-4 py-3", children: /* @__PURE__ */ jsxRuntime.jsx("h6", { className: "font-medium", children: service.serviceName }) }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "p-4", children: [
-          showProvider && service.providerName && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between text-sm", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: provider }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { children: service.providerName })
-          ] }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between text-sm", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: occurrence }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { children: getOccurrenceLabel(service.occurrence) })
-          ] }),
-          /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "my-3" }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between text-sm", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: nextOrder }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { title: service.nextOrder?.toString(), children: formatDate4(service.nextOrder) })
-          ] }),
-          !service.overrideConsent && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 text-right text-xs text-red-600", children: consentNote })
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 px-4 py-3", children: [
+          currentStyle.icon,
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "h6",
+            {
+              className: "truncate text-sm font-semibold",
+              title: service.serviceName,
+              children: service.serviceName
+            }
+          )
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-t bg-gray-50 px-4 py-3 text-right", children: /* @__PURE__ */ jsxRuntime.jsxs(
-          "button",
-          {
-            type: "button",
-            onClick: (e) => {
-              e.stopPropagation();
-              onDelete?.(service);
-            },
-            className: "rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50",
-            children: [
-              /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-trash mr-1" }),
-              deleteLabel
-            ]
-          }
-        ) })
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 px-4 pb-4", children: [
+          showProvider && service.providerName && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: provider }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted truncate rounded-md px-3 py-2 text-sm", children: service.providerName })
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: occurrence }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted rounded-md px-3 py-2 text-sm", children: getOccurrenceLabel(service.occurrence) })
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: nextOrder }),
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "div",
+              {
+                className: "bg-muted rounded-md px-3 py-2 text-sm",
+                title: service.nextOrder?.toString(),
+                children: formatDate4(service.nextOrder)
+              }
+            )
+          ] }),
+          effectiveState === "warning" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-warning/10 text-warning-800 dark:text-warning-200 rounded-md px-3 py-2 text-xs", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-exclamation-triangle mr-1" }),
+            consentNote
+          ] }),
+          effectiveState === "error" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-times-circle mr-1" }),
+            consentNote
+          ] }),
+          !isDisabled && /* @__PURE__ */ jsxRuntime.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: (e) => {
+                e.stopPropagation();
+                onDelete?.(service);
+              },
+              className: "text-muted-foreground hover:text-destructive mx-auto flex items-center gap-1 text-xs transition-colors",
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "svg",
+                  {
+                    className: "h-3 w-3",
+                    fill: "none",
+                    viewBox: "0 0 24 24",
+                    stroke: "currentColor",
+                    strokeWidth: 2,
+                    children: /* @__PURE__ */ jsxRuntime.jsx(
+                      "path",
+                      {
+                        strokeLinecap: "round",
+                        strokeLinejoin: "round",
+                        d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      }
+                    )
+                  }
+                ),
+                deleteLabel
+              ]
+            }
+          )
+        ] })
       ]
     }
   );
@@ -25187,7 +25323,7 @@ function RecurringServiceAddCard({
       type: "button",
       onClick,
       className: chunkOR5DRJCW_cjs.cn(
-        "text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary flex min-h-[200px] w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 transition-colors",
+        "text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary border-border bg-muted/50 flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 transition-colors",
         className
       ),
       children: [
@@ -25244,15 +25380,15 @@ function RecurringServiceSetupModal({
     onSave(formData);
   };
   if (!open) return null;
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "fixed inset-0 z-50 flex items-center justify-center bg-black/50", children: /* @__PURE__ */ jsxRuntime.jsxs(
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "w-full max-w-lg rounded-lg bg-white shadow-xl",
+        "bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl",
         className
       ),
       children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-primary flex items-center justify-between border-b p-4 text-white", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-primary text-primary-foreground flex items-center justify-between p-4", children: [
           /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-lg font-semibold", children: title }),
           /* @__PURE__ */ jsxRuntime.jsx(
             "button",
@@ -25266,13 +25402,13 @@ function RecurringServiceSetupModal({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "p-6", children: [
           showProviderSelector && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-sm font-medium", children: provider }),
+            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: provider }),
             /* @__PURE__ */ jsxRuntime.jsxs(
               "select",
               {
                 value: formData.providerId,
                 onChange: (e) => setFormData({ ...formData, providerId: e.target.value }),
-                className: "w-full rounded-lg border border-gray-300 p-2",
+                className: "bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none",
                 required: showProviderSelector,
                 children: [
                   /* @__PURE__ */ jsxRuntime.jsx("option", { value: "", children: "Select provider..." }),
@@ -25282,13 +25418,13 @@ function RecurringServiceSetupModal({
             )
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-sm font-medium", children: service }),
+            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: service }),
             /* @__PURE__ */ jsxRuntime.jsxs(
               "select",
               {
                 value: formData.serviceId,
                 onChange: (e) => setFormData({ ...formData, serviceId: e.target.value }),
-                className: "w-full rounded-lg border border-gray-300 p-2",
+                className: "bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none",
                 required: true,
                 children: [
                   /* @__PURE__ */ jsxRuntime.jsx("option", { value: "", children: "Select service..." }),
@@ -25298,13 +25434,13 @@ function RecurringServiceSetupModal({
             )
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-sm font-medium", children: occurrence }),
+            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: occurrence }),
             /* @__PURE__ */ jsxRuntime.jsxs(
               "select",
               {
                 value: formData.occurrence,
                 onChange: (e) => setFormData({ ...formData, occurrence: e.target.value }),
-                className: "w-full rounded-lg border border-gray-300 p-2",
+                className: "bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none",
                 required: true,
                 children: [
                   /* @__PURE__ */ jsxRuntime.jsx("option", { value: "monthly", children: "Monthly" }),
@@ -25326,7 +25462,7 @@ function RecurringServiceSetupModal({
                     ...formData,
                     overrideConsent: e.target.checked
                   }),
-                  className: "h-4 w-4 rounded border-gray-300"
+                  className: "border-input accent-primary h-4 w-4 rounded"
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm", children: overrideConsent })
@@ -25339,7 +25475,7 @@ function RecurringServiceSetupModal({
               {
                 type: "button",
                 onClick: onClose,
-                className: "rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50",
+                className: "border-border text-muted-foreground hover:bg-muted rounded-lg border px-4 py-2 transition-colors",
                 children: cancel
               }
             ),
@@ -25348,7 +25484,7 @@ function RecurringServiceSetupModal({
               {
                 type: "submit",
                 disabled: saving,
-                className: "bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white disabled:bg-gray-300",
+                className: "bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-lg px-4 py-2 transition-colors",
                 children: saving ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex items-center gap-2", children: [
                   /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-spinner fa-spin" }),
                   "Saving..."
@@ -25428,16 +25564,16 @@ function RejectionModal({
   };
   return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "md", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
     /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: title }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
-      (description || itemDescription) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-lg bg-gray-50 p-3 dark:bg-gray-800", children: [
-        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: description }),
-        itemDescription && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-sm font-medium text-gray-900 dark:text-white", children: itemDescription })
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
+      (description || itemDescription) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-muted rounded-lg p-3", children: [
+        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm", children: description }),
+        itemDescription && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground mt-1 text-sm font-medium", children: itemDescription })
       ] }),
-      variant === "danger" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: [
+      variant === "danger" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-lg border p-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
-            className: "mt-0.5 h-5 w-5 flex-shrink-0 text-red-500",
+            className: "text-destructive mt-0.5 h-5 w-5 flex-shrink-0",
             fill: "none",
             viewBox: "0 0 24 24",
             stroke: "currentColor",
@@ -25452,14 +25588,17 @@ function RejectionModal({
             )
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: "This action cannot be undone. The affected party will be notified of this rejection." })
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm", children: "This action cannot be undone. The affected party will be notified of this rejection." })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300", children: "Reason for rejection" }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground mb-2 block text-sm font-medium", children: "Reason for rejection" }),
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-2", children: reasons.map((reason) => /* @__PURE__ */ jsxRuntime.jsxs(
           "label",
           {
-            className: `flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${selectedReasonId === reason.id ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20" : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"} `,
+            className: chunkOR5DRJCW_cjs.cn(
+              "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
+              selectedReasonId === reason.id ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground/50"
+            ),
             children: [
               /* @__PURE__ */ jsxRuntime.jsx(
                 "input",
@@ -25469,25 +25608,25 @@ function RejectionModal({
                   value: reason.id,
                   checked: selectedReasonId === reason.id,
                   onChange: (e) => setSelectedReasonId(e.target.value),
-                  className: "h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  className: "text-primary focus:ring-primary border-border h-4 w-4"
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-gray-900 dark:text-white", children: reason.label }),
-              reason.requiresDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-gray-500 dark:text-gray-400", children: "(requires details)" })
+              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-sm", children: reason.label }),
+              reason.requiresDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs", children: "(requires details)" })
             ]
           },
           reason.id
         )) })
       ] }),
       showDetails && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-foreground mb-1 block text-sm font-medium", children: [
           detailsLabel,
-          needsDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-red-500", children: "*" })
+          needsDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx(
           "textarea",
           {
-            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+            className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
             rows: 3,
             value: details,
             onChange: (e) => setDetails(e.target.value),
@@ -25495,7 +25634,7 @@ function RejectionModal({
             required: needsDetails
           }
         ),
-        needsDetails && !details.trim() && selectedReasonId && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-xs text-red-500", children: "Please provide additional details for this rejection reason." })
+        needsDetails && !details.trim() && selectedReasonId && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive mt-1 text-xs", children: "Please provide additional details for this rejection reason." })
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
@@ -25798,7 +25937,7 @@ function ReportDashboard({
     ] })
   ] });
 }
-function ResultsEntryForm({
+var ResultsEntryForm = React46__namespace.forwardRef(function ResultsEntryForm2({
   employeeFirstName,
   employeeLastName,
   initialData = {},
@@ -25808,7 +25947,7 @@ function ResultsEntryForm({
   onSubmit,
   labels = {},
   className
-}) {
+}, ref) {
   const {
     testResults = "Test Results",
     passed = "Passed",
@@ -25865,39 +26004,60 @@ function ResultsEntryForm({
       (prev) => prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]
     );
   };
+  const validateAndSubmit = React46__namespace.useCallback(() => {
+    if (!result) {
+      setShowError(true);
+      return;
+    }
+    setShowError(false);
+    onSubmit({
+      result,
+      alternateText: alternateText || void 0,
+      dateDrawn: dateDrawnValue || void 0,
+      dateCompleted: dateCompletedValue || void 0,
+      recommendations: recommendations || void 0,
+      files: files.length > 0 ? files : void 0,
+      providerContacts: selectedContacts.length > 0 ? selectedContacts : void 0,
+      applyToAllServices: applyToAll
+    });
+  }, [
+    result,
+    alternateText,
+    dateDrawnValue,
+    dateCompletedValue,
+    recommendations,
+    files,
+    selectedContacts,
+    applyToAll,
+    onSubmit
+  ]);
+  React46__namespace.useImperativeHandle(
+    ref,
+    () => ({
+      submit: validateAndSubmit
+    }),
+    [validateAndSubmit]
+  );
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-6", className), children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4 sm:flex-row sm:items-center", children: [
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "sm:w-1/2", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mr-2 font-semibold", children: testResults }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-2 flex gap-4 sm:mt-0 sm:inline-flex", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(
-            chunkXHJGYBYG_cjs.Radio,
-            {
-              name: "result",
-              value: "passed",
-              label: passed,
-              checked: result === "passed",
-              onChange: () => {
-                setResult("passed");
-                setShowError(false);
-              }
-            }
-          ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            chunkXHJGYBYG_cjs.Radio,
-            {
-              name: "result",
-              value: "failed",
-              label: failed,
-              checked: result === "failed",
-              onChange: () => {
-                setResult("failed");
-                setShowError(false);
-              }
-            }
-          )
-        ] })
-      ] }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "sm:w-1/2", children: /* @__PURE__ */ jsxRuntime.jsxs(
+        chunkXHJGYBYG_cjs.RadioGroup,
+        {
+          name: "result",
+          label: testResults,
+          value: result ?? "",
+          onValueChange: (value) => {
+            setResult(value);
+            setShowError(false);
+          },
+          orientation: "horizontal",
+          error: showError ? pleaseSelectResult : void 0,
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkXHJGYBYG_cjs.Radio, { value: "passed", label: passed }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkXHJGYBYG_cjs.Radio, { value: "failed", label: failed })
+          ]
+        }
+      ) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "sm:w-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(
         chunkVV4N4WY6_cjs.Input,
         {
@@ -26073,56 +26233,121 @@ function ResultsEntryForm({
     ] }),
     showError && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm font-medium", children: pleaseSelectResult })
   ] });
-}
-function ResultsEntryCard({
+});
+function ResultsEntryModal({
   serviceName,
   employeeFirstName,
   employeeLastName,
-  isOpen = true,
-  onClose,
+  open,
+  onOpenChange,
   onSubmit,
+  isSubmitting = false,
   labels = {},
   ...props
 }) {
   const { submit = "Submit", close = "Close" } = labels;
+  const formRef = React46__namespace.useRef(null);
   const employeeName = employeeFirstName || employeeLastName ? `${employeeFirstName ?? ""} ${employeeLastName ?? ""}`.trim() : void 0;
-  if (!isOpen) return null;
-  const handleSubmit = (data) => {
-    onSubmit(data);
-    onClose();
+  const handleSubmitClick = () => {
+    formRef.current?.submit();
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-background w-full max-w-2xl rounded-lg border shadow-lg", children: [
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-primary text-primary-foreground rounded-t-lg p-4", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-lg font-semibold", children: serviceName }),
-      employeeName && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm opacity-90", children: employeeName })
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "2xl", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: serviceName }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { children: [
+      employeeName && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted mb-4 rounded-lg p-3", children: /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-muted-foreground text-sm", children: [
+        "Employee:",
+        " ",
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground font-medium", children: employeeName })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        ResultsEntryForm,
+        {
+          ref: formRef,
+          employeeFirstName,
+          employeeLastName,
+          onSubmit,
+          labels,
+          ...props
+        }
+      )
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "p-6", children: /* @__PURE__ */ jsxRuntime.jsx(
-      ResultsEntryForm,
-      {
-        serviceName,
-        employeeFirstName,
-        employeeLastName,
-        onSubmit: handleSubmit,
-        labels,
-        ...props
-      }
-    ) }),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-end gap-3 border-t p-4", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onClose, children: close }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
         chunkMKJDBXX4_cjs.Button,
         {
-          onClick: () => {
-            const form = document.querySelector("[data-results-form]");
-            if (form) {
-              form.dispatchEvent(new Event("submit", { bubbles: true }));
-            }
-          },
-          children: submit
+          type: "button",
+          variant: "outline",
+          onClick: () => onOpenChange(false),
+          disabled: isSubmitting,
+          children: close
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        chunkMKJDBXX4_cjs.Button,
+        {
+          type: "button",
+          onClick: handleSubmitClick,
+          disabled: isSubmitting,
+          children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+            /* @__PURE__ */ jsxRuntime.jsxs(
+              "svg",
+              {
+                className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                children: [
+                  /* @__PURE__ */ jsxRuntime.jsx(
+                    "circle",
+                    {
+                      className: "opacity-25",
+                      cx: "12",
+                      cy: "12",
+                      r: "10",
+                      stroke: "currentColor",
+                      strokeWidth: "4"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntime.jsx(
+                    "path",
+                    {
+                      className: "opacity-75",
+                      fill: "currentColor",
+                      d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    }
+                  )
+                ]
+              }
+            ),
+            "Processing..."
+          ] }) : submit
         }
       )
     ] })
   ] });
+}
+function ResultsEntryCard({
+  isOpen,
+  onClose,
+  onSubmit,
+  ...restProps
+}) {
+  const handleSubmit = (data) => {
+    onSubmit(data);
+    onClose();
+  };
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    ResultsEntryModal,
+    {
+      open: isOpen,
+      onOpenChange: (nextOpen) => {
+        if (!nextOpen) {
+          onClose();
+        }
+      },
+      onSubmit: handleSubmit,
+      ...restProps
+    }
+  );
 }
 function ScheduleCalendar({
   appointments,
@@ -27321,42 +27546,42 @@ function ServiceCard({
   return /* @__PURE__ */ jsxRuntime.jsx(
     chunkHRA4FUO6_cjs.Card,
     {
-      className: `h-full transition-all duration-200 ${onClick ? "cursor-pointer hover:shadow-md" : ""} ${selected ? "ring-2 ring-blue-500 dark:ring-blue-400" : ""} ${!currentlyOffered ? "opacity-60" : ""} ${className} `.trim(),
+      className: `h-full transition-all duration-200 ${onClick ? "cursor-pointer hover:shadow-md" : ""} ${selected ? "ring-primary ring-2" : ""} ${!currentlyOffered ? "opacity-60" : ""} ${className} `.trim(),
       onClick: onClick ? handleCardClick : void 0,
       children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full flex-col p-4", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-start justify-between gap-2", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "truncate font-semibold text-gray-900 dark:text-white", children: name }),
-            category && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-xs text-gray-500 dark:text-gray-400", children: category })
+            /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-foreground truncate font-semibold", children: name }),
+            category && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mt-0.5 text-xs", children: category })
           ] }),
           !currentlyOffered && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "warning", size: "sm", children: "Not Offered" })
         ] }),
-        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-400", children: description }),
+        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mb-3 line-clamp-2 text-sm", children: description }),
         tags.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex flex-wrap gap-1", children: [
           tags.slice(0, 3).map((tag) => /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
-              className: "inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+              className: "bg-muted text-muted-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium",
               children: tag
             },
             tag
           )),
-          tags.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs text-gray-500 dark:text-gray-400", children: [
+          tags.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
             "+",
             tags.length - 3
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-auto", children: [
           price !== void 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-baseline justify-between", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs font-medium text-gray-500 uppercase dark:text-gray-400", children: "Base Price" }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-lg font-bold text-gray-900 dark:text-white", children: formatCurrency2(price, currency) })
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs font-medium uppercase", children: "Base Price" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-lg font-bold", children: formatCurrency2(price, currency) })
           ] }),
           showInventory && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between text-sm", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-gray-500 dark:text-gray-400", children: "Inventory" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "Inventory" }),
             /* @__PURE__ */ jsxRuntime.jsxs(
               "span",
               {
-                className: `font-medium ${isLowInventory ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"}`,
+                className: `font-medium ${isLowInventory ? "text-destructive" : "text-foreground"}`,
                 children: [
                   inventoryCount,
                   inventoryTotal && ` / ${inventoryTotal}`
@@ -27364,53 +27589,19 @@ function ServiceCard({
               }
             )
           ] }),
-          (hasCustomAvailability || customPricingCount > 0) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400", children: [
-            /* @__PURE__ */ jsxRuntime.jsx(
-              "svg",
-              {
-                className: "h-3.5 w-3.5",
-                fill: "none",
-                viewBox: "0 0 24 24",
-                stroke: "currentColor",
-                children: /* @__PURE__ */ jsxRuntime.jsx(
-                  "path",
-                  {
-                    strokeLinecap: "round",
-                    strokeLinejoin: "round",
-                    strokeWidth: 2,
-                    d: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                  }
-                )
-              }
-            ),
+          (hasCustomAvailability || customPricingCount > 0) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-muted-foreground mb-3 flex items-center gap-2 text-xs", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.SlidersHorizontal, { className: "h-3.5 w-3.5" }),
             /* @__PURE__ */ jsxRuntime.jsx("span", { children: customPricingCount > 0 ? `${customPricingCount} custom pricing tier${customPricingCount > 1 ? "s" : ""}` : "Custom availability" })
           ] }),
-          (onEdit || onManage || onDelete) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-end gap-2 border-t border-gray-100 pt-2 dark:border-gray-800", children: [
+          (onEdit || onManage || onDelete) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border flex items-center gap-2 border-t pt-2", children: [
             onDelete && /* @__PURE__ */ jsxRuntime.jsx(
               "button",
               {
                 type: "button",
                 onClick: handleDeleteClick,
-                className: "p-1.5 text-gray-400 transition-colors hover:text-red-500 dark:hover:text-red-400",
+                className: "text-muted-foreground hover:text-destructive p-1.5 transition-colors",
                 title: "Delete service",
-                children: /* @__PURE__ */ jsxRuntime.jsx(
-                  "svg",
-                  {
-                    className: "h-4 w-4",
-                    fill: "none",
-                    viewBox: "0 0 24 24",
-                    stroke: "currentColor",
-                    children: /* @__PURE__ */ jsxRuntime.jsx(
-                      "path",
-                      {
-                        strokeLinecap: "round",
-                        strokeLinejoin: "round",
-                        strokeWidth: 2,
-                        d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      }
-                    )
-                  }
-                )
+                children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Trash2, { className: "h-4 w-4" })
               }
             ),
             onEdit && /* @__PURE__ */ jsxRuntime.jsx(
@@ -27418,26 +27609,9 @@ function ServiceCard({
               {
                 type: "button",
                 onClick: handleEditClick,
-                className: "p-1.5 text-gray-400 transition-colors hover:text-blue-500 dark:hover:text-blue-400",
+                className: "text-muted-foreground hover:text-primary p-1.5 transition-colors",
                 title: "Edit service",
-                children: /* @__PURE__ */ jsxRuntime.jsx(
-                  "svg",
-                  {
-                    className: "h-4 w-4",
-                    fill: "none",
-                    viewBox: "0 0 24 24",
-                    stroke: "currentColor",
-                    children: /* @__PURE__ */ jsxRuntime.jsx(
-                      "path",
-                      {
-                        strokeLinecap: "round",
-                        strokeLinejoin: "round",
-                        strokeWidth: 2,
-                        d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      }
-                    )
-                  }
-                )
+                children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Pencil, { className: "h-4 w-4" })
               }
             ),
             onManage && /* @__PURE__ */ jsxRuntime.jsx(
@@ -27445,7 +27619,7 @@ function ServiceCard({
               {
                 type: "button",
                 onClick: handleManageClick,
-                className: "rounded px-3 py-1 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20",
+                className: "text-primary hover:bg-primary/10 ml-auto rounded px-3 py-1 text-sm font-medium transition-colors",
                 children: "Manage"
               }
             )
@@ -27462,28 +27636,11 @@ function AddServiceCard({
   return /* @__PURE__ */ jsxRuntime.jsx(
     chunkHRA4FUO6_cjs.Card,
     {
-      className: `h-full cursor-pointer border-2 border-dashed border-gray-300 bg-gray-50 transition-all duration-200 hover:border-blue-400 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800/50 dark:hover:border-blue-500 dark:hover:bg-gray-800 ${className} `.trim(),
+      className: `border-border bg-muted/50 hover:border-primary hover:bg-muted h-full cursor-pointer border-2 border-dashed transition-all duration-200 ${className} `.trim(),
       onClick,
       children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full min-h-[160px] flex-col items-center justify-center p-4", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(
-          "svg",
-          {
-            className: "h-6 w-6 text-gray-500 dark:text-gray-400",
-            fill: "none",
-            viewBox: "0 0 24 24",
-            stroke: "currentColor",
-            children: /* @__PURE__ */ jsxRuntime.jsx(
-              "path",
-              {
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                strokeWidth: 2,
-                d: "M12 4v16m8-8H4"
-              }
-            )
-          }
-        ) }),
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-600 dark:text-gray-400", children: "Add New Service" })
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted mb-3 flex h-12 w-12 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Plus, { className: "text-muted-foreground h-6 w-6" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm font-medium", children: "Add New Service" })
       ] })
     }
   );
@@ -27666,18 +27823,18 @@ function ServiceGeneralSettings({
   ] });
 }
 function ServiceSkeleton() {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "animate-pulse rounded-lg border border-gray-200 p-4 dark:border-gray-700", children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border animate-pulse rounded-lg border p-4", children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-start justify-between", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-5 w-32 rounded bg-gray-200 dark:bg-gray-700" }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-5 w-16 rounded bg-gray-200 dark:bg-gray-700" })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-5 w-32 rounded" }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-5 w-16 rounded" })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 space-y-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-full rounded bg-gray-200 dark:bg-gray-700" }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-full rounded" }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-3/4 rounded" })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700" }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700" })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-6 w-20 rounded-full" }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-6 w-20 rounded-full" })
     ] })
   ] });
 }
@@ -27725,7 +27882,7 @@ function ServiceGrid({
       /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
-          className: "mb-4 h-12 w-12 text-gray-400",
+          className: "text-muted-foreground mb-4 h-12 w-12",
           fill: "none",
           viewBox: "0 0 24 24",
           stroke: "currentColor",
@@ -27740,7 +27897,7 @@ function ServiceGrid({
           )
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-gray-500 dark:text-gray-400", children: emptyMessage })
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground", children: emptyMessage })
     ] });
   }
   return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -33258,6 +33415,7 @@ exports.ReportLink = ReportLink;
 exports.ResourceLink = ResourceLink;
 exports.ResultsEntryCard = ResultsEntryCard;
 exports.ResultsEntryForm = ResultsEntryForm;
+exports.ResultsEntryModal = ResultsEntryModal;
 exports.SSOConfigForm = SSOConfigForm;
 exports.ScheduleCalendar = ScheduleCalendar;
 exports.SearchResultsMessage = SearchResultsMessage;
