@@ -49,6 +49,15 @@ html, body {
   color: var(--mieweb-destructive) !important;
 }
 
+/* Exception: Allow white text to override the muted foreground (e.g., on colored backgrounds) */
+[data-theme="dark"] .sbdocs .text-white,
+[data-theme="dark"] .sbdocs span.text-white,
+[data-theme="dark"] .sbdocs p.text-white,
+[data-theme="dark"] .sbdocs [style*="color: white"],
+[data-theme="dark"] .sbdocs [style*="color:white"] {
+  color: #ffffff !important;
+}
+
 /* Story preview containers */
 [data-theme="dark"] .docs-story,
 [data-theme="dark"] .sb-story,
