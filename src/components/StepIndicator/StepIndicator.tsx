@@ -123,9 +123,128 @@ export function StepIndicator({
     return true;
   };
 
+  const circleButton = (
+    step: Step,
+    index: number,
+    status: string,
+    clickable: boolean
+  ) => (
+    <button
+      type="button"
+      onClick={() => handleStepClick(index)}
+      disabled={!clickable}
+      className={`${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
+        step.hasError
+          ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
+          : status === 'completed'
+            ? 'bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white'
+            : status === 'current'
+              ? 'bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
+              : 'bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
+      }`.trim()}
+      aria-current={status === 'current' ? 'step' : undefined}
+    >
+      {step.hasError ? (
+        <ErrorIcon className="h-4 w-4" />
+      ) : status === 'completed' ? (
+        step.icon || <CheckIcon className="h-4 w-4" />
+      ) : (
+        step.icon || (
+          <span
+            className={
+              status === 'current'
+                ? 'text-white'
+                : 'text-neutral-500 dark:text-neutral-300'
+            }
+          >
+            {index + 1}
+          </span>
+        )
+      )}
+    </button>
+  );
+
+  const stepLabel = (step: Step, status: string, horizontal: boolean) => (
+    <div className={`${horizontal ? 'text-center' : 'flex-1'} ${sizes.text}`}>
+      <p
+        className={`font-medium ${
+          step.hasError
+            ? 'text-red-600 dark:text-red-400'
+            : status === 'completed' || status === 'current'
+              ? 'text-neutral-900 dark:text-white'
+              : 'text-neutral-500 dark:text-neutral-400'
+        }`.trim()}
+      >
+        {step.label}
+        {step.optional && (
+          <span className="font-normal text-neutral-500 dark:text-neutral-400">
+            {' '}
+            (optional)
+          </span>
+        )}
+      </p>
+      {step.description && (
+        <p className="mt-0.5 text-neutral-500 dark:text-neutral-400">
+          {step.description}
+        </p>
+      )}
+    </div>
+  );
+
+  if (orientation === 'horizontal') {
+    return (
+      <nav className={`flex ${className}`.trim()} aria-label="Progress">
+        {steps.map((step, index) => {
+          const status = getStepStatus(index);
+          const isLast = index === steps.length - 1;
+          const clickable = isClickable(index);
+
+          return (
+            <div key={step.id} className="flex flex-1 flex-col items-center">
+              {/* Track row: left connector + circle + right connector */}
+              <div className="flex w-full items-center">
+                {index > 0 ? (
+                  <div
+                    className={`flex-1 ${sizes.line} ${
+                      index <= currentStep
+                        ? 'bg-primary-600 dark:bg-primary-500'
+                        : 'bg-neutral-200 dark:bg-neutral-700'
+                    }`}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <div className="flex-1" />
+                )}
+
+                {circleButton(step, index, status, clickable)}
+
+                {!isLast ? (
+                  <div
+                    className={`flex-1 ${sizes.line} ${
+                      index < currentStep
+                        ? 'bg-primary-600 dark:bg-primary-500'
+                        : 'bg-neutral-200 dark:bg-neutral-700'
+                    }`}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <div className="flex-1" />
+                )}
+              </div>
+
+              {/* Label below */}
+              <div className="mt-2">{stepLabel(step, status, true)}</div>
+            </div>
+          );
+        })}
+      </nav>
+    );
+  }
+
+  // Vertical orientation
   return (
     <nav
-      className={` ${orientation === 'horizontal' ? 'flex items-center' : 'flex flex-col'} ${sizes.gap} ${className} `.trim()}
+      className={`flex flex-col ${sizes.gap} ${className}`.trim()}
       aria-label="Progress"
     >
       {steps.map((step, index) => {
@@ -135,85 +254,22 @@ export function StepIndicator({
 
         return (
           <React.Fragment key={step.id}>
-            <div
-              className={`flex items-center ${orientation === 'vertical' ? 'flex-row' : 'flex-col'} ${sizes.gap} `.trim()}
-            >
-              {/* Step Circle */}
-              <button
-                type="button"
-                onClick={() => handleStepClick(index)}
-                disabled={!clickable}
-                className={` ${sizes.circle} flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
-                  step.hasError
-                    ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
-                    : status === 'completed'
-                      ? 'bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white'
-                      : status === 'current'
-                        ? 'bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
-                        : 'bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
-                } `.trim()}
-                aria-current={status === 'current' ? 'step' : undefined}
-              >
-                {step.hasError ? (
-                  <ErrorIcon className="h-4 w-4" />
-                ) : status === 'completed' ? (
-                  step.icon || <CheckIcon className="h-4 w-4" />
-                ) : (
-                  step.icon || (
-                    <span
-                      className={
-                        status === 'current'
-                          ? 'text-white'
-                          : 'text-neutral-500 dark:text-neutral-300'
-                      }
-                    >
-                      {index + 1}
-                    </span>
-                  )
-                )}
-              </button>
-
-              {/* Step Label */}
-              <div
-                className={` ${orientation === 'horizontal' ? 'text-center' : 'flex-1'} ${sizes.text} `.trim()}
-              >
-                <p
-                  className={`font-medium ${
-                    step.hasError
-                      ? 'text-red-600 dark:text-red-400'
-                      : status === 'completed' || status === 'current'
-                        ? 'text-neutral-900 dark:text-white'
-                        : 'text-neutral-500 dark:text-neutral-400'
-                  } `.trim()}
-                >
-                  {step.label}
-                  {step.optional && (
-                    <span className="font-normal text-neutral-500 dark:text-neutral-400">
-                      {' '}
-                      (optional)
-                    </span>
-                  )}
-                </p>
-                {step.description && (
-                  <p className="mt-0.5 text-neutral-500 dark:text-neutral-400">
-                    {step.description}
-                  </p>
-                )}
-              </div>
+            <div className={`flex flex-row items-center ${sizes.gap}`}>
+              {circleButton(step, index, status, clickable)}
+              {stepLabel(step, status, false)}
             </div>
 
-            {/* Connector Line */}
             {!isLast && (
               <div
-                className={` ${orientation === 'horizontal' ? 'flex min-w-8 flex-1 items-center justify-center' : `flex min-h-4 justify-center ${size === 'sm' ? 'w-6' : size === 'lg' ? 'w-10' : 'w-8'}`}`.trim()}
+                className={`flex min-h-4 justify-center ${size === 'sm' ? 'w-6' : size === 'lg' ? 'w-10' : 'w-8'}`}
                 aria-hidden="true"
               >
                 <div
-                  className={` ${orientation === 'horizontal' ? 'w-full' : 'h-full min-h-4'} ${sizes.line} ${
+                  className={`h-full min-h-4 ${sizes.line} ${
                     index < currentStep
                       ? 'bg-primary-600 dark:bg-primary-500'
                       : 'bg-neutral-200 dark:bg-neutral-700'
-                  } `.trim()}
+                  }`}
                 />
               </div>
             )}
