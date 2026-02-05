@@ -585,8 +585,10 @@ export function ResultsEntryModal({
  * @deprecated Use ResultsEntryModal instead. This wrapper provides backward
  * compatibility with the old isOpen/onClose API.
  */
-export interface ResultsEntryCardProps
-  extends Omit<ResultsEntryModalProps, 'open' | 'onOpenChange'> {
+export interface ResultsEntryCardProps extends Omit<
+  ResultsEntryModalProps,
+  'open' | 'onOpenChange'
+> {
   /** Legacy prop: whether the card/modal is open */
   isOpen: boolean;
   /** Legacy prop: called when the card/modal requests to close */
