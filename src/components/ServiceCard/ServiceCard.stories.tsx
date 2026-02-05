@@ -8,6 +8,81 @@ const meta: Meta<typeof ServiceCard> = {
   parameters: {
     layout: 'centered',
   },
+  argTypes: {
+    id: {
+      control: 'text',
+      description: 'Unique service identifier',
+    },
+    name: {
+      control: 'text',
+      description: 'Service name displayed on the card',
+    },
+    description: {
+      control: 'text',
+      description: 'Optional service description text',
+    },
+    price: {
+      control: 'number',
+      description: 'Base price for the service',
+    },
+    currency: {
+      control: 'select',
+      options: ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
+      description: 'Currency code for price formatting',
+    },
+    currentlyOffered: {
+      control: 'boolean',
+      description: 'Whether the service is currently available',
+    },
+    limitedInventory: {
+      control: 'boolean',
+      description: 'Whether inventory is limited',
+    },
+    inventoryCount: {
+      control: 'number',
+      description: 'Current available inventory count',
+    },
+    inventoryTotal: {
+      control: 'number',
+      description: 'Total inventory capacity',
+    },
+    hasCustomAvailability: {
+      control: 'boolean',
+      description: 'Whether the service has custom availability settings',
+    },
+    customPricingCount: {
+      control: 'number',
+      description: 'Number of custom pricing tiers',
+    },
+    category: {
+      control: 'text',
+      description: 'Service category label',
+    },
+    tags: {
+      control: 'object',
+      description: 'Array of tag labels',
+    },
+    selected: {
+      control: 'boolean',
+      description: 'Whether the card is in selected state',
+    },
+    onClick: {
+      action: 'clicked',
+      description: 'Callback when card is clicked',
+    },
+    onEdit: {
+      action: 'edit',
+      description: 'Callback for edit action',
+    },
+    onManage: {
+      action: 'manage',
+      description: 'Callback for manage action',
+    },
+    onDelete: {
+      action: 'delete',
+      description: 'Callback for delete action',
+    },
+  },
   decorators: [
     (Story) => (
       <div className="w-72">
