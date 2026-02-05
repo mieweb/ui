@@ -143,14 +143,14 @@ export function StepIndicator({
                 type="button"
                 onClick={() => handleStepClick(index)}
                 disabled={!clickable}
-                className={` ${sizes.circle} flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
+                className={` ${sizes.circle} flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
                   step.hasError
                     ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
                     : status === 'completed'
-                      ? 'bg-blue-600 text-white focus:ring-blue-500 dark:bg-blue-500'
+                      ? 'bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white'
                       : status === 'current'
-                        ? 'bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:ring-blue-500'
-                        : 'bg-gray-200 text-gray-500 focus:ring-gray-400 dark:bg-gray-700 dark:text-gray-400'
+                        ? 'bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
+                        : 'bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
                 } `.trim()}
                 aria-current={status === 'current' ? 'step' : undefined}
               >
@@ -159,7 +159,17 @@ export function StepIndicator({
                 ) : status === 'completed' ? (
                   step.icon || <CheckIcon className="h-4 w-4" />
                 ) : (
-                  step.icon || <span>{index + 1}</span>
+                  step.icon || (
+                    <span
+                      className={
+                        status === 'current'
+                          ? 'text-white'
+                          : 'text-neutral-500 dark:text-neutral-300'
+                      }
+                    >
+                      {index + 1}
+                    </span>
+                  )
                 )}
               </button>
 
@@ -172,20 +182,20 @@ export function StepIndicator({
                     step.hasError
                       ? 'text-red-600 dark:text-red-400'
                       : status === 'completed' || status === 'current'
-                        ? 'text-gray-900 dark:text-white'
-                        : 'text-gray-500 dark:text-gray-400'
+                        ? 'text-neutral-900 dark:text-white'
+                        : 'text-neutral-500 dark:text-neutral-400'
                   } `.trim()}
                 >
                   {step.label}
                   {step.optional && (
-                    <span className="font-normal text-gray-500 dark:text-gray-400">
+                    <span className="font-normal text-neutral-500 dark:text-neutral-400">
                       {' '}
                       (optional)
                     </span>
                   )}
                 </p>
                 {step.description && (
-                  <p className="mt-0.5 text-gray-500 dark:text-gray-400">
+                  <p className="mt-0.5 text-neutral-500 dark:text-neutral-400">
                     {step.description}
                   </p>
                 )}
@@ -195,14 +205,14 @@ export function StepIndicator({
             {/* Connector Line */}
             {!isLast && (
               <div
-                className={` ${orientation === 'horizontal' ? 'min-w-8 flex-1' : 'ml-4 min-h-4'} flex items-center justify-center`.trim()}
+                className={` ${orientation === 'horizontal' ? 'flex min-w-8 flex-1 items-center justify-center' : `flex min-h-4 justify-center ${size === 'sm' ? 'w-6' : size === 'lg' ? 'w-10' : 'w-8'}`}`.trim()}
                 aria-hidden="true"
               >
                 <div
                   className={` ${orientation === 'horizontal' ? 'w-full' : 'h-full min-h-4'} ${sizes.line} ${
                     index < currentStep
-                      ? 'bg-blue-600 dark:bg-blue-500'
-                      : 'bg-gray-200 dark:bg-gray-700'
+                      ? 'bg-primary-600 dark:bg-primary-500'
+                      : 'bg-neutral-200 dark:bg-neutral-700'
                   } `.trim()}
                 />
               </div>
