@@ -52,9 +52,15 @@ export interface ResultsEntryData {
   applyToAllServices?: boolean;
 }
 
+/** Ref handle for imperative form control */
+export interface ResultsEntryFormRef {
+  /** Validate and submit the form */
+  submit: () => void;
+}
+
 export interface ResultsEntryFormProps {
-  /** Service name */
-  serviceName: string;
+  /** Service name (used by modal wrapper, not displayed in form) */
+  serviceName?: string;
   /** Employee first name */
   employeeFirstName?: string;
   /** Employee last name */
@@ -117,17 +123,23 @@ export interface ResultsEntryFormProps {
  * />
  * ```
  */
-export function ResultsEntryForm({
-  employeeFirstName,
-  employeeLastName,
-  initialData = {},
-  providerContacts = [],
-  showFileUpload = false,
-  showApplyToAll = true,
-  onSubmit,
-  labels = {},
-  className,
-}: ResultsEntryFormProps) {
+export const ResultsEntryForm = React.forwardRef<
+  ResultsEntryFormRef,
+  ResultsEntryFormProps
+>(function ResultsEntryForm(
+  {
+    employeeFirstName,
+    employeeLastName,
+    initialData = {},
+    providerContacts = [],
+    showFileUpload = false,
+    showApplyToAll = true,
+    onSubmit,
+    labels = {},
+    className,
+  },
+  ref
+) {
   const {
     testResults = 'Test Results',
     passed = 'Passed',
@@ -203,7 +215,7 @@ export function ResultsEntryForm({
   void employeeName;
 
   // Helper to validate and submit
-  const validateAndSubmit = () => {
+  const validateAndSubmit = React.useCallback(() => {
     if (!result) {
       setShowError(true);
       return;
@@ -221,9 +233,26 @@ export function ResultsEntryForm({
         selectedContacts.length > 0 ? selectedContacts : undefined,
       applyToAllServices: applyToAll,
     });
-  };
-  // Expose via void to prevent unused warning - can be used via ref
-  void validateAndSubmit;
+  }, [
+    result,
+    alternateText,
+    dateDrawnValue,
+    dateCompletedValue,
+    recommendations,
+    files,
+    selectedContacts,
+    applyToAll,
+    onSubmit,
+  ]);
+
+  // Expose submit method via ref for parent components
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      submit: validateAndSubmit,
+    }),
+    [validateAndSubmit]
+  );
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -429,7 +458,7 @@ export function ResultsEntryForm({
       )}
     </div>
   );
-}
+});
 
 // ============================================================================
 // ResultsEntryModal - Pre-built modal wrapper
@@ -463,30 +492,16 @@ export function ResultsEntryModal({
   ...props
 }: ResultsEntryModalProps) {
   const { submit = 'Submit', close = 'Close' } = labels;
-  const formRef = React.useRef<HTMLFormElement>(null);
-  const [formData, setFormData] = React.useState<ResultsEntryData | null>(null);
+  const formRef = React.useRef<ResultsEntryFormRef>(null);
 
   const employeeName =
     employeeFirstName || employeeLastName
       ? `${employeeFirstName ?? ''} ${employeeLastName ?? ''}`.trim()
       : undefined;
 
-  // Handle form data from ResultsEntryForm
-  const handleFormSubmit = (data: ResultsEntryData) => {
-    setFormData(data);
-  };
-
-  // Submit when formData is set
-  React.useEffect(() => {
-    if (formData) {
-      onSubmit(formData);
-      setFormData(null);
-    }
-  }, [formData, onSubmit]);
-
   const handleSubmitClick = () => {
-    // Trigger form validation and submission
-    formRef.current?.requestSubmit();
+    // Trigger form validation and submission via ref
+    formRef.current?.submit();
   };
 
   return (
@@ -506,16 +521,14 @@ export function ResultsEntryModal({
             </p>
           </div>
         )}
-        <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
-          <ResultsEntryForm
-            serviceName={serviceName}
-            employeeFirstName={employeeFirstName}
-            employeeLastName={employeeLastName}
-            onSubmit={handleFormSubmit}
-            labels={labels}
-            {...props}
-          />
-        </form>
+        <ResultsEntryForm
+          ref={formRef}
+          employeeFirstName={employeeFirstName}
+          employeeLastName={employeeLastName}
+          onSubmit={onSubmit}
+          labels={labels}
+          {...props}
+        />
       </ModalBody>
 
       <ModalFooter>
@@ -564,7 +577,42 @@ export function ResultsEntryModal({
   );
 }
 
-// Legacy alias for backwards compatibility
-export const ResultsEntryCard = ResultsEntryModal;
+// ============================================================================
+// Legacy ResultsEntryCard - Backward compatible wrapper
+// ============================================================================
+
+/**
+ * @deprecated Use ResultsEntryModal instead. This wrapper provides backward
+ * compatibility with the old isOpen/onClose API.
+ */
+export interface ResultsEntryCardProps
+  extends Omit<ResultsEntryModalProps, 'open' | 'onOpenChange'> {
+  /** Legacy prop: whether the card/modal is open */
+  isOpen: boolean;
+  /** Legacy prop: called when the card/modal requests to close */
+  onClose: () => void;
+}
+
+/**
+ * @deprecated Use ResultsEntryModal instead.
+ * Legacy wrapper that translates the old isOpen/onClose API to the new open/onOpenChange API.
+ */
+export function ResultsEntryCard({
+  isOpen,
+  onClose,
+  ...restProps
+}: ResultsEntryCardProps) {
+  return (
+    <ResultsEntryModal
+      open={isOpen}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose();
+        }
+      }}
+      {...restProps}
+    />
+  );
+}
 
 export default ResultsEntryForm;
