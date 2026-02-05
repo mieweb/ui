@@ -18,7 +18,7 @@ const meta: Meta<typeof ServicePicker> = {
   },
   decorators: [
     (Story) => (
-      <div className="h-[500px] w-[400px] overflow-hidden rounded-lg border">
+      <div className="border-border h-[500px] w-[400px] overflow-hidden rounded-lg border">
         <Story />
       </div>
     ),
