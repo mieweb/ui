@@ -99,90 +99,99 @@ export function TimelineProgress({
 
   return (
     <div
-      className={cn('flex items-start overflow-x-auto py-4', className)}
+      className={cn('py-4', className)}
       role="progressbar"
       aria-valuenow={currentIndex + 1}
       aria-valuemin={1}
       aria-valuemax={visibleSteps.length}
     >
-      {visibleSteps.map((step, index) => {
-        const state = getStepState(index);
-        const isLast = index === visibleSteps.length - 1;
+      {/* Progress track with circles overlaid */}
+      <div className="relative flex items-start">
+        {visibleSteps.map((step, index) => {
+          const state = getStepState(index);
+          const isLast = index === visibleSteps.length - 1;
 
-        return (
-          <div
-            key={step.key}
-            className={cn(
-              'flex flex-1 flex-col items-center',
-              !isLast && 'mr-2'
-            )}
-          >
-            {/* Timestamp above */}
-            {showTimestamps && (
-              <div className="mb-1 h-5 text-center text-xs text-gray-500">
-                {step.completedAt
-                  ? formatTimestamp(step.completedAt)
-                  : '\u00A0'}
-              </div>
-            )}
+          return (
+            <div key={step.key} className="flex flex-1 flex-col items-center">
+              {/* Timestamp above */}
+              {showTimestamps && (
+                <div className="mb-2 h-4 text-center text-xs text-neutral-500 dark:text-neutral-400">
+                  {step.completedAt
+                    ? formatTimestamp(step.completedAt)
+                    : '\u00A0'}
+                </div>
+              )}
 
-            {/* Progress bar and point */}
-            <div className="flex w-full items-center">
-              {/* Left bar */}
-              <div
-                className={cn(
-                  'h-1 flex-1',
-                  index === 0 ? 'bg-transparent' : '',
-                  state === 'completed' || (state === 'current' && index > 0)
-                    ? 'bg-brand-500'
-                    : 'bg-gray-200 dark:bg-gray-700'
+              {/* Track + circle row */}
+              <div className="relative flex w-full items-center">
+                {/* Left connector */}
+                {index > 0 && (
+                  <div
+                    className={cn(
+                      'h-0.5 flex-1',
+                      state === 'completed' || state === 'current'
+                        ? 'bg-primary-500 dark:bg-primary-400'
+                        : 'bg-neutral-200 dark:bg-neutral-700'
+                    )}
+                  />
                 )}
-              />
+                {index === 0 && <div className="flex-1" />}
 
-              {/* Point */}
+                {/* Circle — fixed outer box so connectors stay level */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+                  <div
+                    className={cn(
+                      'relative z-10 flex items-center justify-center rounded-full transition-all duration-200',
+                      state === 'completed' &&
+                        'bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 h-8 w-8 ring-2',
+                      state === 'current' &&
+                        'bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 h-10 w-10 text-white shadow-md ring-4',
+                      state === 'pending' &&
+                        'h-8 w-8 bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700'
+                    )}
+                  >
+                    {state === 'completed' && <CheckIcon className="h-4 w-4" />}
+                    {state === 'current' && (
+                      <div className="h-2.5 w-2.5 rounded-full bg-white" />
+                    )}
+                    {state === 'pending' && (
+                      <div className="h-2 w-2 rounded-full bg-neutral-300 dark:bg-neutral-600" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Right connector */}
+                {!isLast && (
+                  <div
+                    className={cn(
+                      'h-0.5 flex-1',
+                      state === 'completed'
+                        ? 'bg-primary-500 dark:bg-primary-400'
+                        : 'bg-neutral-200 dark:bg-neutral-700'
+                    )}
+                  />
+                )}
+                {isLast && <div className="flex-1" />}
+              </div>
+
+              {/* Label below */}
               <div
                 className={cn(
-                  'relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2',
+                  'mt-2.5 text-center text-xs font-medium capitalize',
                   state === 'completed' &&
-                    'border-brand-500 bg-brand-500 text-white',
+                    'text-primary-700 dark:text-primary-300',
                   state === 'current' &&
-                    'border-brand-500 bg-white dark:bg-gray-900',
+                    'font-semibold text-neutral-900 dark:text-white',
                   state === 'pending' &&
-                    'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900'
+                    'text-neutral-400 dark:text-neutral-500'
                 )}
               >
-                {state === 'completed' && <CheckIcon className="h-3 w-3" />}
-                {state === 'current' && (
-                  <div className="bg-brand-500 h-2 w-2 rounded-full" />
-                )}
+                {step.label}
               </div>
-
-              {/* Right bar */}
-              <div
-                className={cn(
-                  'h-1 flex-1',
-                  isLast ? 'bg-transparent' : '',
-                  state === 'completed'
-                    ? 'bg-brand-500'
-                    : 'bg-gray-200 dark:bg-gray-700'
-                )}
-              />
             </div>
-
-            {/* Label below */}
-            <div
-              className={cn(
-                'mt-2 text-center text-xs font-medium capitalize',
-                state === 'completed' && 'text-brand-600 dark:text-brand-400',
-                state === 'current' && 'text-gray-900 dark:text-gray-100',
-                state === 'pending' && 'text-gray-400 dark:text-gray-500'
-              )}
-            >
-              {step.label}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -264,73 +273,78 @@ export function TimelineEventList({
   const getEventColor = (type: TimelineEvent['type']): string => {
     switch (type) {
       case 'message':
-        return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue-50 text-blue-500 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40';
       case 'status':
-        return 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400';
+        return 'bg-green-50 text-green-500 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40';
       case 'attachment':
-        return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+        return 'bg-purple-50 text-purple-500 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40';
       case 'assignment':
-        return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400';
+        return 'bg-orange-50 text-orange-500 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40';
       case 'note':
-        return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+        return 'bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40';
       default:
-        return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+        return 'bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40';
     }
   };
 
   if (events.length === 0) {
     return (
-      <div className={cn('py-8 text-center text-gray-500', className)}>
+      <div className={cn('py-8 text-center text-neutral-500', className)}>
         No activity yet.
       </div>
     );
   }
 
   return (
-    <div className={cn('space-y-4', className)}>
-      {events.map((event, index) => (
-        <div key={event.id} className="relative flex gap-4">
-          {/* Vertical line */}
-          {index < events.length - 1 && (
-            <div className="absolute top-10 left-5 h-full w-px bg-gray-200 dark:bg-gray-700" />
-          )}
+    <div className={cn('relative', className)}>
+      {/* Continuous vertical connector line */}
+      {events.length > 1 && (
+        <div
+          className="absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700"
+          aria-hidden="true"
+        />
+      )}
 
-          {/* Icon */}
-          <div
-            className={cn(
-              'relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
-              getEventColor(event.type)
-            )}
-          >
-            {getEventIcon(event.type)}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 pt-1">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                  {event.title}
-                </h4>
-                {event.author && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    by {event.author}
-                  </p>
-                )}
-              </div>
-              <time className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
-                {formatTime(event.timestamp)}
-              </time>
+      <div className="space-y-6">
+        {events.map((event) => (
+          <div key={event.id} className="relative flex gap-4">
+            {/* Icon circle */}
+            <div
+              className={cn(
+                'relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-2',
+                getEventColor(event.type)
+              )}
+            >
+              {getEventIcon(event.type)}
             </div>
 
-            {event.content && (
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                {event.content}
-              </p>
-            )}
+            {/* Content */}
+            <div className="flex-1 pt-0.5">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h4 className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    {event.title}
+                  </h4>
+                  {event.author && (
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                      by {event.author}
+                    </p>
+                  )}
+                </div>
+                <time className="shrink-0 pt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
+                  {formatTime(event.timestamp)}
+                </time>
+              </div>
+
+              {event.content && (
+                <p className="mt-1.5 text-sm text-neutral-600 dark:text-neutral-300">
+                  {event.content}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -385,7 +399,7 @@ export function OrderConfirmation({
       aria-modal="true"
       aria-labelledby="order-confirmation-title"
     >
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-800">
         {/* Success animation */}
         <div className="mb-6 flex justify-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
@@ -398,19 +412,19 @@ export function OrderConfirmation({
         {/* Title */}
         <h2
           id="order-confirmation-title"
-          className="mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-100"
+          className="mb-2 text-center text-2xl font-bold text-neutral-900 dark:text-neutral-100"
         >
           Order Submitted!
         </h2>
 
         {orderNumber && (
-          <p className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p className="mb-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
             Order #{orderNumber}
           </p>
         )}
 
         {/* Message */}
-        <p className="mb-6 text-center text-gray-600 dark:text-gray-300">
+        <p className="mb-6 text-center text-neutral-600 dark:text-neutral-300">
           {message}
         </p>
 
@@ -420,8 +434,8 @@ export function OrderConfirmation({
           onClick={onClose}
           className={cn(
             'w-full rounded-lg px-4 py-3 font-medium',
-            'bg-brand-600 hover:bg-brand-700 text-white',
-            'dark:bg-brand-500 dark:hover:bg-brand-600',
+            'bg-primary-600 hover:bg-primary-700 text-white',
+            'dark:bg-primary-500 dark:hover:bg-primary-600',
             'transition-colors'
           )}
         >
