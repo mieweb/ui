@@ -1,6 +1,7 @@
 export {
   ResultsEntryForm,
-  ResultsEntryCard,
+  ResultsEntryModal,
+  ResultsEntryCard, // Legacy alias
   default,
 } from './ResultsEntryForm';
 
