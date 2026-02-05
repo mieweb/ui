@@ -1,7 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
@@ -117,7 +123,7 @@ export function SetupServiceModal({
           <ModalTitle>{title}</ModalTitle>
         </ModalHeader>
 
-        <div className="space-y-4">
+        <ModalBody className="min-w-[320px] space-y-4">
           {/* Error message */}
           {errorMessage && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
@@ -157,13 +163,13 @@ export function SetupServiceModal({
           <div>
             <label
               htmlFor="setup-service-description"
-              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="text-foreground mb-1 block text-sm font-medium"
             >
               Description
             </label>
             <textarea
               id="setup-service-description"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
               rows={3}
               value={formData.description}
               onChange={(e) =>
@@ -196,12 +202,12 @@ export function SetupServiceModal({
           <div>
             <label
               htmlFor="setup-service-price"
-              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="text-foreground mb-1 block text-sm font-medium"
             >
               Base Price
             </label>
             <div className="relative">
-              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                 $
               </span>
               <input
@@ -209,7 +215,7 @@ export function SetupServiceModal({
                 type="number"
                 min="0"
                 step="0.01"
-                className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
                 value={formData.price}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -225,16 +231,17 @@ export function SetupServiceModal({
 
           {/* Toggles */}
           <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-foreground text-sm font-medium">
                   Currently Offered
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground text-xs">
                   Service is available for orders
                 </p>
               </div>
               <Switch
+                className="flex-shrink-0"
                 checked={formData.currentlyOffered}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({
@@ -245,16 +252,17 @@ export function SetupServiceModal({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-foreground text-sm font-medium">
                   Limited Inventory
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground text-xs">
                   Track inventory for this service
                 </p>
               </div>
               <Switch
+                className="flex-shrink-0"
                 checked={formData.limitedInventory}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({
@@ -266,7 +274,7 @@ export function SetupServiceModal({
             </div>
 
             {formData.limitedInventory && (
-              <div className="ml-4 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
+              <div className="border-border ml-4 border-l-2 pl-4">
                 <Input
                   label="Initial Inventory"
                   type="number"
@@ -283,16 +291,17 @@ export function SetupServiceModal({
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-foreground text-sm font-medium">
                   Auto-Accept Referrals
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground text-xs">
                   Automatically accept incoming referrals
                 </p>
               </div>
               <Switch
+                className="flex-shrink-0"
                 checked={formData.autoAcceptReferrals}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({
@@ -303,7 +312,7 @@ export function SetupServiceModal({
               />
             </div>
           </div>
-        </div>
+        </ModalBody>
 
         <ModalFooter>
           <Button

@@ -6,8 +6,24 @@ const meta: Meta<typeof SetupServiceModal> = {
   title: 'Components/SetupServiceModal',
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
+    docs: {
+      story: {
+        inline: true,
+        iframeHeight: 700,
+      },
+    },
   },
+  decorators: [
+    (Story) => (
+      <div
+        className="flex min-h-[700px] items-center justify-center p-8"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   argTypes: {
     onOpenChange: { action: 'onOpenChange' },
     onSave: { action: 'onSave' },
@@ -37,6 +53,8 @@ export const Default: Story = {
     open: true,
     title: 'Add New Service',
     categories: mockCategories,
+    availableServices: mockServices,
+    showServicePicker: false,
   },
 };
 
