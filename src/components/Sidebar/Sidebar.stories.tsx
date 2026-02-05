@@ -462,7 +462,13 @@ export const Default: Story = {
 
 export const Collapsible: Story = {
   render: (args) => (
-    <SidebarProvider defaultExpandedGroup="main">
+    <SidebarProvider
+      defaultExpandedGroup={
+        args.defaultExpandedGroup === 'none'
+          ? undefined
+          : args.defaultExpandedGroup
+      }
+    >
       <div className={args.darkMode ? 'dark' : ''}>
         <CollapsibleDemo />
       </div>
@@ -472,11 +478,19 @@ export const Collapsible: Story = {
     showSearch: false,
     showBadges: false,
   },
+  argTypes: {
+    // Hide controls that don't apply to the CollapsibleDemo
+    expandedWidth: { table: { disable: true } },
+    collapsedWidth: { table: { disable: true } },
+    showSearch: { table: { disable: true } },
+    showBadges: { table: { disable: true } },
+    defaultExpandedGroup: { table: { disable: true } },
+  },
   parameters: {
     docs: {
       description: {
         story:
-          'The sidebar can be collapsed to save screen space. Icons remain visible in collapsed state.',
+          'The sidebar can be collapsed to save screen space. Icons remain visible in collapsed state. This demo uses flat navigation without groups to focus on the collapse behavior.',
       },
     },
   },
