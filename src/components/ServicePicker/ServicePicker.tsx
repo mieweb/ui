@@ -436,21 +436,41 @@ function ServiceItem({
         )}
       >
         {multiple ? (
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={onToggle}
-            disabled={service.disabled}
-            className="text-primary focus:ring-primary border-border h-4 w-4 rounded"
-          />
+          <span className="relative inline-flex shrink-0 items-center justify-center">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onToggle}
+              disabled={service.disabled}
+              className={cn(
+                'peer h-4 w-4 shrink-0 appearance-none rounded',
+                'border-input bg-background border-2',
+                'cursor-pointer transition-all duration-150',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                'disabled:cursor-not-allowed disabled:opacity-50',
+                'checked:bg-primary-500 checked:border-primary-500'
+              )}
+            />
+            <CheckIcon className="pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
+          </span>
         ) : (
-          <input
-            type="radio"
-            checked={selected}
-            onChange={onToggle}
-            disabled={service.disabled}
-            className="text-primary focus:ring-primary border-border h-4 w-4"
-          />
+          <span className="relative inline-flex shrink-0 items-center justify-center">
+            <input
+              type="radio"
+              checked={selected}
+              onChange={onToggle}
+              disabled={service.disabled}
+              className={cn(
+                'peer h-4 w-4 shrink-0 appearance-none rounded-full',
+                'border-input bg-background border-2',
+                'cursor-pointer transition-all duration-150',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                'disabled:cursor-not-allowed disabled:opacity-50',
+                'checked:border-primary-500'
+              )}
+            />
+            <span className="bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" />
+          </span>
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -482,6 +502,20 @@ function ServiceItem({
 // ============================================================================
 // Icons
 // ============================================================================
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={3}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
 
 function SearchIcon({ className }: { className?: string }) {
   return (
