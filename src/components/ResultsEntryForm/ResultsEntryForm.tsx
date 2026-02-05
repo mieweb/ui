@@ -598,12 +598,20 @@ export interface ResultsEntryCardProps extends Omit<
 /**
  * @deprecated Use ResultsEntryModal instead.
  * Legacy wrapper that translates the old isOpen/onClose API to the new open/onOpenChange API.
+ * Also maintains the old behavior of auto-closing after submit.
  */
 export function ResultsEntryCard({
   isOpen,
   onClose,
+  onSubmit,
   ...restProps
 }: ResultsEntryCardProps) {
+  // Wrap onSubmit to auto-close after submit (old behavior)
+  const handleSubmit = (data: ResultsEntryData) => {
+    onSubmit(data);
+    onClose();
+  };
+
   return (
     <ResultsEntryModal
       open={isOpen}
@@ -612,6 +620,7 @@ export function ResultsEntryCard({
           onClose();
         }
       }}
+      onSubmit={handleSubmit}
       {...restProps}
     />
   );

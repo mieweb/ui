@@ -48,7 +48,8 @@ const meta: Meta<typeof ResultsEntryForm> = {
   argTypes: {
     serviceName: {
       control: 'text',
-      description: 'Service name displayed in the form header',
+      description:
+        'Service name (used by modal wrapper, not displayed in form)',
     },
     employeeFirstName: {
       control: 'text',
