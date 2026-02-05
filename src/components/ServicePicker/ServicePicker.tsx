@@ -223,19 +223,21 @@ export function ServicePicker({
 
   return (
     <div
-      className={cn('flex flex-col', !fullWidth && 'lg:max-w-md', className)}
+      className={cn(
+        'bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border',
+        !fullWidth && 'lg:max-w-md',
+        className
+      )}
     >
       <div className="p-3">
         {!hideHeading && (
-          <h2 className="mb-3 text-xl font-bold text-gray-900 dark:text-gray-100">
-            {heading}
-          </h2>
+          <h2 className="text-foreground mb-3 text-xl font-bold">{heading}</h2>
         )}
 
         {showSearch && (
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <SearchIcon className="h-5 w-5 text-gray-400" />
+              <SearchIcon className="text-muted-foreground h-5 w-5" />
             </div>
             <Input
               type="search"
@@ -251,13 +253,13 @@ export function ServicePicker({
 
       <div className="flex-1 overflow-y-auto p-3">
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+          <div className="bg-destructive/10 text-destructive mb-4 rounded-lg p-4">
             <strong>{error}</strong>
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center gap-2 text-gray-500">
+          <div className="text-muted-foreground flex items-center gap-2">
             <SpinnerIcon className="h-5 w-5 animate-spin" />
             <span>Loading available services...</span>
           </div>
@@ -276,7 +278,7 @@ export function ServicePicker({
               ))
             ) : (
               <li>
-                <div className="rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
+                <div className="bg-muted text-muted-foreground rounded-lg p-4">
                   <strong>{emptyMessage}</strong>
                 </div>
               </li>
@@ -300,7 +302,7 @@ export function ServicePicker({
               ))
             ) : (
               <li>
-                <div className="rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
+                <div className="bg-muted text-muted-foreground rounded-lg p-4">
                   <strong>{emptyMessage}</strong>
                 </div>
               </li>
@@ -349,10 +351,10 @@ function ServiceGroupItem({
         onClick={() => onToggleGroup(group.id)}
         className={cn(
           'flex w-full items-center justify-between rounded-lg px-3 py-2',
-          'text-left text-sm font-medium',
-          'hover:bg-gray-100 dark:hover:bg-gray-800',
+          'text-muted-foreground text-left text-sm font-medium',
+          'hover:bg-muted',
           'transition-colors',
-          depth > 0 && 'ml-4 text-gray-600 dark:text-gray-400'
+          depth > 0 && 'ml-4'
         )}
         aria-expanded={isExpanded}
       >
@@ -360,14 +362,14 @@ function ServiceGroupItem({
           <span>{group.name}</span>
           {hasSelection && (
             <span
-              className="bg-brand-500 h-2 w-2 rounded-full"
+              className="bg-primary h-2 w-2 rounded-full"
               aria-label="Has selected items"
             />
           )}
         </span>
         <ChevronIcon
           className={cn(
-            'h-5 w-5 transition-transform',
+            'text-muted-foreground h-5 w-5 transition-transform',
             isExpanded && 'rotate-180'
           )}
         />
@@ -428,47 +430,67 @@ function ServiceItem({
       <label
         className={cn(
           'flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2',
-          'hover:bg-gray-100 dark:hover:bg-gray-800',
+          'hover:bg-muted',
           'transition-colors',
           service.disabled && 'cursor-not-allowed opacity-50'
         )}
       >
         {multiple ? (
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={onToggle}
-            disabled={service.disabled}
-            className="text-brand-600 focus:ring-brand-500 h-4 w-4 rounded border-gray-300"
-          />
+          <span className="relative inline-flex shrink-0 items-center justify-center">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onToggle}
+              disabled={service.disabled}
+              className={cn(
+                'peer h-4 w-4 shrink-0 appearance-none rounded',
+                'border-input bg-background border-2',
+                'cursor-pointer transition-all duration-150',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                'disabled:cursor-not-allowed disabled:opacity-50',
+                'checked:bg-primary-500 checked:border-primary-500'
+              )}
+            />
+            <CheckIcon className="pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
+          </span>
         ) : (
-          <input
-            type="radio"
-            checked={selected}
-            onChange={onToggle}
-            disabled={service.disabled}
-            className="text-brand-600 focus:ring-brand-500 h-4 w-4 border-gray-300"
-          />
+          <span className="relative inline-flex shrink-0 items-center justify-center">
+            <input
+              type="radio"
+              checked={selected}
+              onChange={onToggle}
+              disabled={service.disabled}
+              className={cn(
+                'peer h-4 w-4 shrink-0 appearance-none rounded-full',
+                'border-input bg-background border-2',
+                'cursor-pointer transition-all duration-150',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                'disabled:cursor-not-allowed disabled:opacity-50',
+                'checked:border-primary-500'
+              )}
+            />
+            <span className="bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" />
+          </span>
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <span className="text-foreground text-sm font-medium">
               {service.name}
             </span>
             {service.code && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-muted-foreground text-xs">
                 ({service.code})
               </span>
             )}
           </div>
           {service.description && (
-            <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground truncate text-xs">
               {service.description}
             </p>
           )}
         </div>
         {service.price !== undefined && (
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-foreground text-sm font-medium">
             ${service.price.toFixed(2)}
           </span>
         )}
@@ -480,6 +502,20 @@ function ServiceItem({
 // ============================================================================
 // Icons
 // ============================================================================
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={3}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
 
 function SearchIcon({ className }: { className?: string }) {
   return (
