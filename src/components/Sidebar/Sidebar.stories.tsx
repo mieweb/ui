@@ -163,117 +163,6 @@ function UserFooter() {
   );
 }
 
-function SidebarDemoContent() {
-  const [activePage, setActivePage] = useState('dashboard');
-  const [searchQuery, setSearchQuery] = useState('');
-  const { isCollapsed, isMobileViewport } = useSidebar();
-  const showCollapsed = !isMobileViewport && isCollapsed;
-
-  return (
-    <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-950">
-      <Sidebar>
-        <SidebarHeader>
-          <AppLogo />
-        </SidebarHeader>
-
-        <SidebarContent>
-          {!showCollapsed && (
-            <SidebarSearch
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search menu"
-            />
-          )}
-
-          <SidebarNav>
-            <SidebarNavGroup
-              label="Main"
-              icon={<HomeIcon />}
-              groupId="main"
-              defaultExpanded
-            >
-              <SidebarNavItem
-                label="Dashboard"
-                icon={<HomeIcon />}
-                isActive={activePage === 'dashboard'}
-                onClick={() => setActivePage('dashboard')}
-              />
-              <SidebarNavItem
-                label="Analytics"
-                icon={<ChartIcon />}
-                isActive={activePage === 'analytics'}
-                onClick={() => setActivePage('analytics')}
-                badge={12}
-              />
-            </SidebarNavGroup>
-
-            <SidebarNavGroup
-              label="Management"
-              icon={<UsersIcon />}
-              groupId="management"
-            >
-              <SidebarNavItem
-                label="Users"
-                icon={<UsersIcon />}
-                isActive={activePage === 'users'}
-                onClick={() => setActivePage('users')}
-              />
-              <SidebarNavItem
-                label="Projects"
-                icon={<FolderIcon />}
-                isActive={activePage === 'projects'}
-                onClick={() => setActivePage('projects')}
-              />
-            </SidebarNavGroup>
-
-            <SidebarNavGroup
-              label="Settings"
-              icon={<CogIcon />}
-              groupId="settings"
-            >
-              <SidebarNavItem
-                label="General"
-                icon={<CogIcon />}
-                isActive={activePage === 'general'}
-                onClick={() => setActivePage('general')}
-              />
-              <SidebarNavItem
-                label="Security"
-                isActive={activePage === 'security'}
-                onClick={() => setActivePage('security')}
-              />
-            </SidebarNavGroup>
-          </SidebarNav>
-        </SidebarContent>
-
-        <SidebarFooter>
-          <UserFooter />
-        </SidebarFooter>
-      </Sidebar>
-
-      {/* Main content area */}
-      <div className="flex-1 p-6">
-        <div className="mb-6 flex items-center gap-4">
-          <SidebarMobileToggle />
-          <h1 className="text-xl font-semibold text-neutral-900 capitalize dark:text-white">
-            {activePage}
-          </h1>
-        </div>
-        <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-          <p className="text-neutral-600 dark:text-neutral-400">
-            Content for the {activePage} page goes here. Click navigation items
-            to change pages.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SidebarDemo() {
-  return <SidebarDemoContent />;
-}
-
 // Collapse toggle button that works in both states
 function CollapseToggle() {
   const { isCollapsed, toggleCollapsed, isMobileViewport } = useSidebar();
@@ -348,10 +237,146 @@ function CollapsibleDemo() {
 }
 
 // =============================================================================
+// Types for Stories
+// =============================================================================
+
+interface SidebarStoryArgs {
+  /** Width when expanded */
+  expandedWidth: string;
+  /** Width when collapsed */
+  collapsedWidth: string;
+  /** Show search in sidebar */
+  showSearch: boolean;
+  /** Default expanded group */
+  defaultExpandedGroup: string;
+  /** Show badges on nav items */
+  showBadges: boolean;
+  /** Dark mode simulation */
+  darkMode: boolean;
+}
+
+// =============================================================================
+// Configurable Demo Components
+// =============================================================================
+
+function ConfigurableSidebarDemo({
+  expandedWidth,
+  collapsedWidth,
+  showSearch,
+  showBadges,
+}: Omit<SidebarStoryArgs, 'defaultExpandedGroup' | 'darkMode'>) {
+  const [activePage, setActivePage] = useState('dashboard');
+  const [searchQuery, setSearchQuery] = useState('');
+  const { isCollapsed, isMobileViewport } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+
+  return (
+    <div className="flex h-[600px] w-full overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-950">
+      <Sidebar expandedWidth={expandedWidth} collapsedWidth={collapsedWidth}>
+        <SidebarHeader>
+          <AppLogo />
+        </SidebarHeader>
+
+        <SidebarContent>
+          {showSearch && !showCollapsed && (
+            <SidebarSearch
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search menu"
+            />
+          )}
+
+          <SidebarNav>
+            <SidebarNavGroup
+              label="Main"
+              icon={<HomeIcon />}
+              groupId="main"
+              defaultExpanded
+            >
+              <SidebarNavItem
+                label="Dashboard"
+                icon={<HomeIcon />}
+                isActive={activePage === 'dashboard'}
+                onClick={() => setActivePage('dashboard')}
+              />
+              <SidebarNavItem
+                label="Analytics"
+                icon={<ChartIcon />}
+                isActive={activePage === 'analytics'}
+                onClick={() => setActivePage('analytics')}
+                badge={showBadges ? 12 : undefined}
+              />
+            </SidebarNavGroup>
+
+            <SidebarNavGroup
+              label="Management"
+              icon={<UsersIcon />}
+              groupId="management"
+            >
+              <SidebarNavItem
+                label="Users"
+                icon={<UsersIcon />}
+                isActive={activePage === 'users'}
+                onClick={() => setActivePage('users')}
+                badge={showBadges ? 3 : undefined}
+              />
+              <SidebarNavItem
+                label="Projects"
+                icon={<FolderIcon />}
+                isActive={activePage === 'projects'}
+                onClick={() => setActivePage('projects')}
+              />
+            </SidebarNavGroup>
+
+            <SidebarNavGroup
+              label="Settings"
+              icon={<CogIcon />}
+              groupId="settings"
+            >
+              <SidebarNavItem
+                label="General"
+                icon={<CogIcon />}
+                isActive={activePage === 'general'}
+                onClick={() => setActivePage('general')}
+              />
+              <SidebarNavItem
+                label="Security"
+                isActive={activePage === 'security'}
+                onClick={() => setActivePage('security')}
+              />
+            </SidebarNavGroup>
+          </SidebarNav>
+        </SidebarContent>
+
+        <SidebarFooter>
+          <UserFooter />
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Main content area */}
+      <div className="flex-1 p-6">
+        <div className="mb-6 flex items-center gap-4">
+          <SidebarMobileToggle />
+          <h1 className="text-xl font-semibold text-neutral-900 capitalize dark:text-white">
+            {activePage}
+          </h1>
+        </div>
+        <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
+          <p className="text-neutral-600 dark:text-neutral-400">
+            Content for the {activePage} page goes here. Click navigation items
+            to change pages.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
 // Meta
 // =============================================================================
 
-const meta: Meta<typeof Sidebar> = {
+const meta: Meta<SidebarStoryArgs> = {
   title: 'Components/Sidebar',
   component: Sidebar,
   parameters: {
@@ -364,40 +389,132 @@ const meta: Meta<typeof Sidebar> = {
     },
   },
   tags: ['autodocs'],
-  decorators: [
-    (Story) => (
-      <SidebarProvider defaultExpandedGroup="main">
-        <Story />
-      </SidebarProvider>
-    ),
-  ],
+  argTypes: {
+    expandedWidth: {
+      control: 'text',
+      description: 'Width when expanded',
+      table: { category: 'Dimensions' },
+    },
+    collapsedWidth: {
+      control: 'text',
+      description: 'Width when collapsed',
+      table: { category: 'Dimensions' },
+    },
+    showSearch: {
+      control: 'boolean',
+      description: 'Show search input in sidebar',
+      table: { category: 'Features' },
+    },
+    defaultExpandedGroup: {
+      control: 'select',
+      options: ['main', 'management', 'settings', 'none'],
+      description: 'Which nav group is expanded by default',
+      table: { category: 'Features' },
+    },
+    showBadges: {
+      control: 'boolean',
+      description: 'Show notification badges on nav items',
+      table: { category: 'Features' },
+    },
+    darkMode: {
+      control: 'boolean',
+      description: 'Toggle dark mode preview',
+      table: { category: 'Appearance' },
+    },
+  },
+  args: {
+    expandedWidth: '280px',
+    collapsedWidth: '80px',
+    showSearch: true,
+    defaultExpandedGroup: 'main',
+    showBadges: true,
+    darkMode: false,
+  },
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<SidebarStoryArgs>;
 
 // =============================================================================
 // Stories
 // =============================================================================
 
 export const Default: Story = {
-  render: () => <SidebarDemo />,
+  render: (args) => (
+    <SidebarProvider
+      defaultExpandedGroup={
+        args.defaultExpandedGroup === 'none'
+          ? undefined
+          : args.defaultExpandedGroup
+      }
+    >
+      <div className={args.darkMode ? 'dark' : ''}>
+        <ConfigurableSidebarDemo
+          expandedWidth={args.expandedWidth}
+          collapsedWidth={args.collapsedWidth}
+          showSearch={args.showSearch}
+          showBadges={args.showBadges}
+        />
+      </div>
+    </SidebarProvider>
+  ),
 };
 
 export const Collapsible: Story = {
-  render: () => <CollapsibleDemo />,
+  render: (args) => (
+    <SidebarProvider
+      defaultExpandedGroup={
+        args.defaultExpandedGroup === 'none'
+          ? undefined
+          : args.defaultExpandedGroup
+      }
+    >
+      <div className={args.darkMode ? 'dark' : ''}>
+        <CollapsibleDemo />
+      </div>
+    </SidebarProvider>
+  ),
+  args: {
+    showSearch: false,
+    showBadges: false,
+  },
+  argTypes: {
+    // Hide controls that don't apply to the CollapsibleDemo
+    expandedWidth: { table: { disable: true } },
+    collapsedWidth: { table: { disable: true } },
+    showSearch: { table: { disable: true } },
+    showBadges: { table: { disable: true } },
+    defaultExpandedGroup: { table: { disable: true } },
+  },
   parameters: {
     docs: {
       description: {
         story:
-          'The sidebar can be collapsed to save screen space. Icons remain visible in collapsed state.',
+          'The sidebar can be collapsed to save screen space. Icons remain visible in collapsed state. This demo uses flat navigation without groups to focus on the collapse behavior.',
       },
     },
   },
 };
 
 export const MobileView: Story = {
-  render: () => <SidebarDemo />,
+  render: (args) => (
+    <SidebarProvider
+      defaultExpandedGroup={
+        args.defaultExpandedGroup === 'none'
+          ? undefined
+          : args.defaultExpandedGroup
+      }
+    >
+      <div className={args.darkMode ? 'dark' : ''}>
+        <ConfigurableSidebarDemo
+          expandedWidth={args.expandedWidth}
+          collapsedWidth={args.collapsedWidth}
+          showSearch={args.showSearch}
+          showBadges={args.showBadges}
+        />
+      </div>
+    </SidebarProvider>
+  ),
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
