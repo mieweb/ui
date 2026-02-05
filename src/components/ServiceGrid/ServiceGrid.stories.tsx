@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import { ServiceGrid, ServiceGridProps } from './ServiceGrid';
 
 const meta: Meta<typeof ServiceGrid> = {
@@ -134,10 +133,6 @@ export const Default: Story = {
     isLoading: false,
     skeletonCount: 6,
     emptyMessage: 'No services available',
-    onEdit: action('onEdit'),
-    onManage: action('onManage'),
-    onDelete: action('onDelete'),
-    onAdd: action('onAdd'),
   },
 };
 
@@ -212,7 +207,6 @@ export const EmptyWithAddCard: Story = {
     showAddCard: true,
     columns: 3,
     gap: 'md',
-    onAdd: action('onAdd'),
   },
 };
 
@@ -240,10 +234,6 @@ export const ManyServices: Story = {
     showAddCard: true,
     columns: 4,
     gap: 'md',
-    onEdit: action('onEdit'),
-    onManage: action('onManage'),
-    onDelete: action('onDelete'),
-    onAdd: action('onAdd'),
   },
 };
 
