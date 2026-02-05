@@ -351,10 +351,10 @@ function ServiceGroupItem({
         onClick={() => onToggleGroup(group.id)}
         className={cn(
           'flex w-full items-center justify-between rounded-lg px-3 py-2',
-          'text-foreground text-left text-sm font-medium',
+          'text-muted-foreground text-left text-sm font-medium',
           'hover:bg-muted',
           'transition-colors',
-          depth > 0 && 'text-muted-foreground ml-4'
+          depth > 0 && 'ml-4'
         )}
         aria-expanded={isExpanded}
       >
@@ -369,7 +369,7 @@ function ServiceGroupItem({
         </span>
         <ChevronIcon
           className={cn(
-            'h-5 w-5 transition-transform',
+            'text-muted-foreground h-5 w-5 transition-transform',
             isExpanded && 'rotate-180'
           )}
         />
