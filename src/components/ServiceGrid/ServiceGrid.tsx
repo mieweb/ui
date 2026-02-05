@@ -37,18 +37,18 @@ export interface ServiceGridProps {
 
 function ServiceSkeleton() {
   return (
-    <div className="animate-pulse rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+    <div className="border-border animate-pulse rounded-lg border p-4">
       <div className="mb-3 flex items-start justify-between">
-        <div className="h-5 w-32 rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="h-5 w-16 rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="bg-muted h-5 w-32 rounded" />
+        <div className="bg-muted h-5 w-16 rounded" />
       </div>
       <div className="mb-4 space-y-2">
-        <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="bg-muted h-4 w-full rounded" />
+        <div className="bg-muted h-4 w-3/4 rounded" />
       </div>
       <div className="flex gap-2">
-        <div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700" />
-        <div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700" />
+        <div className="bg-muted h-6 w-20 rounded-full" />
+        <div className="bg-muted h-6 w-20 rounded-full" />
       </div>
     </div>
   );
@@ -105,7 +105,7 @@ export function ServiceGrid({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <svg
-          className="mb-4 h-12 w-12 text-gray-400"
+          className="text-muted-foreground mb-4 h-12 w-12"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -117,7 +117,7 @@ export function ServiceGrid({
             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
           />
         </svg>
-        <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+        <p className="text-muted-foreground">{emptyMessage}</p>
       </div>
     );
   }
