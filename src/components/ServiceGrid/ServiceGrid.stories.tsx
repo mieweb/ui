@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
 import { ServiceGrid, ServiceGridProps } from './ServiceGrid';
 
 const meta: Meta<typeof ServiceGrid> = {
@@ -8,6 +7,58 @@ const meta: Meta<typeof ServiceGrid> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+  },
+  argTypes: {
+    services: {
+      control: 'object',
+      description: 'Array of services to display',
+    },
+    onEdit: {
+      action: 'onEdit',
+      description: 'Handler for editing a service',
+    },
+    onManage: {
+      action: 'onManage',
+      description: 'Handler for managing a service (inventory, pricing, etc.)',
+    },
+    onDelete: {
+      action: 'onDelete',
+      description: 'Handler for deleting a service',
+    },
+    onAdd: {
+      action: 'onAdd',
+      description: 'Handler for adding a new service',
+    },
+    showAddCard: {
+      control: 'boolean',
+      description: 'Whether to show the add card',
+    },
+    isLoading: {
+      control: 'boolean',
+      description: 'Loading state',
+    },
+    skeletonCount: {
+      control: { type: 'number', min: 1, max: 12 },
+      description: 'Number of skeleton cards to show when loading',
+    },
+    emptyMessage: {
+      control: 'text',
+      description: 'Empty state message',
+    },
+    columns: {
+      control: { type: 'select' },
+      options: [1, 2, 3, 4],
+      description: 'Grid columns',
+    },
+    gap: {
+      control: { type: 'select' },
+      options: ['sm', 'md', 'lg'],
+      description: 'Gap between cards',
+    },
+    className: {
+      control: 'text',
+      description: 'Additional class name',
+    },
   },
 };
 
@@ -73,121 +124,124 @@ const sampleServices: ServiceGridProps['services'] = [
   },
 ];
 
-// Interactive demo
-function InteractiveDemo(props: Partial<ServiceGridProps>) {
-  const [services, setServices] = useState(sampleServices);
-
-  const handleAdd = () => {
-    const newId = String(services.length + 1);
-    setServices([
-      ...services,
-      {
-        id: newId,
-        name: `New Service ${newId}`,
-        description: 'A newly added service',
-        price: 50.0,
-        currentlyOffered: true,
-      },
-    ]);
-  };
-
-  const handleDelete = (id: string) => {
-    setServices(services.filter((s) => s.id !== id));
-  };
-
-  const handleEdit = (id: string) => {
-    console.log('Edit service:', id);
-  };
-
-  const handleManage = (id: string) => {
-    console.log('Manage service:', id);
-  };
-
-  return (
-    <ServiceGrid
-      services={services}
-      onAdd={handleAdd}
-      onEdit={handleEdit}
-      onManage={handleManage}
-      onDelete={handleDelete}
-      {...props}
-    />
-  );
-}
-
 export const Default: Story = {
-  render: () => <InteractiveDemo />,
+  args: {
+    services: sampleServices,
+    showAddCard: true,
+    columns: 3,
+    gap: 'md',
+    isLoading: false,
+    skeletonCount: 6,
+    emptyMessage: 'No services available',
+  },
 };
 
 export const TwoColumns: Story = {
-  render: () => <InteractiveDemo columns={2} />,
+  args: {
+    ...Default.args,
+    columns: 2,
+  },
 };
 
 export const FourColumns: Story = {
-  render: () => <InteractiveDemo columns={4} />,
+  args: {
+    ...Default.args,
+    columns: 4,
+  },
 };
 
 export const SmallGap: Story = {
-  render: () => <InteractiveDemo gap="sm" />,
+  args: {
+    ...Default.args,
+    gap: 'sm',
+  },
 };
 
 export const LargeGap: Story = {
-  render: () => <InteractiveDemo gap="lg" />,
+  args: {
+    ...Default.args,
+    gap: 'lg',
+  },
 };
 
 export const WithoutAddCard: Story = {
-  render: () => <InteractiveDemo showAddCard={false} />,
+  args: {
+    ...Default.args,
+    showAddCard: false,
+  },
 };
 
 export const Loading: Story = {
-  render: () => <ServiceGrid services={[]} isLoading skeletonCount={6} />,
+  args: {
+    services: [],
+    isLoading: true,
+    skeletonCount: 6,
+    columns: 3,
+    gap: 'md',
+  },
 };
 
 export const LoadingFourColumns: Story = {
-  render: () => (
-    <ServiceGrid services={[]} isLoading skeletonCount={8} columns={4} />
-  ),
+  args: {
+    services: [],
+    isLoading: true,
+    skeletonCount: 8,
+    columns: 4,
+    gap: 'md',
+  },
 };
 
 export const EmptyState: Story = {
-  render: () => (
-    <ServiceGrid
-      services={[]}
-      showAddCard={false}
-      emptyMessage="No services have been added yet."
-    />
-  ),
+  args: {
+    services: [],
+    showAddCard: false,
+    emptyMessage: 'No services have been added yet.',
+    columns: 3,
+    gap: 'md',
+  },
 };
 
 export const EmptyWithAddCard: Story = {
-  render: () => <InteractiveDemo services={[]} showAddCard />,
   args: {
     services: [],
     showAddCard: true,
+    columns: 3,
+    gap: 'md',
   },
 };
 
 export const FewServices: Story = {
-  render: () => <InteractiveDemo services={sampleServices.slice(0, 2)} />,
+  args: {
+    ...Default.args,
+    services: sampleServices.slice(0, 2),
+  },
 };
 
-export const ManyServices: Story = {
-  render: () => {
-    const manyServices = Array.from({ length: 12 }, (_, i) => ({
-      id: String(i + 1),
-      name: `Service ${i + 1}`,
-      description: `Description for service ${i + 1}`,
-      price: 25 + i * 10,
-      currentlyOffered: i % 4 !== 0,
-      limitedInventory: i % 3 === 0,
-      inventoryCount: i % 3 === 0 ? Math.floor(Math.random() * 20) : undefined,
-      inventoryTotal: i % 3 === 0 ? 20 : undefined,
-    }));
+const manyServices = Array.from({ length: 12 }, (_, i) => ({
+  id: String(i + 1),
+  name: `Service ${i + 1}`,
+  description: `Description for service ${i + 1}`,
+  price: 25 + i * 10,
+  currentlyOffered: i % 4 !== 0,
+  limitedInventory: i % 3 === 0,
+  inventoryCount: i % 3 === 0 ? 10 + i : undefined,
+  inventoryTotal: i % 3 === 0 ? 20 : undefined,
+}));
 
-    return <InteractiveDemo services={manyServices} columns={4} />;
+export const ManyServices: Story = {
+  args: {
+    services: manyServices,
+    showAddCard: true,
+    columns: 4,
+    gap: 'md',
   },
 };
 
 export const ReadOnly: Story = {
-  render: () => <ServiceGrid services={sampleServices} showAddCard={false} />,
+  args: {
+    services: sampleServices,
+    showAddCard: false,
+    columns: 3,
+    gap: 'md',
+  },
 };
