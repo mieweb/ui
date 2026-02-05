@@ -1,7 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
@@ -117,7 +123,7 @@ export function SetupServiceModal({
           <ModalTitle>{title}</ModalTitle>
         </ModalHeader>
 
-        <div className="space-y-4">
+        <ModalBody className="min-w-[320px] space-y-4">
           {/* Error message */}
           {errorMessage && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
@@ -225,8 +231,8 @@ export function SetupServiceModal({
 
           {/* Toggles */}
           <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
                 <p className="text-foreground text-sm font-medium">
                   Currently Offered
                 </p>
@@ -235,6 +241,7 @@ export function SetupServiceModal({
                 </p>
               </div>
               <Switch
+                className="flex-shrink-0"
                 checked={formData.currentlyOffered}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({
@@ -245,8 +252,8 @@ export function SetupServiceModal({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
                 <p className="text-foreground text-sm font-medium">
                   Limited Inventory
                 </p>
@@ -255,6 +262,7 @@ export function SetupServiceModal({
                 </p>
               </div>
               <Switch
+                className="flex-shrink-0"
                 checked={formData.limitedInventory}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({
@@ -283,8 +291,8 @@ export function SetupServiceModal({
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
                 <p className="text-foreground text-sm font-medium">
                   Auto-Accept Referrals
                 </p>
@@ -293,6 +301,7 @@ export function SetupServiceModal({
                 </p>
               </div>
               <Switch
+                className="flex-shrink-0"
                 checked={formData.autoAcceptReferrals}
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({
@@ -303,7 +312,7 @@ export function SetupServiceModal({
               />
             </div>
           </div>
-        </div>
+        </ModalBody>
 
         <ModalFooter>
           <Button
