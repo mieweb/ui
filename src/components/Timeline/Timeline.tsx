@@ -170,7 +170,7 @@ export function TimelineProgress({
 
   return (
     <div
-      className={cn(sizes.padding, className)}
+      className={cn(sizes.padding, 'overflow-x-auto', className)}
       role="progressbar"
       aria-valuenow={currentIndex + 1}
       aria-valuemin={1}
@@ -210,7 +210,7 @@ export function TimelineProgress({
                       state === 'completed' ||
                         state === 'current' ||
                         state === 'error'
-                        ? 'bg-primary-500 dark:bg-primary-400'
+                        ? 'bg-primary-600 dark:bg-primary-500'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     )}
                   />
@@ -280,7 +280,7 @@ export function TimelineProgress({
                       'flex-1',
                       sizes.connector,
                       state === 'completed'
-                        ? 'bg-primary-500 dark:bg-primary-400'
+                        ? 'bg-primary-600 dark:bg-primary-500'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     )}
                   />
