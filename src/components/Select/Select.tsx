@@ -1,7 +1,7 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 // ============================================================================
@@ -144,6 +144,7 @@ function Select({
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const generatedId = React.useId();
   const selectId = id || generatedId;
@@ -208,14 +209,59 @@ function Select({
   // Get selected option
   const selectedOption = flatOptions.find((opt) => opt.value === value);
 
-  // Close dropdown
-  useClickOutside(containerRef, () => setIsOpen(false));
+  // Close dropdown on click outside (handles both container and portaled dropdown)
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
   useEscapeKey(() => {
     if (isOpen) {
       setIsOpen(false);
       triggerRef.current?.focus();
     }
   }, isOpen);
+
+  // Track trigger position for portal dropdown
+  const [dropdownStyle, setDropdownStyle] = React.useState<React.CSSProperties>(
+    {}
+  );
+
+  const updateDropdownPosition = React.useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: 'fixed',
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    updateDropdownPosition();
+
+    window.addEventListener('scroll', updateDropdownPosition, true);
+    window.addEventListener('resize', updateDropdownPosition);
+    return () => {
+      window.removeEventListener('scroll', updateDropdownPosition, true);
+      window.removeEventListener('resize', updateDropdownPosition);
+    };
+  }, [isOpen, updateDropdownPosition]);
 
   // Handle value change
   const handleValueChange = React.useCallback(
@@ -343,104 +389,107 @@ function Select({
           />
         </button>
 
-        {/* Dropdown */}
-        {isOpen && (
-          <div
-            className={cn(
-              'absolute z-50 mt-1 w-full',
-              'border-border bg-card rounded-lg border shadow-lg',
-              'animate-in fade-in zoom-in-95 duration-100'
-            )}
-          >
-            {/* Search Input */}
-            {searchable && (
-              <div className="border-border border-b p-2">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={searchPlaceholder}
-                  className={cn(
-                    'border-input bg-background w-full rounded-md border px-3 py-2 text-sm',
-                    'placeholder:text-muted-foreground',
-                    'focus:ring-ring focus:ring-2 focus:outline-none'
-                  )}
-                  aria-label="Search options"
-                />
-              </div>
-            )}
-
-            {/* Options List */}
-            <ul
-              ref={listRef}
-              id={listboxId}
-              role="listbox"
-              aria-label={label || 'Options'}
-              className="max-h-60 overflow-auto p-1"
-            >
-              {filteredFlatOptions.length === 0 ? (
-                <li className="text-muted-foreground px-3 py-2 text-center text-sm">
-                  {noResultsText}
-                </li>
-              ) : (
-                filteredOptions.map((item) => {
-                  if ('options' in item) {
-                    // Render group
-                    return (
-                      <li key={`group-${item.label}`} role="presentation">
-                        <div className="text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase">
-                          {item.label}
-                        </div>
-                        <ul role="group" aria-label={item.label}>
-                          {item.options.map((option) => (
-                            <SelectOptionItem
-                              key={option.value}
-                              option={option}
-                              isSelected={option.value === value}
-                              isHighlighted={
-                                filteredFlatOptions[highlightedIndex]?.value ===
-                                option.value
-                              }
-                              onSelect={() => handleValueChange(option.value)}
-                              onMouseEnter={() => {
-                                const idx = filteredFlatOptions.findIndex(
-                                  (o) => o.value === option.value
-                                );
-                                setHighlightedIndex(idx);
-                              }}
-                            />
-                          ))}
-                        </ul>
-                      </li>
-                    );
-                  }
-
-                  // Render single option
-                  return (
-                    <SelectOptionItem
-                      key={item.value}
-                      option={item}
-                      isSelected={item.value === value}
-                      isHighlighted={
-                        filteredFlatOptions[highlightedIndex]?.value ===
-                        item.value
-                      }
-                      onSelect={() => handleValueChange(item.value)}
-                      onMouseEnter={() => {
-                        const idx = filteredFlatOptions.findIndex(
-                          (o) => o.value === item.value
-                        );
-                        setHighlightedIndex(idx);
-                      }}
-                    />
-                  );
-                })
+        {/* Dropdown (portaled to body to avoid overflow clipping) */}
+        {isOpen &&
+          createPortal(
+            <div
+              ref={dropdownRef}
+              style={dropdownStyle}
+              className={cn(
+                'border-border bg-card rounded-lg border shadow-lg',
+                'animate-in fade-in zoom-in-95 duration-100'
               )}
-            </ul>
-          </div>
-        )}
+            >
+              {/* Search Input */}
+              {searchable && (
+                <div className="border-border border-b p-2">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={searchPlaceholder}
+                    className={cn(
+                      'border-input bg-background w-full rounded-md border px-3 py-2 text-sm',
+                      'placeholder:text-muted-foreground',
+                      'focus:ring-ring focus:ring-2 focus:outline-none'
+                    )}
+                    aria-label="Search options"
+                  />
+                </div>
+              )}
+
+              {/* Options List */}
+              <ul
+                ref={listRef}
+                id={listboxId}
+                role="listbox"
+                aria-label={label || 'Options'}
+                className="max-h-60 overflow-auto p-1"
+              >
+                {filteredFlatOptions.length === 0 ? (
+                  <li className="text-muted-foreground px-3 py-2 text-center text-sm">
+                    {noResultsText}
+                  </li>
+                ) : (
+                  filteredOptions.map((item) => {
+                    if ('options' in item) {
+                      // Render group
+                      return (
+                        <li key={`group-${item.label}`} role="presentation">
+                          <div className="text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase">
+                            {item.label}
+                          </div>
+                          <ul role="group" aria-label={item.label}>
+                            {item.options.map((option) => (
+                              <SelectOptionItem
+                                key={option.value}
+                                option={option}
+                                isSelected={option.value === value}
+                                isHighlighted={
+                                  filteredFlatOptions[highlightedIndex]
+                                    ?.value === option.value
+                                }
+                                onSelect={() => handleValueChange(option.value)}
+                                onMouseEnter={() => {
+                                  const idx = filteredFlatOptions.findIndex(
+                                    (o) => o.value === option.value
+                                  );
+                                  setHighlightedIndex(idx);
+                                }}
+                              />
+                            ))}
+                          </ul>
+                        </li>
+                      );
+                    }
+
+                    // Render single option
+                    return (
+                      <SelectOptionItem
+                        key={item.value}
+                        option={item}
+                        isSelected={item.value === value}
+                        isHighlighted={
+                          filteredFlatOptions[highlightedIndex]?.value ===
+                          item.value
+                        }
+                        onSelect={() => handleValueChange(item.value)}
+                        onMouseEnter={() => {
+                          const idx = filteredFlatOptions.findIndex(
+                            (o) => o.value === item.value
+                          );
+                          setHighlightedIndex(idx);
+                        }}
+                      />
+                    );
+                  })
+                )}
+              </ul>
+            </div>,
+            document.body
+          )}
       </div>
 
       {/* Error Message */}
