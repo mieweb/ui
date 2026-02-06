@@ -1,6 +1,6 @@
 {
   "name": "@mieweb/ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A themeable, accessible React component library built with Tailwind CSS",
   "author": "Medical Informatics Engineering, Inc.",
   "license": "SEE LICENSE IN LICENSE",
