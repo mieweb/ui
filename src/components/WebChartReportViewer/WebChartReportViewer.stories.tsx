@@ -70,24 +70,11 @@ const sampleReports: SystemReport[] = [
 
 const sampleResult: ReportResult = {
   success: true,
-  data: `
-    <h2>Active Employees Report</h2>
-    <p>Generated on ${new Date().toLocaleDateString()}</p>
-    <table class="min-w-full border">
-      <thead>
-        <tr>
-          <th class="border px-4 py-2">Name</th>
-          <th class="border px-4 py-2">Department</th>
-          <th class="border px-4 py-2">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="border px-4 py-2">John Doe</td><td class="border px-4 py-2">Engineering</td><td class="border px-4 py-2">Active</td></tr>
-        <tr><td class="border px-4 py-2">Jane Smith</td><td class="border px-4 py-2">Operations</td><td class="border px-4 py-2">Active</td></tr>
-        <tr><td class="border px-4 py-2">Bob Wilson</td><td class="border px-4 py-2">Maintenance</td><td class="border px-4 py-2">Active</td></tr>
-      </tbody>
-    </table>
-  `,
+  data: [
+    { Name: 'John Doe', Department: 'Engineering', Status: 'Active' },
+    { Name: 'Jane Smith', Department: 'Operations', Status: 'Active' },
+    { Name: 'Bob Wilson', Department: 'Maintenance', Status: 'Active' },
+  ],
 };
 
 function DefaultWrapper() {
