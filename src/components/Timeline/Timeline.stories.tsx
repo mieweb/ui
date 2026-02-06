@@ -7,29 +7,12 @@ import {
   OrderConfirmation,
   type TimelineStep,
   type TimelineEvent,
+  type TimelineSize,
 } from './Timeline';
 
 // =============================================================================
 // TimelineProgress Stories
 // =============================================================================
-
-const progressMeta: Meta<typeof TimelineProgress> = {
-  title: 'Components/Timeline/Progress',
-  component: TimelineProgress,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'padded',
-    docs: {
-      description: {
-        component:
-          'A horizontal timeline progress indicator showing order/workflow steps.',
-      },
-    },
-  },
-};
-
-export default progressMeta;
-type ProgressStory = StoryObj<typeof TimelineProgress>;
 
 const sampleSteps: TimelineStep[] = [
   { key: 'submitted', label: 'Submitted', completedAt: '2024-01-15T10:00:00Z' },
@@ -43,10 +26,88 @@ const sampleSteps: TimelineStep[] = [
   { key: 'results', label: 'Results' },
 ];
 
+// Wrapper to support hasError boolean in Storybook
+interface TimelineProgressWrapperProps {
+  steps: TimelineStep[];
+  currentStep: string;
+  showTimestamps?: boolean;
+  size?: TimelineSize;
+  pulse?: boolean;
+  hasError?: boolean;
+}
+
+function TimelineProgressWrapper({
+  steps,
+  currentStep,
+  showTimestamps,
+  size = 'md',
+  pulse = true,
+  hasError = false,
+}: TimelineProgressWrapperProps) {
+  const modifiedSteps = hasError
+    ? steps.map((step) =>
+        step.key === currentStep ? { ...step, error: true } : step
+      )
+    : steps;
+
+  return (
+    <TimelineProgress
+      steps={modifiedSteps}
+      currentStep={currentStep}
+      showTimestamps={showTimestamps}
+      size={size}
+      pulse={pulse}
+    />
+  );
+}
+
+const progressMeta: Meta<typeof TimelineProgressWrapper> = {
+  title: 'Components/Timeline/Progress',
+  component: TimelineProgressWrapper,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component:
+          'A horizontal timeline progress indicator showing order/workflow steps.',
+      },
+    },
+  },
+  argTypes: {
+    currentStep: {
+      control: 'select',
+      options: ['submitted', 'processing', 'scheduled', 'completed', 'results'],
+      description: 'The current step key in the timeline',
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg'],
+      description: 'Size variant of the timeline',
+    },
+    showTimestamps: {
+      control: 'boolean',
+      description: 'Whether to show timestamps above each step',
+    },
+    pulse: {
+      control: 'boolean',
+      description: 'Show a pulse animation on the current step',
+    },
+    hasError: {
+      control: 'boolean',
+      description: 'Set the current step to an error state',
+    },
+  },
+};
+
+export default progressMeta;
+type ProgressStory = StoryObj<typeof TimelineProgressWrapper>;
+
 export const Default: ProgressStory = {
   args: {
     steps: sampleSteps,
     currentStep: 'scheduled',
+    hasError: false,
   },
 };
 
@@ -83,6 +144,61 @@ export const WithoutTimestamps: ProgressStory = {
   parameters: {
     docs: {
       description: { story: 'Timeline without timestamp labels.' },
+    },
+  },
+};
+
+export const WithError: ProgressStory = {
+  args: {
+    steps: sampleSteps,
+    currentStep: 'scheduled',
+    hasError: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Timeline with an error step. Toggle the hasError control to see the error state.',
+      },
+    },
+  },
+};
+
+export const Small: ProgressStory = {
+  args: {
+    steps: sampleSteps,
+    currentStep: 'scheduled',
+    size: 'sm',
+  },
+  parameters: {
+    docs: {
+      description: { story: 'Small size variant for compact layouts.' },
+    },
+  },
+};
+
+export const Medium: ProgressStory = {
+  args: {
+    steps: sampleSteps,
+    currentStep: 'scheduled',
+    size: 'md',
+  },
+  parameters: {
+    docs: {
+      description: { story: 'Medium size variant (default).' },
+    },
+  },
+};
+
+export const Large: ProgressStory = {
+  args: {
+    steps: sampleSteps,
+    currentStep: 'scheduled',
+    size: 'lg',
+  },
+  parameters: {
+    docs: {
+      description: { story: 'Large size variant for prominent displays.' },
     },
   },
 };
@@ -210,7 +326,7 @@ export const Confirmation: StoryObj<typeof OrderConfirmation> = {
       <div>
         <button
           onClick={() => setOpen(true)}
-          className="bg-brand-600 rounded px-4 py-2 text-white"
+          className="bg-primary-600 rounded px-4 py-2 text-white"
         >
           Show Confirmation
         </button>
