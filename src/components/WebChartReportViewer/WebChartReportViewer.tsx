@@ -202,7 +202,20 @@ export function WebChartReportViewer({
               key={report.id}
               interactive
               padding="none"
+              role="button"
+              tabIndex={0}
+              aria-label={
+                report.description
+                  ? `${report.name}: ${report.description}`
+                  : report.name
+              }
               onClick={() => handleReportClick(report)}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleReportClick(report);
+                }
+              }}
               className="cursor-pointer"
             >
               <CardContent className="p-3">
@@ -230,8 +243,9 @@ export function WebChartReportViewer({
       <Modal
         open={modalOpen}
         onOpenChange={(open) => {
-          if (!open) handleClose();
-          else setModalOpen(true);
+          if (!open) {
+            handleClose();
+          }
         }}
         size="4xl"
       >
@@ -278,7 +292,12 @@ export function WebChartReportViewer({
           )}
 
           {/* Refresh Button */}
-          <Button size="sm" onClick={onRefreshReport} title={refreshReport}>
+          <Button
+            size="sm"
+            onClick={onRefreshReport}
+            title={refreshReport}
+            aria-label={refreshReport}
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
@@ -314,19 +333,24 @@ export function WebChartReportViewer({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {rows.map((row, i) => (
-                        <TableRow key={i}>
-                          {columns.map((key) => (
-                            <TableCell key={key}>
-                              {columnRenderers?.[key]
-                                ? columnRenderers[key](row[key], row)
-                                : row[key] == null
-                                  ? ''
-                                  : String(row[key])}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
+                      {rows.map((row) => {
+                        const rowKey =
+                          columns.map((key) => String(row[key])).join('|') ||
+                          JSON.stringify(row);
+                        return (
+                          <TableRow key={rowKey}>
+                            {columns.map((key) => (
+                              <TableCell key={key}>
+                                {columnRenderers?.[key]
+                                  ? columnRenderers[key](row[key], row)
+                                  : row[key] == null
+                                    ? ''
+                                    : String(row[key])}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 );
