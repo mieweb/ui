@@ -1,16 +1,25 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   WebChartReportViewer,
   ReportDatePicker,
   type SystemReport,
   type ReportResult,
 } from './WebChartReportViewer';
+import { Badge } from '../Badge';
 
 const meta: Meta<typeof WebChartReportViewer> = {
   title: 'Components/WebChartReportViewer',
   component: WebChartReportViewer,
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      story: {
+        inline: false,
+        iframeHeight: 900,
+      },
+    },
+  },
 };
 
 export default meta;
@@ -60,26 +69,49 @@ const sampleReports: SystemReport[] = [
   },
 ];
 
+const statusRenderer = (value: unknown) => {
+  const status = String(value);
+  const variant =
+    status === 'Active'
+      ? 'success'
+      : status === 'On Leave'
+        ? 'warning'
+        : status === 'Inactive'
+          ? 'secondary'
+          : 'default';
+  return (
+    <Badge variant={variant} size="sm">
+      {status}
+    </Badge>
+  );
+};
+
+const columnRenderers = {
+  Status: statusRenderer,
+};
+
 const sampleResult: ReportResult = {
   success: true,
-  data: `
-    <h2>Active Employees Report</h2>
-    <p>Generated on ${new Date().toLocaleDateString()}</p>
-    <table class="min-w-full border">
-      <thead>
-        <tr>
-          <th class="border px-4 py-2">Name</th>
-          <th class="border px-4 py-2">Department</th>
-          <th class="border px-4 py-2">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="border px-4 py-2">John Doe</td><td class="border px-4 py-2">Engineering</td><td class="border px-4 py-2">Active</td></tr>
-        <tr><td class="border px-4 py-2">Jane Smith</td><td class="border px-4 py-2">Operations</td><td class="border px-4 py-2">Active</td></tr>
-        <tr><td class="border px-4 py-2">Bob Wilson</td><td class="border px-4 py-2">Maintenance</td><td class="border px-4 py-2">Active</td></tr>
-      </tbody>
-    </table>
-  `,
+  data: [
+    {
+      Name: 'John Doe',
+      Department: 'Engineering',
+      'Hire Date': '2021-03-15',
+      Status: 'Active',
+    },
+    {
+      Name: 'Jane Smith',
+      Department: 'Operations',
+      'Hire Date': '2019-07-22',
+      Status: 'Active',
+    },
+    {
+      Name: 'Bob Wilson',
+      Department: 'Maintenance',
+      'Hire Date': '2020-11-01',
+      Status: 'On Leave',
+    },
+  ],
 };
 
 function DefaultWrapper() {
@@ -108,6 +140,7 @@ function DefaultWrapper() {
       onReportSelect={handleReportSelect}
       onRefreshReports={() => console.log('Refresh reports')}
       onRefreshReport={() => console.log('Refresh report')}
+      columnRenderers={columnRenderers}
       dateRange={{
         start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         end: new Date(),
@@ -176,6 +209,81 @@ function DatePickerWrapper() {
 
 export const DatePicker: StoryObj<typeof ReportDatePicker> = {
   render: () => <DatePickerWrapper />,
+};
+
+const structuredResult: ReportResult = {
+  success: true,
+  data: [
+    {
+      Name: 'John Doe',
+      Department: 'Engineering',
+      'Hire Date': '2021-03-15',
+      Status: 'Active',
+    },
+    {
+      Name: 'Jane Smith',
+      Department: 'Operations',
+      'Hire Date': '2019-07-22',
+      Status: 'Active',
+    },
+    {
+      Name: 'Bob Wilson',
+      Department: 'Maintenance',
+      'Hire Date': '2020-11-01',
+      Status: 'On Leave',
+    },
+    {
+      Name: 'Alice Brown',
+      Department: 'HR',
+      'Hire Date': '2018-01-10',
+      Status: 'Inactive',
+    },
+    {
+      Name: 'Charlie Davis',
+      Department: 'Engineering',
+      'Hire Date': '2022-06-30',
+      Status: 'Active',
+    },
+  ],
+};
+
+function StructuredDataWrapper() {
+  const [currentReport, setCurrentReport] = useState<
+    SystemReport | undefined
+  >();
+  const [reportResult, setReportResult] = useState<ReportResult | undefined>();
+  const [loadingReport, setLoadingReport] = useState(false);
+
+  const handleReportSelect = (report: SystemReport) => {
+    setCurrentReport(report);
+    setLoadingReport(true);
+    setTimeout(() => {
+      setReportResult(structuredResult);
+      setLoadingReport(false);
+    }, 1500);
+  };
+
+  return (
+    <WebChartReportViewer
+      reports={sampleReports}
+      currentReport={currentReport}
+      reportResult={reportResult}
+      loadingReport={loadingReport}
+      onReportSelect={handleReportSelect}
+      onRefreshReports={() => console.log('Refresh reports')}
+      onRefreshReport={() => console.log('Refresh report')}
+      columnRenderers={columnRenderers}
+      dateRange={{
+        start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        end: new Date(),
+      }}
+      onDateRangeChange={(start, end) => console.log('Date range:', start, end)}
+    />
+  );
+}
+
+export const StructuredData: Story = {
+  render: () => <StructuredDataWrapper />,
 };
 
 export const CustomBranding: Story = {
