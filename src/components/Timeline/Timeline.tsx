@@ -21,9 +21,13 @@ export interface TimelineStep {
   completedAt?: Date | string;
   /** Whether this step is hidden */
   hidden?: boolean;
+  /** Whether this step has an error */
+  error?: boolean;
 }
 
-export type TimelineStepState = 'completed' | 'current' | 'pending';
+export type TimelineStepState = 'completed' | 'current' | 'pending' | 'error';
+
+export type TimelineSize = 'sm' | 'md' | 'lg';
 
 /**
  * Timeline event/message
@@ -58,6 +62,10 @@ export interface TimelineProgressProps {
   currentStep: string;
   /** Whether to show timestamps */
   showTimestamps?: boolean;
+  /** Size variant */
+  size?: TimelineSize;
+  /** Whether to show a pulse animation on the current step */
+  pulse?: boolean;
   /** Custom className */
   className?: string;
 }
@@ -81,12 +89,75 @@ export function TimelineProgress({
   steps,
   currentStep,
   showTimestamps = true,
+  size = 'md',
+  pulse = true,
   className,
 }: TimelineProgressProps) {
   const visibleSteps = steps.filter((step) => !step.hidden);
   const currentIndex = visibleSteps.findIndex((s) => s.key === currentStep);
 
-  const getStepState = (index: number): TimelineStepState => {
+  // Size configurations
+  const sizeConfig = {
+    sm: {
+      wrapper: 'h-6 w-6',
+      completed: 'h-5 w-5',
+      current: 'h-6 w-6',
+      pending: 'h-5 w-5',
+      error: 'h-6 w-6',
+      checkIcon: 'h-3 w-3',
+      xIcon: 'h-3.5 w-3.5',
+      currentDot: 'h-1.5 w-1.5',
+      pendingDot: 'h-1.5 w-1.5',
+      connector: 'h-px',
+      timestamp: 'text-[10px]',
+      label: 'text-[10px]',
+      padding: 'py-2',
+      labelMargin: 'mt-1.5',
+      timestampMargin: 'mb-1',
+    },
+    md: {
+      wrapper: 'h-10 w-10',
+      completed: 'h-8 w-8',
+      current: 'h-10 w-10',
+      pending: 'h-8 w-8',
+      error: 'h-10 w-10',
+      checkIcon: 'h-4 w-4',
+      xIcon: 'h-5 w-5',
+      currentDot: 'h-2.5 w-2.5',
+      pendingDot: 'h-2 w-2',
+      connector: 'h-0.5',
+      timestamp: 'text-xs',
+      label: 'text-xs',
+      padding: 'py-4',
+      labelMargin: 'mt-2.5',
+      timestampMargin: 'mb-2',
+    },
+    lg: {
+      wrapper: 'h-14 w-14',
+      completed: 'h-11 w-11',
+      current: 'h-14 w-14',
+      pending: 'h-11 w-11',
+      error: 'h-14 w-14',
+      checkIcon: 'h-5 w-5',
+      xIcon: 'h-6 w-6',
+      currentDot: 'h-3.5 w-3.5',
+      pendingDot: 'h-2.5 w-2.5',
+      connector: 'h-1',
+      timestamp: 'text-sm',
+      label: 'text-sm',
+      padding: 'py-6',
+      labelMargin: 'mt-3',
+      timestampMargin: 'mb-3',
+    },
+  };
+
+  const sizes = sizeConfig[size];
+
+  const getStepState = (
+    index: number,
+    step: TimelineStep
+  ): TimelineStepState => {
+    if (step.error) return 'error';
     if (index < currentIndex) return 'completed';
     if (index === currentIndex) return 'current';
     return 'pending';
@@ -99,7 +170,7 @@ export function TimelineProgress({
 
   return (
     <div
-      className={cn('py-4', className)}
+      className={cn(sizes.padding, className)}
       role="progressbar"
       aria-valuenow={currentIndex + 1}
       aria-valuemin={1}
@@ -108,14 +179,20 @@ export function TimelineProgress({
       {/* Progress track with circles overlaid */}
       <div className="relative flex items-start">
         {visibleSteps.map((step, index) => {
-          const state = getStepState(index);
+          const state = getStepState(index, step);
           const isLast = index === visibleSteps.length - 1;
 
           return (
             <div key={step.key} className="flex flex-1 flex-col items-center">
               {/* Timestamp above */}
               {showTimestamps && (
-                <div className="mb-2 h-4 text-center text-xs text-neutral-500 dark:text-neutral-400">
+                <div
+                  className={cn(
+                    'h-4 text-center text-neutral-500 dark:text-neutral-400',
+                    sizes.timestamp,
+                    sizes.timestampMargin
+                  )}
+                >
                   {step.completedAt
                     ? formatTimestamp(step.completedAt)
                     : '\u00A0'}
@@ -128,8 +205,11 @@ export function TimelineProgress({
                 {index > 0 && (
                   <div
                     className={cn(
-                      'h-0.5 flex-1',
-                      state === 'completed' || state === 'current'
+                      'flex-1',
+                      sizes.connector,
+                      state === 'completed' ||
+                        state === 'current' ||
+                        state === 'error'
                         ? 'bg-primary-500 dark:bg-primary-400'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     )}
@@ -138,25 +218,58 @@ export function TimelineProgress({
                 {index === 0 && <div className="flex-1" />}
 
                 {/* Circle — fixed outer box so connectors stay level */}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+                <div
+                  className={cn(
+                    'flex shrink-0 items-center justify-center',
+                    sizes.wrapper
+                  )}
+                >
                   <div
                     className={cn(
                       'relative z-10 flex items-center justify-center rounded-full transition-all duration-200',
                       state === 'completed' &&
-                        'bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 h-8 w-8 ring-2',
+                        cn(
+                          'bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2',
+                          sizes.completed
+                        ),
                       state === 'current' &&
-                        'bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 h-10 w-10 text-white shadow-md ring-4',
+                        cn(
+                          'bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4',
+                          sizes.current,
+                          pulse && 'animate-pulse'
+                        ),
                       state === 'pending' &&
-                        'h-8 w-8 bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700'
+                        cn(
+                          'bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700',
+                          sizes.pending
+                        ),
+                      state === 'error' &&
+                        cn(
+                          'bg-red-500 text-white shadow-md ring-4 shadow-red-500/30 ring-red-100 dark:bg-red-500 dark:ring-red-900/50',
+                          sizes.error
+                        )
                     )}
                   >
-                    {state === 'completed' && <CheckIcon className="h-4 w-4" />}
+                    {state === 'completed' && (
+                      <CheckIcon className={sizes.checkIcon} />
+                    )}
                     {state === 'current' && (
-                      <div className="h-2.5 w-2.5 rounded-full bg-white" />
+                      <div
+                        className={cn(
+                          'rounded-full bg-white',
+                          sizes.currentDot
+                        )}
+                      />
                     )}
                     {state === 'pending' && (
-                      <div className="h-2 w-2 rounded-full bg-neutral-300 dark:bg-neutral-600" />
+                      <div
+                        className={cn(
+                          'rounded-full bg-neutral-300 dark:bg-neutral-600',
+                          sizes.pendingDot
+                        )}
+                      />
                     )}
+                    {state === 'error' && <XIcon className={sizes.xIcon} />}
                   </div>
                 </div>
 
@@ -164,7 +277,8 @@ export function TimelineProgress({
                 {!isLast && (
                   <div
                     className={cn(
-                      'h-0.5 flex-1',
+                      'flex-1',
+                      sizes.connector,
                       state === 'completed'
                         ? 'bg-primary-500 dark:bg-primary-400'
                         : 'bg-neutral-200 dark:bg-neutral-700'
@@ -177,13 +291,17 @@ export function TimelineProgress({
               {/* Label below */}
               <div
                 className={cn(
-                  'mt-2.5 text-center text-xs font-medium capitalize',
+                  'text-center font-medium capitalize',
+                  sizes.label,
+                  sizes.labelMargin,
                   state === 'completed' &&
                     'text-primary-700 dark:text-primary-300',
                   state === 'current' &&
                     'font-semibold text-neutral-900 dark:text-white',
                   state === 'pending' &&
-                    'text-neutral-400 dark:text-neutral-500'
+                    'text-neutral-400 dark:text-neutral-500',
+                  state === 'error' &&
+                    'font-semibold text-red-600 dark:text-red-400'
                 )}
               >
                 {step.label}
@@ -465,6 +583,24 @@ function CheckIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M4.5 12.75l6 6 9-13.5"
+      />
+    </svg>
+  );
+}
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={3}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 18L18 6M6 6l12 12"
       />
     </svg>
   );
