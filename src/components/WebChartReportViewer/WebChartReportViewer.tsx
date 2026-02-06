@@ -1,7 +1,22 @@
 'use client';
 
 import * as React from 'react';
+import { AlertTriangle, Check, Link, RefreshCw } from 'lucide-react';
 import { cn } from '../../utils';
+import { Button } from '../Button';
+import { Card, CardContent } from '../Card';
+import { Alert, AlertDescription, AlertTitle } from '../Alert';
+import { Skeleton } from '../Skeleton';
+import { Spinner } from '../Spinner';
+import { Input } from '../Input';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalClose,
+} from '../Modal';
+import { Select } from '../Select';
 
 export interface SystemReport {
   /** Report ID */
@@ -104,20 +119,19 @@ export function WebChartReportViewer({
     reconnect = 'Reconnect',
     noReports = 'No reports available',
     loadingData = 'Fetching latest data from Enterprise Health...',
-    close = 'Close',
     dateFrom = 'From',
     dateTo = 'To',
   } = labels;
 
-  const [offcanvasOpen, setOffcanvasOpen] = React.useState(false);
+  const [modalOpen, setModalOpen] = React.useState(false);
 
   const handleReportClick = (report: SystemReport) => {
     onReportSelect?.(report);
-    setOffcanvasOpen(true);
+    setModalOpen(true);
   };
 
   const handleClose = () => {
-    setOffcanvasOpen(false);
+    setModalOpen(false);
     onClose?.();
   };
 
@@ -130,41 +144,32 @@ export function WebChartReportViewer({
     <div className={cn('webchart-report-viewer', className)}>
       {/* Error State */}
       {error && (
-        <div className="mb-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4">
-          <div className="flex items-start gap-2">
-            <i className="fas fa-exclamation-triangle mt-0.5 text-yellow-600" />
-            <div className="flex-1">
-              <span className="font-medium text-yellow-800">{error}</span>
-              <p className="mt-1 text-sm text-yellow-700">
-                If this error persists, you can try reconnecting{' '}
-                {webchartBrand.name}.
-              </p>
-              {onReconnect && (
-                <button
-                  type="button"
-                  onClick={onReconnect}
-                  className="mt-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
-                >
-                  <i className="fas fa-link mr-2" />
-                  {reconnect}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        <Alert variant="warning" icon={<AlertTriangle />} className="mb-4">
+          <AlertTitle>{error}</AlertTitle>
+          <AlertDescription>
+            If this error persists, you can try reconnecting{' '}
+            {webchartBrand.name}.
+            {onReconnect && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onReconnect}
+                className="mt-2"
+              >
+                <Link className="mr-2 h-4 w-4" />
+                {reconnect}
+              </Button>
+            )}
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Refresh Button */}
       {!error && !loading && (
-        <button
-          type="button"
-          onClick={onRefreshReports}
-          className="bg-primary hover:bg-primary/90 mb-4 rounded-lg px-4 py-2 text-white"
-          title={refreshReports}
-        >
-          <i className="fas fa-sync-alt mr-2" />
+        <Button onClick={onRefreshReports} className="mb-4">
+          <RefreshCw className="mr-2 h-4 w-4" />
           {refreshReports}
-        </button>
+        </Button>
       )}
 
       {/* Reports Grid */}
@@ -173,27 +178,32 @@ export function WebChartReportViewer({
           // Loading placeholders
           <>
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-12 rounded-lg bg-gray-200" />
-              </div>
+              <Skeleton key={i} variant="button" className="h-12 w-full" />
             ))}
           </>
         ) : reports.length > 0 ? (
           // Report buttons
           reports.map((report) => (
-            <button
+            <Card
               key={report.id}
-              type="button"
+              interactive
+              padding="none"
               onClick={() => handleReportClick(report)}
-              className="border-primary text-primary hover:bg-primary w-full truncate rounded-lg border bg-white p-3 text-left hover:text-white"
-              title={
-                report.description
-                  ? `${report.name}: ${report.description}`
-                  : report.name
-              }
+              className="cursor-pointer"
             >
-              {report.name}
-            </button>
+              <CardContent className="p-3">
+                <span
+                  className="block truncate text-sm font-medium"
+                  title={
+                    report.description
+                      ? `${report.name}: ${report.description}`
+                      : report.name
+                  }
+                >
+                  {report.name}
+                </span>
+              </CardContent>
+            </Card>
           ))
         ) : (
           <div className="text-muted-foreground col-span-full py-8 text-center">
@@ -202,122 +212,91 @@ export function WebChartReportViewer({
         )}
       </div>
 
-      {/* Report Offcanvas */}
-      {offcanvasOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          {/* Backdrop */}
-          <div
-            role="button"
-            tabIndex={0}
-            aria-label="Close panel"
-            className="fixed inset-0 bg-black/50"
-            onClick={handleClose}
-            onKeyDown={(e) => e.key === 'Enter' && handleClose()}
-          />
-
-          {/* Offcanvas Panel */}
-          <div className="fixed right-0 bottom-0 left-0 flex h-3/4 flex-col rounded-t-xl bg-white shadow-xl">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b p-4">
-              <div className="flex items-center gap-3">
-                <h5 className="text-lg font-semibold">
-                  {currentReport?.name || 'Report Results'}
-                </h5>
-                {reportResult?.error ? (
-                  <span className="text-yellow-500" title={reportResult.error}>
-                    <i className="fas fa-exclamation-triangle" />
-                  </span>
-                ) : reportResult?.success ? (
-                  <span className="text-green-500">
-                    <i className="fas fa-check-circle" />
-                  </span>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="text-2xl text-gray-400 hover:text-gray-600"
-                aria-label={close}
-              >
-                &times;
-              </button>
-            </div>
-
-            {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-3 border-b bg-gray-50 p-4">
-              {/* Date Range */}
-              {onDateRangeChange && dateRange && (
-                <div className="flex items-center gap-2">
-                  <label className="text-muted-foreground text-sm">
-                    {dateFrom}:
-                  </label>
-                  <input
-                    type="date"
-                    value={formatDate(dateRange.start)}
-                    onChange={(e) =>
-                      onDateRangeChange(e.target.value, dateRange.end)
-                    }
-                    className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
-                  />
-                  <label className="text-muted-foreground text-sm">
-                    {dateTo}:
-                  </label>
-                  <input
-                    type="date"
-                    value={formatDate(dateRange.end)}
-                    onChange={(e) =>
-                      onDateRangeChange(dateRange.start, e.target.value)
-                    }
-                    className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
-                  />
-                </div>
-              )}
-
-              {/* Refresh Button */}
-              <button
-                type="button"
-                onClick={onRefreshReport}
-                className="bg-primary hover:bg-primary/90 rounded-lg px-3 py-1.5 text-white"
-                title={refreshReport}
-              >
-                <i className="fas fa-sync-alt" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="flex-1 overflow-auto p-4">
-              {loadingReport ? (
-                <div className="flex h-full flex-col items-center justify-center">
-                  <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-                  <span className="text-muted-foreground mt-4">
-                    {loadingData}
-                  </span>
-                </div>
-              ) : reportResult?.error ? (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-                  <i className="fas fa-exclamation-circle mr-2" />
-                  {reportResult.error}
-                </div>
-              ) : reportResult?.data ? (
-                typeof reportResult.data === 'string' ? (
-                  <div
-                    className="prose max-w-none"
-                    dangerouslySetInnerHTML={{ __html: reportResult.data }}
-                  />
-                ) : (
-                  <pre className="overflow-auto rounded-lg bg-gray-100 p-4 text-sm">
-                    {JSON.stringify(reportResult.data, null, 2)}
-                  </pre>
-                )
-              ) : (
-                <div className="text-muted-foreground py-8 text-center">
-                  No data available
-                </div>
-              )}
-            </div>
+      {/* Report Modal */}
+      <Modal
+        open={modalOpen}
+        onOpenChange={(open) => {
+          if (!open) handleClose();
+          else setModalOpen(true);
+        }}
+        size="4xl"
+      >
+        <ModalHeader>
+          <div className="flex items-center gap-3">
+            <ModalTitle>{currentReport?.name || 'Report Results'}</ModalTitle>
+            {reportResult?.error ? (
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            ) : reportResult?.success ? (
+              <Check className="h-5 w-5 text-green-500" />
+            ) : null}
           </div>
+          <ModalClose />
+        </ModalHeader>
+
+        {/* Toolbar */}
+        <div className="bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4">
+          {/* Date Range */}
+          {onDateRangeChange && dateRange && (
+            <div className="flex items-center gap-2">
+              <label className="text-muted-foreground text-sm">
+                {dateFrom}:
+              </label>
+              <Input
+                type="date"
+                size="sm"
+                value={formatDate(dateRange.start)}
+                onChange={(e) =>
+                  onDateRangeChange(e.target.value, dateRange.end)
+                }
+                className="w-auto"
+              />
+              <label className="text-muted-foreground text-sm">{dateTo}:</label>
+              <Input
+                type="date"
+                size="sm"
+                value={formatDate(dateRange.end)}
+                onChange={(e) =>
+                  onDateRangeChange(dateRange.start, e.target.value)
+                }
+                className="w-auto"
+              />
+            </div>
+          )}
+
+          {/* Refresh Button */}
+          <Button size="sm" onClick={onRefreshReport} title={refreshReport}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
         </div>
-      )}
+
+        <ModalBody className="max-h-[60vh] overflow-auto">
+          {loadingReport ? (
+            <div className="flex h-64 flex-col items-center justify-center">
+              <Spinner size="xl" />
+              <span className="text-muted-foreground mt-4">{loadingData}</span>
+            </div>
+          ) : reportResult?.error ? (
+            <Alert variant="danger" icon={<AlertTriangle />}>
+              <AlertDescription>{reportResult.error}</AlertDescription>
+            </Alert>
+          ) : reportResult?.data ? (
+            typeof reportResult.data === 'string' ? (
+              <div
+                className="prose dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: reportResult.data }}
+              />
+            ) : (
+              <pre className="bg-muted overflow-auto rounded-lg p-4 text-sm">
+                {JSON.stringify(reportResult.data, null, 2)}
+              </pre>
+            )
+          ) : (
+            <div className="text-muted-foreground py-8 text-center">
+              No data available
+            </div>
+          )}
+        </ModalBody>
+      </Modal>
     </div>
   );
 }
@@ -363,7 +342,7 @@ export function ReportDatePicker({
     setPreset(value);
     const now = new Date();
     let start: Date;
-    let end: Date = now;
+    const end: Date = now;
 
     switch (value) {
       case 'today':
@@ -391,36 +370,38 @@ export function ReportDatePicker({
     onChange?.(start, end);
   };
 
+  const selectOptions = presets.map((p) => ({
+    value: p.value,
+    label: p.label,
+  }));
+
   return (
     <div className={cn('flex flex-wrap items-center gap-3', className)}>
-      <select
+      <Select
         value={preset}
-        onChange={(e) => handlePresetChange(e.target.value)}
-        className="rounded-lg border border-gray-300 px-3 py-2"
-      >
-        {presets.map((p) => (
-          <option key={p.value} value={p.value}>
-            {p.label}
-          </option>
-        ))}
-      </select>
+        onValueChange={(value) => handlePresetChange(value)}
+        options={selectOptions}
+        size="sm"
+      />
 
       {preset === 'custom' && (
         <>
-          <input
+          <Input
             type="date"
+            size="sm"
             value={formatDate(startDate)}
             onChange={(e) => onChange?.(e.target.value, endDate || new Date())}
-            className="rounded-lg border border-gray-300 px-3 py-2"
+            className="w-auto"
           />
           <span className="text-muted-foreground">to</span>
-          <input
+          <Input
             type="date"
+            size="sm"
             value={formatDate(endDate)}
             onChange={(e) =>
               onChange?.(startDate || new Date(), e.target.value)
             }
-            className="rounded-lg border border-gray-300 px-3 py-2"
+            className="w-auto"
           />
         </>
       )}

@@ -11,6 +11,14 @@ const meta: Meta<typeof WebChartReportViewer> = {
   title: 'Components/WebChartReportViewer',
   component: WebChartReportViewer,
   tags: ['autodocs'],
+  parameters: {
+    docs: {
+      story: {
+        inline: false,
+        iframeHeight: 900,
+      },
+    },
+  },
 };
 
 export default meta;
