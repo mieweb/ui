@@ -1,5 +1,4 @@
-export { Select, selectTriggerVariants } from '../../chunk-KJOFWJHV.js';
-import '../../chunk-OT36EMM5.js';
+export { Select, selectTriggerVariants } from '../../chunk-MFB4FS7D.js';
 import '../../chunk-T4ME7QCT.js';
 import '../../chunk-F3SOEIN2.js';
 //# sourceMappingURL=index.js.map

@@ -1663,7 +1663,7 @@ interface BusinessHoursSchedule {
     timezone?: string;
 }
 declare const containerVariants$1: (props?: ({
-    variant?: "inline" | "compact" | "default" | "card" | null | undefined;
+    variant?: "inline" | "default" | "compact" | "card" | null | undefined;
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface OpenStatusBadgeProps {
@@ -2113,7 +2113,7 @@ interface CookieConsentLink {
     href: string;
 }
 declare const bannerVariants: (props?: ({
-    position?: "top" | "bottom" | "bottom-right" | "bottom-left" | null | undefined;
+    position?: "bottom" | "top" | "bottom-right" | "bottom-left" | null | undefined;
     variant?: "default" | "minimal" | "branded" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface CookieConsentBannerProps extends VariantProps<typeof bannerVariants> {
@@ -7526,7 +7526,7 @@ interface DisclaimerTextProps {
 }
 declare function DisclaimerText({ children, variant, className, }: DisclaimerTextProps): react_jsx_runtime.JSX.Element;
 declare const footerVariants: (props?: ({
-    variant?: "primary" | "default" | "white" | "dark" | null | undefined;
+    variant?: "primary" | "white" | "dark" | "default" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface SiteFooterProps extends VariantProps<typeof footerVariants> {
     logo?: {

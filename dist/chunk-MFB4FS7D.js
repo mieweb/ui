@@ -1,7 +1,7 @@
-import { useClickOutside } from './chunk-OT36EMM5.js';
 import { useEscapeKey } from './chunk-T4ME7QCT.js';
 import { cn } from './chunk-F3SOEIN2.js';
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cva } from 'class-variance-authority';
 import { jsxs, jsx } from 'react/jsx-runtime';
 
@@ -61,6 +61,7 @@ function Select({
   const triggerRef = React.useRef(null);
   const searchInputRef = React.useRef(null);
   const listRef = React.useRef(null);
+  const dropdownRef = React.useRef(null);
   const generatedId = React.useId();
   const selectId = id || generatedId;
   const listboxId = `${selectId}-listbox`;
@@ -111,13 +112,47 @@ function Select({
     return result;
   }, [filteredOptions]);
   const selectedOption = flatOptions.find((opt) => opt.value === value);
-  useClickOutside(containerRef, () => setIsOpen(false));
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e) => {
+      const target = e.target;
+      if (containerRef.current && !containerRef.current.contains(target) && dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
   useEscapeKey(() => {
     if (isOpen) {
       setIsOpen(false);
       triggerRef.current?.focus();
     }
   }, isOpen);
+  const [dropdownStyle, setDropdownStyle] = React.useState(
+    {}
+  );
+  const updateDropdownPosition = React.useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999
+    });
+  }, []);
+  React.useEffect(() => {
+    if (!isOpen) return;
+    updateDropdownPosition();
+    window.addEventListener("scroll", updateDropdownPosition, true);
+    window.addEventListener("resize", updateDropdownPosition);
+    return () => {
+      window.removeEventListener("scroll", updateDropdownPosition, true);
+      window.removeEventListener("resize", updateDropdownPosition);
+    };
+  }, [isOpen, updateDropdownPosition]);
   const handleValueChange = React.useCallback(
     (newValue) => {
       if (!isControlled) {
@@ -237,83 +272,87 @@ function Select({
           ]
         }
       ),
-      isOpen && /* @__PURE__ */ jsxs(
-        "div",
-        {
-          className: cn(
-            "absolute z-50 mt-1 w-full",
-            "border-border bg-card rounded-lg border shadow-lg",
-            "animate-in fade-in zoom-in-95 duration-100"
-          ),
-          children: [
-            searchable && /* @__PURE__ */ jsx("div", { className: "border-border border-b p-2", children: /* @__PURE__ */ jsx(
-              "input",
-              {
-                ref: searchInputRef,
-                type: "text",
-                value: searchQuery,
-                onChange: (e) => setSearchQuery(e.target.value),
-                onKeyDown: handleKeyDown,
-                placeholder: searchPlaceholder,
-                className: cn(
-                  "border-input bg-background w-full rounded-md border px-3 py-2 text-sm",
-                  "placeholder:text-muted-foreground",
-                  "focus:ring-ring focus:ring-2 focus:outline-none"
-                ),
-                "aria-label": "Search options"
-              }
-            ) }),
-            /* @__PURE__ */ jsx(
-              "ul",
-              {
-                ref: listRef,
-                id: listboxId,
-                role: "listbox",
-                "aria-label": label || "Options",
-                className: "max-h-60 overflow-auto p-1",
-                children: filteredFlatOptions.length === 0 ? /* @__PURE__ */ jsx("li", { className: "text-muted-foreground px-3 py-2 text-center text-sm", children: noResultsText }) : filteredOptions.map((item) => {
-                  if ("options" in item) {
-                    return /* @__PURE__ */ jsxs("li", { role: "presentation", children: [
-                      /* @__PURE__ */ jsx("div", { className: "text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase", children: item.label }),
-                      /* @__PURE__ */ jsx("ul", { role: "group", "aria-label": item.label, children: item.options.map((option) => /* @__PURE__ */ jsx(
-                        SelectOptionItem,
-                        {
-                          option,
-                          isSelected: option.value === value,
-                          isHighlighted: filteredFlatOptions[highlightedIndex]?.value === option.value,
-                          onSelect: () => handleValueChange(option.value),
-                          onMouseEnter: () => {
-                            const idx = filteredFlatOptions.findIndex(
-                              (o) => o.value === option.value
-                            );
-                            setHighlightedIndex(idx);
-                          }
-                        },
-                        option.value
-                      )) })
-                    ] }, `group-${item.label}`);
-                  }
-                  return /* @__PURE__ */ jsx(
-                    SelectOptionItem,
-                    {
-                      option: item,
-                      isSelected: item.value === value,
-                      isHighlighted: filteredFlatOptions[highlightedIndex]?.value === item.value,
-                      onSelect: () => handleValueChange(item.value),
-                      onMouseEnter: () => {
-                        const idx = filteredFlatOptions.findIndex(
-                          (o) => o.value === item.value
-                        );
-                        setHighlightedIndex(idx);
-                      }
-                    },
-                    item.value
-                  );
-                })
-              }
-            )
-          ]
-        }
+      isOpen && createPortal(
+        /* @__PURE__ */ jsxs(
+          "div",
+          {
+            ref: dropdownRef,
+            style: dropdownStyle,
+            className: cn(
+              "border-border bg-card rounded-lg border shadow-lg",
+              "animate-in fade-in zoom-in-95 duration-100"
+            ),
+            children: [
+              searchable && /* @__PURE__ */ jsx("div", { className: "border-border border-b p-2", children: /* @__PURE__ */ jsx(
+                "input",
+                {
+                  ref: searchInputRef,
+                  type: "text",
+                  value: searchQuery,
+                  onChange: (e) => setSearchQuery(e.target.value),
+                  onKeyDown: handleKeyDown,
+                  placeholder: searchPlaceholder,
+                  className: cn(
+                    "border-input bg-background w-full rounded-md border px-3 py-2 text-sm",
+                    "placeholder:text-muted-foreground",
+                    "focus:ring-ring focus:ring-2 focus:outline-none"
+                  ),
+                  "aria-label": "Search options"
+                }
+              ) }),
+              /* @__PURE__ */ jsx(
+                "ul",
+                {
+                  ref: listRef,
+                  id: listboxId,
+                  role: "listbox",
+                  "aria-label": label || "Options",
+                  className: "max-h-60 overflow-auto p-1",
+                  children: filteredFlatOptions.length === 0 ? /* @__PURE__ */ jsx("li", { className: "text-muted-foreground px-3 py-2 text-center text-sm", children: noResultsText }) : filteredOptions.map((item) => {
+                    if ("options" in item) {
+                      return /* @__PURE__ */ jsxs("li", { role: "presentation", children: [
+                        /* @__PURE__ */ jsx("div", { className: "text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase", children: item.label }),
+                        /* @__PURE__ */ jsx("ul", { role: "group", "aria-label": item.label, children: item.options.map((option) => /* @__PURE__ */ jsx(
+                          SelectOptionItem,
+                          {
+                            option,
+                            isSelected: option.value === value,
+                            isHighlighted: filteredFlatOptions[highlightedIndex]?.value === option.value,
+                            onSelect: () => handleValueChange(option.value),
+                            onMouseEnter: () => {
+                              const idx = filteredFlatOptions.findIndex(
+                                (o) => o.value === option.value
+                              );
+                              setHighlightedIndex(idx);
+                            }
+                          },
+                          option.value
+                        )) })
+                      ] }, `group-${item.label}`);
+                    }
+                    return /* @__PURE__ */ jsx(
+                      SelectOptionItem,
+                      {
+                        option: item,
+                        isSelected: item.value === value,
+                        isHighlighted: filteredFlatOptions[highlightedIndex]?.value === item.value,
+                        onSelect: () => handleValueChange(item.value),
+                        onMouseEnter: () => {
+                          const idx = filteredFlatOptions.findIndex(
+                            (o) => o.value === item.value
+                          );
+                          setHighlightedIndex(idx);
+                        }
+                      },
+                      item.value
+                    );
+                  })
+                }
+              )
+            ]
+          }
+        ),
+        document.body
       )
     ] }),
     error && /* @__PURE__ */ jsx("p", { id: errorId, className: "text-destructive text-sm", role: "alert", children: error }),
@@ -402,5 +441,5 @@ function CheckIcon({ className }) {
 }
 
 export { Select, selectTriggerVariants };
-//# sourceMappingURL=chunk-KJOFWJHV.js.map
-//# sourceMappingURL=chunk-KJOFWJHV.js.map
+//# sourceMappingURL=chunk-MFB4FS7D.js.map
+//# sourceMappingURL=chunk-MFB4FS7D.js.map

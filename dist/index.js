@@ -10,8 +10,8 @@ export { createBrandPreset, generateBrandCSS, generateTailwindTheme } from './ch
 export { bluehiveBrand } from './chunk-ULOA7WBW.js';
 export { defaultBrand } from './chunk-4LTN2LEN.js';
 export { enterpriseHealthBrand } from './chunk-MTZPVOP6.js';
-import { Select } from './chunk-KJOFWJHV.js';
-export { Select, selectTriggerVariants } from './chunk-KJOFWJHV.js';
+import { Select } from './chunk-MFB4FS7D.js';
+export { Select, selectTriggerVariants } from './chunk-MFB4FS7D.js';
 export { Skeleton, SkeletonCard, SkeletonTable, SkeletonText, skeletonVariants } from './chunk-6OCIIIAI.js';
 import { Spinner, SpinnerWithLabel } from './chunk-GV5JQBPX.js';
 export { FullPageSpinner, Spinner, SpinnerWithLabel, spinnerVariants } from './chunk-GV5JQBPX.js';

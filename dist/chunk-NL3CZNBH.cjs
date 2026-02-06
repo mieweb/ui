@@ -1,9 +1,9 @@
 'use strict';
 
-var chunkSWMRCGL4_cjs = require('./chunk-SWMRCGL4.cjs');
 var chunkFHY3K6PL_cjs = require('./chunk-FHY3K6PL.cjs');
 var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
 var React = require('react');
+var reactDom = require('react-dom');
 var classVarianceAuthority = require('class-variance-authority');
 var jsxRuntime = require('react/jsx-runtime');
 
@@ -83,6 +83,7 @@ function Select({
   const triggerRef = React__namespace.useRef(null);
   const searchInputRef = React__namespace.useRef(null);
   const listRef = React__namespace.useRef(null);
+  const dropdownRef = React__namespace.useRef(null);
   const generatedId = React__namespace.useId();
   const selectId = id || generatedId;
   const listboxId = `${selectId}-listbox`;
@@ -133,13 +134,47 @@ function Select({
     return result;
   }, [filteredOptions]);
   const selectedOption = flatOptions.find((opt) => opt.value === value);
-  chunkSWMRCGL4_cjs.useClickOutside(containerRef, () => setIsOpen(false));
+  React__namespace.useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e) => {
+      const target = e.target;
+      if (containerRef.current && !containerRef.current.contains(target) && dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
   chunkFHY3K6PL_cjs.useEscapeKey(() => {
     if (isOpen) {
       setIsOpen(false);
       triggerRef.current?.focus();
     }
   }, isOpen);
+  const [dropdownStyle, setDropdownStyle] = React__namespace.useState(
+    {}
+  );
+  const updateDropdownPosition = React__namespace.useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999
+    });
+  }, []);
+  React__namespace.useEffect(() => {
+    if (!isOpen) return;
+    updateDropdownPosition();
+    window.addEventListener("scroll", updateDropdownPosition, true);
+    window.addEventListener("resize", updateDropdownPosition);
+    return () => {
+      window.removeEventListener("scroll", updateDropdownPosition, true);
+      window.removeEventListener("resize", updateDropdownPosition);
+    };
+  }, [isOpen, updateDropdownPosition]);
   const handleValueChange = React__namespace.useCallback(
     (newValue) => {
       if (!isControlled) {
@@ -259,83 +294,87 @@ function Select({
           ]
         }
       ),
-      isOpen && /* @__PURE__ */ jsxRuntime.jsxs(
-        "div",
-        {
-          className: chunkOR5DRJCW_cjs.cn(
-            "absolute z-50 mt-1 w-full",
-            "border-border bg-card rounded-lg border shadow-lg",
-            "animate-in fade-in zoom-in-95 duration-100"
-          ),
-          children: [
-            searchable && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-border border-b p-2", children: /* @__PURE__ */ jsxRuntime.jsx(
-              "input",
-              {
-                ref: searchInputRef,
-                type: "text",
-                value: searchQuery,
-                onChange: (e) => setSearchQuery(e.target.value),
-                onKeyDown: handleKeyDown,
-                placeholder: searchPlaceholder,
-                className: chunkOR5DRJCW_cjs.cn(
-                  "border-input bg-background w-full rounded-md border px-3 py-2 text-sm",
-                  "placeholder:text-muted-foreground",
-                  "focus:ring-ring focus:ring-2 focus:outline-none"
-                ),
-                "aria-label": "Search options"
-              }
-            ) }),
-            /* @__PURE__ */ jsxRuntime.jsx(
-              "ul",
-              {
-                ref: listRef,
-                id: listboxId,
-                role: "listbox",
-                "aria-label": label || "Options",
-                className: "max-h-60 overflow-auto p-1",
-                children: filteredFlatOptions.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("li", { className: "text-muted-foreground px-3 py-2 text-center text-sm", children: noResultsText }) : filteredOptions.map((item) => {
-                  if ("options" in item) {
-                    return /* @__PURE__ */ jsxRuntime.jsxs("li", { role: "presentation", children: [
-                      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase", children: item.label }),
-                      /* @__PURE__ */ jsxRuntime.jsx("ul", { role: "group", "aria-label": item.label, children: item.options.map((option) => /* @__PURE__ */ jsxRuntime.jsx(
-                        SelectOptionItem,
-                        {
-                          option,
-                          isSelected: option.value === value,
-                          isHighlighted: filteredFlatOptions[highlightedIndex]?.value === option.value,
-                          onSelect: () => handleValueChange(option.value),
-                          onMouseEnter: () => {
-                            const idx = filteredFlatOptions.findIndex(
-                              (o) => o.value === option.value
-                            );
-                            setHighlightedIndex(idx);
-                          }
-                        },
-                        option.value
-                      )) })
-                    ] }, `group-${item.label}`);
-                  }
-                  return /* @__PURE__ */ jsxRuntime.jsx(
-                    SelectOptionItem,
-                    {
-                      option: item,
-                      isSelected: item.value === value,
-                      isHighlighted: filteredFlatOptions[highlightedIndex]?.value === item.value,
-                      onSelect: () => handleValueChange(item.value),
-                      onMouseEnter: () => {
-                        const idx = filteredFlatOptions.findIndex(
-                          (o) => o.value === item.value
-                        );
-                        setHighlightedIndex(idx);
-                      }
-                    },
-                    item.value
-                  );
-                })
-              }
-            )
-          ]
-        }
+      isOpen && reactDom.createPortal(
+        /* @__PURE__ */ jsxRuntime.jsxs(
+          "div",
+          {
+            ref: dropdownRef,
+            style: dropdownStyle,
+            className: chunkOR5DRJCW_cjs.cn(
+              "border-border bg-card rounded-lg border shadow-lg",
+              "animate-in fade-in zoom-in-95 duration-100"
+            ),
+            children: [
+              searchable && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-border border-b p-2", children: /* @__PURE__ */ jsxRuntime.jsx(
+                "input",
+                {
+                  ref: searchInputRef,
+                  type: "text",
+                  value: searchQuery,
+                  onChange: (e) => setSearchQuery(e.target.value),
+                  onKeyDown: handleKeyDown,
+                  placeholder: searchPlaceholder,
+                  className: chunkOR5DRJCW_cjs.cn(
+                    "border-input bg-background w-full rounded-md border px-3 py-2 text-sm",
+                    "placeholder:text-muted-foreground",
+                    "focus:ring-ring focus:ring-2 focus:outline-none"
+                  ),
+                  "aria-label": "Search options"
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                "ul",
+                {
+                  ref: listRef,
+                  id: listboxId,
+                  role: "listbox",
+                  "aria-label": label || "Options",
+                  className: "max-h-60 overflow-auto p-1",
+                  children: filteredFlatOptions.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("li", { className: "text-muted-foreground px-3 py-2 text-center text-sm", children: noResultsText }) : filteredOptions.map((item) => {
+                    if ("options" in item) {
+                      return /* @__PURE__ */ jsxRuntime.jsxs("li", { role: "presentation", children: [
+                        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase", children: item.label }),
+                        /* @__PURE__ */ jsxRuntime.jsx("ul", { role: "group", "aria-label": item.label, children: item.options.map((option) => /* @__PURE__ */ jsxRuntime.jsx(
+                          SelectOptionItem,
+                          {
+                            option,
+                            isSelected: option.value === value,
+                            isHighlighted: filteredFlatOptions[highlightedIndex]?.value === option.value,
+                            onSelect: () => handleValueChange(option.value),
+                            onMouseEnter: () => {
+                              const idx = filteredFlatOptions.findIndex(
+                                (o) => o.value === option.value
+                              );
+                              setHighlightedIndex(idx);
+                            }
+                          },
+                          option.value
+                        )) })
+                      ] }, `group-${item.label}`);
+                    }
+                    return /* @__PURE__ */ jsxRuntime.jsx(
+                      SelectOptionItem,
+                      {
+                        option: item,
+                        isSelected: item.value === value,
+                        isHighlighted: filteredFlatOptions[highlightedIndex]?.value === item.value,
+                        onSelect: () => handleValueChange(item.value),
+                        onMouseEnter: () => {
+                          const idx = filteredFlatOptions.findIndex(
+                            (o) => o.value === item.value
+                          );
+                          setHighlightedIndex(idx);
+                        }
+                      },
+                      item.value
+                    );
+                  })
+                }
+              )
+            ]
+          }
+        ),
+        document.body
       )
     ] }),
     error && /* @__PURE__ */ jsxRuntime.jsx("p", { id: errorId, className: "text-destructive text-sm", role: "alert", children: error }),
@@ -425,5 +464,5 @@ function CheckIcon({ className }) {
 
 exports.Select = Select;
 exports.selectTriggerVariants = selectTriggerVariants;
-//# sourceMappingURL=chunk-LEE3NMNP.cjs.map
-//# sourceMappingURL=chunk-LEE3NMNP.cjs.map
+//# sourceMappingURL=chunk-NL3CZNBH.cjs.map
+//# sourceMappingURL=chunk-NL3CZNBH.cjs.map
