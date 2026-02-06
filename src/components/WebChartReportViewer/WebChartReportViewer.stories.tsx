@@ -186,6 +186,80 @@ export const DatePicker: StoryObj<typeof ReportDatePicker> = {
   render: () => <DatePickerWrapper />,
 };
 
+const structuredResult: ReportResult = {
+  success: true,
+  data: [
+    {
+      Name: 'John Doe',
+      Department: 'Engineering',
+      Status: 'Active',
+      'Hire Date': '2021-03-15',
+    },
+    {
+      Name: 'Jane Smith',
+      Department: 'Operations',
+      Status: 'Active',
+      'Hire Date': '2019-07-22',
+    },
+    {
+      Name: 'Bob Wilson',
+      Department: 'Maintenance',
+      Status: 'Active',
+      'Hire Date': '2020-11-01',
+    },
+    {
+      Name: 'Alice Brown',
+      Department: 'HR',
+      Status: 'On Leave',
+      'Hire Date': '2018-01-10',
+    },
+    {
+      Name: 'Charlie Davis',
+      Department: 'Engineering',
+      Status: 'Active',
+      'Hire Date': '2022-06-30',
+    },
+  ],
+};
+
+function StructuredDataWrapper() {
+  const [currentReport, setCurrentReport] = useState<
+    SystemReport | undefined
+  >();
+  const [reportResult, setReportResult] = useState<ReportResult | undefined>();
+  const [loadingReport, setLoadingReport] = useState(false);
+
+  const handleReportSelect = (report: SystemReport) => {
+    setCurrentReport(report);
+    setLoadingReport(true);
+    setTimeout(() => {
+      setReportResult(structuredResult);
+      setLoadingReport(false);
+    }, 1500);
+  };
+
+  return (
+    <WebChartReportViewer
+      reports={sampleReports}
+      currentReport={currentReport}
+      reportResult={reportResult}
+      loadingReport={loadingReport}
+      onReportSelect={handleReportSelect}
+      onRefreshReports={() => console.log('Refresh reports')}
+      onRefreshReport={() => console.log('Refresh report')}
+      dateRange={{
+        start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        end: new Date(),
+      }}
+      onDateRangeChange={(start, end) => console.log('Date range:', start, end)}
+    />
+  );
+}
+
+export const StructuredData: Story = {
+  render: () => <StructuredDataWrapper />,
+};
+
 export const CustomBranding: Story = {
   args: {
     reports: sampleReports,

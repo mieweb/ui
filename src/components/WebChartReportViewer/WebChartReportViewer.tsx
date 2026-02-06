@@ -17,6 +17,14 @@ import {
   ModalClose,
 } from '../Modal';
 import { Select } from '../Select';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../Table';
 
 export interface SystemReport {
   /** Report ID */
@@ -31,7 +39,7 @@ export interface SystemReport {
 
 export interface ReportResult {
   /** Result data (typically HTML or structured data) */
-  data?: string | Record<string, unknown>;
+  data?: string | Record<string, unknown> | Record<string, unknown>[];
   /** Chart/visualization data */
   chartData?: unknown;
   /** Error message if report failed */
@@ -285,10 +293,47 @@ export function WebChartReportViewer({
                 className="prose dark:prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: reportResult.data }}
               />
+            ) : Array.isArray(reportResult.data) &&
+              reportResult.data.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {Object.keys(
+                      reportResult.data[0] as Record<string, unknown>
+                    ).map((key) => (
+                      <TableHead key={key}>{key}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(reportResult.data as Record<string, unknown>[]).map(
+                    (row, i) => (
+                      <TableRow key={i}>
+                        {Object.values(row).map((val, j) => (
+                          <TableCell key={j}>
+                            {val == null ? '' : String(val)}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    )
+                  )}
+                </TableBody>
+              </Table>
             ) : (
-              <pre className="bg-muted overflow-auto rounded-lg p-4 text-sm">
-                {JSON.stringify(reportResult.data, null, 2)}
-              </pre>
+              <Table>
+                <TableBody>
+                  {Object.entries(
+                    reportResult.data as Record<string, unknown>
+                  ).map(([key, val]) => (
+                    <TableRow key={key}>
+                      <TableCell className="text-muted-foreground font-medium">
+                        {key}
+                      </TableCell>
+                      <TableCell>{val == null ? '' : String(val)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             )
           ) : (
             <div className="text-muted-foreground py-8 text-center">
