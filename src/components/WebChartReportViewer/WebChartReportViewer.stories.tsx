@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   WebChartReportViewer,
   ReportDatePicker,
   type SystemReport,
   type ReportResult,
 } from './WebChartReportViewer';
+import { Badge } from '../Badge';
 
 const meta: Meta<typeof WebChartReportViewer> = {
   title: 'Components/WebChartReportViewer',
@@ -68,12 +69,48 @@ const sampleReports: SystemReport[] = [
   },
 ];
 
+const statusRenderer = (value: unknown) => {
+  const status = String(value);
+  const variant =
+    status === 'Active'
+      ? 'success'
+      : status === 'On Leave'
+        ? 'warning'
+        : status === 'Inactive'
+          ? 'secondary'
+          : 'default';
+  return (
+    <Badge variant={variant} size="sm">
+      {status}
+    </Badge>
+  );
+};
+
+const columnRenderers = {
+  Status: statusRenderer,
+};
+
 const sampleResult: ReportResult = {
   success: true,
   data: [
-    { Name: 'John Doe', Department: 'Engineering', Status: 'Active' },
-    { Name: 'Jane Smith', Department: 'Operations', Status: 'Active' },
-    { Name: 'Bob Wilson', Department: 'Maintenance', Status: 'Active' },
+    {
+      Name: 'John Doe',
+      Department: 'Engineering',
+      'Hire Date': '2021-03-15',
+      Status: 'Active',
+    },
+    {
+      Name: 'Jane Smith',
+      Department: 'Operations',
+      'Hire Date': '2019-07-22',
+      Status: 'Active',
+    },
+    {
+      Name: 'Bob Wilson',
+      Department: 'Maintenance',
+      'Hire Date': '2020-11-01',
+      Status: 'On Leave',
+    },
   ],
 };
 
@@ -103,6 +140,7 @@ function DefaultWrapper() {
       onReportSelect={handleReportSelect}
       onRefreshReports={() => console.log('Refresh reports')}
       onRefreshReport={() => console.log('Refresh report')}
+      columnRenderers={columnRenderers}
       dateRange={{
         start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         end: new Date(),
@@ -179,32 +217,32 @@ const structuredResult: ReportResult = {
     {
       Name: 'John Doe',
       Department: 'Engineering',
-      Status: 'Active',
       'Hire Date': '2021-03-15',
+      Status: 'Active',
     },
     {
       Name: 'Jane Smith',
       Department: 'Operations',
-      Status: 'Active',
       'Hire Date': '2019-07-22',
+      Status: 'Active',
     },
     {
       Name: 'Bob Wilson',
       Department: 'Maintenance',
-      Status: 'Active',
       'Hire Date': '2020-11-01',
+      Status: 'On Leave',
     },
     {
       Name: 'Alice Brown',
       Department: 'HR',
-      Status: 'On Leave',
       'Hire Date': '2018-01-10',
+      Status: 'Inactive',
     },
     {
       Name: 'Charlie Davis',
       Department: 'Engineering',
-      Status: 'Active',
       'Hire Date': '2022-06-30',
+      Status: 'Active',
     },
   ],
 };
@@ -234,6 +272,7 @@ function StructuredDataWrapper() {
       onReportSelect={handleReportSelect}
       onRefreshReports={() => console.log('Refresh reports')}
       onRefreshReport={() => console.log('Refresh report')}
+      columnRenderers={columnRenderers}
       dateRange={{
         start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         end: new Date(),

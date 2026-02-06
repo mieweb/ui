@@ -87,6 +87,11 @@ export interface WebChartReportViewerProps {
   };
   /** Callback to reconnect WebChart */
   onReconnect?: () => void;
+  /** Custom cell renderers keyed by column name */
+  columnRenderers?: Record<
+    string,
+    (value: unknown, row: Record<string, unknown>) => React.ReactNode
+  >;
   /** Custom class name */
   className?: string;
   /** Labels */
@@ -118,6 +123,7 @@ export function WebChartReportViewer({
   onDateRangeChange,
   webchartBrand = { name: 'Enterprise Health' },
   onReconnect,
+  columnRenderers,
   className,
   labels = {},
 }: WebChartReportViewerProps) {
@@ -295,30 +301,36 @@ export function WebChartReportViewer({
               />
             ) : Array.isArray(reportResult.data) &&
               reportResult.data.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {Object.keys(
-                      reportResult.data[0] as Record<string, unknown>
-                    ).map((key) => (
-                      <TableHead key={key}>{key}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(reportResult.data as Record<string, unknown>[]).map(
-                    (row, i) => (
-                      <TableRow key={i}>
-                        {Object.values(row).map((val, j) => (
-                          <TableCell key={j}>
-                            {val == null ? '' : String(val)}
-                          </TableCell>
+              (() => {
+                const rows = reportResult.data as Record<string, unknown>[];
+                const columns = Object.keys(rows[0]);
+                return (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {columns.map((key) => (
+                          <TableHead key={key}>{key}</TableHead>
                         ))}
                       </TableRow>
-                    )
-                  )}
-                </TableBody>
-              </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {rows.map((row, i) => (
+                        <TableRow key={i}>
+                          {columns.map((key) => (
+                            <TableCell key={key}>
+                              {columnRenderers?.[key]
+                                ? columnRenderers[key](row[key], row)
+                                : row[key] == null
+                                  ? ''
+                                  : String(row[key])}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                );
+              })()
             ) : (
               <Table>
                 <TableBody>
