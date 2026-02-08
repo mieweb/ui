@@ -5,7 +5,7 @@ import { VariantProps } from 'class-variance-authority';
 
 declare const spinnerVariants: (props?: ({
     size?: "sm" | "md" | "lg" | "xl" | "xs" | null | undefined;
-    variant?: "default" | "white" | "muted" | null | undefined;
+    variant?: "default" | "muted" | "white" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof spinnerVariants> {
     /** Accessible label for the spinner */

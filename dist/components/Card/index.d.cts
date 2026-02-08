@@ -3,8 +3,8 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const cardVariants: (props?: ({
-    padding?: "sm" | "md" | "lg" | "xl" | "none" | null | undefined;
-    variant?: "ghost" | "default" | "filled" | "elevated" | "outlined" | null | undefined;
+    padding?: "sm" | "md" | "lg" | "none" | "xl" | null | undefined;
+    variant?: "default" | "filled" | "ghost" | "elevated" | "outlined" | null | undefined;
     interactive?: boolean | null | undefined;
     selected?: boolean | null | undefined;
     orientation?: "horizontal" | "vertical" | null | undefined;

@@ -1,4 +1,4 @@
-export { ThemeProvider, ThemeProviderContext, ThemeToggle, themeToggleIconVariants, themeToggleVariants, useThemeContext } from './chunk-TA6FVVCM.js';
+export { ThemeProvider, ThemeProviderContext, ThemeToggle, themeToggleIconVariants, themeToggleVariants, useThemeContext } from './chunk-ONHUDE3F.js';
 import { Tooltip } from './chunk-UZUBLXVC.js';
 export { Tooltip } from './chunk-UZUBLXVC.js';
 export { VisuallyHidden } from './chunk-H2CIKJQI.js';
@@ -10,8 +10,9 @@ export { createBrandPreset, generateBrandCSS, generateTailwindTheme } from './ch
 export { bluehiveBrand } from './chunk-ULOA7WBW.js';
 export { defaultBrand } from './chunk-4LTN2LEN.js';
 export { enterpriseHealthBrand } from './chunk-MTZPVOP6.js';
-import { Select } from './chunk-KJOFWJHV.js';
-export { Select, selectTriggerVariants } from './chunk-KJOFWJHV.js';
+import { Select } from './chunk-MFB4FS7D.js';
+export { Select, selectTriggerVariants } from './chunk-MFB4FS7D.js';
+import { Skeleton } from './chunk-6OCIIIAI.js';
 export { Skeleton, SkeletonCard, SkeletonTable, SkeletonText, skeletonVariants } from './chunk-6OCIIIAI.js';
 import { Spinner, SpinnerWithLabel } from './chunk-GV5JQBPX.js';
 export { FullPageSpinner, Spinner, SpinnerWithLabel, spinnerVariants } from './chunk-GV5JQBPX.js';
@@ -52,7 +53,7 @@ import { Input } from './chunk-NXRLGHEC.js';
 export { Input, inputVariants } from './chunk-NXRLGHEC.js';
 import { useCommandK, useIsMobile, useMediaQuery } from './chunk-CP7NPDQW.js';
 export { useCommandK, useIsDesktop, useIsLargeDesktop, useIsMobile, useIsMobileOrTablet, useIsSmallTablet, useIsTablet, useKeyboardShortcut, useMediaQuery } from './chunk-CP7NPDQW.js';
-export { useTheme } from './chunk-KJZNEVYM.js';
+export { useTheme } from './chunk-EF23XUV2.js';
 export { usePrefersReducedMotion } from './chunk-HB7C7NB5.js';
 import { useFocusTrap } from './chunk-4SMSH4OY.js';
 export { useFocusTrap } from './chunk-4SMSH4OY.js';
@@ -73,15 +74,352 @@ import { Avatar } from './chunk-NIHESA7O.js';
 export { Avatar, AvatarGroup, avatarVariants, getInitials } from './chunk-NIHESA7O.js';
 import { cn } from './chunk-F3SOEIN2.js';
 export { cn } from './chunk-F3SOEIN2.js';
-import * as React46 from 'react';
-import React46__default, { memo, createContext, useState, useEffect, useCallback, useMemo, useContext, useRef } from 'react';
-import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
+import * as React47 from 'react';
+import React47__default, { memo, createContext, useState, useEffect, useCallback, useMemo, useContext, useRef } from 'react';
 import { cva } from 'class-variance-authority';
+import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
 import { AgGridReact } from 'ag-grid-react';
 export { AgGridReact } from 'ag-grid-react';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import { FileUp, X, AlertCircle, Mail, Phone, Linkedin, Globe, CheckCircle, Clock, Filter, ChevronDown, Calendar, Printer, Download, FolderUp, Upload, Edit2, Check, ChevronUp, MapPin, Shield, ChevronRight, Building2, SlidersHorizontal, Trash2, Pencil, Plus, Scan, Camera, ScanLine, RefreshCw, FileText, Image } from 'lucide-react';
+import { FileUp, X, AlertCircle, Mail, Phone, Linkedin, Globe, CheckCircle, Clock, Filter, ChevronDown, Calendar, Printer, Download, FolderUp, Upload, Edit2, Check, ChevronUp, MapPin, Shield, ChevronRight, Building2, SlidersHorizontal, Trash2, Pencil, Plus, Link, AlertTriangle, RefreshCw, Scan, Camera, ScanLine, FileText, Image } from 'lucide-react';
 
+var AccordionContext = React47.createContext(null);
+function useAccordionContext() {
+  const context = React47.useContext(AccordionContext);
+  if (!context) {
+    throw new Error("Accordion components must be used within an Accordion");
+  }
+  return context;
+}
+var accordionVariants = cva("w-full", {
+  variants: {
+    variant: {
+      default: "divide-y divide-gray-200 dark:divide-gray-700",
+      bordered: "border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700",
+      separated: "space-y-2"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+function Accordion({
+  children,
+  variant,
+  allowMultiple = false,
+  defaultExpanded = [],
+  className,
+  ...props
+}) {
+  const [expandedItems, setExpandedItems] = React47.useState(
+    new Set(defaultExpanded)
+  );
+  const toggleItem = React47.useCallback(
+    (id) => {
+      setExpandedItems((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          if (!allowMultiple) {
+            next.clear();
+          }
+          next.add(id);
+        }
+        return next;
+      });
+    },
+    [allowMultiple]
+  );
+  const contextValue = React47.useMemo(
+    () => ({ expandedItems, toggleItem, allowMultiple }),
+    [expandedItems, toggleItem, allowMultiple]
+  );
+  return /* @__PURE__ */ jsx(AccordionContext.Provider, { value: contextValue, children: /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: cn(accordionVariants({ variant }), className),
+      ...props,
+      children
+    }
+  ) });
+}
+var AccordionItemContext = React47.createContext(null);
+function useAccordionItemContext() {
+  const context = React47.useContext(AccordionItemContext);
+  if (!context) {
+    throw new Error("AccordionItem components must be used within an AccordionItem");
+  }
+  return context;
+}
+var accordionItemVariants = cva("", {
+  variants: {
+    variant: {
+      default: "",
+      bordered: "first:rounded-t-lg last:rounded-b-lg",
+      separated: "border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+function AccordionItem({
+  children,
+  id,
+  variant,
+  className,
+  ...props
+}) {
+  const { expandedItems } = useAccordionContext();
+  const isExpanded = expandedItems.has(id);
+  const contextValue = React47.useMemo(
+    () => ({ itemId: id, isExpanded }),
+    [id, isExpanded]
+  );
+  return /* @__PURE__ */ jsx(AccordionItemContext.Provider, { value: contextValue, children: /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: cn(accordionItemVariants({ variant }), className),
+      "data-state": isExpanded ? "open" : "closed",
+      ...props,
+      children
+    }
+  ) });
+}
+var accordionTriggerVariants = cva(
+  "flex w-full items-center justify-between text-left font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+  {
+    variants: {
+      size: {
+        sm: "py-2 px-3 text-sm",
+        md: "py-3 px-4 text-base",
+        lg: "py-4 px-5 text-lg"
+      },
+      variant: {
+        default: "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-white",
+        muted: "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+      }
+    },
+    defaultVariants: {
+      size: "md",
+      variant: "default"
+    }
+  }
+);
+function AccordionTrigger({
+  children,
+  size,
+  variant,
+  showChevron = true,
+  className,
+  ...props
+}) {
+  const { toggleItem } = useAccordionContext();
+  const { itemId, isExpanded } = useAccordionItemContext();
+  return /* @__PURE__ */ jsxs(
+    "button",
+    {
+      type: "button",
+      onClick: () => toggleItem(itemId),
+      "aria-expanded": isExpanded,
+      "aria-controls": `accordion-content-${itemId}`,
+      className: cn(accordionTriggerVariants({ size, variant }), className),
+      ...props,
+      children: [
+        /* @__PURE__ */ jsx("span", { className: "flex-1", children }),
+        showChevron && /* @__PURE__ */ jsx(
+          ChevronIcon,
+          {
+            className: cn(
+              "h-5 w-5 shrink-0 text-gray-500 transition-transform duration-200",
+              isExpanded && "rotate-180"
+            )
+          }
+        )
+      ]
+    }
+  );
+}
+var accordionContentVariants = cva(
+  "overflow-hidden transition-all duration-200 ease-in-out",
+  {
+    variants: {
+      size: {
+        sm: "px-3 text-sm",
+        md: "px-4 text-base",
+        lg: "px-5 text-lg"
+      }
+    },
+    defaultVariants: {
+      size: "md"
+    }
+  }
+);
+function AccordionContent({
+  children,
+  size,
+  className,
+  ...props
+}) {
+  const { itemId, isExpanded } = useAccordionItemContext();
+  const contentRef = React47.useRef(null);
+  const [height, setHeight] = React47.useState(
+    isExpanded ? void 0 : 0
+  );
+  React47.useEffect(() => {
+    if (!contentRef.current) return;
+    const resizeObserver = new ResizeObserver(() => {
+      if (isExpanded) {
+        setHeight(contentRef.current?.scrollHeight);
+      }
+    });
+    resizeObserver.observe(contentRef.current);
+    return () => resizeObserver.disconnect();
+  }, [isExpanded]);
+  React47.useEffect(() => {
+    if (isExpanded) {
+      setHeight(contentRef.current?.scrollHeight);
+    } else {
+      setHeight(0);
+    }
+  }, [isExpanded]);
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      id: `accordion-content-${itemId}`,
+      role: "region",
+      "aria-labelledby": `accordion-trigger-${itemId}`,
+      style: { height },
+      className: cn(
+        accordionContentVariants({ size }),
+        "text-gray-600 dark:text-gray-400",
+        className
+      ),
+      ...props,
+      children: /* @__PURE__ */ jsx("div", { ref: contentRef, className: "pb-4 pt-1", children })
+    }
+  );
+}
+function FAQAccordion({ items, className }) {
+  return /* @__PURE__ */ jsx(Accordion, { variant: "default", className, children: items.map((item) => /* @__PURE__ */ jsxs(AccordionItem, { id: item.id, children: [
+    /* @__PURE__ */ jsx(AccordionTrigger, { children: item.question }),
+    /* @__PURE__ */ jsx(AccordionContent, { children: item.answer })
+  ] }, item.id)) });
+}
+function generateProviderFAQs(provider) {
+  const faqs = [];
+  const { name, address, phoneNumber, services, website, locationType } = provider;
+  faqs.push({
+    id: "location",
+    question: `Where is ${name} located?`,
+    answer: /* @__PURE__ */ jsxs("span", { children: [
+      name,
+      " is located at",
+      " ",
+      /* @__PURE__ */ jsxs(
+        "a",
+        {
+          href: `https://www.google.com/maps?daddr=${encodeURIComponent(
+            `${address.street1}, ${address.city}, ${address.state} ${address.postalCode}`
+          )}`,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "text-primary-600 hover:text-primary-700 dark:text-primary-400",
+          children: [
+            address.street1,
+            ", ",
+            address.city,
+            ", ",
+            address.state,
+            " ",
+            address.postalCode
+          ]
+        }
+      ),
+      "."
+    ] })
+  });
+  if (phoneNumber) {
+    faqs.push({
+      id: "phone",
+      question: `What is the phone number for ${name}?`,
+      answer: /* @__PURE__ */ jsxs("span", { children: [
+        "You can contact ",
+        name,
+        " by calling",
+        " ",
+        /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: `tel:${phoneNumber}`,
+            className: "text-primary-600 hover:text-primary-700 dark:text-primary-400",
+            children: phoneNumber
+          }
+        ),
+        "."
+      ] })
+    });
+  }
+  if (services && services.length > 0) {
+    const serviceNames = services.slice(0, 5).map((s) => s.name);
+    const hasMore = services.length > 5;
+    faqs.push({
+      id: "services",
+      question: `What services does ${name} offer?`,
+      answer: `${name} offers services including ${serviceNames.join(", ")}${hasMore ? ` and ${services.length - 5} more services` : ""}.`
+    });
+  }
+  if (website) {
+    faqs.push({
+      id: "website",
+      question: `Does ${name} have a website?`,
+      answer: /* @__PURE__ */ jsxs("span", { children: [
+        "Yes, you can visit the ",
+        name,
+        " website at",
+        " ",
+        /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: website,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "text-primary-600 hover:text-primary-700 dark:text-primary-400",
+            children: new URL(website).hostname
+          }
+        ),
+        "."
+      ] })
+    });
+  }
+  if (locationType) {
+    faqs.push({
+      id: "facility-type",
+      question: `What type of facility is ${name}?`,
+      answer: `${name} is classified as a ${locationType}.`
+    });
+  }
+  faqs.push({
+    id: "booking",
+    question: `How do I book an appointment at ${name}?`,
+    answer: `You can book an appointment at ${name} by clicking the "Book Appointment" button on this page, calling the provider directly${phoneNumber ? ` at ${phoneNumber}` : ""}, or visiting their website${website ? ` at ${new URL(website).hostname}` : ""}.`
+  });
+  return faqs;
+}
+function ChevronIcon({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
+    }
+  );
+}
 var SEX_OPTIONS = [
   { value: "F", label: "Female" },
   { value: "M", label: "Male" },
@@ -548,8 +886,8 @@ function AdditionalFields({
   className,
   collapsible = true
 }) {
-  const [isExpanded, setIsExpanded] = React46.useState(defaultExpanded);
-  const contentId = React46.useId();
+  const [isExpanded, setIsExpanded] = React47.useState(defaultExpanded);
+  const contentId = React47.useId();
   const handleNameChange = (id, name) => {
     const updated = value.map(
       (entry) => entry.id === id ? { ...entry, name } : entry
@@ -1007,12 +1345,12 @@ function AddressForm({
   className,
   googlePlaces
 }) {
-  const generatedId = React46.useId();
+  const generatedId = React47.useId();
   const idPrefix = id || generatedId;
-  const autocompleteRef = React46.useRef(
+  const autocompleteRef = React47.useRef(
     null
   );
-  const inputRef = React46.useRef(null);
+  const inputRef = React47.useRef(null);
   const mergedLabels = { ...DEFAULT_LABELS, ...labels };
   const mergedPlaceholders = { ...DEFAULT_PLACEHOLDERS, ...placeholders };
   const handleChange = (field, fieldValue) => {
@@ -1021,7 +1359,7 @@ function AddressForm({
       [field]: fieldValue
     });
   };
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (!googlePlaces?.enabled || !inputRef.current) return;
     if (typeof google === "undefined" || !google.maps?.places) {
       console.warn(
@@ -1291,30 +1629,30 @@ function AGGridInner({
   loadingMessage = "Loading...",
   ...props
 }, ref) {
-  const internalRef = React46.useRef(null);
-  const gridApiRef = React46.useRef(null);
+  const internalRef = React47.useRef(null);
+  const gridApiRef = React47.useRef(null);
   const resolvedRef = gridRef || ref || internalRef;
-  const handleGridReady = React46.useCallback(
+  const handleGridReady = React47.useCallback(
     (event) => {
       gridApiRef.current = event.api;
       onGridReady?.(event);
     },
     [onGridReady]
   );
-  const handleRowClicked = React46.useCallback(
+  const handleRowClicked = React47.useCallback(
     (event) => {
       onRowClick?.(event);
     },
     [onRowClick]
   );
-  const mergedDefaultColDef = React46.useMemo(
+  const mergedDefaultColDef = React47.useMemo(
     () => ({
       ...getDefaultColDef(sortable, filterable, resizable),
       ...userDefaultColDef
     }),
     [userDefaultColDef, sortable, filterable, resizable]
   );
-  const resolvedRowSelection = React46.useMemo(() => {
+  const resolvedRowSelection = React47.useMemo(() => {
     if (!rowSelection) return void 0;
     if (typeof rowSelection === "object") {
       return rowSelection;
@@ -1333,7 +1671,7 @@ function AGGridInner({
     }
     return void 0;
   }, [rowSelection]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (gridApiRef.current) {
       if (loading) {
         gridApiRef.current.showLoadingOverlay();
@@ -1382,7 +1720,7 @@ function AGGridInner({
     }
   );
 }
-var AGGrid = React46.forwardRef(AGGridInner);
+var AGGrid = React47.forwardRef(AGGridInner);
 AGGrid.displayName = "AGGrid";
 function getNestedValue(obj, path) {
   if (!obj || !path) return void 0;
@@ -2020,7 +2358,7 @@ var chevronRotation = {
   left: "rotate-90",
   right: "-rotate-90"
 };
-function ChevronIcon({
+function ChevronIcon2({
   className,
   direction = "down"
 }) {
@@ -2473,7 +2811,7 @@ function ToolResultDisplay({
   showRawData = false,
   className
 }) {
-  const [showJson, setShowJson] = React46.useState(false);
+  const [showJson, setShowJson] = React47.useState(false);
   if (result.type === "error") {
     return /* @__PURE__ */ jsx(
       "div",
@@ -2627,7 +2965,7 @@ function MCPToolCallDisplay({
   onLinkClick,
   className
 }) {
-  const [showDetails, setShowDetails] = React46.useState(!defaultCollapsed);
+  const [showDetails, setShowDetails] = React47.useState(!defaultCollapsed);
   const formatDuration2 = (ms) => {
     if (!ms) return null;
     if (ms < 1e3) return `${ms}ms`;
@@ -2841,7 +3179,7 @@ function AITypingIndicator({ className }) {
   );
 }
 function ContentBlock({ content, onLinkClick }) {
-  const [isCollapsed, setIsCollapsed] = React46.useState(
+  const [isCollapsed, setIsCollapsed] = React47.useState(
     content.collapsed ?? false
   );
   if (content.type === "text" && content.text) {
@@ -2887,7 +3225,7 @@ function ContentBlock({ content, onLinkClick }) {
               "Thinking..."
             ] }),
             /* @__PURE__ */ jsx(
-              ChevronIcon,
+              ChevronIcon2,
               {
                 direction: isCollapsed ? "right" : "down",
                 className: "text-neutral-400"
@@ -3213,7 +3551,7 @@ function AttachmentPreviewItem({
   );
 }
 AttachmentPreviewItem.displayName = "AttachmentPreviewItem";
-var AttachmentPicker = React46.forwardRef(
+var AttachmentPicker = React47.forwardRef(
   ({
     onFilesSelected,
     acceptedTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
@@ -3226,8 +3564,8 @@ var AttachmentPicker = React46.forwardRef(
     className,
     children
   }, ref) => {
-    const inputRef = React46.useRef(null);
-    React46.useImperativeHandle(ref, () => inputRef.current);
+    const inputRef = React47.useRef(null);
+    React47.useImperativeHandle(ref, () => inputRef.current);
     const handleClick = () => {
       inputRef.current?.click();
     };
@@ -3317,8 +3655,8 @@ function DragDropZone({
   children,
   className
 }) {
-  const [isDragging, setIsDragging] = React46.useState(false);
-  const dragCounterRef = React46.useRef(0);
+  const [isDragging, setIsDragging] = React47.useState(false);
+  const dragCounterRef = React47.useRef(0);
   const handleDragEnter = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -3419,7 +3757,7 @@ function CameraButton({
   disabled = false,
   className
 }) {
-  const inputRef = React46.useRef(null);
+  const inputRef = React47.useRef(null);
   const handleClick = () => {
     inputRef.current?.click();
   };
@@ -3556,7 +3894,7 @@ var sendButtonVariants = cva(
     }
   }
 );
-var SendButton = React46.forwardRef(
+var SendButton = React47.forwardRef(
   ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
     return /* @__PURE__ */ jsx(
       "button",
@@ -3610,7 +3948,7 @@ var SendButton = React46.forwardRef(
   }
 );
 SendButton.displayName = "SendButton";
-var MessageComposer = React46.forwardRef(
+var MessageComposer = React47.forwardRef(
   ({
     onSend,
     onTypingStart,
@@ -3632,22 +3970,22 @@ var MessageComposer = React46.forwardRef(
     variant = "default",
     className
   }, ref) => {
-    const textareaRef = React46.useRef(null);
-    const [content, setContent] = React46.useState("");
-    const [attachments, setAttachments] = React46.useState(
+    const textareaRef = React47.useRef(null);
+    const [content, setContent] = React47.useState("");
+    const [attachments, setAttachments] = React47.useState(
       []
     );
-    const [isTyping, setIsTyping] = React46.useState(false);
-    const typingTimeoutRef = React46.useRef(null);
-    React46.useImperativeHandle(ref, () => textareaRef.current);
-    React46.useEffect(() => {
+    const [isTyping, setIsTyping] = React47.useState(false);
+    const typingTimeoutRef = React47.useRef(null);
+    React47.useImperativeHandle(ref, () => textareaRef.current);
+    React47.useEffect(() => {
       const textarea = textareaRef.current;
       if (textarea) {
         textarea.style.height = "auto";
         textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
       }
     }, [content]);
-    React46.useEffect(() => {
+    React47.useEffect(() => {
       if (content.length > 0 && !isTyping) {
         setIsTyping(true);
         onTypingStart?.();
@@ -3667,12 +4005,12 @@ var MessageComposer = React46.forwardRef(
         }
       };
     }, [content, isTyping, onTypingStart, onTypingStop]);
-    React46.useEffect(() => {
+    React47.useEffect(() => {
       if (autoFocus) {
         textareaRef.current?.focus();
       }
     }, [autoFocus]);
-    React46.useEffect(() => {
+    React47.useEffect(() => {
       if (replyTo) {
         textareaRef.current?.focus();
       }
@@ -3736,7 +4074,7 @@ var MessageComposer = React46.forwardRef(
         return prev.filter((a) => a.id !== attachmentId);
       });
     };
-    React46.useEffect(() => {
+    React47.useEffect(() => {
       const currentAttachments = attachments;
       return () => {
         currentAttachments.forEach((a) => {
@@ -4265,7 +4603,7 @@ function defaultFormatTimestamp(timestamp) {
     minute: "2-digit"
   });
 }
-var MessageBubble = React46.forwardRef(
+var MessageBubble = React47.forwardRef(
   ({
     className,
     message,
@@ -4699,7 +5037,7 @@ function LoadMoreButton({
   ) });
 }
 LoadMoreButton.displayName = "LoadMoreButton";
-var MessageList = React46.forwardRef(
+var MessageList = React47.forwardRef(
   ({
     messages,
     currentUser,
@@ -4718,19 +5056,19 @@ var MessageList = React46.forwardRef(
     className,
     autoScroll = "onNewMessage"
   }, ref) => {
-    const scrollContainerRef = React46.useRef(null);
-    const bottomRef = React46.useRef(null);
-    const [isUserScrolled, setIsUserScrolled] = React46.useState(false);
-    const prevMessageCountRef = React46.useRef(messages.length);
-    React46.useImperativeHandle(ref, () => scrollContainerRef.current);
-    const handleScroll = React46.useCallback(() => {
+    const scrollContainerRef = React47.useRef(null);
+    const bottomRef = React47.useRef(null);
+    const [isUserScrolled, setIsUserScrolled] = React47.useState(false);
+    const prevMessageCountRef = React47.useRef(messages.length);
+    React47.useImperativeHandle(ref, () => scrollContainerRef.current);
+    const handleScroll = React47.useCallback(() => {
       const container = scrollContainerRef.current;
       if (!container) return;
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       setIsUserScrolled(!isAtBottom);
     }, []);
-    React46.useEffect(() => {
+    React47.useEffect(() => {
       const container = scrollContainerRef.current;
       const bottom = bottomRef.current;
       if (!container || !bottom) return;
@@ -4746,7 +5084,7 @@ var MessageList = React46.forwardRef(
         }
       }
     }, [messages, currentUser.id, autoScroll, isUserScrolled]);
-    React46.useEffect(() => {
+    React47.useEffect(() => {
       const bottom = bottomRef.current;
       if (bottom && !isLoading) {
         bottom.scrollIntoView();
@@ -4792,7 +5130,7 @@ var MessageList = React46.forwardRef(
         "aria-live": "polite",
         children: [
           hasMore && onLoadMore && /* @__PURE__ */ jsx(LoadMoreButton, { isLoading: isLoadingMore, onClick: onLoadMore }),
-          /* @__PURE__ */ jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxs(React46.Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxs(React47.Fragment, { children: [
             groupByDate && group.label && /* @__PURE__ */ jsx(DateSeparator, { label: group.label }),
             group.messages.map((message, index) => {
               const prevMessage = group.messages[index - 1];
@@ -5071,13 +5409,13 @@ function AIChat({
   onClear,
   onClose
 }) {
-  const messagesEndRef = React46.useRef(null);
-  const messages = React46.useMemo(
+  const messagesEndRef = React47.useRef(null);
+  const messages = React47.useMemo(
     () => session?.messages || messagesProp || [],
     [session?.messages, messagesProp]
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   const handleSend = async (message) => {
@@ -5303,7 +5641,7 @@ function FloatingAIChat({
   pulse = false,
   ...chatProps
 }) {
-  const [internalOpen, setInternalOpen] = React46.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React47.useState(defaultOpen);
   const isControlled = controlledOpen !== void 0;
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const handleOpenChange = (open) => {
@@ -5592,10 +5930,10 @@ function AuthDialog({
   requireEmailVerification = false,
   className
 }) {
-  const [internalMode, setInternalMode] = React46.useState("login");
-  const [isLoading, setIsLoading] = React46.useState(false);
-  const [error, setError] = React46.useState(null);
-  const [success, setSuccess] = React46.useState(null);
+  const [internalMode, setInternalMode] = React47.useState("login");
+  const [isLoading, setIsLoading] = React47.useState(false);
+  const [error, setError] = React47.useState(null);
+  const [success, setSuccess] = React47.useState(null);
   const mode = controlledMode ?? internalMode;
   const setMode = (newMode) => {
     setError(null);
@@ -5606,14 +5944,14 @@ function AuthDialog({
       setInternalMode(newMode);
     }
   };
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isOpen) onClose();
     };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -5839,9 +6177,9 @@ function AuthDialog({
   );
 }
 function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
-  const [email, setEmail] = React46.useState("");
-  const [password, setPassword] = React46.useState("");
-  const [showPassword, setShowPassword] = React46.useState(false);
+  const [email, setEmail] = React47.useState("");
+  const [password, setPassword] = React47.useState("");
+  const [showPassword, setShowPassword] = React47.useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(email, password);
@@ -5942,11 +6280,11 @@ function SignupForm({
   termsUrl,
   privacyUrl
 }) {
-  const [email, setEmail] = React46.useState("");
-  const [password, setPassword] = React46.useState("");
-  const [confirmPassword, setConfirmPassword] = React46.useState("");
-  const [acceptedTerms, setAcceptedTerms] = React46.useState(false);
-  const [showPassword, setShowPassword] = React46.useState(false);
+  const [email, setEmail] = React47.useState("");
+  const [password, setPassword] = React47.useState("");
+  const [confirmPassword, setConfirmPassword] = React47.useState("");
+  const [acceptedTerms, setAcceptedTerms] = React47.useState(false);
+  const [showPassword, setShowPassword] = React47.useState(false);
   const passwordsMatch = password === confirmPassword;
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -6094,7 +6432,7 @@ function ForgotPasswordForm({
   isLoading,
   onBack
 }) {
-  const [email, setEmail] = React46.useState("");
+  const [email, setEmail] = React47.useState("");
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(email);
@@ -6145,9 +6483,9 @@ function ForgotPasswordForm({
   ] });
 }
 function ResetPasswordForm({ onSubmit, isLoading }) {
-  const [password, setPassword] = React46.useState("");
-  const [confirmPassword, setConfirmPassword] = React46.useState("");
-  const [showPassword, setShowPassword] = React46.useState(false);
+  const [password, setPassword] = React47.useState("");
+  const [confirmPassword, setConfirmPassword] = React47.useState("");
+  const [showPassword, setShowPassword] = React47.useState(false);
   const passwordsMatch = password === confirmPassword;
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -6480,9 +6818,9 @@ function ServiceSelect({
   error,
   className
 }) {
-  const [isOpen, setIsOpen] = React46.useState(false);
-  const dropdownRef = React46.useRef(null);
-  React46.useEffect(() => {
+  const [isOpen, setIsOpen] = React47.useState(false);
+  const dropdownRef = React47.useRef(null);
+  React47.useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -6608,7 +6946,7 @@ function DialogOverlay({
   children,
   className
 }) {
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -6653,7 +6991,7 @@ function BookingDialog({
   isLoading = false,
   className
 }) {
-  const [formData, setFormData] = React46.useState({
+  const [formData, setFormData] = React47.useState({
     firstName: defaultValues?.firstName || "",
     lastName: defaultValues?.lastName || "",
     phoneNumber: defaultValues?.phoneNumber || "",
@@ -6662,7 +7000,7 @@ function BookingDialog({
     consentEmail: defaultValues?.consentEmail ?? false,
     consentSms: defaultValues?.consentSms ?? false
   });
-  const [errors, setErrors] = React46.useState({});
+  const [errors, setErrors] = React47.useState({});
   const validate = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) {
@@ -6859,7 +7197,7 @@ function InlineBookingForm({
   isLoading = false,
   className
 }) {
-  const [formData, setFormData] = React46.useState({
+  const [formData, setFormData] = React47.useState({
     firstName: defaultValues?.firstName || "",
     lastName: defaultValues?.lastName || "",
     phoneNumber: defaultValues?.phoneNumber || "",
@@ -6868,7 +7206,7 @@ function InlineBookingForm({
     consentEmail: defaultValues?.consentEmail ?? false,
     consentSms: defaultValues?.consentSms ?? false
   });
-  const [errors, setErrors] = React46.useState({});
+  const [errors, setErrors] = React47.useState({});
   const validate = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) {
@@ -7450,7 +7788,7 @@ function HoursSummary({
   defaultExpanded = false,
   className
 }) {
-  const [isExpanded, setIsExpanded] = React46.useState(defaultExpanded);
+  const [isExpanded, setIsExpanded] = React47.useState(defaultExpanded);
   const isOpen = isCurrentlyOpen(schedule.officeHours);
   const todayHours = getTodayHours(schedule.officeHours, use24Hour);
   const hasStructuredHours = schedule.officeHours && schedule.officeHours.length > 0;
@@ -7873,17 +8211,17 @@ function CheckrIntegration({
     viewDetails = "View Details",
     noReportsSelected = "No reports selected"
   } = labels;
-  const [showInviteModal, setShowInviteModal] = React46.useState(false);
-  const [candidateName, setCandidateName] = React46.useState("");
-  const [candidateEmail, setCandidateEmail] = React46.useState("");
-  const [candidatePhone, setCandidatePhone] = React46.useState("");
-  const [selectedPackage, setSelectedPackage] = React46.useState(
+  const [showInviteModal, setShowInviteModal] = React47.useState(false);
+  const [candidateName, setCandidateName] = React47.useState("");
+  const [candidateEmail, setCandidateEmail] = React47.useState("");
+  const [candidatePhone, setCandidatePhone] = React47.useState("");
+  const [selectedPackage, setSelectedPackage] = React47.useState(
     packages[0]?.id || ""
   );
-  const [selectedReports, setSelectedReports] = React46.useState(
+  const [selectedReports, setSelectedReports] = React47.useState(
     /* @__PURE__ */ new Set()
   );
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     setSelectedReports(/* @__PURE__ */ new Set());
   }, [reports, connected]);
   const statusLabels = {
@@ -7917,7 +8255,7 @@ function CheckrIntegration({
     failed: "bg-destructive",
     expired: "bg-muted-foreground"
   };
-  const statusCounts = React46.useMemo(() => {
+  const statusCounts = React47.useMemo(() => {
     const counts = {
       pending: 0,
       running: 0,
@@ -8376,7 +8714,7 @@ function CommandPaletteProvider({
     }
   }, [isOpen, open, close]);
   useCommandK(toggle, enableShortcut);
-  React46__default.useEffect(() => {
+  React47__default.useEffect(() => {
     if (!customEventName) return;
     const handler = () => open();
     document.addEventListener(customEventName, handler);
@@ -9174,11 +9512,11 @@ function formatRetryTime(time) {
 }
 function useConnectionStatus(options = {}) {
   const { onDisconnect, onReconnect } = options;
-  const [isOnline, setIsOnline] = React46.useState(() => {
+  const [isOnline, setIsOnline] = React47.useState(() => {
     if (typeof window === "undefined") return true;
     return navigator.onLine;
   });
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
       onReconnect?.();
@@ -9241,7 +9579,7 @@ function CookieConsentBanner({
   isMobileApp = false,
   className
 }) {
-  const [isAnimating, setIsAnimating] = React46.useState(false);
+  const [isAnimating, setIsAnimating] = React47.useState(false);
   const handleAccept = () => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -9293,7 +9631,7 @@ function CookieConsentBanner({
                         appName,
                         " you are agreeing to our",
                         " ",
-                        legalLinks.map((link, index) => /* @__PURE__ */ jsxs(React46.Fragment, { children: [
+                        legalLinks.map((link, index) => /* @__PURE__ */ jsxs(React47.Fragment, { children: [
                           index > 0 && (index === legalLinks.length - 1 ? " and " : ", "),
                           /* @__PURE__ */ jsx(
                             "a",
@@ -9409,20 +9747,20 @@ function CompactCookieBanner({
 var COOKIE_CONSENT_KEY = "cookie-consent-accepted";
 function useCookieConsent(options = {}) {
   const { storageKey = COOKIE_CONSENT_KEY, onConsent } = options;
-  const [hasConsented, setHasConsented] = React46.useState(() => {
+  const [hasConsented, setHasConsented] = React47.useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(storageKey) === "true";
   });
-  const acceptCookies = React46.useCallback(() => {
+  const acceptCookies = React47.useCallback(() => {
     localStorage.setItem(storageKey, "true");
     setHasConsented(true);
     onConsent?.();
   }, [storageKey, onConsent]);
-  const declineCookies = React46.useCallback(() => {
+  const declineCookies = React47.useCallback(() => {
     localStorage.setItem(storageKey, "declined");
     setHasConsented(true);
   }, [storageKey]);
-  const resetConsent = React46.useCallback(() => {
+  const resetConsent = React47.useCallback(() => {
     localStorage.removeItem(storageKey);
     setHasConsented(false);
   }, [storageKey]);
@@ -9714,9 +10052,9 @@ function CSVFileUpload({
     selectFile = "Select a file to upload or drag and drop",
     selectButton = "Select File to Upload"
   } = labels;
-  const inputRef = React46.useRef(null);
-  const [isDragging, setIsDragging] = React46.useState(false);
-  const handleDrop = React46.useCallback(
+  const inputRef = React47.useRef(null);
+  const [isDragging, setIsDragging] = React47.useState(false);
+  const handleDrop = React47.useCallback(
     (e) => {
       e.preventDefault();
       setIsDragging(false);
@@ -9727,14 +10065,14 @@ function CSVFileUpload({
     },
     [onFileSelect]
   );
-  const handleDragOver = React46.useCallback((e) => {
+  const handleDragOver = React47.useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
   }, []);
-  const handleDragLeave = React46.useCallback(() => {
+  const handleDragLeave = React47.useCallback(() => {
     setIsDragging(false);
   }, []);
-  const handleFileChange = React46.useCallback(
+  const handleFileChange = React47.useCallback(
     (e) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -10053,11 +10391,11 @@ function DropZone({
   className,
   children
 }) {
-  const [isDragging, setIsDragging] = React46.useState(false);
-  const inputRef = React46.useRef(null);
-  const dropZoneRef = React46.useRef(null);
-  const dragCounter = React46.useRef(0);
-  const handleDragEnter = React46.useCallback(
+  const [isDragging, setIsDragging] = React47.useState(false);
+  const inputRef = React47.useRef(null);
+  const dropZoneRef = React47.useRef(null);
+  const dragCounter = React47.useRef(0);
+  const handleDragEnter = React47.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10069,7 +10407,7 @@ function DropZone({
     },
     [disabled]
   );
-  const handleDragLeave = React46.useCallback(
+  const handleDragLeave = React47.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10081,11 +10419,11 @@ function DropZone({
     },
     [disabled]
   );
-  const handleDragOver = React46.useCallback((e) => {
+  const handleDragOver = React47.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  const handleDrop = React46.useCallback(
+  const handleDrop = React47.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10098,12 +10436,12 @@ function DropZone({
     },
     [disabled, onFilesSelected]
   );
-  const handleClick = React46.useCallback(() => {
+  const handleClick = React47.useCallback(() => {
     if (!disabled) {
       inputRef.current?.click();
     }
   }, [disabled]);
-  const handleKeyDown = React46.useCallback(
+  const handleKeyDown = React47.useCallback(
     (e) => {
       if ((e.key === "Enter" || e.key === " ") && !disabled) {
         e.preventDefault();
@@ -10112,7 +10450,7 @@ function DropZone({
     },
     [disabled]
   );
-  const handleInputChange = React46.useCallback(
+  const handleInputChange = React47.useCallback(
     (e) => {
       if (e.target.files && e.target.files.length > 0) {
         onFilesSelected(e.target.files);
@@ -10200,7 +10538,7 @@ DropZone.displayName = "DropZone";
 function FilePreviewItem({ file, onRemove, disabled }) {
   const isPdf = file.file.type === "application/pdf";
   const isImage = file.file.type.startsWith("image/");
-  const handleRemove = React46.useCallback(() => {
+  const handleRemove = React47.useCallback(() => {
     onRemove(file.id);
   }, [file.id, onRemove]);
   return /* @__PURE__ */ jsxs(
@@ -10344,24 +10682,24 @@ function useCamera({
   width = 1920,
   height = 1080
 } = {}) {
-  const [permission, setPermission] = React46.useState("prompt");
-  const [stream, setStream] = React46.useState(null);
-  const [isReady, setIsReady] = React46.useState(false);
-  const [error, setError] = React46.useState(null);
-  const [currentFacingMode, setCurrentFacingMode] = React46.useState(initialFacingMode);
-  const videoRef = React46.useRef(null);
-  const canvasRef = React46.useRef(null);
-  React46.useEffect(() => {
+  const [permission, setPermission] = React47.useState("prompt");
+  const [stream, setStream] = React47.useState(null);
+  const [isReady, setIsReady] = React47.useState(false);
+  const [error, setError] = React47.useState(null);
+  const [currentFacingMode, setCurrentFacingMode] = React47.useState(initialFacingMode);
+  const videoRef = React47.useRef(null);
+  const canvasRef = React47.useRef(null);
+  React47.useEffect(() => {
     checkCameraPermission().then(setPermission);
   }, []);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
   }, [stream]);
-  const startCamera = React46.useCallback(async () => {
+  const startCamera = React47.useCallback(async () => {
     if (!hasCameraSupport()) {
       setPermission("unavailable");
       setError(new Error("Camera is not supported on this device"));
@@ -10395,7 +10733,7 @@ function useCamera({
       }
     }
   }, [currentFacingMode, width, height]);
-  const stopCamera = React46.useCallback(() => {
+  const stopCamera = React47.useCallback(() => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
       setStream(null);
@@ -10405,8 +10743,8 @@ function useCamera({
       videoRef.current.srcObject = null;
     }
   }, [stream]);
-  const shouldRestartRef = React46.useRef(false);
-  const switchCamera = React46.useCallback(() => {
+  const shouldRestartRef = React47.useRef(false);
+  const switchCamera = React47.useCallback(() => {
     const newFacingMode = currentFacingMode === "user" ? "environment" : "user";
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -10419,13 +10757,13 @@ function useCamera({
     }
     setCurrentFacingMode(newFacingMode);
   }, [currentFacingMode, stream]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (shouldRestartRef.current && !stream) {
       shouldRestartRef.current = false;
       startCamera();
     }
   }, [currentFacingMode, stream, startCamera]);
-  const capturePhoto = React46.useCallback(() => {
+  const capturePhoto = React47.useCallback(() => {
     if (!videoRef.current || !isReady) {
       return null;
     }
@@ -10972,14 +11310,14 @@ function WebcamModal({
     width: 1920,
     height: 1080
   });
-  const [capturedFile, setCapturedFile] = React46.useState(null);
-  const [previewUrl, setPreviewUrl] = React46.useState(null);
-  const [autoDetectEnabled, setAutoDetectEnabled] = React46.useState(enableAutoCapture);
-  const [videoDimensions, setVideoDimensions] = React46.useState({
+  const [capturedFile, setCapturedFile] = React47.useState(null);
+  const [previewUrl, setPreviewUrl] = React47.useState(null);
+  const [autoDetectEnabled, setAutoDetectEnabled] = React47.useState(enableAutoCapture);
+  const [videoDimensions, setVideoDimensions] = React47.useState({
     width: 0,
     height: 0
   });
-  const handleAutoCapture = React46.useCallback(() => {
+  const handleAutoCapture = React47.useCallback(() => {
     const file = capturePhoto();
     if (file) {
       setCapturedFile(file);
@@ -11000,8 +11338,8 @@ function WebcamModal({
     },
     handleAutoCapture
   );
-  const hasStartedRef = React46.useRef(false);
-  React46.useEffect(() => {
+  const hasStartedRef = React47.useRef(false);
+  React47.useEffect(() => {
     const video = videoRef.current;
     if (video && isReady) {
       const updateDimensions = () => {
@@ -11015,7 +11353,7 @@ function WebcamModal({
       return () => video.removeEventListener("resize", updateDimensions);
     }
   }, [isReady, videoRef]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (open && permission !== "denied" && permission !== "unavailable") {
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
@@ -11034,7 +11372,7 @@ function WebcamModal({
       });
     }
   }, [open, permission]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (isReady && autoDetectEnabled && !capturedFile) {
       detection.startDetection();
     }
@@ -11042,7 +11380,7 @@ function WebcamModal({
       detection.stopDetection();
     };
   }, [isReady, autoDetectEnabled, capturedFile]);
-  const handleCapture = React46.useCallback(() => {
+  const handleCapture = React47.useCallback(() => {
     const file = capturePhoto();
     if (file) {
       setCapturedFile(file);
@@ -11050,7 +11388,7 @@ function WebcamModal({
       stopCamera();
     }
   }, [capturePhoto, stopCamera]);
-  const handleRetake = React46.useCallback(() => {
+  const handleRetake = React47.useCallback(() => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -11059,13 +11397,13 @@ function WebcamModal({
     detection.resetDetection();
     startCamera();
   }, [previewUrl, startCamera, detection]);
-  const handleConfirm = React46.useCallback(() => {
+  const handleConfirm = React47.useCallback(() => {
     if (capturedFile) {
       onCapture(capturedFile);
       onOpenChange(false);
     }
   }, [capturedFile, onCapture, onOpenChange]);
-  const handleClose = React46.useCallback(() => {
+  const handleClose = React47.useCallback(() => {
     stopCamera();
     detection.stopDetection();
     if (previewUrl) {
@@ -11217,13 +11555,13 @@ function useFileUpload({
   multiple = false,
   onValidationError
 } = {}) {
-  const [files, setFiles] = React46.useState([]);
-  React46.useEffect(() => {
+  const [files, setFiles] = React47.useState([]);
+  React47.useEffect(() => {
     return () => {
       files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
     };
   }, []);
-  const addFiles = React46.useCallback(
+  const addFiles = React47.useCallback(
     (fileList, source = "upload") => {
       const newFiles = [];
       const errors = [];
@@ -11255,7 +11593,7 @@ function useFileUpload({
     },
     [acceptedFileTypes, maxFileSizeMb, multiple, onValidationError]
   );
-  const addFile = React46.useCallback(
+  const addFile = React47.useCallback(
     (file, source = "upload") => {
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(file);
@@ -11263,7 +11601,7 @@ function useFileUpload({
     },
     [addFiles]
   );
-  const removeFile = React46.useCallback((id) => {
+  const removeFile = React47.useCallback((id) => {
     setFiles((prev) => {
       const fileToRemove = prev.find((f) => f.id === id);
       if (fileToRemove) {
@@ -11272,13 +11610,13 @@ function useFileUpload({
       return prev.filter((f) => f.id !== id);
     });
   }, []);
-  const clearFiles = React46.useCallback(() => {
+  const clearFiles = React47.useCallback(() => {
     setFiles((prev) => {
       prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
       return [];
     });
   }, []);
-  const getFiles = React46.useCallback(() => {
+  const getFiles = React47.useCallback(() => {
     return files.map((f) => f.file);
   }, [files]);
   return {
@@ -11306,12 +11644,12 @@ function DocumentScanner({
   onValidationError,
   onStateChange
 }) {
-  const [state, setState] = React46.useState("idle");
-  const [error, setError] = React46.useState(null);
-  const [isWebcamOpen, setIsWebcamOpen] = React46.useState(false);
-  const [validationErrors, setValidationErrors] = React46.useState([]);
+  const [state, setState] = React47.useState("idle");
+  const [error, setError] = React47.useState(null);
+  const [isWebcamOpen, setIsWebcamOpen] = React47.useState(false);
+  const [validationErrors, setValidationErrors] = React47.useState([]);
   const isMobile = useIsMobile();
-  const cameraInputRef = React46.useRef(null);
+  const cameraInputRef = React47.useRef(null);
   const {
     files,
     addFiles,
@@ -11329,17 +11667,17 @@ function DocumentScanner({
       onValidationError?.(errors);
     }
   });
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     onStateChange?.(state);
   }, [state, onStateChange]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (hasFiles && state === "idle") {
       setState("preview");
     } else if (!hasFiles && state === "preview") {
       setState("idle");
     }
   }, [hasFiles, state]);
-  const handleFilesSelected = React46.useCallback(
+  const handleFilesSelected = React47.useCallback(
     (fileList) => {
       setError(null);
       setValidationErrors([]);
@@ -11347,10 +11685,10 @@ function DocumentScanner({
     },
     [addFiles]
   );
-  const handleCameraCapture = React46.useCallback(() => {
+  const handleCameraCapture = React47.useCallback(() => {
     cameraInputRef.current?.click();
   }, []);
-  const handleCameraInputChange = React46.useCallback(
+  const handleCameraInputChange = React47.useCallback(
     (e) => {
       if (e.target.files && e.target.files.length > 0) {
         setError(null);
@@ -11361,7 +11699,7 @@ function DocumentScanner({
     },
     [addFiles]
   );
-  const handleWebcamCapture = React46.useCallback(
+  const handleWebcamCapture = React47.useCallback(
     (file) => {
       setError(null);
       setValidationErrors([]);
@@ -11369,7 +11707,7 @@ function DocumentScanner({
     },
     [addFile]
   );
-  const handleScan = React46.useCallback(async () => {
+  const handleScan = React47.useCallback(async () => {
     if (!hasFiles) return;
     try {
       setState("processing");
@@ -11388,11 +11726,11 @@ function DocumentScanner({
       setError(errorMessage);
     }
   }, [hasFiles, getFiles, onScan, onResult, clearFiles]);
-  const handleRetry = React46.useCallback(() => {
+  const handleRetry = React47.useCallback(() => {
     setState("preview");
     setError(null);
   }, []);
-  const handleClearAll = React46.useCallback(() => {
+  const handleClearAll = React47.useCallback(() => {
     clearFiles();
     setError(null);
     setValidationErrors([]);
@@ -11683,10 +12021,10 @@ function useDropzone({
   multiple = false,
   disabled = false
 }) {
-  const [isDragging, setIsDragging] = React46.useState(false);
-  const inputRef = React46.useRef(null);
-  const dragCounter = React46.useRef(0);
-  const handleDragEnter = React46.useCallback(
+  const [isDragging, setIsDragging] = React47.useState(false);
+  const inputRef = React47.useRef(null);
+  const dragCounter = React47.useRef(0);
+  const handleDragEnter = React47.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -11698,11 +12036,11 @@ function useDropzone({
     },
     [disabled]
   );
-  const handleDragOver = React46.useCallback((e) => {
+  const handleDragOver = React47.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  const handleDragLeave = React46.useCallback((e) => {
+  const handleDragLeave = React47.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current--;
@@ -11710,7 +12048,7 @@ function useDropzone({
       setIsDragging(false);
     }
   }, []);
-  const handleDrop = React46.useCallback(
+  const handleDrop = React47.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -11724,7 +12062,7 @@ function useDropzone({
     },
     [disabled, multiple, onDrop]
   );
-  const handleInputChange = React46.useCallback(
+  const handleInputChange = React47.useCallback(
     (e) => {
       const files = e.target.files ? Array.from(e.target.files) : [];
       if (files.length > 0) {
@@ -11734,7 +12072,7 @@ function useDropzone({
     },
     [onDrop]
   );
-  const open = React46.useCallback(() => {
+  const open = React47.useCallback(() => {
     if (!disabled) {
       inputRef.current?.click();
     }
@@ -11784,7 +12122,7 @@ function ClaimProviderForm({
   termsUrl = "/terms",
   className = ""
 }) {
-  const [formData, setFormData] = React46.useState({
+  const [formData, setFormData] = React47.useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -11992,14 +12330,14 @@ function CreateInvoiceModal({
   currency = "$",
   defaultDueDays = 30
 }) {
-  const [step, setStep] = React46.useState(1);
-  const [employerId, setEmployerId] = React46.useState("");
-  const [selectedOrders, setSelectedOrders] = React46.useState(
+  const [step, setStep] = React47.useState(1);
+  const [employerId, setEmployerId] = React47.useState("");
+  const [selectedOrders, setSelectedOrders] = React47.useState(
     /* @__PURE__ */ new Set()
   );
-  const [dueDate, setDueDate] = React46.useState("");
-  const [notes, setNotes] = React46.useState("");
-  React46.useEffect(() => {
+  const [dueDate, setDueDate] = React47.useState("");
+  const [notes, setNotes] = React47.useState("");
+  React47.useEffect(() => {
     if (!open) {
       setStep(1);
       setEmployerId("");
@@ -12008,7 +12346,7 @@ function CreateInvoiceModal({
       setNotes("");
     }
   }, [open]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (!dueDate && open) {
       const date = /* @__PURE__ */ new Date();
       date.setDate(date.getDate() + defaultDueDays);
@@ -12316,14 +12654,14 @@ function CreateReferralModal({
   errorMessage,
   currency = "$"
 }) {
-  const [selectedServices, setSelectedServices] = React46.useState(
+  const [selectedServices, setSelectedServices] = React47.useState(
     /* @__PURE__ */ new Set()
   );
-  const [notes, setNotes] = React46.useState("");
-  const [priority, setPriority] = React46.useState(
+  const [notes, setNotes] = React47.useState("");
+  const [priority, setPriority] = React47.useState(
     "normal"
   );
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (!open) {
       setSelectedServices(/* @__PURE__ */ new Set());
       setNotes("");
@@ -12523,15 +12861,15 @@ function EditUserRoleModal({
   isSubmitting = false,
   errorMessage
 }) {
-  const [selectedRoleId, setSelectedRoleId] = React46.useState(
+  const [selectedRoleId, setSelectedRoleId] = React47.useState(
     user?.currentRoleId || ""
   );
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (user?.currentRoleId) {
       setSelectedRoleId(user.currentRoleId);
     }
   }, [user?.currentRoleId]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (!open && user?.currentRoleId) {
       setSelectedRoleId(user.currentRoleId);
     }
@@ -12693,24 +13031,24 @@ function EmployeeForm({
     emailRequired = "Email is required",
     dobRequired = "Date of birth is required"
   } = labels;
-  const [firstName, setFirstName] = React46.useState(initialData.firstName ?? "");
-  const [lastName, setLastName] = React46.useState(initialData.lastName ?? "");
-  const [email, setEmail] = React46.useState(initialData.email ?? "");
-  const [dob, setDob] = React46.useState(initialData.dob ?? "");
-  const [selectedDepartments, setSelectedDepartments] = React46.useState(initialData.departments ?? []);
-  const [title, setTitle] = React46.useState(initialData.title ?? "");
-  const [address, setAddress] = React46.useState(
+  const [firstName, setFirstName] = React47.useState(initialData.firstName ?? "");
+  const [lastName, setLastName] = React47.useState(initialData.lastName ?? "");
+  const [email, setEmail] = React47.useState(initialData.email ?? "");
+  const [dob, setDob] = React47.useState(initialData.dob ?? "");
+  const [selectedDepartments, setSelectedDepartments] = React47.useState(initialData.departments ?? []);
+  const [title, setTitle] = React47.useState(initialData.title ?? "");
+  const [address, setAddress] = React47.useState(
     initialData.address ?? {}
   );
-  const [phones, setPhones] = React46.useState(
+  const [phones, setPhones] = React47.useState(
     initialData.phones ?? [{ number: "", type: "cell" }]
   );
-  const [isActive, setIsActive] = React46.useState(initialData.isActive ?? true);
-  const [additionalInfo, setAdditionalInfo] = React46.useState(
+  const [isActive, setIsActive] = React47.useState(initialData.isActive ?? true);
+  const [additionalInfo, setAdditionalInfo] = React47.useState(
     initialData.additionalInfo ?? ""
   );
-  const [sendInvite, setSendInvite] = React46.useState(false);
-  const [errors, setErrors] = React46.useState({});
+  const [sendInvite, setSendInvite] = React47.useState(false);
+  const [errors, setErrors] = React47.useState({});
   const validate = () => {
     const newErrors = {};
     if (!firstName.trim()) newErrors.firstName = firstNameRequired;
@@ -13022,8 +13360,8 @@ function EmployeeProfileCard({
   className,
   labels = {}
 }) {
-  const [isExpanded, setIsExpanded] = React46.useState(defaultExpanded);
-  const fileInputRef = React46.useRef(null);
+  const [isExpanded, setIsExpanded] = React47.useState(defaultExpanded);
+  const fileInputRef = React47.useRef(null);
   const {
     moreDetails = "more details",
     lessDetails = "less details",
@@ -13480,13 +13818,13 @@ function EmployerList({
   emptyMessage = "No employers linked yet",
   className = ""
 }) {
-  const [searchQuery, setSearchQuery] = React46.useState("");
+  const [searchQuery, setSearchQuery] = React47.useState("");
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     onSearch?.(query);
   };
-  const filteredEmployers = React46.useMemo(() => {
+  const filteredEmployers = React47.useMemo(() => {
     if (!searchQuery.trim()) return employers;
     const q = searchQuery.toLowerCase();
     return employers.filter(
@@ -14037,7 +14375,7 @@ function EmployerServiceModal({
   isSubmitting = false,
   errorMessage
 }) {
-  const [config, setConfig] = React46.useState({
+  const [config, setConfig] = React47.useState({
     serviceId: service?.id || "",
     employerId: employer?.id || "",
     customPrice: existingConfig?.customPrice,
@@ -14049,7 +14387,7 @@ function EmployerServiceModal({
     notes: existingConfig?.notes,
     billingCode: existingConfig?.billingCode
   });
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     setConfig({
       serviceId: service?.id || "",
       employerId: employer?.id || "",
@@ -14765,8 +15103,8 @@ function FileManager({
   errorMessage,
   className = ""
 }) {
-  const [isDragging, setIsDragging] = React46.useState(false);
-  const fileInputRef = React46.useRef(null);
+  const [isDragging, setIsDragging] = React47.useState(false);
+  const fileInputRef = React47.useRef(null);
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -15013,14 +15351,14 @@ function HelpSupportPanel({
   successMessage,
   className = ""
 }) {
-  const [searchTerm, setSearchTerm] = React46.useState("");
-  const [expandedFaq, setExpandedFaq] = React46.useState(null);
-  const [formData, setFormData] = React46.useState({
+  const [searchTerm, setSearchTerm] = React47.useState("");
+  const [expandedFaq, setExpandedFaq] = React47.useState(null);
+  const [formData, setFormData] = React47.useState({
     subject: "",
     message: "",
     email: ""
   });
-  const [showSuccess, setShowSuccess] = React46.useState(false);
+  const [showSuccess, setShowSuccess] = React47.useState(false);
   const filteredFaqs = faqs.filter(
     (faq) => faq.question.toLowerCase().includes(searchTerm.toLowerCase()) || faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -15466,7 +15804,7 @@ function HRISProviderSelector({
     syncPending = "We are still waiting on data from your HRIS Provider. Please check back later.",
     supportEmail = "support@bluehive.com"
   } = labels;
-  const filteredProviders = React46.useMemo(() => {
+  const filteredProviders = React47.useMemo(() => {
     if (!searchQuery.trim()) return providers;
     const query = searchQuery.toLowerCase();
     return providers.filter((p) => p.displayName.toLowerCase().includes(query));
@@ -15665,11 +16003,11 @@ function InventoryManager({
   isLoading = false,
   className = ""
 }) {
-  const [updateType, setUpdateType] = React46.useState(
+  const [updateType, setUpdateType] = React47.useState(
     "credit"
   );
-  const [updateAmount, setUpdateAmount] = React46.useState("");
-  const [updateMemo, setUpdateMemo] = React46.useState("");
+  const [updateAmount, setUpdateAmount] = React47.useState("");
+  const [updateMemo, setUpdateMemo] = React47.useState("");
   const handleSubmit = () => {
     if (!updateAmount || !onUpdateSubmit) return;
     const amount = parseInt(updateAmount, 10);
@@ -15734,7 +16072,7 @@ function InventoryManager({
         /* @__PURE__ */ jsx("th", { className: "text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase", children: "Change" }),
         /* @__PURE__ */ jsx("th", { className: "text-muted-foreground py-2 text-right text-xs font-medium tracking-wider uppercase", children: "Quantity" })
       ] }) }),
-      /* @__PURE__ */ jsx("tbody", { className: "divide-border/50 divide-y", children: logEntries.map((entry) => /* @__PURE__ */ jsxs(React46.Fragment, { children: [
+      /* @__PURE__ */ jsx("tbody", { className: "divide-border/50 divide-y", children: logEntries.map((entry) => /* @__PURE__ */ jsxs(React47.Fragment, { children: [
         /* @__PURE__ */ jsxs("tr", { children: [
           /* @__PURE__ */ jsx(
             "td",
@@ -15963,12 +16301,12 @@ function InviteUserModal({
   errorMessage,
   successMessage
 }) {
-  const [email, setEmail] = React46.useState("");
-  const [firstName, setFirstName] = React46.useState("");
-  const [lastName, setLastName] = React46.useState("");
-  const [roleId, setRoleId] = React46.useState(defaultRoleId || "");
-  const [message, setMessage] = React46.useState("");
-  React46.useEffect(() => {
+  const [email, setEmail] = React47.useState("");
+  const [firstName, setFirstName] = React47.useState("");
+  const [lastName, setLastName] = React47.useState("");
+  const [roleId, setRoleId] = React47.useState(defaultRoleId || "");
+  const [message, setMessage] = React47.useState("");
+  React47.useEffect(() => {
     if (!open) {
       setEmail("");
       setFirstName("");
@@ -16167,7 +16505,7 @@ function InvoiceList({
   currency = "$",
   className = ""
 }) {
-  const [searchQuery, setSearchQuery] = React46.useState("");
+  const [searchQuery, setSearchQuery] = React47.useState("");
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -16204,7 +16542,7 @@ function InvoiceList({
     { value: "overdue", label: "Overdue" },
     { value: "cancelled", label: "Cancelled" }
   ];
-  const filteredInvoices = React46.useMemo(() => {
+  const filteredInvoices = React47.useMemo(() => {
     let result = invoices;
     if (statusFilter !== "all") {
       result = result.filter((inv) => inv.status === statusFilter);
@@ -16217,7 +16555,7 @@ function InvoiceList({
     }
     return result;
   }, [invoices, statusFilter, searchQuery]);
-  const totals = React46.useMemo(() => {
+  const totals = React47.useMemo(() => {
     return {
       total: filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0),
       paid: filteredInvoices.filter((inv) => inv.status === "paid").reduce((sum, inv) => sum + inv.amount, 0),
@@ -16388,16 +16726,16 @@ function InvoicePaymentPage({
   showStripeBranding = true,
   className = ""
 }) {
-  const [paymentMethod, setPaymentMethod] = React46.useState(
+  const [paymentMethod, setPaymentMethod] = React47.useState(
     acceptedMethods[0] || "card"
   );
-  const [name, setName] = React46.useState("");
-  const [email, setEmail] = React46.useState("");
-  const [cardNumber, setCardNumber] = React46.useState("");
-  const [expiry, setExpiry] = React46.useState("");
-  const [cvc, setCvc] = React46.useState("");
-  const [routingNumber, setRoutingNumber] = React46.useState("");
-  const [accountNumber, setAccountNumber] = React46.useState("");
+  const [name, setName] = React47.useState("");
+  const [email, setEmail] = React47.useState("");
+  const [cardNumber, setCardNumber] = React47.useState("");
+  const [expiry, setExpiry] = React47.useState("");
+  const [cvc, setCvc] = React47.useState("");
+  const [routingNumber, setRoutingNumber] = React47.useState("");
+  const [accountNumber, setAccountNumber] = React47.useState("");
   const formatCurrency3 = (amount) => {
     return `${currency}${amount.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
@@ -17078,10 +17416,10 @@ function LanguageSelector({
   disabled = false,
   className
 }) {
-  const [isOpen, setIsOpen] = React46.useState(false);
-  const containerRef = React46.useRef(null);
+  const [isOpen, setIsOpen] = React47.useState(false);
+  const containerRef = React47.useRef(null);
   const selectedLanguage = languages.find((l) => l.code === value);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
@@ -17090,7 +17428,7 @@ function LanguageSelector({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") setIsOpen(false);
     };
@@ -17569,7 +17907,7 @@ function formatLastSeen(date) {
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString();
 }
-var ConversationHeader = React46.forwardRef(
+var ConversationHeader = React47.forwardRef(
   ({
     className,
     size,
@@ -17681,7 +18019,7 @@ var ConversationHeader = React46.forwardRef(
   }
 );
 ConversationHeader.displayName = "ConversationHeader";
-var ConversationListItem = React46.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
+var ConversationListItem = React47.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
   const participant = conversation.participants.find((p) => !p.isCurrentUser);
   const title = getConversationTitle(conversation, participant);
   const avatarUrl = conversation.avatarUrl || participant?.avatarUrl;
@@ -17871,7 +18209,7 @@ function ConversationListSkeleton({
 }
 ConversationListSkeleton.displayName = "ConversationListSkeleton";
 function LightboxModal({ attachment, onClose }) {
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
@@ -17966,7 +18304,7 @@ function LightboxModal({ attachment, onClose }) {
   );
 }
 LightboxModal.displayName = "LightboxModal";
-var MessageThread = React46.forwardRef(
+var MessageThread = React47.forwardRef(
   ({
     conversation,
     messages,
@@ -17997,8 +18335,8 @@ var MessageThread = React46.forwardRef(
     onError,
     className
   }, ref) => {
-    const [lightboxAttachment, setLightboxAttachment] = React46.useState(null);
-    const [replyTo, setReplyTo] = React46.useState(null);
+    const [lightboxAttachment, setLightboxAttachment] = React47.useState(null);
+    const [replyTo, setReplyTo] = React47.useState(null);
     const participant = conversation?.type === "direct" ? conversation.participants.find((p) => p.id !== currentUser.id) : void 0;
     const handleAttachmentClick = (attachment, message) => {
       if (attachment.type === "image" || attachment.type === "video") {
@@ -18166,13 +18504,13 @@ function useMessages(options) {
     onRetry,
     onLoadMore
   } = options;
-  const [messages, setMessages] = React46.useState(initialMessages);
-  const [isSending, setIsSending] = React46.useState(false);
-  const [isLoadingMore, setIsLoadingMore] = React46.useState(false);
-  React46.useEffect(() => {
+  const [messages, setMessages] = React47.useState(initialMessages);
+  const [isSending, setIsSending] = React47.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React47.useState(false);
+  React47.useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
-  const addMessage = React46.useCallback((message) => {
+  const addMessage = React47.useCallback((message) => {
     setMessages((prev) => {
       if (prev.some((m) => m.id === message.id)) {
         return prev;
@@ -18180,7 +18518,7 @@ function useMessages(options) {
       return [...prev, message];
     });
   }, []);
-  const updateMessage = React46.useCallback(
+  const updateMessage = React47.useCallback(
     (messageId, updates) => {
       setMessages(
         (prev) => prev.map((m) => m.id === messageId ? { ...m, ...updates } : m)
@@ -18188,22 +18526,22 @@ function useMessages(options) {
     },
     []
   );
-  const removeMessage = React46.useCallback((messageId) => {
+  const removeMessage = React47.useCallback((messageId) => {
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
-  const updateStatus = React46.useCallback(
+  const updateStatus = React47.useCallback(
     (messageId, status) => {
       updateMessage(messageId, { status });
     },
     [updateMessage]
   );
-  const markAsRead = React46.useCallback(
+  const markAsRead = React47.useCallback(
     (messageId) => {
       updateStatus(messageId, "read");
     },
     [updateStatus]
   );
-  const sendMessage = React46.useCallback(
+  const sendMessage = React47.useCallback(
     async (newMessage) => {
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticMessage = {
@@ -18235,7 +18573,7 @@ function useMessages(options) {
     },
     [currentUser, onSend, addMessage, updateStatus]
   );
-  const retryMessage = React46.useCallback(
+  const retryMessage = React47.useCallback(
     async (messageId) => {
       updateStatus(messageId, "sending");
       try {
@@ -18249,7 +18587,7 @@ function useMessages(options) {
     },
     [onRetry, updateStatus]
   );
-  const loadMore = React46.useCallback(async () => {
+  const loadMore = React47.useCallback(async () => {
     if (isLoadingMore || !onLoadMore) return;
     setIsLoadingMore(true);
     try {
@@ -18280,13 +18618,13 @@ function useTypingIndicator(options = {}) {
     onTypingStart,
     onTypingStop
   } = options;
-  const [participants, setParticipants] = React46.useState(initialParticipants);
-  const [isLocalTyping, setIsLocalTyping] = React46.useState(false);
-  const typingTimeoutRef = React46.useRef(null);
-  React46.useEffect(() => {
+  const [participants, setParticipants] = React47.useState(initialParticipants);
+  const [isLocalTyping, setIsLocalTyping] = React47.useState(false);
+  const typingTimeoutRef = React47.useRef(null);
+  React47.useEffect(() => {
     setParticipants(initialParticipants);
   }, [initialParticipants]);
-  const startTyping = React46.useCallback(() => {
+  const startTyping = React47.useCallback(() => {
     if (!isLocalTyping) {
       setIsLocalTyping(true);
       onTypingStart?.();
@@ -18299,21 +18637,21 @@ function useTypingIndicator(options = {}) {
       onTypingStop?.();
     }, debounceTime);
   }, [isLocalTyping, debounceTime, onTypingStart, onTypingStop]);
-  const stopTyping = React46.useCallback(() => {
+  const stopTyping = React47.useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     setIsLocalTyping(false);
     onTypingStop?.();
   }, [onTypingStop]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
     };
   }, []);
-  const typingState = React46.useMemo(
+  const typingState = React47.useMemo(
     () => ({
       participants,
       lastUpdated: /* @__PURE__ */ new Date()
@@ -18329,11 +18667,11 @@ function useTypingIndicator(options = {}) {
 }
 function useMessageScroll(options) {
   const { messages, currentUserId, threshold = 100 } = options;
-  const scrollContainerRef = React46.useRef(null);
-  const bottomRef = React46.useRef(null);
-  const [isScrolledUp, setIsScrolledUp] = React46.useState(false);
-  const prevMessageCountRef = React46.useRef(messages.length);
-  React46.useEffect(() => {
+  const scrollContainerRef = React47.useRef(null);
+  const bottomRef = React47.useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = React47.useState(false);
+  const prevMessageCountRef = React47.useRef(messages.length);
+  React47.useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     const handleScroll = () => {
@@ -18344,12 +18682,12 @@ function useMessageScroll(options) {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [threshold]);
-  const scrollToBottom = React46.useCallback((smooth = true) => {
+  const scrollToBottom = React47.useCallback((smooth = true) => {
     bottomRef.current?.scrollIntoView({
       behavior: smooth ? "smooth" : "auto"
     });
   }, []);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     const messageCountChanged = messages.length !== prevMessageCountRef.current;
     prevMessageCountRef.current = messages.length;
     if (!messageCountChanged) return;
@@ -18368,9 +18706,9 @@ function useMessageScroll(options) {
 }
 function useReadReceipts(options) {
   const { currentUserId, onMarkRead, threshold = 0.5 } = options;
-  const observerRef = React46.useRef(null);
-  const observedMessagesRef = React46.useRef(/* @__PURE__ */ new Set());
-  React46.useEffect(() => {
+  const observerRef = React47.useRef(null);
+  const observedMessagesRef = React47.useRef(/* @__PURE__ */ new Set());
+  React47.useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -18389,7 +18727,7 @@ function useReadReceipts(options) {
       observerRef.current?.disconnect();
     };
   }, [onMarkRead, threshold]);
-  const observeMessage = React46.useCallback(
+  const observeMessage = React47.useCallback(
     (element, message) => {
       if (!element || !observerRef.current) return;
       if (message.sender.id !== currentUserId && message.status !== "read" && !observedMessagesRef.current.has(message.id)) {
@@ -18400,6 +18738,213 @@ function useReadReceipts(options) {
     [currentUserId]
   );
   return { observeMessage };
+}
+function NearbyProviderCard({
+  provider,
+  LinkComponent,
+  formatPhone = defaultFormatPhone,
+  className
+}) {
+  const { name, slug, logoUrl, address, phoneNumber, distance } = provider;
+  const LinkWrapper = LinkComponent ? ({ to, className: className2, children }) => /* @__PURE__ */ jsx(LinkComponent, { to, className: className2, children }) : ({ to, className: className2, children }) => /* @__PURE__ */ jsx("a", { href: to, className: className2, children });
+  const initials = name.split(" ").map((word) => word[0]).join("").toUpperCase().slice(0, 2);
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: cn(
+        "rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800",
+        className
+      ),
+      children: /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4", children: [
+        /* @__PURE__ */ jsxs(LinkWrapper, { to: `/provider/${slug}`, className: "shrink-0", children: [
+          logoUrl ? /* @__PURE__ */ jsx(
+            "img",
+            {
+              src: logoUrl,
+              alt: `${name} logo`,
+              className: "h-16 w-16 rounded-lg object-contain",
+              onError: (e) => {
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+              }
+            }
+          ) : null,
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: cn(
+                "flex h-16 w-16 items-center justify-center rounded-lg bg-primary-100 text-xl font-bold text-primary-600 dark:bg-primary-900/30 dark:text-primary-400",
+                logoUrl && "hidden"
+              ),
+              children: initials
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxs("div", { className: "mb-1 flex items-start justify-between gap-2", children: [
+            /* @__PURE__ */ jsx(
+              LinkWrapper,
+              {
+                to: `/provider/${slug}`,
+                className: "text-base font-semibold text-gray-900 hover:text-primary-600 dark:text-white dark:hover:text-primary-400",
+                children: name
+              }
+            ),
+            /* @__PURE__ */ jsxs("span", { className: "shrink-0 text-sm text-gray-500 dark:text-gray-400", children: [
+              /* @__PURE__ */ jsx("span", { className: "font-medium text-primary-600 dark:text-primary-400", children: distance.toFixed(2) }),
+              " ",
+              /* @__PURE__ */ jsx("span", { className: "text-xs uppercase", children: "mi" })
+            ] })
+          ] }),
+          address && /* @__PURE__ */ jsxs("div", { className: "mb-2 text-sm text-gray-600 dark:text-gray-400", children: [
+            /* @__PURE__ */ jsx("div", { children: address.street1 }),
+            address.street2 && /* @__PURE__ */ jsx("div", { children: address.street2 }),
+            /* @__PURE__ */ jsxs("div", { children: [
+              address.city,
+              ", ",
+              address.state,
+              " ",
+              address.postalCode
+            ] })
+          ] }),
+          phoneNumber && /* @__PURE__ */ jsxs(
+            "a",
+            {
+              href: `tel:${phoneNumber}`,
+              className: "inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
+              children: [
+                /* @__PURE__ */ jsx(PhoneIcon3, { className: "h-4 w-4" }),
+                formatPhone(phoneNumber)
+              ]
+            }
+          )
+        ] })
+      ] })
+    }
+  );
+}
+function NearbyProvidersList({
+  providers,
+  maxProviders = 3,
+  zipcode,
+  LinkComponent,
+  formatPhone,
+  title = "Nearby Providers",
+  showConciergeBanner = true,
+  className
+}) {
+  const displayedProviders = providers.slice(0, maxProviders);
+  if (providers.length === 0) {
+    return null;
+  }
+  return /* @__PURE__ */ jsxs("div", { className: cn("space-y-4", className), children: [
+    /* @__PURE__ */ jsxs("h2", { className: "flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white", children: [
+      /* @__PURE__ */ jsx(LocationIcon, { className: "h-5 w-5 text-primary-600 dark:text-primary-400" }),
+      title
+    ] }),
+    showConciergeBanner && /* @__PURE__ */ jsx(ConciergeBanner, {}),
+    /* @__PURE__ */ jsx("div", { className: "space-y-3", children: displayedProviders.map((provider) => /* @__PURE__ */ jsx(
+      NearbyProviderCard,
+      {
+        provider,
+        LinkComponent,
+        formatPhone
+      },
+      provider.id
+    )) }),
+    zipcode && /* @__PURE__ */ jsxs(
+      "a",
+      {
+        href: `/providers/search/${zipcode}/25`,
+        className: "inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
+        children: [
+          /* @__PURE__ */ jsx(LocationIcon, { className: "h-4 w-4" }),
+          "SHOW PROVIDERS IN ",
+          zipcode
+        ]
+      }
+    )
+  ] });
+}
+function ConciergeBanner() {
+  return /* @__PURE__ */ jsx("div", { className: "rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-900/20", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+    /* @__PURE__ */ jsx(
+      "img",
+      {
+        src: "/images/logos/bluehive-concierge.png",
+        alt: "BlueHive Concierge",
+        className: "h-12 w-auto",
+        onError: (e) => {
+          e.currentTarget.style.display = "none";
+        }
+      }
+    ),
+    /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
+      /* @__PURE__ */ jsx("p", { className: "text-sm text-gray-700 dark:text-gray-300", children: "We handle every step for you \u2014 from scheduling to results." }),
+      /* @__PURE__ */ jsxs(
+        "a",
+        {
+          href: "https://bluehive.com/concierge/",
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400",
+          children: [
+            "LEARN MORE",
+            /* @__PURE__ */ jsx(ArrowRightIcon, { className: "h-4 w-4" })
+          ]
+        }
+      )
+    ] })
+  ] }) });
+}
+function defaultFormatPhone(phone) {
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  }
+  if (cleaned.length === 11 && cleaned[0] === "1") {
+    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+  }
+  return phone;
+}
+function PhoneIcon3({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      width: "1em",
+      height: "1em",
+      children: /* @__PURE__ */ jsx("path", { d: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" })
+    }
+  );
+}
+function LocationIcon({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      width: "1em",
+      height: "1em",
+      children: /* @__PURE__ */ jsx("path", { d: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" })
+    }
+  );
+}
+function ArrowRightIcon({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
+    }
+  );
 }
 function NotificationCenter({
   notifications,
@@ -19139,13 +19684,13 @@ function OrderConfirmationWizard({
   stepTitles = ["Verify Employee", "Consent & ID", "Confirmation"],
   className = ""
 }) {
-  const [step, setStep] = React46.useState(initialStep);
-  const [employeeVerified, setEmployeeVerified] = React46.useState(false);
-  const [verificationNotes, setVerificationNotes] = React46.useState("");
-  const [consentObtained, setConsentObtained] = React46.useState(false);
-  const [idVerified, setIdVerified] = React46.useState(false);
-  const [idType, setIdType] = React46.useState("");
-  const [confirmationNotes, setConfirmationNotes] = React46.useState("");
+  const [step, setStep] = React47.useState(initialStep);
+  const [employeeVerified, setEmployeeVerified] = React47.useState(false);
+  const [verificationNotes, setVerificationNotes] = React47.useState("");
+  const [consentObtained, setConsentObtained] = React47.useState(false);
+  const [idVerified, setIdVerified] = React47.useState(false);
+  const [idType, setIdType] = React47.useState("");
+  const [confirmationNotes, setConfirmationNotes] = React47.useState("");
   const handleStepChange = (newStep) => {
     setStep(newStep);
     onStepChange?.(newStep);
@@ -19173,7 +19718,7 @@ function OrderConfirmationWizard({
       const stepNum = index + 1;
       const isActive = step === stepNum;
       const isComplete = step > stepNum;
-      return /* @__PURE__ */ jsxs(React46.Fragment, { children: [
+      return /* @__PURE__ */ jsxs(React47.Fragment, { children: [
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center", children: [
           /* @__PURE__ */ jsx(
             "div",
@@ -19578,7 +20123,7 @@ function OrderList({
   actions,
   className
 }) {
-  const filteredOrders = React46.useMemo(() => {
+  const filteredOrders = React47.useMemo(() => {
     const activeTabConfig = tabs.find((t) => t.id === activeTab);
     if (!activeTabConfig?.statuses || !getOrderStatus) {
       return orders;
@@ -19587,7 +20132,7 @@ function OrderList({
       (order) => activeTabConfig.statuses.includes(getOrderStatus(order))
     );
   }, [orders, activeTab, tabs, getOrderStatus]);
-  const tabCounts = React46.useMemo(() => {
+  const tabCounts = React47.useMemo(() => {
     if (!getOrderStatus) return {};
     const counts = {};
     tabs.forEach((tab) => {
@@ -19737,7 +20282,7 @@ function OrderLookupForm({
   welcomeMessage = "Look up your order by entering the information below.",
   className = ""
 }) {
-  const [formData, setFormData] = React46.useState({
+  const [formData, setFormData] = React47.useState({
     orderNumber: "",
     dateOfBirth: "",
     lastName: ""
@@ -20846,7 +21391,7 @@ function PermissionItem({
   parentChecked
 }) {
   const hasChildren = permission.children && permission.children.length > 0;
-  const [isExpanded, setIsExpanded] = React46.useState(true);
+  const [isExpanded, setIsExpanded] = React47.useState(true);
   const handleChange = (checked) => {
     onToggle(permission.id, checked);
     if (!checked && hasChildren) {
@@ -20924,12 +21469,12 @@ function PermissionsEditor({
     summary = "Summary",
     all = "All"
   } = labels;
-  const [expandedGroups, setExpandedGroups] = React46.useState(
+  const [expandedGroups, setExpandedGroups] = React47.useState(
     () => new Set(
       groups.filter((g) => g.defaultExpanded !== false).map((g) => g.id)
     )
   );
-  const permissionMap = React46.useMemo(() => {
+  const permissionMap = React47.useMemo(() => {
     const map = /* @__PURE__ */ new Map();
     const processPermissions = (permissions) => {
       permissions.forEach((perm) => {
@@ -20973,7 +21518,7 @@ function PermissionsEditor({
       onEmployersChange([...selectedEmployers, employerId]);
     }
   };
-  const assignedPermissionNames = React46.useMemo(() => {
+  const assignedPermissionNames = React47.useMemo(() => {
     return assignedPermissions.map((id) => permissionMap.get(id)?.name).filter(Boolean);
   }, [assignedPermissions, permissionMap]);
   return /* @__PURE__ */ jsxs("div", { className: cn("space-y-6", className), children: [
@@ -21283,7 +21828,7 @@ var logoContainerVariants = cva(
   }
 );
 var ProviderLogo = ({ logoURL, name, variant }) => {
-  const [hasError, setHasError] = React46.useState(false);
+  const [hasError, setHasError] = React47.useState(false);
   if (!logoURL || hasError) {
     return /* @__PURE__ */ jsx("div", { className: cn(logoContainerVariants({ variant })), children: /* @__PURE__ */ jsx("div", { className: "bg-primary-100 dark:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-full", children: /* @__PURE__ */ jsx("span", { className: "text-primary-600 dark:text-primary-400 text-lg font-bold", children: name.charAt(0).toUpperCase() }) }) });
   }
@@ -21371,7 +21916,7 @@ function formatAddressSingleLine2(address) {
   parts.push(`${address.city}, ${address.state} ${address.postalCode}`);
   return parts.join(", ");
 }
-var ProviderCard = React46.forwardRef(
+var ProviderCard = React47.forwardRef(
   ({
     provider,
     variant = "compact",
@@ -21737,7 +22282,7 @@ function ActionButtonsBar({
         phoneNumber && /* @__PURE__ */ jsx(
           ActionButton2,
           {
-            icon: /* @__PURE__ */ jsx(PhoneIcon3, {}),
+            icon: /* @__PURE__ */ jsx(PhoneIcon4, {}),
             label: "Call",
             onClick: () => onCall?.(phoneNumber)
           }
@@ -21804,7 +22349,7 @@ function ProviderLogo2({
   size = "md",
   className
 }) {
-  const [hasError, setHasError] = React46.useState(false);
+  const [hasError, setHasError] = React47.useState(false);
   const initials = name.split(" ").map((word) => word[0]).join("").toUpperCase().slice(0, 2);
   if (!src || hasError) {
     return /* @__PURE__ */ jsx(
@@ -22222,7 +22767,7 @@ function ProviderDetailHeaderSkeleton({
           /* @__PURE__ */ jsx("div", { className: "h-3 w-12 rounded bg-gray-200 dark:bg-gray-700" })
         ] }, i)) }),
         /* @__PURE__ */ jsxs("div", { className: "container mx-auto px-4 py-6", children: [
-          /* @__PURE__ */ jsx("div", { className: "mb-4 hidden items-center gap-2 sm:flex", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxs(React46.Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "mb-4 hidden items-center gap-2 sm:flex", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxs(React47.Fragment, { children: [
             i > 1 && /* @__PURE__ */ jsx("div", { className: "h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700" }),
             /* @__PURE__ */ jsx("div", { className: "h-4 w-16 rounded bg-gray-200 dark:bg-gray-700" })
           ] }, i)) }),
@@ -22267,7 +22812,7 @@ function DirectionsIcon({ className }) {
     }
   );
 }
-function PhoneIcon3({ className }) {
+function PhoneIcon4({ className }) {
   return /* @__PURE__ */ jsx(
     "svg",
     {
@@ -22500,6 +23045,236 @@ function BlogIcon({ className }) {
       children: /* @__PURE__ */ jsx("path", { d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" })
     }
   );
+}
+function ProviderMap({
+  coordinates,
+  providerName,
+  address,
+  mapboxToken,
+  zoom = 15,
+  showSatelliteToggle = true,
+  showFullscreen = true,
+  showZoomControls = true,
+  height,
+  directionsUrl,
+  className
+}) {
+  const mapContainerRef = React47.useRef(null);
+  const mapRef = React47.useRef(null);
+  const [mapLoaded, setMapLoaded] = React47.useState(false);
+  const [mapStyle, setMapStyle] = React47.useState("streets");
+  const [isFullscreen, setIsFullscreen] = React47.useState(false);
+  const [error, setError] = React47.useState(null);
+  React47.useEffect(() => {
+    if (!mapboxToken) {
+      return;
+    }
+    const loadMapbox = async () => {
+      try {
+        if (typeof window !== "undefined" && !document.querySelector('link[href*="mapbox-gl"]')) {
+          const link = document.createElement("link");
+          link.href = "https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css";
+          link.rel = "stylesheet";
+          document.head.appendChild(link);
+        }
+        let mapboxgl;
+        try {
+          const mod = await import('mapbox-gl');
+          const defaultExport = mod.default || mod;
+          if (defaultExport && typeof defaultExport.Map === "function") {
+            mapboxgl = defaultExport;
+          }
+        } catch {
+        }
+        if (!mapboxgl) {
+          const win = window;
+          if (win.mapboxgl) {
+            mapboxgl = win.mapboxgl;
+          }
+        }
+        if (!mapboxgl) {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js";
+            script.onload = () => resolve();
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          mapboxgl = window.mapboxgl;
+        }
+        if (!mapboxgl) {
+          throw new Error("Mapbox GL JS failed to load");
+        }
+        mapboxgl.accessToken = mapboxToken;
+        if (mapContainerRef.current && !mapRef.current) {
+          const map = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            style: mapStyle === "streets" ? "mapbox://styles/mapbox/streets-v12" : "mapbox://styles/mapbox/satellite-streets-v12",
+            center: [coordinates.longitude, coordinates.latitude],
+            zoom
+          });
+          new mapboxgl.Marker({ color: "#0ea5e9" }).setLngLat([coordinates.longitude, coordinates.latitude]).setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(
+              `<strong>${providerName}</strong><br/>${address}`
+            )
+          ).addTo(map);
+          if (showZoomControls) {
+            map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+          }
+          if (showFullscreen) {
+            map.addControl(new mapboxgl.FullscreenControl(), "bottom-right");
+          }
+          map.addControl(
+            new mapboxgl.GeolocateControl({
+              positionOptions: { enableHighAccuracy: true },
+              trackUserLocation: false,
+              showUserHeading: false
+            }),
+            "bottom-right"
+          );
+          map.on("load", () => {
+            setMapLoaded(true);
+          });
+          mapRef.current = map;
+        }
+      } catch (err) {
+        console.error("Failed to load map:", err);
+        setError("Failed to load map");
+      }
+    };
+    loadMapbox();
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [mapboxToken, coordinates, zoom, providerName, address, showZoomControls, showFullscreen]);
+  React47.useEffect(() => {
+    if (mapRef.current && mapLoaded) {
+      const map = mapRef.current;
+      map.setStyle(
+        mapStyle === "streets" ? "mapbox://styles/mapbox/streets-v12" : "mapbox://styles/mapbox/satellite-streets-v12"
+      );
+    }
+  }, [mapStyle, mapLoaded]);
+  React47.useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+  if (!mapboxToken) {
+    return /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: cn(
+          "relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800",
+          height || "aspect-video",
+          className
+        ),
+        children: /* @__PURE__ */ jsx(
+          StaticMapFallback,
+          {
+            coordinates,
+            providerName,
+            address,
+            directionsUrl
+          }
+        )
+      }
+    );
+  }
+  if (error) {
+    return /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: cn(
+          "relative flex items-center justify-center overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800",
+          height || "aspect-video",
+          className
+        ),
+        children: /* @__PURE__ */ jsxs("div", { className: "text-center text-gray-500 dark:text-gray-400", children: [
+          /* @__PURE__ */ jsx("p", { children: "Map unavailable" }),
+          directionsUrl && /* @__PURE__ */ jsx(
+            "a",
+            {
+              href: directionsUrl,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "mt-2 inline-block text-primary-600 hover:text-primary-700 dark:text-primary-400",
+              children: "Get Directions \u2192"
+            }
+          )
+        ] })
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: cn(
+        "relative overflow-hidden rounded-lg",
+        height || "aspect-video",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsx("div", { ref: mapContainerRef, className: "absolute inset-0" }),
+        showSatelliteToggle && mapLoaded && /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setMapStyle((s) => s === "streets" ? "satellite" : "streets"),
+            className: "absolute top-2 right-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+            children: mapStyle === "streets" ? "Satellite view" : "Map view"
+          }
+        ),
+        directionsUrl && mapLoaded && /* @__PURE__ */ jsx(
+          "a",
+          {
+            href: directionsUrl,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
+            children: "GET DIRECTIONS"
+          }
+        ),
+        !mapLoaded && /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800", children: /* @__PURE__ */ jsx("div", { className: "h-8 w-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" }) })
+      ]
+    }
+  );
+}
+function StaticMapFallback({
+  coordinates,
+  providerName,
+  address,
+  directionsUrl
+}) {
+  const staticMapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.longitude - 0.01}%2C${coordinates.latitude - 0.01}%2C${coordinates.longitude + 0.01}%2C${coordinates.latitude + 0.01}&layer=mapnik&marker=${coordinates.latitude}%2C${coordinates.longitude}`;
+  return /* @__PURE__ */ jsxs("div", { className: "relative h-full w-full", children: [
+    /* @__PURE__ */ jsx(
+      "iframe",
+      {
+        title: `Map showing ${providerName} location`,
+        src: staticMapUrl,
+        className: "h-full w-full border-0",
+        loading: "lazy",
+        referrerPolicy: "no-referrer-when-downgrade"
+      }
+    ),
+    directionsUrl && /* @__PURE__ */ jsx(
+      "a",
+      {
+        href: directionsUrl,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
+        children: "GET DIRECTIONS"
+      }
+    )
+  ] });
 }
 function ProviderOverview({
   providerName,
@@ -23082,7 +23857,7 @@ var SearchResultsMessage = ({
     }
   );
 };
-var ProviderSearchBar = React46.forwardRef(
+var ProviderSearchBar = React47.forwardRef(
   ({
     onSearch,
     onGeolocate,
@@ -23103,10 +23878,10 @@ var ProviderSearchBar = React46.forwardRef(
     className,
     ...props
   }, ref) => {
-    const [internalValue, setInternalValue] = React46.useState(
+    const [internalValue, setInternalValue] = React47.useState(
       defaultValue || ""
     );
-    const [validationError, setValidationError] = React46.useState(
+    const [validationError, setValidationError] = React47.useState(
       null
     );
     const zipValue = value ?? internalValue;
@@ -23371,7 +24146,7 @@ function XMarkIcon({ className }) {
   );
 }
 function InputField({ label, icon, className, id, ...props }) {
-  const generatedId = React46.useId();
+  const generatedId = React47.useId();
   const inputId = id || generatedId;
   return /* @__PURE__ */ jsxs("div", { className: "relative", children: [
     label && /* @__PURE__ */ jsx("label", { htmlFor: inputId, className: labelVariants(), children: label }),
@@ -23395,7 +24170,7 @@ function SelectField({
   id,
   ...props
 }) {
-  const generatedId = React46.useId();
+  const generatedId = React47.useId();
   const selectId = id || generatedId;
   return /* @__PURE__ */ jsxs("div", { children: [
     label && /* @__PURE__ */ jsx("label", { htmlFor: selectId, className: labelVariants(), children: label }),
@@ -23447,12 +24222,12 @@ function ServiceMultiSelect({
   disabled = false,
   showCounts = false
 }) {
-  const [isOpen, setIsOpen] = React46.useState(false);
-  const [searchTerm, setSearchTerm] = React46.useState("");
-  const containerRef = React46.useRef(null);
-  const inputRef = React46.useRef(null);
-  const listboxId = React46.useId();
-  React46.useEffect(() => {
+  const [isOpen, setIsOpen] = React47.useState(false);
+  const [searchTerm, setSearchTerm] = React47.useState("");
+  const containerRef = React47.useRef(null);
+  const inputRef = React47.useRef(null);
+  const listboxId = React47.useId();
+  React47.useEffect(() => {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -23461,14 +24236,14 @@ function ServiceMultiSelect({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const filteredServices = React46.useMemo(() => {
+  const filteredServices = React47.useMemo(() => {
     if (!searchTerm) return services;
     const lowerSearch = searchTerm.toLowerCase();
     return services.filter(
       (service) => service.label.toLowerCase().includes(lowerSearch) || service.category?.toLowerCase().includes(lowerSearch)
     );
   }, [services, searchTerm]);
-  const groupedServices = React46.useMemo(() => {
+  const groupedServices = React47.useMemo(() => {
     const groups = {};
     filteredServices.forEach((service) => {
       const category = service.category || "Other";
@@ -23477,7 +24252,7 @@ function ServiceMultiSelect({
     });
     return groups;
   }, [filteredServices]);
-  const selectedServiceObjects = React46.useMemo(
+  const selectedServiceObjects = React47.useMemo(
     () => services.filter((s) => selectedServices.includes(s.value)),
     [services, selectedServices]
   );
@@ -23955,10 +24730,10 @@ function ProviderSelector({
   size = "md",
   className
 }) {
-  const [isOpen, setIsOpen] = React46.useState(false);
-  const [searchQuery, setSearchQuery] = React46.useState("");
-  const containerRef = React46.useRef(null);
-  React46.useEffect(() => {
+  const [isOpen, setIsOpen] = React47.useState(false);
+  const [searchQuery, setSearchQuery] = React47.useState("");
+  const containerRef = React47.useRef(null);
+  React47.useEffect(() => {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -23967,7 +24742,7 @@ function ProviderSelector({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     function handleEscape(event) {
       if (event.key === "Escape") {
         setIsOpen(false);
@@ -23976,12 +24751,12 @@ function ProviderSelector({
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
     }
   }, [isOpen]);
-  const filteredProviders = React46.useMemo(() => {
+  const filteredProviders = React47.useMemo(() => {
     if (!searchQuery) return providers;
     const query = searchQuery.toLowerCase();
     return providers.filter(
@@ -24183,9 +24958,9 @@ function ProviderSettings({
   defaultTab = "general",
   className = ""
 }) {
-  const [settings, setSettings] = React46.useState(initialSettings);
-  const [hasChanges, setHasChanges] = React46.useState(false);
-  React46.useEffect(() => {
+  const [settings, setSettings] = React47.useState(initialSettings);
+  const [hasChanges, setHasChanges] = React47.useState(false);
+  React47.useEffect(() => {
     setSettings(initialSettings);
     setHasChanges(false);
   }, [initialSettings]);
@@ -25359,7 +26134,7 @@ function RecurringServiceSetupModal({
     cancel = "Cancel",
     save = "Save"
   } = labels;
-  const [formData, setFormData] = React46.useState(
+  const [formData, setFormData] = React47.useState(
     initialData || {
       providerId: "",
       serviceId: "",
@@ -25367,7 +26142,7 @@ function RecurringServiceSetupModal({
       overrideConsent: false
     }
   );
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (initialData) {
       setFormData(initialData);
     } else {
@@ -25547,9 +26322,9 @@ function RejectionModal({
   isSubmitting = false,
   variant = "danger"
 }) {
-  const [selectedReasonId, setSelectedReasonId] = React46.useState("");
-  const [details, setDetails] = React46.useState("");
-  React46.useEffect(() => {
+  const [selectedReasonId, setSelectedReasonId] = React47.useState("");
+  const [details, setDetails] = React47.useState("");
+  React47.useEffect(() => {
     if (!open) {
       setSelectedReasonId("");
       setDetails("");
@@ -25941,7 +26716,7 @@ function ReportDashboard({
     ] })
   ] });
 }
-var ResultsEntryForm = React46.forwardRef(function ResultsEntryForm2({
+var ResultsEntryForm = React47.forwardRef(function ResultsEntryForm2({
   employeeFirstName,
   employeeLastName,
   initialData = {},
@@ -25969,30 +26744,30 @@ var ResultsEntryForm = React46.forwardRef(function ResultsEntryForm2({
     addProviderContact = "Click here to add a provider contact",
     pleaseSelectResult = "Please select a result"
   } = labels;
-  const [result, setResult] = React46.useState(
+  const [result, setResult] = React47.useState(
     initialData.result ?? null
   );
-  const [alternateText, setAlternateText] = React46.useState(
+  const [alternateText, setAlternateText] = React47.useState(
     initialData.alternateText ?? ""
   );
-  const [dateDrawnValue, setDateDrawnValue] = React46.useState(
+  const [dateDrawnValue, setDateDrawnValue] = React47.useState(
     initialData.dateDrawn ?? ""
   );
-  const [dateCompletedValue, setDateCompletedValue] = React46.useState(
+  const [dateCompletedValue, setDateCompletedValue] = React47.useState(
     initialData.dateCompleted ?? ""
   );
-  const [recommendations, setRecommendations] = React46.useState(
+  const [recommendations, setRecommendations] = React47.useState(
     initialData.recommendations ?? ""
   );
-  const [files, setFiles] = React46.useState(initialData.files ?? []);
-  const [selectedContacts, setSelectedContacts] = React46.useState(
+  const [files, setFiles] = React47.useState(initialData.files ?? []);
+  const [selectedContacts, setSelectedContacts] = React47.useState(
     initialData.providerContacts ?? []
   );
-  const [applyToAll, setApplyToAll] = React46.useState(
+  const [applyToAll, setApplyToAll] = React47.useState(
     initialData.applyToAllServices ?? false
   );
-  const [showError, setShowError] = React46.useState(false);
-  const fileInputRef = React46.useRef(null);
+  const [showError, setShowError] = React47.useState(false);
+  const fileInputRef = React47.useRef(null);
   const handleFileSelect = (e) => {
     const selectedFiles = Array.from(e.target.files || []);
     setFiles((prev) => [...prev, ...selectedFiles]);
@@ -26008,7 +26783,7 @@ var ResultsEntryForm = React46.forwardRef(function ResultsEntryForm2({
       (prev) => prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]
     );
   };
-  const validateAndSubmit = React46.useCallback(() => {
+  const validateAndSubmit = React47.useCallback(() => {
     if (!result) {
       setShowError(true);
       return;
@@ -26035,7 +26810,7 @@ var ResultsEntryForm = React46.forwardRef(function ResultsEntryForm2({
     applyToAll,
     onSubmit
   ]);
-  React46.useImperativeHandle(
+  React47.useImperativeHandle(
     ref,
     () => ({
       submit: validateAndSubmit
@@ -26250,7 +27025,7 @@ function ResultsEntryModal({
   ...props
 }) {
   const { submit = "Submit", close = "Close" } = labels;
-  const formRef = React46.useRef(null);
+  const formRef = React47.useRef(null);
   const employeeName = employeeFirstName || employeeLastName ? `${employeeFirstName ?? ""} ${employeeLastName ?? ""}`.trim() : void 0;
   const handleSubmitClick = () => {
     formRef.current?.submit();
@@ -26365,7 +27140,7 @@ function ScheduleCalendar({
   isLoading = false,
   className = ""
 }) {
-  const [currentDate, setCurrentDate] = React46.useState(selectedDate);
+  const [currentDate, setCurrentDate] = React47.useState(selectedDate);
   const formatTime4 = (date) => {
     const d = typeof date === "string" ? new Date(date) : date;
     return d.toLocaleTimeString("en-US", {
@@ -26641,7 +27416,7 @@ function ScheduleCalendar({
     }
   );
 }
-var accordionVariants = cva(
+var accordionVariants2 = cva(
   "service-accordion divide-y divide-neutral-200 dark:divide-neutral-700",
   {
     variants: {
@@ -26781,7 +27556,7 @@ function SubCategoryAccordion({
   onServiceClick,
   index
 }) {
-  const [isExpanded, setIsExpanded] = React46.useState(
+  const [isExpanded, setIsExpanded] = React47.useState(
     subCategory.defaultExpanded ?? false
   );
   const contentId = `sub-content-${index}`;
@@ -26848,7 +27623,7 @@ function CategoryAccordionItem({
   onExpandChange
 }) {
   const isControlled = expandedCategories !== void 0;
-  const [internalExpanded, setInternalExpanded] = React46.useState(
+  const [internalExpanded, setInternalExpanded] = React47.useState(
     category.defaultExpanded ?? false
   );
   const isExpanded = isControlled ? expandedCategories.includes(category.name) : internalExpanded;
@@ -26942,7 +27717,7 @@ function ServiceAccordion({
   onExpandedChange,
   className
 }) {
-  const [internalExpanded, setInternalExpanded] = React46.useState([]);
+  const [internalExpanded, setInternalExpanded] = React47.useState([]);
   const isControlled = controlledExpanded !== void 0;
   const expanded = isControlled ? controlledExpanded : internalExpanded;
   const handleExpandChange = (categoryName, isExpanded) => {
@@ -26965,7 +27740,7 @@ function ServiceAccordion({
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: cn(accordionVariants({ variant }), className),
+      className: cn(accordionVariants2({ variant }), className),
       role: "region",
       "aria-label": "Service categories",
       children: categories.map((category, index) => /* @__PURE__ */ jsx(
@@ -27216,7 +27991,7 @@ function ServiceBadgeGroup({
   size = "md",
   onShowMore
 }) {
-  const badges = React46.Children.toArray(children);
+  const badges = React47.Children.toArray(children);
   const visibleBadges = maxVisible ? badges.slice(0, maxVisible) : badges;
   const hiddenCount = maxVisible ? badges.length - maxVisible : 0;
   return /* @__PURE__ */ jsxs("div", { className: cn("flex flex-wrap gap-2", className), children: [
@@ -27970,15 +28745,15 @@ function ServicePicker({
   fullWidth = false,
   className
 }) {
-  const [searchQuery, setSearchQuery] = React46.useState("");
-  const [expandedGroups, setExpandedGroups] = React46.useState(
+  const [searchQuery, setSearchQuery] = React47.useState("");
+  const [expandedGroups, setExpandedGroups] = React47.useState(
     /* @__PURE__ */ new Set()
   );
-  const filteredGroups = React46.useMemo(
+  const filteredGroups = React47.useMemo(
     () => filterServices(groups, searchQuery),
     [groups, searchQuery]
   );
-  const searchResults = React46.useMemo(
+  const searchResults = React47.useMemo(
     () => searchQuery ? flattenServices(filteredGroups) : [],
     [filteredGroups, searchQuery]
   );
@@ -28015,12 +28790,16 @@ function ServicePicker({
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: cn("flex flex-col", !fullWidth && "lg:max-w-md", className),
+      className: cn(
+        "bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border",
+        !fullWidth && "lg:max-w-md",
+        className
+      ),
       children: [
         /* @__PURE__ */ jsxs("div", { className: "p-3", children: [
-          !hideHeading && /* @__PURE__ */ jsx("h2", { className: "mb-3 text-xl font-bold text-gray-900 dark:text-gray-100", children: heading }),
+          !hideHeading && /* @__PURE__ */ jsx("h2", { className: "text-foreground mb-3 text-xl font-bold", children: heading }),
           showSearch && /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsx(SearchIcon5, { className: "h-5 w-5 text-gray-400" }) }),
+            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsx(SearchIcon5, { className: "text-muted-foreground h-5 w-5" }) }),
             /* @__PURE__ */ jsx(
               Input,
               {
@@ -28035,8 +28814,8 @@ function ServicePicker({
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "flex-1 overflow-y-auto p-3", children: [
-          error && /* @__PURE__ */ jsx("div", { className: "mb-4 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400", children: /* @__PURE__ */ jsx("strong", { children: error }) }),
-          loading ? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 text-gray-500", children: [
+          error && /* @__PURE__ */ jsx("div", { className: "bg-destructive/10 text-destructive mb-4 rounded-lg p-4", children: /* @__PURE__ */ jsx("strong", { children: error }) }),
+          loading ? /* @__PURE__ */ jsxs("div", { className: "text-muted-foreground flex items-center gap-2", children: [
             /* @__PURE__ */ jsx(SpinnerIcon5, { className: "h-5 w-5 animate-spin" }),
             /* @__PURE__ */ jsx("span", { children: "Loading available services..." })
           ] }) : isSearching ? (
@@ -28050,7 +28829,7 @@ function ServicePicker({
                 multiple
               },
               service.id
-            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
           ) : (
             // Grouped list - accordion style
             /* @__PURE__ */ jsx("ul", { className: "space-y-1", children: filteredGroups.length > 0 ? filteredGroups.map((group) => /* @__PURE__ */ jsx(
@@ -28065,7 +28844,7 @@ function ServicePicker({
                 multiple
               },
               group.id
-            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
           )
         ] })
       ]
@@ -28093,10 +28872,10 @@ function ServiceGroupItem({
         onClick: () => onToggleGroup(group.id),
         className: cn(
           "flex w-full items-center justify-between rounded-lg px-3 py-2",
-          "text-left text-sm font-medium",
-          "hover:bg-gray-100 dark:hover:bg-gray-800",
+          "text-muted-foreground text-left text-sm font-medium",
+          "hover:bg-muted",
           "transition-colors",
-          depth > 0 && "ml-4 text-gray-600 dark:text-gray-400"
+          depth > 0 && "ml-4"
         ),
         "aria-expanded": isExpanded,
         children: [
@@ -28105,16 +28884,16 @@ function ServiceGroupItem({
             hasSelection && /* @__PURE__ */ jsx(
               "span",
               {
-                className: "bg-brand-500 h-2 w-2 rounded-full",
+                className: "bg-primary h-2 w-2 rounded-full",
                 "aria-label": "Has selected items"
               }
             )
           ] }),
           /* @__PURE__ */ jsx(
-            ChevronIcon2,
+            ChevronIcon3,
             {
               className: cn(
-                "h-5 w-5 transition-transform",
+                "text-muted-foreground h-5 w-5 transition-transform",
                 isExpanded && "rotate-180"
               )
             }
@@ -28161,48 +28940,81 @@ function ServiceItem({
     {
       className: cn(
         "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2",
-        "hover:bg-gray-100 dark:hover:bg-gray-800",
+        "hover:bg-muted",
         "transition-colors",
         service.disabled && "cursor-not-allowed opacity-50"
       ),
       children: [
-        multiple ? /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: "checkbox",
-            checked: selected,
-            onChange: onToggle,
-            disabled: service.disabled,
-            className: "text-brand-600 focus:ring-brand-500 h-4 w-4 rounded border-gray-300"
-          }
-        ) : /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: "radio",
-            checked: selected,
-            onChange: onToggle,
-            disabled: service.disabled,
-            className: "text-brand-600 focus:ring-brand-500 h-4 w-4 border-gray-300"
-          }
-        ),
+        multiple ? /* @__PURE__ */ jsxs("span", { className: "relative inline-flex shrink-0 items-center justify-center", children: [
+          /* @__PURE__ */ jsx(
+            "input",
+            {
+              type: "checkbox",
+              checked: selected,
+              onChange: onToggle,
+              disabled: service.disabled,
+              className: cn(
+                "peer h-4 w-4 shrink-0 appearance-none rounded",
+                "border-input bg-background border-2",
+                "cursor-pointer transition-all duration-150",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "checked:bg-primary-500 checked:border-primary-500"
+              )
+            }
+          ),
+          /* @__PURE__ */ jsx(CheckIcon4, { className: "pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" })
+        ] }) : /* @__PURE__ */ jsxs("span", { className: "relative inline-flex shrink-0 items-center justify-center", children: [
+          /* @__PURE__ */ jsx(
+            "input",
+            {
+              type: "radio",
+              checked: selected,
+              onChange: onToggle,
+              disabled: service.disabled,
+              className: cn(
+                "peer h-4 w-4 shrink-0 appearance-none rounded-full",
+                "border-input bg-background border-2",
+                "cursor-pointer transition-all duration-150",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "checked:border-primary-500"
+              )
+            }
+          ),
+          /* @__PURE__ */ jsx("span", { className: "bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" })
+        ] }),
         /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
           /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-gray-900 dark:text-gray-100", children: service.name }),
-            service.code && /* @__PURE__ */ jsxs("span", { className: "text-xs text-gray-500 dark:text-gray-400", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-foreground text-sm font-medium", children: service.name }),
+            service.code && /* @__PURE__ */ jsxs("span", { className: "text-muted-foreground text-xs", children: [
               "(",
               service.code,
               ")"
             ] })
           ] }),
-          service.description && /* @__PURE__ */ jsx("p", { className: "truncate text-xs text-gray-500 dark:text-gray-400", children: service.description })
+          service.description && /* @__PURE__ */ jsx("p", { className: "text-muted-foreground truncate text-xs", children: service.description })
         ] }),
-        service.price !== void 0 && /* @__PURE__ */ jsxs("span", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: [
+        service.price !== void 0 && /* @__PURE__ */ jsxs("span", { className: "text-foreground text-sm font-medium", children: [
           "$",
           service.price.toFixed(2)
         ] })
       ]
     }
   ) });
+}
+function CheckIcon4({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 3,
+      children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+    }
+  );
 }
 function SearchIcon5({ className }) {
   return /* @__PURE__ */ jsx(
@@ -28247,7 +29059,7 @@ function SpinnerIcon5({ className }) {
     )
   ] });
 }
-function ChevronIcon2({ className }) {
+function ChevronIcon3({ className }) {
   return /* @__PURE__ */ jsx(
     "svg",
     {
@@ -28270,16 +29082,16 @@ function ServicePricingManager({
   categories: _categories = [],
   className = ""
 }) {
-  const [searchTerm, setSearchTerm] = React46.useState("");
-  const [selectedCategory, setSelectedCategory] = React46.useState(
+  const [searchTerm, setSearchTerm] = React47.useState("");
+  const [selectedCategory, setSelectedCategory] = React47.useState(
     null
   );
-  const [editingService, setEditingService] = React46.useState(null);
-  const [editPrice, setEditPrice] = React46.useState("");
-  const [editEmployerPrice, setEditEmployerPrice] = React46.useState("");
-  const [showBulkModal, setShowBulkModal] = React46.useState(false);
-  const [bulkAdjustment, setBulkAdjustment] = React46.useState("");
-  const [bulkAdjustmentType, setBulkAdjustmentType] = React46.useState("percent");
+  const [editingService, setEditingService] = React47.useState(null);
+  const [editPrice, setEditPrice] = React47.useState("");
+  const [editEmployerPrice, setEditEmployerPrice] = React47.useState("");
+  const [showBulkModal, setShowBulkModal] = React47.useState(false);
+  const [bulkAdjustment, setBulkAdjustment] = React47.useState("");
+  const [bulkAdjustmentType, setBulkAdjustmentType] = React47.useState("percent");
   const formatCurrency3 = (amount) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -28641,7 +29453,7 @@ function ServiceShippingSettings({
   isSaving = false,
   className = ""
 }) {
-  const [address, setAddress] = React46.useState(
+  const [address, setAddress] = React47.useState(
     defaultAddress || {
       name: "",
       street1: "",
@@ -28806,7 +29618,7 @@ function SetupServiceModal({
   errorMessage,
   title = "Add New Service"
 }) {
-  const [formData, setFormData] = React46.useState({
+  const [formData, setFormData] = React47.useState({
     name: "",
     description: "",
     price: 0,
@@ -28816,7 +29628,7 @@ function SetupServiceModal({
     initialInventory: void 0,
     autoAcceptReferrals: false
   });
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (!open) {
       setFormData({
         name: "",
@@ -28849,7 +29661,7 @@ function SetupServiceModal({
   const isValid = formData.name.trim() && formData.price >= 0;
   return /* @__PURE__ */ jsx(Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxs("form", { onSubmit: handleSubmit, children: [
     /* @__PURE__ */ jsx(ModalHeader, { children: /* @__PURE__ */ jsx(ModalTitle, { children: title }) }),
-    /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
+    /* @__PURE__ */ jsxs(ModalBody, { className: "min-w-[320px] space-y-4", children: [
       errorMessage && /* @__PURE__ */ jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
       showServicePicker && availableServices.length > 0 && /* @__PURE__ */ jsx(
         Select,
@@ -28880,7 +29692,7 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-description",
-            className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300",
+            className: "text-foreground mb-1 block text-sm font-medium",
             children: "Description"
           }
         ),
@@ -28888,7 +29700,7 @@ function SetupServiceModal({
           "textarea",
           {
             id: "setup-service-description",
-            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+            className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
             rows: 3,
             value: formData.description,
             onChange: (e) => setFormData((prev) => ({
@@ -28917,12 +29729,12 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-price",
-            className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300",
+            className: "text-foreground mb-1 block text-sm font-medium",
             children: "Base Price"
           }
         ),
         /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-          /* @__PURE__ */ jsx("span", { className: "absolute top-1/2 left-3 -translate-y-1/2 text-gray-500", children: "$" }),
+          /* @__PURE__ */ jsx("span", { className: "text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2", children: "$" }),
           /* @__PURE__ */ jsx(
             "input",
             {
@@ -28930,7 +29742,7 @@ function SetupServiceModal({
               type: "number",
               min: "0",
               step: "0.01",
-              className: "w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+              className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none",
               value: formData.price,
               onChange: (e) => setFormData((prev) => ({
                 ...prev,
@@ -28943,14 +29755,15 @@ function SetupServiceModal({
         ] })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "space-y-3 pt-2", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Currently Offered" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Service is available for orders" })
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-foreground text-sm font-medium", children: "Currently Offered" }),
+            /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-xs", children: "Service is available for orders" })
           ] }),
           /* @__PURE__ */ jsx(
             Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.currentlyOffered,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -28959,14 +29772,15 @@ function SetupServiceModal({
             }
           )
         ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Limited Inventory" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Track inventory for this service" })
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-foreground text-sm font-medium", children: "Limited Inventory" }),
+            /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-xs", children: "Track inventory for this service" })
           ] }),
           /* @__PURE__ */ jsx(
             Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.limitedInventory,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -28975,7 +29789,7 @@ function SetupServiceModal({
             }
           )
         ] }),
-        formData.limitedInventory && /* @__PURE__ */ jsx("div", { className: "ml-4 border-l-2 border-gray-200 pl-4 dark:border-gray-700", children: /* @__PURE__ */ jsx(
+        formData.limitedInventory && /* @__PURE__ */ jsx("div", { className: "border-border ml-4 border-l-2 pl-4", children: /* @__PURE__ */ jsx(
           Input,
           {
             label: "Initial Inventory",
@@ -28989,14 +29803,15 @@ function SetupServiceModal({
             placeholder: "Enter quantity"
           }
         ) }),
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Auto-Accept Referrals" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Automatically accept incoming referrals" })
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-foreground text-sm font-medium", children: "Auto-Accept Referrals" }),
+            /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-xs", children: "Automatically accept incoming referrals" })
           ] }),
           /* @__PURE__ */ jsx(
             Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.autoAcceptReferrals,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -29728,7 +30543,7 @@ function NewsletterForm({
   isLoading = false,
   className
 }) {
-  const [email, setEmail] = React46.useState("");
+  const [email, setEmail] = React47.useState("");
   function handleSubmit(e) {
     e.preventDefault();
     if (email.trim()) {
@@ -29842,7 +30657,7 @@ function LegalLinks({
     "nav",
     {
       className: cn("flex flex-wrap items-center gap-x-4 gap-y-1", className),
-      children: links.map((link, index) => /* @__PURE__ */ jsxs(React46.Fragment, { children: [
+      children: links.map((link, index) => /* @__PURE__ */ jsxs(React47.Fragment, { children: [
         index > 0 && /* @__PURE__ */ jsx(
           "span",
           {
@@ -30257,9 +31072,9 @@ function UserMenu({
   menuItems = [],
   className
 }) {
-  const [isOpen, setIsOpen] = React46.useState(false);
-  const menuRef = React46.useRef(null);
-  React46.useEffect(() => {
+  const [isOpen, setIsOpen] = React47.useState(false);
+  const menuRef = React47.useRef(null);
+  React47.useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -30537,7 +31352,7 @@ function SiteHeader({
   userMenuItems,
   className
 }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = React46.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React47.useState(false);
   const colorVariant = variant === "primary" || variant === "transparent" ? "light" : "dark";
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx("div", { className: "h-16", "aria-hidden": "true" }),
@@ -30871,29 +31686,29 @@ function SSOConfigForm({
     delete: deleteLabel = "Delete SSO",
     cancel = "Cancel"
   } = labels;
-  const [clientDomain, setClientDomain] = React46.useState(
+  const [clientDomain, setClientDomain] = React47.useState(
     initialData.clientDomain ?? ""
   );
-  const [ssoLoginUrl, setSsoLoginUrl] = React46.useState(
+  const [ssoLoginUrl, setSsoLoginUrl] = React47.useState(
     initialData.ssoLoginUrl ?? ""
   );
-  const [ssoLogoutUrl, setSsoLogoutUrl] = React46.useState(
+  const [ssoLogoutUrl, setSsoLogoutUrl] = React47.useState(
     initialData.ssoLogoutUrl ?? ""
   );
-  const [forceReauth, setForceReauth] = React46.useState(
+  const [forceReauth, setForceReauth] = React47.useState(
     initialData.forceReauthentication ?? false
   );
-  const [idpSigns, setIdpSigns] = React46.useState(
+  const [idpSigns, setIdpSigns] = React47.useState(
     initialData.idpSignsRequest ?? false
   );
-  const [allowUnencrypted, setAllowUnencrypted] = React46.useState(
+  const [allowUnencrypted, setAllowUnencrypted] = React47.useState(
     initialData.allowUnencryptedAssertion ?? false
   );
-  const [certificateFile, setCertificateFile] = React46.useState(
+  const [certificateFile, setCertificateFile] = React47.useState(
     null
   );
-  const fileInputRef = React46.useRef(null);
-  const [errors, setErrors] = React46.useState({});
+  const fileInputRef = React47.useRef(null);
+  const [errors, setErrors] = React47.useState({});
   const validate = () => {
     const newErrors = {};
     if (!clientDomain.trim()) {
@@ -31064,7 +31879,7 @@ function SSOConfigForm({
     ] })
   ] });
 }
-function CheckIcon4({ className }) {
+function CheckIcon5({ className }) {
   return /* @__PURE__ */ jsx(
     "svg",
     {
@@ -31149,66 +31964,89 @@ function StepIndicator({
     if (allowCompletedStepsOnly) return index <= currentStep;
     return true;
   };
+  const circleButton = (step, index, status, clickable) => /* @__PURE__ */ jsx(
+    "button",
+    {
+      type: "button",
+      onClick: () => handleStepClick(index),
+      disabled: !clickable,
+      className: `${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white" : status === "current" ? "bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900" : "bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300"}`.trim(),
+      "aria-current": status === "current" ? "step" : void 0,
+      children: step.hasError ? /* @__PURE__ */ jsx(ErrorIcon, { className: "h-4 w-4" }) : status === "completed" ? step.icon || /* @__PURE__ */ jsx(CheckIcon5, { className: "h-4 w-4" }) : step.icon || /* @__PURE__ */ jsx(
+        "span",
+        {
+          className: status === "current" ? "text-white" : "text-neutral-500 dark:text-neutral-300",
+          children: index + 1
+        }
+      )
+    }
+  );
+  const stepLabel = (step, status, horizontal) => /* @__PURE__ */ jsxs("div", { className: `${horizontal ? "text-center" : "flex-1"} ${sizes.text}`, children: [
+    /* @__PURE__ */ jsxs(
+      "p",
+      {
+        className: `font-medium ${step.hasError ? "text-red-600 dark:text-red-400" : status === "completed" || status === "current" ? "text-neutral-900 dark:text-white" : "text-neutral-500 dark:text-neutral-400"}`.trim(),
+        children: [
+          step.label,
+          step.optional && /* @__PURE__ */ jsxs("span", { className: "font-normal text-neutral-500 dark:text-neutral-400", children: [
+            " ",
+            "(optional)"
+          ] })
+        ]
+      }
+    ),
+    step.description && /* @__PURE__ */ jsx("p", { className: "mt-0.5 text-neutral-500 dark:text-neutral-400", children: step.description })
+  ] });
+  if (orientation === "horizontal") {
+    return /* @__PURE__ */ jsx("nav", { className: `flex ${className}`.trim(), "aria-label": "Progress", children: steps.map((step, index) => {
+      const status = getStepStatus(index);
+      const isLast = index === steps.length - 1;
+      const clickable = isClickable(index);
+      return /* @__PURE__ */ jsxs("div", { className: "flex flex-1 flex-col items-center", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex w-full items-center", children: [
+          index > 0 ? /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: `flex-1 ${sizes.line} ${index <= currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`,
+              "aria-hidden": "true"
+            }
+          ) : /* @__PURE__ */ jsx("div", { className: "flex-1" }),
+          circleButton(step, index, status, clickable),
+          !isLast ? /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: `flex-1 ${sizes.line} ${index < currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`,
+              "aria-hidden": "true"
+            }
+          ) : /* @__PURE__ */ jsx("div", { className: "flex-1" })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "mt-2", children: stepLabel(step, status, true) })
+      ] }, step.id);
+    }) });
+  }
   return /* @__PURE__ */ jsx(
     "nav",
     {
-      className: ` ${orientation === "horizontal" ? "flex items-center" : "flex flex-col"} ${sizes.gap} ${className} `.trim(),
+      className: `flex flex-col ${sizes.gap} ${className}`.trim(),
       "aria-label": "Progress",
       children: steps.map((step, index) => {
         const status = getStepStatus(index);
         const isLast = index === steps.length - 1;
         const clickable = isClickable(index);
-        return /* @__PURE__ */ jsxs(React46.Fragment, { children: [
-          /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: `flex items-center ${orientation === "vertical" ? "flex-row" : "flex-col"} ${sizes.gap} `.trim(),
-              children: [
-                /* @__PURE__ */ jsx(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: () => handleStepClick(index),
-                    disabled: !clickable,
-                    className: ` ${sizes.circle} flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-blue-600 text-white focus:ring-blue-500 dark:bg-blue-500" : status === "current" ? "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:ring-blue-500" : "bg-gray-200 text-gray-500 focus:ring-gray-400 dark:bg-gray-700 dark:text-gray-400"} `.trim(),
-                    "aria-current": status === "current" ? "step" : void 0,
-                    children: step.hasError ? /* @__PURE__ */ jsx(ErrorIcon, { className: "h-4 w-4" }) : status === "completed" ? step.icon || /* @__PURE__ */ jsx(CheckIcon4, { className: "h-4 w-4" }) : step.icon || /* @__PURE__ */ jsx("span", { children: index + 1 })
-                  }
-                ),
-                /* @__PURE__ */ jsxs(
-                  "div",
-                  {
-                    className: ` ${orientation === "horizontal" ? "text-center" : "flex-1"} ${sizes.text} `.trim(),
-                    children: [
-                      /* @__PURE__ */ jsxs(
-                        "p",
-                        {
-                          className: `font-medium ${step.hasError ? "text-red-600 dark:text-red-400" : status === "completed" || status === "current" ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"} `.trim(),
-                          children: [
-                            step.label,
-                            step.optional && /* @__PURE__ */ jsxs("span", { className: "font-normal text-gray-500 dark:text-gray-400", children: [
-                              " ",
-                              "(optional)"
-                            ] })
-                          ]
-                        }
-                      ),
-                      step.description && /* @__PURE__ */ jsx("p", { className: "mt-0.5 text-gray-500 dark:text-gray-400", children: step.description })
-                    ]
-                  }
-                )
-              ]
-            }
-          ),
+        return /* @__PURE__ */ jsxs(React47.Fragment, { children: [
+          /* @__PURE__ */ jsxs("div", { className: `flex flex-row items-center ${sizes.gap}`, children: [
+            circleButton(step, index, status, clickable),
+            stepLabel(step, status, false)
+          ] }),
           !isLast && /* @__PURE__ */ jsx(
             "div",
             {
-              className: ` ${orientation === "horizontal" ? "min-w-8 flex-1" : "ml-4 min-h-4"} flex items-center justify-center`.trim(),
+              className: `flex min-h-4 justify-center ${size === "sm" ? "w-6" : size === "lg" ? "w-10" : "w-8"}`,
               "aria-hidden": "true",
               children: /* @__PURE__ */ jsx(
                 "div",
                 {
-                  className: ` ${orientation === "horizontal" ? "w-full" : "h-full min-h-4"} ${sizes.line} ${index < currentStep ? "bg-blue-600 dark:bg-blue-500" : "bg-gray-200 dark:bg-gray-700"} `.trim()
+                  className: `h-full min-h-4 ${sizes.line} ${index < currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`
                 }
               )
             }
@@ -31352,11 +32190,68 @@ function TimelineProgress({
   steps,
   currentStep,
   showTimestamps = true,
+  size = "md",
+  pulse = true,
   className
 }) {
   const visibleSteps = steps.filter((step) => !step.hidden);
   const currentIndex = visibleSteps.findIndex((s) => s.key === currentStep);
-  const getStepState = (index) => {
+  const sizeConfig = {
+    sm: {
+      wrapper: "h-6 w-6",
+      completed: "h-5 w-5",
+      current: "h-6 w-6",
+      pending: "h-5 w-5",
+      error: "h-6 w-6",
+      checkIcon: "h-3 w-3",
+      xIcon: "h-3.5 w-3.5",
+      currentDot: "h-1.5 w-1.5",
+      pendingDot: "h-1.5 w-1.5",
+      connector: "h-px",
+      timestamp: "text-[10px]",
+      label: "text-[10px]",
+      padding: "py-2",
+      labelMargin: "mt-1.5",
+      timestampMargin: "mb-1"
+    },
+    md: {
+      wrapper: "h-10 w-10",
+      completed: "h-8 w-8",
+      current: "h-10 w-10",
+      pending: "h-8 w-8",
+      error: "h-10 w-10",
+      checkIcon: "h-4 w-4",
+      xIcon: "h-5 w-5",
+      currentDot: "h-2.5 w-2.5",
+      pendingDot: "h-2 w-2",
+      connector: "h-0.5",
+      timestamp: "text-xs",
+      label: "text-xs",
+      padding: "py-4",
+      labelMargin: "mt-2.5",
+      timestampMargin: "mb-2"
+    },
+    lg: {
+      wrapper: "h-14 w-14",
+      completed: "h-11 w-11",
+      current: "h-14 w-14",
+      pending: "h-11 w-11",
+      error: "h-14 w-14",
+      checkIcon: "h-5 w-5",
+      xIcon: "h-6 w-6",
+      currentDot: "h-3.5 w-3.5",
+      pendingDot: "h-2.5 w-2.5",
+      connector: "h-1",
+      timestamp: "text-sm",
+      label: "text-sm",
+      padding: "py-6",
+      labelMargin: "mt-3",
+      timestampMargin: "mb-3"
+    }
+  };
+  const sizes = sizeConfig[size];
+  const getStepState = (index, step) => {
+    if (step.error) return "error";
     if (index < currentIndex) return "completed";
     if (index === currentIndex) return "current";
     return "pending";
@@ -31368,77 +32263,123 @@ function TimelineProgress({
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: cn("flex items-start overflow-x-auto py-4", className),
+      className: cn(sizes.padding, "overflow-x-auto", className),
       role: "progressbar",
       "aria-valuenow": currentIndex + 1,
       "aria-valuemin": 1,
       "aria-valuemax": visibleSteps.length,
-      children: visibleSteps.map((step, index) => {
-        const state = getStepState(index);
+      children: /* @__PURE__ */ jsx("div", { className: "relative flex items-start", children: visibleSteps.map((step, index) => {
+        const state = getStepState(index, step);
         const isLast = index === visibleSteps.length - 1;
-        return /* @__PURE__ */ jsxs(
-          "div",
-          {
-            className: cn(
-              "flex flex-1 flex-col items-center",
-              !isLast && "mr-2"
+        return /* @__PURE__ */ jsxs("div", { className: "flex flex-1 flex-col items-center", children: [
+          showTimestamps && /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: cn(
+                "h-4 text-center text-neutral-500 dark:text-neutral-400",
+                sizes.timestamp,
+                sizes.timestampMargin
+              ),
+              children: step.completedAt ? formatTimestamp(step.completedAt) : "\xA0"
+            }
+          ),
+          /* @__PURE__ */ jsxs("div", { className: "relative flex w-full items-center", children: [
+            index > 0 && /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: cn(
+                  "flex-1",
+                  sizes.connector,
+                  state === "completed" || state === "current" || state === "error" ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"
+                )
+              }
             ),
-            children: [
-              showTimestamps && /* @__PURE__ */ jsx("div", { className: "mb-1 h-5 text-center text-xs text-gray-500", children: step.completedAt ? formatTimestamp(step.completedAt) : "\xA0" }),
-              /* @__PURE__ */ jsxs("div", { className: "flex w-full items-center", children: [
-                /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    className: cn(
-                      "h-1 flex-1",
-                      index === 0 ? "bg-transparent" : "",
-                      state === "completed" || state === "current" && index > 0 ? "bg-brand-500" : "bg-gray-200 dark:bg-gray-700"
-                    )
-                  }
+            index === 0 && /* @__PURE__ */ jsx("div", { className: "flex-1" }),
+            /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: cn(
+                  "flex shrink-0 items-center justify-center",
+                  sizes.wrapper
                 ),
-                /* @__PURE__ */ jsxs(
+                children: /* @__PURE__ */ jsxs(
                   "div",
                   {
                     className: cn(
-                      "relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-                      state === "completed" && "border-brand-500 bg-brand-500 text-white",
-                      state === "current" && "border-brand-500 bg-white dark:bg-gray-900",
-                      state === "pending" && "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
+                      "relative z-10 flex items-center justify-center rounded-full transition-all duration-200",
+                      state === "completed" && cn(
+                        "bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2",
+                        sizes.completed
+                      ),
+                      state === "current" && cn(
+                        "bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4",
+                        sizes.current,
+                        pulse && "animate-pulse"
+                      ),
+                      state === "pending" && cn(
+                        "bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700",
+                        sizes.pending
+                      ),
+                      state === "error" && cn(
+                        "bg-red-500 text-white shadow-md ring-4 shadow-red-500/30 ring-red-100 dark:bg-red-500 dark:ring-red-900/50",
+                        sizes.error
+                      )
                     ),
                     children: [
-                      state === "completed" && /* @__PURE__ */ jsx(CheckIcon5, { className: "h-3 w-3" }),
-                      state === "current" && /* @__PURE__ */ jsx("div", { className: "bg-brand-500 h-2 w-2 rounded-full" })
+                      state === "completed" && /* @__PURE__ */ jsx(CheckIcon6, { className: sizes.checkIcon }),
+                      state === "current" && /* @__PURE__ */ jsx(
+                        "div",
+                        {
+                          className: cn(
+                            "rounded-full bg-white",
+                            sizes.currentDot
+                          )
+                        }
+                      ),
+                      state === "pending" && /* @__PURE__ */ jsx(
+                        "div",
+                        {
+                          className: cn(
+                            "rounded-full bg-neutral-300 dark:bg-neutral-600",
+                            sizes.pendingDot
+                          )
+                        }
+                      ),
+                      state === "error" && /* @__PURE__ */ jsx(XIcon4, { className: sizes.xIcon })
                     ]
                   }
-                ),
-                /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    className: cn(
-                      "h-1 flex-1",
-                      isLast ? "bg-transparent" : "",
-                      state === "completed" ? "bg-brand-500" : "bg-gray-200 dark:bg-gray-700"
-                    )
-                  }
                 )
-              ] }),
-              /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: cn(
-                    "mt-2 text-center text-xs font-medium capitalize",
-                    state === "completed" && "text-brand-600 dark:text-brand-400",
-                    state === "current" && "text-gray-900 dark:text-gray-100",
-                    state === "pending" && "text-gray-400 dark:text-gray-500"
-                  ),
-                  children: step.label
-                }
-              )
-            ]
-          },
-          step.key
-        );
-      })
+              }
+            ),
+            !isLast && /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: cn(
+                  "flex-1",
+                  sizes.connector,
+                  state === "completed" ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"
+                )
+              }
+            ),
+            isLast && /* @__PURE__ */ jsx("div", { className: "flex-1" })
+          ] }),
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: cn(
+                "text-center font-medium capitalize",
+                sizes.label,
+                sizes.labelMargin,
+                state === "completed" && "text-primary-700 dark:text-primary-300",
+                state === "current" && "font-semibold text-neutral-900 dark:text-white",
+                state === "pending" && "text-neutral-400 dark:text-neutral-500",
+                state === "error" && "font-semibold text-red-600 dark:text-red-400"
+              ),
+              children: step.label
+            }
+          )
+        ] }, step.key);
+      }) })
     }
   );
 }
@@ -31487,48 +32428,56 @@ function TimelineEventList({
   const getEventColor = (type) => {
     switch (type) {
       case "message":
-        return "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
+        return "bg-blue-50 text-blue-500 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40";
       case "status":
-        return "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400";
+        return "bg-green-50 text-green-500 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40";
       case "attachment":
-        return "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400";
+        return "bg-purple-50 text-purple-500 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40";
       case "assignment":
-        return "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400";
+        return "bg-orange-50 text-orange-500 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40";
       case "note":
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+        return "bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40";
       default:
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+        return "bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40";
     }
   };
   if (events.length === 0) {
-    return /* @__PURE__ */ jsx("div", { className: cn("py-8 text-center text-gray-500", className), children: "No activity yet." });
+    return /* @__PURE__ */ jsx("div", { className: cn("py-8 text-center text-neutral-500", className), children: "No activity yet." });
   }
-  return /* @__PURE__ */ jsx("div", { className: cn("space-y-4", className), children: events.map((event, index) => /* @__PURE__ */ jsxs("div", { className: "relative flex gap-4", children: [
-    index < events.length - 1 && /* @__PURE__ */ jsx("div", { className: "absolute top-10 left-5 h-full w-px bg-gray-200 dark:bg-gray-700" }),
-    /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsxs("div", { className: cn("relative", className), children: [
+    events.length > 1 && /* @__PURE__ */ jsx(
       "div",
       {
-        className: cn(
-          "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-          getEventColor(event.type)
-        ),
-        children: getEventIcon(event.type)
+        className: "absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700",
+        "aria-hidden": "true"
       }
     ),
-    /* @__PURE__ */ jsxs("div", { className: "flex-1 pt-1", children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-2", children: [
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h4", { className: "font-medium text-gray-900 dark:text-gray-100", children: event.title }),
-          event.author && /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: [
-            "by ",
-            event.author
-          ] })
+    /* @__PURE__ */ jsx("div", { className: "space-y-6", children: events.map((event) => /* @__PURE__ */ jsxs("div", { className: "relative flex gap-4", children: [
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: cn(
+            "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-2",
+            getEventColor(event.type)
+          ),
+          children: getEventIcon(event.type)
+        }
+      ),
+      /* @__PURE__ */ jsxs("div", { className: "flex-1 pt-0.5", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-2", children: [
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("h4", { className: "font-semibold text-neutral-900 dark:text-neutral-100", children: event.title }),
+            event.author && /* @__PURE__ */ jsxs("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: [
+              "by ",
+              event.author
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx("time", { className: "shrink-0 pt-0.5 text-xs text-neutral-400 dark:text-neutral-500", children: formatTime4(event.timestamp) })
         ] }),
-        /* @__PURE__ */ jsx("time", { className: "shrink-0 text-xs text-gray-400 dark:text-gray-500", children: formatTime4(event.timestamp) })
-      ] }),
-      event.content && /* @__PURE__ */ jsx("p", { className: "mt-2 text-sm text-gray-600 dark:text-gray-300", children: event.content })
-    ] })
-  ] }, event.id)) });
+        event.content && /* @__PURE__ */ jsx("p", { className: "mt-1.5 text-sm text-neutral-600 dark:text-neutral-300", children: event.content })
+      ] })
+    ] }, event.id)) })
+  ] });
 }
 TimelineEventList.displayName = "TimelineEventList";
 function OrderConfirmation({
@@ -31549,21 +32498,21 @@ function OrderConfirmation({
       role: "dialog",
       "aria-modal": "true",
       "aria-labelledby": "order-confirmation-title",
-      children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800", children: [
+      children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-800", children: [
         /* @__PURE__ */ jsx("div", { className: "mb-6 flex justify-center", children: /* @__PURE__ */ jsx("div", { className: "flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsx("div", { className: "animate-bounce", children: /* @__PURE__ */ jsx(PlaneIcon, { className: "h-10 w-10 text-green-600 dark:text-green-400" }) }) }) }),
         /* @__PURE__ */ jsx(
           "h2",
           {
             id: "order-confirmation-title",
-            className: "mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-100",
+            className: "mb-2 text-center text-2xl font-bold text-neutral-900 dark:text-neutral-100",
             children: "Order Submitted!"
           }
         ),
-        orderNumber && /* @__PURE__ */ jsxs("p", { className: "mb-4 text-center text-sm text-gray-500 dark:text-gray-400", children: [
+        orderNumber && /* @__PURE__ */ jsxs("p", { className: "mb-4 text-center text-sm text-neutral-500 dark:text-neutral-400", children: [
           "Order #",
           orderNumber
         ] }),
-        /* @__PURE__ */ jsx("p", { className: "mb-6 text-center text-gray-600 dark:text-gray-300", children: message }),
+        /* @__PURE__ */ jsx("p", { className: "mb-6 text-center text-neutral-600 dark:text-neutral-300", children: message }),
         /* @__PURE__ */ jsx(
           "button",
           {
@@ -31571,8 +32520,8 @@ function OrderConfirmation({
             onClick: onClose,
             className: cn(
               "w-full rounded-lg px-4 py-3 font-medium",
-              "bg-brand-600 hover:bg-brand-700 text-white",
-              "dark:bg-brand-500 dark:hover:bg-brand-600",
+              "bg-primary-600 hover:bg-primary-700 text-white",
+              "dark:bg-primary-500 dark:hover:bg-primary-600",
               "transition-colors"
             ),
             children: "Got It"
@@ -31583,7 +32532,7 @@ function OrderConfirmation({
   );
 }
 OrderConfirmation.displayName = "OrderConfirmation";
-function CheckIcon5({ className }) {
+function CheckIcon6({ className }) {
   return /* @__PURE__ */ jsx(
     "svg",
     {
@@ -31598,6 +32547,26 @@ function CheckIcon5({ className }) {
           strokeLinecap: "round",
           strokeLinejoin: "round",
           d: "M4.5 12.75l6 6 9-13.5"
+        }
+      )
+    }
+  );
+}
+function XIcon4({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 3,
+      children: /* @__PURE__ */ jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M6 18L18 6M6 6l12 12"
         }
       )
     }
@@ -31723,7 +32692,7 @@ function PlaneIcon({ className }) {
     }
   );
 }
-var CheckIcon6 = () => /* @__PURE__ */ jsx(
+var CheckIcon7 = () => /* @__PURE__ */ jsx(
   "svg",
   {
     className: "h-5 w-5",
@@ -31788,7 +32757,7 @@ var InfoIcon = () => /* @__PURE__ */ jsx(
     )
   }
 );
-var XIcon4 = () => /* @__PURE__ */ jsx(
+var XIcon5 = () => /* @__PURE__ */ jsx(
   "svg",
   {
     className: "h-4 w-4",
@@ -31825,7 +32794,7 @@ var variantStyles = {
   }
 };
 var defaultIcons = {
-  success: /* @__PURE__ */ jsx(CheckIcon6, {}),
+  success: /* @__PURE__ */ jsx(CheckIcon7, {}),
   error: /* @__PURE__ */ jsx(XCircleIcon, {}),
   warning: /* @__PURE__ */ jsx(ExclamationIcon, {}),
   info: /* @__PURE__ */ jsx(InfoIcon, {})
@@ -31871,7 +32840,7 @@ function Toast({
             onClick: onClose,
             className: "flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10",
             "aria-label": "Dismiss notification",
-            children: /* @__PURE__ */ jsx(XIcon4, {})
+            children: /* @__PURE__ */ jsx(XIcon5, {})
           }
         )
       ]
@@ -32025,6 +32994,7 @@ function WebChartReportViewer({
   onDateRangeChange,
   webchartBrand: webchartBrand2 = { name: "Enterprise Health" },
   onReconnect,
+  columnRenderers,
   className,
   labels = {}
 }) {
@@ -32034,17 +33004,16 @@ function WebChartReportViewer({
     reconnect = "Reconnect",
     noReports = "No reports available",
     loadingData = "Fetching latest data from Enterprise Health...",
-    close = "Close",
     dateFrom = "From",
     dateTo = "To"
   } = labels;
-  const [offcanvasOpen, setOffcanvasOpen] = React46.useState(false);
+  const [modalOpen, setModalOpen] = React47.useState(false);
   const handleReportClick = (report) => {
     onReportSelect?.(report);
-    setOffcanvasOpen(true);
+    setModalOpen(true);
   };
   const handleClose = () => {
-    setOffcanvasOpen(false);
+    setModalOpen(false);
     onClose?.();
   };
   const formatDate4 = (date) => {
@@ -32052,144 +33021,153 @@ function WebChartReportViewer({
     return d.toISOString().split("T")[0];
   };
   return /* @__PURE__ */ jsxs("div", { className: cn("webchart-report-viewer", className), children: [
-    error && /* @__PURE__ */ jsx("div", { className: "mb-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2", children: [
-      /* @__PURE__ */ jsx("i", { className: "fas fa-exclamation-triangle mt-0.5 text-yellow-600" }),
-      /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
-        /* @__PURE__ */ jsx("span", { className: "font-medium text-yellow-800", children: error }),
-        /* @__PURE__ */ jsxs("p", { className: "mt-1 text-sm text-yellow-700", children: [
-          "If this error persists, you can try reconnecting",
-          " ",
-          webchartBrand2.name,
-          "."
-        ] }),
+    error && /* @__PURE__ */ jsxs(Alert, { variant: "warning", icon: /* @__PURE__ */ jsx(AlertTriangle, {}), className: "mb-4", children: [
+      /* @__PURE__ */ jsx(AlertTitle, { children: error }),
+      /* @__PURE__ */ jsxs(AlertDescription, { children: [
+        "If this error persists, you can try reconnecting",
+        " ",
+        webchartBrand2.name,
+        ".",
         onReconnect && /* @__PURE__ */ jsxs(
-          "button",
+          Button,
           {
-            type: "button",
+            variant: "secondary",
+            size: "sm",
             onClick: onReconnect,
-            className: "mt-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50",
+            className: "mt-2",
             children: [
-              /* @__PURE__ */ jsx("i", { className: "fas fa-link mr-2" }),
+              /* @__PURE__ */ jsx(Link, { className: "mr-2 h-4 w-4" }),
               reconnect
             ]
           }
         )
       ] })
-    ] }) }),
-    !error && !loading && /* @__PURE__ */ jsxs(
-      "button",
-      {
-        type: "button",
-        onClick: onRefreshReports,
-        className: "bg-primary hover:bg-primary/90 mb-4 rounded-lg px-4 py-2 text-white",
-        title: refreshReports,
-        children: [
-          /* @__PURE__ */ jsx("i", { className: "fas fa-sync-alt mr-2" }),
-          refreshReports
-        ]
-      }
-    ),
+    ] }),
+    !error && !loading && /* @__PURE__ */ jsxs(Button, { onClick: onRefreshReports, className: "mb-4", children: [
+      /* @__PURE__ */ jsx(RefreshCw, { className: "mr-2 h-4 w-4" }),
+      refreshReports
+    ] }),
     /* @__PURE__ */ jsx("div", { className: "mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3", children: loading ? (
       // Loading placeholders
-      /* @__PURE__ */ jsx(Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsx("div", { className: "animate-pulse", children: /* @__PURE__ */ jsx("div", { className: "h-12 rounded-lg bg-gray-200" }) }, i)) })
+      /* @__PURE__ */ jsx(Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsx(Skeleton, { variant: "button", className: "h-12 w-full" }, i)) })
     ) : reports.length > 0 ? (
       // Report buttons
       reports.map((report) => /* @__PURE__ */ jsx(
-        "button",
+        Card,
         {
-          type: "button",
+          interactive: true,
+          padding: "none",
+          role: "button",
+          tabIndex: 0,
+          "aria-label": report.description ? `${report.name}: ${report.description}` : report.name,
           onClick: () => handleReportClick(report),
-          className: "border-primary text-primary hover:bg-primary w-full truncate rounded-lg border bg-white p-3 text-left hover:text-white",
-          title: report.description ? `${report.name}: ${report.description}` : report.name,
-          children: report.name
+          onKeyDown: (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleReportClick(report);
+            }
+          },
+          className: "cursor-pointer",
+          children: /* @__PURE__ */ jsx(CardContent, { className: "p-3", children: /* @__PURE__ */ jsx(
+            "span",
+            {
+              className: "block truncate text-sm font-medium",
+              title: report.description ? `${report.name}: ${report.description}` : report.name,
+              children: report.name
+            }
+          ) })
         },
         report.id
       ))
     ) : /* @__PURE__ */ jsx("div", { className: "text-muted-foreground col-span-full py-8 text-center", children: noReports }) }),
-    offcanvasOpen && /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 z-50 flex", children: [
-      /* @__PURE__ */ jsx(
-        "div",
-        {
-          role: "button",
-          tabIndex: 0,
-          "aria-label": "Close panel",
-          className: "fixed inset-0 bg-black/50",
-          onClick: handleClose,
-          onKeyDown: (e) => e.key === "Enter" && handleClose()
-        }
-      ),
-      /* @__PURE__ */ jsxs("div", { className: "fixed right-0 bottom-0 left-0 flex h-3/4 flex-col rounded-t-xl bg-white shadow-xl", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between border-b p-4", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ jsx("h5", { className: "text-lg font-semibold", children: currentReport?.name || "Report Results" }),
-            reportResult?.error ? /* @__PURE__ */ jsx("span", { className: "text-yellow-500", title: reportResult.error, children: /* @__PURE__ */ jsx("i", { className: "fas fa-exclamation-triangle" }) }) : reportResult?.success ? /* @__PURE__ */ jsx("span", { className: "text-green-500", children: /* @__PURE__ */ jsx("i", { className: "fas fa-check-circle" }) }) : null
+    /* @__PURE__ */ jsxs(
+      Modal,
+      {
+        open: modalOpen,
+        onOpenChange: (open) => {
+          if (!open) {
+            handleClose();
+          }
+        },
+        size: "4xl",
+        children: [
+          /* @__PURE__ */ jsxs(ModalHeader, { children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ jsx(ModalTitle, { children: currentReport?.name || "Report Results" }),
+              reportResult?.error ? /* @__PURE__ */ jsx(AlertTriangle, { className: "h-5 w-5 text-yellow-500" }) : reportResult?.success ? /* @__PURE__ */ jsx(Check, { className: "h-5 w-5 text-green-500" }) : null
+            ] }),
+            /* @__PURE__ */ jsx(ModalClose, {})
           ] }),
-          /* @__PURE__ */ jsx(
-            "button",
-            {
-              type: "button",
-              onClick: handleClose,
-              className: "text-2xl text-gray-400 hover:text-gray-600",
-              "aria-label": close,
-              children: "\xD7"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap items-center gap-3 border-b bg-gray-50 p-4", children: [
-          onDateRangeChange && dateRange && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
-              dateFrom,
-              ":"
+          /* @__PURE__ */ jsxs("div", { className: "bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4", children: [
+            onDateRangeChange && dateRange && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
+                dateFrom,
+                ":"
+              ] }),
+              /* @__PURE__ */ jsx(
+                Input,
+                {
+                  type: "date",
+                  size: "sm",
+                  value: formatDate4(dateRange.start),
+                  onChange: (e) => onDateRangeChange(e.target.value, dateRange.end),
+                  className: "w-auto"
+                }
+              ),
+              /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
+                dateTo,
+                ":"
+              ] }),
+              /* @__PURE__ */ jsx(
+                Input,
+                {
+                  type: "date",
+                  size: "sm",
+                  value: formatDate4(dateRange.end),
+                  onChange: (e) => onDateRangeChange(dateRange.start, e.target.value),
+                  className: "w-auto"
+                }
+              )
             ] }),
             /* @__PURE__ */ jsx(
-              "input",
+              Button,
               {
-                type: "date",
-                value: formatDate4(dateRange.start),
-                onChange: (e) => onDateRangeChange(e.target.value, dateRange.end),
-                className: "rounded-lg border border-gray-300 px-2 py-1 text-sm"
-              }
-            ),
-            /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
-              dateTo,
-              ":"
-            ] }),
-            /* @__PURE__ */ jsx(
-              "input",
-              {
-                type: "date",
-                value: formatDate4(dateRange.end),
-                onChange: (e) => onDateRangeChange(dateRange.start, e.target.value),
-                className: "rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                size: "sm",
+                onClick: onRefreshReport,
+                title: refreshReport,
+                "aria-label": refreshReport,
+                children: /* @__PURE__ */ jsx(RefreshCw, { className: "h-4 w-4" })
               }
             )
           ] }),
-          /* @__PURE__ */ jsx(
-            "button",
+          /* @__PURE__ */ jsx(ModalBody, { className: "max-h-[60vh] overflow-auto", children: loadingReport ? /* @__PURE__ */ jsxs("div", { className: "flex h-64 flex-col items-center justify-center", children: [
+            /* @__PURE__ */ jsx(Spinner, { size: "xl" }),
+            /* @__PURE__ */ jsx("span", { className: "text-muted-foreground mt-4", children: loadingData })
+          ] }) : reportResult?.error ? /* @__PURE__ */ jsx(Alert, { variant: "danger", icon: /* @__PURE__ */ jsx(AlertTriangle, {}), children: /* @__PURE__ */ jsx(AlertDescription, { children: reportResult.error }) }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsx(
+            "div",
             {
-              type: "button",
-              onClick: onRefreshReport,
-              className: "bg-primary hover:bg-primary/90 rounded-lg px-3 py-1.5 text-white",
-              title: refreshReport,
-              children: /* @__PURE__ */ jsx("i", { className: "fas fa-sync-alt" })
+              className: "prose dark:prose-invert max-w-none",
+              dangerouslySetInnerHTML: { __html: reportResult.data }
             }
-          )
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-auto p-4", children: loadingReport ? /* @__PURE__ */ jsxs("div", { className: "flex h-full flex-col items-center justify-center", children: [
-          /* @__PURE__ */ jsx("div", { className: "border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" }),
-          /* @__PURE__ */ jsx("span", { className: "text-muted-foreground mt-4", children: loadingData })
-        ] }) : reportResult?.error ? /* @__PURE__ */ jsxs("div", { className: "rounded-lg border border-red-200 bg-red-50 p-4 text-red-600", children: [
-          /* @__PURE__ */ jsx("i", { className: "fas fa-exclamation-circle mr-2" }),
-          reportResult.error
-        ] }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: "prose max-w-none",
-            dangerouslySetInnerHTML: { __html: reportResult.data }
-          }
-        ) : /* @__PURE__ */ jsx("pre", { className: "overflow-auto rounded-lg bg-gray-100 p-4 text-sm", children: JSON.stringify(reportResult.data, null, 2) }) : /* @__PURE__ */ jsx("div", { className: "text-muted-foreground py-8 text-center", children: "No data available" }) })
-      ] })
-    ] })
+          ) : Array.isArray(reportResult.data) && reportResult.data.length > 0 ? (() => {
+            const rows = reportResult.data;
+            const columns = Object.keys(rows[0]);
+            return /* @__PURE__ */ jsxs(Table, { children: [
+              /* @__PURE__ */ jsx(TableHeader, { children: /* @__PURE__ */ jsx(TableRow, { children: columns.map((key) => /* @__PURE__ */ jsx(TableHead, { children: key }, key)) }) }),
+              /* @__PURE__ */ jsx(TableBody, { children: rows.map((row) => {
+                const rowKey = columns.map((key) => String(row[key])).join("|") || JSON.stringify(row);
+                return /* @__PURE__ */ jsx(TableRow, { children: columns.map((key) => /* @__PURE__ */ jsx(TableCell, { children: columnRenderers?.[key] ? columnRenderers[key](row[key], row) : row[key] == null ? "" : String(row[key]) }, key)) }, rowKey);
+              }) })
+            ] });
+          })() : /* @__PURE__ */ jsx(Table, { children: /* @__PURE__ */ jsx(TableBody, { children: Object.entries(
+            reportResult.data
+          ).map(([key, val]) => /* @__PURE__ */ jsxs(TableRow, { children: [
+            /* @__PURE__ */ jsx(TableCell, { className: "text-muted-foreground font-medium", children: key }),
+            /* @__PURE__ */ jsx(TableCell, { children: val == null ? "" : String(val) })
+          ] }, key)) }) }) : /* @__PURE__ */ jsx("div", { className: "text-muted-foreground py-8 text-center", children: "No data available" }) })
+        ]
+      }
+    )
   ] });
 }
 function ReportDatePicker({
@@ -32206,7 +33184,7 @@ function ReportDatePicker({
   ],
   className
 }) {
-  const [preset, setPreset] = React46.useState("this-month");
+  const [preset, setPreset] = React47.useState("this-month");
   const formatDate4 = (date) => {
     if (!date) return "";
     const d = typeof date === "string" ? new Date(date) : date;
@@ -32216,7 +33194,7 @@ function ReportDatePicker({
     setPreset(value);
     const now = /* @__PURE__ */ new Date();
     let start;
-    let end = now;
+    const end = now;
     switch (value) {
       case "today":
         start = now;
@@ -32241,34 +33219,40 @@ function ReportDatePicker({
     }
     onChange?.(start, end);
   };
+  const selectOptions = presets.map((p) => ({
+    value: p.value,
+    label: p.label
+  }));
   return /* @__PURE__ */ jsxs("div", { className: cn("flex flex-wrap items-center gap-3", className), children: [
     /* @__PURE__ */ jsx(
-      "select",
+      Select,
       {
         value: preset,
-        onChange: (e) => handlePresetChange(e.target.value),
-        className: "rounded-lg border border-gray-300 px-3 py-2",
-        children: presets.map((p) => /* @__PURE__ */ jsx("option", { value: p.value, children: p.label }, p.value))
+        onValueChange: (value) => handlePresetChange(value),
+        options: selectOptions,
+        size: "sm"
       }
     ),
     preset === "custom" && /* @__PURE__ */ jsxs(Fragment, { children: [
       /* @__PURE__ */ jsx(
-        "input",
+        Input,
         {
           type: "date",
+          size: "sm",
           value: formatDate4(startDate),
           onChange: (e) => onChange?.(e.target.value, endDate || /* @__PURE__ */ new Date()),
-          className: "rounded-lg border border-gray-300 px-3 py-2"
+          className: "w-auto"
         }
       ),
       /* @__PURE__ */ jsx("span", { className: "text-muted-foreground", children: "to" }),
       /* @__PURE__ */ jsx(
-        "input",
+        Input,
         {
           type: "date",
+          size: "sm",
           value: formatDate4(endDate),
           onChange: (e) => onChange?.(startDate || /* @__PURE__ */ new Date(), e.target.value),
-          className: "rounded-lg border border-gray-300 px-3 py-2"
+          className: "w-auto"
         }
       )
     ] })
@@ -32288,7 +33272,7 @@ function isValidUrl(url) {
     }
   }
 }
-var WebsiteInput = React46.forwardRef(
+var WebsiteInput = React47.forwardRef(
   ({
     value = "",
     onChange,
@@ -32299,7 +33283,7 @@ var WebsiteInput = React46.forwardRef(
     error,
     ...props
   }, ref) => {
-    const [localError, setLocalError] = React46.useState();
+    const [localError, setLocalError] = React47.useState();
     const handleChange = (e) => {
       onChange?.(e.target.value);
       if (localError) {
@@ -32381,7 +33365,7 @@ function WebsiteInputGroup({
   typeLabels,
   className
 }) {
-  const websites = React46.useMemo(() => {
+  const websites = React47.useMemo(() => {
     if (value.length >= minEntries) return value;
     const padding = Array(minEntries - value.length).fill(null).map(() => ({ url: "", type: "website" }));
     return [...value, ...padding];
@@ -32527,6 +33511,6 @@ function WebsiteInputGroup({
 }
 WebsiteInputGroup.displayName = "WebsiteInputGroup";
 
-export { AGGrid, AIChat, AIChatModal, AIChatTrigger, AILogoIcon, AIMessageDisplay, AITypingIndicator, AccessDeniedPage, ActionButton2 as ActionButton, ActionButtonsBar, ActiveFilters, AddContactModal, AddServiceCard, AdditionalFields, Address, AddressCard, AddressCompact, AddressDisplay, AddressForm, AddressInline, AppHeader, AppHeaderActions, AppHeaderDivider, AppHeaderIconButton, AppHeaderSearch, AppHeaderSection, AppHeaderTitle, AppHeaderUserMenu, AttachmentPicker, AttachmentPreview, AttachmentPreviewItem, AuthButtons, AuthDialog, AvatarNameRenderer, BookAppointmentButton, BookingDialog, BooleanRenderer, BusinessHours, BusinessHoursEditor, CSVColumnMapper, CSVFileUpload, CameraButton, CardSkeleton, CellRenderers, CharacterCounter, CheckrIntegration, ChevronIcon, ClaimListingButton, ClaimProviderForm, CloseIcon, CommandPalette, CommandPaletteProvider, CommandPaletteTrigger, CompactCookieBanner, CompactFilterBar, CompactHeader, CompactHours, CompactProviderHeader, CompanyRenderer, ConnectionStatusBadge, ConnectionStatusBar, ConnectionStatusOverlay, ConsentSwitch, ConversationHeader, ConversationListItem, ConversationListSkeleton, CookieConsentBanner, CopyrightText, CreateInvoiceModal, CreateReferralModal, CurrencyRenderer, DEFAULT_ERROR_CONFIGS, DEFAULT_LANGUAGES, DEFAULT_RADIUS_OPTIONS, DEFAULT_SOCIAL_PROVIDERS, DOTBadge, DateRangeFilter, DateRangePicker, DateRenderer, DateSeparator, DialogOverlay, DisclaimerText, DocumentDetectionOverlay, DocumentScanner, DomainRenderer, DragDropZone, DropZone, DropzoneOverlay, EditUserRoleModal, EmailRenderer, EmployeeForm, EmployeeProfileCard, EmployerContactCard, EmployerList, EmployerPricingCard, EmployerServiceModal, EmployerView, EmptyState, EngagementScoreRenderer, ErrorPage, FileManager, FilePreview, FloatingAIChat, FloatingInput, FooterLinkSection, SocialMediaLinks2 as FooterSocialLinks, HRISProviderSelector, HelpSupportPanel, HeroSearchBar, HoursSummary, InlineBookingForm, InventoryManager, InviteUserModal, InvoiceList, InvoicePaymentPage, InvoiceView, LanguageSelector, LanguageSelectorInline, LanguageSelectorNative, LegalLinks, LightboxModal, LinkedInRenderer, LoadMoreButton, LoadingBar, LoadingDots, LoadingOverlay, LoadingPage, LoadingSkeleton, MCPToolCallDisplay, MaintenancePage, MemoizedAvatarNameRenderer, MemoizedBooleanRenderer, MemoizedCompanyRenderer, MemoizedCurrencyRenderer, MemoizedDateRenderer, MemoizedDomainRenderer, MemoizedEmailRenderer, MemoizedEngagementScoreRenderer, MemoizedLinkedInRenderer, MemoizedNumberRenderer, MemoizedPhoneRenderer, MemoizedProgressRenderer, MemoizedStatusBadgeRenderer, MemoizedTagsRenderer, MessageAvatar, MessageBubble, MessageComposer, MessageList, MessageStatusIcon, MessageThread, MessagingSplitView, MobileBackButton, MobileMenuButton, MobileMenuPanel, NavLinks, NewsletterForm, NotFoundPage, NotificationCenter, NumberRenderer, OfflinePage, OnboardingCompletion, OnboardingStepQuestion, OnboardingWizard, OpenStatusBadge, OrderCard, OrderConfirmation, OrderConfirmationWizard, OrderDetailSidebar, OrderList, OrderLookupForm, OrderSidebar, OrderSidebarTabs, PageHeader, PaymentHistoryTable, PaymentMethodBank, PaymentMethodCard, PaymentMethodList, PendingClaimsTable, PermissionsEditor, PhoneRenderer, ProductVersion, ProductVersionBadge, ProgressRenderer, Breadcrumb2 as ProviderBreadcrumb, ProviderCard, ProviderCardGrid, ProviderCardSkeleton, ProviderDetailHeader, ProviderDetailHeaderSkeleton, ProviderLogo2 as ProviderLogo, ProviderOverview, ProviderSearchBar, ProviderSearchFilters, ProviderSelector, ProviderSettings, SocialMediaLinks as ProviderSocialLinks, ProviderUsersTable, QuickBookCard, QuickLinksCard, ReadReceiptIndicator, RecurringServiceAddCard, RecurringServiceCard, RecurringServiceGrid, RecurringServiceSetupModal, RefreshIcon, RejectionModal, ReportDashboard, ReportDatePicker, ReportLink, ResourceLink, ResultsEntryCard, ResultsEntryForm, ResultsEntryModal, SSOConfigForm, ScheduleCalendar, SearchResultsMessage, SelectedServicesBadges, SendButton, SendIcon, ServerErrorPage, ServiceAccordion, ServiceBadge, ServiceBadgeGroup, ServiceCard, ServiceCategoryBadge, ServiceGeneralSettings, ServiceGrid, ServiceLink, ServiceList, ServiceMultiSelect, ServicePicker, ServicePricingManager, ServiceSelect, ServiceShippingSettings, ServiceTagCloud, ServiceTagCloudBadges, SetupServiceModal, Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMobileToggle, SidebarNav, SidebarNavGroup, SidebarNavItem, SidebarProvider, SidebarSearch, SidebarToggle, SimpleFooter, SiteFooter, SiteHeader, SiteLogo, SkeletonMessage, SparklesIcon, SpinnerIcon2 as SpinnerIcon, StatusBadgeRenderer, StepIndicator, StripeBadge, StripeSecureBadge, SuggestedActions, TagsRenderer, TimelineEventList, TimelineProgress, Toast, ToastContainer, ToastProvider, ToolStatusIcon, TypingIndicator, UpdateAvailableOverlay, UserMenu, VerifiedBadge2 as VerifiedBadge, WEBSITE_TYPES, WebChartReportViewer, WebcamModal, WebsiteInput, WebsiteInputGroup, bubbleVariants2 as bubbleVariants, create24HourSchedule, createDefaultSchedule, createWeekdaySchedule, defaultOrderTabs, formatAddressLines, formatAddressSingleLine, formatCityState, formatCityStateZip, formatDateLabel, formatFileSize2 as formatFileSize, formatLastSeen, formatPhoneDisplay, generateAttachmentId, generateId, getConversationSubtitle, getConversationTitle, getFileType, getGoogleMapsSearchUrl, getGoogleMapsUrl, getToolIcon, groupMessagesByDate, headerVariants, isSameSenderGroup, isValidUrl, sendButtonVariants, statusColors, useCamera, useCommandPalette, useConnectionStatus, useCookieConsent, useDocumentDetection, useDropzone, useFileUpload, useMessageScroll, useMessages, useReadReceipts, useSidebar, useToast, useTypingIndicator, validateFile };
+export { AGGrid, AIChat, AIChatModal, AIChatTrigger, AILogoIcon, AIMessageDisplay, AITypingIndicator, AccessDeniedPage, Accordion, AccordionContent, AccordionItem, AccordionTrigger, ActionButton2 as ActionButton, ActionButtonsBar, ActiveFilters, AddContactModal, AddServiceCard, AdditionalFields, Address, AddressCard, AddressCompact, AddressDisplay, AddressForm, AddressInline, AppHeader, AppHeaderActions, AppHeaderDivider, AppHeaderIconButton, AppHeaderSearch, AppHeaderSection, AppHeaderTitle, AppHeaderUserMenu, AttachmentPicker, AttachmentPreview, AttachmentPreviewItem, AuthButtons, AuthDialog, AvatarNameRenderer, BookAppointmentButton, BookingDialog, BooleanRenderer, BusinessHours, BusinessHoursEditor, CSVColumnMapper, CSVFileUpload, CameraButton, CardSkeleton, CellRenderers, CharacterCounter, CheckrIntegration, ChevronIcon2 as ChevronIcon, ClaimListingButton, ClaimProviderForm, CloseIcon, CommandPalette, CommandPaletteProvider, CommandPaletteTrigger, CompactCookieBanner, CompactFilterBar, CompactHeader, CompactHours, CompactProviderHeader, CompanyRenderer, ConnectionStatusBadge, ConnectionStatusBar, ConnectionStatusOverlay, ConsentSwitch, ConversationHeader, ConversationListItem, ConversationListSkeleton, CookieConsentBanner, CopyrightText, CreateInvoiceModal, CreateReferralModal, CurrencyRenderer, DEFAULT_ERROR_CONFIGS, DEFAULT_LANGUAGES, DEFAULT_RADIUS_OPTIONS, DEFAULT_SOCIAL_PROVIDERS, DOTBadge, DateRangeFilter, DateRangePicker, DateRenderer, DateSeparator, DialogOverlay, DisclaimerText, DocumentDetectionOverlay, DocumentScanner, DomainRenderer, DragDropZone, DropZone, DropzoneOverlay, EditUserRoleModal, EmailRenderer, EmployeeForm, EmployeeProfileCard, EmployerContactCard, EmployerList, EmployerPricingCard, EmployerServiceModal, EmployerView, EmptyState, EngagementScoreRenderer, ErrorPage, FAQAccordion, FileManager, FilePreview, FloatingAIChat, FloatingInput, FooterLinkSection, SocialMediaLinks2 as FooterSocialLinks, HRISProviderSelector, HelpSupportPanel, HeroSearchBar, HoursSummary, InlineBookingForm, InventoryManager, InviteUserModal, InvoiceList, InvoicePaymentPage, InvoiceView, LanguageSelector, LanguageSelectorInline, LanguageSelectorNative, LegalLinks, LightboxModal, LinkedInRenderer, LoadMoreButton, LoadingBar, LoadingDots, LoadingOverlay, LoadingPage, LoadingSkeleton, MCPToolCallDisplay, MaintenancePage, MemoizedAvatarNameRenderer, MemoizedBooleanRenderer, MemoizedCompanyRenderer, MemoizedCurrencyRenderer, MemoizedDateRenderer, MemoizedDomainRenderer, MemoizedEmailRenderer, MemoizedEngagementScoreRenderer, MemoizedLinkedInRenderer, MemoizedNumberRenderer, MemoizedPhoneRenderer, MemoizedProgressRenderer, MemoizedStatusBadgeRenderer, MemoizedTagsRenderer, MessageAvatar, MessageBubble, MessageComposer, MessageList, MessageStatusIcon, MessageThread, MessagingSplitView, MobileBackButton, MobileMenuButton, MobileMenuPanel, NavLinks, NearbyProviderCard, NearbyProvidersList, NewsletterForm, NotFoundPage, NotificationCenter, NumberRenderer, OfflinePage, OnboardingCompletion, OnboardingStepQuestion, OnboardingWizard, OpenStatusBadge, OrderCard, OrderConfirmation, OrderConfirmationWizard, OrderDetailSidebar, OrderList, OrderLookupForm, OrderSidebar, OrderSidebarTabs, PageHeader, PaymentHistoryTable, PaymentMethodBank, PaymentMethodCard, PaymentMethodList, PendingClaimsTable, PermissionsEditor, PhoneRenderer, ProductVersion, ProductVersionBadge, ProgressRenderer, Breadcrumb2 as ProviderBreadcrumb, ProviderCard, ProviderCardGrid, ProviderCardSkeleton, ProviderDetailHeader, ProviderDetailHeaderSkeleton, ProviderLogo2 as ProviderLogo, ProviderMap, ProviderOverview, ProviderSearchBar, ProviderSearchFilters, ProviderSelector, ProviderSettings, SocialMediaLinks as ProviderSocialLinks, ProviderUsersTable, QuickBookCard, QuickLinksCard, ReadReceiptIndicator, RecurringServiceAddCard, RecurringServiceCard, RecurringServiceGrid, RecurringServiceSetupModal, RefreshIcon, RejectionModal, ReportDashboard, ReportDatePicker, ReportLink, ResourceLink, ResultsEntryCard, ResultsEntryForm, ResultsEntryModal, SSOConfigForm, ScheduleCalendar, SearchResultsMessage, SelectedServicesBadges, SendButton, SendIcon, ServerErrorPage, ServiceAccordion, ServiceBadge, ServiceBadgeGroup, ServiceCard, ServiceCategoryBadge, ServiceGeneralSettings, ServiceGrid, ServiceLink, ServiceList, ServiceMultiSelect, ServicePicker, ServicePricingManager, ServiceSelect, ServiceShippingSettings, ServiceTagCloud, ServiceTagCloudBadges, SetupServiceModal, Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMobileToggle, SidebarNav, SidebarNavGroup, SidebarNavItem, SidebarProvider, SidebarSearch, SidebarToggle, SimpleFooter, SiteFooter, SiteHeader, SiteLogo, SkeletonMessage, SparklesIcon, SpinnerIcon2 as SpinnerIcon, StatusBadgeRenderer, StepIndicator, StripeBadge, StripeSecureBadge, SuggestedActions, TagsRenderer, TimelineEventList, TimelineProgress, Toast, ToastContainer, ToastProvider, ToolStatusIcon, TypingIndicator, UpdateAvailableOverlay, UserMenu, VerifiedBadge2 as VerifiedBadge, WEBSITE_TYPES, WebChartReportViewer, WebcamModal, WebsiteInput, WebsiteInputGroup, bubbleVariants2 as bubbleVariants, create24HourSchedule, createDefaultSchedule, createWeekdaySchedule, defaultOrderTabs, formatAddressLines, formatAddressSingleLine, formatCityState, formatCityStateZip, formatDateLabel, formatFileSize2 as formatFileSize, formatLastSeen, formatPhoneDisplay, generateAttachmentId, generateId, generateProviderFAQs, getConversationSubtitle, getConversationTitle, getFileType, getGoogleMapsSearchUrl, getGoogleMapsUrl, getToolIcon, groupMessagesByDate, headerVariants, isSameSenderGroup, isValidUrl, sendButtonVariants, statusColors, useCamera, useCommandPalette, useConnectionStatus, useCookieConsent, useDocumentDetection, useDropzone, useFileUpload, useMessageScroll, useMessages, useReadReceipts, useSidebar, useToast, useTypingIndicator, validateFile };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

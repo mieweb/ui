@@ -1,6 +1,6 @@
 'use strict';
 
-var chunkVDMQCSXT_cjs = require('./chunk-VDMQCSXT.cjs');
+var chunkPDHFC5S5_cjs = require('./chunk-PDHFC5S5.cjs');
 var chunkBXK5TNJE_cjs = require('./chunk-BXK5TNJE.cjs');
 var chunkZJCPW6MS_cjs = require('./chunk-ZJCPW6MS.cjs');
 var chunk6DP6RKUA_cjs = require('./chunk-6DP6RKUA.cjs');
@@ -11,7 +11,7 @@ var chunkFFJVCQ5R_cjs = require('./chunk-FFJVCQ5R.cjs');
 var chunk4LNS5QDP_cjs = require('./chunk-4LNS5QDP.cjs');
 var chunkO5HS7ZND_cjs = require('./chunk-O5HS7ZND.cjs');
 var chunkP52GA3GJ_cjs = require('./chunk-P52GA3GJ.cjs');
-var chunkLEE3NMNP_cjs = require('./chunk-LEE3NMNP.cjs');
+var chunkNL3CZNBH_cjs = require('./chunk-NL3CZNBH.cjs');
 var chunkN3QTYHRZ_cjs = require('./chunk-N3QTYHRZ.cjs');
 var chunkJYMQJ32S_cjs = require('./chunk-JYMQJ32S.cjs');
 var chunkRRQGH7C5_cjs = require('./chunk-RRQGH7C5.cjs');
@@ -36,7 +36,7 @@ var chunkB7DA35BY_cjs = require('./chunk-B7DA35BY.cjs');
 var chunkFIXAVBUA_cjs = require('./chunk-FIXAVBUA.cjs');
 var chunkVV4N4WY6_cjs = require('./chunk-VV4N4WY6.cjs');
 var chunkR4DM4635_cjs = require('./chunk-R4DM4635.cjs');
-var chunk2O7D6F67_cjs = require('./chunk-2O7D6F67.cjs');
+var chunkJZIH3A2A_cjs = require('./chunk-JZIH3A2A.cjs');
 var chunk6HFFWEM3_cjs = require('./chunk-6HFFWEM3.cjs');
 var chunkNNEFAUHV_cjs = require('./chunk-NNEFAUHV.cjs');
 var chunkSWMRCGL4_cjs = require('./chunk-SWMRCGL4.cjs');
@@ -51,9 +51,9 @@ var chunkAKTUXJPI_cjs = require('./chunk-AKTUXJPI.cjs');
 var chunk53K3KWXQ_cjs = require('./chunk-53K3KWXQ.cjs');
 var chunk2J2V4TMJ_cjs = require('./chunk-2J2V4TMJ.cjs');
 var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
-var React46 = require('react');
-var jsxRuntime = require('react/jsx-runtime');
+var React47 = require('react');
 var classVarianceAuthority = require('class-variance-authority');
+var jsxRuntime = require('react/jsx-runtime');
 var agGridReact = require('ag-grid-react');
 var agGridCommunity = require('ag-grid-community');
 var lucideReact = require('lucide-react');
@@ -76,8 +76,345 @@ function _interopNamespace(e) {
   return Object.freeze(n);
 }
 
-var React46__namespace = /*#__PURE__*/_interopNamespace(React46);
+var React47__namespace = /*#__PURE__*/_interopNamespace(React47);
 
+var AccordionContext = React47__namespace.createContext(null);
+function useAccordionContext() {
+  const context = React47__namespace.useContext(AccordionContext);
+  if (!context) {
+    throw new Error("Accordion components must be used within an Accordion");
+  }
+  return context;
+}
+var accordionVariants = classVarianceAuthority.cva("w-full", {
+  variants: {
+    variant: {
+      default: "divide-y divide-gray-200 dark:divide-gray-700",
+      bordered: "border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700",
+      separated: "space-y-2"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+function Accordion({
+  children,
+  variant,
+  allowMultiple = false,
+  defaultExpanded = [],
+  className,
+  ...props
+}) {
+  const [expandedItems, setExpandedItems] = React47__namespace.useState(
+    new Set(defaultExpanded)
+  );
+  const toggleItem = React47__namespace.useCallback(
+    (id) => {
+      setExpandedItems((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          if (!allowMultiple) {
+            next.clear();
+          }
+          next.add(id);
+        }
+        return next;
+      });
+    },
+    [allowMultiple]
+  );
+  const contextValue = React47__namespace.useMemo(
+    () => ({ expandedItems, toggleItem, allowMultiple }),
+    [expandedItems, toggleItem, allowMultiple]
+  );
+  return /* @__PURE__ */ jsxRuntime.jsx(AccordionContext.Provider, { value: contextValue, children: /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(accordionVariants({ variant }), className),
+      ...props,
+      children
+    }
+  ) });
+}
+var AccordionItemContext = React47__namespace.createContext(null);
+function useAccordionItemContext() {
+  const context = React47__namespace.useContext(AccordionItemContext);
+  if (!context) {
+    throw new Error("AccordionItem components must be used within an AccordionItem");
+  }
+  return context;
+}
+var accordionItemVariants = classVarianceAuthority.cva("", {
+  variants: {
+    variant: {
+      default: "",
+      bordered: "first:rounded-t-lg last:rounded-b-lg",
+      separated: "border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+function AccordionItem({
+  children,
+  id,
+  variant,
+  className,
+  ...props
+}) {
+  const { expandedItems } = useAccordionContext();
+  const isExpanded = expandedItems.has(id);
+  const contextValue = React47__namespace.useMemo(
+    () => ({ itemId: id, isExpanded }),
+    [id, isExpanded]
+  );
+  return /* @__PURE__ */ jsxRuntime.jsx(AccordionItemContext.Provider, { value: contextValue, children: /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(accordionItemVariants({ variant }), className),
+      "data-state": isExpanded ? "open" : "closed",
+      ...props,
+      children
+    }
+  ) });
+}
+var accordionTriggerVariants = classVarianceAuthority.cva(
+  "flex w-full items-center justify-between text-left font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+  {
+    variants: {
+      size: {
+        sm: "py-2 px-3 text-sm",
+        md: "py-3 px-4 text-base",
+        lg: "py-4 px-5 text-lg"
+      },
+      variant: {
+        default: "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-white",
+        muted: "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+      }
+    },
+    defaultVariants: {
+      size: "md",
+      variant: "default"
+    }
+  }
+);
+function AccordionTrigger({
+  children,
+  size,
+  variant,
+  showChevron = true,
+  className,
+  ...props
+}) {
+  const { toggleItem } = useAccordionContext();
+  const { itemId, isExpanded } = useAccordionItemContext();
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "button",
+    {
+      type: "button",
+      onClick: () => toggleItem(itemId),
+      "aria-expanded": isExpanded,
+      "aria-controls": `accordion-content-${itemId}`,
+      className: chunkOR5DRJCW_cjs.cn(accordionTriggerVariants({ size, variant }), className),
+      ...props,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1", children }),
+        showChevron && /* @__PURE__ */ jsxRuntime.jsx(
+          ChevronIcon,
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "h-5 w-5 shrink-0 text-gray-500 transition-transform duration-200",
+              isExpanded && "rotate-180"
+            )
+          }
+        )
+      ]
+    }
+  );
+}
+var accordionContentVariants = classVarianceAuthority.cva(
+  "overflow-hidden transition-all duration-200 ease-in-out",
+  {
+    variants: {
+      size: {
+        sm: "px-3 text-sm",
+        md: "px-4 text-base",
+        lg: "px-5 text-lg"
+      }
+    },
+    defaultVariants: {
+      size: "md"
+    }
+  }
+);
+function AccordionContent({
+  children,
+  size,
+  className,
+  ...props
+}) {
+  const { itemId, isExpanded } = useAccordionItemContext();
+  const contentRef = React47__namespace.useRef(null);
+  const [height, setHeight] = React47__namespace.useState(
+    isExpanded ? void 0 : 0
+  );
+  React47__namespace.useEffect(() => {
+    if (!contentRef.current) return;
+    const resizeObserver = new ResizeObserver(() => {
+      if (isExpanded) {
+        setHeight(contentRef.current?.scrollHeight);
+      }
+    });
+    resizeObserver.observe(contentRef.current);
+    return () => resizeObserver.disconnect();
+  }, [isExpanded]);
+  React47__namespace.useEffect(() => {
+    if (isExpanded) {
+      setHeight(contentRef.current?.scrollHeight);
+    } else {
+      setHeight(0);
+    }
+  }, [isExpanded]);
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      id: `accordion-content-${itemId}`,
+      role: "region",
+      "aria-labelledby": `accordion-trigger-${itemId}`,
+      style: { height },
+      className: chunkOR5DRJCW_cjs.cn(
+        accordionContentVariants({ size }),
+        "text-gray-600 dark:text-gray-400",
+        className
+      ),
+      ...props,
+      children: /* @__PURE__ */ jsxRuntime.jsx("div", { ref: contentRef, className: "pb-4 pt-1", children })
+    }
+  );
+}
+function FAQAccordion({ items, className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(Accordion, { variant: "default", className, children: items.map((item) => /* @__PURE__ */ jsxRuntime.jsxs(AccordionItem, { id: item.id, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(AccordionTrigger, { children: item.question }),
+    /* @__PURE__ */ jsxRuntime.jsx(AccordionContent, { children: item.answer })
+  ] }, item.id)) });
+}
+function generateProviderFAQs(provider) {
+  const faqs = [];
+  const { name, address, phoneNumber, services, website, locationType } = provider;
+  faqs.push({
+    id: "location",
+    question: `Where is ${name} located?`,
+    answer: /* @__PURE__ */ jsxRuntime.jsxs("span", { children: [
+      name,
+      " is located at",
+      " ",
+      /* @__PURE__ */ jsxRuntime.jsxs(
+        "a",
+        {
+          href: `https://www.google.com/maps?daddr=${encodeURIComponent(
+            `${address.street1}, ${address.city}, ${address.state} ${address.postalCode}`
+          )}`,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "text-primary-600 hover:text-primary-700 dark:text-primary-400",
+          children: [
+            address.street1,
+            ", ",
+            address.city,
+            ", ",
+            address.state,
+            " ",
+            address.postalCode
+          ]
+        }
+      ),
+      "."
+    ] })
+  });
+  if (phoneNumber) {
+    faqs.push({
+      id: "phone",
+      question: `What is the phone number for ${name}?`,
+      answer: /* @__PURE__ */ jsxRuntime.jsxs("span", { children: [
+        "You can contact ",
+        name,
+        " by calling",
+        " ",
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "a",
+          {
+            href: `tel:${phoneNumber}`,
+            className: "text-primary-600 hover:text-primary-700 dark:text-primary-400",
+            children: phoneNumber
+          }
+        ),
+        "."
+      ] })
+    });
+  }
+  if (services && services.length > 0) {
+    const serviceNames = services.slice(0, 5).map((s) => s.name);
+    const hasMore = services.length > 5;
+    faqs.push({
+      id: "services",
+      question: `What services does ${name} offer?`,
+      answer: `${name} offers services including ${serviceNames.join(", ")}${hasMore ? ` and ${services.length - 5} more services` : ""}.`
+    });
+  }
+  if (website) {
+    faqs.push({
+      id: "website",
+      question: `Does ${name} have a website?`,
+      answer: /* @__PURE__ */ jsxRuntime.jsxs("span", { children: [
+        "Yes, you can visit the ",
+        name,
+        " website at",
+        " ",
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "a",
+          {
+            href: website,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "text-primary-600 hover:text-primary-700 dark:text-primary-400",
+            children: new URL(website).hostname
+          }
+        ),
+        "."
+      ] })
+    });
+  }
+  if (locationType) {
+    faqs.push({
+      id: "facility-type",
+      question: `What type of facility is ${name}?`,
+      answer: `${name} is classified as a ${locationType}.`
+    });
+  }
+  faqs.push({
+    id: "booking",
+    question: `How do I book an appointment at ${name}?`,
+    answer: `You can book an appointment at ${name} by clicking the "Book Appointment" button on this page, calling the provider directly${phoneNumber ? ` at ${phoneNumber}` : ""}, or visiting their website${website ? ` at ${new URL(website).hostname}` : ""}.`
+  });
+  return faqs;
+}
+function ChevronIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
+    }
+  );
+}
 var SEX_OPTIONS = [
   { value: "F", label: "Female" },
   { value: "M", label: "Male" },
@@ -113,9 +450,9 @@ function AddContactModal({
   showCustomFields = true,
   showPhone = true
 }) {
-  const [formData, setFormData] = React46.useState(defaultContact);
-  const [errors, setErrors] = React46.useState({});
-  React46.useEffect(() => {
+  const [formData, setFormData] = React47.useState(defaultContact);
+  const [errors, setErrors] = React47.useState({});
+  React47.useEffect(() => {
     if (open) {
       setFormData(contact ? { ...defaultContact, ...contact } : defaultContact);
       setErrors({});
@@ -242,7 +579,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkLEE3NMNP_cjs.Select,
+              chunkNL3CZNBH_cjs.Select,
               {
                 id: "contact-sex",
                 options: SEX_OPTIONS,
@@ -544,8 +881,8 @@ function AdditionalFields({
   className,
   collapsible = true
 }) {
-  const [isExpanded, setIsExpanded] = React46__namespace.useState(defaultExpanded);
-  const contentId = React46__namespace.useId();
+  const [isExpanded, setIsExpanded] = React47__namespace.useState(defaultExpanded);
+  const contentId = React47__namespace.useId();
   const handleNameChange = (id, name) => {
     const updated = value.map(
       (entry) => entry.id === id ? { ...entry, name } : entry
@@ -1003,12 +1340,12 @@ function AddressForm({
   className,
   googlePlaces
 }) {
-  const generatedId = React46__namespace.useId();
+  const generatedId = React47__namespace.useId();
   const idPrefix = id || generatedId;
-  const autocompleteRef = React46__namespace.useRef(
+  const autocompleteRef = React47__namespace.useRef(
     null
   );
-  const inputRef = React46__namespace.useRef(null);
+  const inputRef = React47__namespace.useRef(null);
   const mergedLabels = { ...DEFAULT_LABELS, ...labels };
   const mergedPlaceholders = { ...DEFAULT_PLACEHOLDERS, ...placeholders };
   const handleChange = (field, fieldValue) => {
@@ -1017,7 +1354,7 @@ function AddressForm({
       [field]: fieldValue
     });
   };
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (!googlePlaces?.enabled || !inputRef.current) return;
     if (typeof google === "undefined" || !google.maps?.places) {
       console.warn(
@@ -1287,30 +1624,30 @@ function AGGridInner({
   loadingMessage = "Loading...",
   ...props
 }, ref) {
-  const internalRef = React46__namespace.useRef(null);
-  const gridApiRef = React46__namespace.useRef(null);
+  const internalRef = React47__namespace.useRef(null);
+  const gridApiRef = React47__namespace.useRef(null);
   const resolvedRef = gridRef || ref || internalRef;
-  const handleGridReady = React46__namespace.useCallback(
+  const handleGridReady = React47__namespace.useCallback(
     (event) => {
       gridApiRef.current = event.api;
       onGridReady?.(event);
     },
     [onGridReady]
   );
-  const handleRowClicked = React46__namespace.useCallback(
+  const handleRowClicked = React47__namespace.useCallback(
     (event) => {
       onRowClick?.(event);
     },
     [onRowClick]
   );
-  const mergedDefaultColDef = React46__namespace.useMemo(
+  const mergedDefaultColDef = React47__namespace.useMemo(
     () => ({
       ...getDefaultColDef(sortable, filterable, resizable),
       ...userDefaultColDef
     }),
     [userDefaultColDef, sortable, filterable, resizable]
   );
-  const resolvedRowSelection = React46__namespace.useMemo(() => {
+  const resolvedRowSelection = React47__namespace.useMemo(() => {
     if (!rowSelection) return void 0;
     if (typeof rowSelection === "object") {
       return rowSelection;
@@ -1329,7 +1666,7 @@ function AGGridInner({
     }
     return void 0;
   }, [rowSelection]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (gridApiRef.current) {
       if (loading) {
         gridApiRef.current.showLoadingOverlay();
@@ -1378,7 +1715,7 @@ function AGGridInner({
     }
   );
 }
-var AGGrid = React46__namespace.forwardRef(AGGridInner);
+var AGGrid = React47__namespace.forwardRef(AGGridInner);
 AGGrid.displayName = "AGGrid";
 function getNestedValue(obj, path) {
   if (!obj || !path) return void 0;
@@ -1800,59 +2137,59 @@ function TagsRenderer(props) {
     ] })
   ] });
 }
-var MemoizedAvatarNameRenderer = React46.memo(
+var MemoizedAvatarNameRenderer = React47.memo(
   AvatarNameRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedStatusBadgeRenderer = React46.memo(
+var MemoizedStatusBadgeRenderer = React47.memo(
   StatusBadgeRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedEngagementScoreRenderer = React46.memo(
+var MemoizedEngagementScoreRenderer = React47.memo(
   EngagementScoreRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedEmailRenderer = React46.memo(
+var MemoizedEmailRenderer = React47.memo(
   EmailRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedPhoneRenderer = React46.memo(
+var MemoizedPhoneRenderer = React47.memo(
   PhoneRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedLinkedInRenderer = React46.memo(
+var MemoizedLinkedInRenderer = React47.memo(
   LinkedInRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedDomainRenderer = React46.memo(
+var MemoizedDomainRenderer = React47.memo(
   DomainRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedCurrencyRenderer = React46.memo(
+var MemoizedCurrencyRenderer = React47.memo(
   CurrencyRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedNumberRenderer = React46.memo(
+var MemoizedNumberRenderer = React47.memo(
   NumberRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedDateRenderer = React46.memo(
+var MemoizedDateRenderer = React47.memo(
   DateRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedBooleanRenderer = React46.memo(
+var MemoizedBooleanRenderer = React47.memo(
   BooleanRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedCompanyRenderer = React46.memo(
+var MemoizedCompanyRenderer = React47.memo(
   CompanyRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedProgressRenderer = React46.memo(
+var MemoizedProgressRenderer = React47.memo(
   ProgressRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedTagsRenderer = React46.memo(
+var MemoizedTagsRenderer = React47.memo(
   TagsRenderer,
   cellRendererPropsAreEqual
 );
@@ -2016,7 +2353,7 @@ var chevronRotation = {
   left: "rotate-90",
   right: "-rotate-90"
 };
-function ChevronIcon({
+function ChevronIcon2({
   className,
   direction = "down"
 }) {
@@ -2469,7 +2806,7 @@ function ToolResultDisplay({
   showRawData = false,
   className
 }) {
-  const [showJson, setShowJson] = React46__namespace.useState(false);
+  const [showJson, setShowJson] = React47__namespace.useState(false);
   if (result.type === "error") {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "div",
@@ -2623,7 +2960,7 @@ function MCPToolCallDisplay({
   onLinkClick,
   className
 }) {
-  const [showDetails, setShowDetails] = React46__namespace.useState(!defaultCollapsed);
+  const [showDetails, setShowDetails] = React47__namespace.useState(!defaultCollapsed);
   const formatDuration2 = (ms) => {
     if (!ms) return null;
     if (ms < 1e3) return `${ms}ms`;
@@ -2837,7 +3174,7 @@ function AITypingIndicator({ className }) {
   );
 }
 function ContentBlock({ content, onLinkClick }) {
-  const [isCollapsed, setIsCollapsed] = React46__namespace.useState(
+  const [isCollapsed, setIsCollapsed] = React47__namespace.useState(
     content.collapsed ?? false
   );
   if (content.type === "text" && content.text) {
@@ -2883,7 +3220,7 @@ function ContentBlock({ content, onLinkClick }) {
               "Thinking..."
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              ChevronIcon,
+              ChevronIcon2,
               {
                 direction: isCollapsed ? "right" : "down",
                 className: "text-neutral-400"
@@ -3209,7 +3546,7 @@ function AttachmentPreviewItem({
   );
 }
 AttachmentPreviewItem.displayName = "AttachmentPreviewItem";
-var AttachmentPicker = React46__namespace.forwardRef(
+var AttachmentPicker = React47__namespace.forwardRef(
   ({
     onFilesSelected,
     acceptedTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
@@ -3222,8 +3559,8 @@ var AttachmentPicker = React46__namespace.forwardRef(
     className,
     children
   }, ref) => {
-    const inputRef = React46__namespace.useRef(null);
-    React46__namespace.useImperativeHandle(ref, () => inputRef.current);
+    const inputRef = React47__namespace.useRef(null);
+    React47__namespace.useImperativeHandle(ref, () => inputRef.current);
     const handleClick = () => {
       inputRef.current?.click();
     };
@@ -3313,8 +3650,8 @@ function DragDropZone({
   children,
   className
 }) {
-  const [isDragging, setIsDragging] = React46__namespace.useState(false);
-  const dragCounterRef = React46__namespace.useRef(0);
+  const [isDragging, setIsDragging] = React47__namespace.useState(false);
+  const dragCounterRef = React47__namespace.useRef(0);
   const handleDragEnter = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -3415,7 +3752,7 @@ function CameraButton({
   disabled = false,
   className
 }) {
-  const inputRef = React46__namespace.useRef(null);
+  const inputRef = React47__namespace.useRef(null);
   const handleClick = () => {
     inputRef.current?.click();
   };
@@ -3552,7 +3889,7 @@ var sendButtonVariants = classVarianceAuthority.cva(
     }
   }
 );
-var SendButton = React46__namespace.forwardRef(
+var SendButton = React47__namespace.forwardRef(
   ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "button",
@@ -3606,7 +3943,7 @@ var SendButton = React46__namespace.forwardRef(
   }
 );
 SendButton.displayName = "SendButton";
-var MessageComposer = React46__namespace.forwardRef(
+var MessageComposer = React47__namespace.forwardRef(
   ({
     onSend,
     onTypingStart,
@@ -3628,22 +3965,22 @@ var MessageComposer = React46__namespace.forwardRef(
     variant = "default",
     className
   }, ref) => {
-    const textareaRef = React46__namespace.useRef(null);
-    const [content, setContent] = React46__namespace.useState("");
-    const [attachments, setAttachments] = React46__namespace.useState(
+    const textareaRef = React47__namespace.useRef(null);
+    const [content, setContent] = React47__namespace.useState("");
+    const [attachments, setAttachments] = React47__namespace.useState(
       []
     );
-    const [isTyping, setIsTyping] = React46__namespace.useState(false);
-    const typingTimeoutRef = React46__namespace.useRef(null);
-    React46__namespace.useImperativeHandle(ref, () => textareaRef.current);
-    React46__namespace.useEffect(() => {
+    const [isTyping, setIsTyping] = React47__namespace.useState(false);
+    const typingTimeoutRef = React47__namespace.useRef(null);
+    React47__namespace.useImperativeHandle(ref, () => textareaRef.current);
+    React47__namespace.useEffect(() => {
       const textarea = textareaRef.current;
       if (textarea) {
         textarea.style.height = "auto";
         textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
       }
     }, [content]);
-    React46__namespace.useEffect(() => {
+    React47__namespace.useEffect(() => {
       if (content.length > 0 && !isTyping) {
         setIsTyping(true);
         onTypingStart?.();
@@ -3663,12 +4000,12 @@ var MessageComposer = React46__namespace.forwardRef(
         }
       };
     }, [content, isTyping, onTypingStart, onTypingStop]);
-    React46__namespace.useEffect(() => {
+    React47__namespace.useEffect(() => {
       if (autoFocus) {
         textareaRef.current?.focus();
       }
     }, [autoFocus]);
-    React46__namespace.useEffect(() => {
+    React47__namespace.useEffect(() => {
       if (replyTo) {
         textareaRef.current?.focus();
       }
@@ -3732,7 +4069,7 @@ var MessageComposer = React46__namespace.forwardRef(
         return prev.filter((a) => a.id !== attachmentId);
       });
     };
-    React46__namespace.useEffect(() => {
+    React47__namespace.useEffect(() => {
       const currentAttachments = attachments;
       return () => {
         currentAttachments.forEach((a) => {
@@ -4261,7 +4598,7 @@ function defaultFormatTimestamp(timestamp) {
     minute: "2-digit"
   });
 }
-var MessageBubble = React46__namespace.forwardRef(
+var MessageBubble = React47__namespace.forwardRef(
   ({
     className,
     message,
@@ -4695,7 +5032,7 @@ function LoadMoreButton({
   ) });
 }
 LoadMoreButton.displayName = "LoadMoreButton";
-var MessageList = React46__namespace.forwardRef(
+var MessageList = React47__namespace.forwardRef(
   ({
     messages,
     currentUser,
@@ -4714,19 +5051,19 @@ var MessageList = React46__namespace.forwardRef(
     className,
     autoScroll = "onNewMessage"
   }, ref) => {
-    const scrollContainerRef = React46__namespace.useRef(null);
-    const bottomRef = React46__namespace.useRef(null);
-    const [isUserScrolled, setIsUserScrolled] = React46__namespace.useState(false);
-    const prevMessageCountRef = React46__namespace.useRef(messages.length);
-    React46__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
-    const handleScroll = React46__namespace.useCallback(() => {
+    const scrollContainerRef = React47__namespace.useRef(null);
+    const bottomRef = React47__namespace.useRef(null);
+    const [isUserScrolled, setIsUserScrolled] = React47__namespace.useState(false);
+    const prevMessageCountRef = React47__namespace.useRef(messages.length);
+    React47__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
+    const handleScroll = React47__namespace.useCallback(() => {
       const container = scrollContainerRef.current;
       if (!container) return;
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       setIsUserScrolled(!isAtBottom);
     }, []);
-    React46__namespace.useEffect(() => {
+    React47__namespace.useEffect(() => {
       const container = scrollContainerRef.current;
       const bottom = bottomRef.current;
       if (!container || !bottom) return;
@@ -4742,7 +5079,7 @@ var MessageList = React46__namespace.forwardRef(
         }
       }
     }, [messages, currentUser.id, autoScroll, isUserScrolled]);
-    React46__namespace.useEffect(() => {
+    React47__namespace.useEffect(() => {
       const bottom = bottomRef.current;
       if (bottom && !isLoading) {
         bottom.scrollIntoView();
@@ -4788,7 +5125,7 @@ var MessageList = React46__namespace.forwardRef(
         "aria-live": "polite",
         children: [
           hasMore && onLoadMore && /* @__PURE__ */ jsxRuntime.jsx(LoadMoreButton, { isLoading: isLoadingMore, onClick: onLoadMore }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React46__namespace.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
             groupByDate && group.label && /* @__PURE__ */ jsxRuntime.jsx(DateSeparator, { label: group.label }),
             group.messages.map((message, index) => {
               const prevMessage = group.messages[index - 1];
@@ -5067,13 +5404,13 @@ function AIChat({
   onClear,
   onClose
 }) {
-  const messagesEndRef = React46__namespace.useRef(null);
-  const messages = React46__namespace.useMemo(
+  const messagesEndRef = React47__namespace.useRef(null);
+  const messages = React47__namespace.useMemo(
     () => session?.messages || messagesProp || [],
     [session?.messages, messagesProp]
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   const handleSend = async (message) => {
@@ -5299,7 +5636,7 @@ function FloatingAIChat({
   pulse = false,
   ...chatProps
 }) {
-  const [internalOpen, setInternalOpen] = React46__namespace.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React47__namespace.useState(defaultOpen);
   const isControlled = controlledOpen !== void 0;
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const handleOpenChange = (open) => {
@@ -5588,10 +5925,10 @@ function AuthDialog({
   requireEmailVerification = false,
   className
 }) {
-  const [internalMode, setInternalMode] = React46__namespace.useState("login");
-  const [isLoading, setIsLoading] = React46__namespace.useState(false);
-  const [error, setError] = React46__namespace.useState(null);
-  const [success, setSuccess] = React46__namespace.useState(null);
+  const [internalMode, setInternalMode] = React47__namespace.useState("login");
+  const [isLoading, setIsLoading] = React47__namespace.useState(false);
+  const [error, setError] = React47__namespace.useState(null);
+  const [success, setSuccess] = React47__namespace.useState(null);
   const mode = controlledMode ?? internalMode;
   const setMode = (newMode) => {
     setError(null);
@@ -5602,14 +5939,14 @@ function AuthDialog({
       setInternalMode(newMode);
     }
   };
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isOpen) onClose();
     };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -5835,9 +6172,9 @@ function AuthDialog({
   );
 }
 function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
-  const [email, setEmail] = React46__namespace.useState("");
-  const [password, setPassword] = React46__namespace.useState("");
-  const [showPassword, setShowPassword] = React46__namespace.useState(false);
+  const [email, setEmail] = React47__namespace.useState("");
+  const [password, setPassword] = React47__namespace.useState("");
+  const [showPassword, setShowPassword] = React47__namespace.useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(email, password);
@@ -5938,11 +6275,11 @@ function SignupForm({
   termsUrl,
   privacyUrl
 }) {
-  const [email, setEmail] = React46__namespace.useState("");
-  const [password, setPassword] = React46__namespace.useState("");
-  const [confirmPassword, setConfirmPassword] = React46__namespace.useState("");
-  const [acceptedTerms, setAcceptedTerms] = React46__namespace.useState(false);
-  const [showPassword, setShowPassword] = React46__namespace.useState(false);
+  const [email, setEmail] = React47__namespace.useState("");
+  const [password, setPassword] = React47__namespace.useState("");
+  const [confirmPassword, setConfirmPassword] = React47__namespace.useState("");
+  const [acceptedTerms, setAcceptedTerms] = React47__namespace.useState(false);
+  const [showPassword, setShowPassword] = React47__namespace.useState(false);
   const passwordsMatch = password === confirmPassword;
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -6090,7 +6427,7 @@ function ForgotPasswordForm({
   isLoading,
   onBack
 }) {
-  const [email, setEmail] = React46__namespace.useState("");
+  const [email, setEmail] = React47__namespace.useState("");
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(email);
@@ -6141,9 +6478,9 @@ function ForgotPasswordForm({
   ] });
 }
 function ResetPasswordForm({ onSubmit, isLoading }) {
-  const [password, setPassword] = React46__namespace.useState("");
-  const [confirmPassword, setConfirmPassword] = React46__namespace.useState("");
-  const [showPassword, setShowPassword] = React46__namespace.useState(false);
+  const [password, setPassword] = React47__namespace.useState("");
+  const [confirmPassword, setConfirmPassword] = React47__namespace.useState("");
+  const [showPassword, setShowPassword] = React47__namespace.useState(false);
   const passwordsMatch = password === confirmPassword;
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -6476,9 +6813,9 @@ function ServiceSelect({
   error,
   className
 }) {
-  const [isOpen, setIsOpen] = React46__namespace.useState(false);
-  const dropdownRef = React46__namespace.useRef(null);
-  React46__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React47__namespace.useState(false);
+  const dropdownRef = React47__namespace.useRef(null);
+  React47__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -6604,7 +6941,7 @@ function DialogOverlay({
   children,
   className
 }) {
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -6649,7 +6986,7 @@ function BookingDialog({
   isLoading = false,
   className
 }) {
-  const [formData, setFormData] = React46__namespace.useState({
+  const [formData, setFormData] = React47__namespace.useState({
     firstName: defaultValues?.firstName || "",
     lastName: defaultValues?.lastName || "",
     phoneNumber: defaultValues?.phoneNumber || "",
@@ -6658,7 +6995,7 @@ function BookingDialog({
     consentEmail: defaultValues?.consentEmail ?? false,
     consentSms: defaultValues?.consentSms ?? false
   });
-  const [errors, setErrors] = React46__namespace.useState({});
+  const [errors, setErrors] = React47__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) {
@@ -6855,7 +7192,7 @@ function InlineBookingForm({
   isLoading = false,
   className
 }) {
-  const [formData, setFormData] = React46__namespace.useState({
+  const [formData, setFormData] = React47__namespace.useState({
     firstName: defaultValues?.firstName || "",
     lastName: defaultValues?.lastName || "",
     phoneNumber: defaultValues?.phoneNumber || "",
@@ -6864,7 +7201,7 @@ function InlineBookingForm({
     consentEmail: defaultValues?.consentEmail ?? false,
     consentSms: defaultValues?.consentSms ?? false
   });
-  const [errors, setErrors] = React46__namespace.useState({});
+  const [errors, setErrors] = React47__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) {
@@ -7446,7 +7783,7 @@ function HoursSummary({
   defaultExpanded = false,
   className
 }) {
-  const [isExpanded, setIsExpanded] = React46__namespace.useState(defaultExpanded);
+  const [isExpanded, setIsExpanded] = React47__namespace.useState(defaultExpanded);
   const isOpen = isCurrentlyOpen(schedule.officeHours);
   const todayHours = getTodayHours(schedule.officeHours, use24Hour);
   const hasStructuredHours = schedule.officeHours && schedule.officeHours.length > 0;
@@ -7539,7 +7876,7 @@ function BusinessHoursEditor({
 }) {
   const schedule = ensureAllDays(value);
   const orderedDays = getOrderedDays(weekStartsOn);
-  const handleAddTimeSlot = React46.useCallback(
+  const handleAddTimeSlot = React47.useCallback(
     (dayIndex) => {
       const newSchedule = [...schedule];
       const daySchedule = newSchedule.find((d) => d.day === dayIndex);
@@ -7553,7 +7890,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleRemoveTimeSlot = React46.useCallback(
+  const handleRemoveTimeSlot = React47.useCallback(
     (dayIndex, slotIndex) => {
       const newSchedule = [...schedule];
       const daySchedule = newSchedule.find((d) => d.day === dayIndex);
@@ -7564,7 +7901,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleTimeChange = React46.useCallback(
+  const handleTimeChange = React47.useCallback(
     (dayIndex, slotIndex, field, value2) => {
       const newSchedule = [...schedule];
       const daySchedule = newSchedule.find((d) => d.day === dayIndex);
@@ -7578,7 +7915,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleCopyToAll = React46.useCallback(
+  const handleCopyToAll = React47.useCallback(
     (sourceDayIndex) => {
       const sourceDay = schedule.find((d) => d.day === sourceDayIndex);
       if (!sourceDay || sourceDay.hours.length === 0) return;
@@ -7596,7 +7933,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleCopyToWeekdays = React46.useCallback(
+  const handleCopyToWeekdays = React47.useCallback(
     (sourceDayIndex) => {
       const sourceDay = schedule.find((d) => d.day === sourceDayIndex);
       if (!sourceDay || sourceDay.hours.length === 0) return;
@@ -7869,17 +8206,17 @@ function CheckrIntegration({
     viewDetails = "View Details",
     noReportsSelected = "No reports selected"
   } = labels;
-  const [showInviteModal, setShowInviteModal] = React46__namespace.useState(false);
-  const [candidateName, setCandidateName] = React46__namespace.useState("");
-  const [candidateEmail, setCandidateEmail] = React46__namespace.useState("");
-  const [candidatePhone, setCandidatePhone] = React46__namespace.useState("");
-  const [selectedPackage, setSelectedPackage] = React46__namespace.useState(
+  const [showInviteModal, setShowInviteModal] = React47__namespace.useState(false);
+  const [candidateName, setCandidateName] = React47__namespace.useState("");
+  const [candidateEmail, setCandidateEmail] = React47__namespace.useState("");
+  const [candidatePhone, setCandidatePhone] = React47__namespace.useState("");
+  const [selectedPackage, setSelectedPackage] = React47__namespace.useState(
     packages[0]?.id || ""
   );
-  const [selectedReports, setSelectedReports] = React46__namespace.useState(
+  const [selectedReports, setSelectedReports] = React47__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     setSelectedReports(/* @__PURE__ */ new Set());
   }, [reports, connected]);
   const statusLabels = {
@@ -7913,7 +8250,7 @@ function CheckrIntegration({
     failed: "bg-destructive",
     expired: "bg-muted-foreground"
   };
-  const statusCounts = React46__namespace.useMemo(() => {
+  const statusCounts = React47__namespace.useMemo(() => {
     const counts = {
       pending: 0,
       running: 0,
@@ -8314,7 +8651,7 @@ function CheckrIntegration({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkLEE3NMNP_cjs.Select,
+            chunkNL3CZNBH_cjs.Select,
             {
               label: packageLabel,
               options: packageOptions,
@@ -8339,7 +8676,7 @@ function CheckrIntegration({
     ] })
   ] });
 }
-var CommandPaletteContext = React46.createContext(
+var CommandPaletteContext = React47.createContext(
   null
 );
 function CommandPaletteProvider({
@@ -8347,24 +8684,24 @@ function CommandPaletteProvider({
   enableShortcut = true,
   customEventName
 }) {
-  const [isOpen, setIsOpen] = React46.useState(false);
-  const [query, setQuery] = React46.useState("");
-  const [selectedIndex, setSelectedIndex] = React46.useState(-1);
-  const [activeCategory, setActiveCategory] = React46.useState(null);
-  const [items, setItems] = React46.useState([]);
-  const [categories, setCategories] = React46.useState([]);
-  const open = React46.useCallback(() => {
+  const [isOpen, setIsOpen] = React47.useState(false);
+  const [query, setQuery] = React47.useState("");
+  const [selectedIndex, setSelectedIndex] = React47.useState(-1);
+  const [activeCategory, setActiveCategory] = React47.useState(null);
+  const [items, setItems] = React47.useState([]);
+  const [categories, setCategories] = React47.useState([]);
+  const open = React47.useCallback(() => {
     setIsOpen(true);
     setQuery("");
     setSelectedIndex(-1);
     setActiveCategory(null);
   }, []);
-  const close = React46.useCallback(() => {
+  const close = React47.useCallback(() => {
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(-1);
   }, []);
-  const toggle = React46.useCallback(() => {
+  const toggle = React47.useCallback(() => {
     if (isOpen) {
       close();
     } else {
@@ -8372,13 +8709,13 @@ function CommandPaletteProvider({
     }
   }, [isOpen, open, close]);
   chunkR4DM4635_cjs.useCommandK(toggle, enableShortcut);
-  React46__namespace.default.useEffect(() => {
+  React47__namespace.default.useEffect(() => {
     if (!customEventName) return;
     const handler = () => open();
     document.addEventListener(customEventName, handler);
     return () => document.removeEventListener(customEventName, handler);
   }, [customEventName, open]);
-  const contextValue = React46.useMemo(
+  const contextValue = React47.useMemo(
     () => ({
       isOpen,
       open,
@@ -8410,7 +8747,7 @@ function CommandPaletteProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(CommandPaletteContext.Provider, { value: contextValue, children });
 }
 function useCommandPalette() {
-  const context = React46.useContext(CommandPaletteContext);
+  const context = React47.useContext(CommandPaletteContext);
   if (!context) {
     throw new Error(
       "useCommandPalette must be used within a CommandPaletteProvider"
@@ -8498,10 +8835,10 @@ function CommandPalette({
     items,
     categories
   } = useCommandPalette();
-  const inputRef = React46.useRef(null);
-  const containerRef = React46.useRef(null);
-  const listRef = React46.useRef(null);
-  const filteredItems = React46.useMemo(() => {
+  const inputRef = React47.useRef(null);
+  const containerRef = React47.useRef(null);
+  const listRef = React47.useRef(null);
+  const filteredItems = React47.useMemo(() => {
     let result = items;
     if (activeCategory) {
       result = result.filter((item) => item.category === activeCategory);
@@ -8514,7 +8851,7 @@ function CommandPalette({
     }
     return result;
   }, [items, query, activeCategory]);
-  const groupedItems = React46.useMemo(() => {
+  const groupedItems = React47.useMemo(() => {
     const groups = /* @__PURE__ */ new Map();
     filteredItems.forEach((item) => {
       const category = item.category ?? "Other";
@@ -8526,15 +8863,15 @@ function CommandPalette({
   }, [filteredItems]);
   chunkFHY3K6PL_cjs.useEscapeKey(close, isOpen);
   chunkSWMRCGL4_cjs.useClickOutside(containerRef, close);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     setSelectedIndex(filteredItems.length > 0 ? 0 : -1);
   }, [filteredItems.length, setSelectedIndex]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
       const selectedElement = listRef.current.querySelector(
         `[data-index="${selectedIndex}"]`
@@ -8542,7 +8879,7 @@ function CommandPalette({
       selectedElement?.scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
-  const handleKeyDown = React46.useCallback(
+  const handleKeyDown = React47.useCallback(
     (e) => {
       switch (e.key) {
         case "ArrowDown":
@@ -8586,7 +8923,7 @@ function CommandPalette({
       setActiveCategory
     ]
   );
-  const handleItemClick = React46.useCallback(
+  const handleItemClick = React47.useCallback(
     (item) => {
       if (!item.disabled) {
         onSelect?.(item);
@@ -8595,7 +8932,7 @@ function CommandPalette({
     },
     [onSelect, close]
   );
-  const getCategoryInfo = React46.useCallback(
+  const getCategoryInfo = React47.useCallback(
     (categoryId) => {
       return categories.find((c) => c.id === categoryId);
     },
@@ -9170,11 +9507,11 @@ function formatRetryTime(time) {
 }
 function useConnectionStatus(options = {}) {
   const { onDisconnect, onReconnect } = options;
-  const [isOnline, setIsOnline] = React46__namespace.useState(() => {
+  const [isOnline, setIsOnline] = React47__namespace.useState(() => {
     if (typeof window === "undefined") return true;
     return navigator.onLine;
   });
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
       onReconnect?.();
@@ -9237,7 +9574,7 @@ function CookieConsentBanner({
   isMobileApp = false,
   className
 }) {
-  const [isAnimating, setIsAnimating] = React46__namespace.useState(false);
+  const [isAnimating, setIsAnimating] = React47__namespace.useState(false);
   const handleAccept = () => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -9289,7 +9626,7 @@ function CookieConsentBanner({
                         appName,
                         " you are agreeing to our",
                         " ",
-                        legalLinks.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React46__namespace.Fragment, { children: [
+                        legalLinks.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
                           index > 0 && (index === legalLinks.length - 1 ? " and " : ", "),
                           /* @__PURE__ */ jsxRuntime.jsx(
                             "a",
@@ -9405,20 +9742,20 @@ function CompactCookieBanner({
 var COOKIE_CONSENT_KEY = "cookie-consent-accepted";
 function useCookieConsent(options = {}) {
   const { storageKey = COOKIE_CONSENT_KEY, onConsent } = options;
-  const [hasConsented, setHasConsented] = React46__namespace.useState(() => {
+  const [hasConsented, setHasConsented] = React47__namespace.useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(storageKey) === "true";
   });
-  const acceptCookies = React46__namespace.useCallback(() => {
+  const acceptCookies = React47__namespace.useCallback(() => {
     localStorage.setItem(storageKey, "true");
     setHasConsented(true);
     onConsent?.();
   }, [storageKey, onConsent]);
-  const declineCookies = React46__namespace.useCallback(() => {
+  const declineCookies = React47__namespace.useCallback(() => {
     localStorage.setItem(storageKey, "declined");
     setHasConsented(true);
   }, [storageKey]);
-  const resetConsent = React46__namespace.useCallback(() => {
+  const resetConsent = React47__namespace.useCallback(() => {
     localStorage.removeItem(storageKey);
     setHasConsented(false);
   }, [storageKey]);
@@ -9614,7 +9951,7 @@ function CSVColumnCard({
                   hasError && !column.ignored && "ring-warning/50 ring-2"
                 ),
                 children: /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkLEE3NMNP_cjs.Select,
+                  chunkNL3CZNBH_cjs.Select,
                   {
                     id: formatHtmlId(column.name),
                     options: selectOptions,
@@ -9635,7 +9972,7 @@ function CSVColumnCard({
           childSelectOptions && childSelectOptions.length > 0 && column.mappedTo && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: "Sub-field" }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkLEE3NMNP_cjs.Select,
+              chunkNL3CZNBH_cjs.Select,
               {
                 id: formatHtmlId(column.name, column.mappedTo),
                 options: childSelectOptions,
@@ -9710,9 +10047,9 @@ function CSVFileUpload({
     selectFile = "Select a file to upload or drag and drop",
     selectButton = "Select File to Upload"
   } = labels;
-  const inputRef = React46__namespace.useRef(null);
-  const [isDragging, setIsDragging] = React46__namespace.useState(false);
-  const handleDrop = React46__namespace.useCallback(
+  const inputRef = React47__namespace.useRef(null);
+  const [isDragging, setIsDragging] = React47__namespace.useState(false);
+  const handleDrop = React47__namespace.useCallback(
     (e) => {
       e.preventDefault();
       setIsDragging(false);
@@ -9723,14 +10060,14 @@ function CSVFileUpload({
     },
     [onFileSelect]
   );
-  const handleDragOver = React46__namespace.useCallback((e) => {
+  const handleDragOver = React47__namespace.useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
   }, []);
-  const handleDragLeave = React46__namespace.useCallback(() => {
+  const handleDragLeave = React47__namespace.useCallback(() => {
     setIsDragging(false);
   }, []);
-  const handleFileChange = React46__namespace.useCallback(
+  const handleFileChange = React47__namespace.useCallback(
     (e) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -10049,11 +10386,11 @@ function DropZone({
   className,
   children
 }) {
-  const [isDragging, setIsDragging] = React46__namespace.useState(false);
-  const inputRef = React46__namespace.useRef(null);
-  const dropZoneRef = React46__namespace.useRef(null);
-  const dragCounter = React46__namespace.useRef(0);
-  const handleDragEnter = React46__namespace.useCallback(
+  const [isDragging, setIsDragging] = React47__namespace.useState(false);
+  const inputRef = React47__namespace.useRef(null);
+  const dropZoneRef = React47__namespace.useRef(null);
+  const dragCounter = React47__namespace.useRef(0);
+  const handleDragEnter = React47__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10065,7 +10402,7 @@ function DropZone({
     },
     [disabled]
   );
-  const handleDragLeave = React46__namespace.useCallback(
+  const handleDragLeave = React47__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10077,11 +10414,11 @@ function DropZone({
     },
     [disabled]
   );
-  const handleDragOver = React46__namespace.useCallback((e) => {
+  const handleDragOver = React47__namespace.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  const handleDrop = React46__namespace.useCallback(
+  const handleDrop = React47__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10094,12 +10431,12 @@ function DropZone({
     },
     [disabled, onFilesSelected]
   );
-  const handleClick = React46__namespace.useCallback(() => {
+  const handleClick = React47__namespace.useCallback(() => {
     if (!disabled) {
       inputRef.current?.click();
     }
   }, [disabled]);
-  const handleKeyDown = React46__namespace.useCallback(
+  const handleKeyDown = React47__namespace.useCallback(
     (e) => {
       if ((e.key === "Enter" || e.key === " ") && !disabled) {
         e.preventDefault();
@@ -10108,7 +10445,7 @@ function DropZone({
     },
     [disabled]
   );
-  const handleInputChange = React46__namespace.useCallback(
+  const handleInputChange = React47__namespace.useCallback(
     (e) => {
       if (e.target.files && e.target.files.length > 0) {
         onFilesSelected(e.target.files);
@@ -10196,7 +10533,7 @@ DropZone.displayName = "DropZone";
 function FilePreviewItem({ file, onRemove, disabled }) {
   const isPdf = file.file.type === "application/pdf";
   const isImage = file.file.type.startsWith("image/");
-  const handleRemove = React46__namespace.useCallback(() => {
+  const handleRemove = React47__namespace.useCallback(() => {
     onRemove(file.id);
   }, [file.id, onRemove]);
   return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -10340,24 +10677,24 @@ function useCamera({
   width = 1920,
   height = 1080
 } = {}) {
-  const [permission, setPermission] = React46__namespace.useState("prompt");
-  const [stream, setStream] = React46__namespace.useState(null);
-  const [isReady, setIsReady] = React46__namespace.useState(false);
-  const [error, setError] = React46__namespace.useState(null);
-  const [currentFacingMode, setCurrentFacingMode] = React46__namespace.useState(initialFacingMode);
-  const videoRef = React46__namespace.useRef(null);
-  const canvasRef = React46__namespace.useRef(null);
-  React46__namespace.useEffect(() => {
+  const [permission, setPermission] = React47__namespace.useState("prompt");
+  const [stream, setStream] = React47__namespace.useState(null);
+  const [isReady, setIsReady] = React47__namespace.useState(false);
+  const [error, setError] = React47__namespace.useState(null);
+  const [currentFacingMode, setCurrentFacingMode] = React47__namespace.useState(initialFacingMode);
+  const videoRef = React47__namespace.useRef(null);
+  const canvasRef = React47__namespace.useRef(null);
+  React47__namespace.useEffect(() => {
     checkCameraPermission().then(setPermission);
   }, []);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
   }, [stream]);
-  const startCamera = React46__namespace.useCallback(async () => {
+  const startCamera = React47__namespace.useCallback(async () => {
     if (!hasCameraSupport()) {
       setPermission("unavailable");
       setError(new Error("Camera is not supported on this device"));
@@ -10391,7 +10728,7 @@ function useCamera({
       }
     }
   }, [currentFacingMode, width, height]);
-  const stopCamera = React46__namespace.useCallback(() => {
+  const stopCamera = React47__namespace.useCallback(() => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
       setStream(null);
@@ -10401,8 +10738,8 @@ function useCamera({
       videoRef.current.srcObject = null;
     }
   }, [stream]);
-  const shouldRestartRef = React46__namespace.useRef(false);
-  const switchCamera = React46__namespace.useCallback(() => {
+  const shouldRestartRef = React47__namespace.useRef(false);
+  const switchCamera = React47__namespace.useCallback(() => {
     const newFacingMode = currentFacingMode === "user" ? "environment" : "user";
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -10415,13 +10752,13 @@ function useCamera({
     }
     setCurrentFacingMode(newFacingMode);
   }, [currentFacingMode, stream]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (shouldRestartRef.current && !stream) {
       shouldRestartRef.current = false;
       startCamera();
     }
   }, [currentFacingMode, stream, startCamera]);
-  const capturePhoto = React46__namespace.useCallback(() => {
+  const capturePhoto = React47__namespace.useCallback(() => {
     if (!videoRef.current || !isReady) {
       return null;
     }
@@ -10563,7 +10900,7 @@ function compareFingerprints(fp1, fp2) {
   return Math.max(0, Math.min(100, (1 - avgDiff * 5) * 100));
 }
 function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
-  const mergedConfig = React46.useMemo(
+  const mergedConfig = React47.useMemo(
     () => ({ ...DEFAULT_CONFIG, ...config }),
     // Intentionally depend on individual properties to avoid unnecessary re-renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -10579,16 +10916,16 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       config.enableAutoCapture
     ]
   );
-  const [state, setState] = React46.useState(INITIAL_STATE);
-  const canvasRef = React46.useRef(null);
-  const ctxRef = React46.useRef(null);
-  const animationFrameRef = React46.useRef(null);
-  const lastFingerprintRef = React46.useRef([]);
-  const stabilityStartRef = React46.useRef(null);
-  const countdownIntervalRef = React46.useRef(null);
-  const isDetectingRef = React46.useRef(false);
+  const [state, setState] = React47.useState(INITIAL_STATE);
+  const canvasRef = React47.useRef(null);
+  const ctxRef = React47.useRef(null);
+  const animationFrameRef = React47.useRef(null);
+  const lastFingerprintRef = React47.useRef([]);
+  const stabilityStartRef = React47.useRef(null);
+  const countdownIntervalRef = React47.useRef(null);
+  const isDetectingRef = React47.useRef(false);
   const STABILITY_THRESHOLD = 85;
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     canvasRef.current = document.createElement("canvas");
     ctxRef.current = canvasRef.current.getContext("2d", {
       willReadFrequently: true
@@ -10598,7 +10935,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       ctxRef.current = null;
     };
   }, []);
-  const processFrame = React46.useCallback(() => {
+  const processFrame = React47.useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
@@ -10668,7 +11005,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       }
     }, frameDelay);
   }, [videoRef, mergedConfig]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (state.isReadyForCapture && mergedConfig.enableAutoCapture && state.captureCountdown === 0 && !countdownIntervalRef.current) {
       let countdown = mergedConfig.captureCountdown;
       setState((prev) => ({ ...prev, captureCountdown: countdown }));
@@ -10697,7 +11034,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
     onAutoCapture,
     state.captureCountdown
   ]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -10707,12 +11044,12 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       }
     };
   }, []);
-  const startDetection = React46.useCallback(() => {
+  const startDetection = React47.useCallback(() => {
     isDetectingRef.current = true;
     setState((prev) => ({ ...prev, isDetecting: true, error: null }));
     processFrame();
   }, [processFrame]);
-  const stopDetection = React46.useCallback(() => {
+  const stopDetection = React47.useCallback(() => {
     isDetectingRef.current = false;
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -10724,7 +11061,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
     }
     setState((prev) => ({ ...prev, isDetecting: false }));
   }, []);
-  const resetDetection = React46.useCallback(() => {
+  const resetDetection = React47.useCallback(() => {
     stopDetection();
     lastFingerprintRef.current = [];
     stabilityStartRef.current = null;
@@ -10968,14 +11305,14 @@ function WebcamModal({
     width: 1920,
     height: 1080
   });
-  const [capturedFile, setCapturedFile] = React46__namespace.useState(null);
-  const [previewUrl, setPreviewUrl] = React46__namespace.useState(null);
-  const [autoDetectEnabled, setAutoDetectEnabled] = React46__namespace.useState(enableAutoCapture);
-  const [videoDimensions, setVideoDimensions] = React46__namespace.useState({
+  const [capturedFile, setCapturedFile] = React47__namespace.useState(null);
+  const [previewUrl, setPreviewUrl] = React47__namespace.useState(null);
+  const [autoDetectEnabled, setAutoDetectEnabled] = React47__namespace.useState(enableAutoCapture);
+  const [videoDimensions, setVideoDimensions] = React47__namespace.useState({
     width: 0,
     height: 0
   });
-  const handleAutoCapture = React46__namespace.useCallback(() => {
+  const handleAutoCapture = React47__namespace.useCallback(() => {
     const file = capturePhoto();
     if (file) {
       setCapturedFile(file);
@@ -10996,8 +11333,8 @@ function WebcamModal({
     },
     handleAutoCapture
   );
-  const hasStartedRef = React46__namespace.useRef(false);
-  React46__namespace.useEffect(() => {
+  const hasStartedRef = React47__namespace.useRef(false);
+  React47__namespace.useEffect(() => {
     const video = videoRef.current;
     if (video && isReady) {
       const updateDimensions = () => {
@@ -11011,7 +11348,7 @@ function WebcamModal({
       return () => video.removeEventListener("resize", updateDimensions);
     }
   }, [isReady, videoRef]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (open && permission !== "denied" && permission !== "unavailable") {
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
@@ -11030,7 +11367,7 @@ function WebcamModal({
       });
     }
   }, [open, permission]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (isReady && autoDetectEnabled && !capturedFile) {
       detection.startDetection();
     }
@@ -11038,7 +11375,7 @@ function WebcamModal({
       detection.stopDetection();
     };
   }, [isReady, autoDetectEnabled, capturedFile]);
-  const handleCapture = React46__namespace.useCallback(() => {
+  const handleCapture = React47__namespace.useCallback(() => {
     const file = capturePhoto();
     if (file) {
       setCapturedFile(file);
@@ -11046,7 +11383,7 @@ function WebcamModal({
       stopCamera();
     }
   }, [capturePhoto, stopCamera]);
-  const handleRetake = React46__namespace.useCallback(() => {
+  const handleRetake = React47__namespace.useCallback(() => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -11055,13 +11392,13 @@ function WebcamModal({
     detection.resetDetection();
     startCamera();
   }, [previewUrl, startCamera, detection]);
-  const handleConfirm = React46__namespace.useCallback(() => {
+  const handleConfirm = React47__namespace.useCallback(() => {
     if (capturedFile) {
       onCapture(capturedFile);
       onOpenChange(false);
     }
   }, [capturedFile, onCapture, onOpenChange]);
-  const handleClose = React46__namespace.useCallback(() => {
+  const handleClose = React47__namespace.useCallback(() => {
     stopCamera();
     detection.stopDetection();
     if (previewUrl) {
@@ -11213,13 +11550,13 @@ function useFileUpload({
   multiple = false,
   onValidationError
 } = {}) {
-  const [files, setFiles] = React46__namespace.useState([]);
-  React46__namespace.useEffect(() => {
+  const [files, setFiles] = React47__namespace.useState([]);
+  React47__namespace.useEffect(() => {
     return () => {
       files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
     };
   }, []);
-  const addFiles = React46__namespace.useCallback(
+  const addFiles = React47__namespace.useCallback(
     (fileList, source = "upload") => {
       const newFiles = [];
       const errors = [];
@@ -11251,7 +11588,7 @@ function useFileUpload({
     },
     [acceptedFileTypes, maxFileSizeMb, multiple, onValidationError]
   );
-  const addFile = React46__namespace.useCallback(
+  const addFile = React47__namespace.useCallback(
     (file, source = "upload") => {
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(file);
@@ -11259,7 +11596,7 @@ function useFileUpload({
     },
     [addFiles]
   );
-  const removeFile = React46__namespace.useCallback((id) => {
+  const removeFile = React47__namespace.useCallback((id) => {
     setFiles((prev) => {
       const fileToRemove = prev.find((f) => f.id === id);
       if (fileToRemove) {
@@ -11268,13 +11605,13 @@ function useFileUpload({
       return prev.filter((f) => f.id !== id);
     });
   }, []);
-  const clearFiles = React46__namespace.useCallback(() => {
+  const clearFiles = React47__namespace.useCallback(() => {
     setFiles((prev) => {
       prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
       return [];
     });
   }, []);
-  const getFiles = React46__namespace.useCallback(() => {
+  const getFiles = React47__namespace.useCallback(() => {
     return files.map((f) => f.file);
   }, [files]);
   return {
@@ -11302,12 +11639,12 @@ function DocumentScanner({
   onValidationError,
   onStateChange
 }) {
-  const [state, setState] = React46__namespace.useState("idle");
-  const [error, setError] = React46__namespace.useState(null);
-  const [isWebcamOpen, setIsWebcamOpen] = React46__namespace.useState(false);
-  const [validationErrors, setValidationErrors] = React46__namespace.useState([]);
+  const [state, setState] = React47__namespace.useState("idle");
+  const [error, setError] = React47__namespace.useState(null);
+  const [isWebcamOpen, setIsWebcamOpen] = React47__namespace.useState(false);
+  const [validationErrors, setValidationErrors] = React47__namespace.useState([]);
   const isMobile = chunkR4DM4635_cjs.useIsMobile();
-  const cameraInputRef = React46__namespace.useRef(null);
+  const cameraInputRef = React47__namespace.useRef(null);
   const {
     files,
     addFiles,
@@ -11325,17 +11662,17 @@ function DocumentScanner({
       onValidationError?.(errors);
     }
   });
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     onStateChange?.(state);
   }, [state, onStateChange]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (hasFiles && state === "idle") {
       setState("preview");
     } else if (!hasFiles && state === "preview") {
       setState("idle");
     }
   }, [hasFiles, state]);
-  const handleFilesSelected = React46__namespace.useCallback(
+  const handleFilesSelected = React47__namespace.useCallback(
     (fileList) => {
       setError(null);
       setValidationErrors([]);
@@ -11343,10 +11680,10 @@ function DocumentScanner({
     },
     [addFiles]
   );
-  const handleCameraCapture = React46__namespace.useCallback(() => {
+  const handleCameraCapture = React47__namespace.useCallback(() => {
     cameraInputRef.current?.click();
   }, []);
-  const handleCameraInputChange = React46__namespace.useCallback(
+  const handleCameraInputChange = React47__namespace.useCallback(
     (e) => {
       if (e.target.files && e.target.files.length > 0) {
         setError(null);
@@ -11357,7 +11694,7 @@ function DocumentScanner({
     },
     [addFiles]
   );
-  const handleWebcamCapture = React46__namespace.useCallback(
+  const handleWebcamCapture = React47__namespace.useCallback(
     (file) => {
       setError(null);
       setValidationErrors([]);
@@ -11365,7 +11702,7 @@ function DocumentScanner({
     },
     [addFile]
   );
-  const handleScan = React46__namespace.useCallback(async () => {
+  const handleScan = React47__namespace.useCallback(async () => {
     if (!hasFiles) return;
     try {
       setState("processing");
@@ -11384,11 +11721,11 @@ function DocumentScanner({
       setError(errorMessage);
     }
   }, [hasFiles, getFiles, onScan, onResult, clearFiles]);
-  const handleRetry = React46__namespace.useCallback(() => {
+  const handleRetry = React47__namespace.useCallback(() => {
     setState("preview");
     setError(null);
   }, []);
-  const handleClearAll = React46__namespace.useCallback(() => {
+  const handleClearAll = React47__namespace.useCallback(() => {
     clearFiles();
     setError(null);
     setValidationErrors([]);
@@ -11679,10 +12016,10 @@ function useDropzone({
   multiple = false,
   disabled = false
 }) {
-  const [isDragging, setIsDragging] = React46__namespace.useState(false);
-  const inputRef = React46__namespace.useRef(null);
-  const dragCounter = React46__namespace.useRef(0);
-  const handleDragEnter = React46__namespace.useCallback(
+  const [isDragging, setIsDragging] = React47__namespace.useState(false);
+  const inputRef = React47__namespace.useRef(null);
+  const dragCounter = React47__namespace.useRef(0);
+  const handleDragEnter = React47__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -11694,11 +12031,11 @@ function useDropzone({
     },
     [disabled]
   );
-  const handleDragOver = React46__namespace.useCallback((e) => {
+  const handleDragOver = React47__namespace.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  const handleDragLeave = React46__namespace.useCallback((e) => {
+  const handleDragLeave = React47__namespace.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current--;
@@ -11706,7 +12043,7 @@ function useDropzone({
       setIsDragging(false);
     }
   }, []);
-  const handleDrop = React46__namespace.useCallback(
+  const handleDrop = React47__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -11720,7 +12057,7 @@ function useDropzone({
     },
     [disabled, multiple, onDrop]
   );
-  const handleInputChange = React46__namespace.useCallback(
+  const handleInputChange = React47__namespace.useCallback(
     (e) => {
       const files = e.target.files ? Array.from(e.target.files) : [];
       if (files.length > 0) {
@@ -11730,7 +12067,7 @@ function useDropzone({
     },
     [onDrop]
   );
-  const open = React46__namespace.useCallback(() => {
+  const open = React47__namespace.useCallback(() => {
     if (!disabled) {
       inputRef.current?.click();
     }
@@ -11780,7 +12117,7 @@ function ClaimProviderForm({
   termsUrl = "/terms",
   className = ""
 }) {
-  const [formData, setFormData] = React46__namespace.useState({
+  const [formData, setFormData] = React47__namespace.useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -11860,7 +12197,7 @@ function ClaimProviderForm({
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: "Your Role" }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkLEE3NMNP_cjs.Select,
+          chunkNL3CZNBH_cjs.Select,
           {
             label: "Role at this Organization",
             value: formData.role,
@@ -11883,7 +12220,7 @@ function ClaimProviderForm({
         )
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkLEE3NMNP_cjs.Select,
+        chunkNL3CZNBH_cjs.Select,
         {
           label: "Preferred Language",
           value: formData.preferredLanguage || "en",
@@ -11988,14 +12325,14 @@ function CreateInvoiceModal({
   currency = "$",
   defaultDueDays = 30
 }) {
-  const [step, setStep] = React46__namespace.useState(1);
-  const [employerId, setEmployerId] = React46__namespace.useState("");
-  const [selectedOrders, setSelectedOrders] = React46__namespace.useState(
+  const [step, setStep] = React47__namespace.useState(1);
+  const [employerId, setEmployerId] = React47__namespace.useState("");
+  const [selectedOrders, setSelectedOrders] = React47__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  const [dueDate, setDueDate] = React46__namespace.useState("");
-  const [notes, setNotes] = React46__namespace.useState("");
-  React46__namespace.useEffect(() => {
+  const [dueDate, setDueDate] = React47__namespace.useState("");
+  const [notes, setNotes] = React47__namespace.useState("");
+  React47__namespace.useEffect(() => {
     if (!open) {
       setStep(1);
       setEmployerId("");
@@ -12004,7 +12341,7 @@ function CreateInvoiceModal({
       setNotes("");
     }
   }, [open]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (!dueDate && open) {
       const date = /* @__PURE__ */ new Date();
       date.setDate(date.getDate() + defaultDueDays);
@@ -12072,7 +12409,7 @@ function CreateInvoiceModal({
       step === 1 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: "Select the employer you want to create an invoice for." }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkLEE3NMNP_cjs.Select,
+          chunkNL3CZNBH_cjs.Select,
           {
             label: "Employer",
             options: employerOptions,
@@ -12312,14 +12649,14 @@ function CreateReferralModal({
   errorMessage,
   currency = "$"
 }) {
-  const [selectedServices, setSelectedServices] = React46__namespace.useState(
+  const [selectedServices, setSelectedServices] = React47__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  const [notes, setNotes] = React46__namespace.useState("");
-  const [priority, setPriority] = React46__namespace.useState(
+  const [notes, setNotes] = React47__namespace.useState("");
+  const [priority, setPriority] = React47__namespace.useState(
     "normal"
   );
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (!open) {
       setSelectedServices(/* @__PURE__ */ new Set());
       setNotes("");
@@ -12519,15 +12856,15 @@ function EditUserRoleModal({
   isSubmitting = false,
   errorMessage
 }) {
-  const [selectedRoleId, setSelectedRoleId] = React46__namespace.useState(
+  const [selectedRoleId, setSelectedRoleId] = React47__namespace.useState(
     user?.currentRoleId || ""
   );
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (user?.currentRoleId) {
       setSelectedRoleId(user.currentRoleId);
     }
   }, [user?.currentRoleId]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (!open && user?.currentRoleId) {
       setSelectedRoleId(user.currentRoleId);
     }
@@ -12567,7 +12904,7 @@ function EditUserRoleModal({
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm", children: errorMessage })
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkLEE3NMNP_cjs.Select,
+        chunkNL3CZNBH_cjs.Select,
         {
           label: "Role",
           value: selectedRoleId,
@@ -12689,24 +13026,24 @@ function EmployeeForm({
     emailRequired = "Email is required",
     dobRequired = "Date of birth is required"
   } = labels;
-  const [firstName, setFirstName] = React46__namespace.useState(initialData.firstName ?? "");
-  const [lastName, setLastName] = React46__namespace.useState(initialData.lastName ?? "");
-  const [email, setEmail] = React46__namespace.useState(initialData.email ?? "");
-  const [dob, setDob] = React46__namespace.useState(initialData.dob ?? "");
-  const [selectedDepartments, setSelectedDepartments] = React46__namespace.useState(initialData.departments ?? []);
-  const [title, setTitle] = React46__namespace.useState(initialData.title ?? "");
-  const [address, setAddress] = React46__namespace.useState(
+  const [firstName, setFirstName] = React47__namespace.useState(initialData.firstName ?? "");
+  const [lastName, setLastName] = React47__namespace.useState(initialData.lastName ?? "");
+  const [email, setEmail] = React47__namespace.useState(initialData.email ?? "");
+  const [dob, setDob] = React47__namespace.useState(initialData.dob ?? "");
+  const [selectedDepartments, setSelectedDepartments] = React47__namespace.useState(initialData.departments ?? []);
+  const [title, setTitle] = React47__namespace.useState(initialData.title ?? "");
+  const [address, setAddress] = React47__namespace.useState(
     initialData.address ?? {}
   );
-  const [phones, setPhones] = React46__namespace.useState(
+  const [phones, setPhones] = React47__namespace.useState(
     initialData.phones ?? [{ number: "", type: "cell" }]
   );
-  const [isActive, setIsActive] = React46__namespace.useState(initialData.isActive ?? true);
-  const [additionalInfo, setAdditionalInfo] = React46__namespace.useState(
+  const [isActive, setIsActive] = React47__namespace.useState(initialData.isActive ?? true);
+  const [additionalInfo, setAdditionalInfo] = React47__namespace.useState(
     initialData.additionalInfo ?? ""
   );
-  const [sendInvite, setSendInvite] = React46__namespace.useState(false);
-  const [errors, setErrors] = React46__namespace.useState({});
+  const [sendInvite, setSendInvite] = React47__namespace.useState(false);
+  const [errors, setErrors] = React47__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!firstName.trim()) newErrors.firstName = firstNameRequired;
@@ -12799,7 +13136,7 @@ function EmployeeForm({
     departments.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
       /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-4 text-lg font-semibold", children: departmentLabel }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkLEE3NMNP_cjs.Select,
+        chunkNL3CZNBH_cjs.Select,
         {
           label: selectDepartments,
           value: selectedDepartments[0] ?? "",
@@ -12888,7 +13225,7 @@ function EmployeeForm({
             }
           ) }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "w-32", children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkLEE3NMNP_cjs.Select,
+            chunkNL3CZNBH_cjs.Select,
             {
               label: index === 0 ? "Type" : void 0,
               value: phone.type,
@@ -13018,8 +13355,8 @@ function EmployeeProfileCard({
   className,
   labels = {}
 }) {
-  const [isExpanded, setIsExpanded] = React46__namespace.useState(defaultExpanded);
-  const fileInputRef = React46__namespace.useRef(null);
+  const [isExpanded, setIsExpanded] = React47__namespace.useState(defaultExpanded);
+  const fileInputRef = React47__namespace.useRef(null);
   const {
     moreDetails = "more details",
     lessDetails = "less details",
@@ -13476,13 +13813,13 @@ function EmployerList({
   emptyMessage = "No employers linked yet",
   className = ""
 }) {
-  const [searchQuery, setSearchQuery] = React46__namespace.useState("");
+  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     onSearch?.(query);
   };
-  const filteredEmployers = React46__namespace.useMemo(() => {
+  const filteredEmployers = React47__namespace.useMemo(() => {
     if (!searchQuery.trim()) return employers;
     const q = searchQuery.toLowerCase();
     return employers.filter(
@@ -14033,7 +14370,7 @@ function EmployerServiceModal({
   isSubmitting = false,
   errorMessage
 }) {
-  const [config, setConfig] = React46__namespace.useState({
+  const [config, setConfig] = React47__namespace.useState({
     serviceId: service?.id || "",
     employerId: employer?.id || "",
     customPrice: existingConfig?.customPrice,
@@ -14045,7 +14382,7 @@ function EmployerServiceModal({
     notes: existingConfig?.notes,
     billingCode: existingConfig?.billingCode
   });
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     setConfig({
       serviceId: service?.id || "",
       employerId: employer?.id || "",
@@ -14761,8 +15098,8 @@ function FileManager({
   errorMessage,
   className = ""
 }) {
-  const [isDragging, setIsDragging] = React46__namespace.useState(false);
-  const fileInputRef = React46__namespace.useRef(null);
+  const [isDragging, setIsDragging] = React47__namespace.useState(false);
+  const fileInputRef = React47__namespace.useRef(null);
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -15009,14 +15346,14 @@ function HelpSupportPanel({
   successMessage,
   className = ""
 }) {
-  const [searchTerm, setSearchTerm] = React46__namespace.useState("");
-  const [expandedFaq, setExpandedFaq] = React46__namespace.useState(null);
-  const [formData, setFormData] = React46__namespace.useState({
+  const [searchTerm, setSearchTerm] = React47__namespace.useState("");
+  const [expandedFaq, setExpandedFaq] = React47__namespace.useState(null);
+  const [formData, setFormData] = React47__namespace.useState({
     subject: "",
     message: "",
     email: ""
   });
-  const [showSuccess, setShowSuccess] = React46__namespace.useState(false);
+  const [showSuccess, setShowSuccess] = React47__namespace.useState(false);
   const filteredFaqs = faqs.filter(
     (faq) => faq.question.toLowerCase().includes(searchTerm.toLowerCase()) || faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -15462,7 +15799,7 @@ function HRISProviderSelector({
     syncPending = "We are still waiting on data from your HRIS Provider. Please check back later.",
     supportEmail = "support@bluehive.com"
   } = labels;
-  const filteredProviders = React46__namespace.useMemo(() => {
+  const filteredProviders = React47__namespace.useMemo(() => {
     if (!searchQuery.trim()) return providers;
     const query = searchQuery.toLowerCase();
     return providers.filter((p) => p.displayName.toLowerCase().includes(query));
@@ -15661,11 +15998,11 @@ function InventoryManager({
   isLoading = false,
   className = ""
 }) {
-  const [updateType, setUpdateType] = React46__namespace.useState(
+  const [updateType, setUpdateType] = React47__namespace.useState(
     "credit"
   );
-  const [updateAmount, setUpdateAmount] = React46__namespace.useState("");
-  const [updateMemo, setUpdateMemo] = React46__namespace.useState("");
+  const [updateAmount, setUpdateAmount] = React47__namespace.useState("");
+  const [updateMemo, setUpdateMemo] = React47__namespace.useState("");
   const handleSubmit = () => {
     if (!updateAmount || !onUpdateSubmit) return;
     const amount = parseInt(updateAmount, 10);
@@ -15730,7 +16067,7 @@ function InventoryManager({
         /* @__PURE__ */ jsxRuntime.jsx("th", { className: "text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase", children: "Change" }),
         /* @__PURE__ */ jsxRuntime.jsx("th", { className: "text-muted-foreground py-2 text-right text-xs font-medium tracking-wider uppercase", children: "Quantity" })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-border/50 divide-y", children: logEntries.map((entry) => /* @__PURE__ */ jsxRuntime.jsxs(React46__namespace.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-border/50 divide-y", children: logEntries.map((entry) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs("tr", { children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "td",
@@ -15959,12 +16296,12 @@ function InviteUserModal({
   errorMessage,
   successMessage
 }) {
-  const [email, setEmail] = React46__namespace.useState("");
-  const [firstName, setFirstName] = React46__namespace.useState("");
-  const [lastName, setLastName] = React46__namespace.useState("");
-  const [roleId, setRoleId] = React46__namespace.useState(defaultRoleId || "");
-  const [message, setMessage] = React46__namespace.useState("");
-  React46__namespace.useEffect(() => {
+  const [email, setEmail] = React47__namespace.useState("");
+  const [firstName, setFirstName] = React47__namespace.useState("");
+  const [lastName, setLastName] = React47__namespace.useState("");
+  const [roleId, setRoleId] = React47__namespace.useState(defaultRoleId || "");
+  const [message, setMessage] = React47__namespace.useState("");
+  React47__namespace.useEffect(() => {
     if (!open) {
       setEmail("");
       setFirstName("");
@@ -16070,7 +16407,7 @@ function InviteUserModal({
         )
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkLEE3NMNP_cjs.Select,
+        chunkNL3CZNBH_cjs.Select,
         {
           label: "Role",
           value: roleId,
@@ -16163,7 +16500,7 @@ function InvoiceList({
   currency = "$",
   className = ""
 }) {
-  const [searchQuery, setSearchQuery] = React46__namespace.useState("");
+  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -16200,7 +16537,7 @@ function InvoiceList({
     { value: "overdue", label: "Overdue" },
     { value: "cancelled", label: "Cancelled" }
   ];
-  const filteredInvoices = React46__namespace.useMemo(() => {
+  const filteredInvoices = React47__namespace.useMemo(() => {
     let result = invoices;
     if (statusFilter !== "all") {
       result = result.filter((inv) => inv.status === statusFilter);
@@ -16213,7 +16550,7 @@ function InvoiceList({
     }
     return result;
   }, [invoices, statusFilter, searchQuery]);
-  const totals = React46__namespace.useMemo(() => {
+  const totals = React47__namespace.useMemo(() => {
     return {
       total: filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0),
       paid: filteredInvoices.filter((inv) => inv.status === "paid").reduce((sum, inv) => sum + inv.amount, 0),
@@ -16384,16 +16721,16 @@ function InvoicePaymentPage({
   showStripeBranding = true,
   className = ""
 }) {
-  const [paymentMethod, setPaymentMethod] = React46__namespace.useState(
+  const [paymentMethod, setPaymentMethod] = React47__namespace.useState(
     acceptedMethods[0] || "card"
   );
-  const [name, setName] = React46__namespace.useState("");
-  const [email, setEmail] = React46__namespace.useState("");
-  const [cardNumber, setCardNumber] = React46__namespace.useState("");
-  const [expiry, setExpiry] = React46__namespace.useState("");
-  const [cvc, setCvc] = React46__namespace.useState("");
-  const [routingNumber, setRoutingNumber] = React46__namespace.useState("");
-  const [accountNumber, setAccountNumber] = React46__namespace.useState("");
+  const [name, setName] = React47__namespace.useState("");
+  const [email, setEmail] = React47__namespace.useState("");
+  const [cardNumber, setCardNumber] = React47__namespace.useState("");
+  const [expiry, setExpiry] = React47__namespace.useState("");
+  const [cvc, setCvc] = React47__namespace.useState("");
+  const [routingNumber, setRoutingNumber] = React47__namespace.useState("");
+  const [accountNumber, setAccountNumber] = React47__namespace.useState("");
   const formatCurrency3 = (amount) => {
     return `${currency}${amount.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
@@ -17074,10 +17411,10 @@ function LanguageSelector({
   disabled = false,
   className
 }) {
-  const [isOpen, setIsOpen] = React46__namespace.useState(false);
-  const containerRef = React46__namespace.useRef(null);
+  const [isOpen, setIsOpen] = React47__namespace.useState(false);
+  const containerRef = React47__namespace.useRef(null);
   const selectedLanguage = languages.find((l) => l.code === value);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
@@ -17086,7 +17423,7 @@ function LanguageSelector({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") setIsOpen(false);
     };
@@ -17565,7 +17902,7 @@ function formatLastSeen(date) {
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString();
 }
-var ConversationHeader = React46__namespace.forwardRef(
+var ConversationHeader = React47__namespace.forwardRef(
   ({
     className,
     size,
@@ -17677,7 +18014,7 @@ var ConversationHeader = React46__namespace.forwardRef(
   }
 );
 ConversationHeader.displayName = "ConversationHeader";
-var ConversationListItem = React46__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
+var ConversationListItem = React47__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
   const participant = conversation.participants.find((p) => !p.isCurrentUser);
   const title = getConversationTitle(conversation, participant);
   const avatarUrl = conversation.avatarUrl || participant?.avatarUrl;
@@ -17867,7 +18204,7 @@ function ConversationListSkeleton({
 }
 ConversationListSkeleton.displayName = "ConversationListSkeleton";
 function LightboxModal({ attachment, onClose }) {
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
@@ -17962,7 +18299,7 @@ function LightboxModal({ attachment, onClose }) {
   );
 }
 LightboxModal.displayName = "LightboxModal";
-var MessageThread = React46__namespace.forwardRef(
+var MessageThread = React47__namespace.forwardRef(
   ({
     conversation,
     messages,
@@ -17993,8 +18330,8 @@ var MessageThread = React46__namespace.forwardRef(
     onError,
     className
   }, ref) => {
-    const [lightboxAttachment, setLightboxAttachment] = React46__namespace.useState(null);
-    const [replyTo, setReplyTo] = React46__namespace.useState(null);
+    const [lightboxAttachment, setLightboxAttachment] = React47__namespace.useState(null);
+    const [replyTo, setReplyTo] = React47__namespace.useState(null);
     const participant = conversation?.type === "direct" ? conversation.participants.find((p) => p.id !== currentUser.id) : void 0;
     const handleAttachmentClick = (attachment, message) => {
       if (attachment.type === "image" || attachment.type === "video") {
@@ -18162,13 +18499,13 @@ function useMessages(options) {
     onRetry,
     onLoadMore
   } = options;
-  const [messages, setMessages] = React46__namespace.useState(initialMessages);
-  const [isSending, setIsSending] = React46__namespace.useState(false);
-  const [isLoadingMore, setIsLoadingMore] = React46__namespace.useState(false);
-  React46__namespace.useEffect(() => {
+  const [messages, setMessages] = React47__namespace.useState(initialMessages);
+  const [isSending, setIsSending] = React47__namespace.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React47__namespace.useState(false);
+  React47__namespace.useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
-  const addMessage = React46__namespace.useCallback((message) => {
+  const addMessage = React47__namespace.useCallback((message) => {
     setMessages((prev) => {
       if (prev.some((m) => m.id === message.id)) {
         return prev;
@@ -18176,7 +18513,7 @@ function useMessages(options) {
       return [...prev, message];
     });
   }, []);
-  const updateMessage = React46__namespace.useCallback(
+  const updateMessage = React47__namespace.useCallback(
     (messageId, updates) => {
       setMessages(
         (prev) => prev.map((m) => m.id === messageId ? { ...m, ...updates } : m)
@@ -18184,22 +18521,22 @@ function useMessages(options) {
     },
     []
   );
-  const removeMessage = React46__namespace.useCallback((messageId) => {
+  const removeMessage = React47__namespace.useCallback((messageId) => {
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
-  const updateStatus = React46__namespace.useCallback(
+  const updateStatus = React47__namespace.useCallback(
     (messageId, status) => {
       updateMessage(messageId, { status });
     },
     [updateMessage]
   );
-  const markAsRead = React46__namespace.useCallback(
+  const markAsRead = React47__namespace.useCallback(
     (messageId) => {
       updateStatus(messageId, "read");
     },
     [updateStatus]
   );
-  const sendMessage = React46__namespace.useCallback(
+  const sendMessage = React47__namespace.useCallback(
     async (newMessage) => {
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticMessage = {
@@ -18231,7 +18568,7 @@ function useMessages(options) {
     },
     [currentUser, onSend, addMessage, updateStatus]
   );
-  const retryMessage = React46__namespace.useCallback(
+  const retryMessage = React47__namespace.useCallback(
     async (messageId) => {
       updateStatus(messageId, "sending");
       try {
@@ -18245,7 +18582,7 @@ function useMessages(options) {
     },
     [onRetry, updateStatus]
   );
-  const loadMore = React46__namespace.useCallback(async () => {
+  const loadMore = React47__namespace.useCallback(async () => {
     if (isLoadingMore || !onLoadMore) return;
     setIsLoadingMore(true);
     try {
@@ -18276,13 +18613,13 @@ function useTypingIndicator(options = {}) {
     onTypingStart,
     onTypingStop
   } = options;
-  const [participants, setParticipants] = React46__namespace.useState(initialParticipants);
-  const [isLocalTyping, setIsLocalTyping] = React46__namespace.useState(false);
-  const typingTimeoutRef = React46__namespace.useRef(null);
-  React46__namespace.useEffect(() => {
+  const [participants, setParticipants] = React47__namespace.useState(initialParticipants);
+  const [isLocalTyping, setIsLocalTyping] = React47__namespace.useState(false);
+  const typingTimeoutRef = React47__namespace.useRef(null);
+  React47__namespace.useEffect(() => {
     setParticipants(initialParticipants);
   }, [initialParticipants]);
-  const startTyping = React46__namespace.useCallback(() => {
+  const startTyping = React47__namespace.useCallback(() => {
     if (!isLocalTyping) {
       setIsLocalTyping(true);
       onTypingStart?.();
@@ -18295,21 +18632,21 @@ function useTypingIndicator(options = {}) {
       onTypingStop?.();
     }, debounceTime);
   }, [isLocalTyping, debounceTime, onTypingStart, onTypingStop]);
-  const stopTyping = React46__namespace.useCallback(() => {
+  const stopTyping = React47__namespace.useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     setIsLocalTyping(false);
     onTypingStop?.();
   }, [onTypingStop]);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
     };
   }, []);
-  const typingState = React46__namespace.useMemo(
+  const typingState = React47__namespace.useMemo(
     () => ({
       participants,
       lastUpdated: /* @__PURE__ */ new Date()
@@ -18325,11 +18662,11 @@ function useTypingIndicator(options = {}) {
 }
 function useMessageScroll(options) {
   const { messages, currentUserId, threshold = 100 } = options;
-  const scrollContainerRef = React46__namespace.useRef(null);
-  const bottomRef = React46__namespace.useRef(null);
-  const [isScrolledUp, setIsScrolledUp] = React46__namespace.useState(false);
-  const prevMessageCountRef = React46__namespace.useRef(messages.length);
-  React46__namespace.useEffect(() => {
+  const scrollContainerRef = React47__namespace.useRef(null);
+  const bottomRef = React47__namespace.useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = React47__namespace.useState(false);
+  const prevMessageCountRef = React47__namespace.useRef(messages.length);
+  React47__namespace.useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     const handleScroll = () => {
@@ -18340,12 +18677,12 @@ function useMessageScroll(options) {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [threshold]);
-  const scrollToBottom = React46__namespace.useCallback((smooth = true) => {
+  const scrollToBottom = React47__namespace.useCallback((smooth = true) => {
     bottomRef.current?.scrollIntoView({
       behavior: smooth ? "smooth" : "auto"
     });
   }, []);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     const messageCountChanged = messages.length !== prevMessageCountRef.current;
     prevMessageCountRef.current = messages.length;
     if (!messageCountChanged) return;
@@ -18364,9 +18701,9 @@ function useMessageScroll(options) {
 }
 function useReadReceipts(options) {
   const { currentUserId, onMarkRead, threshold = 0.5 } = options;
-  const observerRef = React46__namespace.useRef(null);
-  const observedMessagesRef = React46__namespace.useRef(/* @__PURE__ */ new Set());
-  React46__namespace.useEffect(() => {
+  const observerRef = React47__namespace.useRef(null);
+  const observedMessagesRef = React47__namespace.useRef(/* @__PURE__ */ new Set());
+  React47__namespace.useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -18385,7 +18722,7 @@ function useReadReceipts(options) {
       observerRef.current?.disconnect();
     };
   }, [onMarkRead, threshold]);
-  const observeMessage = React46__namespace.useCallback(
+  const observeMessage = React47__namespace.useCallback(
     (element, message) => {
       if (!element || !observerRef.current) return;
       if (message.sender.id !== currentUserId && message.status !== "read" && !observedMessagesRef.current.has(message.id)) {
@@ -18396,6 +18733,213 @@ function useReadReceipts(options) {
     [currentUserId]
   );
   return { observeMessage };
+}
+function NearbyProviderCard({
+  provider,
+  LinkComponent,
+  formatPhone = defaultFormatPhone,
+  className
+}) {
+  const { name, slug, logoUrl, address, phoneNumber, distance } = provider;
+  const LinkWrapper = LinkComponent ? ({ to, className: className2, children }) => /* @__PURE__ */ jsxRuntime.jsx(LinkComponent, { to, className: className2, children }) : ({ to, className: className2, children }) => /* @__PURE__ */ jsxRuntime.jsx("a", { href: to, className: className2, children });
+  const initials = name.split(" ").map((word) => word[0]).join("").toUpperCase().slice(0, 2);
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800",
+        className
+      ),
+      children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-4", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(LinkWrapper, { to: `/provider/${slug}`, className: "shrink-0", children: [
+          logoUrl ? /* @__PURE__ */ jsxRuntime.jsx(
+            "img",
+            {
+              src: logoUrl,
+              alt: `${name} logo`,
+              className: "h-16 w-16 rounded-lg object-contain",
+              onError: (e) => {
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+              }
+            }
+          ) : null,
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex h-16 w-16 items-center justify-center rounded-lg bg-primary-100 text-xl font-bold text-primary-600 dark:bg-primary-900/30 dark:text-primary-400",
+                logoUrl && "hidden"
+              ),
+              children: initials
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-1 flex items-start justify-between gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              LinkWrapper,
+              {
+                to: `/provider/${slug}`,
+                className: "text-base font-semibold text-gray-900 hover:text-primary-600 dark:text-white dark:hover:text-primary-400",
+                children: name
+              }
+            ),
+            /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "shrink-0 text-sm text-gray-500 dark:text-gray-400", children: [
+              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-primary-600 dark:text-primary-400", children: distance.toFixed(2) }),
+              " ",
+              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs uppercase", children: "mi" })
+            ] })
+          ] }),
+          address && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 text-sm text-gray-600 dark:text-gray-400", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("div", { children: address.street1 }),
+            address.street2 && /* @__PURE__ */ jsxRuntime.jsx("div", { children: address.street2 }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+              address.city,
+              ", ",
+              address.state,
+              " ",
+              address.postalCode
+            ] })
+          ] }),
+          phoneNumber && /* @__PURE__ */ jsxRuntime.jsxs(
+            "a",
+            {
+              href: `tel:${phoneNumber}`,
+              className: "inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon3, { className: "h-4 w-4" }),
+                formatPhone(phoneNumber)
+              ]
+            }
+          )
+        ] })
+      ] })
+    }
+  );
+}
+function NearbyProvidersList({
+  providers,
+  maxProviders = 3,
+  zipcode,
+  LinkComponent,
+  formatPhone,
+  title = "Nearby Providers",
+  showConciergeBanner = true,
+  className
+}) {
+  const displayedProviders = providers.slice(0, maxProviders);
+  if (providers.length === 0) {
+    return null;
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-4", className), children: [
+    /* @__PURE__ */ jsxRuntime.jsxs("h2", { className: "flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "h-5 w-5 text-primary-600 dark:text-primary-400" }),
+      title
+    ] }),
+    showConciergeBanner && /* @__PURE__ */ jsxRuntime.jsx(ConciergeBanner, {}),
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: displayedProviders.map((provider) => /* @__PURE__ */ jsxRuntime.jsx(
+      NearbyProviderCard,
+      {
+        provider,
+        LinkComponent,
+        formatPhone
+      },
+      provider.id
+    )) }),
+    zipcode && /* @__PURE__ */ jsxRuntime.jsxs(
+      "a",
+      {
+        href: `/providers/search/${zipcode}/25`,
+        className: "inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "h-4 w-4" }),
+          "SHOW PROVIDERS IN ",
+          zipcode
+        ]
+      }
+    )
+  ] });
+}
+function ConciergeBanner() {
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-900/20", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "img",
+      {
+        src: "/images/logos/bluehive-concierge.png",
+        alt: "BlueHive Concierge",
+        className: "h-12 w-auto",
+        onError: (e) => {
+          e.currentTarget.style.display = "none";
+        }
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-700 dark:text-gray-300", children: "We handle every step for you \u2014 from scheduling to results." }),
+      /* @__PURE__ */ jsxRuntime.jsxs(
+        "a",
+        {
+          href: "https://bluehive.com/concierge/",
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400",
+          children: [
+            "LEARN MORE",
+            /* @__PURE__ */ jsxRuntime.jsx(ArrowRightIcon, { className: "h-4 w-4" })
+          ]
+        }
+      )
+    ] })
+  ] }) });
+}
+function defaultFormatPhone(phone) {
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  }
+  if (cleaned.length === 11 && cleaned[0] === "1") {
+    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+  }
+  return phone;
+}
+function PhoneIcon3({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      width: "1em",
+      height: "1em",
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" })
+    }
+  );
+}
+function LocationIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "currentColor",
+      viewBox: "0 0 24 24",
+      width: "1em",
+      height: "1em",
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" })
+    }
+  );
+}
+function ArrowRightIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
+    }
+  );
 }
 function NotificationCenter({
   notifications,
@@ -19135,13 +19679,13 @@ function OrderConfirmationWizard({
   stepTitles = ["Verify Employee", "Consent & ID", "Confirmation"],
   className = ""
 }) {
-  const [step, setStep] = React46__namespace.useState(initialStep);
-  const [employeeVerified, setEmployeeVerified] = React46__namespace.useState(false);
-  const [verificationNotes, setVerificationNotes] = React46__namespace.useState("");
-  const [consentObtained, setConsentObtained] = React46__namespace.useState(false);
-  const [idVerified, setIdVerified] = React46__namespace.useState(false);
-  const [idType, setIdType] = React46__namespace.useState("");
-  const [confirmationNotes, setConfirmationNotes] = React46__namespace.useState("");
+  const [step, setStep] = React47__namespace.useState(initialStep);
+  const [employeeVerified, setEmployeeVerified] = React47__namespace.useState(false);
+  const [verificationNotes, setVerificationNotes] = React47__namespace.useState("");
+  const [consentObtained, setConsentObtained] = React47__namespace.useState(false);
+  const [idVerified, setIdVerified] = React47__namespace.useState(false);
+  const [idType, setIdType] = React47__namespace.useState("");
+  const [confirmationNotes, setConfirmationNotes] = React47__namespace.useState("");
   const handleStepChange = (newStep) => {
     setStep(newStep);
     onStepChange?.(newStep);
@@ -19169,7 +19713,7 @@ function OrderConfirmationWizard({
       const stepNum = index + 1;
       const isActive = step === stepNum;
       const isComplete = step > stepNum;
-      return /* @__PURE__ */ jsxRuntime.jsxs(React46__namespace.Fragment, { children: [
+      return /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "div",
@@ -19574,7 +20118,7 @@ function OrderList({
   actions,
   className
 }) {
-  const filteredOrders = React46__namespace.useMemo(() => {
+  const filteredOrders = React47__namespace.useMemo(() => {
     const activeTabConfig = tabs.find((t) => t.id === activeTab);
     if (!activeTabConfig?.statuses || !getOrderStatus) {
       return orders;
@@ -19583,7 +20127,7 @@ function OrderList({
       (order) => activeTabConfig.statuses.includes(getOrderStatus(order))
     );
   }, [orders, activeTab, tabs, getOrderStatus]);
-  const tabCounts = React46__namespace.useMemo(() => {
+  const tabCounts = React47__namespace.useMemo(() => {
     if (!getOrderStatus) return {};
     const counts = {};
     tabs.forEach((tab) => {
@@ -19733,7 +20277,7 @@ function OrderLookupForm({
   welcomeMessage = "Look up your order by entering the information below.",
   className = ""
 }) {
-  const [formData, setFormData] = React46__namespace.useState({
+  const [formData, setFormData] = React47__namespace.useState({
     orderNumber: "",
     dateOfBirth: "",
     lastName: ""
@@ -20842,7 +21386,7 @@ function PermissionItem({
   parentChecked
 }) {
   const hasChildren = permission.children && permission.children.length > 0;
-  const [isExpanded, setIsExpanded] = React46__namespace.useState(true);
+  const [isExpanded, setIsExpanded] = React47__namespace.useState(true);
   const handleChange = (checked) => {
     onToggle(permission.id, checked);
     if (!checked && hasChildren) {
@@ -20920,12 +21464,12 @@ function PermissionsEditor({
     summary = "Summary",
     all = "All"
   } = labels;
-  const [expandedGroups, setExpandedGroups] = React46__namespace.useState(
+  const [expandedGroups, setExpandedGroups] = React47__namespace.useState(
     () => new Set(
       groups.filter((g) => g.defaultExpanded !== false).map((g) => g.id)
     )
   );
-  const permissionMap = React46__namespace.useMemo(() => {
+  const permissionMap = React47__namespace.useMemo(() => {
     const map = /* @__PURE__ */ new Map();
     const processPermissions = (permissions) => {
       permissions.forEach((perm) => {
@@ -20969,7 +21513,7 @@ function PermissionsEditor({
       onEmployersChange([...selectedEmployers, employerId]);
     }
   };
-  const assignedPermissionNames = React46__namespace.useMemo(() => {
+  const assignedPermissionNames = React47__namespace.useMemo(() => {
     return assignedPermissions.map((id) => permissionMap.get(id)?.name).filter(Boolean);
   }, [assignedPermissions, permissionMap]);
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-6", className), children: [
@@ -21279,7 +21823,7 @@ var logoContainerVariants = classVarianceAuthority.cva(
   }
 );
 var ProviderLogo = ({ logoURL, name, variant }) => {
-  const [hasError, setHasError] = React46__namespace.useState(false);
+  const [hasError, setHasError] = React47__namespace.useState(false);
   if (!logoURL || hasError) {
     return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(logoContainerVariants({ variant })), children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-100 dark:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-primary-600 dark:text-primary-400 text-lg font-bold", children: name.charAt(0).toUpperCase() }) }) });
   }
@@ -21367,7 +21911,7 @@ function formatAddressSingleLine2(address) {
   parts.push(`${address.city}, ${address.state} ${address.postalCode}`);
   return parts.join(", ");
 }
-var ProviderCard = React46__namespace.forwardRef(
+var ProviderCard = React47__namespace.forwardRef(
   ({
     provider,
     variant = "compact",
@@ -21733,7 +22277,7 @@ function ActionButtonsBar({
         phoneNumber && /* @__PURE__ */ jsxRuntime.jsx(
           ActionButton2,
           {
-            icon: /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon3, {}),
+            icon: /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon4, {}),
             label: "Call",
             onClick: () => onCall?.(phoneNumber)
           }
@@ -21800,7 +22344,7 @@ function ProviderLogo2({
   size = "md",
   className
 }) {
-  const [hasError, setHasError] = React46__namespace.useState(false);
+  const [hasError, setHasError] = React47__namespace.useState(false);
   const initials = name.split(" ").map((word) => word[0]).join("").toUpperCase().slice(0, 2);
   if (!src || hasError) {
     return /* @__PURE__ */ jsxRuntime.jsx(
@@ -22218,7 +22762,7 @@ function ProviderDetailHeaderSkeleton({
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-12 rounded bg-gray-200 dark:bg-gray-700" })
         ] }, i)) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "container mx-auto px-4 py-6", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 hidden items-center gap-2 sm:flex", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxRuntime.jsxs(React46__namespace.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 hidden items-center gap-2 sm:flex", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
             i > 1 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700" }),
             /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-16 rounded bg-gray-200 dark:bg-gray-700" })
           ] }, i)) }),
@@ -22263,7 +22807,7 @@ function DirectionsIcon({ className }) {
     }
   );
 }
-function PhoneIcon3({ className }) {
+function PhoneIcon4({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -22496,6 +23040,236 @@ function BlogIcon({ className }) {
       children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" })
     }
   );
+}
+function ProviderMap({
+  coordinates,
+  providerName,
+  address,
+  mapboxToken,
+  zoom = 15,
+  showSatelliteToggle = true,
+  showFullscreen = true,
+  showZoomControls = true,
+  height,
+  directionsUrl,
+  className
+}) {
+  const mapContainerRef = React47__namespace.useRef(null);
+  const mapRef = React47__namespace.useRef(null);
+  const [mapLoaded, setMapLoaded] = React47__namespace.useState(false);
+  const [mapStyle, setMapStyle] = React47__namespace.useState("streets");
+  const [isFullscreen, setIsFullscreen] = React47__namespace.useState(false);
+  const [error, setError] = React47__namespace.useState(null);
+  React47__namespace.useEffect(() => {
+    if (!mapboxToken) {
+      return;
+    }
+    const loadMapbox = async () => {
+      try {
+        if (typeof window !== "undefined" && !document.querySelector('link[href*="mapbox-gl"]')) {
+          const link = document.createElement("link");
+          link.href = "https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css";
+          link.rel = "stylesheet";
+          document.head.appendChild(link);
+        }
+        let mapboxgl;
+        try {
+          const mod = await import('mapbox-gl');
+          const defaultExport = mod.default || mod;
+          if (defaultExport && typeof defaultExport.Map === "function") {
+            mapboxgl = defaultExport;
+          }
+        } catch {
+        }
+        if (!mapboxgl) {
+          const win = window;
+          if (win.mapboxgl) {
+            mapboxgl = win.mapboxgl;
+          }
+        }
+        if (!mapboxgl) {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js";
+            script.onload = () => resolve();
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          mapboxgl = window.mapboxgl;
+        }
+        if (!mapboxgl) {
+          throw new Error("Mapbox GL JS failed to load");
+        }
+        mapboxgl.accessToken = mapboxToken;
+        if (mapContainerRef.current && !mapRef.current) {
+          const map = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            style: mapStyle === "streets" ? "mapbox://styles/mapbox/streets-v12" : "mapbox://styles/mapbox/satellite-streets-v12",
+            center: [coordinates.longitude, coordinates.latitude],
+            zoom
+          });
+          new mapboxgl.Marker({ color: "#0ea5e9" }).setLngLat([coordinates.longitude, coordinates.latitude]).setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML(
+              `<strong>${providerName}</strong><br/>${address}`
+            )
+          ).addTo(map);
+          if (showZoomControls) {
+            map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+          }
+          if (showFullscreen) {
+            map.addControl(new mapboxgl.FullscreenControl(), "bottom-right");
+          }
+          map.addControl(
+            new mapboxgl.GeolocateControl({
+              positionOptions: { enableHighAccuracy: true },
+              trackUserLocation: false,
+              showUserHeading: false
+            }),
+            "bottom-right"
+          );
+          map.on("load", () => {
+            setMapLoaded(true);
+          });
+          mapRef.current = map;
+        }
+      } catch (err) {
+        console.error("Failed to load map:", err);
+        setError("Failed to load map");
+      }
+    };
+    loadMapbox();
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [mapboxToken, coordinates, zoom, providerName, address, showZoomControls, showFullscreen]);
+  React47__namespace.useEffect(() => {
+    if (mapRef.current && mapLoaded) {
+      const map = mapRef.current;
+      map.setStyle(
+        mapStyle === "streets" ? "mapbox://styles/mapbox/streets-v12" : "mapbox://styles/mapbox/satellite-streets-v12"
+      );
+    }
+  }, [mapStyle, mapLoaded]);
+  React47__namespace.useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+  if (!mapboxToken) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800",
+          height || "aspect-video",
+          className
+        ),
+        children: /* @__PURE__ */ jsxRuntime.jsx(
+          StaticMapFallback,
+          {
+            coordinates,
+            providerName,
+            address,
+            directionsUrl
+          }
+        )
+      }
+    );
+  }
+  if (error) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "relative flex items-center justify-center overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800",
+          height || "aspect-video",
+          className
+        ),
+        children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center text-gray-500 dark:text-gray-400", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("p", { children: "Map unavailable" }),
+          directionsUrl && /* @__PURE__ */ jsxRuntime.jsx(
+            "a",
+            {
+              href: directionsUrl,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "mt-2 inline-block text-primary-600 hover:text-primary-700 dark:text-primary-400",
+              children: "Get Directions \u2192"
+            }
+          )
+        ] })
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "relative overflow-hidden rounded-lg",
+        height || "aspect-video",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { ref: mapContainerRef, className: "absolute inset-0" }),
+        showSatelliteToggle && mapLoaded && /* @__PURE__ */ jsxRuntime.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setMapStyle((s) => s === "streets" ? "satellite" : "streets"),
+            className: "absolute top-2 right-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+            children: mapStyle === "streets" ? "Satellite view" : "Map view"
+          }
+        ),
+        directionsUrl && mapLoaded && /* @__PURE__ */ jsxRuntime.jsx(
+          "a",
+          {
+            href: directionsUrl,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
+            children: "GET DIRECTIONS"
+          }
+        ),
+        !mapLoaded && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-8 w-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" }) })
+      ]
+    }
+  );
+}
+function StaticMapFallback({
+  coordinates,
+  providerName,
+  address,
+  directionsUrl
+}) {
+  const staticMapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.longitude - 0.01}%2C${coordinates.latitude - 0.01}%2C${coordinates.longitude + 0.01}%2C${coordinates.latitude + 0.01}&layer=mapnik&marker=${coordinates.latitude}%2C${coordinates.longitude}`;
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative h-full w-full", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "iframe",
+      {
+        title: `Map showing ${providerName} location`,
+        src: staticMapUrl,
+        className: "h-full w-full border-0",
+        loading: "lazy",
+        referrerPolicy: "no-referrer-when-downgrade"
+      }
+    ),
+    directionsUrl && /* @__PURE__ */ jsxRuntime.jsx(
+      "a",
+      {
+        href: directionsUrl,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
+        children: "GET DIRECTIONS"
+      }
+    )
+  ] });
 }
 function ProviderOverview({
   providerName,
@@ -23078,7 +23852,7 @@ var SearchResultsMessage = ({
     }
   );
 };
-var ProviderSearchBar = React46__namespace.forwardRef(
+var ProviderSearchBar = React47__namespace.forwardRef(
   ({
     onSearch,
     onGeolocate,
@@ -23099,10 +23873,10 @@ var ProviderSearchBar = React46__namespace.forwardRef(
     className,
     ...props
   }, ref) => {
-    const [internalValue, setInternalValue] = React46__namespace.useState(
+    const [internalValue, setInternalValue] = React47__namespace.useState(
       defaultValue || ""
     );
-    const [validationError, setValidationError] = React46__namespace.useState(
+    const [validationError, setValidationError] = React47__namespace.useState(
       null
     );
     const zipValue = value ?? internalValue;
@@ -23367,7 +24141,7 @@ function XMarkIcon({ className }) {
   );
 }
 function InputField({ label, icon, className, id, ...props }) {
-  const generatedId = React46__namespace.useId();
+  const generatedId = React47__namespace.useId();
   const inputId = id || generatedId;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
     label && /* @__PURE__ */ jsxRuntime.jsx("label", { htmlFor: inputId, className: labelVariants(), children: label }),
@@ -23391,7 +24165,7 @@ function SelectField({
   id,
   ...props
 }) {
-  const generatedId = React46__namespace.useId();
+  const generatedId = React47__namespace.useId();
   const selectId = id || generatedId;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
     label && /* @__PURE__ */ jsxRuntime.jsx("label", { htmlFor: selectId, className: labelVariants(), children: label }),
@@ -23443,12 +24217,12 @@ function ServiceMultiSelect({
   disabled = false,
   showCounts = false
 }) {
-  const [isOpen, setIsOpen] = React46__namespace.useState(false);
-  const [searchTerm, setSearchTerm] = React46__namespace.useState("");
-  const containerRef = React46__namespace.useRef(null);
-  const inputRef = React46__namespace.useRef(null);
-  const listboxId = React46__namespace.useId();
-  React46__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React47__namespace.useState(false);
+  const [searchTerm, setSearchTerm] = React47__namespace.useState("");
+  const containerRef = React47__namespace.useRef(null);
+  const inputRef = React47__namespace.useRef(null);
+  const listboxId = React47__namespace.useId();
+  React47__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -23457,14 +24231,14 @@ function ServiceMultiSelect({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const filteredServices = React46__namespace.useMemo(() => {
+  const filteredServices = React47__namespace.useMemo(() => {
     if (!searchTerm) return services;
     const lowerSearch = searchTerm.toLowerCase();
     return services.filter(
       (service) => service.label.toLowerCase().includes(lowerSearch) || service.category?.toLowerCase().includes(lowerSearch)
     );
   }, [services, searchTerm]);
-  const groupedServices = React46__namespace.useMemo(() => {
+  const groupedServices = React47__namespace.useMemo(() => {
     const groups = {};
     filteredServices.forEach((service) => {
       const category = service.category || "Other";
@@ -23473,7 +24247,7 @@ function ServiceMultiSelect({
     });
     return groups;
   }, [filteredServices]);
-  const selectedServiceObjects = React46__namespace.useMemo(
+  const selectedServiceObjects = React47__namespace.useMemo(
     () => services.filter((s) => selectedServices.includes(s.value)),
     [services, selectedServices]
   );
@@ -23951,10 +24725,10 @@ function ProviderSelector({
   size = "md",
   className
 }) {
-  const [isOpen, setIsOpen] = React46__namespace.useState(false);
-  const [searchQuery, setSearchQuery] = React46__namespace.useState("");
-  const containerRef = React46__namespace.useRef(null);
-  React46__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React47__namespace.useState(false);
+  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
+  const containerRef = React47__namespace.useRef(null);
+  React47__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -23963,7 +24737,7 @@ function ProviderSelector({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     function handleEscape(event) {
       if (event.key === "Escape") {
         setIsOpen(false);
@@ -23972,12 +24746,12 @@ function ProviderSelector({
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
     }
   }, [isOpen]);
-  const filteredProviders = React46__namespace.useMemo(() => {
+  const filteredProviders = React47__namespace.useMemo(() => {
     if (!searchQuery) return providers;
     const query = searchQuery.toLowerCase();
     return providers.filter(
@@ -24179,9 +24953,9 @@ function ProviderSettings({
   defaultTab = "general",
   className = ""
 }) {
-  const [settings, setSettings] = React46__namespace.useState(initialSettings);
-  const [hasChanges, setHasChanges] = React46__namespace.useState(false);
-  React46__namespace.useEffect(() => {
+  const [settings, setSettings] = React47__namespace.useState(initialSettings);
+  const [hasChanges, setHasChanges] = React47__namespace.useState(false);
+  React47__namespace.useEffect(() => {
     setSettings(initialSettings);
     setHasChanges(false);
   }, [initialSettings]);
@@ -25355,7 +26129,7 @@ function RecurringServiceSetupModal({
     cancel = "Cancel",
     save = "Save"
   } = labels;
-  const [formData, setFormData] = React46__namespace.useState(
+  const [formData, setFormData] = React47__namespace.useState(
     initialData || {
       providerId: "",
       serviceId: "",
@@ -25363,7 +26137,7 @@ function RecurringServiceSetupModal({
       overrideConsent: false
     }
   );
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (initialData) {
       setFormData(initialData);
     } else {
@@ -25543,9 +26317,9 @@ function RejectionModal({
   isSubmitting = false,
   variant = "danger"
 }) {
-  const [selectedReasonId, setSelectedReasonId] = React46__namespace.useState("");
-  const [details, setDetails] = React46__namespace.useState("");
-  React46__namespace.useEffect(() => {
+  const [selectedReasonId, setSelectedReasonId] = React47__namespace.useState("");
+  const [details, setDetails] = React47__namespace.useState("");
+  React47__namespace.useEffect(() => {
     if (!open) {
       setSelectedReasonId("");
       setDetails("");
@@ -25800,7 +26574,7 @@ function ReportDashboard({
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkLEE3NMNP_cjs.Select,
+          chunkNL3CZNBH_cjs.Select,
           {
             options: dateRangeOptions,
             value: selectedDateRange,
@@ -25937,7 +26711,7 @@ function ReportDashboard({
     ] })
   ] });
 }
-var ResultsEntryForm = React46__namespace.forwardRef(function ResultsEntryForm2({
+var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2({
   employeeFirstName,
   employeeLastName,
   initialData = {},
@@ -25965,30 +26739,30 @@ var ResultsEntryForm = React46__namespace.forwardRef(function ResultsEntryForm2(
     addProviderContact = "Click here to add a provider contact",
     pleaseSelectResult = "Please select a result"
   } = labels;
-  const [result, setResult] = React46__namespace.useState(
+  const [result, setResult] = React47__namespace.useState(
     initialData.result ?? null
   );
-  const [alternateText, setAlternateText] = React46__namespace.useState(
+  const [alternateText, setAlternateText] = React47__namespace.useState(
     initialData.alternateText ?? ""
   );
-  const [dateDrawnValue, setDateDrawnValue] = React46__namespace.useState(
+  const [dateDrawnValue, setDateDrawnValue] = React47__namespace.useState(
     initialData.dateDrawn ?? ""
   );
-  const [dateCompletedValue, setDateCompletedValue] = React46__namespace.useState(
+  const [dateCompletedValue, setDateCompletedValue] = React47__namespace.useState(
     initialData.dateCompleted ?? ""
   );
-  const [recommendations, setRecommendations] = React46__namespace.useState(
+  const [recommendations, setRecommendations] = React47__namespace.useState(
     initialData.recommendations ?? ""
   );
-  const [files, setFiles] = React46__namespace.useState(initialData.files ?? []);
-  const [selectedContacts, setSelectedContacts] = React46__namespace.useState(
+  const [files, setFiles] = React47__namespace.useState(initialData.files ?? []);
+  const [selectedContacts, setSelectedContacts] = React47__namespace.useState(
     initialData.providerContacts ?? []
   );
-  const [applyToAll, setApplyToAll] = React46__namespace.useState(
+  const [applyToAll, setApplyToAll] = React47__namespace.useState(
     initialData.applyToAllServices ?? false
   );
-  const [showError, setShowError] = React46__namespace.useState(false);
-  const fileInputRef = React46__namespace.useRef(null);
+  const [showError, setShowError] = React47__namespace.useState(false);
+  const fileInputRef = React47__namespace.useRef(null);
   const handleFileSelect = (e) => {
     const selectedFiles = Array.from(e.target.files || []);
     setFiles((prev) => [...prev, ...selectedFiles]);
@@ -26004,7 +26778,7 @@ var ResultsEntryForm = React46__namespace.forwardRef(function ResultsEntryForm2(
       (prev) => prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]
     );
   };
-  const validateAndSubmit = React46__namespace.useCallback(() => {
+  const validateAndSubmit = React47__namespace.useCallback(() => {
     if (!result) {
       setShowError(true);
       return;
@@ -26031,7 +26805,7 @@ var ResultsEntryForm = React46__namespace.forwardRef(function ResultsEntryForm2(
     applyToAll,
     onSubmit
   ]);
-  React46__namespace.useImperativeHandle(
+  React47__namespace.useImperativeHandle(
     ref,
     () => ({
       submit: validateAndSubmit
@@ -26246,7 +27020,7 @@ function ResultsEntryModal({
   ...props
 }) {
   const { submit = "Submit", close = "Close" } = labels;
-  const formRef = React46__namespace.useRef(null);
+  const formRef = React47__namespace.useRef(null);
   const employeeName = employeeFirstName || employeeLastName ? `${employeeFirstName ?? ""} ${employeeLastName ?? ""}`.trim() : void 0;
   const handleSubmitClick = () => {
     formRef.current?.submit();
@@ -26361,7 +27135,7 @@ function ScheduleCalendar({
   isLoading = false,
   className = ""
 }) {
-  const [currentDate, setCurrentDate] = React46__namespace.useState(selectedDate);
+  const [currentDate, setCurrentDate] = React47__namespace.useState(selectedDate);
   const formatTime4 = (date) => {
     const d = typeof date === "string" ? new Date(date) : date;
     return d.toLocaleTimeString("en-US", {
@@ -26637,7 +27411,7 @@ function ScheduleCalendar({
     }
   );
 }
-var accordionVariants = classVarianceAuthority.cva(
+var accordionVariants2 = classVarianceAuthority.cva(
   "service-accordion divide-y divide-neutral-200 dark:divide-neutral-700",
   {
     variants: {
@@ -26777,7 +27551,7 @@ function SubCategoryAccordion({
   onServiceClick,
   index
 }) {
-  const [isExpanded, setIsExpanded] = React46__namespace.useState(
+  const [isExpanded, setIsExpanded] = React47__namespace.useState(
     subCategory.defaultExpanded ?? false
   );
   const contentId = `sub-content-${index}`;
@@ -26844,7 +27618,7 @@ function CategoryAccordionItem({
   onExpandChange
 }) {
   const isControlled = expandedCategories !== void 0;
-  const [internalExpanded, setInternalExpanded] = React46__namespace.useState(
+  const [internalExpanded, setInternalExpanded] = React47__namespace.useState(
     category.defaultExpanded ?? false
   );
   const isExpanded = isControlled ? expandedCategories.includes(category.name) : internalExpanded;
@@ -26938,7 +27712,7 @@ function ServiceAccordion({
   onExpandedChange,
   className
 }) {
-  const [internalExpanded, setInternalExpanded] = React46__namespace.useState([]);
+  const [internalExpanded, setInternalExpanded] = React47__namespace.useState([]);
   const isControlled = controlledExpanded !== void 0;
   const expanded = isControlled ? controlledExpanded : internalExpanded;
   const handleExpandChange = (categoryName, isExpanded) => {
@@ -26961,7 +27735,7 @@ function ServiceAccordion({
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
-      className: chunkOR5DRJCW_cjs.cn(accordionVariants({ variant }), className),
+      className: chunkOR5DRJCW_cjs.cn(accordionVariants2({ variant }), className),
       role: "region",
       "aria-label": "Service categories",
       children: categories.map((category, index) => /* @__PURE__ */ jsxRuntime.jsx(
@@ -27212,7 +27986,7 @@ function ServiceBadgeGroup({
   size = "md",
   onShowMore
 }) {
-  const badges = React46__namespace.Children.toArray(children);
+  const badges = React47__namespace.Children.toArray(children);
   const visibleBadges = maxVisible ? badges.slice(0, maxVisible) : badges;
   const hiddenCount = maxVisible ? badges.length - maxVisible : 0;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-wrap gap-2", className), children: [
@@ -27736,7 +28510,7 @@ function ServiceGeneralSettings({
             }
           ),
           categories.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-            chunkLEE3NMNP_cjs.Select,
+            chunkNL3CZNBH_cjs.Select,
             {
               label: "Category",
               value: categoryId || "",
@@ -27966,15 +28740,15 @@ function ServicePicker({
   fullWidth = false,
   className
 }) {
-  const [searchQuery, setSearchQuery] = React46__namespace.useState("");
-  const [expandedGroups, setExpandedGroups] = React46__namespace.useState(
+  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
+  const [expandedGroups, setExpandedGroups] = React47__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  const filteredGroups = React46__namespace.useMemo(
+  const filteredGroups = React47__namespace.useMemo(
     () => filterServices(groups, searchQuery),
     [groups, searchQuery]
   );
-  const searchResults = React46__namespace.useMemo(
+  const searchResults = React47__namespace.useMemo(
     () => searchQuery ? flattenServices(filteredGroups) : [],
     [filteredGroups, searchQuery]
   );
@@ -28011,12 +28785,16 @@ function ServicePicker({
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
-      className: chunkOR5DRJCW_cjs.cn("flex flex-col", !fullWidth && "lg:max-w-md", className),
+      className: chunkOR5DRJCW_cjs.cn(
+        "bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border",
+        !fullWidth && "lg:max-w-md",
+        className
+      ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "p-3", children: [
-          !hideHeading && /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "mb-3 text-xl font-bold text-gray-900 dark:text-gray-100", children: heading }),
+          !hideHeading && /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "text-foreground mb-3 text-xl font-bold", children: heading }),
           showSearch && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon5, { className: "h-5 w-5 text-gray-400" }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon5, { className: "text-muted-foreground h-5 w-5" }) }),
             /* @__PURE__ */ jsxRuntime.jsx(
               chunkVV4N4WY6_cjs.Input,
               {
@@ -28031,8 +28809,8 @@ function ServicePicker({
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 overflow-y-auto p-3", children: [
-          error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: error }) }),
-          loading ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 text-gray-500", children: [
+          error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-destructive/10 text-destructive mb-4 rounded-lg p-4", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: error }) }),
+          loading ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-muted-foreground flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon5, { className: "h-5 w-5 animate-spin" }),
             /* @__PURE__ */ jsxRuntime.jsx("span", { children: "Loading available services..." })
           ] }) : isSearching ? (
@@ -28046,7 +28824,7 @@ function ServicePicker({
                 multiple
               },
               service.id
-            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
           ) : (
             // Grouped list - accordion style
             /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "space-y-1", children: filteredGroups.length > 0 ? filteredGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsx(
@@ -28061,7 +28839,7 @@ function ServicePicker({
                 multiple
               },
               group.id
-            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
           )
         ] })
       ]
@@ -28089,10 +28867,10 @@ function ServiceGroupItem({
         onClick: () => onToggleGroup(group.id),
         className: chunkOR5DRJCW_cjs.cn(
           "flex w-full items-center justify-between rounded-lg px-3 py-2",
-          "text-left text-sm font-medium",
-          "hover:bg-gray-100 dark:hover:bg-gray-800",
+          "text-muted-foreground text-left text-sm font-medium",
+          "hover:bg-muted",
           "transition-colors",
-          depth > 0 && "ml-4 text-gray-600 dark:text-gray-400"
+          depth > 0 && "ml-4"
         ),
         "aria-expanded": isExpanded,
         children: [
@@ -28101,16 +28879,16 @@ function ServiceGroupItem({
             hasSelection && /* @__PURE__ */ jsxRuntime.jsx(
               "span",
               {
-                className: "bg-brand-500 h-2 w-2 rounded-full",
+                className: "bg-primary h-2 w-2 rounded-full",
                 "aria-label": "Has selected items"
               }
             )
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            ChevronIcon2,
+            ChevronIcon3,
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "h-5 w-5 transition-transform",
+                "text-muted-foreground h-5 w-5 transition-transform",
                 isExpanded && "rotate-180"
               )
             }
@@ -28157,48 +28935,81 @@ function ServiceItem({
     {
       className: chunkOR5DRJCW_cjs.cn(
         "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2",
-        "hover:bg-gray-100 dark:hover:bg-gray-800",
+        "hover:bg-muted",
         "transition-colors",
         service.disabled && "cursor-not-allowed opacity-50"
       ),
       children: [
-        multiple ? /* @__PURE__ */ jsxRuntime.jsx(
-          "input",
-          {
-            type: "checkbox",
-            checked: selected,
-            onChange: onToggle,
-            disabled: service.disabled,
-            className: "text-brand-600 focus:ring-brand-500 h-4 w-4 rounded border-gray-300"
-          }
-        ) : /* @__PURE__ */ jsxRuntime.jsx(
-          "input",
-          {
-            type: "radio",
-            checked: selected,
-            onChange: onToggle,
-            disabled: service.disabled,
-            className: "text-brand-600 focus:ring-brand-500 h-4 w-4 border-gray-300"
-          }
-        ),
+        multiple ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "relative inline-flex shrink-0 items-center justify-center", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "input",
+            {
+              type: "checkbox",
+              checked: selected,
+              onChange: onToggle,
+              disabled: service.disabled,
+              className: chunkOR5DRJCW_cjs.cn(
+                "peer h-4 w-4 shrink-0 appearance-none rounded",
+                "border-input bg-background border-2",
+                "cursor-pointer transition-all duration-150",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "checked:bg-primary-500 checked:border-primary-500"
+              )
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(CheckIcon4, { className: "pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" })
+        ] }) : /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "relative inline-flex shrink-0 items-center justify-center", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "input",
+            {
+              type: "radio",
+              checked: selected,
+              onChange: onToggle,
+              disabled: service.disabled,
+              className: chunkOR5DRJCW_cjs.cn(
+                "peer h-4 w-4 shrink-0 appearance-none rounded-full",
+                "border-input bg-background border-2",
+                "cursor-pointer transition-all duration-150",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "checked:border-primary-500"
+              )
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" })
+        ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-gray-900 dark:text-gray-100", children: service.name }),
-            service.code && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs text-gray-500 dark:text-gray-400", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-sm font-medium", children: service.name }),
+            service.code && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
               "(",
               service.code,
               ")"
             ] })
           ] }),
-          service.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-xs text-gray-500 dark:text-gray-400", children: service.description })
+          service.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground truncate text-xs", children: service.description })
         ] }),
-        service.price !== void 0 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: [
+        service.price !== void 0 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-foreground text-sm font-medium", children: [
           "$",
           service.price.toFixed(2)
         ] })
       ]
     }
   ) });
+}
+function CheckIcon4({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 3,
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+    }
+  );
 }
 function SearchIcon5({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -28243,7 +29054,7 @@ function SpinnerIcon5({ className }) {
     )
   ] });
 }
-function ChevronIcon2({ className }) {
+function ChevronIcon3({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -28266,16 +29077,16 @@ function ServicePricingManager({
   categories: _categories = [],
   className = ""
 }) {
-  const [searchTerm, setSearchTerm] = React46__namespace.useState("");
-  const [selectedCategory, setSelectedCategory] = React46__namespace.useState(
+  const [searchTerm, setSearchTerm] = React47__namespace.useState("");
+  const [selectedCategory, setSelectedCategory] = React47__namespace.useState(
     null
   );
-  const [editingService, setEditingService] = React46__namespace.useState(null);
-  const [editPrice, setEditPrice] = React46__namespace.useState("");
-  const [editEmployerPrice, setEditEmployerPrice] = React46__namespace.useState("");
-  const [showBulkModal, setShowBulkModal] = React46__namespace.useState(false);
-  const [bulkAdjustment, setBulkAdjustment] = React46__namespace.useState("");
-  const [bulkAdjustmentType, setBulkAdjustmentType] = React46__namespace.useState("percent");
+  const [editingService, setEditingService] = React47__namespace.useState(null);
+  const [editPrice, setEditPrice] = React47__namespace.useState("");
+  const [editEmployerPrice, setEditEmployerPrice] = React47__namespace.useState("");
+  const [showBulkModal, setShowBulkModal] = React47__namespace.useState(false);
+  const [bulkAdjustment, setBulkAdjustment] = React47__namespace.useState("");
+  const [bulkAdjustmentType, setBulkAdjustmentType] = React47__namespace.useState("percent");
   const formatCurrency3 = (amount) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -28637,7 +29448,7 @@ function ServiceShippingSettings({
   isSaving = false,
   className = ""
 }) {
-  const [address, setAddress] = React46__namespace.useState(
+  const [address, setAddress] = React47__namespace.useState(
     defaultAddress || {
       name: "",
       street1: "",
@@ -28669,7 +29480,7 @@ function ServiceShippingSettings({
     ] }),
     shippingEnabled && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-6", children: [
       shippingMethods.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkLEE3NMNP_cjs.Select,
+        chunkNL3CZNBH_cjs.Select,
         {
           label: "Shipping Method",
           value: selectedMethodId || "",
@@ -28736,7 +29547,7 @@ function ServiceShippingSettings({
             }
           ) }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkLEE3NMNP_cjs.Select,
+            chunkNL3CZNBH_cjs.Select,
             {
               label: "State",
               value: address.state,
@@ -28802,7 +29613,7 @@ function SetupServiceModal({
   errorMessage,
   title = "Add New Service"
 }) {
-  const [formData, setFormData] = React46__namespace.useState({
+  const [formData, setFormData] = React47__namespace.useState({
     name: "",
     description: "",
     price: 0,
@@ -28812,7 +29623,7 @@ function SetupServiceModal({
     initialInventory: void 0,
     autoAcceptReferrals: false
   });
-  React46__namespace.useEffect(() => {
+  React47__namespace.useEffect(() => {
     if (!open) {
       setFormData({
         name: "",
@@ -28845,10 +29656,10 @@ function SetupServiceModal({
   const isValid = formData.name.trim() && formData.price >= 0;
   return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
     /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: title }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "min-w-[320px] space-y-4", children: [
       errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
       showServicePicker && availableServices.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkLEE3NMNP_cjs.Select,
+        chunkNL3CZNBH_cjs.Select,
         {
           label: "Select Service",
           value: formData.serviceId || "",
@@ -28876,7 +29687,7 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-description",
-            className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300",
+            className: "text-foreground mb-1 block text-sm font-medium",
             children: "Description"
           }
         ),
@@ -28884,7 +29695,7 @@ function SetupServiceModal({
           "textarea",
           {
             id: "setup-service-description",
-            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+            className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
             rows: 3,
             value: formData.description,
             onChange: (e) => setFormData((prev) => ({
@@ -28896,7 +29707,7 @@ function SetupServiceModal({
         )
       ] }),
       categories.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkLEE3NMNP_cjs.Select,
+        chunkNL3CZNBH_cjs.Select,
         {
           label: "Category",
           value: formData.categoryId || "",
@@ -28913,12 +29724,12 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-price",
-            className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300",
+            className: "text-foreground mb-1 block text-sm font-medium",
             children: "Base Price"
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute top-1/2 left-3 -translate-y-1/2 text-gray-500", children: "$" }),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2", children: "$" }),
           /* @__PURE__ */ jsxRuntime.jsx(
             "input",
             {
@@ -28926,7 +29737,7 @@ function SetupServiceModal({
               type: "number",
               min: "0",
               step: "0.01",
-              className: "w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+              className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none",
               value: formData.price,
               onChange: (e) => setFormData((prev) => ({
                 ...prev,
@@ -28939,14 +29750,15 @@ function SetupServiceModal({
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3 pt-2", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Currently Offered" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Service is available for orders" })
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Currently Offered" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Service is available for orders" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
             chunkRRQGH7C5_cjs.Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.currentlyOffered,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -28955,14 +29767,15 @@ function SetupServiceModal({
             }
           )
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Limited Inventory" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Track inventory for this service" })
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Limited Inventory" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Track inventory for this service" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
             chunkRRQGH7C5_cjs.Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.limitedInventory,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -28971,7 +29784,7 @@ function SetupServiceModal({
             }
           )
         ] }),
-        formData.limitedInventory && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "ml-4 border-l-2 border-gray-200 pl-4 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(
+        formData.limitedInventory && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-border ml-4 border-l-2 pl-4", children: /* @__PURE__ */ jsxRuntime.jsx(
           chunkVV4N4WY6_cjs.Input,
           {
             label: "Initial Inventory",
@@ -28985,14 +29798,15 @@ function SetupServiceModal({
             placeholder: "Enter quantity"
           }
         ) }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Auto-Accept Referrals" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Automatically accept incoming referrals" })
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Auto-Accept Referrals" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Automatically accept incoming referrals" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
             chunkRRQGH7C5_cjs.Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.autoAcceptReferrals,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -29049,7 +29863,7 @@ function SetupServiceModal({
     ] })
   ] }) });
 }
-var SidebarContext = React46.createContext(null);
+var SidebarContext = React47.createContext(null);
 function SidebarProvider({
   children,
   defaultCollapsed = false,
@@ -29059,7 +29873,7 @@ function SidebarProvider({
   mobileBreakpoint = "(max-width: 1023px)"
 }) {
   const isMobileViewport = chunkR4DM4635_cjs.useMediaQuery(mobileBreakpoint);
-  const [isCollapsed, setIsCollapsed] = React46.useState(() => {
+  const [isCollapsed, setIsCollapsed] = React47.useState(() => {
     if (typeof window !== "undefined" && persistCollapsed) {
       const stored = localStorage.getItem(storageKey);
       if (stored !== null) {
@@ -29068,39 +29882,39 @@ function SidebarProvider({
     }
     return defaultCollapsed;
   });
-  const [isMobileOpen, setIsMobileOpen] = React46.useState(false);
-  const [expandedGroup, setExpandedGroup] = React46.useState(
+  const [isMobileOpen, setIsMobileOpen] = React47.useState(false);
+  const [expandedGroup, setExpandedGroup] = React47.useState(
     defaultExpandedGroup
   );
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (persistCollapsed && typeof window !== "undefined") {
       localStorage.setItem(storageKey, String(isCollapsed));
     }
   }, [isCollapsed, persistCollapsed, storageKey]);
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     if (!isMobileViewport && isMobileOpen) {
       setIsMobileOpen(false);
     }
   }, [isMobileViewport, isMobileOpen]);
-  const toggleCollapsed = React46.useCallback(() => {
+  const toggleCollapsed = React47.useCallback(() => {
     setIsCollapsed((prev) => !prev);
   }, []);
-  const setCollapsed = React46.useCallback((collapsed) => {
+  const setCollapsed = React47.useCallback((collapsed) => {
     setIsCollapsed(collapsed);
   }, []);
-  const openMobile = React46.useCallback(() => {
+  const openMobile = React47.useCallback(() => {
     setIsMobileOpen(true);
   }, []);
-  const closeMobile = React46.useCallback(() => {
+  const closeMobile = React47.useCallback(() => {
     setIsMobileOpen(false);
   }, []);
-  const toggleMobile = React46.useCallback(() => {
+  const toggleMobile = React47.useCallback(() => {
     setIsMobileOpen((prev) => !prev);
   }, []);
-  const toggleGroup = React46.useCallback((group) => {
+  const toggleGroup = React47.useCallback((group) => {
     setExpandedGroup((prev) => prev === group ? null : group);
   }, []);
-  const contextValue = React46.useMemo(
+  const contextValue = React47.useMemo(
     () => ({
       isCollapsed,
       toggleCollapsed,
@@ -29130,7 +29944,7 @@ function SidebarProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(SidebarContext.Provider, { value: contextValue, children });
 }
 function useSidebar() {
-  const context = React46.useContext(SidebarContext);
+  const context = React47.useContext(SidebarContext);
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider");
   }
@@ -29348,9 +30162,9 @@ function SidebarNavGroup({
   const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
-  const [localExpanded, setLocalExpanded] = React46.useState(defaultExpanded);
+  const [localExpanded, setLocalExpanded] = React47.useState(defaultExpanded);
   const effectiveExpanded = groupId ? isExpanded : localExpanded;
-  const handleToggle = React46.useCallback(() => {
+  const handleToggle = React47.useCallback(() => {
     if (groupId) {
       toggleGroup(groupId);
     } else {
@@ -29421,7 +30235,7 @@ function SidebarNavItem({
 }) {
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
-  const handleClick = React46.useCallback(() => {
+  const handleClick = React47.useCallback(() => {
     if (disabled) return;
     onClick?.();
     if (isMobileViewport) {
@@ -29541,9 +30355,9 @@ function SidebarSearch({
   "data-testid": testId = "sidebar-search"
 }) {
   const { isCollapsed, isMobileViewport, setCollapsed } = useSidebar();
-  const inputRef = React46.useRef(null);
+  const inputRef = React47.useRef(null);
   const showCollapsed = !isMobileViewport && isCollapsed;
-  React46.useEffect(() => {
+  React47.useEffect(() => {
     const handleKeyDown = (e) => {
       const target = e.target;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
@@ -29724,7 +30538,7 @@ function NewsletterForm({
   isLoading = false,
   className
 }) {
-  const [email, setEmail] = React46__namespace.useState("");
+  const [email, setEmail] = React47__namespace.useState("");
   function handleSubmit(e) {
     e.preventDefault();
     if (email.trim()) {
@@ -29838,7 +30652,7 @@ function LegalLinks({
     "nav",
     {
       className: chunkOR5DRJCW_cjs.cn("flex flex-wrap items-center gap-x-4 gap-y-1", className),
-      children: links.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React46__namespace.Fragment, { children: [
+      children: links.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
         index > 0 && /* @__PURE__ */ jsxRuntime.jsx(
           "span",
           {
@@ -30253,9 +31067,9 @@ function UserMenu({
   menuItems = [],
   className
 }) {
-  const [isOpen, setIsOpen] = React46__namespace.useState(false);
-  const menuRef = React46__namespace.useRef(null);
-  React46__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React47__namespace.useState(false);
+  const menuRef = React47__namespace.useRef(null);
+  React47__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -30533,7 +31347,7 @@ function SiteHeader({
   userMenuItems,
   className
 }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = React46__namespace.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React47__namespace.useState(false);
   const colorVariant = variant === "primary" || variant === "transparent" ? "light" : "dark";
   return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-16", "aria-hidden": "true" }),
@@ -30867,29 +31681,29 @@ function SSOConfigForm({
     delete: deleteLabel = "Delete SSO",
     cancel = "Cancel"
   } = labels;
-  const [clientDomain, setClientDomain] = React46__namespace.useState(
+  const [clientDomain, setClientDomain] = React47__namespace.useState(
     initialData.clientDomain ?? ""
   );
-  const [ssoLoginUrl, setSsoLoginUrl] = React46__namespace.useState(
+  const [ssoLoginUrl, setSsoLoginUrl] = React47__namespace.useState(
     initialData.ssoLoginUrl ?? ""
   );
-  const [ssoLogoutUrl, setSsoLogoutUrl] = React46__namespace.useState(
+  const [ssoLogoutUrl, setSsoLogoutUrl] = React47__namespace.useState(
     initialData.ssoLogoutUrl ?? ""
   );
-  const [forceReauth, setForceReauth] = React46__namespace.useState(
+  const [forceReauth, setForceReauth] = React47__namespace.useState(
     initialData.forceReauthentication ?? false
   );
-  const [idpSigns, setIdpSigns] = React46__namespace.useState(
+  const [idpSigns, setIdpSigns] = React47__namespace.useState(
     initialData.idpSignsRequest ?? false
   );
-  const [allowUnencrypted, setAllowUnencrypted] = React46__namespace.useState(
+  const [allowUnencrypted, setAllowUnencrypted] = React47__namespace.useState(
     initialData.allowUnencryptedAssertion ?? false
   );
-  const [certificateFile, setCertificateFile] = React46__namespace.useState(
+  const [certificateFile, setCertificateFile] = React47__namespace.useState(
     null
   );
-  const fileInputRef = React46__namespace.useRef(null);
-  const [errors, setErrors] = React46__namespace.useState({});
+  const fileInputRef = React47__namespace.useRef(null);
+  const [errors, setErrors] = React47__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!clientDomain.trim()) {
@@ -31060,7 +31874,7 @@ function SSOConfigForm({
     ] })
   ] });
 }
-function CheckIcon4({ className }) {
+function CheckIcon5({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -31145,66 +31959,89 @@ function StepIndicator({
     if (allowCompletedStepsOnly) return index <= currentStep;
     return true;
   };
+  const circleButton = (step, index, status, clickable) => /* @__PURE__ */ jsxRuntime.jsx(
+    "button",
+    {
+      type: "button",
+      onClick: () => handleStepClick(index),
+      disabled: !clickable,
+      className: `${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white" : status === "current" ? "bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900" : "bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300"}`.trim(),
+      "aria-current": status === "current" ? "step" : void 0,
+      children: step.hasError ? /* @__PURE__ */ jsxRuntime.jsx(ErrorIcon, { className: "h-4 w-4" }) : status === "completed" ? step.icon || /* @__PURE__ */ jsxRuntime.jsx(CheckIcon5, { className: "h-4 w-4" }) : step.icon || /* @__PURE__ */ jsxRuntime.jsx(
+        "span",
+        {
+          className: status === "current" ? "text-white" : "text-neutral-500 dark:text-neutral-300",
+          children: index + 1
+        }
+      )
+    }
+  );
+  const stepLabel = (step, status, horizontal) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: `${horizontal ? "text-center" : "flex-1"} ${sizes.text}`, children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      "p",
+      {
+        className: `font-medium ${step.hasError ? "text-red-600 dark:text-red-400" : status === "completed" || status === "current" ? "text-neutral-900 dark:text-white" : "text-neutral-500 dark:text-neutral-400"}`.trim(),
+        children: [
+          step.label,
+          step.optional && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-normal text-neutral-500 dark:text-neutral-400", children: [
+            " ",
+            "(optional)"
+          ] })
+        ]
+      }
+    ),
+    step.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-neutral-500 dark:text-neutral-400", children: step.description })
+  ] });
+  if (orientation === "horizontal") {
+    return /* @__PURE__ */ jsxRuntime.jsx("nav", { className: `flex ${className}`.trim(), "aria-label": "Progress", children: steps.map((step, index) => {
+      const status = getStepStatus(index);
+      const isLast = index === steps.length - 1;
+      const clickable = isClickable(index);
+      return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-1 flex-col items-center", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full items-center", children: [
+          index > 0 ? /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: `flex-1 ${sizes.line} ${index <= currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`,
+              "aria-hidden": "true"
+            }
+          ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1" }),
+          circleButton(step, index, status, clickable),
+          !isLast ? /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: `flex-1 ${sizes.line} ${index < currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`,
+              "aria-hidden": "true"
+            }
+          ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1" })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2", children: stepLabel(step, status, true) })
+      ] }, step.id);
+    }) });
+  }
   return /* @__PURE__ */ jsxRuntime.jsx(
     "nav",
     {
-      className: ` ${orientation === "horizontal" ? "flex items-center" : "flex flex-col"} ${sizes.gap} ${className} `.trim(),
+      className: `flex flex-col ${sizes.gap} ${className}`.trim(),
       "aria-label": "Progress",
       children: steps.map((step, index) => {
         const status = getStepStatus(index);
         const isLast = index === steps.length - 1;
         const clickable = isClickable(index);
-        return /* @__PURE__ */ jsxRuntime.jsxs(React46__namespace.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntime.jsxs(
-            "div",
-            {
-              className: `flex items-center ${orientation === "vertical" ? "flex-row" : "flex-col"} ${sizes.gap} `.trim(),
-              children: [
-                /* @__PURE__ */ jsxRuntime.jsx(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: () => handleStepClick(index),
-                    disabled: !clickable,
-                    className: ` ${sizes.circle} flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-blue-600 text-white focus:ring-blue-500 dark:bg-blue-500" : status === "current" ? "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:ring-blue-500" : "bg-gray-200 text-gray-500 focus:ring-gray-400 dark:bg-gray-700 dark:text-gray-400"} `.trim(),
-                    "aria-current": status === "current" ? "step" : void 0,
-                    children: step.hasError ? /* @__PURE__ */ jsxRuntime.jsx(ErrorIcon, { className: "h-4 w-4" }) : status === "completed" ? step.icon || /* @__PURE__ */ jsxRuntime.jsx(CheckIcon4, { className: "h-4 w-4" }) : step.icon || /* @__PURE__ */ jsxRuntime.jsx("span", { children: index + 1 })
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntime.jsxs(
-                  "div",
-                  {
-                    className: ` ${orientation === "horizontal" ? "text-center" : "flex-1"} ${sizes.text} `.trim(),
-                    children: [
-                      /* @__PURE__ */ jsxRuntime.jsxs(
-                        "p",
-                        {
-                          className: `font-medium ${step.hasError ? "text-red-600 dark:text-red-400" : status === "completed" || status === "current" ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"} `.trim(),
-                          children: [
-                            step.label,
-                            step.optional && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-normal text-gray-500 dark:text-gray-400", children: [
-                              " ",
-                              "(optional)"
-                            ] })
-                          ]
-                        }
-                      ),
-                      step.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-gray-500 dark:text-gray-400", children: step.description })
-                    ]
-                  }
-                )
-              ]
-            }
-          ),
+        return /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: `flex flex-row items-center ${sizes.gap}`, children: [
+            circleButton(step, index, status, clickable),
+            stepLabel(step, status, false)
+          ] }),
           !isLast && /* @__PURE__ */ jsxRuntime.jsx(
             "div",
             {
-              className: ` ${orientation === "horizontal" ? "min-w-8 flex-1" : "ml-4 min-h-4"} flex items-center justify-center`.trim(),
+              className: `flex min-h-4 justify-center ${size === "sm" ? "w-6" : size === "lg" ? "w-10" : "w-8"}`,
               "aria-hidden": "true",
               children: /* @__PURE__ */ jsxRuntime.jsx(
                 "div",
                 {
-                  className: ` ${orientation === "horizontal" ? "w-full" : "h-full min-h-4"} ${sizes.line} ${index < currentStep ? "bg-blue-600 dark:bg-blue-500" : "bg-gray-200 dark:bg-gray-700"} `.trim()
+                  className: `h-full min-h-4 ${sizes.line} ${index < currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`
                 }
               )
             }
@@ -31348,11 +32185,68 @@ function TimelineProgress({
   steps,
   currentStep,
   showTimestamps = true,
+  size = "md",
+  pulse = true,
   className
 }) {
   const visibleSteps = steps.filter((step) => !step.hidden);
   const currentIndex = visibleSteps.findIndex((s) => s.key === currentStep);
-  const getStepState = (index) => {
+  const sizeConfig = {
+    sm: {
+      wrapper: "h-6 w-6",
+      completed: "h-5 w-5",
+      current: "h-6 w-6",
+      pending: "h-5 w-5",
+      error: "h-6 w-6",
+      checkIcon: "h-3 w-3",
+      xIcon: "h-3.5 w-3.5",
+      currentDot: "h-1.5 w-1.5",
+      pendingDot: "h-1.5 w-1.5",
+      connector: "h-px",
+      timestamp: "text-[10px]",
+      label: "text-[10px]",
+      padding: "py-2",
+      labelMargin: "mt-1.5",
+      timestampMargin: "mb-1"
+    },
+    md: {
+      wrapper: "h-10 w-10",
+      completed: "h-8 w-8",
+      current: "h-10 w-10",
+      pending: "h-8 w-8",
+      error: "h-10 w-10",
+      checkIcon: "h-4 w-4",
+      xIcon: "h-5 w-5",
+      currentDot: "h-2.5 w-2.5",
+      pendingDot: "h-2 w-2",
+      connector: "h-0.5",
+      timestamp: "text-xs",
+      label: "text-xs",
+      padding: "py-4",
+      labelMargin: "mt-2.5",
+      timestampMargin: "mb-2"
+    },
+    lg: {
+      wrapper: "h-14 w-14",
+      completed: "h-11 w-11",
+      current: "h-14 w-14",
+      pending: "h-11 w-11",
+      error: "h-14 w-14",
+      checkIcon: "h-5 w-5",
+      xIcon: "h-6 w-6",
+      currentDot: "h-3.5 w-3.5",
+      pendingDot: "h-2.5 w-2.5",
+      connector: "h-1",
+      timestamp: "text-sm",
+      label: "text-sm",
+      padding: "py-6",
+      labelMargin: "mt-3",
+      timestampMargin: "mb-3"
+    }
+  };
+  const sizes = sizeConfig[size];
+  const getStepState = (index, step) => {
+    if (step.error) return "error";
     if (index < currentIndex) return "completed";
     if (index === currentIndex) return "current";
     return "pending";
@@ -31364,77 +32258,123 @@ function TimelineProgress({
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
-      className: chunkOR5DRJCW_cjs.cn("flex items-start overflow-x-auto py-4", className),
+      className: chunkOR5DRJCW_cjs.cn(sizes.padding, "overflow-x-auto", className),
       role: "progressbar",
       "aria-valuenow": currentIndex + 1,
       "aria-valuemin": 1,
       "aria-valuemax": visibleSteps.length,
-      children: visibleSteps.map((step, index) => {
-        const state = getStepState(index);
+      children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative flex items-start", children: visibleSteps.map((step, index) => {
+        const state = getStepState(index, step);
         const isLast = index === visibleSteps.length - 1;
-        return /* @__PURE__ */ jsxRuntime.jsxs(
-          "div",
-          {
-            className: chunkOR5DRJCW_cjs.cn(
-              "flex flex-1 flex-col items-center",
-              !isLast && "mr-2"
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-1 flex-col items-center", children: [
+          showTimestamps && /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "h-4 text-center text-neutral-500 dark:text-neutral-400",
+                sizes.timestamp,
+                sizes.timestampMargin
+              ),
+              children: step.completedAt ? formatTimestamp(step.completedAt) : "\xA0"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative flex w-full items-center", children: [
+            index > 0 && /* @__PURE__ */ jsxRuntime.jsx(
+              "div",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "flex-1",
+                  sizes.connector,
+                  state === "completed" || state === "current" || state === "error" ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"
+                )
+              }
             ),
-            children: [
-              showTimestamps && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-1 h-5 text-center text-xs text-gray-500", children: step.completedAt ? formatTimestamp(step.completedAt) : "\xA0" }),
-              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full items-center", children: [
-                /* @__PURE__ */ jsxRuntime.jsx(
-                  "div",
-                  {
-                    className: chunkOR5DRJCW_cjs.cn(
-                      "h-1 flex-1",
-                      index === 0 ? "bg-transparent" : "",
-                      state === "completed" || state === "current" && index > 0 ? "bg-brand-500" : "bg-gray-200 dark:bg-gray-700"
-                    )
-                  }
+            index === 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1" }),
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "div",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "flex shrink-0 items-center justify-center",
+                  sizes.wrapper
                 ),
-                /* @__PURE__ */ jsxRuntime.jsxs(
+                children: /* @__PURE__ */ jsxRuntime.jsxs(
                   "div",
                   {
                     className: chunkOR5DRJCW_cjs.cn(
-                      "relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-                      state === "completed" && "border-brand-500 bg-brand-500 text-white",
-                      state === "current" && "border-brand-500 bg-white dark:bg-gray-900",
-                      state === "pending" && "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
+                      "relative z-10 flex items-center justify-center rounded-full transition-all duration-200",
+                      state === "completed" && chunkOR5DRJCW_cjs.cn(
+                        "bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2",
+                        sizes.completed
+                      ),
+                      state === "current" && chunkOR5DRJCW_cjs.cn(
+                        "bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4",
+                        sizes.current,
+                        pulse && "animate-pulse"
+                      ),
+                      state === "pending" && chunkOR5DRJCW_cjs.cn(
+                        "bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700",
+                        sizes.pending
+                      ),
+                      state === "error" && chunkOR5DRJCW_cjs.cn(
+                        "bg-red-500 text-white shadow-md ring-4 shadow-red-500/30 ring-red-100 dark:bg-red-500 dark:ring-red-900/50",
+                        sizes.error
+                      )
                     ),
                     children: [
-                      state === "completed" && /* @__PURE__ */ jsxRuntime.jsx(CheckIcon5, { className: "h-3 w-3" }),
-                      state === "current" && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-brand-500 h-2 w-2 rounded-full" })
+                      state === "completed" && /* @__PURE__ */ jsxRuntime.jsx(CheckIcon6, { className: sizes.checkIcon }),
+                      state === "current" && /* @__PURE__ */ jsxRuntime.jsx(
+                        "div",
+                        {
+                          className: chunkOR5DRJCW_cjs.cn(
+                            "rounded-full bg-white",
+                            sizes.currentDot
+                          )
+                        }
+                      ),
+                      state === "pending" && /* @__PURE__ */ jsxRuntime.jsx(
+                        "div",
+                        {
+                          className: chunkOR5DRJCW_cjs.cn(
+                            "rounded-full bg-neutral-300 dark:bg-neutral-600",
+                            sizes.pendingDot
+                          )
+                        }
+                      ),
+                      state === "error" && /* @__PURE__ */ jsxRuntime.jsx(XIcon4, { className: sizes.xIcon })
                     ]
                   }
-                ),
-                /* @__PURE__ */ jsxRuntime.jsx(
-                  "div",
-                  {
-                    className: chunkOR5DRJCW_cjs.cn(
-                      "h-1 flex-1",
-                      isLast ? "bg-transparent" : "",
-                      state === "completed" ? "bg-brand-500" : "bg-gray-200 dark:bg-gray-700"
-                    )
-                  }
                 )
-              ] }),
-              /* @__PURE__ */ jsxRuntime.jsx(
-                "div",
-                {
-                  className: chunkOR5DRJCW_cjs.cn(
-                    "mt-2 text-center text-xs font-medium capitalize",
-                    state === "completed" && "text-brand-600 dark:text-brand-400",
-                    state === "current" && "text-gray-900 dark:text-gray-100",
-                    state === "pending" && "text-gray-400 dark:text-gray-500"
-                  ),
-                  children: step.label
-                }
-              )
-            ]
-          },
-          step.key
-        );
-      })
+              }
+            ),
+            !isLast && /* @__PURE__ */ jsxRuntime.jsx(
+              "div",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "flex-1",
+                  sizes.connector,
+                  state === "completed" ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"
+                )
+              }
+            ),
+            isLast && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1" })
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "text-center font-medium capitalize",
+                sizes.label,
+                sizes.labelMargin,
+                state === "completed" && "text-primary-700 dark:text-primary-300",
+                state === "current" && "font-semibold text-neutral-900 dark:text-white",
+                state === "pending" && "text-neutral-400 dark:text-neutral-500",
+                state === "error" && "font-semibold text-red-600 dark:text-red-400"
+              ),
+              children: step.label
+            }
+          )
+        ] }, step.key);
+      }) })
     }
   );
 }
@@ -31483,48 +32423,56 @@ function TimelineEventList({
   const getEventColor = (type) => {
     switch (type) {
       case "message":
-        return "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
+        return "bg-blue-50 text-blue-500 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40";
       case "status":
-        return "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400";
+        return "bg-green-50 text-green-500 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40";
       case "attachment":
-        return "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400";
+        return "bg-purple-50 text-purple-500 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40";
       case "assignment":
-        return "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400";
+        return "bg-orange-50 text-orange-500 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40";
       case "note":
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+        return "bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40";
       default:
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+        return "bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40";
     }
   };
   if (events.length === 0) {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("py-8 text-center text-gray-500", className), children: "No activity yet." });
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("py-8 text-center text-neutral-500", className), children: "No activity yet." });
   }
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("space-y-4", className), children: events.map((event, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative flex gap-4", children: [
-    index < events.length - 1 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute top-10 left-5 h-full w-px bg-gray-200 dark:bg-gray-700" }),
-    /* @__PURE__ */ jsxRuntime.jsx(
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("relative", className), children: [
+    events.length > 1 && /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        className: chunkOR5DRJCW_cjs.cn(
-          "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-          getEventColor(event.type)
-        ),
-        children: getEventIcon(event.type)
+        className: "absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700",
+        "aria-hidden": "true"
       }
     ),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 pt-1", children: [
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start justify-between gap-2", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "font-medium text-gray-900 dark:text-gray-100", children: event.title }),
-          event.author && /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: [
-            "by ",
-            event.author
-          ] })
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-6", children: events.map((event) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative flex gap-4", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "div",
+        {
+          className: chunkOR5DRJCW_cjs.cn(
+            "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-2",
+            getEventColor(event.type)
+          ),
+          children: getEventIcon(event.type)
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 pt-0.5", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start justify-between gap-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "font-semibold text-neutral-900 dark:text-neutral-100", children: event.title }),
+            event.author && /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: [
+              "by ",
+              event.author
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsx("time", { className: "shrink-0 pt-0.5 text-xs text-neutral-400 dark:text-neutral-500", children: formatTime4(event.timestamp) })
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsx("time", { className: "shrink-0 text-xs text-gray-400 dark:text-gray-500", children: formatTime4(event.timestamp) })
-      ] }),
-      event.content && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-2 text-sm text-gray-600 dark:text-gray-300", children: event.content })
-    ] })
-  ] }, event.id)) });
+        event.content && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1.5 text-sm text-neutral-600 dark:text-neutral-300", children: event.content })
+      ] })
+    ] }, event.id)) })
+  ] });
 }
 TimelineEventList.displayName = "TimelineEventList";
 function OrderConfirmation({
@@ -31545,21 +32493,21 @@ function OrderConfirmation({
       role: "dialog",
       "aria-modal": "true",
       "aria-labelledby": "order-confirmation-title",
-      children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800", children: [
+      children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-800", children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-6 flex justify-center", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "animate-bounce", children: /* @__PURE__ */ jsxRuntime.jsx(PlaneIcon, { className: "h-10 w-10 text-green-600 dark:text-green-400" }) }) }) }),
         /* @__PURE__ */ jsxRuntime.jsx(
           "h2",
           {
             id: "order-confirmation-title",
-            className: "mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-100",
+            className: "mb-2 text-center text-2xl font-bold text-neutral-900 dark:text-neutral-100",
             children: "Order Submitted!"
           }
         ),
-        orderNumber && /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "mb-4 text-center text-sm text-gray-500 dark:text-gray-400", children: [
+        orderNumber && /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "mb-4 text-center text-sm text-neutral-500 dark:text-neutral-400", children: [
           "Order #",
           orderNumber
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-6 text-center text-gray-600 dark:text-gray-300", children: message }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-6 text-center text-neutral-600 dark:text-neutral-300", children: message }),
         /* @__PURE__ */ jsxRuntime.jsx(
           "button",
           {
@@ -31567,8 +32515,8 @@ function OrderConfirmation({
             onClick: onClose,
             className: chunkOR5DRJCW_cjs.cn(
               "w-full rounded-lg px-4 py-3 font-medium",
-              "bg-brand-600 hover:bg-brand-700 text-white",
-              "dark:bg-brand-500 dark:hover:bg-brand-600",
+              "bg-primary-600 hover:bg-primary-700 text-white",
+              "dark:bg-primary-500 dark:hover:bg-primary-600",
               "transition-colors"
             ),
             children: "Got It"
@@ -31579,7 +32527,7 @@ function OrderConfirmation({
   );
 }
 OrderConfirmation.displayName = "OrderConfirmation";
-function CheckIcon5({ className }) {
+function CheckIcon6({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -31594,6 +32542,26 @@ function CheckIcon5({ className }) {
           strokeLinecap: "round",
           strokeLinejoin: "round",
           d: "M4.5 12.75l6 6 9-13.5"
+        }
+      )
+    }
+  );
+}
+function XIcon4({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 3,
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M6 18L18 6M6 6l12 12"
         }
       )
     }
@@ -31719,7 +32687,7 @@ function PlaneIcon({ className }) {
     }
   );
 }
-var CheckIcon6 = () => /* @__PURE__ */ jsxRuntime.jsx(
+var CheckIcon7 = () => /* @__PURE__ */ jsxRuntime.jsx(
   "svg",
   {
     className: "h-5 w-5",
@@ -31784,7 +32752,7 @@ var InfoIcon = () => /* @__PURE__ */ jsxRuntime.jsx(
     )
   }
 );
-var XIcon4 = () => /* @__PURE__ */ jsxRuntime.jsx(
+var XIcon5 = () => /* @__PURE__ */ jsxRuntime.jsx(
   "svg",
   {
     className: "h-4 w-4",
@@ -31821,7 +32789,7 @@ var variantStyles = {
   }
 };
 var defaultIcons = {
-  success: /* @__PURE__ */ jsxRuntime.jsx(CheckIcon6, {}),
+  success: /* @__PURE__ */ jsxRuntime.jsx(CheckIcon7, {}),
   error: /* @__PURE__ */ jsxRuntime.jsx(XCircleIcon, {}),
   warning: /* @__PURE__ */ jsxRuntime.jsx(ExclamationIcon, {}),
   info: /* @__PURE__ */ jsxRuntime.jsx(InfoIcon, {})
@@ -31867,7 +32835,7 @@ function Toast({
             onClick: onClose,
             className: "flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10",
             "aria-label": "Dismiss notification",
-            children: /* @__PURE__ */ jsxRuntime.jsx(XIcon4, {})
+            children: /* @__PURE__ */ jsxRuntime.jsx(XIcon5, {})
           }
         )
       ]
@@ -31901,7 +32869,7 @@ function ToastContainer({
     }
   );
 }
-var ToastContext = React46.createContext(null);
+var ToastContext = React47.createContext(null);
 var toastIdCounter = 0;
 function generateToastId() {
   return `toast-${++toastIdCounter}-${Date.now()}`;
@@ -31911,8 +32879,8 @@ function ToastProvider({
   maxToasts = 5,
   defaultDuration = 5e3
 }) {
-  const [toasts, setToasts] = React46.useState([]);
-  const dismiss = React46.useCallback((id) => {
+  const [toasts, setToasts] = React47.useState([]);
+  const dismiss = React47.useCallback((id) => {
     setToasts((prev) => {
       const toast2 = prev.find((t) => t.id === id);
       if (toast2?.onDismiss) {
@@ -31921,13 +32889,13 @@ function ToastProvider({
       return prev.filter((t) => t.id !== id);
     });
   }, []);
-  const dismissAll = React46.useCallback(() => {
+  const dismissAll = React47.useCallback(() => {
     setToasts((prev) => {
       prev.forEach((t) => t.onDismiss?.());
       return [];
     });
   }, []);
-  const toast = React46.useCallback(
+  const toast = React47.useCallback(
     (options) => {
       const id = generateToastId();
       const duration = options.duration ?? defaultDuration;
@@ -31954,13 +32922,13 @@ function ToastProvider({
     },
     [maxToasts, defaultDuration, dismiss]
   );
-  const success = React46.useCallback(
+  const success = React47.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "success" });
     },
     [toast]
   );
-  const error = React46.useCallback(
+  const error = React47.useCallback(
     (message, options) => {
       return toast({
         ...options,
@@ -31972,19 +32940,19 @@ function ToastProvider({
     },
     [toast]
   );
-  const warning = React46.useCallback(
+  const warning = React47.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "warning" });
     },
     [toast]
   );
-  const info = React46.useCallback(
+  const info = React47.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "info" });
     },
     [toast]
   );
-  const contextValue = React46.useMemo(
+  const contextValue = React47.useMemo(
     () => ({
       toasts,
       toast,
@@ -32000,7 +32968,7 @@ function ToastProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(ToastContext.Provider, { value: contextValue, children });
 }
 function useToast() {
-  const context = React46.useContext(ToastContext);
+  const context = React47.useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
   }
@@ -32021,6 +32989,7 @@ function WebChartReportViewer({
   onDateRangeChange,
   webchartBrand: webchartBrand2 = { name: "Enterprise Health" },
   onReconnect,
+  columnRenderers,
   className,
   labels = {}
 }) {
@@ -32030,17 +32999,16 @@ function WebChartReportViewer({
     reconnect = "Reconnect",
     noReports = "No reports available",
     loadingData = "Fetching latest data from Enterprise Health...",
-    close = "Close",
     dateFrom = "From",
     dateTo = "To"
   } = labels;
-  const [offcanvasOpen, setOffcanvasOpen] = React46__namespace.useState(false);
+  const [modalOpen, setModalOpen] = React47__namespace.useState(false);
   const handleReportClick = (report) => {
     onReportSelect?.(report);
-    setOffcanvasOpen(true);
+    setModalOpen(true);
   };
   const handleClose = () => {
-    setOffcanvasOpen(false);
+    setModalOpen(false);
     onClose?.();
   };
   const formatDate4 = (date) => {
@@ -32048,144 +33016,153 @@ function WebChartReportViewer({
     return d.toISOString().split("T")[0];
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("webchart-report-viewer", className), children: [
-    error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-exclamation-triangle mt-0.5 text-yellow-600" }),
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-yellow-800", children: error }),
-        /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "mt-1 text-sm text-yellow-700", children: [
-          "If this error persists, you can try reconnecting",
-          " ",
-          webchartBrand2.name,
-          "."
-        ] }),
+    error && /* @__PURE__ */ jsxRuntime.jsxs(chunkIY7UQPDO_cjs.Alert, { variant: "warning", icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, {}), className: "mb-4", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertTitle, { children: error }),
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkIY7UQPDO_cjs.AlertDescription, { children: [
+        "If this error persists, you can try reconnecting",
+        " ",
+        webchartBrand2.name,
+        ".",
         onReconnect && /* @__PURE__ */ jsxRuntime.jsxs(
-          "button",
+          chunkMKJDBXX4_cjs.Button,
           {
-            type: "button",
+            variant: "secondary",
+            size: "sm",
             onClick: onReconnect,
-            className: "mt-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50",
+            className: "mt-2",
             children: [
-              /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-link mr-2" }),
+              /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Link, { className: "mr-2 h-4 w-4" }),
               reconnect
             ]
           }
         )
       ] })
-    ] }) }),
-    !error && !loading && /* @__PURE__ */ jsxRuntime.jsxs(
-      "button",
-      {
-        type: "button",
-        onClick: onRefreshReports,
-        className: "bg-primary hover:bg-primary/90 mb-4 rounded-lg px-4 py-2 text-white",
-        title: refreshReports,
-        children: [
-          /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-sync-alt mr-2" }),
-          refreshReports
-        ]
-      }
-    ),
+    ] }),
+    !error && !loading && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { onClick: onRefreshReports, className: "mb-4", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "mr-2 h-4 w-4" }),
+      refreshReports
+    ] }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3", children: loading ? (
       // Loading placeholders
-      /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "animate-pulse", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-12 rounded-lg bg-gray-200" }) }, i)) })
+      /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsxRuntime.jsx(chunkN3QTYHRZ_cjs.Skeleton, { variant: "button", className: "h-12 w-full" }, i)) })
     ) : reports.length > 0 ? (
       // Report buttons
       reports.map((report) => /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
+        chunkHRA4FUO6_cjs.Card,
         {
-          type: "button",
+          interactive: true,
+          padding: "none",
+          role: "button",
+          tabIndex: 0,
+          "aria-label": report.description ? `${report.name}: ${report.description}` : report.name,
           onClick: () => handleReportClick(report),
-          className: "border-primary text-primary hover:bg-primary w-full truncate rounded-lg border bg-white p-3 text-left hover:text-white",
-          title: report.description ? `${report.name}: ${report.description}` : report.name,
-          children: report.name
+          onKeyDown: (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleReportClick(report);
+            }
+          },
+          className: "cursor-pointer",
+          children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "p-3", children: /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: "block truncate text-sm font-medium",
+              title: report.description ? `${report.name}: ${report.description}` : report.name,
+              children: report.name
+            }
+          ) })
         },
         report.id
       ))
     ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground col-span-full py-8 text-center", children: noReports }) }),
-    offcanvasOpen && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "fixed inset-0 z-50 flex", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(
-        "div",
-        {
-          role: "button",
-          tabIndex: 0,
-          "aria-label": "Close panel",
-          className: "fixed inset-0 bg-black/50",
-          onClick: handleClose,
-          onKeyDown: (e) => e.key === "Enter" && handleClose()
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "fixed right-0 bottom-0 left-0 flex h-3/4 flex-col rounded-t-xl bg-white shadow-xl", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b p-4", children: [
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("h5", { className: "text-lg font-semibold", children: currentReport?.name || "Report Results" }),
-            reportResult?.error ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-yellow-500", title: reportResult.error, children: /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-exclamation-triangle" }) }) : reportResult?.success ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-green-500", children: /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-check-circle" }) }) : null
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      chunkI7L6CQXR_cjs.Modal,
+      {
+        open: modalOpen,
+        onOpenChange: (open) => {
+          if (!open) {
+            handleClose();
+          }
+        },
+        size: "4xl",
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalHeader, { children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: currentReport?.name || "Report Results" }),
+              reportResult?.error ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, { className: "h-5 w-5 text-yellow-500" }) : reportResult?.success ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-5 w-5 text-green-500" }) : null
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalClose, {})
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: handleClose,
-              className: "text-2xl text-gray-400 hover:text-gray-600",
-              "aria-label": close,
-              children: "\xD7"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-center gap-3 border-b bg-gray-50 p-4", children: [
-          onDateRangeChange && dateRange && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-muted-foreground text-sm", children: [
-              dateFrom,
-              ":"
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4", children: [
+            onDateRangeChange && dateRange && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-muted-foreground text-sm", children: [
+                dateFrom,
+                ":"
+              ] }),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                chunkVV4N4WY6_cjs.Input,
+                {
+                  type: "date",
+                  size: "sm",
+                  value: formatDate4(dateRange.start),
+                  onChange: (e) => onDateRangeChange(e.target.value, dateRange.end),
+                  className: "w-auto"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-muted-foreground text-sm", children: [
+                dateTo,
+                ":"
+              ] }),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                chunkVV4N4WY6_cjs.Input,
+                {
+                  type: "date",
+                  size: "sm",
+                  value: formatDate4(dateRange.end),
+                  onChange: (e) => onDateRangeChange(dateRange.start, e.target.value),
+                  className: "w-auto"
+                }
+              )
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              "input",
+              chunkMKJDBXX4_cjs.Button,
               {
-                type: "date",
-                value: formatDate4(dateRange.start),
-                onChange: (e) => onDateRangeChange(e.target.value, dateRange.end),
-                className: "rounded-lg border border-gray-300 px-2 py-1 text-sm"
-              }
-            ),
-            /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-muted-foreground text-sm", children: [
-              dateTo,
-              ":"
-            ] }),
-            /* @__PURE__ */ jsxRuntime.jsx(
-              "input",
-              {
-                type: "date",
-                value: formatDate4(dateRange.end),
-                onChange: (e) => onDateRangeChange(dateRange.start, e.target.value),
-                className: "rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                size: "sm",
+                onClick: onRefreshReport,
+                title: refreshReport,
+                "aria-label": refreshReport,
+                children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "h-4 w-4" })
               }
             )
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "button",
+          /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalBody, { className: "max-h-[60vh] overflow-auto", children: loadingReport ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-64 flex-col items-center justify-center", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkJYMQJ32S_cjs.Spinner, { size: "xl" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mt-4", children: loadingData })
+          ] }) : reportResult?.error ? /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.Alert, { variant: "danger", icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, {}), children: /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertDescription, { children: reportResult.error }) }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
             {
-              type: "button",
-              onClick: onRefreshReport,
-              className: "bg-primary hover:bg-primary/90 rounded-lg px-3 py-1.5 text-white",
-              title: refreshReport,
-              children: /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-sync-alt" })
+              className: "prose dark:prose-invert max-w-none",
+              dangerouslySetInnerHTML: { __html: reportResult.data }
             }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1 overflow-auto p-4", children: loadingReport ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full flex-col items-center justify-center", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" }),
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mt-4", children: loadingData })
-        ] }) : reportResult?.error ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-lg border border-red-200 bg-red-50 p-4 text-red-600", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-exclamation-circle mr-2" }),
-          reportResult.error
-        ] }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsxRuntime.jsx(
-          "div",
-          {
-            className: "prose max-w-none",
-            dangerouslySetInnerHTML: { __html: reportResult.data }
-          }
-        ) : /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "overflow-auto rounded-lg bg-gray-100 p-4 text-sm", children: JSON.stringify(reportResult.data, null, 2) }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground py-8 text-center", children: "No data available" }) })
-      ] })
-    ] })
+          ) : Array.isArray(reportResult.data) && reportResult.data.length > 0 ? (() => {
+            const rows = reportResult.data;
+            const columns = Object.keys(rows[0]);
+            return /* @__PURE__ */ jsxRuntime.jsxs(chunkLZEY55QZ_cjs.Table, { children: [
+              /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableRow, { children: columns.map((key) => /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHead, { children: key }, key)) }) }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableBody, { children: rows.map((row) => {
+                const rowKey = columns.map((key) => String(row[key])).join("|") || JSON.stringify(row);
+                return /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableRow, { children: columns.map((key) => /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: columnRenderers?.[key] ? columnRenderers[key](row[key], row) : row[key] == null ? "" : String(row[key]) }, key)) }, rowKey);
+              }) })
+            ] });
+          })() : /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.Table, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableBody, { children: Object.entries(
+            reportResult.data
+          ).map(([key, val]) => /* @__PURE__ */ jsxRuntime.jsxs(chunkLZEY55QZ_cjs.TableRow, { children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { className: "text-muted-foreground font-medium", children: key }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: val == null ? "" : String(val) })
+          ] }, key)) }) }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground py-8 text-center", children: "No data available" }) })
+        ]
+      }
+    )
   ] });
 }
 function ReportDatePicker({
@@ -32202,7 +33179,7 @@ function ReportDatePicker({
   ],
   className
 }) {
-  const [preset, setPreset] = React46__namespace.useState("this-month");
+  const [preset, setPreset] = React47__namespace.useState("this-month");
   const formatDate4 = (date) => {
     if (!date) return "";
     const d = typeof date === "string" ? new Date(date) : date;
@@ -32212,7 +33189,7 @@ function ReportDatePicker({
     setPreset(value);
     const now = /* @__PURE__ */ new Date();
     let start;
-    let end = now;
+    const end = now;
     switch (value) {
       case "today":
         start = now;
@@ -32237,34 +33214,40 @@ function ReportDatePicker({
     }
     onChange?.(start, end);
   };
+  const selectOptions = presets.map((p) => ({
+    value: p.value,
+    label: p.label
+  }));
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-wrap items-center gap-3", className), children: [
     /* @__PURE__ */ jsxRuntime.jsx(
-      "select",
+      chunkNL3CZNBH_cjs.Select,
       {
         value: preset,
-        onChange: (e) => handlePresetChange(e.target.value),
-        className: "rounded-lg border border-gray-300 px-3 py-2",
-        children: presets.map((p) => /* @__PURE__ */ jsxRuntime.jsx("option", { value: p.value, children: p.label }, p.value))
+        onValueChange: (value) => handlePresetChange(value),
+        options: selectOptions,
+        size: "sm"
       }
     ),
     preset === "custom" && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        "input",
+        chunkVV4N4WY6_cjs.Input,
         {
           type: "date",
+          size: "sm",
           value: formatDate4(startDate),
           onChange: (e) => onChange?.(e.target.value, endDate || /* @__PURE__ */ new Date()),
-          className: "rounded-lg border border-gray-300 px-3 py-2"
+          className: "w-auto"
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "to" }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        "input",
+        chunkVV4N4WY6_cjs.Input,
         {
           type: "date",
+          size: "sm",
           value: formatDate4(endDate),
           onChange: (e) => onChange?.(startDate || /* @__PURE__ */ new Date(), e.target.value),
-          className: "rounded-lg border border-gray-300 px-3 py-2"
+          className: "w-auto"
         }
       )
     ] })
@@ -32284,7 +33267,7 @@ function isValidUrl(url) {
     }
   }
 }
-var WebsiteInput = React46__namespace.forwardRef(
+var WebsiteInput = React47__namespace.forwardRef(
   ({
     value = "",
     onChange,
@@ -32295,7 +33278,7 @@ var WebsiteInput = React46__namespace.forwardRef(
     error,
     ...props
   }, ref) => {
-    const [localError, setLocalError] = React46__namespace.useState();
+    const [localError, setLocalError] = React47__namespace.useState();
     const handleChange = (e) => {
       onChange?.(e.target.value);
       if (localError) {
@@ -32377,7 +33360,7 @@ function WebsiteInputGroup({
   typeLabels,
   className
 }) {
-  const websites = React46__namespace.useMemo(() => {
+  const websites = React47__namespace.useMemo(() => {
     if (value.length >= minEntries) return value;
     const padding = Array(minEntries - value.length).fill(null).map(() => ({ url: "", type: "website" }));
     return [...value, ...padding];
@@ -32525,27 +33508,27 @@ WebsiteInputGroup.displayName = "WebsiteInputGroup";
 
 Object.defineProperty(exports, "ThemeProvider", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.ThemeProvider; }
+  get: function () { return chunkPDHFC5S5_cjs.ThemeProvider; }
 });
 Object.defineProperty(exports, "ThemeProviderContext", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.ThemeProviderContext; }
+  get: function () { return chunkPDHFC5S5_cjs.ThemeProviderContext; }
 });
 Object.defineProperty(exports, "ThemeToggle", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.ThemeToggle; }
+  get: function () { return chunkPDHFC5S5_cjs.ThemeToggle; }
 });
 Object.defineProperty(exports, "themeToggleIconVariants", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.themeToggleIconVariants; }
+  get: function () { return chunkPDHFC5S5_cjs.themeToggleIconVariants; }
 });
 Object.defineProperty(exports, "themeToggleVariants", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.themeToggleVariants; }
+  get: function () { return chunkPDHFC5S5_cjs.themeToggleVariants; }
 });
 Object.defineProperty(exports, "useThemeContext", {
   enumerable: true,
-  get: function () { return chunkVDMQCSXT_cjs.useThemeContext; }
+  get: function () { return chunkPDHFC5S5_cjs.useThemeContext; }
 });
 Object.defineProperty(exports, "Tooltip", {
   enumerable: true,
@@ -32597,11 +33580,11 @@ Object.defineProperty(exports, "enterpriseHealthBrand", {
 });
 Object.defineProperty(exports, "Select", {
   enumerable: true,
-  get: function () { return chunkLEE3NMNP_cjs.Select; }
+  get: function () { return chunkNL3CZNBH_cjs.Select; }
 });
 Object.defineProperty(exports, "selectTriggerVariants", {
   enumerable: true,
-  get: function () { return chunkLEE3NMNP_cjs.selectTriggerVariants; }
+  get: function () { return chunkNL3CZNBH_cjs.selectTriggerVariants; }
 });
 Object.defineProperty(exports, "Skeleton", {
   enumerable: true,
@@ -33045,7 +34028,7 @@ Object.defineProperty(exports, "useMediaQuery", {
 });
 Object.defineProperty(exports, "useTheme", {
   enumerable: true,
-  get: function () { return chunk2O7D6F67_cjs.useTheme; }
+  get: function () { return chunkJZIH3A2A_cjs.useTheme; }
 });
 Object.defineProperty(exports, "usePrefersReducedMotion", {
   enumerable: true,
@@ -33211,6 +34194,10 @@ exports.AILogoIcon = AILogoIcon;
 exports.AIMessageDisplay = AIMessageDisplay;
 exports.AITypingIndicator = AITypingIndicator;
 exports.AccessDeniedPage = AccessDeniedPage;
+exports.Accordion = Accordion;
+exports.AccordionContent = AccordionContent;
+exports.AccordionItem = AccordionItem;
+exports.AccordionTrigger = AccordionTrigger;
 exports.ActionButton = ActionButton2;
 exports.ActionButtonsBar = ActionButtonsBar;
 exports.ActiveFilters = ActiveFilters;
@@ -33249,7 +34236,7 @@ exports.CardSkeleton = CardSkeleton;
 exports.CellRenderers = CellRenderers;
 exports.CharacterCounter = CharacterCounter;
 exports.CheckrIntegration = CheckrIntegration;
-exports.ChevronIcon = ChevronIcon;
+exports.ChevronIcon = ChevronIcon2;
 exports.ClaimListingButton = ClaimListingButton;
 exports.ClaimProviderForm = ClaimProviderForm;
 exports.CloseIcon = CloseIcon;
@@ -33303,6 +34290,7 @@ exports.EmployerView = EmployerView;
 exports.EmptyState = EmptyState;
 exports.EngagementScoreRenderer = EngagementScoreRenderer;
 exports.ErrorPage = ErrorPage;
+exports.FAQAccordion = FAQAccordion;
 exports.FileManager = FileManager;
 exports.FilePreview = FilePreview;
 exports.FloatingAIChat = FloatingAIChat;
@@ -33358,6 +34346,8 @@ exports.MobileBackButton = MobileBackButton;
 exports.MobileMenuButton = MobileMenuButton;
 exports.MobileMenuPanel = MobileMenuPanel;
 exports.NavLinks = NavLinks;
+exports.NearbyProviderCard = NearbyProviderCard;
+exports.NearbyProvidersList = NearbyProvidersList;
 exports.NewsletterForm = NewsletterForm;
 exports.NotFoundPage = NotFoundPage;
 exports.NotificationCenter = NotificationCenter;
@@ -33393,6 +34383,7 @@ exports.ProviderCardSkeleton = ProviderCardSkeleton;
 exports.ProviderDetailHeader = ProviderDetailHeader;
 exports.ProviderDetailHeaderSkeleton = ProviderDetailHeaderSkeleton;
 exports.ProviderLogo = ProviderLogo2;
+exports.ProviderMap = ProviderMap;
 exports.ProviderOverview = ProviderOverview;
 exports.ProviderSearchBar = ProviderSearchBar;
 exports.ProviderSearchFilters = ProviderSearchFilters;
@@ -33494,6 +34485,7 @@ exports.formatLastSeen = formatLastSeen;
 exports.formatPhoneDisplay = formatPhoneDisplay;
 exports.generateAttachmentId = generateAttachmentId;
 exports.generateId = generateId;
+exports.generateProviderFAQs = generateProviderFAQs;
 exports.getConversationSubtitle = getConversationSubtitle;
 exports.getConversationTitle = getConversationTitle;
 exports.getFileType = getFileType;

@@ -35,9 +35,9 @@ export interface ThemeProviderProps {
  */
 function ThemeProvider({
   children,
-  defaultTheme: _defaultTheme = 'system',
+  defaultTheme = 'system',
 }: ThemeProviderProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme(defaultTheme);
 
   const value = React.useMemo(
     () => ({ theme, setTheme, resolvedTheme }),

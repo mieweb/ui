@@ -12,13 +12,13 @@ function getSystemTheme(): ResolvedTheme {
     : 'light';
 }
 
-function getStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'system';
+function getStoredTheme(): Theme | null {
+  if (typeof window === 'undefined') return null;
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
   if (stored === 'light' || stored === 'dark' || stored === 'system') {
     return stored;
   }
-  return 'system';
+  return null;
 }
 
 function applyTheme(theme: ResolvedTheme): void {
@@ -45,16 +45,19 @@ function applyTheme(theme: ResolvedTheme): void {
  * }
  * ```
  */
-export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light');
+export function useTheme(defaultTheme: Theme = 'system') {
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(
+    defaultTheme === 'system' ? 'light' : defaultTheme === 'dark' ? 'dark' : 'light'
+  );
 
-  // Initialize theme from storage
+  // Initialize theme from storage, falling back to defaultTheme
   useEffect(() => {
     const stored = getStoredTheme();
-    setThemeState(stored);
+    const initial = stored ?? defaultTheme;
+    setThemeState(initial);
 
-    const resolved = stored === 'system' ? getSystemTheme() : stored;
+    const resolved = initial === 'system' ? getSystemTheme() : initial;
     setResolvedTheme(resolved);
     applyTheme(resolved);
   }, []);

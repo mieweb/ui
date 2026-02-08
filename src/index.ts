@@ -1,4 +1,5 @@
 // Components
+export * from './components/Accordion';
 export * from './components/AddContactModal';
 export * from './components/AdditionalFields';
 export * from './components/Address';
@@ -47,7 +48,13 @@ export * from './components/EmployerView';
 export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
-export * from './components/HelpSupportPanel';
+// HelpSupportPanel exports FAQItem which conflicts with Accordion
+export {
+  HelpSupportPanel,
+  type HelpSupportPanelProps,
+  type SupportContact,
+  type FAQItem as HelpFAQItem,
+} from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
 export * from './components/Input';
 export * from './components/InventoryManager';
@@ -60,6 +67,7 @@ export * from './components/LanguageSelector';
 export * from './components/LoadingPage';
 export * from './components/Messaging';
 export * from './components/Modal';
+export * from './components/NearbyProviderCard';
 export * from './components/NotificationCenter';
 export * from './components/OnboardingWizard';
 export * from './components/OrderCard';
@@ -84,6 +92,7 @@ export * from './components/ProductVersion';
 export * from './components/Progress';
 export * from './components/ProviderCard';
 export * from './components/ProviderDetailHeader';
+export * from './components/ProviderMap';
 // ProviderOverview exports QuickAction type which conflicts with QuickAction component
 export {
   ProviderOverview,

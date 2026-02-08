@@ -1,0 +1,15 @@
+export {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+  FAQAccordion,
+  generateProviderFAQs,
+  type AccordionProps,
+  type AccordionItemProps,
+  type AccordionTriggerProps,
+  type AccordionContentProps,
+  type FAQItem,
+  type FAQAccordionProps,
+  type ProviderFAQData,
+} from './Accordion';

@@ -1,6 +1,6 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
-import { T as Theme, R as ResolvedTheme } from '../../useTheme-B9SWu6ui.js';
+import { T as Theme, R as ResolvedTheme } from '../../useTheme-4pRCRjFK.js';
 import * as class_variance_authority_types from 'class-variance-authority/types';
 import { VariantProps } from 'class-variance-authority';
 
@@ -31,7 +31,7 @@ interface ThemeProviderProps {
  * }
  * ```
  */
-declare function ThemeProvider({ children, defaultTheme: _defaultTheme, }: ThemeProviderProps): react_jsx_runtime.JSX.Element;
+declare function ThemeProvider({ children, defaultTheme, }: ThemeProviderProps): react_jsx_runtime.JSX.Element;
 declare namespace ThemeProvider {
     var displayName: string;
 }
@@ -54,7 +54,7 @@ declare function useThemeContext(): ThemeProviderContextValue;
 
 declare const themeToggleVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
-    variant?: "ghost" | "default" | null | undefined;
+    variant?: "default" | "ghost" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const themeToggleIconVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;

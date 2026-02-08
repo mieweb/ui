@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+'use strict';
+
+var react = require('react');
 
 // src/hooks/useTheme.ts
 var THEME_STORAGE_KEY = "mieweb-ui-theme";
@@ -7,12 +9,12 @@ function getSystemTheme() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 function getStoredTheme() {
-  if (typeof window === "undefined") return "system";
+  if (typeof window === "undefined") return null;
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
   if (stored === "light" || stored === "dark" || stored === "system") {
     return stored;
   }
-  return "system";
+  return null;
 }
 function applyTheme(theme) {
   if (typeof document === "undefined") return;
@@ -21,17 +23,20 @@ function applyTheme(theme) {
   root.classList.add(theme);
   root.setAttribute("data-theme", theme);
 }
-function useTheme() {
-  const [theme, setThemeState] = useState("system");
-  const [resolvedTheme, setResolvedTheme] = useState("light");
-  useEffect(() => {
+function useTheme(defaultTheme = "system") {
+  const [theme, setThemeState] = react.useState(defaultTheme);
+  const [resolvedTheme, setResolvedTheme] = react.useState(
+    defaultTheme === "system" ? "light" : defaultTheme === "dark" ? "dark" : "light"
+  );
+  react.useEffect(() => {
     const stored = getStoredTheme();
-    setThemeState(stored);
-    const resolved = stored === "system" ? getSystemTheme() : stored;
+    const initial = stored ?? defaultTheme;
+    setThemeState(initial);
+    const resolved = initial === "system" ? getSystemTheme() : initial;
     setResolvedTheme(resolved);
     applyTheme(resolved);
   }, []);
-  useEffect(() => {
+  react.useEffect(() => {
     if (theme !== "system") return;
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e) => {
@@ -42,7 +47,7 @@ function useTheme() {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
-  const setTheme = useCallback((newTheme) => {
+  const setTheme = react.useCallback((newTheme) => {
     setThemeState(newTheme);
     localStorage.setItem(THEME_STORAGE_KEY, newTheme);
     const resolved = newTheme === "system" ? getSystemTheme() : newTheme;
@@ -56,6 +61,6 @@ function useTheme() {
   };
 }
 
-export { useTheme };
-//# sourceMappingURL=chunk-KJZNEVYM.js.map
-//# sourceMappingURL=chunk-KJZNEVYM.js.map
+exports.useTheme = useTheme;
+//# sourceMappingURL=chunk-JZIH3A2A.cjs.map
+//# sourceMappingURL=chunk-JZIH3A2A.cjs.map

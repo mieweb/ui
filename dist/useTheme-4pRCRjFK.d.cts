@@ -15,7 +15,7 @@ type ResolvedTheme = 'light' | 'dark';
  * }
  * ```
  */
-declare function useTheme(): {
+declare function useTheme(defaultTheme?: Theme): {
     theme: Theme;
     setTheme: (newTheme: Theme) => void;
     resolvedTheme: ResolvedTheme;

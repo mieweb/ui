@@ -4,7 +4,7 @@ import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 declare const skeletonVariants: (props?: ({
-    variant?: "button" | "title" | "image" | "text" | "default" | "card" | "avatar" | null | undefined;
+    variant?: "default" | "title" | "button" | "text" | "image" | "card" | "avatar" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof skeletonVariants> {
     /** Width of the skeleton */

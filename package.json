@@ -138,6 +138,7 @@
   "peerDependencies": {
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
+    "mapbox-gl": ">=2.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "wavesurfer.js": ">=7.0.0"
@@ -156,6 +157,9 @@
       "optional": false
     },
     "wavesurfer.js": {
+      "optional": true
+    },
+    "mapbox-gl": {
       "optional": true
     }
   },
@@ -178,6 +182,7 @@
     "@testing-library/jest-dom": "^6.6.5",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.3",
+    "@types/mapbox-gl": "^3.4.1",
     "@types/node": "^22.13.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
@@ -193,6 +198,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-storybook": "^10.1.11",
     "jsdom": "^26.0.0",
+    "mapbox-gl": "^3.18.1",
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",

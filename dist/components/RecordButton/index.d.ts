@@ -47,7 +47,7 @@ interface RecordButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonEl
     mimeType?: string;
 }
 declare const recordButtonVariants: (props?: ({
-    variant?: "ghost" | "outline" | "default" | "minimal" | null | undefined;
+    variant?: "default" | "ghost" | "outline" | "minimal" | null | undefined;
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare function formatDuration(seconds: number): string;
