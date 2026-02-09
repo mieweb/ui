@@ -46,7 +46,14 @@ export function SiteLogo({
   const content = (
     <div className={cn('flex items-center gap-2', className)}>
       {logoSrc ? (
-        <img src={logoSrc} alt={logoAlt} className="h-8 w-8 object-contain" />
+        <img
+          src={logoSrc}
+          alt={logoAlt}
+          className={cn(
+            'object-contain',
+            textSrc ? 'h-8 w-8' : 'h-[30px] w-auto'
+          )}
+        />
       ) : (
         <div
           className={cn(
@@ -598,7 +605,7 @@ const headerVariants = cva(
       variant: {
         primary: 'bg-primary-600',
         white:
-          'bg-white shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800',
+          'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.24)] dark:bg-gray-900 dark:border-b dark:border-gray-800 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[3px] after:bg-gradient-to-r after:from-[#27AAE1] after:via-[#5DBFE8] after:to-[#27AAE1]',
         transparent: 'bg-transparent',
         glass: 'bg-white/80 backdrop-blur-md shadow-sm dark:bg-gray-900/80',
       },

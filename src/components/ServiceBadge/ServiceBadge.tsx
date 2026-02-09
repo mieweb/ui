@@ -7,7 +7,7 @@ import { cn } from '../../utils/cn';
 // =============================================================================
 
 const serviceBadgeVariants = cva(
-  'inline-flex items-center font-medium transition-colors',
+  'inline-flex items-center font-medium transition-all duration-200',
   {
     variants: {
       variant: {
@@ -27,14 +27,14 @@ const serviceBadgeVariants = cva(
           'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
       },
       size: {
-        xs: 'text-xs px-1.5 py-0.5 rounded',
-        sm: 'text-xs px-2 py-1 rounded-md',
-        md: 'text-sm px-2.5 py-1.5 rounded-md',
-        lg: 'text-sm px-3 py-2 rounded-lg',
-        xl: 'text-base px-4 py-2.5 rounded-lg',
+        xs: 'text-xs px-2 py-0.5 rounded-full',
+        sm: 'text-xs px-2.5 py-1 rounded-full',
+        md: 'text-sm px-3 py-1.5 rounded-full',
+        lg: 'text-sm px-3.5 py-2 rounded-full',
+        xl: 'text-base px-4 py-2.5 rounded-full',
       },
       interactive: {
-        true: 'cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-1',
+        true: 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 active:scale-[0.97]',
         false: '',
       },
     },
@@ -437,12 +437,12 @@ export function DOTBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md font-medium',
+        'inline-flex items-center rounded-full font-medium',
         config.className,
-        size === 'xs' && 'px-1.5 py-0.5 text-xs',
-        size === 'sm' && 'px-2 py-1 text-xs',
-        (size === 'md' || !size) && 'px-2.5 py-1.5 text-sm',
-        size === 'lg' && 'px-3 py-2 text-sm',
+        size === 'xs' && 'px-2 py-0.5 text-xs',
+        size === 'sm' && 'px-2.5 py-1 text-xs',
+        (size === 'md' || !size) && 'px-3 py-1.5 text-sm',
+        size === 'lg' && 'px-3.5 py-2 text-sm',
         size === 'xl' && 'px-4 py-2.5 text-base',
         className
       )}

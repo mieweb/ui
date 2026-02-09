@@ -257,7 +257,7 @@ const containerVariants = cva('business-hours', {
   variants: {
     variant: {
       default: '',
-      card: 'rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden',
+      card: 'rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800 overflow-hidden',
       compact: '',
       inline: 'inline-flex items-center gap-2',
     },
@@ -273,10 +273,10 @@ const containerVariants = cva('business-hours', {
   },
 });
 
-const dayRowVariants = cva('flex justify-between items-start gap-4 py-2', {
+const dayRowVariants = cva('flex justify-between items-start gap-4 py-2.5', {
   variants: {
     isToday: {
-      true: 'bg-primary-50 dark:bg-primary-900/20 -mx-3 px-3 rounded-md',
+      true: 'bg-primary-50/60 dark:bg-primary-900/20 -mx-3 px-3 rounded-lg',
       false: '',
     },
   },
@@ -509,7 +509,7 @@ export function BusinessHours({
   return (
     <div className={cn(containerVariants({ variant, size }), className)}>
       {variant === 'card' && (
-        <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800">
+        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/80">
           <div className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white">
             <ClockIcon className="text-neutral-500" />
             {headerText}
@@ -624,7 +624,7 @@ export function HoursSummary({
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
           'flex w-full items-center justify-between rounded-lg p-3',
-          'bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-800 dark:hover:bg-neutral-700',
+          'bg-gray-50/80 hover:bg-gray-100/80 dark:bg-gray-800/80 dark:hover:bg-gray-700/80',
           'transition-colors'
         )}
         aria-expanded={isExpanded}
@@ -654,7 +654,7 @@ export function HoursSummary({
       </button>
 
       {isExpanded && hasStructuredHours && (
-        <div className="mt-2 rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="mt-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800">
           <BusinessHours
             schedule={schedule}
             showHeader={false}

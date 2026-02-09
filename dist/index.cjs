@@ -7560,7 +7560,7 @@ var containerVariants = classVarianceAuthority.cva("business-hours", {
   variants: {
     variant: {
       default: "",
-      card: "rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden",
+      card: "rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800 overflow-hidden",
       compact: "",
       inline: "inline-flex items-center gap-2"
     },
@@ -7575,10 +7575,10 @@ var containerVariants = classVarianceAuthority.cva("business-hours", {
     size: "md"
   }
 });
-var dayRowVariants = classVarianceAuthority.cva("flex justify-between items-start gap-4 py-2", {
+var dayRowVariants = classVarianceAuthority.cva("flex justify-between items-start gap-4 py-2.5", {
   variants: {
     isToday: {
-      true: "bg-primary-50 dark:bg-primary-900/20 -mx-3 px-3 rounded-md",
+      true: "bg-primary-50/60 dark:bg-primary-900/20 -mx-3 px-3 rounded-lg",
       false: ""
     }
   },
@@ -7730,7 +7730,7 @@ function BusinessHours({
     ] });
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(containerVariants({ variant, size }), className), children: [
-    variant === "card" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800", children: [
+    variant === "card" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/80", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 font-medium text-neutral-900 dark:text-white", children: [
         /* @__PURE__ */ jsxRuntime.jsx(ClockIcon, { className: "text-neutral-500" }),
         headerText
@@ -7795,7 +7795,7 @@ function HoursSummary({
         onClick: () => setIsExpanded(!isExpanded),
         className: chunkOR5DRJCW_cjs.cn(
           "flex w-full items-center justify-between rounded-lg p-3",
-          "bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-800 dark:hover:bg-neutral-700",
+          "bg-gray-50/80 hover:bg-gray-100/80 dark:bg-gray-800/80 dark:hover:bg-gray-700/80",
           "transition-colors"
         ),
         "aria-expanded": isExpanded,
@@ -7826,7 +7826,7 @@ function HoursSummary({
         ]
       }
     ),
-    isExpanded && hasStructuredHours && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900", children: /* @__PURE__ */ jsxRuntime.jsx(
+    isExpanded && hasStructuredHours && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800", children: /* @__PURE__ */ jsxRuntime.jsx(
       BusinessHours,
       {
         schedule,
@@ -18741,13 +18741,21 @@ function NearbyProviderCard({
   className
 }) {
   const { name, slug, logoUrl, address, phoneNumber, distance } = provider;
-  const LinkWrapper = LinkComponent ? ({ to, className: className2, children }) => /* @__PURE__ */ jsxRuntime.jsx(LinkComponent, { to, className: className2, children }) : ({ to, className: className2, children }) => /* @__PURE__ */ jsxRuntime.jsx("a", { href: to, className: className2, children });
+  const LinkWrapper = LinkComponent ? ({
+    to,
+    className: className2,
+    children
+  }) => /* @__PURE__ */ jsxRuntime.jsx(LinkComponent, { to, className: className2, children }) : ({
+    to,
+    className: className2,
+    children
+  }) => /* @__PURE__ */ jsxRuntime.jsx("a", { href: to, className: className2, children });
   const initials = name.split(" ").map((word) => word[0]).join("").toUpperCase().slice(0, 2);
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800",
+        "rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100 transition-all hover:shadow-md hover:ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 dark:hover:ring-gray-600",
         className
       ),
       children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-4", children: [
@@ -18757,7 +18765,7 @@ function NearbyProviderCard({
             {
               src: logoUrl,
               alt: `${name} logo`,
-              className: "h-16 w-16 rounded-lg object-contain",
+              className: "h-14 w-14 rounded-xl bg-white object-contain p-1 ring-1 ring-gray-100 dark:bg-gray-700 dark:ring-gray-600",
               onError: (e) => {
                 e.currentTarget.style.display = "none";
                 e.currentTarget.nextElementSibling?.classList.remove("hidden");
@@ -18768,7 +18776,7 @@ function NearbyProviderCard({
             "div",
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "flex h-16 w-16 items-center justify-center rounded-lg bg-primary-100 text-xl font-bold text-primary-600 dark:bg-primary-900/30 dark:text-primary-400",
+                "from-primary-500 to-primary-700 shadow-primary-500/20 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br text-lg font-bold text-white shadow-sm",
                 logoUrl && "hidden"
               ),
               children: initials
@@ -18781,14 +18789,13 @@ function NearbyProviderCard({
               LinkWrapper,
               {
                 to: `/provider/${slug}`,
-                className: "text-base font-semibold text-gray-900 hover:text-primary-600 dark:text-white dark:hover:text-primary-400",
+                className: "hover:text-primary-600 dark:hover:text-primary-400 text-sm font-semibold text-gray-900 transition-colors dark:text-white",
                 children: name
               }
             ),
-            /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "shrink-0 text-sm text-gray-500 dark:text-gray-400", children: [
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-primary-600 dark:text-primary-400", children: distance.toFixed(2) }),
-              " ",
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs uppercase", children: "mi" })
+            /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", children: [
+              distance.toFixed(1),
+              " mi"
             ] })
           ] }),
           address && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 text-sm text-gray-600 dark:text-gray-400", children: [
@@ -18806,7 +18813,7 @@ function NearbyProviderCard({
             "a",
             {
               href: `tel:${phoneNumber}`,
-              className: "inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
+              className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm",
               children: [
                 /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon3, { className: "h-4 w-4" }),
                 formatPhone(phoneNumber)
@@ -18834,7 +18841,7 @@ function NearbyProvidersList({
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-4", className), children: [
     /* @__PURE__ */ jsxRuntime.jsxs("h2", { className: "flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "h-5 w-5 text-primary-600 dark:text-primary-400" }),
+      /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "text-primary-600 dark:text-primary-400 h-5 w-5" }),
       title
     ] }),
     showConciergeBanner && /* @__PURE__ */ jsxRuntime.jsx(ConciergeBanner, {}),
@@ -18851,7 +18858,7 @@ function NearbyProvidersList({
       "a",
       {
         href: `/providers/search/${zipcode}/25`,
-        className: "inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
+        className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-2 text-sm font-medium",
         children: [
           /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "h-4 w-4" }),
           "SHOW PROVIDERS IN ",
@@ -18862,7 +18869,7 @@ function NearbyProvidersList({
   ] });
 }
 function ConciergeBanner() {
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-900/20", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-primary-200 bg-primary-50 dark:border-primary-800 dark:bg-primary-900/20 rounded-lg border p-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
     /* @__PURE__ */ jsxRuntime.jsx(
       "img",
       {
@@ -18882,7 +18889,7 @@ function ConciergeBanner() {
           href: "https://bluehive.com/concierge/",
           target: "_blank",
           rel: "noopener noreferrer",
-          className: "mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400",
+          className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 mt-1 inline-flex items-center gap-1 text-sm font-medium",
           children: [
             "LEARN MORE",
             /* @__PURE__ */ jsxRuntime.jsx(ArrowRightIcon, { className: "h-4 w-4" })
@@ -21784,10 +21791,10 @@ var providerCardVariants = classVarianceAuthority.cva(
   [
     "group relative flex w-full overflow-hidden rounded-xl",
     "bg-card text-card-foreground",
-    "border border-border",
-    "shadow-card",
+    "border-0",
+    "shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.24)]",
     "transition-all duration-200",
-    "hover:shadow-md hover:border-primary-200 dark:hover:border-primary-800"
+    "hover:shadow-md"
   ],
   {
     variants: {
@@ -21813,7 +21820,7 @@ var logoContainerVariants = classVarianceAuthority.cva(
     variants: {
       variant: {
         compact: "h-20 w-full",
-        list: "w-28 h-full",
+        list: "w-24 h-full",
         featured: "h-32 w-full rounded-lg mb-4"
       }
     },
@@ -21840,37 +21847,11 @@ var ProviderLogo = ({ logoURL, name, variant }) => {
 };
 var DistanceBadge = ({ distance }) => {
   if (distance === void 0) return null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground inline-flex items-center gap-1 text-xs", children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(
-      "svg",
-      {
-        className: "h-3 w-3",
-        fill: "none",
-        viewBox: "0 0 24 24",
-        stroke: "currentColor",
-        strokeWidth: 2,
-        children: [
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "path",
-            {
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-              d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "path",
-            {
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-              d: "M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            }
-          )
-        ]
-      }
-    ),
-    distance.toFixed(1),
-    "mi"
+  const formatted = distance < 10 ? parseFloat(distance.toFixed(2)).toString() : distance.toFixed(0);
+  return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "bg-primary-600/10 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400 inline-flex shrink-0 items-center gap-1 rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-3 w-3", fill: "currentColor", viewBox: "0 0 512 512", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19L508.48 67.48c16.49-38.4-14.96-80.35-63.96-63.96z" }) }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { children: formatted }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "uppercase", children: "MI" })
   ] });
 };
 var SafeFromWildfiresNotice = () => /* @__PURE__ */ jsxRuntime.jsx(chunkBXK5TNJE_cjs.Tooltip, { content: "BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-success/10 text-success inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs", children: [
@@ -21904,12 +21885,6 @@ function formatPhoneNumber3(phone) {
     return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
   }
   return phone;
-}
-function formatAddressSingleLine2(address) {
-  const parts = [address.street1];
-  if (address.street2) parts.push(address.street2);
-  parts.push(`${address.city}, ${address.state} ${address.postalCode}`);
-  return parts.join(", ");
 }
 var ProviderCard = React47__namespace.forwardRef(
   ({
@@ -21988,28 +21963,31 @@ var ProviderCard = React47__namespace.forwardRef(
               ),
               children: [
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-1 flex items-start justify-between gap-2", children: [
-                  /* @__PURE__ */ jsxRuntime.jsx(
-                    "h3",
-                    {
-                      className: chunkOR5DRJCW_cjs.cn(
-                        "text-primary-600 dark:text-primary-400 line-clamp-2 font-semibold",
-                        "group-hover:text-primary-700 dark:group-hover:text-primary-300",
-                        "transition-colors",
-                        variant === "featured" ? "text-lg" : "text-sm"
-                      ),
-                      children: provider.name
-                    }
-                  ),
-                  provider.verified && /* @__PURE__ */ jsxRuntime.jsx(VerifiedBadge, {})
+                  /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-1", children: [
+                    /* @__PURE__ */ jsxRuntime.jsx(
+                      "h3",
+                      {
+                        className: chunkOR5DRJCW_cjs.cn(
+                          "text-primary-600 dark:text-primary-400 line-clamp-2 font-semibold",
+                          "group-hover:text-primary-700 dark:group-hover:text-primary-300",
+                          "transition-colors",
+                          variant === "featured" ? "text-lg" : "text-[15px] leading-tight"
+                        ),
+                        children: provider.name
+                      }
+                    ),
+                    provider.verified && /* @__PURE__ */ jsxRuntime.jsx(VerifiedBadge, {})
+                  ] }),
+                  /* @__PURE__ */ jsxRuntime.jsx(DistanceBadge, { distance: provider.distance })
                 ] }),
-                /* @__PURE__ */ jsxRuntime.jsx(
+                /* @__PURE__ */ jsxRuntime.jsxs(
                   "p",
                   {
                     className: chunkOR5DRJCW_cjs.cn(
                       "text-muted-foreground",
-                      variant === "featured" ? "text-sm" : "text-xs"
+                      variant === "featured" ? "text-sm" : "text-[13px]"
                     ),
-                    children: variant === "list" ? formatAddressSingleLine2(provider.address) : /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+                    children: [
                       provider.address.street1,
                       provider.address.street2 && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
                         /* @__PURE__ */ jsxRuntime.jsx("br", {}),
@@ -22021,22 +21999,35 @@ var ProviderCard = React47__namespace.forwardRef(
                       provider.address.state,
                       " ",
                       provider.address.postalCode
-                    ] })
+                    ]
                   }
                 ),
-                provider.workNumber && /* @__PURE__ */ jsxRuntime.jsx(
+                provider.workNumber && /* @__PURE__ */ jsxRuntime.jsxs(
                   "a",
                   {
                     href: `tel:${provider.workNumber}`,
                     "data-phone-link": true,
                     onClick: handlePhoneClick,
                     className: chunkOR5DRJCW_cjs.cn(
-                      "text-primary-600 hover:text-primary-700 mt-1",
-                      "dark:text-primary-400 dark:hover:text-primary-300",
+                      "mt-1 inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800",
+                      "dark:text-emerald-400 dark:hover:text-emerald-300",
                       "hover:underline",
-                      variant === "featured" ? "text-sm" : "text-xs"
+                      variant === "featured" ? "text-sm" : "text-[13px]"
                     ),
-                    children: formatPhoneNumber3(provider.workNumber)
+                    children: [
+                      /* @__PURE__ */ jsxRuntime.jsx(
+                        "svg",
+                        {
+                          xmlns: "http://www.w3.org/2000/svg",
+                          viewBox: "0 0 512 512",
+                          fill: "currentColor",
+                          className: "h-3.5 w-3.5 shrink-0",
+                          "aria-hidden": "true",
+                          children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" })
+                        }
+                      ),
+                      formatPhoneNumber3(provider.workNumber)
+                    ]
                   }
                 ),
                 displayServices && displayServices.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 flex flex-wrap gap-1.5", children: [
@@ -22057,11 +22048,8 @@ var ProviderCard = React47__namespace.forwardRef(
                   ] })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1" }),
-                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 flex items-center justify-between", children: [
-                  /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-                    provider.safeFromWildfires && /* @__PURE__ */ jsxRuntime.jsx(SafeFromWildfiresNotice, {}),
-                    !provider.safeFromWildfires && /* @__PURE__ */ jsxRuntime.jsx(DistanceBadge, { distance: provider.distance })
-                  ] }),
+                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-2 flex items-center justify-between", children: [
+                  /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center gap-2", children: provider.safeFromWildfires && /* @__PURE__ */ jsxRuntime.jsx(SafeFromWildfiresNotice, {}) }),
                   renderActions?.(provider)
                 ] })
               ]
@@ -22191,152 +22179,46 @@ var ProviderCardSkeleton = ({
   );
 };
 ProviderCardSkeleton.displayName = "ProviderCardSkeleton";
-var actionButtonVariants = classVarianceAuthority.cva(
-  "flex flex-col items-center justify-center gap-1 py-3 px-2 text-sm font-normal transition-colors",
-  {
-    variants: {
-      variant: {
-        default: "text-gray-600 hover:text-primary-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800",
-        active: "text-primary-600 bg-primary-50 dark:text-primary-400 dark:bg-primary-900/20"
-      }
-    },
-    defaultVariants: {
-      variant: "default"
-    }
-  }
-);
-function ActionButton2({
-  icon,
-  label,
-  variant,
-  href,
-  className,
-  onClick,
-  ...props
-}) {
-  const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xl", children: icon }),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs whitespace-nowrap", children: label })
-  ] });
-  if (href) {
-    return /* @__PURE__ */ jsxRuntime.jsx(
-      "a",
-      {
-        href,
-        target: "_blank",
-        rel: "noopener noreferrer",
-        className: chunkOR5DRJCW_cjs.cn(
-          actionButtonVariants({ variant: variant ?? "default" }),
-          className
-        ),
-        children: content
-      }
-    );
-  }
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "button",
-    {
-      type: "button",
-      className: chunkOR5DRJCW_cjs.cn(
-        actionButtonVariants({ variant: variant ?? "default" }),
-        className
-      ),
-      onClick,
-      ...props,
-      children: content
-    }
-  );
-}
-function ActionButtonsBar({
-  provider,
-  onShare,
-  onCopyLink,
-  onCall,
-  className
-}) {
-  const { address, phoneNumber, urls } = provider;
-  const directionsUrl = `https://www.google.com/maps?daddr=${encodeURIComponent(
-    `${address.street1}, ${address.city}, ${address.state} ${address.postalCode}`
-  )}`;
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      className: chunkOR5DRJCW_cjs.cn(
-        "flex justify-center border-b border-gray-200 dark:border-gray-700",
-        className
-      ),
-      children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex overflow-x-auto", children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
-          ActionButton2,
-          {
-            icon: /* @__PURE__ */ jsxRuntime.jsx(DirectionsIcon, {}),
-            label: "Directions",
-            href: directionsUrl
-          }
-        ),
-        phoneNumber && /* @__PURE__ */ jsxRuntime.jsx(
-          ActionButton2,
-          {
-            icon: /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon4, {}),
-            label: "Call",
-            onClick: () => onCall?.(phoneNumber)
-          }
-        ),
-        urls?.website && /* @__PURE__ */ jsxRuntime.jsx(
-          ActionButton2,
-          {
-            icon: /* @__PURE__ */ jsxRuntime.jsx(WebsiteIcon, {}),
-            label: "Website",
-            href: urls.website
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsx(ActionButton2, { icon: /* @__PURE__ */ jsxRuntime.jsx(ShareIcon, {}), label: "Share", onClick: onShare }),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          ActionButton2,
-          {
-            icon: /* @__PURE__ */ jsxRuntime.jsx(CopyIcon2, {}),
-            label: "Copy Link",
-            onClick: onCopyLink
-          }
-        )
-      ] })
-    }
-  );
-}
 function Breadcrumb2({ items, className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx("nav", { "aria-label": "Breadcrumb", className: chunkOR5DRJCW_cjs.cn("py-2", className), children: /* @__PURE__ */ jsxRuntime.jsx("ol", { className: "flex flex-wrap items-center gap-1 text-sm", children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "flex items-center", children: [
-    index > 0 && /* @__PURE__ */ jsxRuntime.jsx(ChevronRightIcon, { className: "mx-2 h-4 w-4 text-gray-400 dark:text-gray-500" }),
-    index === items.length - 1 ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "max-w-[200px] truncate font-medium text-gray-900 dark:text-white", children: item.label }) : /* @__PURE__ */ jsxRuntime.jsx(
+  return /* @__PURE__ */ jsxRuntime.jsxs("nav", { "aria-label": "Breadcrumb", className: chunkOR5DRJCW_cjs.cn("py-3", className), children: [
+    /* @__PURE__ */ jsxRuntime.jsx("ol", { className: "hidden flex-wrap items-center gap-1 text-sm sm:flex", children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "flex items-center", children: [
+      index > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mx-1.5 text-white/50", children: "\u203A" }),
+      index === items.length - 1 ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-white/80", children: item.label }) : index === 0 ? /* @__PURE__ */ jsxRuntime.jsxs(
+        "a",
+        {
+          href: item.href,
+          className: "text-white/70 transition-colors hover:text-white",
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(HomeIcon, { className: "-mt-0.5 mr-1 inline-block h-3.5 w-3.5" }),
+            item.label
+          ]
+        }
+      ) : /* @__PURE__ */ jsxRuntime.jsx(
+        "a",
+        {
+          href: item.href,
+          className: "text-white/70 transition-colors hover:text-white",
+          children: item.label
+        }
+      )
+    ] }, item.href)) }),
+    items.length >= 2 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "block sm:hidden", children: /* @__PURE__ */ jsxRuntime.jsxs(
       "a",
       {
-        href: item.href,
-        className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline",
-        children: item.label
+        href: items[items.length - 2].href,
+        className: "inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/20",
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon, { className: "h-3.5 w-3.5" }),
+          "Back"
+        ]
       }
-    )
-  ] }, item.href)) }) });
-}
-function MobileBackButton({
-  href,
-  label = "Back",
-  className
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("py-2 sm:hidden", className), children: /* @__PURE__ */ jsxRuntime.jsxs(
-    "a",
-    {
-      href,
-      className: "bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
-      children: [
-        /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon, { className: "h-4 w-4" }),
-        label
-      ]
-    }
-  ) });
+    ) })
+  ] });
 }
 var logoSizeClasses = {
-  sm: "w-16 h-16",
-  md: "w-24 h-24",
-  lg: "w-32 h-32"
+  sm: "w-14 h-14",
+  md: "w-20 h-20",
+  lg: "w-[80px] h-[80px]"
 };
 function ProviderLogo2({
   src,
@@ -22352,8 +22234,8 @@ function ProviderLogo2({
       {
         className: chunkOR5DRJCW_cjs.cn(
           logoSizeClasses[size],
-          "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex items-center justify-center rounded-lg font-bold",
-          size === "sm" && "text-lg",
+          "flex items-center justify-center rounded-2xl bg-gradient-to-br from-white/30 to-white/10 font-bold text-white shadow-lg",
+          size === "sm" && "rounded-xl text-lg",
           size === "md" && "text-2xl",
           size === "lg" && "text-3xl",
           className
@@ -22364,24 +22246,26 @@ function ProviderLogo2({
     );
   }
   return /* @__PURE__ */ jsxRuntime.jsx(
-    "img",
+    "div",
     {
-      src,
-      alt: `${name} logo`,
       className: chunkOR5DRJCW_cjs.cn(
         logoSizeClasses[size],
-        "rounded-lg object-contain",
+        "flex items-center justify-center overflow-hidden rounded-2xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)]",
+        size === "sm" && "rounded-xl",
         className
       ),
-      onError: () => setHasError(true)
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "img",
+        {
+          src,
+          alt: `${name} logo`,
+          className: "h-full w-full object-contain p-2",
+          onError: () => setHasError(true)
+        }
+      )
     }
   );
 }
-var socialIconSizes = {
-  sm: "text-lg",
-  md: "text-xl",
-  lg: "text-2xl"
-};
 function SocialMediaLinks({
   urls,
   providerName,
@@ -22429,24 +22313,21 @@ function SocialMediaLinks({
     },
     { key: "blog", url: urls.blog, icon: /* @__PURE__ */ jsxRuntime.jsx(BlogIcon, {}), label: "Blog" }
   ].filter((link) => link.url);
-  if (socialLinks.length === 0) {
-    return null;
-  }
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-wrap items-center gap-3", className), children: socialLinks.map((link) => /* @__PURE__ */ jsxRuntime.jsxs(
+  if (socialLinks.length === 0) return null;
+  const iconSizes = { sm: "h-3.5 w-3.5", md: "h-4 w-4", lg: "h-5 w-5" };
+  const containerSizes = { sm: "w-7 h-7", md: "w-9 h-9", lg: "w-10 h-10" };
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("flex items-center gap-2", className), children: socialLinks.map((link) => /* @__PURE__ */ jsxRuntime.jsx(
     "a",
     {
       href: link.url,
       target: "_blank",
       rel: "noopener noreferrer",
-      title: `Visit ${providerName} on ${link.label}`,
+      "aria-label": `Visit ${providerName} on ${link.label}`,
       className: chunkOR5DRJCW_cjs.cn(
-        "hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-gray-400",
-        socialIconSizes[size]
+        containerSizes[size],
+        "inline-flex items-center justify-center rounded-lg bg-white/15 text-white transition-all hover:bg-white/25"
       ),
-      children: [
-        link.icon,
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "sr-only", children: link.label })
-      ]
+      children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: iconSizes[size], children: link.icon })
     },
     link.key
   )) });
@@ -22454,28 +22335,19 @@ function SocialMediaLinks({
 function VerifiedBadge2({
   isVerified,
   isClaimed,
-  lastUpdated,
   className
 }) {
-  const formattedDate = lastUpdated ? typeof lastUpdated === "string" ? lastUpdated : lastUpdated.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric"
-  }) : null;
+  if (!isVerified && !isClaimed) return null;
   return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
+    "span",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400",
+        "inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-200 dark:bg-green-900/30 dark:text-green-400 dark:ring-green-800",
         className
       ),
       children: [
-        (isVerified || isClaimed) && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(CheckCircleIcon, { className: "h-4 w-4 text-green-500" }),
-          /* @__PURE__ */ jsxRuntime.jsx("span", { children: "Information verified" })
-        ] }),
-        !isVerified && !isClaimed && /* @__PURE__ */ jsxRuntime.jsx("span", { children: "Information updated" }),
-        formattedDate && /* @__PURE__ */ jsxRuntime.jsx("span", { children: formattedDate })
+        /* @__PURE__ */ jsxRuntime.jsx(CheckCircleIcon, { className: "h-3.5 w-3.5" }),
+        "Verified"
       ]
     }
   );
@@ -22488,92 +22360,108 @@ function AddressDisplay({
   const mapsUrl = `https://www.google.com/maps?daddr=${encodeURIComponent(
     `${address.street1}, ${address.city}, ${address.state} ${address.postalCode}`
   )}`;
-  const addressContent = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+  const addressText = [
     address.street1,
-    address.street2 && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx("br", {}),
-      address.street2
-    ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("br", {}),
-    address.city,
-    ", ",
-    address.state,
-    " ",
-    address.postalCode
-  ] });
+    address.street2,
+    `${address.city}, ${address.state} ${address.postalCode}`
+  ].filter(Boolean).join(", ");
   if (linkToMaps) {
-    return /* @__PURE__ */ jsxRuntime.jsx(
+    return /* @__PURE__ */ jsxRuntime.jsxs(
       "a",
       {
         href: mapsUrl,
         target: "_blank",
         rel: "noopener noreferrer",
         className: chunkOR5DRJCW_cjs.cn(
-          "hover:text-primary-600 dark:hover:text-primary-400 text-gray-600 hover:underline dark:text-gray-300",
+          "inline-flex items-center gap-1.5 text-[15px] text-white/90 transition-colors hover:text-white",
           className
         ),
-        children: addressContent
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(LocationPinIcon, { className: "h-4 w-4 shrink-0" }),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { children: addressText })
+        ]
       }
     );
   }
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "address",
-    {
-      className: chunkOR5DRJCW_cjs.cn("text-gray-600 not-italic dark:text-gray-300", className),
-      children: addressContent
-    }
+  return /* @__PURE__ */ jsxRuntime.jsx("address", { className: chunkOR5DRJCW_cjs.cn("text-sm text-white/90 not-italic", className), children: addressText });
+}
+function QuickAction2({
+  icon,
+  label,
+  href,
+  onClick,
+  className
+}) {
+  const classes = chunkOR5DRJCW_cjs.cn(
+    "flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/10 py-2.5 px-2 lg:w-[70px] lg:h-[74px] text-white transition-all hover:bg-white/20 active:scale-95 cursor-pointer",
+    className
   );
+  const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-lg", children: icon }),
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-[11px] font-medium tracking-[0.22px] uppercase", children: label })
+  ] });
+  if (href) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "a",
+      {
+        href,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: classes,
+        children: content
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntime.jsx("button", { type: "button", onClick, className: classes, children: content });
 }
 function ClaimListingButton({
   slug,
   href,
   className
 }) {
-  const claimUrl = href || `/provider/${slug}/claim`;
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "a",
     {
-      href: claimUrl,
+      href: href || `/provider/${slug}/claim`,
       className: chunkOR5DRJCW_cjs.cn(
-        "hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400",
+        "hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5 text-xs text-gray-500 transition-colors dark:text-gray-400",
         className
       ),
       children: [
-        /* @__PURE__ */ jsxRuntime.jsx(CheckCircleIcon, { className: "h-4 w-4" }),
+        /* @__PURE__ */ jsxRuntime.jsx(CheckCircleIcon, { className: "h-3.5 w-3.5" }),
         "Claim this listing"
       ]
     }
   );
 }
 function ReportLink({ slug, href, className }) {
-  const reportUrl = href || `/provider/${slug}/report`;
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "a",
     {
-      href: reportUrl,
+      href: href || `/provider/${slug}/report`,
       className: chunkOR5DRJCW_cjs.cn(
-        "inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300",
+        "inline-flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300",
         className
       ),
       children: [
-        /* @__PURE__ */ jsxRuntime.jsx(FlagIcon, { className: "h-4 w-4" }),
-        "Report inaccurate information"
+        /* @__PURE__ */ jsxRuntime.jsx(FlagIcon, { className: "h-3.5 w-3.5" }),
+        "Report inaccurate info"
       ]
     }
   );
 }
 var bookButtonVariants = classVarianceAuthority.cva(
-  "inline-flex items-center gap-2 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
+  "inline-flex items-center justify-center gap-2 font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-offset-2",
   {
     variants: {
       size: {
-        sm: "px-3 py-1.5 text-sm",
-        md: "px-4 py-2 text-base",
-        lg: "px-6 py-3 text-lg"
+        sm: "px-4 py-2 text-sm rounded-full",
+        md: "px-5 py-2.5 text-sm rounded-full",
+        lg: "w-full px-4 py-2 text-[17px] rounded-3xl"
       },
       variant: {
-        primary: "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500",
-        outline: "border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/20"
+        primary: "bg-white text-[#086684] uppercase hover:bg-gray-50 focus:ring-white active:bg-gray-100",
+        outline: "border-2 border-white text-white hover:bg-white/10 focus:ring-white"
       }
     },
     defaultVariants: {
@@ -22609,23 +22497,9 @@ function BookAppointmentButton({
     }
   );
 }
-var headerVariants2 = classVarianceAuthority.cva("bg-white dark:bg-gray-900", {
-  variants: {
-    variant: {
-      default: "shadow-sm",
-      flat: "",
-      elevated: "shadow-md"
-    }
-  },
-  defaultVariants: {
-    variant: "default"
-  }
-});
 function ProviderDetailHeader({
   provider,
   breadcrumbs,
-  backButtonHref,
-  variant,
   showActionButtons = true,
   showBreadcrumb = true,
   showSocialLinks = true,
@@ -22634,7 +22508,7 @@ function ProviderDetailHeader({
   showReportLink = true,
   showBookButton = true,
   onShare,
-  onCopyLink,
+  onCopyLink: _onCopyLink,
   onCall,
   onBook,
   className
@@ -22651,66 +22525,140 @@ function ProviderDetailHeader({
     },
     { label: provider.name, href: `/provider/${provider.slug}` }
   ];
-  const defaultBackHref = backButtonHref || `/search/${provider.address.postalCode}`;
+  const directionsUrl = `https://www.google.com/maps?daddr=${encodeURIComponent(
+    `${provider.address.street1}, ${provider.address.city}, ${provider.address.state} ${provider.address.postalCode}`
+  )}`;
   return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
+    "section",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        headerVariants2({ variant: variant ?? "default" }),
+        "relative -mt-16 bg-gradient-to-br from-[#27AAE1] to-[#146A8E] pt-16",
         className
       ),
       children: [
-        showActionButtons && /* @__PURE__ */ jsxRuntime.jsx(
-          ActionButtonsBar,
-          {
-            provider,
-            onShare,
-            onCopyLink,
-            onCall
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "container mx-auto px-4 py-6", children: [
-          showBreadcrumb && /* @__PURE__ */ jsxRuntime.jsx(
-            Breadcrumb2,
-            {
-              items: defaultBreadcrumbs,
-              className: "mb-4 hidden sm:block"
-            }
-          ),
-          showBreadcrumb && /* @__PURE__ */ jsxRuntime.jsx(MobileBackButton, { href: defaultBackHref, className: "mb-4" }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-6 sm:flex-row", children: [
-            /* @__PURE__ */ jsxRuntime.jsx(ProviderLogo2, { src: provider.logoUrl, name: provider.name, size: "lg" }),
-            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
-              /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white", children: provider.name }),
-              /* @__PURE__ */ jsxRuntime.jsx(AddressDisplay, { address: provider.address, className: "mb-3" }),
-              showSocialLinks && provider.urls && /* @__PURE__ */ jsxRuntime.jsx(
-                SocialMediaLinks,
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 bg-gradient-to-br from-[rgba(23,123,165,0.2)] to-[rgba(39,170,225,0.1)]" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative px-4 py-10 pb-12 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mx-auto max-w-7xl", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col lg:flex-row lg:items-start lg:gap-8", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1 lg:max-w-[66%]", children: [
+            showBreadcrumb && /* @__PURE__ */ jsxRuntime.jsx(Breadcrumb2, { items: defaultBreadcrumbs, className: "mb-3" }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-start gap-3", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(
+                ProviderLogo2,
                 {
-                  urls: provider.urls,
-                  providerName: provider.name,
-                  className: "mb-3"
+                  src: provider.logoUrl,
+                  name: provider.name,
+                  size: "lg",
+                  className: "shrink-0"
                 }
               ),
-              showVerifiedBadge && /* @__PURE__ */ jsxRuntime.jsx(
-                VerifiedBadge2,
-                {
-                  isVerified: provider.isVerified,
-                  isClaimed: provider.isClaimed,
-                  lastUpdated: provider.lastUpdated,
-                  className: "mb-4"
-                }
-              ),
-              /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "my-4 border-gray-200 dark:border-gray-700" }),
-              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between", children: [
-                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-2", children: [
-                  showReportLink && /* @__PURE__ */ jsxRuntime.jsx(ReportLink, { slug: provider.slug }),
-                  showClaimButton && /* @__PURE__ */ jsxRuntime.jsx(ClaimListingButton, { slug: provider.slug })
-                ] }),
-                showBookButton && provider.phoneNumber && /* @__PURE__ */ jsxRuntime.jsx(BookAppointmentButton, { onClick: onBook })
+              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
+                /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "mb-2 text-3xl leading-tight font-bold text-white lg:text-4xl", children: provider.name }),
+                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
+                  /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5 text-[13px] font-medium text-white", children: [
+                    /* @__PURE__ */ jsxRuntime.jsx(LocationPinIcon, { className: "h-3.5 w-3.5" }),
+                    provider.address.city,
+                    ", ",
+                    provider.address.state
+                  ] }),
+                  showVerifiedBadge && (provider.isVerified || provider.isClaimed) && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1.5 text-xs font-semibold text-green-200", children: [
+                    /* @__PURE__ */ jsxRuntime.jsx(CheckCircleIcon, { className: "h-3.5 w-3.5" }),
+                    "Verified"
+                  ] })
+                ] })
               ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsx(AddressDisplay, { address: provider.address, className: "mb-3" }),
+            showSocialLinks && provider.urls && /* @__PURE__ */ jsxRuntime.jsx(
+              SocialMediaLinks,
+              {
+                urls: provider.urls,
+                providerName: provider.name,
+                className: "mt-3"
+              }
+            )
+          ] }),
+          showActionButtons && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-6 lg:mt-0 lg:w-[34%] lg:max-w-[360px]", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-[10px]", children: [
+              provider.phoneNumber && /* @__PURE__ */ jsxRuntime.jsxs(
+                "a",
+                {
+                  href: `tel:${provider.phoneNumber}`,
+                  className: "mb-4 flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-4 text-lg font-semibold text-[#086684] shadow-[0_2px_8px_rgba(0,0,0,0.1)] lg:hidden",
+                  children: [
+                    /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon4, { className: "h-5 w-5" }),
+                    "Call now"
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 grid grid-cols-3 gap-1 lg:flex lg:justify-center lg:gap-2", children: [
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  QuickAction2,
+                  {
+                    icon: /* @__PURE__ */ jsxRuntime.jsx(DirectionsIcon, { className: "h-[18px] w-[18px]" }),
+                    label: "Directions",
+                    href: directionsUrl
+                  }
+                ),
+                provider.phoneNumber ? /* @__PURE__ */ jsxRuntime.jsx(
+                  QuickAction2,
+                  {
+                    icon: /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon4, { className: "h-[18px] w-[18px]" }),
+                    label: "Call now",
+                    onClick: () => onCall?.(provider.phoneNumber),
+                    className: "hidden lg:flex"
+                  }
+                ) : null,
+                provider.urls?.website && /* @__PURE__ */ jsxRuntime.jsx(
+                  QuickAction2,
+                  {
+                    icon: /* @__PURE__ */ jsxRuntime.jsx(WebsiteIcon, { className: "h-[18px] w-[18px]" }),
+                    label: "Website",
+                    href: provider.urls.website
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  QuickAction2,
+                  {
+                    icon: /* @__PURE__ */ jsxRuntime.jsx(ShareIcon, { className: "h-[18px] w-[18px]" }),
+                    label: "Share",
+                    onClick: onShare
+                  }
+                )
+              ] }),
+              showBookButton && /* @__PURE__ */ jsxRuntime.jsx(
+                BookAppointmentButton,
+                {
+                  size: "lg",
+                  onClick: onBook,
+                  className: "hidden lg:flex"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 flex flex-wrap items-center gap-4", children: [
+              showReportLink && /* @__PURE__ */ jsxRuntime.jsxs(
+                "a",
+                {
+                  href: `/provider/${provider.slug}/report`,
+                  className: "inline-flex items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-white/80",
+                  children: [
+                    /* @__PURE__ */ jsxRuntime.jsx(FlagIcon, { className: "h-3.5 w-3.5" }),
+                    "Report inaccurate info"
+                  ]
+                }
+              ),
+              showClaimButton && /* @__PURE__ */ jsxRuntime.jsxs(
+                "a",
+                {
+                  href: `/provider/${provider.slug}/claim`,
+                  className: "inline-flex items-center gap-1.5 text-xs text-white/60 transition-colors hover:text-white/80",
+                  children: [
+                    /* @__PURE__ */ jsxRuntime.jsx(CheckCircleIcon, { className: "h-3.5 w-3.5" }),
+                    "Claim this listing"
+                  ]
+                }
+              )
             ] })
           ] })
-        ] })
+        ] }) }) })
       ]
     }
   );
@@ -22725,7 +22673,7 @@ function CompactProviderHeader({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "rounded-lg bg-white p-4 shadow-sm dark:bg-gray-900",
+        "rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900",
         className
       ),
       children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-4", children: [
@@ -22749,61 +22697,104 @@ function ProviderDetailHeaderSkeleton({
   showActionButtons = true,
   className
 }) {
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "section",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "animate-pulse bg-white shadow-sm dark:bg-gray-900",
+        "relative -mt-16 animate-pulse bg-gradient-to-br from-[#27AAE1] to-[#146A8E] pt-16",
         className
       ),
-      children: [
-        showActionButtons && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-center gap-4 border-b border-gray-200 py-4 dark:border-gray-700", children: [1, 2, 3, 4, 5].map((i) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-1", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700" }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-12 rounded bg-gray-200 dark:bg-gray-700" })
-        ] }, i)) }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "container mx-auto px-4 py-6", children: [
+      children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative px-4 py-10 pb-12 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mx-auto max-w-7xl", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col lg:flex-row lg:items-start lg:gap-8", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 hidden items-center gap-2 sm:flex", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
-            i > 1 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700" }),
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-16 rounded bg-gray-200 dark:bg-gray-700" })
+            i > 1 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-3 rounded bg-white/20" }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-16 rounded-full bg-white/20" })
           ] }, i)) }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-6 sm:flex-row", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-32 w-32 rounded-lg bg-gray-200 dark:bg-gray-700" }),
-            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 space-y-4", children: [
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-8 w-64 rounded bg-gray-200 dark:bg-gray-700" }),
-              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
-                /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-48 rounded bg-gray-200 dark:bg-gray-700" }),
-                /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-40 rounded bg-gray-200 dark:bg-gray-700" })
-              ] }),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex gap-3", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxRuntime.jsx(
-                "div",
-                {
-                  className: "h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700"
-                },
-                i
-              )) }),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-32 rounded bg-gray-200 dark:bg-gray-700" }),
-              /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "border-gray-200 dark:border-gray-700" }),
-              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
-                /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-40 rounded bg-gray-200 dark:bg-gray-700" }),
-                /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-12 w-36 rounded-lg bg-gray-200 dark:bg-gray-700" })
-              ] })
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 flex items-start gap-3", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-[80px] w-[80px] rounded-2xl bg-white/20" }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 space-y-3", children: [
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-9 w-64 rounded-lg bg-white/20" }),
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-8 w-32 rounded-full bg-white/20" })
             ] })
-          ] })
-        ] })
-      ]
+          ] }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-3 h-5 w-80 rounded bg-white/20" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex gap-2", children: [1, 2, 3].map((i) => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-9 w-9 rounded-lg bg-white/20" }, i)) })
+        ] }),
+        showActionButtons && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-6 lg:mt-0 lg:w-[34%]", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 rounded-2xl border border-white/20 bg-white/10 p-5", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-4 gap-2", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: "h-[74px] rounded-xl bg-white/10"
+            },
+            i
+          )) }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-10 rounded-3xl bg-white/20" })
+        ] }) })
+      ] }) }) })
     }
   );
 }
-function DirectionsIcon({ className }) {
+function ActionButton2(props) {
   return /* @__PURE__ */ jsxRuntime.jsx(
+    QuickAction2,
+    {
+      icon: props.icon,
+      label: props.label,
+      href: props.href,
+      onClick: props.onClick ? () => props.onClick?.(void 0) : void 0
+    }
+  );
+}
+function ActionButtonsBar(_props) {
+  return null;
+}
+function MobileBackButton({
+  href,
+  label = "Back",
+  className
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("py-2 sm:hidden", className), children: /* @__PURE__ */ jsxRuntime.jsxs(
+    "a",
+    {
+      href,
+      className: "inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon, { className: "h-4 w-4" }),
+        label
+      ]
+    }
+  ) });
+}
+function HomeIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { className, fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" }) });
+}
+function DirectionsIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M22.43 10.59l-9.01-9.01c-.75-.75-2.07-.76-2.83 0l-9 9.01c-.78.78-.78 2.04 0 2.82l9 9.01c.39.39.9.58 1.41.58.51 0 1.02-.19 1.41-.58l9.01-9.01c.79-.78.79-2.04.01-2.82zM7.25 14a.75.75 0 01-.75-.75v-2.5c0-.41.34-.75.75-.75h4v-1.5c0-.89 1.08-1.34 1.71-.71l3.5 3.5c.39.39.39 1.02 0 1.41l-3.5 3.5c-.63.63-1.71.18-1.71-.71V13.5h-3.25a.75.75 0 01-.75-.75v-.75h.75a.25.25 0 00.25-.25v-1.5a.25.25 0 00-.25-.25H7.25z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          }
+        )
+      ]
     }
   );
 }
@@ -22812,11 +22803,18 @@ function PhoneIcon4({ className }) {
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+        }
+      )
     }
   );
 }
@@ -22825,11 +22823,18 @@ function WebsiteIcon({ className }) {
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+        }
+      )
     }
   );
 }
@@ -22838,37 +22843,48 @@ function ShareIcon({ className }) {
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+        }
+      )
     }
   );
 }
-function CopyIcon2({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
+function LocationPinIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" })
-    }
-  );
-}
-function ChevronRightIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          }
+        )
+      ]
     }
   );
 }
@@ -22877,37 +22893,41 @@ function ChevronLeftIcon({ className }) {
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19l-7-7 7-7" })
     }
   );
 }
 function CheckCircleIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { className, fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsxRuntime.jsx(
+    "path",
     {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" })
+      fillRule: "evenodd",
+      d: "M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z",
+      clipRule: "evenodd"
     }
-  );
+  ) });
 }
 function FlagIcon({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+        }
+      )
     }
   );
 }
@@ -22916,130 +22936,47 @@ function CalendarCheckIcon({ className }) {
     "svg",
     {
       className,
-      fill: "currentColor",
+      fill: "none",
       viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 14.5l-1.5-1.5-1 1 2.5 2.5 5-5-1-1-4 4z" })
+      stroke: "currentColor",
+      strokeWidth: 2,
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        }
+      )
     }
   );
 }
-function LinkedInIcon2({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" })
-    }
-  );
+function LinkedInIcon2() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" }) });
 }
-function FacebookIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M12 2.04C6.5 2.04 2 6.53 2 12.06c0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02z" })
-    }
-  );
+function FacebookIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M12 2.04C6.5 2.04 2 6.53 2 12.06c0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02z" }) });
 }
-function InstagramIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z" })
-    }
-  );
+function InstagramIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z" }) });
 }
-function TwitterIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" })
-    }
-  );
+function TwitterIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" }) });
 }
-function TikTokIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" })
-    }
-  );
+function TikTokIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" }) });
 }
-function YelpIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M20.16 12.594l-4.995 1.433c-.96.276-1.74-.8-1.176-1.63l2.905-4.308a1.072 1.072 0 0 1 1.596-.206 9.194 9.194 0 0 1 2.364 3.252 1.073 1.073 0 0 1-.686 1.459zm-5.025 3.152l4.942 1.606a1.072 1.072 0 0 1 .636 1.48 9.188 9.188 0 0 1-2.468 3.168 1.073 1.073 0 0 1-1.592-.26l-2.76-4.409c-.55-.88.196-1.945 1.242-1.585zM8.232 4.764l2.24 8.048c.23.818-.71 1.52-1.444 1.08l-6.51-3.94a1.072 1.072 0 0 1-.328-1.56 9.2 9.2 0 0 1 4.626-4.13 1.073 1.073 0 0 1 1.416.502zm.818 13.83l-.177-5.157c-.037-1 1.225-1.493 1.9-.74l3.54 3.988a1.073 1.073 0 0 1-.108 1.596 9.2 9.2 0 0 1-3.648 1.937 1.073 1.073 0 0 1-1.507-1.624zm-3.98-1.587l4.468-2.59c.86-.496 1.8.4 1.417 1.346l-2.137 5.244a1.073 1.073 0 0 1-1.42.573 9.2 9.2 0 0 1-3.157-2.915 1.073 1.073 0 0 1 .83-1.658z" })
-    }
-  );
+function YelpIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M20.16 12.594l-4.995 1.433c-.96.276-1.74-.8-1.176-1.63l2.905-4.308a1.072 1.072 0 0 1 1.596-.206 9.194 9.194 0 0 1 2.364 3.252 1.073 1.073 0 0 1-.686 1.459zm-5.025 3.152l4.942 1.606a1.072 1.072 0 0 1 .636 1.48 9.188 9.188 0 0 1-2.468 3.168 1.073 1.073 0 0 1-1.592-.26l-2.76-4.409c-.55-.88.196-1.945 1.242-1.585zM8.232 4.764l2.24 8.048c.23.818-.71 1.52-1.444 1.08l-6.51-3.94a1.072 1.072 0 0 1-.328-1.56 9.2 9.2 0 0 1 4.626-4.13 1.073 1.073 0 0 1 1.416.502zm.818 13.83l-.177-5.157c-.037-1 1.225-1.493 1.9-.74l3.54 3.988a1.073 1.073 0 0 1-.108 1.596 9.2 9.2 0 0 1-3.648 1.937 1.073 1.073 0 0 1-1.507-1.624zm-3.98-1.587l4.468-2.59c.86-.496 1.8.4 1.417 1.346l-2.137 5.244a1.073 1.073 0 0 1-1.42.573 9.2 9.2 0 0 1-3.157-2.915 1.073 1.073 0 0 1 .83-1.658z" }) });
 }
-function YouTubeIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z" })
-    }
-  );
+function YouTubeIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z" }) });
 }
-function PinterestIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M9.04 21.54c.96.29 1.93.46 2.96.46a10 10 0 0 0 10-10A10 10 0 0 0 12 2 10 10 0 0 0 2 12c0 4.25 2.67 7.9 6.44 9.34-.09-.78-.18-2.07 0-2.96l1.15-4.94s-.29-.58-.29-1.5c0-1.38.86-2.41 1.84-2.41.86 0 1.26.63 1.26 1.44 0 .86-.57 2.09-.86 3.27-.17.98.52 1.84 1.52 1.84 1.78 0 3.16-1.9 3.16-4.58 0-2.4-1.72-4.04-4.19-4.04-2.82 0-4.48 2.1-4.48 4.31 0 .86.28 1.73.74 2.3.09.06.09.14.06.29l-.29 1.09c0 .17-.11.23-.28.11-1.28-.56-2.02-2.38-2.02-3.85 0-3.16 2.24-6.03 6.56-6.03 3.44 0 6.12 2.47 6.12 5.75 0 3.44-2.13 6.2-5.18 6.2-.97 0-1.92-.52-2.26-1.13l-.67 2.37c-.23.86-.86 2.01-1.29 2.7v-.03z" })
-    }
-  );
+function PinterestIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M9.04 21.54c.96.29 1.93.46 2.96.46a10 10 0 0 0 10-10A10 10 0 0 0 12 2 10 10 0 0 0 2 12c0 4.25 2.67 7.9 6.44 9.34-.09-.78-.18-2.07 0-2.96l1.15-4.94s-.29-.58-.29-1.5c0-1.38.86-2.41 1.84-2.41.86 0 1.26.63 1.26 1.44 0 .86-.57 2.09-.86 3.27-.17.98.52 1.84 1.52 1.84 1.78 0 3.16-1.9 3.16-4.58 0-2.4-1.72-4.04-4.19-4.04-2.82 0-4.48 2.1-4.48 4.31 0 .86.28 1.73.74 2.3.09.06.09.14.06.29l-.29 1.09c0 .17-.11.23-.28.11-1.28-.56-2.02-2.38-2.02-3.85 0-3.16 2.24-6.03 6.56-6.03 3.44 0 6.12 2.47 6.12 5.75 0 3.44-2.13 6.2-5.18 6.2-.97 0-1.92-.52-2.26-1.13l-.67 2.37c-.23.86-.86 2.01-1.29 2.7v-.03z" }) });
 }
-function BlogIcon({ className }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "svg",
-    {
-      className,
-      fill: "currentColor",
-      viewBox: "0 0 24 24",
-      width: "1em",
-      height: "1em",
-      children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" })
-    }
-  );
+function BlogIcon() {
+  return /* @__PURE__ */ jsxRuntime.jsx("svg", { fill: "currentColor", viewBox: "0 0 24 24", className: "h-full w-full", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" }) });
 }
 function ProviderMap({
   coordinates,
@@ -27844,7 +27781,7 @@ function ServiceList({
   ) }, index)) });
 }
 var serviceBadgeVariants = classVarianceAuthority.cva(
-  "inline-flex items-center font-medium transition-colors",
+  "inline-flex items-center font-medium transition-all duration-200",
   {
     variants: {
       variant: {
@@ -27858,14 +27795,14 @@ var serviceBadgeVariants = classVarianceAuthority.cva(
         ghost: "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
       },
       size: {
-        xs: "text-xs px-1.5 py-0.5 rounded",
-        sm: "text-xs px-2 py-1 rounded-md",
-        md: "text-sm px-2.5 py-1.5 rounded-md",
-        lg: "text-sm px-3 py-2 rounded-lg",
-        xl: "text-base px-4 py-2.5 rounded-lg"
+        xs: "text-xs px-2 py-0.5 rounded-full",
+        sm: "text-xs px-2.5 py-1 rounded-full",
+        md: "text-sm px-3 py-1.5 rounded-full",
+        lg: "text-sm px-3.5 py-2 rounded-full",
+        xl: "text-base px-4 py-2.5 rounded-full"
       },
       interactive: {
-        true: "cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-1",
+        true: "cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 active:scale-[0.97]",
         false: ""
       }
     },
@@ -28135,12 +28072,12 @@ function DOTBadge({
     "span",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "inline-flex items-center rounded-md font-medium",
+        "inline-flex items-center rounded-full font-medium",
         config.className,
-        size === "xs" && "px-1.5 py-0.5 text-xs",
-        size === "sm" && "px-2 py-1 text-xs",
-        (size === "md" || !size) && "px-2.5 py-1.5 text-sm",
-        size === "lg" && "px-3 py-2 text-sm",
+        size === "xs" && "px-2 py-0.5 text-xs",
+        size === "sm" && "px-2.5 py-1 text-xs",
+        (size === "md" || !size) && "px-3 py-1.5 text-sm",
+        size === "lg" && "px-3.5 py-2 text-sm",
         size === "xl" && "px-4 py-2.5 text-base",
         className
       ),
@@ -29961,7 +29898,7 @@ var ChevronLeftIcon2 = () => /* @__PURE__ */ jsxRuntime.jsx(
     children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19l-7-7 7-7" })
   }
 );
-var ChevronRightIcon2 = () => /* @__PURE__ */ jsxRuntime.jsx(
+var ChevronRightIcon = () => /* @__PURE__ */ jsxRuntime.jsx(
   "svg",
   {
     className: "h-4 w-4",
@@ -30317,7 +30254,7 @@ function SidebarToggle({
         className
       ),
       "aria-label": isCollapsed ? "Expand sidebar" : "Collapse sidebar",
-      children: isCollapsed ? /* @__PURE__ */ jsxRuntime.jsx(ChevronRightIcon2, {}) : /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon2, {})
+      children: isCollapsed ? /* @__PURE__ */ jsxRuntime.jsx(ChevronRightIcon, {}) : /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon2, {})
     }
   );
   if (position === "floating") {
@@ -30938,7 +30875,17 @@ function SiteLogo({
   className
 }) {
   const content = /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex items-center gap-2", className), children: [
-    logoSrc ? /* @__PURE__ */ jsxRuntime.jsx("img", { src: logoSrc, alt: logoAlt, className: "h-8 w-8 object-contain" }) : /* @__PURE__ */ jsxRuntime.jsx(
+    logoSrc ? /* @__PURE__ */ jsxRuntime.jsx(
+      "img",
+      {
+        src: logoSrc,
+        alt: logoAlt,
+        className: chunkOR5DRJCW_cjs.cn(
+          "object-contain",
+          textSrc ? "h-8 w-8" : "h-[30px] w-auto"
+        )
+      }
+    ) : /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
         className: chunkOR5DRJCW_cjs.cn(
@@ -31316,13 +31263,13 @@ function MobileMenuPanel({
     )
   ] });
 }
-var headerVariants3 = classVarianceAuthority.cva(
+var headerVariants2 = classVarianceAuthority.cva(
   "fixed top-0 left-0 right-0 z-40 transition-colors",
   {
     variants: {
       variant: {
         primary: "bg-primary-600",
-        white: "bg-white shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800",
+        white: "bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.24)] dark:bg-gray-900 dark:border-b dark:border-gray-800 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[3px] after:bg-gradient-to-r after:from-[#27AAE1] after:via-[#5DBFE8] after:to-[#27AAE1]",
         transparent: "bg-transparent",
         glass: "bg-white/80 backdrop-blur-md shadow-sm dark:bg-gray-900/80"
       }
@@ -31355,7 +31302,7 @@ function SiteHeader({
       "header",
       {
         className: chunkOR5DRJCW_cjs.cn(
-          headerVariants3({ variant: variant ?? "primary" }),
+          headerVariants2({ variant: variant ?? "primary" }),
           className
         ),
         children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "container mx-auto px-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-16 items-center justify-between", children: [

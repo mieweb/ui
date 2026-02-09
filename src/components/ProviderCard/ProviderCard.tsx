@@ -43,10 +43,10 @@ const providerCardVariants = cva(
   [
     'group relative flex w-full overflow-hidden rounded-xl',
     'bg-card text-card-foreground',
-    'border border-border',
-    'shadow-card',
+    'border-0',
+    'shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.24)]',
     'transition-all duration-200',
-    'hover:shadow-md hover:border-primary-200 dark:hover:border-primary-800',
+    'hover:shadow-md',
   ],
   {
     variants: {
@@ -73,7 +73,7 @@ const logoContainerVariants = cva(
     variants: {
       variant: {
         compact: 'h-20 w-full',
-        list: 'w-28 h-full',
+        list: 'w-24 h-full',
         featured: 'h-32 w-full rounded-lg mb-4',
       },
     },
@@ -122,27 +122,19 @@ const ProviderLogo: React.FC<{
 const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
   if (distance === undefined) return null;
 
+  // Format: show up to 2 decimal places, but trim trailing zeros
+  const formatted =
+    distance < 10
+      ? parseFloat(distance.toFixed(2)).toString()
+      : distance.toFixed(0);
+
   return (
-    <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-      <svg
-        className="h-3 w-3"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-        />
+    <span className="bg-primary-600/10 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400 inline-flex shrink-0 items-center gap-1 rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
+      <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 512 512">
+        <path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19L508.48 67.48c16.49-38.4-14.96-80.35-63.96-63.96z" />
       </svg>
-      {distance.toFixed(1)}mi
+      <span>{formatted}</span>
+      <span className="uppercase">MI</span>
     </span>
   );
 };
@@ -193,16 +185,6 @@ function formatPhoneNumber(phone: string): string {
     return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
   }
   return phone;
-}
-
-/**
- * Format address for single line display
- */
-function formatAddressSingleLine(address: ProviderAddress): string {
-  const parts = [address.street1];
-  if (address.street2) parts.push(address.street2);
-  parts.push(`${address.city}, ${address.state} ${address.postalCode}`);
-  return parts.join(', ');
 }
 
 // ============================================================================
@@ -326,44 +308,43 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
             variant === 'featured' && ''
           )}
         >
-          {/* Header: Name + Verified */}
+          {/* Header: Name + Distance */}
           <div className="mb-1 flex items-start justify-between gap-2">
-            <h3
-              className={cn(
-                'text-primary-600 dark:text-primary-400 line-clamp-2 font-semibold',
-                'group-hover:text-primary-700 dark:group-hover:text-primary-300',
-                'transition-colors',
-                variant === 'featured' ? 'text-lg' : 'text-sm'
-              )}
-            >
-              {provider.name}
-            </h3>
-            {provider.verified && <VerifiedBadge />}
+            <div className="flex items-start gap-1">
+              <h3
+                className={cn(
+                  'text-primary-600 dark:text-primary-400 line-clamp-2 font-semibold',
+                  'group-hover:text-primary-700 dark:group-hover:text-primary-300',
+                  'transition-colors',
+                  variant === 'featured'
+                    ? 'text-lg'
+                    : 'text-[15px] leading-tight'
+                )}
+              >
+                {provider.name}
+              </h3>
+              {provider.verified && <VerifiedBadge />}
+            </div>
+            <DistanceBadge distance={provider.distance} />
           </div>
 
           {/* Address */}
           <p
             className={cn(
               'text-muted-foreground',
-              variant === 'featured' ? 'text-sm' : 'text-xs'
+              variant === 'featured' ? 'text-sm' : 'text-[13px]'
             )}
           >
-            {variant === 'list' ? (
-              formatAddressSingleLine(provider.address)
-            ) : (
+            {provider.address.street1}
+            {provider.address.street2 && (
               <>
-                {provider.address.street1}
-                {provider.address.street2 && (
-                  <>
-                    <br />
-                    {provider.address.street2}
-                  </>
-                )}
                 <br />
-                {provider.address.city}, {provider.address.state}{' '}
-                {provider.address.postalCode}
+                {provider.address.street2}
               </>
             )}
+            <br />
+            {provider.address.city}, {provider.address.state}{' '}
+            {provider.address.postalCode}
           </p>
 
           {/* Phone */}
@@ -373,12 +354,21 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
               data-phone-link
               onClick={handlePhoneClick}
               className={cn(
-                'text-primary-600 hover:text-primary-700 mt-1',
-                'dark:text-primary-400 dark:hover:text-primary-300',
+                'mt-1 inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800',
+                'dark:text-emerald-400 dark:hover:text-emerald-300',
                 'hover:underline',
-                variant === 'featured' ? 'text-sm' : 'text-xs'
+                variant === 'featured' ? 'text-sm' : 'text-[13px]'
               )}
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+                fill="currentColor"
+                className="h-3.5 w-3.5 shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" />
+              </svg>
               {formatPhoneNumber(provider.workNumber)}
             </a>
           )}
@@ -407,13 +397,10 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
           {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Footer: Distance + Actions */}
-          <div className="mt-3 flex items-center justify-between">
+          {/* Footer: Safe from wildfires + Actions */}
+          <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               {provider.safeFromWildfires && <SafeFromWildfiresNotice />}
-              {!provider.safeFromWildfires && (
-                <DistanceBadge distance={provider.distance} />
-              )}
             </div>
 
             {renderActions?.(provider)}
