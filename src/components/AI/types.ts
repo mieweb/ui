@@ -85,6 +85,7 @@ export interface MCPResourceLink {
     | 'document'
     | 'appointment'
     | 'order'
+    | 'provider'
     | 'external'
     | 'internal';
   /** Icon name or component */

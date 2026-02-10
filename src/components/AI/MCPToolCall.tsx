@@ -203,6 +203,27 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
       />
     </svg>
   ),
+  // Provider tools
+  search_providers: (
+    <svg
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+      />
+    </svg>
+  ),
   // Default tool icon
   default: (
     <svg
@@ -301,6 +322,26 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
           strokeLinecap="round"
           strokeLinejoin="round"
           d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"
+        />
+      </svg>
+    ),
+    provider: (
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
         />
       </svg>
     ),
@@ -523,6 +564,7 @@ const TOOL_FRIENDLY_NAMES: Record<string, string> = {
   create_order: 'Creating order',
   send_message: 'Sending message',
   search: 'Searching',
+  search_providers: 'Searching for providers',
 };
 
 function getToolFriendlyName(toolName: string, status: MCPToolStatus): string {
@@ -536,7 +578,7 @@ function getToolFriendlyName(toolName: string, status: MCPToolStatus): string {
     if (baseName.startsWith('Scheduling'))
       return baseName.replace('Scheduling', 'Scheduled');
     if (baseName.startsWith('Searching'))
-      return baseName.replace('Searching', 'Searched');
+      return baseName.replace('Searching', 'Found');
     if (baseName.startsWith('Looking'))
       return baseName.replace('Looking', 'Found');
     if (baseName.startsWith('Updating'))
@@ -582,6 +624,14 @@ function getParameterSummary(
     return date
       ? `${paramMap.patientName} on ${date}`
       : String(paramMap.patientName);
+  }
+
+  // Provider search
+  if (toolName === 'search_providers' && paramMap.zipcode) {
+    const service = paramMap.service;
+    return service
+      ? `${service} near ${paramMap.zipcode}`
+      : `near ${paramMap.zipcode}`;
   }
 
   return null;
