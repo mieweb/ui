@@ -242,14 +242,26 @@ function Select({
   const updateDropdownPosition = React.useCallback(() => {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const estimatedDropdownHeight = Math.min(
+      (flatOptions.length * 40) + 16,
+      300
+    );
+    const openAbove = spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow;
+
     setDropdownStyle({
       position: 'fixed',
-      top: rect.bottom + 4,
+      ...(openAbove
+        ? { bottom: window.innerHeight - rect.top + 4 }
+        : { top: rect.bottom + 4 }),
       left: rect.left,
       width: rect.width,
+      maxHeight: Math.min(openAbove ? spaceAbove - 8 : spaceBelow - 8, 300),
+      overflowY: 'auto',
       zIndex: 9999,
     });
-  }, []);
+  }, [flatOptions.length]);
 
   React.useEffect(() => {
     if (!isOpen) return;
