@@ -125,6 +125,7 @@ export * from './components/Sidebar';
 export * from './components/SiteFooter';
 export * from './components/SiteHeader';
 export * from './components/Skeleton';
+export * from './components/Slider';
 export * from './components/Spinner';
 export * from './components/SSOConfigForm';
 export * from './components/StepIndicator';

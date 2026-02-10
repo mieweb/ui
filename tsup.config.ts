@@ -29,6 +29,7 @@ export default defineConfig({
     'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
     'components/Select/index': 'src/components/Select/index.ts',
     'components/Skeleton/index': 'src/components/Skeleton/index.ts',
+    'components/Slider/index': 'src/components/Slider/index.ts',
     'components/Spinner/index': 'src/components/Spinner/index.ts',
     'components/Switch/index': 'src/components/Switch/index.ts',
     'components/Table/index': 'src/components/Table/index.ts',
