@@ -572,11 +572,14 @@ function getToolFriendlyName(toolName: string, status: MCPToolStatus): string {
 
   // Adjust tense based on status
   if (status === 'success') {
-    // Past tense approximation
+    // Past tense approximation — check longer prefixes first to avoid
+    // partial matches (e.g. "Searching for" before "Searching")
     if (baseName.startsWith('Creating'))
       return baseName.replace('Creating', 'Created');
     if (baseName.startsWith('Scheduling'))
       return baseName.replace('Scheduling', 'Scheduled');
+    if (baseName.startsWith('Searching for'))
+      return baseName.replace('Searching for', 'Found');
     if (baseName.startsWith('Searching'))
       return baseName.replace('Searching', 'Found');
     if (baseName.startsWith('Looking'))
