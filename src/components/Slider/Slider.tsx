@@ -82,7 +82,8 @@ const sliderThumbVariants = cva(
 // ============================================================================
 
 export interface SliderProps
-  extends VariantProps<typeof sliderTrackVariants>,
+  extends
+    VariantProps<typeof sliderTrackVariants>,
     VariantProps<typeof sliderRangeVariants> {
   /** Current value (controlled) */
   value?: number;
@@ -220,20 +221,20 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
               <label
                 htmlFor={inputId}
                 className={cn(
-                  'text-sm font-medium text-foreground',
+                  'text-foreground text-sm font-medium',
                   disabled && 'opacity-50'
                 )}
               >
                 {label}
                 {showValue && (
-                  <span className="ml-1 text-muted-foreground">
+                  <span className="text-muted-foreground ml-1">
                     {displayValue}
                   </span>
                 )}
               </label>
             )}
             {!label && showValue && (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 {displayValue}
               </span>
             )}
@@ -244,7 +245,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         {description && (
           <p
             className={cn(
-              'mb-2 text-xs text-muted-foreground',
+              'text-muted-foreground mb-2 text-xs',
               disabled && 'opacity-50'
             )}
           >
@@ -300,7 +301,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         {(minLabel || maxLabel) && (
           <div
             className={cn(
-              'mt-1 flex justify-between text-xs text-muted-foreground',
+              'text-muted-foreground mt-1 flex justify-between text-xs',
               disabled && 'opacity-50'
             )}
           >

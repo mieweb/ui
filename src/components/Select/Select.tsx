@@ -244,11 +244,9 @@ function Select({
     const rect = triggerRef.current.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const estimatedDropdownHeight = Math.min(
-      (flatOptions.length * 40) + 16,
-      300
-    );
-    const openAbove = spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow;
+    const estimatedDropdownHeight = Math.min(flatOptions.length * 40 + 16, 300);
+    const openAbove =
+      spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow;
 
     setDropdownStyle({
       position: 'fixed',
