@@ -50,10 +50,10 @@ const sliderThumbVariants = cva(
     'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
     'rounded-full border-2 bg-white',
     'shadow-md transition-shadow duration-150',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-    'hover:shadow-lg',
-    'active:shadow-xl active:scale-110',
-    'disabled:pointer-events-none disabled:opacity-50',
+    'peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2',
+    'peer-hover:shadow-lg',
+    'peer-active:shadow-xl peer-active:scale-110',
+    'group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50',
   ],
   {
     variants: {
@@ -173,11 +173,16 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
       trackClassName,
       id,
       name,
-      'aria-label': ariaLabel,
-      'aria-labelledby': ariaLabelledBy,
+      'aria-label': ariaLabelProp,
+      'aria-labelledby': ariaLabelledByProp,
     },
     ref
   ) => {
+    const hasExplicitLabel = !!label;
+    const ariaLabelledBy = ariaLabelledByProp;
+    const ariaLabel =
+      ariaLabelProp ??
+      (!hasExplicitLabel && !ariaLabelledByProp ? 'Slider' : undefined);
     const [uncontrolledValue, setUncontrolledValue] =
       React.useState(defaultValue);
     const isControlled = controlledValue !== undefined;
@@ -264,17 +269,14 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             />
           </div>
 
-          {/* Thumb indicator (visual only) */}
-          <div
-            className={sliderThumbVariants({ size, variant })}
-            style={{ left: `${percentage}%` }}
-            aria-hidden="true"
-          />
-
           {/* Native range input — stretched to fill, made invisible */}
           <input
             ref={ref}
             type="range"
+            className={cn(
+              'peer absolute inset-0 h-full w-full cursor-pointer opacity-0',
+              disabled && 'cursor-not-allowed'
+            )}
             id={inputId}
             name={name}
             min={min}
@@ -284,16 +286,21 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             onChange={handleChange}
             onMouseUp={handleCommit}
             onTouchEnd={handleCommit}
+            onKeyUp={handleCommit}
+            onBlur={handleCommit}
             disabled={disabled}
             aria-label={ariaLabel}
             aria-labelledby={ariaLabelledBy}
             aria-valuemin={min}
             aria-valuemax={max}
             aria-valuenow={clampedValue}
-            className={cn(
-              'absolute inset-0 h-full w-full cursor-pointer opacity-0',
-              disabled && 'cursor-not-allowed'
-            )}
+          />
+
+          {/* Thumb indicator (visual only) */}
+          <div
+            className={sliderThumbVariants({ size, variant })}
+            style={{ left: `${percentage}%` }}
+            aria-hidden="true"
           />
         </div>
 

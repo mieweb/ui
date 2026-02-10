@@ -255,8 +255,13 @@ function Select({
         : { top: rect.bottom + 4 }),
       left: rect.left,
       width: rect.width,
-      maxHeight: Math.min(openAbove ? spaceAbove - 8 : spaceBelow - 8, 300),
-      overflowY: 'auto',
+      maxHeight: Math.max(
+        Math.min(openAbove ? spaceAbove - 8 : spaceBelow - 8, 300),
+        0
+      ),
+      display: 'flex',
+      flexDirection: 'column' as const,
+      overflow: 'hidden',
       zIndex: 9999,
     });
   }, [flatOptions.length]);
@@ -436,7 +441,7 @@ function Select({
                 id={listboxId}
                 role="listbox"
                 aria-label={label || 'Options'}
-                className="max-h-60 overflow-auto p-1"
+                className="flex-1 overflow-auto p-1"
               >
                 {filteredFlatOptions.length === 0 ? (
                   <li className="text-muted-foreground px-3 py-2 text-center text-sm">
