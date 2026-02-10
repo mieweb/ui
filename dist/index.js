@@ -1,18 +1,22 @@
+import { Textarea } from './chunk-4AWW5WPF.js';
+export { Textarea, textareaVariants } from './chunk-4AWW5WPF.js';
 export { ThemeProvider, ThemeProviderContext, ThemeToggle, themeToggleIconVariants, themeToggleVariants, useThemeContext } from './chunk-TA6FVVCM.js';
 import { Tooltip } from './chunk-UZUBLXVC.js';
 export { Tooltip } from './chunk-UZUBLXVC.js';
 export { VisuallyHidden } from './chunk-H2CIKJQI.js';
-export { brands } from './chunk-FIUNOH6W.js';
+export { brands } from './chunk-S4DK5WN6.js';
+export { enterpriseHealthBrand } from './chunk-MTZPVOP6.js';
 export { miewebBrand } from './chunk-UHSPAFY6.js';
 export { wagglelineBrand } from './chunk-OWPWP46L.js';
 export { webchartBrand } from './chunk-C6MDPPPL.js';
 export { createBrandPreset, generateBrandCSS, generateTailwindTheme } from './chunk-SOFX4T7M.js';
 export { bluehiveBrand } from './chunk-ULOA7WBW.js';
 export { defaultBrand } from './chunk-4LTN2LEN.js';
-export { enterpriseHealthBrand } from './chunk-MTZPVOP6.js';
-import { Select } from './chunk-KJOFWJHV.js';
-export { Select, selectTriggerVariants } from './chunk-KJOFWJHV.js';
+import { Select } from './chunk-QSMMFATL.js';
+export { Select, selectTriggerVariants } from './chunk-QSMMFATL.js';
+import { Skeleton } from './chunk-6OCIIIAI.js';
 export { Skeleton, SkeletonCard, SkeletonTable, SkeletonText, skeletonVariants } from './chunk-6OCIIIAI.js';
+export { Slider, sliderRangeVariants, sliderThumbVariants, sliderTrackVariants } from './chunk-4T2ZNPTC.js';
 import { Spinner, SpinnerWithLabel } from './chunk-GV5JQBPX.js';
 export { FullPageSpinner, Spinner, SpinnerWithLabel, spinnerVariants } from './chunk-GV5JQBPX.js';
 import { Switch } from './chunk-QL2YTVTR.js';
@@ -23,8 +27,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './chunk-JFAXLE2J.js';
 export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants, tabsTriggerVariants } from './chunk-JFAXLE2J.js';
 import { Text } from './chunk-RCMF6KZA.js';
 export { SmallMuted, Text, textVariants } from './chunk-RCMF6KZA.js';
-import { Textarea } from './chunk-4AWW5WPF.js';
-export { Textarea, textareaVariants } from './chunk-4AWW5WPF.js';
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter, ModalClose } from './chunk-SD44QJIP.js';
 export { Modal, ModalBody, ModalClose, ModalFooter, ModalHeader, ModalTitle, modalContentVariants, modalOverlayVariants } from './chunk-SD44QJIP.js';
 export { Pagination, SimplePagination, paginationButtonVariants } from './chunk-ONWOB76P.js';
@@ -80,7 +82,7 @@ import { cva } from 'class-variance-authority';
 import { AgGridReact } from 'ag-grid-react';
 export { AgGridReact } from 'ag-grid-react';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import { FileUp, X, AlertCircle, Mail, Phone, Linkedin, Globe, CheckCircle, Clock, Filter, ChevronDown, Calendar, Printer, Download, FolderUp, Upload, Edit2, Check, ChevronUp, MapPin, Shield, ChevronRight, Building2, SlidersHorizontal, Trash2, Pencil, Plus, Scan, Camera, ScanLine, RefreshCw, FileText, Image } from 'lucide-react';
+import { FileUp, X, AlertCircle, Mail, Phone, Linkedin, Globe, CheckCircle, Clock, Filter, ChevronDown, Calendar, Printer, Download, FolderUp, Upload, Edit2, Check, ChevronUp, MapPin, Shield, ChevronRight, Building2, SlidersHorizontal, Trash2, Pencil, Plus, Link, AlertTriangle, RefreshCw, Scan, Camera, ScanLine, FileText, Image } from 'lucide-react';
 
 var SEX_OPTIONS = [
   { value: "F", label: "Female" },
@@ -2287,6 +2289,35 @@ var TOOL_ICONS = {
       )
     }
   ),
+  // Provider tools
+  search_providers: /* @__PURE__ */ jsxs(
+    "svg",
+    {
+      className: "h-4 w-4",
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      children: [
+        /* @__PURE__ */ jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "path",
+          {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+          }
+        )
+      ]
+    }
+  ),
   // Default tool icon
   default: /* @__PURE__ */ jsx(
     "svg",
@@ -2388,6 +2419,34 @@ function ResourceLink({ link, onClick, className }) {
             d: "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"
           }
         )
+      }
+    ),
+    provider: /* @__PURE__ */ jsxs(
+      "svg",
+      {
+        className: "h-4 w-4",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        children: [
+          /* @__PURE__ */ jsx(
+            "path",
+            {
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              d: "M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "path",
+            {
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              d: "M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+            }
+          )
+        ]
       }
     ),
     external: /* @__PURE__ */ jsx(
@@ -2576,7 +2635,8 @@ var TOOL_FRIENDLY_NAMES = {
   search_documents: "Searching documents",
   create_order: "Creating order",
   send_message: "Sending message",
-  search: "Searching"
+  search: "Searching",
+  search_providers: "Searching for providers"
 };
 function getToolFriendlyName(toolName, status) {
   const baseName = TOOL_FRIENDLY_NAMES[toolName] || toolName.replace(/_/g, " ");
@@ -2585,8 +2645,10 @@ function getToolFriendlyName(toolName, status) {
       return baseName.replace("Creating", "Created");
     if (baseName.startsWith("Scheduling"))
       return baseName.replace("Scheduling", "Scheduled");
+    if (baseName.startsWith("Searching for"))
+      return baseName.replace("Searching for", "Found");
     if (baseName.startsWith("Searching"))
-      return baseName.replace("Searching", "Searched");
+      return baseName.replace("Searching", "Found");
     if (baseName.startsWith("Looking"))
       return baseName.replace("Looking", "Found");
     if (baseName.startsWith("Updating"))
@@ -2615,6 +2677,10 @@ function getParameterSummary(toolName, params) {
   if (toolName.includes("appointment") && paramMap.patientName) {
     const date = paramMap.preferredDate || paramMap.date;
     return date ? `${paramMap.patientName} on ${date}` : String(paramMap.patientName);
+  }
+  if (toolName === "search_providers" && paramMap.zipcode) {
+    const service = paramMap.service;
+    return service ? `${service} near ${paramMap.zipcode}` : `near ${paramMap.zipcode}`;
   }
   return null;
 }
@@ -28015,12 +28081,16 @@ function ServicePicker({
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: cn("flex flex-col", !fullWidth && "lg:max-w-md", className),
+      className: cn(
+        "bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border",
+        !fullWidth && "lg:max-w-md",
+        className
+      ),
       children: [
         /* @__PURE__ */ jsxs("div", { className: "p-3", children: [
-          !hideHeading && /* @__PURE__ */ jsx("h2", { className: "mb-3 text-xl font-bold text-gray-900 dark:text-gray-100", children: heading }),
+          !hideHeading && /* @__PURE__ */ jsx("h2", { className: "text-foreground mb-3 text-xl font-bold", children: heading }),
           showSearch && /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsx(SearchIcon5, { className: "h-5 w-5 text-gray-400" }) }),
+            /* @__PURE__ */ jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsx(SearchIcon5, { className: "text-muted-foreground h-5 w-5" }) }),
             /* @__PURE__ */ jsx(
               Input,
               {
@@ -28035,8 +28105,8 @@ function ServicePicker({
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "flex-1 overflow-y-auto p-3", children: [
-          error && /* @__PURE__ */ jsx("div", { className: "mb-4 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400", children: /* @__PURE__ */ jsx("strong", { children: error }) }),
-          loading ? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 text-gray-500", children: [
+          error && /* @__PURE__ */ jsx("div", { className: "bg-destructive/10 text-destructive mb-4 rounded-lg p-4", children: /* @__PURE__ */ jsx("strong", { children: error }) }),
+          loading ? /* @__PURE__ */ jsxs("div", { className: "text-muted-foreground flex items-center gap-2", children: [
             /* @__PURE__ */ jsx(SpinnerIcon5, { className: "h-5 w-5 animate-spin" }),
             /* @__PURE__ */ jsx("span", { children: "Loading available services..." })
           ] }) : isSearching ? (
@@ -28050,7 +28120,7 @@ function ServicePicker({
                 multiple
               },
               service.id
-            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
           ) : (
             // Grouped list - accordion style
             /* @__PURE__ */ jsx("ul", { className: "space-y-1", children: filteredGroups.length > 0 ? filteredGroups.map((group) => /* @__PURE__ */ jsx(
@@ -28065,7 +28135,7 @@ function ServicePicker({
                 multiple
               },
               group.id
-            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "rounded-lg bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsx("strong", { children: emptyMessage }) }) }) })
           )
         ] })
       ]
@@ -28093,10 +28163,10 @@ function ServiceGroupItem({
         onClick: () => onToggleGroup(group.id),
         className: cn(
           "flex w-full items-center justify-between rounded-lg px-3 py-2",
-          "text-left text-sm font-medium",
-          "hover:bg-gray-100 dark:hover:bg-gray-800",
+          "text-muted-foreground text-left text-sm font-medium",
+          "hover:bg-muted",
           "transition-colors",
-          depth > 0 && "ml-4 text-gray-600 dark:text-gray-400"
+          depth > 0 && "ml-4"
         ),
         "aria-expanded": isExpanded,
         children: [
@@ -28105,7 +28175,7 @@ function ServiceGroupItem({
             hasSelection && /* @__PURE__ */ jsx(
               "span",
               {
-                className: "bg-brand-500 h-2 w-2 rounded-full",
+                className: "bg-primary h-2 w-2 rounded-full",
                 "aria-label": "Has selected items"
               }
             )
@@ -28114,7 +28184,7 @@ function ServiceGroupItem({
             ChevronIcon2,
             {
               className: cn(
-                "h-5 w-5 transition-transform",
+                "text-muted-foreground h-5 w-5 transition-transform",
                 isExpanded && "rotate-180"
               )
             }
@@ -28161,48 +28231,81 @@ function ServiceItem({
     {
       className: cn(
         "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2",
-        "hover:bg-gray-100 dark:hover:bg-gray-800",
+        "hover:bg-muted",
         "transition-colors",
         service.disabled && "cursor-not-allowed opacity-50"
       ),
       children: [
-        multiple ? /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: "checkbox",
-            checked: selected,
-            onChange: onToggle,
-            disabled: service.disabled,
-            className: "text-brand-600 focus:ring-brand-500 h-4 w-4 rounded border-gray-300"
-          }
-        ) : /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: "radio",
-            checked: selected,
-            onChange: onToggle,
-            disabled: service.disabled,
-            className: "text-brand-600 focus:ring-brand-500 h-4 w-4 border-gray-300"
-          }
-        ),
+        multiple ? /* @__PURE__ */ jsxs("span", { className: "relative inline-flex shrink-0 items-center justify-center", children: [
+          /* @__PURE__ */ jsx(
+            "input",
+            {
+              type: "checkbox",
+              checked: selected,
+              onChange: onToggle,
+              disabled: service.disabled,
+              className: cn(
+                "peer h-4 w-4 shrink-0 appearance-none rounded",
+                "border-input bg-background border-2",
+                "cursor-pointer transition-all duration-150",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "checked:bg-primary-500 checked:border-primary-500"
+              )
+            }
+          ),
+          /* @__PURE__ */ jsx(CheckIcon4, { className: "pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" })
+        ] }) : /* @__PURE__ */ jsxs("span", { className: "relative inline-flex shrink-0 items-center justify-center", children: [
+          /* @__PURE__ */ jsx(
+            "input",
+            {
+              type: "radio",
+              checked: selected,
+              onChange: onToggle,
+              disabled: service.disabled,
+              className: cn(
+                "peer h-4 w-4 shrink-0 appearance-none rounded-full",
+                "border-input bg-background border-2",
+                "cursor-pointer transition-all duration-150",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "checked:border-primary-500"
+              )
+            }
+          ),
+          /* @__PURE__ */ jsx("span", { className: "bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" })
+        ] }),
         /* @__PURE__ */ jsxs("div", { className: "min-w-0 flex-1", children: [
           /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-gray-900 dark:text-gray-100", children: service.name }),
-            service.code && /* @__PURE__ */ jsxs("span", { className: "text-xs text-gray-500 dark:text-gray-400", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-foreground text-sm font-medium", children: service.name }),
+            service.code && /* @__PURE__ */ jsxs("span", { className: "text-muted-foreground text-xs", children: [
               "(",
               service.code,
               ")"
             ] })
           ] }),
-          service.description && /* @__PURE__ */ jsx("p", { className: "truncate text-xs text-gray-500 dark:text-gray-400", children: service.description })
+          service.description && /* @__PURE__ */ jsx("p", { className: "text-muted-foreground truncate text-xs", children: service.description })
         ] }),
-        service.price !== void 0 && /* @__PURE__ */ jsxs("span", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: [
+        service.price !== void 0 && /* @__PURE__ */ jsxs("span", { className: "text-foreground text-sm font-medium", children: [
           "$",
           service.price.toFixed(2)
         ] })
       ]
     }
   ) });
+}
+function CheckIcon4({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 3,
+      children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+    }
+  );
 }
 function SearchIcon5({ className }) {
   return /* @__PURE__ */ jsx(
@@ -28849,7 +28952,7 @@ function SetupServiceModal({
   const isValid = formData.name.trim() && formData.price >= 0;
   return /* @__PURE__ */ jsx(Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxs("form", { onSubmit: handleSubmit, children: [
     /* @__PURE__ */ jsx(ModalHeader, { children: /* @__PURE__ */ jsx(ModalTitle, { children: title }) }),
-    /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
+    /* @__PURE__ */ jsxs(ModalBody, { className: "min-w-[320px] space-y-4", children: [
       errorMessage && /* @__PURE__ */ jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
       showServicePicker && availableServices.length > 0 && /* @__PURE__ */ jsx(
         Select,
@@ -28880,7 +28983,7 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-description",
-            className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300",
+            className: "text-foreground mb-1 block text-sm font-medium",
             children: "Description"
           }
         ),
@@ -28888,7 +28991,7 @@ function SetupServiceModal({
           "textarea",
           {
             id: "setup-service-description",
-            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+            className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
             rows: 3,
             value: formData.description,
             onChange: (e) => setFormData((prev) => ({
@@ -28917,12 +29020,12 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-price",
-            className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300",
+            className: "text-foreground mb-1 block text-sm font-medium",
             children: "Base Price"
           }
         ),
         /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-          /* @__PURE__ */ jsx("span", { className: "absolute top-1/2 left-3 -translate-y-1/2 text-gray-500", children: "$" }),
+          /* @__PURE__ */ jsx("span", { className: "text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2", children: "$" }),
           /* @__PURE__ */ jsx(
             "input",
             {
@@ -28930,7 +29033,7 @@ function SetupServiceModal({
               type: "number",
               min: "0",
               step: "0.01",
-              className: "w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+              className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none",
               value: formData.price,
               onChange: (e) => setFormData((prev) => ({
                 ...prev,
@@ -28943,14 +29046,15 @@ function SetupServiceModal({
         ] })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "space-y-3 pt-2", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Currently Offered" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Service is available for orders" })
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-foreground text-sm font-medium", children: "Currently Offered" }),
+            /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-xs", children: "Service is available for orders" })
           ] }),
           /* @__PURE__ */ jsx(
             Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.currentlyOffered,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -28959,14 +29063,15 @@ function SetupServiceModal({
             }
           )
         ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Limited Inventory" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Track inventory for this service" })
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-foreground text-sm font-medium", children: "Limited Inventory" }),
+            /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-xs", children: "Track inventory for this service" })
           ] }),
           /* @__PURE__ */ jsx(
             Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.limitedInventory,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -28975,7 +29080,7 @@ function SetupServiceModal({
             }
           )
         ] }),
-        formData.limitedInventory && /* @__PURE__ */ jsx("div", { className: "ml-4 border-l-2 border-gray-200 pl-4 dark:border-gray-700", children: /* @__PURE__ */ jsx(
+        formData.limitedInventory && /* @__PURE__ */ jsx("div", { className: "border-border ml-4 border-l-2 pl-4", children: /* @__PURE__ */ jsx(
           Input,
           {
             label: "Initial Inventory",
@@ -28989,14 +29094,15 @@ function SetupServiceModal({
             placeholder: "Enter quantity"
           }
         ) }),
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Auto-Accept Referrals" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Automatically accept incoming referrals" })
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-foreground text-sm font-medium", children: "Auto-Accept Referrals" }),
+            /* @__PURE__ */ jsx("p", { className: "text-muted-foreground text-xs", children: "Automatically accept incoming referrals" })
           ] }),
           /* @__PURE__ */ jsx(
             Switch,
             {
+              className: "flex-shrink-0",
               checked: formData.autoAcceptReferrals,
               onCheckedChange: (checked) => setFormData((prev) => ({
                 ...prev,
@@ -31064,7 +31170,7 @@ function SSOConfigForm({
     ] })
   ] });
 }
-function CheckIcon4({ className }) {
+function CheckIcon5({ className }) {
   return /* @__PURE__ */ jsx(
     "svg",
     {
@@ -31149,66 +31255,89 @@ function StepIndicator({
     if (allowCompletedStepsOnly) return index <= currentStep;
     return true;
   };
+  const circleButton = (step, index, status, clickable) => /* @__PURE__ */ jsx(
+    "button",
+    {
+      type: "button",
+      onClick: () => handleStepClick(index),
+      disabled: !clickable,
+      className: `${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white" : status === "current" ? "bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900" : "bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300"}`.trim(),
+      "aria-current": status === "current" ? "step" : void 0,
+      children: step.hasError ? /* @__PURE__ */ jsx(ErrorIcon, { className: "h-4 w-4" }) : status === "completed" ? step.icon || /* @__PURE__ */ jsx(CheckIcon5, { className: "h-4 w-4" }) : step.icon || /* @__PURE__ */ jsx(
+        "span",
+        {
+          className: status === "current" ? "text-white" : "text-neutral-500 dark:text-neutral-300",
+          children: index + 1
+        }
+      )
+    }
+  );
+  const stepLabel = (step, status, horizontal) => /* @__PURE__ */ jsxs("div", { className: `${horizontal ? "text-center" : "flex-1"} ${sizes.text}`, children: [
+    /* @__PURE__ */ jsxs(
+      "p",
+      {
+        className: `font-medium ${step.hasError ? "text-red-600 dark:text-red-400" : status === "completed" || status === "current" ? "text-neutral-900 dark:text-white" : "text-neutral-500 dark:text-neutral-400"}`.trim(),
+        children: [
+          step.label,
+          step.optional && /* @__PURE__ */ jsxs("span", { className: "font-normal text-neutral-500 dark:text-neutral-400", children: [
+            " ",
+            "(optional)"
+          ] })
+        ]
+      }
+    ),
+    step.description && /* @__PURE__ */ jsx("p", { className: "mt-0.5 text-neutral-500 dark:text-neutral-400", children: step.description })
+  ] });
+  if (orientation === "horizontal") {
+    return /* @__PURE__ */ jsx("nav", { className: `flex ${className}`.trim(), "aria-label": "Progress", children: steps.map((step, index) => {
+      const status = getStepStatus(index);
+      const isLast = index === steps.length - 1;
+      const clickable = isClickable(index);
+      return /* @__PURE__ */ jsxs("div", { className: "flex flex-1 flex-col items-center", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex w-full items-center", children: [
+          index > 0 ? /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: `flex-1 ${sizes.line} ${index <= currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`,
+              "aria-hidden": "true"
+            }
+          ) : /* @__PURE__ */ jsx("div", { className: "flex-1" }),
+          circleButton(step, index, status, clickable),
+          !isLast ? /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: `flex-1 ${sizes.line} ${index < currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`,
+              "aria-hidden": "true"
+            }
+          ) : /* @__PURE__ */ jsx("div", { className: "flex-1" })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "mt-2", children: stepLabel(step, status, true) })
+      ] }, step.id);
+    }) });
+  }
   return /* @__PURE__ */ jsx(
     "nav",
     {
-      className: ` ${orientation === "horizontal" ? "flex items-center" : "flex flex-col"} ${sizes.gap} ${className} `.trim(),
+      className: `flex flex-col ${sizes.gap} ${className}`.trim(),
       "aria-label": "Progress",
       children: steps.map((step, index) => {
         const status = getStepStatus(index);
         const isLast = index === steps.length - 1;
         const clickable = isClickable(index);
         return /* @__PURE__ */ jsxs(React46.Fragment, { children: [
-          /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: `flex items-center ${orientation === "vertical" ? "flex-row" : "flex-col"} ${sizes.gap} `.trim(),
-              children: [
-                /* @__PURE__ */ jsx(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: () => handleStepClick(index),
-                    disabled: !clickable,
-                    className: ` ${sizes.circle} flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-blue-600 text-white focus:ring-blue-500 dark:bg-blue-500" : status === "current" ? "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:ring-blue-500" : "bg-gray-200 text-gray-500 focus:ring-gray-400 dark:bg-gray-700 dark:text-gray-400"} `.trim(),
-                    "aria-current": status === "current" ? "step" : void 0,
-                    children: step.hasError ? /* @__PURE__ */ jsx(ErrorIcon, { className: "h-4 w-4" }) : status === "completed" ? step.icon || /* @__PURE__ */ jsx(CheckIcon4, { className: "h-4 w-4" }) : step.icon || /* @__PURE__ */ jsx("span", { children: index + 1 })
-                  }
-                ),
-                /* @__PURE__ */ jsxs(
-                  "div",
-                  {
-                    className: ` ${orientation === "horizontal" ? "text-center" : "flex-1"} ${sizes.text} `.trim(),
-                    children: [
-                      /* @__PURE__ */ jsxs(
-                        "p",
-                        {
-                          className: `font-medium ${step.hasError ? "text-red-600 dark:text-red-400" : status === "completed" || status === "current" ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"} `.trim(),
-                          children: [
-                            step.label,
-                            step.optional && /* @__PURE__ */ jsxs("span", { className: "font-normal text-gray-500 dark:text-gray-400", children: [
-                              " ",
-                              "(optional)"
-                            ] })
-                          ]
-                        }
-                      ),
-                      step.description && /* @__PURE__ */ jsx("p", { className: "mt-0.5 text-gray-500 dark:text-gray-400", children: step.description })
-                    ]
-                  }
-                )
-              ]
-            }
-          ),
+          /* @__PURE__ */ jsxs("div", { className: `flex flex-row items-center ${sizes.gap}`, children: [
+            circleButton(step, index, status, clickable),
+            stepLabel(step, status, false)
+          ] }),
           !isLast && /* @__PURE__ */ jsx(
             "div",
             {
-              className: ` ${orientation === "horizontal" ? "min-w-8 flex-1" : "ml-4 min-h-4"} flex items-center justify-center`.trim(),
+              className: `flex min-h-4 justify-center ${size === "sm" ? "w-6" : size === "lg" ? "w-10" : "w-8"}`,
               "aria-hidden": "true",
               children: /* @__PURE__ */ jsx(
                 "div",
                 {
-                  className: ` ${orientation === "horizontal" ? "w-full" : "h-full min-h-4"} ${sizes.line} ${index < currentStep ? "bg-blue-600 dark:bg-blue-500" : "bg-gray-200 dark:bg-gray-700"} `.trim()
+                  className: `h-full min-h-4 ${sizes.line} ${index < currentStep ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"}`
                 }
               )
             }
@@ -31352,11 +31481,68 @@ function TimelineProgress({
   steps,
   currentStep,
   showTimestamps = true,
+  size = "md",
+  pulse = true,
   className
 }) {
   const visibleSteps = steps.filter((step) => !step.hidden);
   const currentIndex = visibleSteps.findIndex((s) => s.key === currentStep);
-  const getStepState = (index) => {
+  const sizeConfig = {
+    sm: {
+      wrapper: "h-6 w-6",
+      completed: "h-5 w-5",
+      current: "h-6 w-6",
+      pending: "h-5 w-5",
+      error: "h-6 w-6",
+      checkIcon: "h-3 w-3",
+      xIcon: "h-3.5 w-3.5",
+      currentDot: "h-1.5 w-1.5",
+      pendingDot: "h-1.5 w-1.5",
+      connector: "h-px",
+      timestamp: "text-[10px]",
+      label: "text-[10px]",
+      padding: "py-2",
+      labelMargin: "mt-1.5",
+      timestampMargin: "mb-1"
+    },
+    md: {
+      wrapper: "h-10 w-10",
+      completed: "h-8 w-8",
+      current: "h-10 w-10",
+      pending: "h-8 w-8",
+      error: "h-10 w-10",
+      checkIcon: "h-4 w-4",
+      xIcon: "h-5 w-5",
+      currentDot: "h-2.5 w-2.5",
+      pendingDot: "h-2 w-2",
+      connector: "h-0.5",
+      timestamp: "text-xs",
+      label: "text-xs",
+      padding: "py-4",
+      labelMargin: "mt-2.5",
+      timestampMargin: "mb-2"
+    },
+    lg: {
+      wrapper: "h-14 w-14",
+      completed: "h-11 w-11",
+      current: "h-14 w-14",
+      pending: "h-11 w-11",
+      error: "h-14 w-14",
+      checkIcon: "h-5 w-5",
+      xIcon: "h-6 w-6",
+      currentDot: "h-3.5 w-3.5",
+      pendingDot: "h-2.5 w-2.5",
+      connector: "h-1",
+      timestamp: "text-sm",
+      label: "text-sm",
+      padding: "py-6",
+      labelMargin: "mt-3",
+      timestampMargin: "mb-3"
+    }
+  };
+  const sizes = sizeConfig[size];
+  const getStepState = (index, step) => {
+    if (step.error) return "error";
     if (index < currentIndex) return "completed";
     if (index === currentIndex) return "current";
     return "pending";
@@ -31368,77 +31554,123 @@ function TimelineProgress({
   return /* @__PURE__ */ jsx(
     "div",
     {
-      className: cn("flex items-start overflow-x-auto py-4", className),
+      className: cn(sizes.padding, "overflow-x-auto", className),
       role: "progressbar",
       "aria-valuenow": currentIndex + 1,
       "aria-valuemin": 1,
       "aria-valuemax": visibleSteps.length,
-      children: visibleSteps.map((step, index) => {
-        const state = getStepState(index);
+      children: /* @__PURE__ */ jsx("div", { className: "relative flex items-start", children: visibleSteps.map((step, index) => {
+        const state = getStepState(index, step);
         const isLast = index === visibleSteps.length - 1;
-        return /* @__PURE__ */ jsxs(
-          "div",
-          {
-            className: cn(
-              "flex flex-1 flex-col items-center",
-              !isLast && "mr-2"
+        return /* @__PURE__ */ jsxs("div", { className: "flex flex-1 flex-col items-center", children: [
+          showTimestamps && /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: cn(
+                "h-4 text-center text-neutral-500 dark:text-neutral-400",
+                sizes.timestamp,
+                sizes.timestampMargin
+              ),
+              children: step.completedAt ? formatTimestamp(step.completedAt) : "\xA0"
+            }
+          ),
+          /* @__PURE__ */ jsxs("div", { className: "relative flex w-full items-center", children: [
+            index > 0 && /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: cn(
+                  "flex-1",
+                  sizes.connector,
+                  state === "completed" || state === "current" || state === "error" ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"
+                )
+              }
             ),
-            children: [
-              showTimestamps && /* @__PURE__ */ jsx("div", { className: "mb-1 h-5 text-center text-xs text-gray-500", children: step.completedAt ? formatTimestamp(step.completedAt) : "\xA0" }),
-              /* @__PURE__ */ jsxs("div", { className: "flex w-full items-center", children: [
-                /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    className: cn(
-                      "h-1 flex-1",
-                      index === 0 ? "bg-transparent" : "",
-                      state === "completed" || state === "current" && index > 0 ? "bg-brand-500" : "bg-gray-200 dark:bg-gray-700"
-                    )
-                  }
+            index === 0 && /* @__PURE__ */ jsx("div", { className: "flex-1" }),
+            /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: cn(
+                  "flex shrink-0 items-center justify-center",
+                  sizes.wrapper
                 ),
-                /* @__PURE__ */ jsxs(
+                children: /* @__PURE__ */ jsxs(
                   "div",
                   {
                     className: cn(
-                      "relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-                      state === "completed" && "border-brand-500 bg-brand-500 text-white",
-                      state === "current" && "border-brand-500 bg-white dark:bg-gray-900",
-                      state === "pending" && "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900"
+                      "relative z-10 flex items-center justify-center rounded-full transition-all duration-200",
+                      state === "completed" && cn(
+                        "bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2",
+                        sizes.completed
+                      ),
+                      state === "current" && cn(
+                        "bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4",
+                        sizes.current,
+                        pulse && "animate-pulse"
+                      ),
+                      state === "pending" && cn(
+                        "bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700",
+                        sizes.pending
+                      ),
+                      state === "error" && cn(
+                        "bg-red-500 text-white shadow-md ring-4 shadow-red-500/30 ring-red-100 dark:bg-red-500 dark:ring-red-900/50",
+                        sizes.error
+                      )
                     ),
                     children: [
-                      state === "completed" && /* @__PURE__ */ jsx(CheckIcon5, { className: "h-3 w-3" }),
-                      state === "current" && /* @__PURE__ */ jsx("div", { className: "bg-brand-500 h-2 w-2 rounded-full" })
+                      state === "completed" && /* @__PURE__ */ jsx(CheckIcon6, { className: sizes.checkIcon }),
+                      state === "current" && /* @__PURE__ */ jsx(
+                        "div",
+                        {
+                          className: cn(
+                            "rounded-full bg-white",
+                            sizes.currentDot
+                          )
+                        }
+                      ),
+                      state === "pending" && /* @__PURE__ */ jsx(
+                        "div",
+                        {
+                          className: cn(
+                            "rounded-full bg-neutral-300 dark:bg-neutral-600",
+                            sizes.pendingDot
+                          )
+                        }
+                      ),
+                      state === "error" && /* @__PURE__ */ jsx(XIcon4, { className: sizes.xIcon })
                     ]
                   }
-                ),
-                /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    className: cn(
-                      "h-1 flex-1",
-                      isLast ? "bg-transparent" : "",
-                      state === "completed" ? "bg-brand-500" : "bg-gray-200 dark:bg-gray-700"
-                    )
-                  }
                 )
-              ] }),
-              /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: cn(
-                    "mt-2 text-center text-xs font-medium capitalize",
-                    state === "completed" && "text-brand-600 dark:text-brand-400",
-                    state === "current" && "text-gray-900 dark:text-gray-100",
-                    state === "pending" && "text-gray-400 dark:text-gray-500"
-                  ),
-                  children: step.label
-                }
-              )
-            ]
-          },
-          step.key
-        );
-      })
+              }
+            ),
+            !isLast && /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: cn(
+                  "flex-1",
+                  sizes.connector,
+                  state === "completed" ? "bg-primary-600 dark:bg-primary-500" : "bg-neutral-200 dark:bg-neutral-700"
+                )
+              }
+            ),
+            isLast && /* @__PURE__ */ jsx("div", { className: "flex-1" })
+          ] }),
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: cn(
+                "text-center font-medium capitalize",
+                sizes.label,
+                sizes.labelMargin,
+                state === "completed" && "text-primary-700 dark:text-primary-300",
+                state === "current" && "font-semibold text-neutral-900 dark:text-white",
+                state === "pending" && "text-neutral-400 dark:text-neutral-500",
+                state === "error" && "font-semibold text-red-600 dark:text-red-400"
+              ),
+              children: step.label
+            }
+          )
+        ] }, step.key);
+      }) })
     }
   );
 }
@@ -31487,48 +31719,56 @@ function TimelineEventList({
   const getEventColor = (type) => {
     switch (type) {
       case "message":
-        return "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
+        return "bg-blue-50 text-blue-500 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40";
       case "status":
-        return "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400";
+        return "bg-green-50 text-green-500 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40";
       case "attachment":
-        return "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400";
+        return "bg-purple-50 text-purple-500 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40";
       case "assignment":
-        return "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400";
+        return "bg-orange-50 text-orange-500 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40";
       case "note":
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+        return "bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40";
       default:
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+        return "bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40";
     }
   };
   if (events.length === 0) {
-    return /* @__PURE__ */ jsx("div", { className: cn("py-8 text-center text-gray-500", className), children: "No activity yet." });
+    return /* @__PURE__ */ jsx("div", { className: cn("py-8 text-center text-neutral-500", className), children: "No activity yet." });
   }
-  return /* @__PURE__ */ jsx("div", { className: cn("space-y-4", className), children: events.map((event, index) => /* @__PURE__ */ jsxs("div", { className: "relative flex gap-4", children: [
-    index < events.length - 1 && /* @__PURE__ */ jsx("div", { className: "absolute top-10 left-5 h-full w-px bg-gray-200 dark:bg-gray-700" }),
-    /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsxs("div", { className: cn("relative", className), children: [
+    events.length > 1 && /* @__PURE__ */ jsx(
       "div",
       {
-        className: cn(
-          "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-          getEventColor(event.type)
-        ),
-        children: getEventIcon(event.type)
+        className: "absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700",
+        "aria-hidden": "true"
       }
     ),
-    /* @__PURE__ */ jsxs("div", { className: "flex-1 pt-1", children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-2", children: [
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h4", { className: "font-medium text-gray-900 dark:text-gray-100", children: event.title }),
-          event.author && /* @__PURE__ */ jsxs("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: [
-            "by ",
-            event.author
-          ] })
+    /* @__PURE__ */ jsx("div", { className: "space-y-6", children: events.map((event) => /* @__PURE__ */ jsxs("div", { className: "relative flex gap-4", children: [
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: cn(
+            "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-2",
+            getEventColor(event.type)
+          ),
+          children: getEventIcon(event.type)
+        }
+      ),
+      /* @__PURE__ */ jsxs("div", { className: "flex-1 pt-0.5", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-2", children: [
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("h4", { className: "font-semibold text-neutral-900 dark:text-neutral-100", children: event.title }),
+            event.author && /* @__PURE__ */ jsxs("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: [
+              "by ",
+              event.author
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx("time", { className: "shrink-0 pt-0.5 text-xs text-neutral-400 dark:text-neutral-500", children: formatTime4(event.timestamp) })
         ] }),
-        /* @__PURE__ */ jsx("time", { className: "shrink-0 text-xs text-gray-400 dark:text-gray-500", children: formatTime4(event.timestamp) })
-      ] }),
-      event.content && /* @__PURE__ */ jsx("p", { className: "mt-2 text-sm text-gray-600 dark:text-gray-300", children: event.content })
-    ] })
-  ] }, event.id)) });
+        event.content && /* @__PURE__ */ jsx("p", { className: "mt-1.5 text-sm text-neutral-600 dark:text-neutral-300", children: event.content })
+      ] })
+    ] }, event.id)) })
+  ] });
 }
 TimelineEventList.displayName = "TimelineEventList";
 function OrderConfirmation({
@@ -31549,21 +31789,21 @@ function OrderConfirmation({
       role: "dialog",
       "aria-modal": "true",
       "aria-labelledby": "order-confirmation-title",
-      children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800", children: [
+      children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-800", children: [
         /* @__PURE__ */ jsx("div", { className: "mb-6 flex justify-center", children: /* @__PURE__ */ jsx("div", { className: "flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsx("div", { className: "animate-bounce", children: /* @__PURE__ */ jsx(PlaneIcon, { className: "h-10 w-10 text-green-600 dark:text-green-400" }) }) }) }),
         /* @__PURE__ */ jsx(
           "h2",
           {
             id: "order-confirmation-title",
-            className: "mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-100",
+            className: "mb-2 text-center text-2xl font-bold text-neutral-900 dark:text-neutral-100",
             children: "Order Submitted!"
           }
         ),
-        orderNumber && /* @__PURE__ */ jsxs("p", { className: "mb-4 text-center text-sm text-gray-500 dark:text-gray-400", children: [
+        orderNumber && /* @__PURE__ */ jsxs("p", { className: "mb-4 text-center text-sm text-neutral-500 dark:text-neutral-400", children: [
           "Order #",
           orderNumber
         ] }),
-        /* @__PURE__ */ jsx("p", { className: "mb-6 text-center text-gray-600 dark:text-gray-300", children: message }),
+        /* @__PURE__ */ jsx("p", { className: "mb-6 text-center text-neutral-600 dark:text-neutral-300", children: message }),
         /* @__PURE__ */ jsx(
           "button",
           {
@@ -31571,8 +31811,8 @@ function OrderConfirmation({
             onClick: onClose,
             className: cn(
               "w-full rounded-lg px-4 py-3 font-medium",
-              "bg-brand-600 hover:bg-brand-700 text-white",
-              "dark:bg-brand-500 dark:hover:bg-brand-600",
+              "bg-primary-600 hover:bg-primary-700 text-white",
+              "dark:bg-primary-500 dark:hover:bg-primary-600",
               "transition-colors"
             ),
             children: "Got It"
@@ -31583,7 +31823,7 @@ function OrderConfirmation({
   );
 }
 OrderConfirmation.displayName = "OrderConfirmation";
-function CheckIcon5({ className }) {
+function CheckIcon6({ className }) {
   return /* @__PURE__ */ jsx(
     "svg",
     {
@@ -31598,6 +31838,26 @@ function CheckIcon5({ className }) {
           strokeLinecap: "round",
           strokeLinejoin: "round",
           d: "M4.5 12.75l6 6 9-13.5"
+        }
+      )
+    }
+  );
+}
+function XIcon4({ className }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
+    {
+      className,
+      fill: "none",
+      viewBox: "0 0 24 24",
+      stroke: "currentColor",
+      strokeWidth: 3,
+      children: /* @__PURE__ */ jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: "M6 18L18 6M6 6l12 12"
         }
       )
     }
@@ -31723,7 +31983,7 @@ function PlaneIcon({ className }) {
     }
   );
 }
-var CheckIcon6 = () => /* @__PURE__ */ jsx(
+var CheckIcon7 = () => /* @__PURE__ */ jsx(
   "svg",
   {
     className: "h-5 w-5",
@@ -31788,7 +32048,7 @@ var InfoIcon = () => /* @__PURE__ */ jsx(
     )
   }
 );
-var XIcon4 = () => /* @__PURE__ */ jsx(
+var XIcon5 = () => /* @__PURE__ */ jsx(
   "svg",
   {
     className: "h-4 w-4",
@@ -31825,7 +32085,7 @@ var variantStyles = {
   }
 };
 var defaultIcons = {
-  success: /* @__PURE__ */ jsx(CheckIcon6, {}),
+  success: /* @__PURE__ */ jsx(CheckIcon7, {}),
   error: /* @__PURE__ */ jsx(XCircleIcon, {}),
   warning: /* @__PURE__ */ jsx(ExclamationIcon, {}),
   info: /* @__PURE__ */ jsx(InfoIcon, {})
@@ -31871,7 +32131,7 @@ function Toast({
             onClick: onClose,
             className: "flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10",
             "aria-label": "Dismiss notification",
-            children: /* @__PURE__ */ jsx(XIcon4, {})
+            children: /* @__PURE__ */ jsx(XIcon5, {})
           }
         )
       ]
@@ -32025,6 +32285,7 @@ function WebChartReportViewer({
   onDateRangeChange,
   webchartBrand: webchartBrand2 = { name: "Enterprise Health" },
   onReconnect,
+  columnRenderers,
   className,
   labels = {}
 }) {
@@ -32034,17 +32295,16 @@ function WebChartReportViewer({
     reconnect = "Reconnect",
     noReports = "No reports available",
     loadingData = "Fetching latest data from Enterprise Health...",
-    close = "Close",
     dateFrom = "From",
     dateTo = "To"
   } = labels;
-  const [offcanvasOpen, setOffcanvasOpen] = React46.useState(false);
+  const [modalOpen, setModalOpen] = React46.useState(false);
   const handleReportClick = (report) => {
     onReportSelect?.(report);
-    setOffcanvasOpen(true);
+    setModalOpen(true);
   };
   const handleClose = () => {
-    setOffcanvasOpen(false);
+    setModalOpen(false);
     onClose?.();
   };
   const formatDate4 = (date) => {
@@ -32052,144 +32312,153 @@ function WebChartReportViewer({
     return d.toISOString().split("T")[0];
   };
   return /* @__PURE__ */ jsxs("div", { className: cn("webchart-report-viewer", className), children: [
-    error && /* @__PURE__ */ jsx("div", { className: "mb-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2", children: [
-      /* @__PURE__ */ jsx("i", { className: "fas fa-exclamation-triangle mt-0.5 text-yellow-600" }),
-      /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
-        /* @__PURE__ */ jsx("span", { className: "font-medium text-yellow-800", children: error }),
-        /* @__PURE__ */ jsxs("p", { className: "mt-1 text-sm text-yellow-700", children: [
-          "If this error persists, you can try reconnecting",
-          " ",
-          webchartBrand2.name,
-          "."
-        ] }),
+    error && /* @__PURE__ */ jsxs(Alert, { variant: "warning", icon: /* @__PURE__ */ jsx(AlertTriangle, {}), className: "mb-4", children: [
+      /* @__PURE__ */ jsx(AlertTitle, { children: error }),
+      /* @__PURE__ */ jsxs(AlertDescription, { children: [
+        "If this error persists, you can try reconnecting",
+        " ",
+        webchartBrand2.name,
+        ".",
         onReconnect && /* @__PURE__ */ jsxs(
-          "button",
+          Button,
           {
-            type: "button",
+            variant: "secondary",
+            size: "sm",
             onClick: onReconnect,
-            className: "mt-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50",
+            className: "mt-2",
             children: [
-              /* @__PURE__ */ jsx("i", { className: "fas fa-link mr-2" }),
+              /* @__PURE__ */ jsx(Link, { className: "mr-2 h-4 w-4" }),
               reconnect
             ]
           }
         )
       ] })
-    ] }) }),
-    !error && !loading && /* @__PURE__ */ jsxs(
-      "button",
-      {
-        type: "button",
-        onClick: onRefreshReports,
-        className: "bg-primary hover:bg-primary/90 mb-4 rounded-lg px-4 py-2 text-white",
-        title: refreshReports,
-        children: [
-          /* @__PURE__ */ jsx("i", { className: "fas fa-sync-alt mr-2" }),
-          refreshReports
-        ]
-      }
-    ),
+    ] }),
+    !error && !loading && /* @__PURE__ */ jsxs(Button, { onClick: onRefreshReports, className: "mb-4", children: [
+      /* @__PURE__ */ jsx(RefreshCw, { className: "mr-2 h-4 w-4" }),
+      refreshReports
+    ] }),
     /* @__PURE__ */ jsx("div", { className: "mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3", children: loading ? (
       // Loading placeholders
-      /* @__PURE__ */ jsx(Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsx("div", { className: "animate-pulse", children: /* @__PURE__ */ jsx("div", { className: "h-12 rounded-lg bg-gray-200" }) }, i)) })
+      /* @__PURE__ */ jsx(Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsx(Skeleton, { variant: "button", className: "h-12 w-full" }, i)) })
     ) : reports.length > 0 ? (
       // Report buttons
       reports.map((report) => /* @__PURE__ */ jsx(
-        "button",
+        Card,
         {
-          type: "button",
+          interactive: true,
+          padding: "none",
+          role: "button",
+          tabIndex: 0,
+          "aria-label": report.description ? `${report.name}: ${report.description}` : report.name,
           onClick: () => handleReportClick(report),
-          className: "border-primary text-primary hover:bg-primary w-full truncate rounded-lg border bg-white p-3 text-left hover:text-white",
-          title: report.description ? `${report.name}: ${report.description}` : report.name,
-          children: report.name
+          onKeyDown: (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleReportClick(report);
+            }
+          },
+          className: "cursor-pointer",
+          children: /* @__PURE__ */ jsx(CardContent, { className: "p-3", children: /* @__PURE__ */ jsx(
+            "span",
+            {
+              className: "block truncate text-sm font-medium",
+              title: report.description ? `${report.name}: ${report.description}` : report.name,
+              children: report.name
+            }
+          ) })
         },
         report.id
       ))
     ) : /* @__PURE__ */ jsx("div", { className: "text-muted-foreground col-span-full py-8 text-center", children: noReports }) }),
-    offcanvasOpen && /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 z-50 flex", children: [
-      /* @__PURE__ */ jsx(
-        "div",
-        {
-          role: "button",
-          tabIndex: 0,
-          "aria-label": "Close panel",
-          className: "fixed inset-0 bg-black/50",
-          onClick: handleClose,
-          onKeyDown: (e) => e.key === "Enter" && handleClose()
-        }
-      ),
-      /* @__PURE__ */ jsxs("div", { className: "fixed right-0 bottom-0 left-0 flex h-3/4 flex-col rounded-t-xl bg-white shadow-xl", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between border-b p-4", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ jsx("h5", { className: "text-lg font-semibold", children: currentReport?.name || "Report Results" }),
-            reportResult?.error ? /* @__PURE__ */ jsx("span", { className: "text-yellow-500", title: reportResult.error, children: /* @__PURE__ */ jsx("i", { className: "fas fa-exclamation-triangle" }) }) : reportResult?.success ? /* @__PURE__ */ jsx("span", { className: "text-green-500", children: /* @__PURE__ */ jsx("i", { className: "fas fa-check-circle" }) }) : null
+    /* @__PURE__ */ jsxs(
+      Modal,
+      {
+        open: modalOpen,
+        onOpenChange: (open) => {
+          if (!open) {
+            handleClose();
+          }
+        },
+        size: "4xl",
+        children: [
+          /* @__PURE__ */ jsxs(ModalHeader, { children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+              /* @__PURE__ */ jsx(ModalTitle, { children: currentReport?.name || "Report Results" }),
+              reportResult?.error ? /* @__PURE__ */ jsx(AlertTriangle, { className: "h-5 w-5 text-yellow-500" }) : reportResult?.success ? /* @__PURE__ */ jsx(Check, { className: "h-5 w-5 text-green-500" }) : null
+            ] }),
+            /* @__PURE__ */ jsx(ModalClose, {})
           ] }),
-          /* @__PURE__ */ jsx(
-            "button",
-            {
-              type: "button",
-              onClick: handleClose,
-              className: "text-2xl text-gray-400 hover:text-gray-600",
-              "aria-label": close,
-              children: "\xD7"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap items-center gap-3 border-b bg-gray-50 p-4", children: [
-          onDateRangeChange && dateRange && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
-              dateFrom,
-              ":"
+          /* @__PURE__ */ jsxs("div", { className: "bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4", children: [
+            onDateRangeChange && dateRange && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
+                dateFrom,
+                ":"
+              ] }),
+              /* @__PURE__ */ jsx(
+                Input,
+                {
+                  type: "date",
+                  size: "sm",
+                  value: formatDate4(dateRange.start),
+                  onChange: (e) => onDateRangeChange(e.target.value, dateRange.end),
+                  className: "w-auto"
+                }
+              ),
+              /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
+                dateTo,
+                ":"
+              ] }),
+              /* @__PURE__ */ jsx(
+                Input,
+                {
+                  type: "date",
+                  size: "sm",
+                  value: formatDate4(dateRange.end),
+                  onChange: (e) => onDateRangeChange(dateRange.start, e.target.value),
+                  className: "w-auto"
+                }
+              )
             ] }),
             /* @__PURE__ */ jsx(
-              "input",
+              Button,
               {
-                type: "date",
-                value: formatDate4(dateRange.start),
-                onChange: (e) => onDateRangeChange(e.target.value, dateRange.end),
-                className: "rounded-lg border border-gray-300 px-2 py-1 text-sm"
-              }
-            ),
-            /* @__PURE__ */ jsxs("label", { className: "text-muted-foreground text-sm", children: [
-              dateTo,
-              ":"
-            ] }),
-            /* @__PURE__ */ jsx(
-              "input",
-              {
-                type: "date",
-                value: formatDate4(dateRange.end),
-                onChange: (e) => onDateRangeChange(dateRange.start, e.target.value),
-                className: "rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                size: "sm",
+                onClick: onRefreshReport,
+                title: refreshReport,
+                "aria-label": refreshReport,
+                children: /* @__PURE__ */ jsx(RefreshCw, { className: "h-4 w-4" })
               }
             )
           ] }),
-          /* @__PURE__ */ jsx(
-            "button",
+          /* @__PURE__ */ jsx(ModalBody, { className: "max-h-[60vh] overflow-auto", children: loadingReport ? /* @__PURE__ */ jsxs("div", { className: "flex h-64 flex-col items-center justify-center", children: [
+            /* @__PURE__ */ jsx(Spinner, { size: "xl" }),
+            /* @__PURE__ */ jsx("span", { className: "text-muted-foreground mt-4", children: loadingData })
+          ] }) : reportResult?.error ? /* @__PURE__ */ jsx(Alert, { variant: "danger", icon: /* @__PURE__ */ jsx(AlertTriangle, {}), children: /* @__PURE__ */ jsx(AlertDescription, { children: reportResult.error }) }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsx(
+            "div",
             {
-              type: "button",
-              onClick: onRefreshReport,
-              className: "bg-primary hover:bg-primary/90 rounded-lg px-3 py-1.5 text-white",
-              title: refreshReport,
-              children: /* @__PURE__ */ jsx("i", { className: "fas fa-sync-alt" })
+              className: "prose dark:prose-invert max-w-none",
+              dangerouslySetInnerHTML: { __html: reportResult.data }
             }
-          )
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-auto p-4", children: loadingReport ? /* @__PURE__ */ jsxs("div", { className: "flex h-full flex-col items-center justify-center", children: [
-          /* @__PURE__ */ jsx("div", { className: "border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" }),
-          /* @__PURE__ */ jsx("span", { className: "text-muted-foreground mt-4", children: loadingData })
-        ] }) : reportResult?.error ? /* @__PURE__ */ jsxs("div", { className: "rounded-lg border border-red-200 bg-red-50 p-4 text-red-600", children: [
-          /* @__PURE__ */ jsx("i", { className: "fas fa-exclamation-circle mr-2" }),
-          reportResult.error
-        ] }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: "prose max-w-none",
-            dangerouslySetInnerHTML: { __html: reportResult.data }
-          }
-        ) : /* @__PURE__ */ jsx("pre", { className: "overflow-auto rounded-lg bg-gray-100 p-4 text-sm", children: JSON.stringify(reportResult.data, null, 2) }) : /* @__PURE__ */ jsx("div", { className: "text-muted-foreground py-8 text-center", children: "No data available" }) })
-      ] })
-    ] })
+          ) : Array.isArray(reportResult.data) && reportResult.data.length > 0 ? (() => {
+            const rows = reportResult.data;
+            const columns = Object.keys(rows[0]);
+            return /* @__PURE__ */ jsxs(Table, { children: [
+              /* @__PURE__ */ jsx(TableHeader, { children: /* @__PURE__ */ jsx(TableRow, { children: columns.map((key) => /* @__PURE__ */ jsx(TableHead, { children: key }, key)) }) }),
+              /* @__PURE__ */ jsx(TableBody, { children: rows.map((row) => {
+                const rowKey = columns.map((key) => String(row[key])).join("|") || JSON.stringify(row);
+                return /* @__PURE__ */ jsx(TableRow, { children: columns.map((key) => /* @__PURE__ */ jsx(TableCell, { children: columnRenderers?.[key] ? columnRenderers[key](row[key], row) : row[key] == null ? "" : String(row[key]) }, key)) }, rowKey);
+              }) })
+            ] });
+          })() : /* @__PURE__ */ jsx(Table, { children: /* @__PURE__ */ jsx(TableBody, { children: Object.entries(
+            reportResult.data
+          ).map(([key, val]) => /* @__PURE__ */ jsxs(TableRow, { children: [
+            /* @__PURE__ */ jsx(TableCell, { className: "text-muted-foreground font-medium", children: key }),
+            /* @__PURE__ */ jsx(TableCell, { children: val == null ? "" : String(val) })
+          ] }, key)) }) }) : /* @__PURE__ */ jsx("div", { className: "text-muted-foreground py-8 text-center", children: "No data available" }) })
+        ]
+      }
+    )
   ] });
 }
 function ReportDatePicker({
@@ -32216,7 +32485,7 @@ function ReportDatePicker({
     setPreset(value);
     const now = /* @__PURE__ */ new Date();
     let start;
-    let end = now;
+    const end = now;
     switch (value) {
       case "today":
         start = now;
@@ -32241,34 +32510,40 @@ function ReportDatePicker({
     }
     onChange?.(start, end);
   };
+  const selectOptions = presets.map((p) => ({
+    value: p.value,
+    label: p.label
+  }));
   return /* @__PURE__ */ jsxs("div", { className: cn("flex flex-wrap items-center gap-3", className), children: [
     /* @__PURE__ */ jsx(
-      "select",
+      Select,
       {
         value: preset,
-        onChange: (e) => handlePresetChange(e.target.value),
-        className: "rounded-lg border border-gray-300 px-3 py-2",
-        children: presets.map((p) => /* @__PURE__ */ jsx("option", { value: p.value, children: p.label }, p.value))
+        onValueChange: (value) => handlePresetChange(value),
+        options: selectOptions,
+        size: "sm"
       }
     ),
     preset === "custom" && /* @__PURE__ */ jsxs(Fragment, { children: [
       /* @__PURE__ */ jsx(
-        "input",
+        Input,
         {
           type: "date",
+          size: "sm",
           value: formatDate4(startDate),
           onChange: (e) => onChange?.(e.target.value, endDate || /* @__PURE__ */ new Date()),
-          className: "rounded-lg border border-gray-300 px-3 py-2"
+          className: "w-auto"
         }
       ),
       /* @__PURE__ */ jsx("span", { className: "text-muted-foreground", children: "to" }),
       /* @__PURE__ */ jsx(
-        "input",
+        Input,
         {
           type: "date",
+          size: "sm",
           value: formatDate4(endDate),
           onChange: (e) => onChange?.(startDate || /* @__PURE__ */ new Date(), e.target.value),
-          className: "rounded-lg border border-gray-300 px-3 py-2"
+          className: "w-auto"
         }
       )
     ] })

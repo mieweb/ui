@@ -9,5 +9,5 @@ var brands = {
 };
 
 export { brands };
-//# sourceMappingURL=chunk-FIUNOH6W.js.map
-//# sourceMappingURL=chunk-FIUNOH6W.js.map
+//# sourceMappingURL=chunk-S4DK5WN6.js.map
+//# sourceMappingURL=chunk-S4DK5WN6.js.map

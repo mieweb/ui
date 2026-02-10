@@ -1,7 +1,6 @@
 'use strict';
 
-var chunkLEE3NMNP_cjs = require('../../chunk-LEE3NMNP.cjs');
-require('../../chunk-SWMRCGL4.cjs');
+var chunk5UUL5EEO_cjs = require('../../chunk-5UUL5EEO.cjs');
 require('../../chunk-FHY3K6PL.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
@@ -9,11 +8,11 @@ require('../../chunk-OR5DRJCW.cjs');
 
 Object.defineProperty(exports, "Select", {
   enumerable: true,
-  get: function () { return chunkLEE3NMNP_cjs.Select; }
+  get: function () { return chunk5UUL5EEO_cjs.Select; }
 });
 Object.defineProperty(exports, "selectTriggerVariants", {
   enumerable: true,
-  get: function () { return chunkLEE3NMNP_cjs.selectTriggerVariants; }
+  get: function () { return chunk5UUL5EEO_cjs.selectTriggerVariants; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

@@ -11,5 +11,5 @@ var brands = {
 };
 
 exports.brands = brands;
-//# sourceMappingURL=chunk-6DP6RKUA.cjs.map
-//# sourceMappingURL=chunk-6DP6RKUA.cjs.map
+//# sourceMappingURL=chunk-CLJZHS7Y.cjs.map
+//# sourceMappingURL=chunk-CLJZHS7Y.cjs.map
