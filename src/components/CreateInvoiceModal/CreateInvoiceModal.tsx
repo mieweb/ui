@@ -1,11 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
 import { Badge } from '../Badge/Badge';
+import { Textarea } from '../Textarea/Textarea';
 
 export interface EmployerOption {
   id: string;
@@ -352,22 +359,13 @@ export function CreateInvoiceModal({
                 required
               />
 
-              <div>
-                <label
-                  htmlFor="invoice-notes"
-                  className="text-foreground mb-1 block text-sm font-medium"
-                >
-                  Notes (Optional)
-                </label>
-                <textarea
-                  id="invoice-notes"
-                  className="border-input bg-background text-foreground focus:ring-primary w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
-                  rows={3}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any notes for this invoice..."
-                />
-              </div>
+              <Textarea
+                label="Notes (Optional)"
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add any notes for this invoice..."
+              />
             </div>
           )}
         </ModalBody>
