@@ -40,7 +40,7 @@ const meta: Meta<typeof BookingDialog> = {
       // Container with transform creates a new containing block for position:fixed
       // This keeps the dialog within this container in docs view
       <div
-        className="flex min-h-[900px] items-center justify-center bg-background p-4"
+        className="bg-background flex min-h-[900px] items-center justify-center p-4"
         style={{ transform: 'translateZ(0)' }}
       >
         <Story />
@@ -132,7 +132,7 @@ export const ServiceSelectDemo: StoryObj<typeof ServiceSelect> = {
 
 export const InlineForm: StoryObj<typeof InlineBookingForm> = {
   render: () => (
-    <div className="w-96 rounded-lg bg-card p-6 shadow-lg">
+    <div className="bg-card w-96 rounded-lg p-6 shadow-lg">
       <InlineBookingForm
         provider={mockProvider}
         services={mockServices}
