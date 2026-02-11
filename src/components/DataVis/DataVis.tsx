@@ -92,11 +92,11 @@ const dataVisVariants = cva('wc-datavis-themed w-full', {
      */
     brand: {
       default: '',
-      mieweb: 'dv-brand-mieweb',
-      bluehive: 'dv-brand-bluehive',
-      waggleline: 'dv-brand-waggleline',
-      webchart: 'dv-brand-webchart',
-      'enterprise-health': 'dv-brand-enterprise-health',
+      mieweb: '',
+      bluehive: '',
+      waggleline: '',
+      webchart: '',
+      'enterprise-health': '',
     },
   },
   defaultVariants: {
@@ -210,8 +210,9 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
     ref
   ) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
+    const gridInstanceId = React.useId();
     const gridIdRef = React.useRef<string>(
-      `datavis-${Math.random().toString(36).slice(2, 11)}`
+      `datavis-${gridInstanceId.replace(/:/g, '-')}`
     );
 
     // Hold references to DataVis instances for cleanup
@@ -299,20 +300,27 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
       setError(null);
 
       try {
-        // Dynamic import — uses 'wcdatavis' package name.
-        // In Storybook, this is aliased to our shim that loads jQuery UI
-        // plugins before the wcdatavis source files.
-        // For @mieweb/wcdatavis (v3+), consumers should alias it to 'wcdatavis'
-        // in their build config.
-        const wcdatavis = (await import('wcdatavis')) as Record<
-          string,
-          unknown
-        >;
+        // Prefer the scoped package name declared as a peer dependency.
+        // Fall back to the unscoped alias for local/dev or Storybook setups.
+        let wcdatavisModule: Record<string, unknown>;
+        try {
+          wcdatavisModule = (await import('@mieweb/wcdatavis')) as Record<
+            string,
+            unknown
+          >;
+        } catch {
+          // Scoped package not available — fall back to the legacy/unscoped
+          // name (used in Storybook via Vite aliases, or local dev).
+          wcdatavisModule = (await import('wcdatavis')) as Record<
+            string,
+            unknown
+          >;
+        }
 
         // Resolve the actual exports — handle both default and named exports
-        const DataVisModule = wcdatavis.default
-          ? (wcdatavis.default as Record<string, unknown>)
-          : wcdatavis;
+        const DataVisModule = wcdatavisModule.default
+          ? (wcdatavisModule.default as Record<string, unknown>)
+          : wcdatavisModule;
 
         // Try various export patterns the library may use:
         //   Named exports: Source, ComputedView/View, Grid
@@ -449,22 +457,14 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
       onDataLoaded,
     ]);
 
-    // Mount / source change effect
+    // Mount / source / option change effect
     React.useEffect(() => {
       initializeDataVis();
 
       return () => {
         destroyInstances();
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      // Re-initialize when source config changes
-      source.type,
-      source.url,
-      // We intentionally use a serialized key for data changes
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(source.data),
-    ]);
+    }, [initializeDataVis, destroyInstances]);
 
     // -----------------------------------------------------------------------
     // Propagate theme variables to body-level dialogs/popups
