@@ -1,0 +1,1373 @@
+/**
+ * DataVis Theme Overrides
+ * ========================
+ * Overrides every hardcoded color in wcdatavis.css with --mieweb-* design tokens.
+ * Light/dark mode and brand theming work automatically because brands + .dark /
+ * [data-theme='dark'] redefine the same CSS custom properties.
+ *
+ * Selector hierarchy:
+ *   .wc-datavis-themed            (applied by DataVis.tsx via cva)
+ *   .wc-datavis-themed .wcdv_*    (wcdatavis internal classes)
+ *
+ * Color mapping (wcdatavis originals to design tokens):
+ *   #FFFFFF / white       -> --mieweb-background
+ *   #737373               -> --mieweb-muted-foreground
+ *   #c7c7c7               -> --mieweb-border
+ *   #0095D6               -> --mieweb-primary-500
+ *   #f0f0f5 / #F6F6F9     -> --mieweb-muted
+ *   #e8f5e9               -> --mieweb-primary-50 (zebra)
+ *   #888 / #808080        -> --mieweb-muted-foreground
+ *   #000                  -> --mieweb-foreground
+ */
+
+/* ==========================================================================
+   ROOT CONTAINER
+   ========================================================================== */
+
+.wc-datavis-themed {
+  color: var(--mieweb-foreground);
+  font-family: var(--mieweb-font-sans, inherit);
+}
+
+/* ==========================================================================
+   GRID SHELL
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid,
+.wc-datavis-themed .wcdv_graph {
+  background-color: var(--mieweb-background);
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_content {
+  background-color: var(--mieweb-background);
+  border-color: var(--mieweb-border);
+}
+
+/* ==========================================================================
+   TITLE BAR
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid_titlebar {
+  background-color: var(--mieweb-muted);
+  color: var(--mieweb-muted-foreground);
+  border-color: var(--mieweb-border);
+  font-family: var(--mieweb-font-sans, inherit);
+}
+
+.wc-datavis-themed .wcdv_grid_titlebar strong {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_titlebar .headingInfo {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_titlebar .wcdv_spinner {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_titlebar .link {
+  color: var(--mieweb-primary-600);
+}
+
+.wc-datavis-themed .wcdv_grid_titlebar .link:hover {
+  color: var(--mieweb-primary-700);
+}
+
+.wc-datavis-themed .wcdv_heading_container .wcdv_heading_title {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_heading_container .headingInfo {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_titlebar_controls span.fa {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_titlebar_controls span.fa:hover {
+  color: var(--mieweb-foreground);
+}
+
+/* ==========================================================================
+   TOOLBAR
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid_toolbar {
+  background-color: var(--mieweb-muted);
+  border-color: var(--mieweb-border);
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_toolbar > span.fa {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_toolbar > span.fa:hover {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_toolbar button[disabled=disabled] .fa {
+  color: var(--mieweb-border);
+}
+
+.wc-datavis-themed .wcdv_toolbar_section {
+  border-color: var(--mieweb-border);
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_toolbar span.fa.wcdv_info_icon {
+  color: var(--mieweb-primary-500);
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_button,
+.wc-datavis-themed button {
+  font-family: var(--mieweb-font-sans, inherit);
+}
+
+.wc-datavis-themed button.wcdv_icon_button {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed button.wcdv_icon_button:hover {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed button.wcdv_icon_button > span.fa.wcdv_icon_checkbox_off {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed button.wcdv_icon_button > span.fa.wcdv_icon_checkbox_on {
+  background-color: var(--mieweb-primary-500);
+  color: #fff;
+}
+
+.wc-datavis-themed button.wcdv_expand_button > span.fa {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed td button.wcdv_icon_button_incell {
+  background-color: var(--mieweb-muted);
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed td:hover button.wcdv_icon_button_incell {
+  background-color: var(--mieweb-border);
+}
+
+.wc-datavis-themed td button.wcdv_icon_button_incell:hover {
+  color: var(--mieweb-foreground);
+}
+
+/* ==========================================================================
+   CONTROL PANELS (Group / Filter / Pivot / Aggregate)
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid_control {
+  background-color: var(--mieweb-muted);
+  border-color: var(--mieweb-border);
+}
+
+.wc-datavis-themed .wcdv_control_pane {
+  background-color: var(--mieweb-muted);
+  border-color: var(--mieweb-border);
+}
+
+/* Inputs/selects inside control panels should use card bg to appear inset */
+.wc-datavis-themed .wcdv_control_pane input,
+.wc-datavis-themed .wcdv_control_pane select,
+.wc-datavis-themed .wcdv_control_pane textarea {
+  background-color: var(--mieweb-card, var(--mieweb-background)) !important;
+  border: 1px solid var(--mieweb-border) !important;
+  color: var(--mieweb-foreground) !important;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.wc-datavis-themed .wcdv_control_title_bar {
+  border-color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_control_title {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_control_clear_button {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_control_clear_button:hover {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_control_addField {
+  color: var(--mieweb-primary-500);
+}
+
+.wc-datavis-themed .wcdv_control_addField:hover {
+  color: var(--mieweb-primary-600);
+}
+
+/* Field chips inside controls */
+.wc-datavis-themed .wcdv_control_pane ul.wcdv_control_horizontal li .wcdv_field {
+  border-color: var(--mieweb-border);
+  background-color: var(--mieweb-background);
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_control_pane .wcdv_control_vertical li .wcdv_field {
+  border-color: var(--mieweb-border);
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_field_name {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_filter_control ul li .wcdv_field {
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_aggregate_control_error {
+  color: var(--mieweb-warning);
+}
+
+.wc-datavis-themed .ui-widget.ui-widget-content.wcdv_aggregate_control_error_tooltip {
+  border-color: var(--mieweb-warning);
+  color: var(--mieweb-foreground);
+  background-color: var(--mieweb-background);
+}
+
+.wc-datavis-themed .ui-widget.ui-widget-content.wcdv_info_tooltip {
+  border-color: var(--mieweb-muted-foreground);
+  color: var(--mieweb-foreground);
+  background-color: var(--mieweb-background);
+}
+
+.wc-datavis-themed div.wcdv_operations_category {
+  border-color: var(--mieweb-border);
+}
+
+/* ==========================================================================
+   SORT AND FILTER ICONS
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_sort_icon,
+.wc-datavis-themed .wcdv_sort_icon_vertical {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_sort_arrow_active {
+  color: #fff;
+}
+
+.wc-datavis-themed .wcdv_filter_icon {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_filter_icon:hover {
+  color: var(--mieweb-foreground);
+}
+
+/* ==========================================================================
+   TABLE HEADERS
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid_table table {
+  background-color: var(--mieweb-background) !important;
+  color: var(--mieweb-foreground);
+  border-collapse: collapse;
+}
+
+/* Regular th (filter row, etc.) */
+.wc-datavis-themed .wcdv_grid_table table th {
+  background-color: var(--mieweb-muted) !important;
+  color: var(--mieweb-muted-foreground) !important;
+  border-color: var(--mieweb-border) !important;
+}
+
+/* Primary header row */
+.wc-datavis-themed .wcdv_grid_table table thead th {
+  background-color: var(--mieweb-muted) !important;
+  color: var(--mieweb-foreground) !important;
+  font-weight: 600;
+  border-bottom: 2px solid var(--mieweb-border) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table thead th:hover {
+  background-color: color-mix(in srgb, var(--mieweb-muted) 80%, var(--mieweb-foreground)) !important;
+}
+
+/* Secondary header row (group headers, subheaders) */
+.wc-datavis-themed .wcdv_grid_table table > thead > tr + tr > th {
+  background-color: var(--mieweb-muted) !important;
+  color: var(--mieweb-foreground) !important;
+  border-color: var(--mieweb-foreground) !important;
+}
+
+/* Active sort column header */
+.wc-datavis-themed .wcdv_sort_column_active.wcdv_bg-primary {
+  background-color: color-mix(in srgb, var(--mieweb-muted) 70%, var(--mieweb-foreground)) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+/* ==========================================================================
+   TABLE BODY ROWS AND CELLS
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid_table table td,
+.wc-datavis-themed .wcdv_grid_table table th {
+  border-color: var(--mieweb-border) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table td {
+  color: var(--mieweb-foreground) !important;
+}
+
+/* Normal rows */
+.wc-datavis-themed .wcdv_grid_table table > tbody > tr {
+  background-color: var(--mieweb-background) !important;
+  color: var(--mieweb-foreground) !important;
+  transition: background-color 0.12s ease;
+}
+
+.wc-datavis-themed .wcdv_grid_table table > tbody > tr:hover {
+  background-color: var(--mieweb-muted) !important;
+}
+
+/* Zebra striping */
+.wc-datavis-themed .wcdv_grid_table table.zebra > tbody > tr:nth-child(even),
+.wc-datavis-themed .wcdv_grid_table table > tbody > tr.even {
+  background-color: var(--mieweb-muted) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table.zebra > tbody > tr.odd {
+  background-color: var(--mieweb-background) !important;
+}
+
+/* Selected row */
+.wc-datavis-themed .wcdv_grid_table table td.wcdv_selected_row {
+  background-color: color-mix(in srgb, var(--mieweb-primary-500) 18%, transparent) !important;
+}
+
+/* Drill-down active */
+.wc-datavis-themed .wcdv_grid_table table td.wcdv_drill_down:active {
+  background-color: color-mix(in srgb, var(--mieweb-warning) 25%, transparent) !important;
+}
+
+/* Dividers and pivot boundaries */
+.wc-datavis-themed .wcdv_grid_table table .wcdv_divider,
+.wc-datavis-themed .wcdv_grid_table table .wcdv_pivot_colval_boundary {
+  border-color: var(--mieweb-border) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table .wcdv_pivot_aggregate_boundary {
+  border-color: var(--mieweb-border) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table .wcdv_gridtable_agg_pivot td,
+.wc-datavis-themed .wcdv_grid_table table .wcdv_gridtable_agg_pivot th {
+  border-color: var(--mieweb-border) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table .wcdv_bld {
+  border-left-color: var(--mieweb-border) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table .wcdv_brd {
+  border-right-color: var(--mieweb-border) !important;
+}
+
+.wc-datavis-themed .wcdv_grid_table table .wcdv_btd {
+  border-top-color: var(--mieweb-border) !important;
+}
+
+/* ==========================================================================
+   TABLE FOOTER
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid_table table > tfoot {
+  background-color: var(--mieweb-muted) !important;
+  border-color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_grid_table table > tfoot > tr {
+  border-color: var(--mieweb-border);
+  color: var(--mieweb-foreground);
+}
+
+/* ==========================================================================
+   SHOW MORE ROW
+   ========================================================================== */
+
+.wc-datavis-themed tr.wcdvgrid_more td {
+  background-color: var(--mieweb-muted) !important;
+  border-color: var(--mieweb-muted-foreground) !important;
+  color: var(--mieweb-muted-foreground) !important;
+}
+
+.wc-datavis-themed tr.wcdvgrid_more td:hover {
+  color: var(--mieweb-foreground) !important;
+}
+
+/* ==========================================================================
+   FONT-AWESOME ICONS IN GRID
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid .fa,
+.wc-datavis-themed .wcdv_graph .fa {
+  color: inherit;
+}
+
+.wc-datavis-themed .wcdv_grid th .fa {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.wc-datavis-themed .wcdv_grid th .fa:hover {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   PRIMARY THEME COLORS (overrides .wcdv_bg-primary / .wcdv_text-primary)
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_bg-primary {
+  background-color: var(--mieweb-primary-500) !important;
+}
+
+.wc-datavis-themed .wcdv_text-primary {
+  color: var(--mieweb-primary-500) !important;
+}
+
+.wc-datavis-themed .wcdv_border-primary {
+  border-color: var(--mieweb-primary-500) !important;
+}
+
+/* ==========================================================================
+   SPINNER
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_spinner {
+  color: var(--mieweb-primary-500);
+}
+
+.wc-datavis-themed .wcdv_group_value > .spinner > div,
+.wc-datavis-themed .wcdvgrid_more .spinner > div {
+  background-color: var(--mieweb-muted-foreground);
+}
+
+/* ==========================================================================
+   BANNERS
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_warning_banner {
+  border-color: var(--mieweb-destructive);
+  background-color: color-mix(in srgb, var(--mieweb-destructive) 12%, var(--mieweb-background));
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .wcdv_info_banner {
+  border-color: var(--mieweb-primary-500);
+  background-color: color-mix(in srgb, var(--mieweb-primary-500) 10%, var(--mieweb-background));
+  color: var(--mieweb-primary-900);
+}
+
+/* ==========================================================================
+   SELECT ELEMENTS
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid select {
+  border-color: var(--mieweb-border);
+  background-color: var(--mieweb-background);
+  color: var(--mieweb-foreground);
+}
+
+/* ==========================================================================
+   FORM INPUTS (inline search, filter inputs, etc.)
+   ========================================================================== */
+
+.wc-datavis-themed input,
+.wc-datavis-themed select,
+.wc-datavis-themed textarea {
+  background-color: var(--mieweb-background);
+  color: var(--mieweb-foreground);
+  border-color: var(--mieweb-input);
+  font-family: var(--mieweb-font-sans, inherit);
+}
+
+.wc-datavis-themed input:focus,
+.wc-datavis-themed select:focus,
+.wc-datavis-themed textarea:focus {
+  border-color: var(--mieweb-primary-500);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mieweb-ring) 25%, transparent);
+}
+
+/* ==========================================================================
+   LINKS
+   ========================================================================== */
+
+.wc-datavis-themed a,
+.wc-datavis-themed .link {
+  color: var(--mieweb-primary-600);
+}
+
+.wc-datavis-themed a:hover,
+.wc-datavis-themed .link:hover {
+  color: var(--mieweb-primary-700);
+}
+
+/* ==========================================================================
+   DRAG AND DROP
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_drop_target_hover {
+  background-color: color-mix(in srgb, var(--mieweb-primary-500) 11%, transparent) !important;
+}
+
+.wc-datavis-themed .wcdv_drag_handle.ui-draggable-dragging {
+  border-color: var(--mieweb-muted-foreground);
+  background-color: var(--mieweb-muted);
+}
+
+/* ==========================================================================
+   CONTEXT MENU (jQuery contextMenu)
+   ========================================================================== */
+
+.wc-datavis-themed .context-menu-list {
+  background-color: var(--mieweb-card);
+  color: var(--mieweb-foreground);
+  border-color: var(--mieweb-border);
+  border-radius: var(--mieweb-radius-md, 6px);
+  box-shadow: var(--mieweb-shadow-dropdown);
+}
+
+.wc-datavis-themed .context-menu-item.context-menu-hover,
+.wc-datavis-themed .context-menu-hover.context-menu-icon.context-menu-icon--fa::before {
+  background-color: var(--mieweb-muted);
+  color: var(--mieweb-foreground);
+}
+
+.wc-datavis-themed .context-menu-icon.context-menu-icon--fa::before {
+  color: var(--mieweb-primary-500);
+}
+
+/* ==========================================================================
+   JQUERY-UI DIALOG
+   ========================================================================== */
+
+.wc-datavis-themed .ui-dialog,
+.wc-datavis-themed .wcdv_dialog {
+  background-color: var(--mieweb-card);
+  color: var(--mieweb-foreground);
+  border-color: var(--mieweb-border);
+  border-radius: var(--mieweb-radius-lg, 8px);
+  box-shadow: var(--mieweb-shadow-modal);
+}
+
+.wc-datavis-themed .ui-dialog-titlebar {
+  background-color: var(--mieweb-muted);
+  color: var(--mieweb-foreground);
+  border-color: var(--mieweb-border);
+}
+
+/* ==========================================================================
+   COLUMN CONFIGURATION WINDOW
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_colconfigwin_table tr {
+  background-color: var(--mieweb-background);
+}
+
+.wc-datavis-themed .wcdv_colconfigwin_table thead tr th {
+  color: var(--mieweb-muted-foreground);
+}
+
+.wc-datavis-themed .wcdv_colconfigwin_table tbody tr:hover {
+  background-color: color-mix(in srgb, var(--mieweb-primary-500) 10%, var(--mieweb-background));
+}
+
+/* ==========================================================================
+   GROUP FUNCTION WINDOW
+   ========================================================================== */
+
+.wc-datavis-themed div.wcdv_groupfun_buttons {
+  border-color: var(--mieweb-foreground);
+}
+
+/* ==========================================================================
+   BUTTON BAR
+   ========================================================================== */
+
+.wc-datavis-themed div.wcdv_button_bar button[data-role=ok] span.fa {
+  color: var(--mieweb-success);
+}
+
+.wc-datavis-themed div.wcdv_button_bar button[data-role=cancel] span.fa {
+  color: var(--mieweb-destructive);
+}
+
+/* ==========================================================================
+   SUMO SELECT (multi-select dropdown)
+   ========================================================================== */
+
+.wc-datavis-themed .SumoSelect .select-all.selected > span i,
+.wc-datavis-themed .SumoSelect > .optWrapper.multiple > .options li.opt.selected span i {
+  background-color: var(--mieweb-primary-500);
+}
+
+.wc-datavis-themed .SumoSelect .select-all.partial > span i {
+  background-color: var(--mieweb-border);
+}
+
+.wc-datavis-themed .SumoSelect > .optWrapper {
+  background-color: var(--mieweb-card);
+  border-color: var(--mieweb-border);
+  color: var(--mieweb-foreground);
+}
+
+/* ==========================================================================
+   PROGRESSBAR (jQuery UI)
+   ========================================================================== */
+
+.wc-datavis-themed .ui-progressbar .ui-progressbar-value.wcdvgrid_progressbar {
+  background: var(--mieweb-primary-500);
+}
+
+/* ==========================================================================
+   GRAPH MESSAGE
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_graph_message {
+  color: var(--mieweb-muted-foreground);
+}
+
+/* ==========================================================================
+   EMPTY CELLS
+   ========================================================================== */
+
+.wc-datavis-themed .wcdv_grid_table table td.wcdv_cell_empty div,
+.wc-datavis-themed .wcdv_grid_table table th.wcdv_cell_empty div {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--mieweb-muted-foreground),
+    var(--mieweb-muted-foreground) 8px,
+    transparent 8px,
+    transparent 16px
+  );
+  opacity: 0.25;
+}
+
+/* ==========================================================================
+   SCROLLBARS (WebKit)
+   ========================================================================== */
+
+.wc-datavis-themed ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.wc-datavis-themed ::-webkit-scrollbar-track {
+  background: var(--mieweb-muted);
+  border-radius: 6px;
+}
+
+.wc-datavis-themed ::-webkit-scrollbar-thumb {
+  background: var(--mieweb-border);
+  border-radius: 6px;
+  border: 2px solid var(--mieweb-muted);
+}
+
+.wc-datavis-themed ::-webkit-scrollbar-thumb:hover {
+  background: var(--mieweb-muted-foreground);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .wc-datavis-themed {
+    font-size: 16px;
+  }
+
+  .wc-datavis-themed .wcdv_grid_toolbar {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
+/* ==========================================================================
+   HIGH CONTRAST
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+  .wc-datavis-themed .wcdv_grid_table table > tbody > tr:hover {
+    outline: 2px solid var(--mieweb-foreground);
+  }
+
+  .wc-datavis-themed .wcdv_grid_table table td:focus {
+    outline: 3px solid var(--mieweb-foreground) !important;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-datavis-themed,
+  .wc-datavis-themed * {
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   PRINT
+   ========================================================================== */
+
+/* ==========================================================================
+   DIALOGS & POPUPS (jQuery UI)
+   --------------------------------------------------------------------------
+   jQuery UI appends dialogs to <body>, OUTSIDE .wc-datavis-themed.
+   We target .wcdv_dialog directly and use .dark / [data-theme="dark"]
+   ancestors (set on <html>) for dark mode.
+   ========================================================================== */
+
+/* --- Dialog shell --- */
+.wcdv_dialog.ui-dialog {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  color: var(--mieweb-foreground, #171717) !important;
+  border: 1px solid var(--mieweb-border, #e5e7eb) !important;
+  border-radius: var(--mieweb-radius-lg, 8px) !important;
+  box-shadow: var(--mieweb-shadow-modal, 0 10px 15px -3px rgb(0 0 0 / 0.1)) !important;
+  font-family: var(--mieweb-font-sans, inherit);
+  overflow: hidden;
+  min-width: 420px;
+}
+
+/* --- Titlebar --- */
+.wcdv_dialog .ui-dialog-titlebar {
+  background: var(--mieweb-card, #ffffff) !important;
+  color: var(--mieweb-foreground, #171717) !important;
+  border-bottom: 1px solid var(--mieweb-border, #e5e7eb) !important;
+  padding: 16px 20px !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wcdv_dialog .ui-dialog-title {
+  color: var(--mieweb-foreground) !important;
+  font-weight: 700;
+  font-size: 1.5em;
+  letter-spacing: -0.01em;
+}
+
+/* --- Close button (×) --- */
+.wcdv_dialog .ui-dialog-titlebar-close {
+  background: transparent !important;
+  border: none !important;
+  color: var(--mieweb-primary-500, #38bdf8) !important;
+  opacity: 1;
+  cursor: pointer;
+  font-size: 0 !important;
+  padding: 2px 6px !important;
+  position: static !important;
+  float: none;
+  order: 2;
+  width: auto !important;
+  height: auto !important;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.wcdv_dialog .ui-dialog-titlebar-close:hover {
+  color: var(--mieweb-primary-600, #0284c7) !important;
+}
+
+.wcdv_dialog .ui-dialog-titlebar-close .ui-icon,
+.wcdv_dialog .ui-dialog-titlebar-close .ui-button-icon-space,
+.wcdv_dialog .ui-dialog-titlebar-close .ui-button-text {
+  display: none !important;
+}
+
+.wcdv_dialog .ui-dialog-titlebar-close::after {
+  content: '\00d7';
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+/* --- Content area --- */
+.wcdv_dialog .ui-dialog-content {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  color: var(--mieweb-foreground) !important;
+  padding: 0 20px 14px !important;
+}
+
+/* --- Button pane (bottom bar with OK/Cancel/Reset) --- */
+.wcdv_dialog .ui-dialog-buttonpane {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  border-top: 1px solid var(--mieweb-border, #e5e7eb) !important;
+  padding: 12px 20px !important;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+}
+
+.wcdv_dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* --- Icon buttons inside column config table rows --- */
+.wcdv_dialog .wcdv_icon_button,
+.wcdv_dialog button.wcdv_icon_button {
+  background: transparent !important;
+  border: none !important;
+  padding: 4px 6px !important;
+  color: var(--mieweb-primary-500, #38bdf8) !important;
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 0.12s ease, transform 0.1s ease;
+  border-radius: var(--mieweb-radius-sm, 4px) !important;
+  line-height: 1;
+}
+
+.wcdv_dialog .wcdv_icon_button:hover,
+.wcdv_dialog button.wcdv_icon_button:hover {
+  color: var(--mieweb-primary-600, #0284c7) !important;
+  background: color-mix(in srgb, var(--mieweb-primary-500) 10%, transparent) !important;
+  transform: scale(1.1);
+}
+
+.wcdv_dialog .wcdv_icon_button .fa,
+.wcdv_dialog button.wcdv_icon_button .fa {
+  color: inherit !important;
+  font-size: 15px;
+}
+
+/* Off-state icons (dimmed) */
+.wcdv_dialog .wcdv_icon_checkbox_off {
+  opacity: 0.45;
+}
+
+.wcdv_dialog .wcdv_icon_checkbox_on {
+  opacity: 1;
+}
+
+/* --- Standard dialog buttons (OK, Cancel in buttonset) --- */
+.wcdv_dialog .ui-dialog-buttonset .ui-button,
+.wcdv_dialog .ui-dialog-buttonset button {
+  padding: 8px 20px !important;
+  font-weight: 600;
+  font-size: 0.9em;
+  border-radius: var(--mieweb-radius-md, 6px) !important;
+  cursor: pointer;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+  font-family: var(--mieweb-font-sans, inherit);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* OK button — filled primary */
+.wcdv_dialog .ui-dialog-buttonset .ui-button:first-child,
+.wcdv_dialog .ui-dialog-buttonset button:first-child {
+  background-color: var(--mieweb-primary-500, #38bdf8) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--mieweb-primary-500, #38bdf8) !important;
+}
+
+.wcdv_dialog .ui-dialog-buttonset .ui-button:first-child:hover,
+.wcdv_dialog .ui-dialog-buttonset button:first-child:hover {
+  background-color: var(--mieweb-primary-600, #0284c7) !important;
+  border-color: var(--mieweb-primary-600, #0284c7) !important;
+}
+
+.wcdv_dialog .ui-dialog-buttonset .ui-button:first-child .fa,
+.wcdv_dialog .ui-dialog-buttonset button:first-child .fa {
+  color: #ffffff !important;
+}
+
+/* Cancel button — text style */
+.wcdv_dialog .ui-dialog-buttonset .ui-button:last-child,
+.wcdv_dialog .ui-dialog-buttonset button:last-child {
+  background-color: transparent !important;
+  color: var(--mieweb-muted-foreground, #737373) !important;
+  border: 1px solid transparent !important;
+}
+
+.wcdv_dialog .ui-dialog-buttonset .ui-button:last-child:hover,
+.wcdv_dialog .ui-dialog-buttonset button:last-child:hover {
+  background-color: var(--mieweb-muted) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+.wcdv_dialog .ui-dialog-buttonset .ui-button:last-child .fa,
+.wcdv_dialog .ui-dialog-buttonset button:last-child .fa {
+  color: inherit !important;
+}
+
+/* --- All other generic buttons inside dialogs (not icon buttons, not buttonset) --- */
+.wcdv_dialog .ui-button:not(.wcdv_icon_button):not(.ui-dialog-titlebar-close),
+.wcdv_dialog button:not(.wcdv_icon_button):not(.ui-dialog-titlebar-close) {
+  font-family: var(--mieweb-font-sans, inherit);
+  cursor: pointer;
+}
+
+/* Hide jQuery UI icon sprites — we use FontAwesome */
+.wcdv_dialog .ui-button .ui-icon {
+  background-image: none !important;
+}
+
+/* --- wcdv_button_bar (inside dialog content: Reset Column Order / OK / Cancel) --- */
+.wcdv_dialog .wcdv_button_bar {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 12px 0 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.wcdv_dialog .wcdv_button_bar button {
+  padding: 8px 20px !important;
+  font-weight: 600;
+  font-size: 0.9em;
+  border-radius: var(--mieweb-radius-md, 6px) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Reset Column Order — filled teal with icon */
+.wcdv_dialog .wcdv_button_bar button:has(.fa-undo) {
+  background-color: var(--mieweb-primary-500, #38bdf8) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--mieweb-primary-500, #38bdf8) !important;
+}
+
+.wcdv_dialog .wcdv_button_bar button:has(.fa-undo):hover {
+  background-color: var(--mieweb-primary-600, #0284c7) !important;
+}
+
+.wcdv_dialog .wcdv_button_bar button:has(.fa-undo) .fa {
+  color: #ffffff !important;
+}
+
+/* OK / Okay button — filled primary */
+.wcdv_dialog .wcdv_button_bar button:has(.fa-check) {
+  background-color: var(--mieweb-primary-500, #38bdf8) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--mieweb-primary-500, #38bdf8) !important;
+}
+
+.wcdv_dialog .wcdv_button_bar button:has(.fa-check):hover {
+  background-color: var(--mieweb-primary-600, #0284c7) !important;
+}
+
+.wcdv_dialog .wcdv_button_bar button:has(.fa-check) .fa {
+  color: #ffffff !important;
+}
+
+/* Cancel — text-only style */
+.wcdv_dialog .wcdv_button_bar button:has(.fa-ban) {
+  background-color: transparent !important;
+  color: var(--mieweb-muted-foreground, #737373) !important;
+  border: 1px solid transparent !important;
+}
+
+.wcdv_dialog .wcdv_button_bar button:has(.fa-ban):hover {
+  background-color: var(--mieweb-muted) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+.wcdv_dialog .wcdv_button_bar button:has(.fa-ban) .fa {
+  color: inherit !important;
+}
+
+/* --- Tabs inside dialogs --- */
+.wcdv_dialog .ui-tabs {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.wcdv_dialog .ui-tabs-nav {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--mieweb-border) !important;
+  padding: 0 !important;
+  margin-bottom: 12px;
+}
+
+.wcdv_dialog .ui-tabs-tab {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-bottom: none !important;
+  margin-bottom: -1px;
+}
+
+.wcdv_dialog .ui-tabs-tab a {
+  color: var(--mieweb-muted-foreground) !important;
+  padding: 8px 16px !important;
+}
+
+.wcdv_dialog .ui-tabs-tab:hover a {
+  color: var(--mieweb-foreground) !important;
+}
+
+.wcdv_dialog .ui-tabs-tab.ui-tabs-active {
+  background: var(--mieweb-card) !important;
+  border-color: var(--mieweb-border) !important;
+  border-bottom-color: var(--mieweb-card) !important;
+  border-radius: var(--mieweb-radius-sm, 4px) var(--mieweb-radius-sm, 4px) 0 0 !important;
+}
+
+.wcdv_dialog .ui-tabs-tab.ui-tabs-active a {
+  color: var(--mieweb-foreground) !important;
+  font-weight: 600;
+}
+
+.wcdv_dialog .ui-tabs-panel {
+  background: transparent !important;
+  border: none !important;
+  color: var(--mieweb-foreground) !important;
+  padding: 8px 0 !important;
+}
+
+/* --- Column config table (Columns dialog) --- */
+.wcdv_colconfigwin_table {
+  border-collapse: collapse !important;
+  width: 100%;
+}
+
+.wcdv_colconfigwin_table tr {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  border-bottom: 1px solid var(--mieweb-border, #e5e7eb) !important;
+  transition: background-color 0.12s ease;
+}
+
+.wcdv_colconfigwin_table thead tr {
+  background-color: var(--mieweb-muted, #f5f5f5) !important;
+}
+
+.wcdv_colconfigwin_table thead tr th {
+  color: var(--mieweb-muted-foreground, #737373) !important;
+  font-weight: 600;
+  font-size: 0.8em;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  padding: 10px 8px !important;
+  border-bottom: 2px solid var(--mieweb-border) !important;
+}
+
+.wcdv_colconfigwin_table tbody tr td {
+  color: var(--mieweb-foreground) !important;
+  padding: 10px 8px !important;
+  vertical-align: middle;
+}
+
+/* Field name column — bold */
+.wcdv_colconfigwin_table tbody tr td:nth-child(2) {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Display name column — primary color */
+.wcdv_colconfigwin_table tbody tr td:nth-child(3) {
+  color: var(--mieweb-primary-500, #38bdf8) !important;
+}
+
+.wcdv_colconfigwin_table tbody tr:hover {
+  background-color: color-mix(in srgb, var(--mieweb-primary-500) 6%, var(--mieweb-card)) !important;
+}
+
+/* Drag handle column */
+.wcdv_colconfigwin_table .drag-handle {
+  cursor: grab;
+}
+
+.wcdv_colconfigwin_table .drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Checkbox styling inside column config */
+.wcdv_colconfigwin_table input[type="checkbox"] {
+  accent-color: var(--mieweb-primary-500);
+}
+
+/* --- Info banner inside dialogs --- */
+.wcdv_dialog .wcdv_info_banner {
+  background-color: color-mix(in srgb, var(--mieweb-primary-500) 8%, var(--mieweb-card)) !important;
+  border: 1px solid color-mix(in srgb, var(--mieweb-primary-500) 25%, var(--mieweb-border)) !important;
+  border-radius: var(--mieweb-radius-md, 6px) !important;
+  color: var(--mieweb-foreground) !important;
+  padding: 8px 12px !important;
+  margin: 8px 0 !important;
+}
+
+.wcdv_dialog .wcdv_info_banner .fa {
+  color: var(--mieweb-primary-500) !important;
+}
+
+/* --- HR inside dialogs --- */
+.wcdv_dialog hr {
+  border-color: var(--mieweb-border) !important;
+  opacity: 0.5;
+}
+
+/* --- Inputs inside dialogs (textareas, selects, etc.) --- */
+.wcdv_dialog input,
+.wcdv_dialog select,
+.wcdv_dialog textarea {
+  background-color: var(--mieweb-background, #ffffff) !important;
+  color: var(--mieweb-foreground) !important;
+  border: 1px solid var(--mieweb-input, #e5e7eb) !important;
+  border-radius: var(--mieweb-radius-sm, 4px) !important;
+  padding: 4px 8px;
+  font-family: var(--mieweb-font-sans, inherit);
+}
+
+.wcdv_dialog input:focus,
+.wcdv_dialog select:focus,
+.wcdv_dialog textarea:focus {
+  border-color: var(--mieweb-primary-500) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mieweb-ring) 25%, transparent) !important;
+}
+
+/* --- Labels --- */
+.wcdv_dialog label {
+  color: var(--mieweb-foreground) !important;
+  font-weight: 500;
+}
+
+/* --- Resize handles --- */
+.wcdv_dialog .ui-resizable-handle {
+  background: transparent !important;
+}
+
+.wcdv_dialog .ui-resizable-se {
+  background-image: none !important;
+  color: var(--mieweb-border) !important;
+}
+
+/* ==========================================================================
+   DIALOGS WITHOUT .wcdv_dialog (generic ui-dialog from wcdatavis)
+   ========================================================================== */
+
+.ui-dialog:has(.wcdv_colconfigwin_table),
+.ui-dialog:has(.wcdv_button_bar) {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  color: var(--mieweb-foreground, #171717) !important;
+  border: 1px solid var(--mieweb-border, #e5e7eb) !important;
+  border-radius: var(--mieweb-radius-lg, 8px) !important;
+  box-shadow: var(--mieweb-shadow-modal, 0 10px 15px -3px rgb(0 0 0 / 0.1)) !important;
+  font-family: var(--mieweb-font-sans, inherit);
+  overflow: hidden;
+  min-width: 420px;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-titlebar,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-titlebar {
+  background: var(--mieweb-card, #ffffff) !important;
+  color: var(--mieweb-foreground) !important;
+  border-bottom: 1px solid var(--mieweb-border) !important;
+  padding: 16px 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-title,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-title {
+  color: var(--mieweb-foreground) !important;
+  font-weight: 700;
+  font-size: 1.5em;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-content,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-content {
+  background-color: var(--mieweb-card) !important;
+  color: var(--mieweb-foreground) !important;
+  padding: 0 20px 14px !important;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-titlebar-close,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-titlebar-close {
+  background: transparent !important;
+  border: none !important;
+  color: var(--mieweb-primary-500, #38bdf8) !important;
+  font-size: 0 !important;
+  position: static !important;
+  overflow: hidden;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-titlebar-close:hover,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-titlebar-close:hover {
+  color: var(--mieweb-primary-600, #0284c7) !important;
+}
+
+/* Icon buttons in generic dialogs */
+.ui-dialog:has(.wcdv_colconfigwin_table) .wcdv_icon_button,
+.ui-dialog:has(.wcdv_button_bar) .wcdv_icon_button {
+  background: transparent !important;
+  border: none !important;
+  padding: 4px 6px !important;
+  color: var(--mieweb-primary-500, #38bdf8) !important;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .wcdv_icon_button:hover,
+.ui-dialog:has(.wcdv_button_bar) .wcdv_icon_button:hover {
+  color: var(--mieweb-primary-600, #0284c7) !important;
+  background: color-mix(in srgb, var(--mieweb-primary-500) 10%, transparent) !important;
+}
+
+/* Bottom bar buttons in generic dialogs */
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-buttonset .ui-button,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-buttonset .ui-button {
+  padding: 8px 20px !important;
+  font-weight: 600;
+  border-radius: var(--mieweb-radius-md, 6px) !important;
+  cursor: pointer;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-buttonset .ui-button:first-child,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-buttonset .ui-button:first-child {
+  background-color: var(--mieweb-primary-500) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--mieweb-primary-500) !important;
+}
+
+.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-buttonset .ui-button:last-child,
+.ui-dialog:has(.wcdv_button_bar) .ui-dialog-buttonset .ui-button:last-child {
+  background-color: transparent !important;
+  color: var(--mieweb-muted-foreground) !important;
+  border: 1px solid transparent !important;
+}
+
+/* ==========================================================================
+   CONTEXT MENU (jQuery contextMenu — also appended to body)
+   ========================================================================== */
+
+.context-menu-list {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  color: var(--mieweb-foreground, #171717) !important;
+  border: 1px solid var(--mieweb-border, #e5e7eb) !important;
+  border-radius: var(--mieweb-radius-md, 6px) !important;
+  box-shadow: var(--mieweb-shadow-dropdown) !important;
+  padding: 4px 0 !important;
+  font-family: var(--mieweb-font-sans, inherit);
+}
+
+.context-menu-item {
+  color: var(--mieweb-foreground) !important;
+  padding: 6px 24px 6px 12px !important;
+}
+
+.context-menu-item.context-menu-hover {
+  background-color: var(--mieweb-muted, #f5f5f5) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+.context-menu-separator {
+  border-bottom-color: var(--mieweb-border) !important;
+}
+
+.context-menu-icon.context-menu-icon--fa::before {
+  color: var(--mieweb-primary-500) !important;
+}
+
+/* ==========================================================================
+   TOOLTIPS (jQuery UI — appended to body)
+   ========================================================================== */
+
+.ui-tooltip {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  color: var(--mieweb-foreground) !important;
+  border: 1px solid var(--mieweb-border) !important;
+  border-radius: var(--mieweb-radius-md, 6px) !important;
+  box-shadow: var(--mieweb-shadow-dropdown) !important;
+  font-family: var(--mieweb-font-sans, inherit);
+  padding: 6px 10px !important;
+  font-size: 0.85em;
+}
+
+/* ==========================================================================
+   SUMO SELECT (dropdown overlay — can be outside .wc-datavis-themed)
+   ========================================================================== */
+
+.SumoSelect > .optWrapper {
+  background-color: var(--mieweb-card, #ffffff) !important;
+  border-color: var(--mieweb-border) !important;
+  color: var(--mieweb-foreground) !important;
+  box-shadow: var(--mieweb-shadow-dropdown) !important;
+  border-radius: var(--mieweb-radius-md, 6px) !important;
+}
+
+.SumoSelect > .optWrapper > .options li.opt {
+  color: var(--mieweb-foreground) !important;
+  border-bottom-color: var(--mieweb-border) !important;
+}
+
+.SumoSelect > .optWrapper > .options li.opt:hover,
+.SumoSelect > .optWrapper > .options li.opt.selected {
+  background-color: var(--mieweb-muted) !important;
+}
+
+.SumoSelect .select-all {
+  border-bottom-color: var(--mieweb-border) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+.SumoSelect .select-all.selected > span i,
+.SumoSelect > .optWrapper.multiple > .options li.opt.selected span i {
+  background-color: var(--mieweb-primary-500) !important;
+}
+
+.SumoSelect > .CaptionCont {
+  border-color: var(--mieweb-input, #e5e7eb) !important;
+  background-color: var(--mieweb-background) !important;
+  color: var(--mieweb-foreground) !important;
+}
+
+.SumoSelect > .CaptionCont > span.placeholder {
+  color: var(--mieweb-muted-foreground) !important;
+}
+
+/* ==========================================================================
+   PRINT
+   ========================================================================== */
+
+@media print {
+  .wc-datavis-themed .wcdv_grid_toolbar,
+  .wc-datavis-themed .wcdvgrid_more {
+    display: none !important;
+  }
+
+  .wc-datavis-themed .wcdv_grid_table table > tbody > tr {
+    break-inside: avoid;
+  }
+
+  .wc-datavis-themed .wcdv_grid_table table thead th {
+    background-color: #e5e7eb !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

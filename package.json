@@ -136,8 +136,10 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@mieweb/wcdatavis": ">=3.0.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
+    "font-awesome": ">=4.7.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "wavesurfer.js": ">=7.0.0"
@@ -156,6 +158,12 @@
       "optional": false
     },
     "wavesurfer.js": {
+      "optional": true
+    },
+    "@mieweb/wcdatavis": {
+      "optional": true
+    },
+    "font-awesome": {
       "optional": true
     }
   },
@@ -204,7 +212,8 @@
     "typescript": "^5.7.3",
     "vite": "^7.3.1",
     "vitest": "^3.0.4",
-    "wavesurfer.js": "^7.8.17"
+    "wavesurfer.js": "^7.8.17",
+    "wcdatavis": "file:../../datavis/wcdatavis"
   },
   "engines": {
     "node": ">=18.0.0"
