@@ -52,15 +52,15 @@ export interface BookingDialogProps {
 // =============================================================================
 
 const inputVariants = cva(
-  'w-full rounded-lg border bg-white px-4 py-3 text-gray-900 transition-colors focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white',
+  'w-full rounded-lg border bg-background px-4 py-3 text-foreground transition-colors focus:outline-none focus:ring-2',
   {
     variants: {
       state: {
         default:
-          'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20 dark:border-gray-600 dark:focus:border-primary-400',
-        error: 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
+          'border-input focus:border-primary-500 focus:ring-primary-500/20',
+        error: 'border-destructive focus:border-destructive focus:ring-destructive/20',
         success:
-          'border-green-500 focus:border-green-500 focus:ring-green-500/20',
+          'border-success focus:border-success focus:ring-success/20',
       },
     },
     defaultVariants: {
@@ -102,17 +102,16 @@ export function FloatingInput({
       <label
         htmlFor={inputId}
         className={cn(
-          'absolute top-4 left-4 origin-left transform text-gray-500 transition-all duration-200',
+          'absolute top-4 left-4 origin-left transform text-muted-foreground transition-all duration-200',
           'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
           'peer-focus:-translate-y-2 peer-focus:scale-75',
           'peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-75',
-          error && 'text-red-500',
-          'dark:text-gray-400'
+          error && 'text-destructive'
         )}
       >
         {label}
       </label>
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
     </div>
   );
 }
@@ -173,11 +172,11 @@ export function ServiceSelect({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'w-full rounded-lg border px-4 py-3 text-left transition-colors',
-          'bg-white dark:bg-gray-800',
+          'bg-background',
           'focus:ring-2 focus:outline-none',
           error
-            ? 'border-red-500 focus:ring-red-500/20'
-            : 'focus:border-primary-500 focus:ring-primary-500/20 dark:focus:border-primary-400 border-gray-300 dark:border-gray-600'
+            ? 'border-destructive focus:ring-destructive/20'
+            : 'border-input focus:border-primary-500 focus:ring-primary-500/20'
         )}
       >
         {selectedServiceNames.length > 0 ? (
@@ -192,45 +191,45 @@ export function ServiceSelect({
             ))}
           </div>
         ) : (
-          <span className="text-gray-500 dark:text-gray-400">
+          <span className="text-muted-foreground">
             {placeholder}
           </span>
         )}
         <ChevronDownIcon
           className={cn(
-            'absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-gray-400 transition-transform',
+            'absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-transform',
             isOpen && 'rotate-180'
           )}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
           {services.map((service) => (
             <label
               key={service.slug}
-              className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-muted"
             >
               <input
                 type="checkbox"
                 checked={selectedServices.includes(service.slug)}
                 onChange={() => toggleService(service.slug)}
-                className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300 dark:border-gray-600"
+                className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-input"
               />
-              <span className="text-gray-900 dark:text-white">
+              <span className="text-foreground">
                 {service.name}
               </span>
             </label>
           ))}
           {services.length === 0 && (
-            <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+            <div className="px-4 py-3 text-center text-muted-foreground">
               No services available
             </div>
           )}
         </div>
       )}
 
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
     </div>
   );
 }
@@ -266,7 +265,7 @@ export function ConsentSwitch({
         onClick={() => onChange(!checked)}
         className={cn(
           'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
-          checked ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+          checked ? 'bg-primary-600' : 'bg-muted'
         )}
       >
         <span
@@ -279,12 +278,12 @@ export function ConsentSwitch({
       <div className="flex-1">
         <label
           htmlFor={id}
-          className="cursor-pointer text-sm font-medium text-gray-900 dark:text-white"
+          className="cursor-pointer text-sm font-medium text-foreground"
         >
           {label}
         </label>
         {description && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {description}
           </p>
         )}
@@ -310,12 +309,25 @@ export function DialogOverlay({
   children,
   className,
 }: DialogOverlayProps) {
+  const overlayRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
+    if (!isOpen) {
       document.body.style.overflow = '';
+      return;
     }
+
+    // When rendered inside a container with `transform` (e.g. Storybook docs),
+    // position:fixed is scoped to that container — don't lock body scroll.
+    const isContained =
+      overlayRef.current &&
+      overlayRef.current.offsetParent !== document.body &&
+      overlayRef.current.offsetParent !== document.documentElement;
+
+    if (!isContained) {
+      document.body.style.overflow = 'hidden';
+    }
+
     return () => {
       document.body.style.overflow = '';
     };
@@ -324,8 +336,8 @@ export function DialogOverlay({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
+    <div ref={overlayRef} className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center p-4">
         {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black/50 transition-opacity"
@@ -336,7 +348,7 @@ export function DialogOverlay({
         {/* Dialog Content */}
         <div
           className={cn(
-            'relative w-full max-w-lg transform rounded-2xl bg-white shadow-2xl transition-all dark:bg-gray-900',
+            'relative w-full max-w-lg transform rounded-2xl bg-card shadow-2xl transition-all',
             className
           )}
           role="dialog"
@@ -410,7 +422,7 @@ export function BookingDialog({
   return (
     <DialogOverlay isOpen={isOpen} onClose={onClose} className={className}>
       {/* Header */}
-      <div className="bg-primary-600 flex items-center justify-between rounded-t-2xl border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+      <div className="bg-primary-600 flex items-center justify-between rounded-t-2xl border-b border-border px-6 py-4">
         <h2 className="text-xl font-semibold text-white">Book Appointment</h2>
         <button
           type="button"
@@ -423,17 +435,17 @@ export function BookingDialog({
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="max-h-[70vh] space-y-6 overflow-y-auto p-6">
+        <div className="space-y-6 overflow-y-auto p-6">
           {/* Provider Info */}
-          <div className="border-b border-gray-200 pb-4 dark:border-gray-700">
-            <h3 className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
+          <div className="border-b border-border pb-4">
+            <h3 className="mb-1 text-lg font-bold text-foreground">
               {provider.name}
             </h3>
             <a
               href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-primary-600 dark:hover:text-primary-400 text-sm text-gray-600 dark:text-gray-400"
+              className="hover:text-primary-600 text-sm text-muted-foreground"
             >
               {provider.address.street1}
               {provider.address.street2 && ` ${provider.address.street2}`}{' '}
@@ -444,7 +456,7 @@ export function BookingDialog({
 
           {/* Contact Information */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
+            <h4 className="mb-4 text-sm font-semibold text-foreground">
               Contact Information
             </h4>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -483,7 +495,7 @@ export function BookingDialog({
 
           {/* Service Selection */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
+            <h4 className="mb-4 text-sm font-semibold text-foreground">
               Please select your services
             </h4>
             <ServiceSelect
@@ -531,11 +543,11 @@ export function BookingDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+        <div className="flex items-center justify-between border-t border-border px-6 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             Close
           </button>
@@ -711,14 +723,14 @@ export function QuickBookCard({
   return (
     <div
       className={cn(
-        'rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800',
+        'rounded-lg border border-border bg-card p-4 shadow-sm',
         className
       )}
     >
-      <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="mb-2 text-lg font-semibold text-card-foreground">
         Schedule an Appointment
       </h3>
-      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+      <p className="mb-4 text-sm text-muted-foreground">
         Book your appointment at {provider.name}
       </p>
       <div className="flex gap-3">
@@ -726,7 +738,7 @@ export function QuickBookCard({
           <button
             type="button"
             onClick={() => onCall(provider.phoneNumber!)}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             <PhoneIcon className="h-4 w-4" />
             Call
