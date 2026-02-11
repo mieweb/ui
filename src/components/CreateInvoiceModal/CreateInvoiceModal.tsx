@@ -276,7 +276,7 @@ export function CreateInvoiceModal({
                           >
                             {isSelected && (
                               <svg
-                                className="h-3 w-3 text-white"
+                                className="text-primary-foreground h-3 w-3"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"

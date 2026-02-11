@@ -62,6 +62,13 @@ export const miewebUISafelist = [
   'border-success',
   'focus:ring-success/20',
   'focus:ring-destructive/20',
+  // Opacity-modifier variants used by components
+  'bg-primary/10',
+  'bg-destructive/10',
+  'border-destructive/30',
+  'border-border/80',
+  'hover:border-border/80',
+  'text-muted-foreground/60',
   'ring-primary',
   'ring-2',
   'ring-offset-2',

@@ -76,9 +76,6 @@ const meta: Meta<typeof CreateInvoiceModal> = {
     orders: mockOrders,
     isLoadingOrders: false,
     isSubmitting: false,
-    onOpenChange: () => {},
-    onSubmit: () => {},
-    onEmployerChange: () => {},
   },
   argTypes: {
     open: {
