@@ -59,6 +59,10 @@ export interface CreateInvoiceModalProps {
   currency?: string;
   /** Default due date offset in days */
   defaultDueDays?: number;
+  /** Initial step for the wizard (for Storybook/testing) */
+  initialStep?: number;
+  /** Initial employer ID (for Storybook/testing) */
+  initialEmployerId?: string;
 }
 
 /**
@@ -76,9 +80,11 @@ export function CreateInvoiceModal({
   errorMessage,
   currency = '$',
   defaultDueDays = 30,
+  initialStep = 1,
+  initialEmployerId = '',
 }: CreateInvoiceModalProps) {
-  const [step, setStep] = React.useState(1);
-  const [employerId, setEmployerId] = React.useState('');
+  const [step, setStep] = React.useState(initialStep);
+  const [employerId, setEmployerId] = React.useState(initialEmployerId);
   const [selectedOrders, setSelectedOrders] = React.useState<Set<string>>(
     new Set()
   );

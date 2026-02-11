@@ -73,6 +73,9 @@ const meta: Meta<typeof CreateInvoiceModal> = {
   args: {
     open: true,
     employers: mockEmployers,
+    orders: mockOrders,
+    isLoadingOrders: false,
+    isSubmitting: false,
     onOpenChange: () => {},
     onSubmit: () => {},
     onEmployerChange: () => {},
@@ -123,24 +126,32 @@ export const Step1SelectEmployer: Story = {};
 
 export const Step2SelectOrders: Story = {
   args: {
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     orders: mockOrders,
   },
 };
 
 export const LoadingOrders: Story = {
   args: {
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     isLoadingOrders: true,
   },
 };
 
 export const NoOrders: Story = {
   args: {
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     orders: [],
   },
 };
 
 export const WithError: Story = {
   args: {
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     orders: mockOrders,
     errorMessage: 'Failed to create invoice. Please try again.',
   },
@@ -148,6 +159,8 @@ export const WithError: Story = {
 
 export const Submitting: Story = {
   args: {
+    initialStep: 3,
+    initialEmployerId: 'emp-1',
     orders: mockOrders,
     isSubmitting: true,
   },
