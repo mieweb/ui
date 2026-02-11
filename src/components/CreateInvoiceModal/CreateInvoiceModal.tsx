@@ -94,13 +94,13 @@ export function CreateInvoiceModal({
   // Reset form when modal closes
   React.useEffect(() => {
     if (!open) {
-      setStep(1);
-      setEmployerId('');
+      setStep(initialStep);
+      setEmployerId(initialEmployerId);
       setSelectedOrders(new Set());
       setDueDate('');
       setNotes('');
     }
-  }, [open]);
+  }, [open, initialStep, initialEmployerId]);
 
   // Set default due date
   React.useEffect(() => {
