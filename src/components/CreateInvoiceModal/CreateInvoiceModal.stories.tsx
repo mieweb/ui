@@ -1,18 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { CreateInvoiceModal } from './CreateInvoiceModal';
 
-const meta: Meta<typeof CreateInvoiceModal> = {
-  title: 'Provider/CreateInvoiceModal',
-  component: CreateInvoiceModal,
-  parameters: {
-    layout: 'centered',
-  },
-  tags: ['autodocs'],
-};
-
-export default meta;
-type Story = StoryObj<typeof CreateInvoiceModal>;
-
 const mockEmployers = [
   { id: 'emp-1', name: 'ABC Trucking Company' },
   { id: 'emp-2', name: 'Metro Transit Authority' },
@@ -63,51 +51,104 @@ const mockOrders = [
   },
 ];
 
-export const Step1SelectEmployer: Story = {
+const meta: Meta<typeof CreateInvoiceModal> = {
+  title: 'Provider/CreateInvoiceModal',
+  component: CreateInvoiceModal,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+  },
+  decorators: [
+    (Story) => (
+      // Container with transform creates a new containing block for position:fixed
+      // This keeps the modal within this container in docs view
+      <div
+        className="bg-background flex min-h-[700px] items-center justify-center p-4"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   args: {
     open: true,
-    onOpenChange: () => {},
     employers: mockEmployers,
-    onEmployerChange: (id) => console.log('Employer selected:', id),
-    onSubmit: (data) => console.log('Submit:', data),
+    orders: mockOrders,
+    isLoadingOrders: false,
+    isSubmitting: false,
+  },
+  argTypes: {
+    open: {
+      control: 'boolean',
+      description: 'Whether the modal is open',
+    },
+    onOpenChange: { action: 'onOpenChange' },
+    onSubmit: { action: 'onSubmit' },
+    onEmployerChange: { action: 'onEmployerChange' },
+    employers: {
+      control: 'object',
+      description: 'Available employers',
+    },
+    orders: {
+      control: 'object',
+      description: 'Available orders (filtered by selected employer)',
+    },
+    isLoadingOrders: {
+      control: 'boolean',
+      description: 'Whether orders are loading',
+    },
+    isSubmitting: {
+      control: 'boolean',
+      description: 'Whether submission is in progress',
+    },
+    errorMessage: {
+      control: 'text',
+      description: 'Error message to display',
+    },
+    currency: {
+      control: 'text',
+      description: 'Currency symbol',
+    },
+    defaultDueDays: {
+      control: 'number',
+      description: 'Default due date offset in days',
+    },
   },
 };
 
+export default meta;
+type Story = StoryObj<typeof CreateInvoiceModal>;
+
+export const Step1SelectEmployer: Story = {};
+
 export const Step2SelectOrders: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employers: mockEmployers,
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     orders: mockOrders,
-    onEmployerChange: (id) => console.log('Employer selected:', id),
-    onSubmit: (data) => console.log('Submit:', data),
   },
 };
 
 export const LoadingOrders: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employers: mockEmployers,
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     isLoadingOrders: true,
-    onEmployerChange: (id) => console.log('Employer selected:', id),
   },
 };
 
 export const NoOrders: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employers: mockEmployers,
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     orders: [],
   },
 };
 
 export const WithError: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employers: mockEmployers,
+    initialStep: 2,
+    initialEmployerId: 'emp-1',
     orders: mockOrders,
     errorMessage: 'Failed to create invoice. Please try again.',
   },
@@ -115,9 +156,8 @@ export const WithError: Story = {
 
 export const Submitting: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employers: mockEmployers,
+    initialStep: 3,
+    initialEmployerId: 'emp-1',
     orders: mockOrders,
     isSubmitting: true,
   },
