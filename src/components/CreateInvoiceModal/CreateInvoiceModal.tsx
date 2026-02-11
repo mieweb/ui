@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+import { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
@@ -166,7 +166,7 @@ export function CreateInvoiceModal({
           </div>
         </ModalHeader>
 
-        <div className="space-y-4">
+        <ModalBody className="space-y-4">
           {/* Error message */}
           {errorMessage && (
             <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
@@ -370,7 +370,7 @@ export function CreateInvoiceModal({
               </div>
             </div>
           )}
-        </div>
+        </ModalBody>
 
         <ModalFooter>
           <div className="flex w-full justify-between">
