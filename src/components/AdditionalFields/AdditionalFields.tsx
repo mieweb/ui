@@ -126,7 +126,7 @@ function AdditionalFields({
               onChange={(e) => handleNameChange(entry.id, e.target.value)}
               placeholder={namePlaceholder}
               disabled={disabled}
-              aria-label="Field name"
+              label="Field name"
               hideLabel
             />
           </div>
@@ -138,7 +138,7 @@ function AdditionalFields({
               onChange={(e) => handleValueChange(entry.id, e.target.value)}
               placeholder={valuePlaceholder}
               disabled={disabled}
-              aria-label="Field value"
+              label="Field value"
               hideLabel
             />
           </div>
@@ -219,9 +219,7 @@ function AdditionalFields({
         id={contentId}
         className={cn(
           'transition-all duration-200',
-          isExpanded
-            ? 'mt-4 max-h-[2000px] opacity-100'
-            : 'max-h-0 overflow-hidden opacity-0'
+          isExpanded ? 'mt-4 opacity-100' : 'max-h-0 overflow-hidden opacity-0'
         )}
         hidden={!isExpanded}
       >

@@ -187,11 +187,7 @@ function InFormContextDemo(args: AdditionalFieldsProps) {
 
           <hr className="border-gray-200 dark:border-gray-700" />
 
-          <AdditionalFields
-            {...args}
-            value={fields}
-            onChange={setFields}
-          />
+          <AdditionalFields {...args} value={fields} onChange={setFields} />
         </div>
       </div>
     </div>
