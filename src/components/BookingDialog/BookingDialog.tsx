@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { isStorybookDocsMode } from '../../utils/environment';
 
 // =============================================================================
 // Types
@@ -297,40 +298,56 @@ export interface DialogOverlayProps {
   className?: string;
 }
 
+/**
+ * Scroll lock state manager for DialogOverlay.
+ * Uses a singleton pattern with ref-counting to handle multiple overlays
+ * and preserve the original body overflow value.
+ */
+const dialogScrollLockState = {
+  count: 0,
+  originalOverflow: null as string | null,
+  reset() {
+    this.count = 0;
+    this.originalOverflow = null;
+  },
+};
+
 export function DialogOverlay({
   isOpen,
   onClose,
   children,
   className,
 }: DialogOverlayProps) {
-  const overlayRef = React.useRef<HTMLDivElement>(null);
-
   React.useEffect(() => {
-    if (!isOpen) {
-      document.body.style.overflow = '';
-      return;
+    // Skip scroll lock in Storybook docs mode where stories render inline
+    if (!isOpen || isStorybookDocsMode()) {
+      return undefined;
     }
 
-    // When rendered inside a container with `transform` (e.g. Storybook docs),
-    // position:fixed is scoped to that container — don't lock body scroll.
-    const isContained =
-      overlayRef.current &&
-      overlayRef.current.offsetParent !== document.body &&
-      overlayRef.current.offsetParent !== document.documentElement;
-
-    if (!isContained) {
+    dialogScrollLockState.count++;
+    // Only capture and set overflow when first overlay opens
+    if (dialogScrollLockState.count === 1) {
+      dialogScrollLockState.originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
     }
 
     return () => {
-      document.body.style.overflow = '';
+      dialogScrollLockState.count--;
+      // Only restore overflow when last overlay closes
+      if (
+        dialogScrollLockState.count === 0 &&
+        dialogScrollLockState.originalOverflow !== null
+      ) {
+        document.body.style.overflow = dialogScrollLockState.originalOverflow;
+        dialogScrollLockState.originalOverflow = null;
+      }
     };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div ref={overlayRef} className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         {/* Backdrop */}
         <div
@@ -429,7 +446,7 @@ export function BookingDialog({
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="space-y-6 overflow-y-auto p-6">
+        <div className="space-y-6 p-6">
           {/* Provider Info */}
           <div className="border-border border-b pb-4">
             <h3 className="text-foreground mb-1 text-lg font-bold">
