@@ -45,7 +45,7 @@ const config: StorybookConfig = {
         },
         // Resolve wcdatavis's jQuery plugins from its nested node_modules so they
         // extend the same jQuery instance the source files import
-        { find: /^jquery-ui(.*)$/, replacement: path.join(wcdatavisNodeModules, 'jquery-ui$1') },
+        { find: /^jquery-ui(.*)$/, replacement: `${wcdatavisNodeModules}/jquery-ui$1` },
         { find: /^jquery-contextmenu$/, replacement: path.join(wcdatavisNodeModules, 'jquery-contextmenu') },
         { find: /^sumoselect$/, replacement: path.join(wcdatavisNodeModules, 'sumoselect') },
         { find: /^flatpickr$/, replacement: path.join(wcdatavisNodeModules, 'flatpickr') },

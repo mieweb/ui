@@ -326,8 +326,11 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
         //   Named exports: Source, ComputedView/View, Grid
         //   MIE.WC_DataVis namespace (browser bundle)
         const mod = DataVisModule as Record<string, unknown>;
-        const mieNs = (mod.MIE as Record<string, unknown> | undefined)
-          ?.WC_DataVis as Record<string, unknown> | undefined;
+        const mieNs =
+          ((mod.MIE as Record<string, unknown> | undefined)?.WC_DataVis as
+            | Record<string, unknown>
+            | undefined) ??
+          (mod.WC_DataVis as Record<string, unknown> | undefined);
 
         const SourceClass = mod.Source ?? mieNs?.Source;
         // v2.x exports ComputedView as "View"; v3.x exports as "ComputedView"
@@ -458,10 +461,24 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
     ]);
 
     // Mount / source / option change effect
+    // Use a "cancelled" flag to guard against race conditions: if props
+    // change while an async init is in-flight, the stale init's state
+    // updates and callbacks are skipped.
     React.useEffect(() => {
-      initializeDataVis();
+      let cancelled = false;
+
+      const run = async () => {
+        await initializeDataVis();
+        // If this effect was cleaned up while the async init was running,
+        // tear down the instances it just created so we don't leak.
+        if (cancelled) {
+          destroyInstances();
+        }
+      };
+      run();
 
       return () => {
+        cancelled = true;
         destroyInstances();
       };
     }, [initializeDataVis, destroyInstances]);
@@ -575,7 +592,7 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
       return () => {
         observer.disconnect();
       };
-    }, [state]); // Re-run when state changes (e.g. grid ready → new dialogs possible)
+    }, [state, brand, variant, size]); // Re-run when state or theming changes
 
     // Compute container style
     const containerStyle = React.useMemo((): React.CSSProperties => {
