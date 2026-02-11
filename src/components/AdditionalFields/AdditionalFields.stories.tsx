@@ -1,14 +1,46 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+import { Input } from '../Input';
 import {
   AdditionalFields,
-  generateId,
+  type AdditionalFieldsProps,
   type KeyValueEntry,
 } from './AdditionalFields';
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+/**
+ * Stateful wrapper that keeps internal value state while forwarding all
+ * other args from Storybook controls so they actually take effect.
+ */
+function StatefulAdditionalFields({
+  value: initialValue = [],
+  onChange: _onChange,
+  ...rest
+}: AdditionalFieldsProps) {
+  const [fields, setFields] = React.useState<KeyValueEntry[]>(initialValue);
+
+  return (
+    <div className="w-full max-w-2xl">
+      <AdditionalFields value={fields} onChange={setFields} {...rest} />
+      <div className="mt-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+        <h4 className="mb-2 text-sm font-medium">Current Value:</h4>
+        <pre className="text-xs">{JSON.stringify(fields, null, 2)}</pre>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// Meta
+// =============================================================================
 
 const meta: Meta<typeof AdditionalFields> = {
   title: 'Forms/AdditionalFields',
   component: AdditionalFields,
+  render: (args) => <StatefulAdditionalFields {...args} />,
   parameters: {
     layout: 'padded',
     docs: {
@@ -40,6 +72,33 @@ const meta: Meta<typeof AdditionalFields> = {
       control: 'number',
       description: 'Maximum number of entries allowed',
     },
+    namePlaceholder: {
+      control: 'text',
+      description: 'Placeholder for the field name input',
+    },
+    valuePlaceholder: {
+      control: 'text',
+      description: 'Placeholder for the field value input',
+    },
+    addButtonLabel: {
+      control: 'text',
+      description: 'Label for the add button',
+    },
+    value: { table: { disable: true } },
+    onChange: { table: { disable: true } },
+    className: { table: { disable: true } },
+  },
+  args: {
+    title: 'Additional Information (Optional)',
+    defaultExpanded: false,
+    disabled: false,
+    collapsible: true,
+    maxEntries: 20,
+    namePlaceholder: 'Field Name',
+    valuePlaceholder: 'Field Value',
+    addButtonLabel: 'Add Additional Information',
+    value: [],
+    onChange: () => {},
   },
 };
 
@@ -50,156 +109,67 @@ type Story = StoryObj<typeof AdditionalFields>;
 // Stories
 // =============================================================================
 
-function DefaultDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>([]);
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields value={fields} onChange={setFields} />
-      <div className="mt-4 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
-        <h4 className="mb-2 text-sm font-medium">Current Value:</h4>
-        <pre className="text-xs">{JSON.stringify(fields, null, 2)}</pre>
-      </div>
-    </div>
-  );
-}
-
-export const Default: Story = {
-  render: () => <DefaultDemo />,
-};
-
-function WithExistingDataDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>([
-    { id: generateId(), name: 'Employee ID', value: 'EMP-12345' },
-    { id: generateId(), name: 'Department', value: 'Engineering' },
-    { id: generateId(), name: 'Cost Center', value: 'CC-001' },
-  ]);
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields
-        value={fields}
-        onChange={setFields}
-        defaultExpanded={true}
-      />
-    </div>
-  );
-}
+export const Default: Story = {};
 
 export const WithExistingData: Story = {
-  render: () => <WithExistingDataDemo />,
+  args: {
+    defaultExpanded: true,
+    value: [
+      { id: 'demo-1', name: 'Employee ID', value: 'EMP-12345' },
+      { id: 'demo-2', name: 'Department', value: 'Engineering' },
+      { id: 'demo-3', name: 'Cost Center', value: 'CC-001' },
+    ],
+  },
 };
-
-function ExpandedByDefaultDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>([]);
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields
-        value={fields}
-        onChange={setFields}
-        defaultExpanded={true}
-        title="Custom Fields"
-      />
-    </div>
-  );
-}
 
 export const ExpandedByDefault: Story = {
-  render: () => <ExpandedByDefaultDemo />,
+  args: {
+    defaultExpanded: true,
+    title: 'Custom Fields',
+  },
 };
-
-function NotCollapsibleDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>([
-    { id: generateId(), name: 'Custom Field 1', value: 'Value 1' },
-  ]);
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields
-        value={fields}
-        onChange={setFields}
-        collapsible={false}
-        title="Custom Fields"
-      />
-    </div>
-  );
-}
 
 export const NotCollapsible: Story = {
-  render: () => <NotCollapsibleDemo />,
+  args: {
+    collapsible: false,
+    title: 'Custom Fields',
+    value: [{ id: 'demo-nc-1', name: 'Custom Field 1', value: 'Value 1' }],
+  },
 };
-
-function DisabledDemo() {
-  const [fields] = React.useState<KeyValueEntry[]>([
-    { id: generateId(), name: 'Employee ID', value: 'EMP-12345' },
-    { id: generateId(), name: 'Department', value: 'Engineering' },
-  ]);
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields
-        value={fields}
-        onChange={() => {}}
-        defaultExpanded={true}
-        disabled
-      />
-    </div>
-  );
-}
 
 export const Disabled: Story = {
-  render: () => <DisabledDemo />,
+  args: {
+    defaultExpanded: true,
+    disabled: true,
+    value: [
+      { id: 'demo-d-1', name: 'Employee ID', value: 'EMP-12345' },
+      { id: 'demo-d-2', name: 'Department', value: 'Engineering' },
+    ],
+  },
 };
-
-function WithMaxEntriesDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>([
-    { id: generateId(), name: 'Field 1', value: 'Value 1' },
-    { id: generateId(), name: 'Field 2', value: 'Value 2' },
-  ]);
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields
-        value={fields}
-        onChange={setFields}
-        defaultExpanded={true}
-        maxEntries={3}
-        title="Additional Fields (Max 3)"
-      />
-      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        Maximum 3 entries allowed. Currently: {fields.length}/3
-      </p>
-    </div>
-  );
-}
 
 export const WithMaxEntries: Story = {
-  render: () => <WithMaxEntriesDemo />,
+  args: {
+    defaultExpanded: true,
+    maxEntries: 3,
+    title: 'Additional Fields (Max 3)',
+    value: [
+      { id: 'demo-m-1', name: 'Field 1', value: 'Value 1' },
+      { id: 'demo-m-2', name: 'Field 2', value: 'Value 2' },
+    ],
+  },
 };
-
-function CustomLabelsDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>([]);
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields
-        value={fields}
-        onChange={setFields}
-        title="Información Adicional (Opcional)"
-        namePlaceholder="Nombre del Campo"
-        valuePlaceholder="Valor del Campo"
-        addButtonLabel="Agregar Información Adicional"
-      />
-    </div>
-  );
-}
 
 export const CustomLabels: Story = {
-  render: () => <CustomLabelsDemo />,
+  args: {
+    title: 'Información Adicional (Opcional)',
+    namePlaceholder: 'Nombre del Campo',
+    valuePlaceholder: 'Valor del Campo',
+    addButtonLabel: 'Agregar Información Adicional',
+  },
 };
 
-function InFormContextDemo() {
+function InFormContextDemo(args: AdditionalFieldsProps) {
   const [fields, setFields] = React.useState<KeyValueEntry[]>([]);
 
   return (
@@ -208,39 +178,16 @@ function InFormContextDemo() {
         <h2 className="mb-4 text-lg font-semibold">Employee Information</h2>
 
         <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="demo-fullname"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Full Name
-            </label>
-            <input
-              id="demo-fullname"
-              type="text"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
-              defaultValue="John Doe"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="demo-email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Email
-            </label>
-            <input
-              id="demo-email"
-              type="email"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
-              defaultValue="john.doe@example.com"
-            />
-          </div>
+          <Input label="Full Name" defaultValue="John Doe" />
+          <Input
+            label="Email"
+            type="email"
+            defaultValue="john.doe@example.com"
+          />
 
           <hr className="border-gray-200 dark:border-gray-700" />
 
-          <AdditionalFields value={fields} onChange={setFields} />
+          <AdditionalFields {...args} value={fields} onChange={setFields} />
         </div>
       </div>
     </div>
@@ -248,28 +195,17 @@ function InFormContextDemo() {
 }
 
 export const InFormContext: Story = {
-  render: () => <InFormContextDemo />,
+  render: (args) => <InFormContextDemo {...args} />,
 };
 
-function MobileViewDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>([
-    { id: generateId(), name: 'Employee ID', value: 'EMP-12345' },
-    { id: generateId(), name: 'Department', value: 'Engineering' },
-  ]);
-
-  return (
-    <div className="w-full max-w-sm">
-      <AdditionalFields
-        value={fields}
-        onChange={setFields}
-        defaultExpanded={true}
-      />
-    </div>
-  );
-}
-
 export const MobileView: Story = {
-  render: () => <MobileViewDemo />,
+  args: {
+    defaultExpanded: true,
+    value: [
+      { id: 'demo-mv-1', name: 'Employee ID', value: 'EMP-12345' },
+      { id: 'demo-mv-2', name: 'Department', value: 'Engineering' },
+    ],
+  },
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
@@ -277,27 +213,14 @@ export const MobileView: Story = {
   },
 };
 
-function ManyFieldsDemo() {
-  const [fields, setFields] = React.useState<KeyValueEntry[]>(
-    Array.from({ length: 10 }, (_, i) => ({
-      id: generateId(),
+export const ManyFields: Story = {
+  args: {
+    defaultExpanded: true,
+    title: 'Many Custom Fields',
+    value: Array.from({ length: 10 }, (_, i) => ({
+      id: `demo-mf-${i + 1}`,
       name: `Field ${i + 1}`,
       value: `Value ${i + 1}`,
-    }))
-  );
-
-  return (
-    <div className="w-full max-w-2xl">
-      <AdditionalFields
-        value={fields}
-        onChange={setFields}
-        defaultExpanded={true}
-        title="Many Custom Fields"
-      />
-    </div>
-  );
-}
-
-export const ManyFields: Story = {
-  render: () => <ManyFieldsDemo />,
+    })),
+  },
 };
