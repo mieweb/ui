@@ -119,16 +119,70 @@ const sampleHttpSource: DataVisProps['source'] = {
 const sampleJsonSource: DataVisProps['source'] = {
   type: 'json',
   data: [
-    { name: 'Apple', category: 'Fruit', price: 1.2, quantity: 150, inStock: true },
-    { name: 'Banana', category: 'Fruit', price: 0.5, quantity: 200, inStock: true },
-    { name: 'Carrot', category: 'Vegetable', price: 0.8, quantity: 100, inStock: true },
-    { name: 'Durian', category: 'Fruit', price: 12.0, quantity: 5, inStock: false },
-    { name: 'Eggplant', category: 'Vegetable', price: 2.5, quantity: 75, inStock: true },
+    {
+      name: 'Apple',
+      category: 'Fruit',
+      price: 1.2,
+      quantity: 150,
+      inStock: true,
+    },
+    {
+      name: 'Banana',
+      category: 'Fruit',
+      price: 0.5,
+      quantity: 200,
+      inStock: true,
+    },
+    {
+      name: 'Carrot',
+      category: 'Vegetable',
+      price: 0.8,
+      quantity: 100,
+      inStock: true,
+    },
+    {
+      name: 'Durian',
+      category: 'Fruit',
+      price: 12.0,
+      quantity: 5,
+      inStock: false,
+    },
+    {
+      name: 'Eggplant',
+      category: 'Vegetable',
+      price: 2.5,
+      quantity: 75,
+      inStock: true,
+    },
     { name: 'Fig', category: 'Fruit', price: 3.0, quantity: 30, inStock: true },
-    { name: 'Grape', category: 'Fruit', price: 2.0, quantity: 180, inStock: true },
-    { name: 'Honeydew', category: 'Fruit', price: 4.5, quantity: 20, inStock: false },
-    { name: 'Iceberg Lettuce', category: 'Vegetable', price: 1.5, quantity: 90, inStock: true },
-    { name: 'Jalapeño', category: 'Vegetable', price: 1.0, quantity: 60, inStock: true },
+    {
+      name: 'Grape',
+      category: 'Fruit',
+      price: 2.0,
+      quantity: 180,
+      inStock: true,
+    },
+    {
+      name: 'Honeydew',
+      category: 'Fruit',
+      price: 4.5,
+      quantity: 20,
+      inStock: false,
+    },
+    {
+      name: 'Iceberg Lettuce',
+      category: 'Vegetable',
+      price: 1.5,
+      quantity: 90,
+      inStock: true,
+    },
+    {
+      name: 'Jalapeño',
+      category: 'Vegetable',
+      price: 1.0,
+      quantity: 60,
+      inStock: true,
+    },
   ],
 };
 
@@ -235,7 +289,7 @@ export const CustomLoading: Story = {
     },
     loading: true,
     loadingMessage: (
-      <div className="flex flex-col items-center gap-3 text-primary-600">
+      <div className="text-primary-600 flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent" />
         <span className="text-sm font-medium">Fetching data...</span>
       </div>
@@ -335,13 +389,17 @@ export const LightDarkComparison: Story = {
     (Story) => (
       <div className="flex flex-col gap-6">
         <div>
-          <h3 className="mb-2 text-sm font-medium text-neutral-500">Light Mode</h3>
+          <h3 className="mb-2 text-sm font-medium text-neutral-500">
+            Light Mode
+          </h3>
           <div className="rounded-xl bg-white p-4">
             <Story />
           </div>
         </div>
         <div>
-          <h3 className="mb-2 text-sm font-medium text-neutral-400">Dark Mode</h3>
+          <h3 className="mb-2 text-sm font-medium text-neutral-400">
+            Dark Mode
+          </h3>
           <div className="dark rounded-xl bg-neutral-950 p-4" data-theme="dark">
             <Story />
           </div>
@@ -408,10 +466,8 @@ export const CustomErrorMessage: Story = {
     errorMessage: (
       <div className="flex flex-col items-center gap-2">
         <span className="text-2xl">⚠️</span>
-        <span className="font-medium text-foreground">
-          Unable to load data
-        </span>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-foreground font-medium">Unable to load data</span>
+        <span className="text-muted-foreground text-xs">
           Please check your network connection and try again.
         </span>
       </div>

@@ -18,7 +18,11 @@ declare module '@mieweb/wcdatavis' {
 
   export class Grid {
     constructor(
-      config: { id: string; computedView: ComputedView; [key: string]: unknown },
+      config: {
+        id: string;
+        computedView: ComputedView;
+        [key: string]: unknown;
+      },
       options?: Record<string, unknown>
     );
     destroy?(): void;

@@ -76,8 +76,7 @@ const dataVisVariants = cva('wc-datavis-themed w-full', {
      */
     variant: {
       default: '',
-      bordered:
-        'rounded-lg border border-border shadow-sm',
+      bordered: 'rounded-lg border border-border shadow-sm',
       card: 'rounded-lg border-0 shadow-card bg-card',
     },
     /**
@@ -228,8 +227,9 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
     // Combined ref handling
     const setRefs = React.useCallback(
       (node: HTMLDivElement | null) => {
-        (containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
-          node;
+        (
+          containerRef as React.MutableRefObject<HTMLDivElement | null>
+        ).current = node;
         if (typeof ref === 'function') {
           ref(node);
         } else if (ref) {
@@ -248,13 +248,22 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
         try {
           const { grid, view, source: src } = instancesRef.current;
           // DataVis objects may have destroy/dispose methods
-          if (grid && typeof (grid as Record<string, unknown>).destroy === 'function') {
+          if (
+            grid &&
+            typeof (grid as Record<string, unknown>).destroy === 'function'
+          ) {
             (grid as { destroy: () => void }).destroy();
           }
-          if (view && typeof (view as Record<string, unknown>).destroy === 'function') {
+          if (
+            view &&
+            typeof (view as Record<string, unknown>).destroy === 'function'
+          ) {
             (view as { destroy: () => void }).destroy();
           }
-          if (src && typeof (src as Record<string, unknown>).destroy === 'function') {
+          if (
+            src &&
+            typeof (src as Record<string, unknown>).destroy === 'function'
+          ) {
             (src as { destroy: () => void }).destroy();
           }
         } catch {
@@ -265,7 +274,9 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
 
       // Clean up temporary window variable used for json/array source bridging
       if (localVarRef.current) {
-        delete (window as unknown as Record<string, unknown>)[localVarRef.current];
+        delete (window as unknown as Record<string, unknown>)[
+          localVarRef.current
+        ];
         localVarRef.current = null;
       }
 
@@ -293,7 +304,10 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
         // plugins before the wcdatavis source files.
         // For @mieweb/wcdatavis (v3+), consumers should alias it to 'wcdatavis'
         // in their build config.
-        const wcdatavis = (await import('wcdatavis')) as Record<string, unknown>;
+        const wcdatavis = (await import('wcdatavis')) as Record<
+          string,
+          unknown
+        >;
 
         // Resolve the actual exports — handle both default and named exports
         const DataVisModule = wcdatavis.default
@@ -420,14 +434,20 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
         const wrappedError =
           err instanceof Error
             ? err
-            : new Error(
-                `DataVis initialization failed: ${String(err)}`
-              );
+            : new Error(`DataVis initialization failed: ${String(err)}`);
         setError(wrappedError);
         setState('error');
         onError?.(wrappedError);
       }
-    }, [source, viewOptions, gridOptions, destroyInstances, onGridReady, onError, onDataLoaded]);
+    }, [
+      source,
+      viewOptions,
+      gridOptions,
+      destroyInstances,
+      onGridReady,
+      onError,
+      onDataLoaded,
+    ]);
 
     // Mount / source change effect
     React.useEffect(() => {
@@ -464,17 +484,40 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
       const propagateVars = (target: HTMLElement) => {
         const cs = getComputedStyle(container);
         const vars = [
-          'background', 'foreground', 'card', 'card-foreground',
-          'muted', 'muted-foreground', 'border', 'input', 'ring',
-          'destructive', 'destructive-foreground',
-          'success', 'success-foreground',
-          'warning', 'warning-foreground',
-          'primary-50', 'primary-100', 'primary-200', 'primary-300',
-          'primary-400', 'primary-500', 'primary-600', 'primary-700',
-          'primary-800', 'primary-900', 'primary-950',
-          'font-sans', 'font-mono',
-          'radius-sm', 'radius-md', 'radius-lg',
-          'shadow-card', 'shadow-dropdown', 'shadow-modal',
+          'background',
+          'foreground',
+          'card',
+          'card-foreground',
+          'muted',
+          'muted-foreground',
+          'border',
+          'input',
+          'ring',
+          'destructive',
+          'destructive-foreground',
+          'success',
+          'success-foreground',
+          'warning',
+          'warning-foreground',
+          'primary-50',
+          'primary-100',
+          'primary-200',
+          'primary-300',
+          'primary-400',
+          'primary-500',
+          'primary-600',
+          'primary-700',
+          'primary-800',
+          'primary-900',
+          'primary-950',
+          'font-sans',
+          'font-mono',
+          'radius-sm',
+          'radius-md',
+          'radius-lg',
+          'shadow-card',
+          'shadow-dropdown',
+          'shadow-modal',
         ];
         for (const v of vars) {
           const val = cs.getPropertyValue(`--mieweb-${v}`).trim();
@@ -538,8 +581,7 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
     const containerStyle = React.useMemo((): React.CSSProperties => {
       const style: React.CSSProperties = {};
       if (height !== undefined) {
-        style.height =
-          typeof height === 'number' ? `${height}px` : height;
+        style.height = typeof height === 'number' ? `${height}px` : height;
       }
       return style;
     }, [height]);
@@ -559,7 +601,7 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
       >
         {/* Loading overlay */}
         {isLoading && (
-          <div className="flex items-center justify-center p-8 text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center p-8">
             {typeof loadingMessage === 'string' ? (
               <div className="flex items-center gap-2">
                 <svg
@@ -592,13 +634,11 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
 
         {/* Error state */}
         {isError && (
-          <div className="flex flex-col items-center justify-center gap-2 p-8 text-destructive">
+          <div className="text-destructive flex flex-col items-center justify-center gap-2 p-8">
             {errorMessage ?? (
               <>
-                <span className="font-medium">
-                  Failed to load DataVis
-                </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="font-medium">Failed to load DataVis</span>
+                <span className="text-muted-foreground text-xs">
                   {error.message}
                 </span>
               </>
@@ -608,7 +648,7 @@ const DataVis = React.forwardRef<HTMLDivElement, DataVisProps>(
 
         {/* Idle / empty state (before initialization) */}
         {isIdle && emptyMessage && (
-          <div className="flex items-center justify-center p-8 text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center p-8">
             {emptyMessage}
           </div>
         )}

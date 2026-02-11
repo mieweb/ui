@@ -109,7 +109,7 @@
   color: var(--mieweb-foreground);
 }
 
-.wc-datavis-themed .wcdv_grid_toolbar button[disabled=disabled] .fa {
+.wc-datavis-themed .wcdv_grid_toolbar button[disabled='disabled'] .fa {
   color: var(--mieweb-border);
 }
 
@@ -215,7 +215,11 @@
 }
 
 /* Field chips inside controls */
-.wc-datavis-themed .wcdv_control_pane ul.wcdv_control_horizontal li .wcdv_field {
+.wc-datavis-themed
+  .wcdv_control_pane
+  ul.wcdv_control_horizontal
+  li
+  .wcdv_field {
   border-color: var(--mieweb-border);
   background-color: var(--mieweb-background);
   color: var(--mieweb-foreground);
@@ -238,7 +242,8 @@
   color: var(--mieweb-warning);
 }
 
-.wc-datavis-themed .ui-widget.ui-widget-content.wcdv_aggregate_control_error_tooltip {
+.wc-datavis-themed
+  .ui-widget.ui-widget-content.wcdv_aggregate_control_error_tooltip {
   border-color: var(--mieweb-warning);
   color: var(--mieweb-foreground);
   background-color: var(--mieweb-background);
@@ -301,7 +306,11 @@
 }
 
 .wc-datavis-themed .wcdv_grid_table table thead th:hover {
-  background-color: color-mix(in srgb, var(--mieweb-muted) 80%, var(--mieweb-foreground)) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-muted) 80%,
+    var(--mieweb-foreground)
+  ) !important;
 }
 
 /* Secondary header row (group headers, subheaders) */
@@ -313,7 +322,11 @@
 
 /* Active sort column header */
 .wc-datavis-themed .wcdv_sort_column_active.wcdv_bg-primary {
-  background-color: color-mix(in srgb, var(--mieweb-muted) 70%, var(--mieweb-foreground)) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-muted) 70%,
+    var(--mieweb-foreground)
+  ) !important;
   color: var(--mieweb-foreground) !important;
 }
 
@@ -353,12 +366,20 @@
 
 /* Selected row */
 .wc-datavis-themed .wcdv_grid_table table td.wcdv_selected_row {
-  background-color: color-mix(in srgb, var(--mieweb-primary-500) 18%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 18%,
+    transparent
+  ) !important;
 }
 
 /* Drill-down active */
 .wc-datavis-themed .wcdv_grid_table table td.wcdv_drill_down:active {
-  background-color: color-mix(in srgb, var(--mieweb-warning) 25%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-warning) 25%,
+    transparent
+  ) !important;
 }
 
 /* Dividers and pivot boundaries */
@@ -469,13 +490,21 @@
 
 .wc-datavis-themed .wcdv_warning_banner {
   border-color: var(--mieweb-destructive);
-  background-color: color-mix(in srgb, var(--mieweb-destructive) 12%, var(--mieweb-background));
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-destructive) 12%,
+    var(--mieweb-background)
+  );
   color: var(--mieweb-foreground);
 }
 
 .wc-datavis-themed .wcdv_info_banner {
   border-color: var(--mieweb-primary-500);
-  background-color: color-mix(in srgb, var(--mieweb-primary-500) 10%, var(--mieweb-background));
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 10%,
+    var(--mieweb-background)
+  );
   color: var(--mieweb-primary-900);
 }
 
@@ -529,7 +558,11 @@
    ========================================================================== */
 
 .wc-datavis-themed .wcdv_drop_target_hover {
-  background-color: color-mix(in srgb, var(--mieweb-primary-500) 11%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 11%,
+    transparent
+  ) !important;
 }
 
 .wc-datavis-themed .wcdv_drag_handle.ui-draggable-dragging {
@@ -550,7 +583,8 @@
 }
 
 .wc-datavis-themed .context-menu-item.context-menu-hover,
-.wc-datavis-themed .context-menu-hover.context-menu-icon.context-menu-icon--fa::before {
+.wc-datavis-themed
+  .context-menu-hover.context-menu-icon.context-menu-icon--fa::before {
   background-color: var(--mieweb-muted);
   color: var(--mieweb-foreground);
 }
@@ -591,7 +625,11 @@
 }
 
 .wc-datavis-themed .wcdv_colconfigwin_table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--mieweb-primary-500) 10%, var(--mieweb-background));
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 10%,
+    var(--mieweb-background)
+  );
 }
 
 /* ==========================================================================
@@ -606,11 +644,11 @@
    BUTTON BAR
    ========================================================================== */
 
-.wc-datavis-themed div.wcdv_button_bar button[data-role=ok] span.fa {
+.wc-datavis-themed div.wcdv_button_bar button[data-role='ok'] span.fa {
   color: var(--mieweb-success);
 }
 
-.wc-datavis-themed div.wcdv_button_bar button[data-role=cancel] span.fa {
+.wc-datavis-themed div.wcdv_button_bar button[data-role='cancel'] span.fa {
   color: var(--mieweb-destructive);
 }
 
@@ -619,7 +657,13 @@
    ========================================================================== */
 
 .wc-datavis-themed .SumoSelect .select-all.selected > span i,
-.wc-datavis-themed .SumoSelect > .optWrapper.multiple > .options li.opt.selected span i {
+.wc-datavis-themed
+  .SumoSelect
+  > .optWrapper.multiple
+  > .options
+  li.opt.selected
+  span
+  i {
   background-color: var(--mieweb-primary-500);
 }
 
@@ -747,7 +791,10 @@
   color: var(--mieweb-foreground, #171717) !important;
   border: 1px solid var(--mieweb-border, #e5e7eb) !important;
   border-radius: var(--mieweb-radius-lg, 8px) !important;
-  box-shadow: var(--mieweb-shadow-modal, 0 10px 15px -3px rgb(0 0 0 / 0.1)) !important;
+  box-shadow: var(
+    --mieweb-shadow-modal,
+    0 10px 15px -3px rgb(0 0 0 / 0.1)
+  ) !important;
   font-family: var(--mieweb-font-sans, inherit);
   overflow: hidden;
   min-width: 420px;
@@ -840,7 +887,9 @@
   color: var(--mieweb-primary-500, #38bdf8) !important;
   font-size: 15px;
   cursor: pointer;
-  transition: color 0.12s ease, transform 0.1s ease;
+  transition:
+    color 0.12s ease,
+    transform 0.1s ease;
   border-radius: var(--mieweb-radius-sm, 4px) !important;
   line-height: 1;
 }
@@ -848,7 +897,11 @@
 .wcdv_dialog .wcdv_icon_button:hover,
 .wcdv_dialog button.wcdv_icon_button:hover {
   color: var(--mieweb-primary-600, #0284c7) !important;
-  background: color-mix(in srgb, var(--mieweb-primary-500) 10%, transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 10%,
+    transparent
+  ) !important;
   transform: scale(1.1);
 }
 
@@ -875,7 +928,9 @@
   font-size: 0.9em;
   border-radius: var(--mieweb-radius-md, 6px) !important;
   cursor: pointer;
-  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+  transition:
+    background-color 0.12s ease,
+    box-shadow 0.12s ease;
   font-family: var(--mieweb-font-sans, inherit);
   display: inline-flex;
   align-items: center;
@@ -1092,7 +1147,11 @@
 }
 
 .wcdv_colconfigwin_table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--mieweb-primary-500) 6%, var(--mieweb-card)) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 6%,
+    var(--mieweb-card)
+  ) !important;
 }
 
 /* Drag handle column */
@@ -1105,14 +1164,19 @@
 }
 
 /* Checkbox styling inside column config */
-.wcdv_colconfigwin_table input[type="checkbox"] {
+.wcdv_colconfigwin_table input[type='checkbox'] {
   accent-color: var(--mieweb-primary-500);
 }
 
 /* --- Info banner inside dialogs --- */
 .wcdv_dialog .wcdv_info_banner {
-  background-color: color-mix(in srgb, var(--mieweb-primary-500) 8%, var(--mieweb-card)) !important;
-  border: 1px solid color-mix(in srgb, var(--mieweb-primary-500) 25%, var(--mieweb-border)) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 8%,
+    var(--mieweb-card)
+  ) !important;
+  border: 1px solid
+    color-mix(in srgb, var(--mieweb-primary-500) 25%, var(--mieweb-border)) !important;
   border-radius: var(--mieweb-radius-md, 6px) !important;
   color: var(--mieweb-foreground) !important;
   padding: 8px 12px !important;
@@ -1175,7 +1239,10 @@
   color: var(--mieweb-foreground, #171717) !important;
   border: 1px solid var(--mieweb-border, #e5e7eb) !important;
   border-radius: var(--mieweb-radius-lg, 8px) !important;
-  box-shadow: var(--mieweb-shadow-modal, 0 10px 15px -3px rgb(0 0 0 / 0.1)) !important;
+  box-shadow: var(
+    --mieweb-shadow-modal,
+    0 10px 15px -3px rgb(0 0 0 / 0.1)
+  ) !important;
   font-family: var(--mieweb-font-sans, inherit);
   overflow: hidden;
   min-width: 420px;
@@ -1235,7 +1302,11 @@
 .ui-dialog:has(.wcdv_colconfigwin_table) .wcdv_icon_button:hover,
 .ui-dialog:has(.wcdv_button_bar) .wcdv_icon_button:hover {
   color: var(--mieweb-primary-600, #0284c7) !important;
-  background: color-mix(in srgb, var(--mieweb-primary-500) 10%, transparent) !important;
+  background: color-mix(
+    in srgb,
+    var(--mieweb-primary-500) 10%,
+    transparent
+  ) !important;
 }
 
 /* Bottom bar buttons in generic dialogs */
@@ -1247,14 +1318,18 @@
   cursor: pointer;
 }
 
-.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-buttonset .ui-button:first-child,
+.ui-dialog:has(.wcdv_colconfigwin_table)
+  .ui-dialog-buttonset
+  .ui-button:first-child,
 .ui-dialog:has(.wcdv_button_bar) .ui-dialog-buttonset .ui-button:first-child {
   background-color: var(--mieweb-primary-500) !important;
   color: #ffffff !important;
   border: 1px solid var(--mieweb-primary-500) !important;
 }
 
-.ui-dialog:has(.wcdv_colconfigwin_table) .ui-dialog-buttonset .ui-button:last-child,
+.ui-dialog:has(.wcdv_colconfigwin_table)
+  .ui-dialog-buttonset
+  .ui-button:last-child,
 .ui-dialog:has(.wcdv_button_bar) .ui-dialog-buttonset .ui-button:last-child {
   background-color: transparent !important;
   color: var(--mieweb-muted-foreground) !important;
