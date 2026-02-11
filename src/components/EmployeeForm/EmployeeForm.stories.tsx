@@ -11,6 +11,9 @@ const meta: Meta<typeof EmployeeForm> = {
   argTypes: {
     onSubmit: { action: 'submitted' },
     onCancel: { action: 'cancelled' },
+    customFields: { control: false },
+    labels: { control: 'object' },
+    className: { table: { disable: true } },
   },
 };
 
