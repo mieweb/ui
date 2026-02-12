@@ -12,6 +12,7 @@ import {
   ModalBody,
   ModalFooter,
 } from '../Modal/Modal';
+import { PencilIcon } from '../Icons';
 
 export interface ServicePrice {
   id: string;
@@ -318,11 +319,12 @@ export function ServicePricingManager({
                     )}
                     {onUpdatePrice && (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
+                        leftIcon={<PencilIcon className="h-3.5 w-3.5" />}
                         onClick={() => handleEditClick(service)}
                       >
-                        Edit Price
+                        Edit
                       </Button>
                     )}
                   </div>
