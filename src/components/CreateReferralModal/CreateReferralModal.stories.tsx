@@ -1,18 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { CreateReferralModal } from './CreateReferralModal';
 
-const meta: Meta<typeof CreateReferralModal> = {
-  title: 'Provider/CreateReferralModal',
-  component: CreateReferralModal,
-  parameters: {
-    layout: 'centered',
-  },
-  tags: ['autodocs'],
-};
-
-export default meta;
-type Story = StoryObj<typeof CreateReferralModal>;
-
 const mockEmployee = {
   id: 'emp-1',
   firstName: 'John',
@@ -55,62 +43,83 @@ const mockServices = [
   },
 ];
 
-export const Default: Story = {
+const meta: Meta<typeof CreateReferralModal> = {
+  title: 'Provider/CreateReferralModal',
+  component: CreateReferralModal,
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      story: { autoplay: false },
+    },
+  },
+  tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <div
+        className="bg-background flex min-h-[900px] items-center justify-center p-4"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
   args: {
     open: true,
-    onOpenChange: () => {},
-    onSubmit: (data) => console.log('Submit:', data),
     employee: mockEmployee,
     services: mockServices,
     employerName: 'ABC Trucking Company',
+    isSubmitting: false,
+  },
+  argTypes: {
+    open: { control: 'boolean', description: 'Whether the modal is open' },
+    onOpenChange: { action: 'onOpenChange' },
+    onSubmit: { action: 'onSubmit' },
+    employee: { control: 'object', description: 'Employee for the referral' },
+    services: {
+      control: 'object',
+      description: 'Available services to select',
+    },
+    employerName: { control: 'text', description: 'Employer name' },
+    isSubmitting: {
+      control: 'boolean',
+      description: 'Whether submission is in progress',
+    },
+    errorMessage: { control: 'text', description: 'Error message to display' },
+    currency: { control: 'text', description: 'Currency symbol' },
   },
 };
 
+export default meta;
+type Story = StoryObj<typeof CreateReferralModal>;
+
+export const Default: Story = {};
+
 export const NoEmployee: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    services: mockServices,
+    employee: undefined,
   },
 };
 
 export const NoServices: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employee: mockEmployee,
     services: [],
-    employerName: 'ABC Trucking Company',
   },
 };
 
 export const Submitting: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employee: mockEmployee,
-    services: mockServices,
-    employerName: 'ABC Trucking Company',
     isSubmitting: true,
   },
 };
 
 export const WithError: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employee: mockEmployee,
-    services: mockServices,
-    employerName: 'ABC Trucking Company',
     errorMessage: 'Failed to create referral. Please try again.',
   },
 };
 
 export const ManyServices: Story = {
   args: {
-    open: true,
-    onOpenChange: () => {},
-    employee: mockEmployee,
     services: [
       ...mockServices,
       { id: 'svc-6', name: 'Hearing Test', price: 55.0 },
@@ -119,6 +128,5 @@ export const ManyServices: Story = {
       { id: 'svc-9', name: 'Back Assessment', price: 75.0 },
       { id: 'svc-10', name: 'TB Skin Test', price: 30.0 },
     ],
-    employerName: 'ABC Trucking Company',
   },
 };

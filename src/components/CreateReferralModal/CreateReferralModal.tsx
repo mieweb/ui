@@ -1,8 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Button } from '../Button/Button';
+import { Textarea } from '../Textarea/Textarea';
 
 export interface Employee {
   id: string;
@@ -116,45 +123,41 @@ export function CreateReferralModal({
           <ModalTitle>Create Referral</ModalTitle>
         </ModalHeader>
 
-        <div className="space-y-4">
+        <ModalBody className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {errorMessage}
-              </p>
+            <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
+              <p className="text-destructive text-sm">{errorMessage}</p>
             </div>
           )}
 
           {/* Employee info */}
           {employee && (
-            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-              <p className="mb-1 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
+            <div className="bg-muted rounded-lg p-4">
+              <p className="text-muted-foreground mb-1 text-xs tracking-wide uppercase">
                 Employee
               </p>
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="text-foreground font-medium">
                 {employee.firstName} {employee.lastName}
               </p>
               {employee.email && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground text-sm">
                   {employee.email}
                 </p>
               )}
               {employerName && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {employerName}
-                </p>
+                <p className="text-muted-foreground text-sm">{employerName}</p>
               )}
             </div>
           )}
 
           {/* Services selection */}
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="text-foreground mb-2 text-sm font-medium">
               Select Services
             </p>
             {services.length === 0 ? (
-              <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground py-4 text-center text-sm">
                 No services available
               </p>
             ) : (
@@ -165,11 +168,12 @@ export function CreateReferralModal({
                     <button
                       key={service.id}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => toggleService(service.id)}
                       className={`w-full rounded-lg border p-3 text-left transition-colors ${
                         isSelected
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-border/80'
                       } `}
                     >
                       <div className="flex items-center justify-between">
@@ -177,13 +181,13 @@ export function CreateReferralModal({
                           <div
                             className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
                               isSelected
-                                ? 'border-blue-500 bg-blue-500'
-                                : 'border-gray-300 dark:border-gray-600'
+                                ? 'border-primary bg-primary'
+                                : 'border-input'
                             } `}
                           >
                             {isSelected && (
                               <svg
-                                className="h-3 w-3 text-white"
+                                className="text-primary-foreground h-3 w-3"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -198,17 +202,17 @@ export function CreateReferralModal({
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-white">
+                            <p className="text-foreground font-medium">
                               {service.name}
                             </p>
                             {service.description && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                              <p className="text-muted-foreground text-xs">
                                 {service.description}
                               </p>
                             )}
                           </div>
                         </div>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <span className="text-foreground font-medium">
                           {currency}
                           {service.price.toFixed(2)}
                         </span>
@@ -222,23 +226,22 @@ export function CreateReferralModal({
 
           {/* Priority */}
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Priority
-            </p>
+            <p className="text-foreground mb-2 text-sm font-medium">Priority</p>
             <div className="flex gap-2">
               {(['normal', 'urgent', 'stat'] as const).map((p) => (
                 <button
                   key={p}
                   type="button"
+                  aria-pressed={priority === p}
                   onClick={() => setPriority(p)}
                   className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                     priority === p
                       ? p === 'stat'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        ? 'bg-destructive/10 text-destructive'
                         : p === 'urgent'
-                          ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                          ? 'bg-warning/10 text-warning'
+                          : 'bg-primary/10 text-primary'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   } `}
                 >
                   {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -249,15 +252,8 @@ export function CreateReferralModal({
 
           {/* Notes */}
           <div>
-            <label
-              htmlFor="referral-notes"
-              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Notes (Optional)
-            </label>
-            <textarea
-              id="referral-notes"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            <Textarea
+              label="Notes (Optional)"
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -267,19 +263,19 @@ export function CreateReferralModal({
 
           {/* Cost summary */}
           {selectedServices.size > 0 && (
-            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+            <div className="bg-muted rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground text-sm">
                     {selectedServices.size} service
                     {selectedServices.size > 1 ? 's' : ''} selected
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground text-xs">
                     Estimated Total
                   </p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-foreground text-xl font-bold">
                     {currency}
                     {totalPrice.toFixed(2)}
                   </p>
@@ -287,7 +283,7 @@ export function CreateReferralModal({
               </div>
             </div>
           )}
-        </div>
+        </ModalBody>
 
         <ModalFooter>
           <Button
