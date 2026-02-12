@@ -38,7 +38,7 @@ const mockServices = [
   { id: '4', name: 'Hair Testing', slug: 'hair-testing' },
 ];
 
-const meta: Meta<typeof ServiceBadge> = {
+const meta: Meta<ServiceBadgeStoryArgs> = {
   title: 'Provider/ServiceBadge',
   component: ServiceBadge,
   parameters: {
