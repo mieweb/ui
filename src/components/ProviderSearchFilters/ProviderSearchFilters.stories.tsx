@@ -44,6 +44,56 @@ const meta: Meta<typeof ProviderSearchFilters> = {
   parameters: {
     layout: 'padded',
   },
+  argTypes: {
+    layout: {
+      control: 'select',
+      options: ['horizontal', 'vertical', 'compact'],
+      description: 'Layout direction of the filter controls',
+    },
+    showNameSearch: {
+      control: 'boolean',
+      description: 'Show provider name search input',
+    },
+    showZipCode: {
+      control: 'boolean',
+      description: 'Show ZIP code input',
+    },
+    showRadius: {
+      control: 'boolean',
+      description: 'Show radius selector',
+    },
+    showServices: {
+      control: 'boolean',
+      description: 'Show service filter multi-select',
+    },
+    showServiceCounts: {
+      control: 'boolean',
+      description: 'Show service counts in dropdown',
+    },
+    showLabels: {
+      control: 'boolean',
+      description: 'Show field labels above inputs',
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Loading state for the filters',
+    },
+    filters: { table: { disable: true } },
+    onFiltersChange: { table: { disable: true } },
+    services: { table: { disable: true } },
+    radiusOptions: { table: { disable: true } },
+    onSubmit: { action: 'submitted' },
+  },
+  args: {
+    layout: 'horizontal',
+    showNameSearch: true,
+    showZipCode: true,
+    showRadius: true,
+    showServices: true,
+    showServiceCounts: false,
+    showLabels: true,
+    loading: false,
+  },
 };
 
 export default meta;
@@ -76,7 +126,7 @@ function FiltersDemo(
 
 // Default horizontal layout
 export const Default: Story = {
-  render: () => <FiltersDemo />,
+  render: (args) => <FiltersDemo {...args} />,
 };
 
 // Vertical layout
