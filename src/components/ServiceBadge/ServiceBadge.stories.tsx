@@ -93,14 +93,20 @@ function TagIcon({ className }: { className?: string }) {
   );
 }
 
-const iconMap: Record<string, React.ReactNode> = {
-  none: undefined as unknown as React.ReactNode,
-  'test-tube': <TestTubeIcon className="h-3.5 w-3.5" />,
-  medical: <MedicalIcon className="h-3.5 w-3.5" />,
-  briefcase: <BriefcaseIcon className="h-3.5 w-3.5" />,
-  heart: <HeartIcon className="h-3.5 w-3.5" />,
-  lab: <LabIcon className="h-3.5 w-3.5" />,
-  tag: <TagIcon className="h-3.5 w-3.5" />,
+type IconComponent = React.FC<{ className?: string }>;
+
+const iconMap: Record<string, IconComponent | undefined> = {
+  none: undefined,
+  'test-tube': TestTubeIcon,
+  medical: MedicalIcon,
+  briefcase: BriefcaseIcon,
+  heart: HeartIcon,
+  lab: LabIcon,
+  tag: TagIcon,
+};
+
+type ServiceBadgeStoryArgs = React.ComponentProps<typeof ServiceBadge> & {
+  iconName?: keyof typeof iconMap;
 };
 
 const mockServices = [
@@ -135,10 +141,10 @@ const meta: Meta<typeof ServiceBadge> = {
       control: 'select',
       options: ['xs', 'sm', 'md', 'lg', 'xl'],
     },
-    icon: {
+    icon: { table: { disable: true } },
+    iconName: {
       control: 'select',
       options: Object.keys(iconMap),
-      mapping: iconMap,
       description: 'Icon to display before the label',
     },
     removable: {
@@ -154,8 +160,17 @@ const meta: Meta<typeof ServiceBadge> = {
   },
   args: {
     children: 'Drug Testing',
-    icon: 'none' as unknown as React.ReactNode,
+    iconName: 'none',
     removable: false,
+  },
+  render: ({ iconName, ...args }: ServiceBadgeStoryArgs) => {
+    const Icon = iconName ? iconMap[iconName] : undefined;
+    return (
+      <ServiceBadge
+        {...args}
+        icon={Icon ? <Icon className="h-3.5 w-3.5" /> : undefined}
+      />
+    );
   },
 };
 
