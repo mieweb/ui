@@ -228,6 +228,19 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
 
   if (!results) return null;
 
+  // Guard against malformed results objects
+  if (
+    typeof results.count !== 'number' ||
+    !results.postalCode ||
+    typeof results.postalCode !== 'object' ||
+    typeof results.postalCode.zipcode !== 'string' ||
+    typeof results.postalCode.city !== 'string' ||
+    typeof results.postalCode.state !== 'string' ||
+    typeof results.distance !== 'number'
+  ) {
+    return null;
+  }
+
   if (results.count === 0) {
     return (
       <div className={cn('text-muted-foreground text-sm', className)}>
