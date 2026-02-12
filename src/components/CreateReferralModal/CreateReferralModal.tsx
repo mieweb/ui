@@ -168,6 +168,7 @@ export function CreateReferralModal({
                     <button
                       key={service.id}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => toggleService(service.id)}
                       className={`w-full rounded-lg border p-3 text-left transition-colors ${
                         isSelected
@@ -231,6 +232,7 @@ export function CreateReferralModal({
                 <button
                   key={p}
                   type="button"
+                  aria-pressed={priority === p}
                   onClick={() => setPriority(p)}
                   className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                     priority === p
@@ -251,7 +253,6 @@ export function CreateReferralModal({
           {/* Notes */}
           <div>
             <Textarea
-              id="referral-notes"
               label="Notes (Optional)"
               rows={2}
               value={notes}
