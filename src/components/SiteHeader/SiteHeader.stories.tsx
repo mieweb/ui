@@ -41,10 +41,10 @@ const meta: Meta<typeof SiteHeader> = {
     },
     loginHref: { control: 'text' },
     signUpHref: { control: 'text' },
-    user: { table: { disable: true } },
-    logo: { table: { disable: true } },
-    links: { table: { disable: true } },
-    userMenuItems: { table: { disable: true } },
+    user: { control: false, table: { disable: true } },
+    logo: { control: false, table: { disable: true } },
+    links: { control: false, table: { disable: true } },
+    userMenuItems: { control: false, table: { disable: true } },
     onLogin: { action: 'login-clicked' },
     onSignUp: { action: 'sign-up-clicked' },
     onLogout: { action: 'logout-clicked' },
@@ -79,11 +79,7 @@ export const Default: Story = {};
 // Logged in user
 export const LoggedIn: Story = {
   args: {
-    logo: { name: 'BlueHive' },
-    links: defaultLinks,
     user: sampleUser,
-    onLogout: () => window.alert('Logout clicked'),
-    onProfile: () => window.alert('Profile clicked'),
   },
 };
 
@@ -91,10 +87,6 @@ export const LoggedIn: Story = {
 export const WhiteVariant: Story = {
   args: {
     variant: 'white',
-    logo: { name: 'BlueHive' },
-    links: defaultLinks,
-    onLogin: () => {},
-    onSignUp: () => {},
   },
 };
 
@@ -102,9 +94,6 @@ export const WhiteVariant: Story = {
 export const GlassVariant: Story = {
   args: {
     variant: 'glass',
-    logo: { name: 'BlueHive' },
-    links: defaultLinks,
-    onLogin: () => {},
   },
   decorators: [
     (Story) => (
