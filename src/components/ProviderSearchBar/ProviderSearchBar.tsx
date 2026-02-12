@@ -233,7 +233,10 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
     typeof results.count !== 'number' ||
     !results.postalCode ||
     typeof results.postalCode !== 'object' ||
-    typeof results.postalCode.zipcode !== 'string'
+    typeof results.postalCode.zipcode !== 'string' ||
+    typeof results.postalCode.city !== 'string' ||
+    typeof results.postalCode.state !== 'string' ||
+    typeof results.distance !== 'number'
   ) {
     return null;
   }
