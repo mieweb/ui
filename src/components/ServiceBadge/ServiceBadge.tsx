@@ -122,13 +122,13 @@ export function ServiceBadge({
     <>
       {icon && <span className="mr-1 flex-shrink-0">{icon}</span>}
       <span className="truncate">{children}</span>
-      {removable && (
+      {removable && onRemove && (
         <button
           type="button"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            onRemove?.();
+            onRemove();
           }}
           className="ml-1 flex-shrink-0 rounded-full p-0.5 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
           aria-label={`Remove ${children}`}
