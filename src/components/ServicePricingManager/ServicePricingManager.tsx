@@ -321,9 +321,9 @@ export function ServicePricingManager({
                       <Button
                         variant="ghost"
                         size="sm"
+                        leftIcon={<PencilIcon className="h-3.5 w-3.5" />}
                         onClick={() => handleEditClick(service)}
                       >
-                        <PencilIcon className="h-3.5 w-3.5" />
                         Edit
                       </Button>
                     )}
