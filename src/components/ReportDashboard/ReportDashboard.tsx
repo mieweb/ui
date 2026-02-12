@@ -176,7 +176,7 @@ export function ReportDashboard({
         </div>
         <div className="flex items-center gap-3">
           <Select
-            options={dateRangeOptions}
+            options={Array.isArray(dateRangeOptions) ? dateRangeOptions : []}
             value={selectedDateRange}
             onValueChange={(value) => onDateRangeChange?.(value)}
             className="w-40"
