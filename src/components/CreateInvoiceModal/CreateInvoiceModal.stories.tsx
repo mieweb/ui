@@ -63,7 +63,7 @@ const meta: Meta<typeof CreateInvoiceModal> = {
       // Container with transform creates a new containing block for position:fixed
       // This keeps the modal within this container in docs view
       <div
-        className="bg-background flex min-h-[700px] items-center justify-center p-4"
+        className="bg-background flex min-h-[900px] items-center justify-center p-4"
         style={{ transform: 'translateZ(0)' }}
       >
         <Story />
