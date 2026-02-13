@@ -211,6 +211,9 @@ export function DateRangePicker({
   const calendarRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
+  const isMobileVariant = variant === 'mobile';
+  const isResponsive = variant === 'responsive';
+
   // Compute right panel month/year
   const rightMonth = leftMonth === 11 ? 0 : leftMonth + 1;
   const rightYear = leftMonth === 11 ? leftYear + 1 : leftYear;
@@ -494,9 +497,6 @@ export function DateRangePicker({
       </div>
     );
   };
-
-  const isMobileVariant = variant === 'mobile';
-  const isResponsive = variant === 'responsive';
 
   return (
     <div ref={wrapperRef} className={cn('relative inline-block', className)}>
