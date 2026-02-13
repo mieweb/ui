@@ -18,10 +18,6 @@ const meta: Meta<typeof DateRangePicker> = {
       control: 'text',
       description: 'Placeholder text for the trigger button',
     },
-    dateFormat: {
-      control: 'text',
-      description: 'Date format for display',
-    },
     className: {
       control: 'text',
       description: 'Custom className',
@@ -70,7 +66,6 @@ type Story = StoryObj<typeof DateRangePicker>;
 
 interface PlaygroundProps {
   placeholder?: string;
-  dateFormat?: string;
   className?: string;
   showPresets?: boolean;
   onChange?: (range: DateRange, presetKey?: string) => void;
@@ -78,7 +73,6 @@ interface PlaygroundProps {
 
 function PlaygroundDemo({
   placeholder,
-  dateFormat,
   className,
   showPresets,
   onChange,
@@ -97,7 +91,6 @@ function PlaygroundDemo({
         }}
         activePreset={preset}
         placeholder={placeholder}
-        dateFormat={dateFormat}
         className={className}
         showPresets={showPresets}
       />

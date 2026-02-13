@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { useClickOutside } from '../../hooks/useClickOutside';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
 import {
@@ -43,10 +45,10 @@ export interface DateRangePickerProps {
   activePreset?: string;
   /** Placeholder text for the date input */
   placeholder?: string;
-  /** Date format for display */
-  dateFormat?: string;
   /** Custom className */
   className?: string;
+  /** Whether to show the preset sidebar in the calendar popup (default: true) */
+  showPresets?: boolean;
   /** Labels for i18n */
   labels?: {
     today?: string;
@@ -143,7 +145,7 @@ function calculateDateRange(presetKey: string): DateRange {
   }
 }
 
-function formatDateRange(range: DateRange, _format?: string): string {
+function formatDateRange(range: DateRange): string {
   if (!range.start && !range.end) return '';
   const formatDate = (d: Date | null) => {
     if (!d) return '';
@@ -184,7 +186,6 @@ export function DateRangePicker({
   presets,
   activePreset,
   placeholder = 'Pick a date range',
-  dateFormat,
   className,
   showPresets = true,
   labels = {},
@@ -217,51 +218,30 @@ export function DateRangePicker({
 
   // Sync external value changes
   React.useEffect(() => {
-    if (value?.start) {
-      setRangeStart(value.start);
-    }
-    if (value?.end) {
-      setRangeEnd(value.end);
-    }
-    if (!value?.start && !value?.end) {
+    if (!value) {
       setRangeStart(null);
       setRangeEnd(null);
+      return;
     }
+    setRangeStart(value.start ?? null);
+    setRangeEnd(value.end ?? null);
   }, [value]);
 
-  // Close calendar on click outside
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        calendarRef.current &&
-        !calendarRef.current.contains(event.target as HTMLElement) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(event.target as HTMLElement)
-      ) {
-        setIsCalendarOpen(false);
-        setSelectingEnd(false);
-      }
-    };
+  // Close calendar on click outside (supports touch via hook)
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  useClickOutside(wrapperRef, () => {
     if (isCalendarOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
+      setIsCalendarOpen(false);
+      setSelectingEnd(false);
     }
-  }, [isCalendarOpen]);
+  });
 
-  // Close on Escape
-  React.useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsCalendarOpen(false);
-        setSelectingEnd(false);
-      }
-    };
-    if (isCalendarOpen) {
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
-    }
-  }, [isCalendarOpen]);
+  // Close on Escape and restore focus to trigger
+  useEscapeKey(() => {
+    setIsCalendarOpen(false);
+    setSelectingEnd(false);
+    triggerRef.current?.focus();
+  }, isCalendarOpen);
 
   const handlePresetSelect = (presetKey: string) => {
     const range = calculateDateRange(presetKey);
@@ -369,22 +349,28 @@ export function DateRangePicker({
     return isSameDay(date, today);
   };
 
-  const displayValue = value ? formatDateRange(value, dateFormat) : '';
+  const displayValue = value ? formatDateRange(value) : '';
 
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
+  // Use Intl API for locale-aware month and day names
+  const monthNames = React.useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) =>
+        new Intl.DateTimeFormat(undefined, { month: 'long' }).format(
+          new Date(2000, i, 1)
+        )
+      ),
+    []
+  );
+
+  const weekdayNames = React.useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) =>
+        new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(
+          new Date(1970, 0, 4 + i)
+        )
+      ),
+    []
+  );
 
   const renderMonthGrid = (month: number, year: number) => {
     const daysInMonth = getDaysInMonth(month, year);
@@ -435,7 +421,7 @@ export function DateRangePicker({
       <div className="w-[280px]">
         {/* Day headers */}
         <div className="mb-1 grid grid-cols-7">
-          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((dayName) => (
+          {weekdayNames.map((dayName) => (
             <div
               key={dayName}
               className="text-muted-foreground py-1 text-center text-xs font-medium"
@@ -502,12 +488,14 @@ export function DateRangePicker({
   };
 
   return (
-    <div className={cn('relative inline-block', className)}>
+    <div ref={wrapperRef} className={cn('relative inline-block', className)}>
       {/* Trigger Button */}
       <button
         ref={triggerRef}
         type="button"
         onClick={toggleCalendar}
+        aria-expanded={isCalendarOpen}
+        aria-haspopup="dialog"
         className={cn(
           'border-input bg-background hover:bg-muted',
           'inline-flex w-[300px] items-center gap-2 rounded-md border px-4 py-2 text-left text-sm font-normal',
@@ -560,7 +548,10 @@ export function DateRangePicker({
                 Select a start and end date from the calendar.
               </p>
 
-              <div className="flex gap-8">
+              <div
+                className="flex gap-8"
+                onMouseLeave={() => setHoverDate(null)}
+              >
                 {/* Left month */}
                 <div>
                   <div className="mb-3 flex items-center">
