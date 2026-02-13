@@ -3,6 +3,7 @@ import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
 import {
+  Filter,
   Calendar,
   ChevronDown,
   ChevronLeft,
@@ -570,7 +571,39 @@ export function DateRangePicker({
   };
 
   return (
-    <div className={cn('grid gap-2', className)}>
+    <div className={cn('relative flex items-center gap-0', className)}>
+      {/* Filter Dropdown */}
+      <Dropdown
+        trigger={
+          <Button
+            variant="primary"
+            size="md"
+            className="rounded-r-none border-r-0"
+            data-cy="btn-date-filter"
+          >
+            <Filter className="h-4 w-4" />
+            <ChevronDown className="ml-1 h-3 w-3" />
+          </Button>
+        }
+        className="max-h-[300px] overflow-auto"
+      >
+        <div className="grid grid-cols-2 gap-0">
+          {finalPresets.map((preset) => (
+            <DropdownItem
+              key={preset.key}
+              onClick={() => handlePresetSelect(preset.key)}
+              className={cn(
+                activePreset === preset.key &&
+                  'bg-primary text-primary-foreground'
+              )}
+              data-cy="datepicker-filter-range"
+            >
+              {preset.label}
+            </DropdownItem>
+          ))}
+        </div>
+      </Dropdown>
+
       {/* Trigger Button */}
       <button
         ref={triggerRef}
@@ -578,7 +611,7 @@ export function DateRangePicker({
         onClick={toggleCalendar}
         className={cn(
           'border-input bg-background hover:bg-muted',
-          'inline-flex w-[300px] items-center gap-2 rounded-md border px-4 py-2 text-left text-sm font-normal',
+          'inline-flex w-[300px] items-center gap-2 rounded-l-none rounded-r-md border px-4 py-2 text-left text-sm font-normal',
           'focus:ring-ring focus:ring-2 focus:outline-none',
           'transition-colors',
           !displayValue && 'text-muted-foreground'
@@ -593,7 +626,7 @@ export function DateRangePicker({
         <div
           ref={calendarRef}
           className={cn(
-            'absolute z-50 mt-1',
+            'absolute top-full left-0 z-50 mt-1',
             'bg-background border-border rounded-lg border p-4 shadow-lg'
           )}
           role="dialog"
@@ -641,27 +674,6 @@ export function DateRangePicker({
               {renderMonthGrid(rightMonth, rightYear)}
             </div>
           </div>
-
-          {/* Presets row */}
-          {finalPresets.length > 0 && (
-            <div className="border-border mt-4 flex flex-wrap gap-1 border-t pt-3">
-              {finalPresets.map((preset) => (
-                <button
-                  key={preset.key}
-                  type="button"
-                  onClick={() => handlePresetSelect(preset.key)}
-                  className={cn(
-                    'rounded-md px-2 py-1 text-xs transition-colors',
-                    'hover:bg-muted',
-                    activePreset === preset.key &&
-                      'bg-primary text-primary-foreground'
-                  )}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>
