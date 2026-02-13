@@ -44,6 +44,8 @@ export interface DateRangePickerProps {
   className?: string;
   /** Whether to show the preset sidebar in the calendar popup (default: true) */
   showPresets?: boolean;
+  /** Display variant: desktop (default), mobile (bottom sheet), or responsive (auto-adapts at md breakpoint) */
+  variant?: 'desktop' | 'mobile' | 'responsive';
   /** Labels for i18n */
   labels?: {
     today?: string;
@@ -183,6 +185,7 @@ export function DateRangePicker({
   placeholder = 'Pick a date range',
   className,
   showPresets = true,
+  variant = 'desktop',
   labels = {},
 }: DateRangePickerProps) {
   const finalPresets = presets || getDefaultPresets(labels);
@@ -268,7 +271,10 @@ export function DateRangePicker({
       setRangeStart(start);
       setRangeEnd(end);
       setSelectingEnd(false);
-      setIsCalendarOpen(false);
+      // In mobile variant, don't auto-close — user clicks Done
+      if (variant !== 'mobile') {
+        setIsCalendarOpen(false);
+      }
       onChange({ start, end });
     }
   };
@@ -477,6 +483,9 @@ export function DateRangePicker({
     );
   };
 
+  const isMobileVariant = variant === 'mobile';
+  const isResponsive = variant === 'responsive';
+
   return (
     <div ref={wrapperRef} className={cn('relative inline-block', className)}>
       {/* Trigger Button */}
@@ -498,8 +507,67 @@ export function DateRangePicker({
         {displayValue || placeholder}
       </button>
 
-      {/* Calendar Popup */}
-      {isCalendarOpen && (
+      {/* Mobile bottom-sheet overlay */}
+      {isMobileVariant && isCalendarOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
+          <div
+            ref={calendarRef}
+            className="bg-background animate-in slide-in-from-bottom w-full max-w-md rounded-t-2xl px-6 pt-4 pb-6 shadow-xl"
+            role="dialog"
+            aria-label="Choose date range"
+          >
+            {/* Drag handle */}
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-300" />
+            <h3 className="mb-4 text-lg font-semibold">{placeholder}</h3>
+
+            {/* Single month navigation */}
+            <div className="mb-3 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={goToPrevMonth}
+                className="hover:bg-muted rounded-md p-1 transition-colors"
+                aria-label="Previous month"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="text-sm font-medium">
+                {monthNames[leftMonth]} {leftYear}
+              </div>
+              <button
+                type="button"
+                onClick={goToNextMonth}
+                className="hover:bg-muted rounded-md p-1 transition-colors"
+                aria-label="Next month"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Single calendar grid */}
+            <div
+              className="flex justify-center"
+              onMouseLeave={() => setHoverDate(null)}
+            >
+              {renderMonthGrid(leftMonth, leftYear)}
+            </div>
+
+            {/* Done button */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsCalendarOpen(false);
+                setSelectingEnd(false);
+              }}
+              className="border-input hover:bg-muted mt-6 w-full rounded-lg border py-3 text-sm font-medium transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop / Responsive popup */}
+      {!isMobileVariant && isCalendarOpen && (
         <div
           ref={calendarRef}
           className={cn(
@@ -510,9 +578,14 @@ export function DateRangePicker({
           aria-label="Choose date range"
         >
           <div className="flex">
-            {/* Preset sidebar */}
+            {/* Preset sidebar — hidden on small screens in responsive mode */}
             {showPresets && (
-              <div className="border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3">
+              <div
+                className={cn(
+                  'border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3',
+                  isResponsive && 'hidden md:flex'
+                )}
+              >
                 {finalPresets.map((preset) => (
                   <button
                     key={preset.key}
@@ -556,12 +629,23 @@ export function DateRangePicker({
                     <div className="flex-1 text-center text-sm font-medium">
                       {monthNames[leftMonth]} {leftYear}
                     </div>
+                    {/* Show right chevron on left month in responsive single-cal mode */}
+                    {isResponsive && (
+                      <button
+                        type="button"
+                        onClick={goToNextMonth}
+                        className="hover:bg-muted rounded-md p-1 transition-colors md:hidden"
+                        aria-label="Next month"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                   {renderMonthGrid(leftMonth, leftYear)}
                 </div>
 
-                {/* Right month */}
-                <div>
+                {/* Right month — hidden on small screens in responsive mode */}
+                <div className={cn(isResponsive && 'hidden md:block')}>
                   <div className="mb-3 flex items-center">
                     <div className="flex-1 text-center text-sm font-medium">
                       {monthNames[rightMonth]} {rightYear}
