@@ -530,8 +530,13 @@ export function DateRangePicker({
             aria-labelledby="mobile-date-range-title"
           >
             {/* Drag handle */}
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted" />
-            <h3 id="mobile-date-range-title" className="mb-4 text-lg font-semibold">{placeholder}</h3>
+            <div className="bg-muted mx-auto mb-4 h-1 w-10 rounded-full" />
+            <h3
+              id="mobile-date-range-title"
+              className="mb-4 text-lg font-semibold"
+            >
+              {placeholder}
+            </h3>
 
             {/* Single month navigation */}
             <div className="mb-3 flex items-center justify-center gap-4">

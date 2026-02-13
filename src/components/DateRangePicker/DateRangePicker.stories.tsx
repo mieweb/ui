@@ -222,7 +222,10 @@ export const Mobile: Story = {
     const [range, setRange] = useState<DateRange>({ start: null, end: null });
 
     return (
-      <div className="relative min-h-[600px]" style={{ transform: 'translateZ(0)' }}>
+      <div
+        className="relative min-h-[600px]"
+        style={{ transform: 'translateZ(0)' }}
+      >
         <DateRangePicker
           value={range}
           onChange={(newRange) => setRange(newRange)}
