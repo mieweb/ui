@@ -47,6 +47,14 @@ const meta: Meta<typeof DateRangePicker> = {
       description: 'Labels for i18n',
     },
     onChange: { action: 'onChange' },
+    showPresets: {
+      control: 'boolean',
+      description: 'Show the preset sidebar in the calendar popup',
+    },
+    showPrint: { table: { disable: true } },
+    onPrint: { table: { disable: true } },
+    showExport: { table: { disable: true } },
+    onExport: { table: { disable: true } },
   },
   args: {
     placeholder: 'Pick a date range',
@@ -64,6 +72,7 @@ interface PlaygroundProps {
   placeholder?: string;
   dateFormat?: string;
   className?: string;
+  showPresets?: boolean;
   onChange?: (range: DateRange, presetKey?: string) => void;
 }
 
@@ -71,6 +80,7 @@ function PlaygroundDemo({
   placeholder,
   dateFormat,
   className,
+  showPresets,
   onChange,
 }: PlaygroundProps) {
   const [range, setRange] = useState<DateRange>({ start: null, end: null });
@@ -89,6 +99,7 @@ function PlaygroundDemo({
         placeholder={placeholder}
         dateFormat={dateFormat}
         className={className}
+        showPresets={showPresets}
       />
     </div>
   );

@@ -186,6 +186,7 @@ export function DateRangePicker({
   placeholder = 'Pick a date range',
   dateFormat,
   className,
+  showPresets = true,
   labels = {},
 }: DateRangePickerProps) {
   const finalPresets = presets || getDefaultPresets(labels);
@@ -532,23 +533,25 @@ export function DateRangePicker({
         >
           <div className="flex">
             {/* Preset sidebar */}
-            <div className="border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3">
-              {finalPresets.map((preset) => (
-                <button
-                  key={preset.key}
-                  type="button"
-                  onClick={() => handlePresetSelect(preset.key)}
-                  className={cn(
-                    'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
-                    'hover:bg-muted',
-                    activePreset === preset.key &&
-                      'bg-primary text-primary-foreground'
-                  )}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
+            {showPresets && (
+              <div className="border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3">
+                {finalPresets.map((preset) => (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    onClick={() => handlePresetSelect(preset.key)}
+                    className={cn(
+                      'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
+                      'hover:bg-muted',
+                      activePreset === preset.key &&
+                        'bg-primary text-primary-foreground'
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Calendar panel */}
             <div className="p-4">
