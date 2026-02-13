@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { isStorybookDocsMode } from '../../utils/environment';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
@@ -214,6 +215,10 @@ export function DateRangePicker({
 
   const isMobileVariant = variant === 'mobile';
   const isResponsive = variant === 'responsive';
+
+  const focusTrapRef = useFocusTrap<HTMLDivElement>(
+    isMobileVariant && isCalendarOpen
+  );
 
   // Compute right panel month/year
   const rightMonth = leftMonth === 11 ? 0 : leftMonth + 1;
@@ -537,8 +542,15 @@ export function DateRangePicker({
           }}
         >
           <div
-            ref={calendarRef}
-            className="bg-background animate-in slide-in-from-bottom w-full max-w-md rounded-t-2xl px-6 pt-4 pb-6 shadow-xl"
+            ref={(node) => {
+              (
+                calendarRef as React.MutableRefObject<HTMLDivElement | null>
+              ).current = node;
+              (
+                focusTrapRef as React.MutableRefObject<HTMLDivElement | null>
+              ).current = node;
+            }}
+            className="bg-background animate-in slide-in-from-bottom max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-2xl px-6 pt-4 pb-6 shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="mobile-date-range-title"
