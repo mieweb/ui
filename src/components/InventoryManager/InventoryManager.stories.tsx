@@ -38,7 +38,7 @@ const mockLogEntries = [
 ];
 
 const meta: Meta<typeof InventoryManager> = {
-  title: 'Components/InventoryManager',
+  title: 'Data Display/InventoryManager',
   component: InventoryManager,
   tags: ['autodocs'],
   parameters: {

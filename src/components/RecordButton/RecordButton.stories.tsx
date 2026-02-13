@@ -354,7 +354,7 @@ function PressAndHoldDemo() {
 // ============================================================================
 
 const meta: Meta<typeof RecordButton> = {
-  title: 'Components/RecordButton',
+  title: 'Media & Device/RecordButton',
   component: RecordButton,
   parameters: {
     layout: 'centered',

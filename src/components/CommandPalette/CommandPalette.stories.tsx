@@ -219,7 +219,7 @@ function EmptyDemo() {
 // =============================================================================
 
 const meta: Meta<typeof CommandPalette> = {
-  title: 'Components/CommandPalette',
+  title: 'Navigation/CommandPalette',
   component: CommandPalette,
   parameters: {
     layout: 'centered',

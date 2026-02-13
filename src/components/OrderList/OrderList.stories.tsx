@@ -10,7 +10,7 @@ import { Button } from '../Button/Button';
 import { Badge } from '../Badge/Badge';
 
 const meta: Meta<typeof OrderList> = {
-  title: 'Components/OrderList',
+  title: 'Feature Modules/OrderList',
   component: OrderList,
   tags: ['autodocs'],
   parameters: {

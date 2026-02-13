@@ -6,7 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import * as Icons from './index';
 
 const meta: Meta = {
-  title: 'Components/Icons',
+  title: 'Foundations/Icons',
   parameters: {
     layout: 'fullscreen',
   },

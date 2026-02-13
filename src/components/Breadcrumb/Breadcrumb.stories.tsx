@@ -19,7 +19,7 @@ type BreadcrumbStoryArgs = Omit<BreadcrumbProps, 'separator'> & {
 };
 
 const meta: Meta<BreadcrumbStoryArgs> = {
-  title: 'Components/Breadcrumb',
+  title: 'Navigation/Breadcrumb',
   component: Breadcrumb,
   parameters: {
     layout: 'centered',

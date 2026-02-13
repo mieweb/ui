@@ -3,7 +3,7 @@ import { OrderSidebar } from './OrderSidebar';
 
 const meta: Meta<typeof OrderSidebar> = {
   component: OrderSidebar,
-  title: 'Components/OrderSidebar',
+  title: 'Navigation/OrderSidebar',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',

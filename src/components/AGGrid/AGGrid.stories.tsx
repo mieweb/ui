@@ -246,7 +246,7 @@ function WithEditableCellsComponent() {
 }
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Components/AGGrid',
+  title: 'Data Display/AGGrid',
   component: AGGrid,
   parameters: {
     layout: 'padded',

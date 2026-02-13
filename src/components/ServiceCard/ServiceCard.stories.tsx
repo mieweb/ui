@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ServiceCard, AddServiceCard } from './ServiceCard';
 
 const meta: Meta<typeof ServiceCard> = {
-  title: 'Components/ServiceCard',
+  title: 'Layout & Structure/ServiceCard',
   component: ServiceCard,
   tags: ['autodocs'],
   parameters: {

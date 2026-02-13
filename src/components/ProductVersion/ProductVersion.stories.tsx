@@ -3,7 +3,7 @@ import { ProductVersion, ProductVersionBadge } from './ProductVersion';
 import { Card } from '../Card';
 
 const meta: Meta<typeof ProductVersion> = {
-  title: 'Components/ProductVersion',
+  title: 'Feature Modules/ProductVersion',
   component: ProductVersion,
   tags: ['autodocs'],
   parameters: {
