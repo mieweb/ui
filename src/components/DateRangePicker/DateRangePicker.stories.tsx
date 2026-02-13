@@ -11,24 +11,12 @@ const meta: Meta<typeof DateRangePicker> = {
   component: DateRangePicker,
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'padded',
   },
   argTypes: {
-    showPrint: {
-      control: 'boolean',
-      description: 'Whether to show print button',
-    },
-    showExport: {
-      control: 'boolean',
-      description: 'Whether to show export button',
-    },
     placeholder: {
       control: 'text',
-      description: 'Placeholder text for the date input',
-    },
-    dateFormat: {
-      control: 'text',
-      description: 'Date format for display',
+      description: 'Placeholder text for the trigger button',
     },
     className: {
       control: 'text',
@@ -36,28 +24,36 @@ const meta: Meta<typeof DateRangePicker> = {
     },
     value: {
       control: false,
+      table: { disable: true },
       description: 'Current date range value',
     },
     activePreset: {
       control: false,
+      table: { disable: true },
       description: 'Currently active preset key',
     },
     presets: {
       control: false,
+      table: { disable: true },
       description: 'Custom presets (uses default if not provided)',
     },
     labels: {
       control: false,
+      table: { disable: true },
       description: 'Labels for i18n',
     },
     onChange: { action: 'onChange' },
-    onPrint: { action: 'onPrint' },
-    onExport: { action: 'onExport' },
+    showPresets: {
+      control: 'boolean',
+      description: 'Show the preset sidebar in the calendar popup',
+    },
+    showPrint: { table: { disable: true } },
+    onPrint: { table: { disable: true } },
+    showExport: { table: { disable: true } },
+    onExport: { table: { disable: true } },
   },
   args: {
-    showPrint: false,
-    showExport: false,
-    placeholder: 'Select date range',
+    placeholder: 'Pick a date range',
   },
 };
 
@@ -69,113 +65,73 @@ type Story = StoryObj<typeof DateRangePicker>;
 // ============================================================================
 
 interface PlaygroundProps {
-  showPrint?: boolean;
-  showExport?: boolean;
   placeholder?: string;
-  dateFormat?: string;
   className?: string;
+  showPresets?: boolean;
   onChange?: (range: DateRange, presetKey?: string) => void;
-  onPrint?: () => void;
-  onExport?: () => void;
 }
 
 function PlaygroundDemo({
-  showPrint,
-  showExport,
   placeholder,
-  dateFormat,
   className,
+  showPresets,
   onChange,
-  onPrint,
-  onExport,
 }: PlaygroundProps) {
   const [range, setRange] = useState<DateRange>({ start: null, end: null });
   const [preset, setPreset] = useState<string>();
 
   return (
-    <DateRangePicker
-      value={range}
-      onChange={(newRange, presetKey) => {
-        setRange(newRange);
-        setPreset(presetKey);
-        onChange?.(newRange, presetKey);
-      }}
-      activePreset={preset}
-      showPrint={showPrint}
-      showExport={showExport}
-      placeholder={placeholder}
-      dateFormat={dateFormat}
-      className={className}
-      onPrint={onPrint}
-      onExport={onExport}
-    />
+    <div className="relative min-h-[500px]">
+      <DateRangePicker
+        value={range}
+        onChange={(newRange, presetKey) => {
+          setRange(newRange);
+          setPreset(presetKey);
+          onChange?.(newRange, presetKey);
+        }}
+        activePreset={preset}
+        placeholder={placeholder}
+        className={className}
+        showPresets={showPresets}
+      />
+    </div>
   );
 }
 
 /**
  * Interactive playground with all controls available.
- * Use the Controls panel to toggle showPrint, showExport, and other props.
+ * Click the button to open the two-month calendar and select a date range.
  */
 export const Playground: Story = {
   render: (args) => <PlaygroundDemo {...args} />,
-  args: {
-    showPrint: true,
-    showExport: true,
-  },
 };
 
 // ============================================================================
 // Demo Stories
 // ============================================================================
 
+/**
+ * Default date range picker. Click the button to open the calendar
+ * and select a start and end date.
+ */
 export const Default: Story = {
   render: function Render() {
     const [range, setRange] = useState<DateRange>({ start: null, end: null });
-    const [preset, setPreset] = useState<string>();
 
     return (
-      <DateRangePicker
-        value={range}
-        onChange={(newRange, presetKey) => {
-          setRange(newRange);
-          setPreset(presetKey);
-        }}
-        activePreset={preset}
-      />
+      <div className="relative min-h-[500px]">
+        <DateRangePicker
+          value={range}
+          onChange={(newRange) => setRange(newRange)}
+        />
+      </div>
     );
   },
 };
 
-export const WithPrintExport: Story = {
-  render: function Render() {
-    const [range, setRange] = useState<DateRange>({ start: null, end: null });
-    const [preset, setPreset] = useState<string>();
-
-    return (
-      <DateRangePicker
-        value={range}
-        onChange={(newRange, presetKey) => {
-          setRange(newRange);
-          setPreset(presetKey);
-        }}
-        activePreset={preset}
-        showPrint
-        showExport
-        onPrint={() => window.alert('Print clicked!')}
-        onExport={() => window.alert('Export clicked!')}
-      />
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Date range picker with print and export buttons for report filtering.',
-      },
-    },
-  },
-};
-
+/**
+ * Date range picker with a preset already selected ("This Month").
+ */
 export const Preselected: Story = {
   render: function Render() {
     const [range, setRange] = useState<DateRange>({
@@ -185,16 +141,16 @@ export const Preselected: Story = {
     const [preset, setPreset] = useState<string | undefined>('this-month');
 
     return (
-      <DateRangePicker
-        value={range}
-        onChange={(newRange, presetKey) => {
-          setRange(newRange);
-          setPreset(presetKey);
-        }}
-        activePreset={preset}
-        showPrint
-        showExport
-      />
+      <div className="relative min-h-[500px]">
+        <DateRangePicker
+          value={range}
+          onChange={(newRange, presetKey) => {
+            setRange(newRange);
+            setPreset(presetKey);
+          }}
+          activePreset={preset}
+        />
+      </div>
     );
   },
   parameters: {
@@ -206,35 +162,36 @@ export const Preselected: Story = {
   },
 };
 
+/**
+ * Date range picker with Spanish labels for internationalization.
+ */
 export const CustomLabels: Story = {
   render: function Render() {
     const [range, setRange] = useState<DateRange>({ start: null, end: null });
     const [preset, setPreset] = useState<string>();
 
     return (
-      <DateRangePicker
-        value={range}
-        onChange={(newRange, presetKey) => {
-          setRange(newRange);
-          setPreset(presetKey);
-        }}
-        activePreset={preset}
-        placeholder="Seleccionar período"
-        showPrint
-        showExport
-        labels={{
-          today: 'Hoy',
-          thisWeek: 'Esta Semana',
-          thisMonth: 'Este Mes',
-          lastMonth: 'Mes Pasado',
-          last7Days: 'Últimos 7 Días',
-          last30Days: 'Últimos 30 Días',
-          thisYear: 'Este Año',
-          lastYear: 'Año Pasado',
-          print: 'Imprimir',
-          export: 'Exportar',
-        }}
-      />
+      <div className="relative min-h-[500px]">
+        <DateRangePicker
+          value={range}
+          onChange={(newRange, presetKey) => {
+            setRange(newRange);
+            setPreset(presetKey);
+          }}
+          activePreset={preset}
+          placeholder="Seleccionar período"
+          labels={{
+            today: 'Hoy',
+            thisWeek: 'Esta Semana',
+            thisMonth: 'Este Mes',
+            lastMonth: 'Mes Pasado',
+            last7Days: 'Últimos 7 Días',
+            last30Days: 'Últimos 30 Días',
+            thisYear: 'Este Año',
+            lastYear: 'Año Pasado',
+          }}
+        />
+      </div>
     );
   },
   parameters: {
@@ -326,36 +283,6 @@ export const FilterVariants: StoryObj<typeof DateRangeFilter> = {
     docs: {
       description: {
         story: 'Filter dropdown in different button variants.',
-      },
-    },
-  },
-};
-
-export const Mobile: Story = {
-  render: function Render() {
-    const [range, setRange] = useState<DateRange>({ start: null, end: null });
-    const [preset, setPreset] = useState<string>();
-
-    return (
-      <div className="w-full">
-        <DateRangePicker
-          value={range}
-          onChange={(newRange, presetKey) => {
-            setRange(newRange);
-            setPreset(presetKey);
-          }}
-          activePreset={preset}
-          showPrint
-          showExport
-        />
-      </div>
-    );
-  },
-  parameters: {
-    viewport: { defaultViewport: 'mobile1' },
-    docs: {
-      description: {
-        story: 'Date range picker on mobile viewport.',
       },
     },
   },
