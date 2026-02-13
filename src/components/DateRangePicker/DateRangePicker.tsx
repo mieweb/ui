@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
-import { Input } from '../Input';
 import { Dropdown, DropdownItem } from '../Dropdown';
 import {
-  Filter,
   Calendar,
   ChevronDown,
   ChevronLeft,
@@ -219,8 +217,8 @@ function formatDateRange(range: DateRange, _format?: string): string {
   const formatDate = (d: Date | null) => {
     if (!d) return '';
     return d.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
+      month: 'short',
+      day: 'numeric',
       year: 'numeric',
     });
   };
@@ -235,22 +233,17 @@ function formatDateRange(range: DateRange, _format?: string): string {
 // ============================================================================
 
 /**
- * Date range picker with preset filters and calendar popup.
+ * Date range picker with a two-month calendar popup.
  * Click the date input to open a calendar for selecting a custom date range.
- * Commonly used for report filtering in dashboard views.
+ * Select a start and end date from the calendar.
  *
  * @example
  * ```tsx
  * const [range, setRange] = useState<DateRange>({ start: null, end: null });
- * const [preset, setPreset] = useState<string>();
  *
  * <DateRangePicker
  *   value={range}
- *   onChange={(newRange, presetKey) => {
- *     setRange(newRange);
- *     setPreset(presetKey);
- *   }}
- *   activePreset={preset}
+ *   onChange={(newRange) => setRange(newRange)}
  * />
  * ```
  */
@@ -259,19 +252,19 @@ export function DateRangePicker({
   onChange,
   presets,
   activePreset,
-  placeholder = 'Select a time period',
+  placeholder = 'Pick a date range',
   dateFormat,
   className,
   labels = {},
 }: DateRangePickerProps) {
   const finalPresets = presets || getDefaultPresets(labels);
 
-  // Calendar state
+  // Calendar state — leftMonth/leftYear is the left panel; right panel is always the next month
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
-  const [calendarMonth, setCalendarMonth] = React.useState(
+  const [leftMonth, setLeftMonth] = React.useState(
     () => value?.start?.getMonth() ?? new Date().getMonth()
   );
-  const [calendarYear, setCalendarYear] = React.useState(
+  const [leftYear, setLeftYear] = React.useState(
     () => value?.start?.getFullYear() ?? new Date().getFullYear()
   );
   const [rangeStart, setRangeStart] = React.useState<Date | null>(
@@ -284,14 +277,16 @@ export function DateRangePicker({
   const [hoverDate, setHoverDate] = React.useState<Date | null>(null);
 
   const calendarRef = React.useRef<HTMLDivElement>(null);
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  // Compute right panel month/year
+  const rightMonth = leftMonth === 11 ? 0 : leftMonth + 1;
+  const rightYear = leftMonth === 11 ? leftYear + 1 : leftYear;
 
   // Sync external value changes
   React.useEffect(() => {
     if (value?.start) {
       setRangeStart(value.start);
-      setCalendarMonth(value.start.getMonth());
-      setCalendarYear(value.start.getFullYear());
     }
     if (value?.end) {
       setRangeEnd(value.end);
@@ -342,16 +337,22 @@ export function DateRangePicker({
     setRangeEnd(range.end);
     setSelectingEnd(false);
     setIsCalendarOpen(false);
+    if (range.start) {
+      setLeftMonth(range.start.getMonth());
+      setLeftYear(range.start.getFullYear());
+    }
     onChange(range, presetKey);
   };
 
-  const handleDayClick = (day: number) => {
-    const clicked = new Date(calendarYear, calendarMonth, day);
+  const handleDayClick = (day: number, month: number, year: number) => {
+    const clicked = new Date(year, month, day);
     if (!selectingEnd) {
+      // First click — set start
       setRangeStart(clicked);
       setRangeEnd(null);
       setSelectingEnd(true);
     } else {
+      // Second click — set end
       let start = rangeStart!;
       let end = clicked;
       if (end < start) {
@@ -370,16 +371,34 @@ export function DateRangePicker({
       if (value?.start) {
         setRangeStart(value.start);
         setRangeEnd(value.end ?? null);
-        setCalendarMonth(value.start.getMonth());
-        setCalendarYear(value.start.getFullYear());
+        setLeftMonth(value.start.getMonth());
+        setLeftYear(value.start.getFullYear());
       } else {
         const now = new Date();
-        setCalendarMonth(now.getMonth());
-        setCalendarYear(now.getFullYear());
+        setLeftMonth(now.getMonth());
+        setLeftYear(now.getFullYear());
       }
       setSelectingEnd(false);
     }
     setIsCalendarOpen(!isCalendarOpen);
+  };
+
+  const goToPrevMonth = () => {
+    if (leftMonth === 0) {
+      setLeftMonth(11);
+      setLeftYear(leftYear - 1);
+    } else {
+      setLeftMonth(leftMonth - 1);
+    }
+  };
+
+  const goToNextMonth = () => {
+    if (leftMonth === 11) {
+      setLeftMonth(0);
+      setLeftYear(leftYear + 1);
+    } else {
+      setLeftMonth(leftMonth + 1);
+    }
   };
 
   // Calendar helpers
@@ -394,8 +413,7 @@ export function DateRangePicker({
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 
-  const isInRange = (day: number) => {
-    const date = new Date(calendarYear, calendarMonth, day);
+  const isInRange = (date: Date) => {
     const start = rangeStart;
     const end = selectingEnd ? hoverDate : rangeEnd;
     if (!start || !end) return false;
@@ -403,24 +421,20 @@ export function DateRangePicker({
     return date > lo && date < hi;
   };
 
-  const isRangeStart = (day: number) => {
+  const isStart = (date: Date) => {
     if (!rangeStart) return false;
-    return isSameDay(new Date(calendarYear, calendarMonth, day), rangeStart);
+    return isSameDay(date, rangeStart);
   };
 
-  const isRangeEnd = (day: number) => {
+  const isEnd = (date: Date) => {
     const end = selectingEnd ? hoverDate : rangeEnd;
     if (!end) return false;
-    return isSameDay(new Date(calendarYear, calendarMonth, day), end);
+    return isSameDay(date, end);
   };
 
-  const isToday = (day: number) => {
+  const isToday = (date: Date) => {
     const today = new Date();
-    return (
-      day === today.getDate() &&
-      calendarMonth === today.getMonth() &&
-      calendarYear === today.getFullYear()
-    );
+    return isSameDay(date, today);
   };
 
   const displayValue = value ? formatDateRange(value, dateFormat) : '';
@@ -440,210 +454,216 @@ export function DateRangePicker({
     'December',
   ];
 
-  const renderCalendar = () => {
-    const daysInMonth = getDaysInMonth(calendarMonth, calendarYear);
-    const firstDay = getFirstDayOfMonth(calendarMonth, calendarYear);
-    const days: (number | null)[] = [];
-    for (let i = 0; i < firstDay; i++) days.push(null);
-    for (let i = 1; i <= daysInMonth; i++) days.push(i);
+  const renderMonthGrid = (month: number, year: number) => {
+    const daysInMonth = getDaysInMonth(month, year);
+    const firstDay = getFirstDayOfMonth(month, year);
+
+    // Previous month overflow days
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
+
+    // Build array of { day, month, year, isCurrentMonth }
+    const cells: {
+      day: number;
+      month: number;
+      year: number;
+      isCurrentMonth: boolean;
+    }[] = [];
+
+    // Previous month overflow
+    for (let i = firstDay - 1; i >= 0; i--) {
+      cells.push({
+        day: daysInPrevMonth - i,
+        month: prevMonth,
+        year: prevYear,
+        isCurrentMonth: false,
+      });
+    }
+
+    // Current month days
+    for (let i = 1; i <= daysInMonth; i++) {
+      cells.push({ day: i, month, year, isCurrentMonth: true });
+    }
+
+    // Next month overflow to fill 6 rows (42 cells)
+    const nextMonth = month === 11 ? 0 : month + 1;
+    const nextYear = month === 11 ? year + 1 : year;
+    const remaining = 42 - cells.length;
+    for (let i = 1; i <= remaining; i++) {
+      cells.push({
+        day: i,
+        month: nextMonth,
+        year: nextYear,
+        isCurrentMonth: false,
+      });
+    }
 
     return (
-      <div
-        ref={calendarRef}
-        className={cn(
-          'absolute top-full left-0 z-50 mt-1',
-          'bg-background border-border rounded-lg border shadow-lg',
-          'w-80 p-3'
-        )}
-        role="dialog"
-        aria-label="Choose date range"
-      >
-        {/* Selection hint */}
-        <div className="text-muted-foreground mb-2 text-center text-xs">
-          {selectingEnd ? 'Select end date' : 'Select start date'}
-        </div>
-
-        {/* Header with month/year navigation */}
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              if (calendarMonth === 0) {
-                setCalendarMonth(11);
-                setCalendarYear(calendarYear - 1);
-              } else {
-                setCalendarMonth(calendarMonth - 1);
-              }
-            }}
-            className="hover:bg-muted rounded-md p-1 transition-colors"
-            aria-label="Previous month"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <div className="flex items-center gap-2">
-            <select
-              value={calendarMonth}
-              onChange={(e) => setCalendarMonth(Number(e.target.value))}
-              className="bg-background border-border rounded border px-2 py-1 text-sm"
-              aria-label="Select month"
-            >
-              {monthNames.map((name, i) => (
-                <option key={name} value={i}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={calendarYear}
-              onChange={(e) => setCalendarYear(Number(e.target.value))}
-              className="bg-background border-border rounded border px-2 py-1 text-sm"
-              aria-label="Select year"
-            >
-              {Array.from(
-                { length: 150 },
-                (_, i) => new Date().getFullYear() - 100 + i
-              ).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (calendarMonth === 11) {
-                setCalendarMonth(0);
-                setCalendarYear(calendarYear + 1);
-              } else {
-                setCalendarMonth(calendarMonth + 1);
-              }
-            }}
-            className="hover:bg-muted rounded-md p-1 transition-colors"
-            aria-label="Next month"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-
+      <div className="w-[280px]">
         {/* Day headers */}
-        <div className="mb-1 grid grid-cols-7 gap-0">
-          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+        <div className="mb-1 grid grid-cols-7">
+          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((dayName) => (
             <div
-              key={day}
+              key={dayName}
               className="text-muted-foreground py-1 text-center text-xs font-medium"
             >
-              {day}
+              {dayName}
             </div>
           ))}
         </div>
 
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-0">
-          {days.map((day, index) => {
-            const inRange = day !== null && isInRange(day);
-            const isStart = day !== null && isRangeStart(day);
-            const isEnd = day !== null && isRangeEnd(day);
-            const today = day !== null && isToday(day);
+        {/* Day grid */}
+        <div className="grid grid-cols-7">
+          {cells.map((cell, index) => {
+            const date = new Date(cell.year, cell.month, cell.day);
+            const inRange = isInRange(date);
+            const start = isStart(date);
+            const end = isEnd(date);
+            const today = isToday(date);
 
             return (
               <button
                 key={index}
                 type="button"
-                disabled={day === null}
-                onClick={() => day && handleDayClick(day)}
+                onClick={() =>
+                  handleDayClick(cell.day, cell.month, cell.year)
+                }
                 onMouseEnter={() => {
-                  if (selectingEnd && day) {
-                    setHoverDate(
-                      new Date(calendarYear, calendarMonth, day)
-                    );
+                  if (selectingEnd) {
+                    setHoverDate(date);
                   }
                 }}
                 className={cn(
-                  'h-8 w-full text-sm transition-colors',
-                  'focus:ring-ring focus:ring-2 focus:outline-none',
-                  day === null && 'invisible',
-                  day !== null && 'hover:bg-muted',
-                  inRange && 'bg-primary/10',
-                  (isStart || isEnd) &&
-                    'bg-primary-800 hover:bg-primary-700 rounded-md text-white',
+                  'relative h-9 w-10 text-center text-sm',
+                  'focus:ring-ring focus:z-10 focus:ring-2 focus:outline-none',
+                  'transition-colors',
+                  // Not current month — dimmed
+                  !cell.isCurrentMonth && 'text-muted-foreground/50',
+                  // Current month — normal
+                  cell.isCurrentMonth && 'text-foreground',
+                  // Hover
+                  'hover:bg-muted',
+                  // In range background
+                  inRange && 'bg-muted',
+                  // Start date
+                  start &&
+                    'bg-foreground text-background rounded-l-md font-semibold hover:bg-foreground',
+                  // End date
+                  end &&
+                    !start &&
+                    'border-foreground text-foreground rounded-r-md border font-semibold',
+                  // Today indicator (only if not start/end)
                   today &&
-                    !isStart &&
-                    !isEnd &&
-                    'border-primary-800 text-primary-800 rounded-md border'
+                    !start &&
+                    !end &&
+                    'font-semibold'
                 )}
               >
-                {day}
+                {cell.day}
               </button>
             );
           })}
-        </div>
-
-        {/* Today button */}
-        <div className="border-border mt-3 border-t pt-3">
-          <button
-            type="button"
-            onClick={() => {
-              const today = new Date();
-              setCalendarMonth(today.getMonth());
-              setCalendarYear(today.getFullYear());
-            }}
-            className="text-primary-800 w-full text-sm hover:underline"
-          >
-            Today
-          </button>
         </div>
       </div>
     );
   };
 
   return (
-    <div className={cn('flex items-center gap-0', className)}>
-      {/* Filter Dropdown */}
-      <Dropdown
-        trigger={
-          <Button
-            variant="primary"
-            size="md"
-            className="rounded-r-none border-r-0"
-            data-cy="btn-date-filter"
-          >
-            <Filter className="h-4 w-4" />
-            <ChevronDown className="ml-1 h-3 w-3" />
-          </Button>
-        }
-        className="max-h-[300px] overflow-auto"
+    <div className={cn('grid gap-2', className)}>
+      {/* Trigger Button */}
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={toggleCalendar}
+        className={cn(
+          'border-input bg-background hover:bg-muted',
+          'inline-flex w-[300px] items-center gap-2 rounded-md border px-4 py-2 text-left text-sm font-normal',
+          'focus:ring-ring focus:ring-2 focus:outline-none',
+          'transition-colors',
+          !displayValue && 'text-muted-foreground'
+        )}
       >
-        <div className="grid grid-cols-2 gap-0">
-          {finalPresets.map((preset) => (
-            <DropdownItem
-              key={preset.key}
-              onClick={() => handlePresetSelect(preset.key)}
-              className={cn(
-                activePreset === preset.key &&
-                  'bg-primary text-primary-foreground'
-              )}
-              data-cy="datepicker-filter-range"
-            >
-              {preset.label}
-            </DropdownItem>
-          ))}
-        </div>
-      </Dropdown>
+        <Calendar className="h-4 w-4" />
+        {displayValue || placeholder}
+      </button>
 
-      {/* Date Input with Calendar */}
-      <div ref={triggerRef} className="relative min-w-[200px] flex-1">
-        <Calendar className="pointer-events-none text-muted-foreground absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2" />
-        <Input
-          type="text"
-          value={displayValue}
-          placeholder={placeholder}
-          readOnly
-          className="cursor-pointer rounded-l-none pl-10"
-          onClick={toggleCalendar}
-        />
-        {isCalendarOpen && renderCalendar()}
-      </div>
+      {/* Calendar Popup */}
+      {isCalendarOpen && (
+        <div
+          ref={calendarRef}
+          className={cn(
+            'absolute z-50 mt-1',
+            'bg-background border-border rounded-lg border p-4 shadow-lg'
+          )}
+          role="dialog"
+          aria-label="Choose date range"
+        >
+          {/* Subtitle */}
+          <p className="text-muted-foreground mb-4 text-sm">
+            Select a start and end date from the calendar.
+          </p>
+
+          <div className="flex gap-8">
+            {/* Left month */}
+            <div>
+              <div className="mb-3 flex items-center">
+                <button
+                  type="button"
+                  onClick={goToPrevMonth}
+                  className="hover:bg-muted rounded-md p-1 transition-colors"
+                  aria-label="Previous month"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="flex-1 text-center text-sm font-medium">
+                  {monthNames[leftMonth]} {leftYear}
+                </div>
+              </div>
+              {renderMonthGrid(leftMonth, leftYear)}
+            </div>
+
+            {/* Right month */}
+            <div>
+              <div className="mb-3 flex items-center">
+                <div className="flex-1 text-center text-sm font-medium">
+                  {monthNames[rightMonth]} {rightYear}
+                </div>
+                <button
+                  type="button"
+                  onClick={goToNextMonth}
+                  className="hover:bg-muted rounded-md p-1 transition-colors"
+                  aria-label="Next month"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+              {renderMonthGrid(rightMonth, rightYear)}
+            </div>
+          </div>
+
+          {/* Presets row */}
+          {finalPresets.length > 0 && (
+            <div className="border-border mt-4 flex flex-wrap gap-1 border-t pt-3">
+              {finalPresets.map((preset) => (
+                <button
+                  key={preset.key}
+                  type="button"
+                  onClick={() => handlePresetSelect(preset.key)}
+                  className={cn(
+                    'rounded-md px-2 py-1 text-xs transition-colors',
+                    'hover:bg-muted',
+                    activePreset === preset.key &&
+                      'bg-primary text-primary-foreground'
+                  )}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
