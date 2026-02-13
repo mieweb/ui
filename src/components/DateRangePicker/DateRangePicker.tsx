@@ -4,12 +4,7 @@ import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
-import {
-  Calendar,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -444,9 +439,7 @@ export function DateRangePicker({
               <button
                 key={index}
                 type="button"
-                onClick={() =>
-                  handleDayClick(cell.day, cell.month, cell.year)
-                }
+                onClick={() => handleDayClick(cell.day, cell.month, cell.year)}
                 onMouseEnter={() => {
                   if (selectingEnd) {
                     setHoverDate(date);
@@ -466,16 +459,13 @@ export function DateRangePicker({
                   inRange && 'bg-muted',
                   // Start date
                   start &&
-                    'bg-foreground text-background rounded-l-md font-semibold hover:bg-foreground',
+                    'bg-foreground text-background hover:bg-foreground rounded-l-md font-semibold',
                   // End date
                   end &&
                     !start &&
                     'border-foreground text-foreground rounded-r-md border font-semibold',
                   // Today indicator (only if not start/end)
-                  today &&
-                    !start &&
-                    !end &&
-                    'font-semibold'
+                  today && !start && !end && 'font-semibold'
                 )}
               >
                 {cell.day}
