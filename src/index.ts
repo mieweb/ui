@@ -23,6 +23,7 @@ export * from './components/CommandPalette';
 export * from './components/ConnectionStatus';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
+export * from './components/DataVis';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';

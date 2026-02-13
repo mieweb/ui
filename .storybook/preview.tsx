@@ -20,11 +20,32 @@ const brands: Record<string, BrandConfig> = {
   webchart: webchartBrand,
 };
 
+// Helper to generate semantic color variable declarations
+function semanticVarBlock(sc: BrandConfig['colors']['light']) {
+  return `
+      --mieweb-background: ${sc.background} !important;
+      --mieweb-foreground: ${sc.foreground} !important;
+      --mieweb-card: ${sc.card} !important;
+      --mieweb-card-foreground: ${sc.cardForeground} !important;
+      --mieweb-muted: ${sc.muted} !important;
+      --mieweb-muted-foreground: ${sc.mutedForeground} !important;
+      --mieweb-border: ${sc.border} !important;
+      --mieweb-input: ${sc.input} !important;
+      --mieweb-ring: ${sc.ring} !important;
+      --mieweb-destructive: ${sc.destructive} !important;
+      --mieweb-destructive-foreground: ${sc.destructiveForeground} !important;
+      --mieweb-success: ${sc.success} !important;
+      --mieweb-success-foreground: ${sc.successForeground} !important;
+      --mieweb-warning: ${sc.warning} !important;
+      --mieweb-warning-foreground: ${sc.warningForeground} !important;`;
+}
+
 // Function to apply brand CSS variables to document
 function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   const root = document.documentElement;
   const colors = brand.colors;
-  const semanticColors = isDark ? colors.dark : colors.light;
+  const lightColors = colors.light;
+  const darkColors = colors.dark;
 
   // Remove any existing brand style tag
   const existingStyle = document.getElementById('mieweb-brand-styles');
@@ -32,11 +53,8 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
     existingStyle.remove();
   }
 
-  // Create a style tag with high specificity to override base.css
-  const styleTag = document.createElement('style');
-  styleTag.id = 'mieweb-brand-styles';
-  styleTag.textContent = `
-    :root, [data-theme="light"], [data-theme="dark"] {
+  // Shared tokens (primary scale, typography, radius, shadows) — same in both modes
+  const sharedVars = `
       --mieweb-primary-50: ${colors.primary[50]} !important;
       --mieweb-primary-100: ${colors.primary[100]} !important;
       --mieweb-primary-200: ${colors.primary[200]} !important;
@@ -48,21 +66,6 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
       --mieweb-primary-800: ${colors.primary[800]} !important;
       --mieweb-primary-900: ${colors.primary[900]} !important;
       --mieweb-primary-950: ${colors.primary[950]} !important;
-      --mieweb-background: ${semanticColors.background} !important;
-      --mieweb-foreground: ${semanticColors.foreground} !important;
-      --mieweb-card: ${semanticColors.card} !important;
-      --mieweb-card-foreground: ${semanticColors.cardForeground} !important;
-      --mieweb-muted: ${semanticColors.muted} !important;
-      --mieweb-muted-foreground: ${semanticColors.mutedForeground} !important;
-      --mieweb-border: ${semanticColors.border} !important;
-      --mieweb-input: ${semanticColors.input} !important;
-      --mieweb-ring: ${semanticColors.ring} !important;
-      --mieweb-destructive: ${semanticColors.destructive} !important;
-      --mieweb-destructive-foreground: ${semanticColors.destructiveForeground} !important;
-      --mieweb-success: ${semanticColors.success} !important;
-      --mieweb-success-foreground: ${semanticColors.successForeground} !important;
-      --mieweb-warning: ${semanticColors.warning} !important;
-      --mieweb-warning-foreground: ${semanticColors.warningForeground} !important;
       --mieweb-font-sans: ${brand.typography.fontFamily.sans.map((f) => (f.includes(' ') ? `"${f}"` : f)).join(', ')} !important;
       ${brand.typography.fontFamily.mono ? `--mieweb-font-mono: ${brand.typography.fontFamily.mono.map((f) => (f.includes(' ') ? `"${f}"` : f)).join(', ')} !important;` : ''}
       --mieweb-radius-none: ${brand.borderRadius.none} !important;
@@ -74,7 +77,19 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
       --mieweb-radius-full: ${brand.borderRadius.full} !important;
       --mieweb-shadow-card: ${brand.boxShadow.card} !important;
       --mieweb-shadow-dropdown: ${brand.boxShadow.dropdown} !important;
-      --mieweb-shadow-modal: ${brand.boxShadow.modal} !important;
+      --mieweb-shadow-modal: ${brand.boxShadow.modal} !important;`;
+
+  // Build style tag with separate light & dark blocks so inline .dark wrappers work
+  const styleTag = document.createElement('style');
+  styleTag.id = 'mieweb-brand-styles';
+  styleTag.textContent = `
+    :root {
+      ${sharedVars}
+      ${semanticVarBlock(isDark ? darkColors : lightColors)}
+    }
+    .dark:not(:root), [data-theme="dark"]:not(:root) {
+      ${sharedVars}
+      ${semanticVarBlock(darkColors)}
     }
   `;
   document.head.appendChild(styleTag);
