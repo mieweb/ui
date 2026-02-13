@@ -3,7 +3,13 @@ import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Input } from '../Input';
 import { Dropdown, DropdownItem } from '../Dropdown';
-import { Filter, Printer, Download, Calendar, ChevronDown } from 'lucide-react';
+import {
+  Filter,
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -44,14 +50,6 @@ export interface DateRangePickerProps {
   presets?: DateRangePreset[];
   /** Currently active preset key */
   activePreset?: string;
-  /** Whether to show print button */
-  showPrint?: boolean;
-  /** Callback when print is clicked */
-  onPrint?: () => void;
-  /** Whether to show export button */
-  showExport?: boolean;
-  /** Callback when export is clicked */
-  onExport?: () => void;
   /** Placeholder text for the date input */
   placeholder?: string;
   /** Date format for display */
@@ -75,8 +73,6 @@ export interface DateRangePickerProps {
     thisYear?: string;
     lastYear?: string;
     filter?: string;
-    print?: string;
-    export?: string;
   };
 }
 
@@ -239,7 +235,8 @@ function formatDateRange(range: DateRange, _format?: string): string {
 // ============================================================================
 
 /**
- * Date range picker with preset filters, print, and export buttons.
+ * Date range picker with preset filters and calendar popup.
+ * Click the date input to open a calendar for selecting a custom date range.
  * Commonly used for report filtering in dashboard views.
  *
  * @example
@@ -254,10 +251,6 @@ function formatDateRange(range: DateRange, _format?: string): string {
  *     setPreset(presetKey);
  *   }}
  *   activePreset={preset}
- *   showPrint
- *   showExport
- *   onPrint={() => window.print()}
- *   onExport={() => exportToCSV()}
  * />
  * ```
  */
@@ -266,10 +259,6 @@ export function DateRangePicker({
   onChange,
   presets,
   activePreset,
-  showPrint = false,
-  onPrint,
-  showExport = false,
-  onExport,
   placeholder = 'Select a time period',
   dateFormat,
   className,
@@ -277,12 +266,336 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const finalPresets = presets || getDefaultPresets(labels);
 
+  // Calendar state
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+  const [calendarMonth, setCalendarMonth] = React.useState(
+    () => value?.start?.getMonth() ?? new Date().getMonth()
+  );
+  const [calendarYear, setCalendarYear] = React.useState(
+    () => value?.start?.getFullYear() ?? new Date().getFullYear()
+  );
+  const [rangeStart, setRangeStart] = React.useState<Date | null>(
+    value?.start ?? null
+  );
+  const [rangeEnd, setRangeEnd] = React.useState<Date | null>(
+    value?.end ?? null
+  );
+  const [selectingEnd, setSelectingEnd] = React.useState(false);
+  const [hoverDate, setHoverDate] = React.useState<Date | null>(null);
+
+  const calendarRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLDivElement>(null);
+
+  // Sync external value changes
+  React.useEffect(() => {
+    if (value?.start) {
+      setRangeStart(value.start);
+      setCalendarMonth(value.start.getMonth());
+      setCalendarYear(value.start.getFullYear());
+    }
+    if (value?.end) {
+      setRangeEnd(value.end);
+    }
+    if (!value?.start && !value?.end) {
+      setRangeStart(null);
+      setRangeEnd(null);
+    }
+  }, [value]);
+
+  // Close calendar on click outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as HTMLElement) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as HTMLElement)
+      ) {
+        setIsCalendarOpen(false);
+        setSelectingEnd(false);
+      }
+    };
+    if (isCalendarOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isCalendarOpen]);
+
+  // Close on Escape
+  React.useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsCalendarOpen(false);
+        setSelectingEnd(false);
+      }
+    };
+    if (isCalendarOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isCalendarOpen]);
+
   const handlePresetSelect = (presetKey: string) => {
     const range = calculateDateRange(presetKey);
+    setRangeStart(range.start);
+    setRangeEnd(range.end);
+    setSelectingEnd(false);
+    setIsCalendarOpen(false);
     onChange(range, presetKey);
   };
 
+  const handleDayClick = (day: number) => {
+    const clicked = new Date(calendarYear, calendarMonth, day);
+    if (!selectingEnd) {
+      setRangeStart(clicked);
+      setRangeEnd(null);
+      setSelectingEnd(true);
+    } else {
+      let start = rangeStart!;
+      let end = clicked;
+      if (end < start) {
+        [start, end] = [end, start];
+      }
+      setRangeStart(start);
+      setRangeEnd(end);
+      setSelectingEnd(false);
+      setIsCalendarOpen(false);
+      onChange({ start, end });
+    }
+  };
+
+  const toggleCalendar = () => {
+    if (!isCalendarOpen) {
+      if (value?.start) {
+        setRangeStart(value.start);
+        setRangeEnd(value.end ?? null);
+        setCalendarMonth(value.start.getMonth());
+        setCalendarYear(value.start.getFullYear());
+      } else {
+        const now = new Date();
+        setCalendarMonth(now.getMonth());
+        setCalendarYear(now.getFullYear());
+      }
+      setSelectingEnd(false);
+    }
+    setIsCalendarOpen(!isCalendarOpen);
+  };
+
+  // Calendar helpers
+  const getDaysInMonth = (month: number, year: number) =>
+    new Date(year, month + 1, 0).getDate();
+
+  const getFirstDayOfMonth = (month: number, year: number) =>
+    new Date(year, month, 1).getDay();
+
+  const isSameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  const isInRange = (day: number) => {
+    const date = new Date(calendarYear, calendarMonth, day);
+    const start = rangeStart;
+    const end = selectingEnd ? hoverDate : rangeEnd;
+    if (!start || !end) return false;
+    const [lo, hi] = start <= end ? [start, end] : [end, start];
+    return date > lo && date < hi;
+  };
+
+  const isRangeStart = (day: number) => {
+    if (!rangeStart) return false;
+    return isSameDay(new Date(calendarYear, calendarMonth, day), rangeStart);
+  };
+
+  const isRangeEnd = (day: number) => {
+    const end = selectingEnd ? hoverDate : rangeEnd;
+    if (!end) return false;
+    return isSameDay(new Date(calendarYear, calendarMonth, day), end);
+  };
+
+  const isToday = (day: number) => {
+    const today = new Date();
+    return (
+      day === today.getDate() &&
+      calendarMonth === today.getMonth() &&
+      calendarYear === today.getFullYear()
+    );
+  };
+
   const displayValue = value ? formatDateRange(value, dateFormat) : '';
+
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const renderCalendar = () => {
+    const daysInMonth = getDaysInMonth(calendarMonth, calendarYear);
+    const firstDay = getFirstDayOfMonth(calendarMonth, calendarYear);
+    const days: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let i = 1; i <= daysInMonth; i++) days.push(i);
+
+    return (
+      <div
+        ref={calendarRef}
+        className={cn(
+          'absolute top-full left-0 z-50 mt-1',
+          'bg-background border-border rounded-lg border shadow-lg',
+          'w-80 p-3'
+        )}
+        role="dialog"
+        aria-label="Choose date range"
+      >
+        {/* Selection hint */}
+        <div className="text-muted-foreground mb-2 text-center text-xs">
+          {selectingEnd ? 'Select end date' : 'Select start date'}
+        </div>
+
+        {/* Header with month/year navigation */}
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => {
+              if (calendarMonth === 0) {
+                setCalendarMonth(11);
+                setCalendarYear(calendarYear - 1);
+              } else {
+                setCalendarMonth(calendarMonth - 1);
+              }
+            }}
+            className="hover:bg-muted rounded-md p-1 transition-colors"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={calendarMonth}
+              onChange={(e) => setCalendarMonth(Number(e.target.value))}
+              className="bg-background border-border rounded border px-2 py-1 text-sm"
+              aria-label="Select month"
+            >
+              {monthNames.map((name, i) => (
+                <option key={name} value={i}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={calendarYear}
+              onChange={(e) => setCalendarYear(Number(e.target.value))}
+              className="bg-background border-border rounded border px-2 py-1 text-sm"
+              aria-label="Select year"
+            >
+              {Array.from(
+                { length: 150 },
+                (_, i) => new Date().getFullYear() - 100 + i
+              ).map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (calendarMonth === 11) {
+                setCalendarMonth(0);
+                setCalendarYear(calendarYear + 1);
+              } else {
+                setCalendarMonth(calendarMonth + 1);
+              }
+            }}
+            className="hover:bg-muted rounded-md p-1 transition-colors"
+            aria-label="Next month"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Day headers */}
+        <div className="mb-1 grid grid-cols-7 gap-0">
+          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+            <div
+              key={day}
+              className="text-muted-foreground py-1 text-center text-xs font-medium"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-0">
+          {days.map((day, index) => {
+            const inRange = day !== null && isInRange(day);
+            const isStart = day !== null && isRangeStart(day);
+            const isEnd = day !== null && isRangeEnd(day);
+            const today = day !== null && isToday(day);
+
+            return (
+              <button
+                key={index}
+                type="button"
+                disabled={day === null}
+                onClick={() => day && handleDayClick(day)}
+                onMouseEnter={() => {
+                  if (selectingEnd && day) {
+                    setHoverDate(
+                      new Date(calendarYear, calendarMonth, day)
+                    );
+                  }
+                }}
+                className={cn(
+                  'h-8 w-full text-sm transition-colors',
+                  'focus:ring-ring focus:ring-2 focus:outline-none',
+                  day === null && 'invisible',
+                  day !== null && 'hover:bg-muted',
+                  inRange && 'bg-primary/10',
+                  (isStart || isEnd) &&
+                    'bg-primary-800 hover:bg-primary-700 rounded-md text-white',
+                  today &&
+                    !isStart &&
+                    !isEnd &&
+                    'border-primary-800 text-primary-800 rounded-md border'
+                )}
+              >
+                {day}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Today button */}
+        <div className="border-border mt-3 border-t pt-3">
+          <button
+            type="button"
+            onClick={() => {
+              const today = new Date();
+              setCalendarMonth(today.getMonth());
+              setCalendarYear(today.getFullYear());
+            }}
+            className="text-primary-800 w-full text-sm hover:underline"
+          >
+            Today
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={cn('flex items-center gap-0', className)}>
@@ -318,46 +631,19 @@ export function DateRangePicker({
         </div>
       </Dropdown>
 
-      {/* Date Input */}
-      <div className="relative min-w-[200px] flex-1">
-        <Calendar className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+      {/* Date Input with Calendar */}
+      <div ref={triggerRef} className="relative min-w-[200px] flex-1">
+        <Calendar className="pointer-events-none text-muted-foreground absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2" />
         <Input
           type="text"
           value={displayValue}
           placeholder={placeholder}
           readOnly
-          className="rounded-none pl-10"
+          className="cursor-pointer rounded-l-none pl-10"
+          onClick={toggleCalendar}
         />
+        {isCalendarOpen && renderCalendar()}
       </div>
-
-      {/* Print Button */}
-      {showPrint && (
-        <Button
-          variant="primary"
-          size="md"
-          onClick={onPrint}
-          className="rounded-none border-l-0"
-          title={labels.print || 'Print Report'}
-        >
-          <Printer className="h-4 w-4" />
-        </Button>
-      )}
-
-      {/* Export Button */}
-      {showExport && (
-        <Button
-          variant="primary"
-          size="md"
-          onClick={onExport}
-          className={cn(
-            'border-l-0',
-            showPrint ? 'rounded-l-none' : 'rounded-none'
-          )}
-          title={labels.export || 'Export Report'}
-        >
-          <Download className="h-4 w-4" />
-        </Button>
-      )}
     </div>
   );
 }
