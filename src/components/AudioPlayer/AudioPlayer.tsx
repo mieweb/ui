@@ -339,7 +339,9 @@ function Waveform({
           if (wavesurferRef.current && isLoaded) {
             const duration = wavesurferRef.current.getDuration();
             if (duration > 0) {
-              wavesurferRef.current.seekTo(time / duration);
+              const clampedTime = Math.min(Math.max(time, 0), duration);
+              const progress = clampedTime / duration;
+              wavesurferRef.current.seekTo(progress);
             }
           }
         },
@@ -422,6 +424,7 @@ function Waveform({
       }
     };
 
+    setIsLoaded(false);
     initWaveSurfer();
 
     return () => {
@@ -577,32 +580,35 @@ function Waveform({
 const AudioPlayer = React.forwardRef<
   AudioPlayerRef,
   AudioPlayerProps & { preload?: boolean; fallbackDuration?: number }
->(function AudioPlayer({
-  src,
-  title,
-  variant = 'compact',
-  size = 'md',
-  onStateChange,
-  onEnded,
-  onError,
-  onTimeUpdate,
-  showTime = true,
-  showDuration = true,
-  waveColor,
-  progressColor,
-  waveformHeight = 64,
-  showWaveformHoverCursor = true,
-  waveformCursorColor,
-  disabled = false,
-  className,
-  'aria-label': ariaLabel,
-  playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
-  showPlaybackRate = false,
-  /** Whether to preload audio (set to false for lists with many items) */
-  preload = false,
-  /** Fallback duration in seconds to display before audio is loaded */
-  fallbackDuration,
-}, ref) {
+>(function AudioPlayer(
+  {
+    src,
+    title,
+    variant = 'compact',
+    size = 'md',
+    onStateChange,
+    onEnded,
+    onError,
+    onTimeUpdate,
+    showTime = true,
+    showDuration = true,
+    waveColor,
+    progressColor,
+    waveformHeight = 64,
+    showWaveformHoverCursor = true,
+    waveformCursorColor,
+    disabled = false,
+    className,
+    'aria-label': ariaLabel,
+    playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
+    showPlaybackRate = false,
+    /** Whether to preload audio (set to false for lists with many items) */
+    preload = false,
+    /** Fallback duration in seconds to display before audio is loaded */
+    fallbackDuration,
+  },
+  ref
+) {
   const [state, setState] = React.useState<AudioPlayerState>('idle');
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
@@ -615,48 +621,6 @@ const AudioPlayer = React.forwardRef<
 
   const isPlaying = state === 'playing';
   const isLoading = state === 'loading';
-
-  // Expose methods via ref for external control
-  React.useImperativeHandle(ref, () => ({
-    get container() {
-      return containerRef.current;
-    },
-    seekTo: (time: number) => {
-      if (variant === 'waveform') {
-        waveformMethodsRef.current?.seekTo(time);
-      } else if (audioRef.current) {
-        audioRef.current.currentTime = time;
-      }
-    },
-    play: () => {
-      if (variant === 'waveform') {
-        waveformMethodsRef.current?.play();
-        setState('playing');
-      } else if (audioRef.current) {
-        audioRef.current.play();
-      }
-    },
-    pause: () => {
-      if (variant === 'waveform') {
-        waveformMethodsRef.current?.pause();
-        setState('paused');
-      } else if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    },
-    getCurrentTime: () => {
-      if (variant === 'waveform') {
-        return waveformMethodsRef.current?.getCurrentTime() ?? 0;
-      }
-      return audioRef.current?.currentTime ?? 0;
-    },
-    getDuration: () => {
-      if (variant === 'waveform') {
-        return waveformMethodsRef.current?.getDuration() ?? 0;
-      }
-      return audioRef.current?.duration ?? 0;
-    },
-  }), [variant]);
 
   // Update state helper
   const updateState = React.useCallback(
@@ -706,6 +670,74 @@ const AudioPlayer = React.forwardRef<
     onEnded,
     onError,
   ]);
+
+  // Expose methods via ref for external control
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      get container() {
+        return containerRef.current;
+      },
+      seekTo: (time: number) => {
+        if (variant === 'waveform') {
+          waveformMethodsRef.current?.seekTo(time);
+        } else {
+          // Lazily initialize audio if not yet created
+          if (!audioRef.current) {
+            initAudio();
+          }
+          if (audioRef.current) {
+            audioRef.current.currentTime = time;
+          }
+        }
+      },
+      play: () => {
+        if (variant === 'waveform') {
+          if (waveformMethodsRef.current) {
+            waveformMethodsRef.current.play();
+            updateState('playing');
+          }
+        } else {
+          // Lazily initialize audio if not yet created
+          if (!audioRef.current) {
+            initAudio();
+          }
+          if (audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              updateState('error');
+              onError?.(error);
+            });
+            updateState('playing');
+          }
+        }
+      },
+      pause: () => {
+        if (variant === 'waveform') {
+          if (waveformMethodsRef.current) {
+            waveformMethodsRef.current.pause();
+            updateState('paused');
+          }
+        } else if (audioRef.current) {
+          audioRef.current.pause();
+          updateState('paused');
+        }
+      },
+      getCurrentTime: () => {
+        if (variant === 'waveform') {
+          return waveformMethodsRef.current?.getCurrentTime() ?? 0;
+        }
+        return audioRef.current?.currentTime ?? 0;
+      },
+      getDuration: () => {
+        if (variant === 'waveform') {
+          return waveformMethodsRef.current?.getDuration() ?? 0;
+        }
+        const rawDuration = audioRef.current?.duration;
+        return Number.isFinite(rawDuration) ? rawDuration! : 0;
+      },
+    }),
+    [variant, initAudio, updateState, onError]
+  );
 
   // Auto-initialize if preload is true
   React.useEffect(() => {
