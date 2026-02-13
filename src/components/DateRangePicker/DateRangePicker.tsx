@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { isStorybookDocsMode } from '../../utils/environment';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -57,6 +57,7 @@ export interface DateRangePickerProps {
     last7Days?: string;
     last30Days?: string;
     filter?: string;
+    done?: string;
   };
 }
 
@@ -246,7 +247,8 @@ export function DateRangePicker({
   }, isCalendarOpen);
 
   // Lock background scroll when mobile bottom sheet is open
-  useEffect(() => {
+  React.useEffect(() => {
+    if (isStorybookDocsMode()) return;
     if (isMobileVariant && isCalendarOpen) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -521,7 +523,19 @@ export function DateRangePicker({
 
       {/* Mobile bottom-sheet overlay */}
       {isMobileVariant && isCalendarOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
+          onClick={(event) => {
+            if (event.target !== event.currentTarget) return;
+            setIsCalendarOpen(false);
+            setSelectingEnd(false);
+            setHoverDate(null);
+            if (triggerRef.current instanceof HTMLElement) {
+              triggerRef.current.focus();
+            }
+          }}
+        >
           <div
             ref={calendarRef}
             className="bg-background animate-in slide-in-from-bottom w-full max-w-md rounded-t-2xl px-6 pt-4 pb-6 shadow-xl"
@@ -581,7 +595,7 @@ export function DateRangePicker({
               }}
               className="border-input hover:bg-muted mt-6 w-full rounded-lg border py-3 text-sm font-medium transition-colors"
             >
-              Done
+              {labels?.done ?? 'Done'}
             </button>
           </div>
         </div>
