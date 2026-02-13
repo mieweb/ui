@@ -18,16 +18,9 @@ export type DateRangePresetKey =
   | 'this-week'
   | 'this-month'
   | 'last-month'
-  | 'last-15-min'
-  | 'last-30-min'
-  | 'last-hour'
   | 'last-24-hours'
   | 'last-7-days'
-  | 'last-30-days'
-  | 'last-90-days'
-  | 'year-to-date'
-  | 'this-year'
-  | 'last-year';
+  | 'last-30-days';
 
 export interface DateRangePreset {
   key: DateRangePresetKey | string;
@@ -60,16 +53,9 @@ export interface DateRangePickerProps {
     thisWeek?: string;
     thisMonth?: string;
     lastMonth?: string;
-    last15Min?: string;
-    last30Min?: string;
-    lastHour?: string;
     last24Hours?: string;
     last7Days?: string;
     last30Days?: string;
-    last90Days?: string;
-    yearToDate?: string;
-    thisYear?: string;
-    lastYear?: string;
     filter?: string;
   };
 }
@@ -86,16 +72,9 @@ function getDefaultPresets(
     thisWeek = 'This Week',
     thisMonth = 'This Month',
     lastMonth = 'Last Month',
-    last15Min = 'Last 15 Minutes',
-    last30Min = 'Last 30 Minutes',
-    lastHour = 'Last Hour',
     last24Hours = 'Last 24 Hours',
     last7Days = 'Last 7 Days',
     last30Days = 'Last 30 Days',
-    last90Days = 'Last 90 Days',
-    yearToDate = 'Year to Date',
-    thisYear = 'This Year',
-    lastYear = 'Last Year',
   } = labels;
 
   return [
@@ -103,16 +82,9 @@ function getDefaultPresets(
     { key: 'this-week', label: thisWeek },
     { key: 'this-month', label: thisMonth },
     { key: 'last-month', label: lastMonth },
-    { key: 'last-15-min', label: last15Min },
-    { key: 'last-30-min', label: last30Min },
-    { key: 'last-hour', label: lastHour },
     { key: 'last-24-hours', label: last24Hours },
     { key: 'last-7-days', label: last7Days },
     { key: 'last-30-days', label: last30Days },
-    { key: 'last-90-days', label: last90Days },
-    { key: 'year-to-date', label: yearToDate },
-    { key: 'this-year', label: thisYear },
-    { key: 'last-year', label: lastYear },
   ];
 }
 
@@ -148,24 +120,6 @@ function calculateDateRange(presetKey: string): DateRange {
       return { start: firstDay, end: lastDay };
     }
 
-    case 'last-15-min':
-      return {
-        start: new Date(now.getTime() - 15 * 60 * 1000),
-        end: now,
-      };
-
-    case 'last-30-min':
-      return {
-        start: new Date(now.getTime() - 30 * 60 * 1000),
-        end: now,
-      };
-
-    case 'last-hour':
-      return {
-        start: new Date(now.getTime() - 60 * 60 * 1000),
-        end: now,
-      };
-
     case 'last-24-hours':
       return {
         start: new Date(now.getTime() - 24 * 60 * 60 * 1000),
@@ -183,29 +137,6 @@ function calculateDateRange(presetKey: string): DateRange {
         start: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
         end: now,
       };
-
-    case 'last-90-days':
-      return {
-        start: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
-        end: now,
-      };
-
-    case 'year-to-date': {
-      const firstOfYear = new Date(now.getFullYear(), 0, 1);
-      return { start: firstOfYear, end: now };
-    }
-
-    case 'this-year': {
-      const firstOfYear = new Date(now.getFullYear(), 0, 1);
-      const lastOfYear = new Date(now.getFullYear(), 11, 31);
-      return { start: firstOfYear, end: lastOfYear };
-    }
-
-    case 'last-year': {
-      const firstOfLastYear = new Date(now.getFullYear() - 1, 0, 1);
-      const lastOfLastYear = new Date(now.getFullYear() - 1, 11, 31);
-      return { start: firstOfLastYear, end: lastOfLastYear };
-    }
 
     default:
       return { start: null, end: null };
