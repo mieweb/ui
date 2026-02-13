@@ -3,7 +3,6 @@ import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
 import {
-  Filter,
   Calendar,
   ChevronDown,
   ChevronLeft,
@@ -571,39 +570,7 @@ export function DateRangePicker({
   };
 
   return (
-    <div className={cn('relative flex items-center gap-0', className)}>
-      {/* Filter Dropdown */}
-      <Dropdown
-        trigger={
-          <Button
-            variant="primary"
-            size="md"
-            className="rounded-r-none border-r-0"
-            data-cy="btn-date-filter"
-          >
-            <Filter className="h-4 w-4" />
-            <ChevronDown className="ml-1 h-3 w-3" />
-          </Button>
-        }
-        className="max-h-[300px] overflow-auto"
-      >
-        <div className="grid grid-cols-2 gap-0">
-          {finalPresets.map((preset) => (
-            <DropdownItem
-              key={preset.key}
-              onClick={() => handlePresetSelect(preset.key)}
-              className={cn(
-                activePreset === preset.key &&
-                  'bg-primary text-primary-foreground'
-              )}
-              data-cy="datepicker-filter-range"
-            >
-              {preset.label}
-            </DropdownItem>
-          ))}
-        </div>
-      </Dropdown>
-
+    <div className={cn('relative inline-block', className)}>
       {/* Trigger Button */}
       <button
         ref={triggerRef}
@@ -611,7 +578,7 @@ export function DateRangePicker({
         onClick={toggleCalendar}
         className={cn(
           'border-input bg-background hover:bg-muted',
-          'inline-flex w-[300px] items-center gap-2 rounded-l-none rounded-r-md border px-4 py-2 text-left text-sm font-normal',
+          'inline-flex w-[300px] items-center gap-2 rounded-md border px-4 py-2 text-left text-sm font-normal',
           'focus:ring-ring focus:ring-2 focus:outline-none',
           'transition-colors',
           !displayValue && 'text-muted-foreground'
@@ -627,51 +594,75 @@ export function DateRangePicker({
           ref={calendarRef}
           className={cn(
             'absolute top-full left-0 z-50 mt-1',
-            'bg-background border-border rounded-lg border p-4 shadow-lg'
+            'bg-background border-border rounded-lg border shadow-lg'
           )}
           role="dialog"
           aria-label="Choose date range"
         >
-          {/* Subtitle */}
-          <p className="text-muted-foreground mb-4 text-sm">
-            Select a start and end date from the calendar.
-          </p>
-
-          <div className="flex gap-8">
-            {/* Left month */}
-            <div>
-              <div className="mb-3 flex items-center">
+          <div className="flex">
+            {/* Preset sidebar */}
+            <div className="border-border flex flex-col gap-0.5 border-r p-3">
+              {finalPresets.map((preset) => (
                 <button
+                  key={preset.key}
                   type="button"
-                  onClick={goToPrevMonth}
-                  className="hover:bg-muted rounded-md p-1 transition-colors"
-                  aria-label="Previous month"
+                  onClick={() => handlePresetSelect(preset.key)}
+                  className={cn(
+                    'whitespace-nowrap rounded-md px-3 py-1.5 text-left text-sm transition-colors',
+                    'hover:bg-muted',
+                    activePreset === preset.key &&
+                      'bg-primary text-primary-foreground'
+                  )}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  {preset.label}
                 </button>
-                <div className="flex-1 text-center text-sm font-medium">
-                  {monthNames[leftMonth]} {leftYear}
-                </div>
-              </div>
-              {renderMonthGrid(leftMonth, leftYear)}
+              ))}
             </div>
 
-            {/* Right month */}
-            <div>
-              <div className="mb-3 flex items-center">
-                <div className="flex-1 text-center text-sm font-medium">
-                  {monthNames[rightMonth]} {rightYear}
+            {/* Calendar panel */}
+            <div className="p-4">
+              {/* Subtitle */}
+              <p className="text-muted-foreground mb-4 text-sm">
+                Select a start and end date from the calendar.
+              </p>
+
+              <div className="flex gap-8">
+                {/* Left month */}
+                <div>
+                  <div className="mb-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={goToPrevMonth}
+                      className="hover:bg-muted rounded-md p-1 transition-colors"
+                      aria-label="Previous month"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <div className="flex-1 text-center text-sm font-medium">
+                      {monthNames[leftMonth]} {leftYear}
+                    </div>
+                  </div>
+                  {renderMonthGrid(leftMonth, leftYear)}
                 </div>
-                <button
-                  type="button"
-                  onClick={goToNextMonth}
-                  className="hover:bg-muted rounded-md p-1 transition-colors"
-                  aria-label="Next month"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+
+                {/* Right month */}
+                <div>
+                  <div className="mb-3 flex items-center">
+                    <div className="flex-1 text-center text-sm font-medium">
+                      {monthNames[rightMonth]} {rightYear}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={goToNextMonth}
+                      className="hover:bg-muted rounded-md p-1 transition-colors"
+                      aria-label="Next month"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {renderMonthGrid(rightMonth, rightYear)}
+                </div>
               </div>
-              {renderMonthGrid(rightMonth, rightYear)}
             </div>
           </div>
         </div>
