@@ -104,7 +104,7 @@ type SchedulePickerStoryArgs = Omit<
 };
 
 const meta = {
-  title: 'Components/SchedulePicker',
+  title: 'Inputs & Controls/SchedulePicker',
   component: SchedulePicker,
   parameters: {
     layout: 'padded',

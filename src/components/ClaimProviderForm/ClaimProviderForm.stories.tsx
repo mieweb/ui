@@ -3,7 +3,7 @@ import { ClaimProviderForm } from './ClaimProviderForm';
 
 const meta: Meta<typeof ClaimProviderForm> = {
   component: ClaimProviderForm,
-  title: 'Components/ClaimProviderForm',
+  title: 'Inputs & Controls/ClaimProviderForm',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

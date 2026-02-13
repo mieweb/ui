@@ -5,7 +5,7 @@ import { Input } from '../Input';
 import { Button } from '../Button';
 
 const meta: Meta<typeof StripeBadge> = {
-  title: 'Components/StripeBadge',
+  title: 'Commerce & Payments/StripeBadge',
   component: StripeBadge,
   tags: ['autodocs'],
   parameters: {

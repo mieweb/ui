@@ -44,7 +44,7 @@ const sampleUser = {
 };
 
 const meta: Meta<typeof EditUserRoleModal> = {
-  title: 'Components/EditUserRoleModal',
+  title: 'Feedback & Overlays/EditUserRoleModal',
   component: EditUserRoleModal,
   tags: ['autodocs'],
   parameters: {

@@ -3,7 +3,7 @@ import { ThemeProvider, useThemeContext } from './ThemeProvider';
 import { Button } from '../Button';
 
 const meta: Meta<typeof ThemeProvider> = {
-  title: 'Components/ThemeProvider',
+  title: 'Foundations/ThemeProvider',
   component: ThemeProvider,
   parameters: {
     layout: 'centered',

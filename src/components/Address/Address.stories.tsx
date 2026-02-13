@@ -8,7 +8,7 @@ import {
 } from './Address';
 
 const meta: Meta<typeof Address> = {
-  title: 'Components/Address',
+  title: 'Inputs & Controls/Address',
   component: Address,
   tags: ['autodocs'],
   parameters: {

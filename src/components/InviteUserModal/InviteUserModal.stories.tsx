@@ -25,7 +25,7 @@ const sampleRoles = [
 ];
 
 const meta: Meta<typeof InviteUserModal> = {
-  title: 'Components/InviteUserModal',
+  title: 'Feedback & Overlays/InviteUserModal',
   component: InviteUserModal,
   tags: ['autodocs'],
   parameters: {

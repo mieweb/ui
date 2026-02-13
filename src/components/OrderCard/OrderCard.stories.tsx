@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { OrderCard } from './OrderCard';
 
 const meta: Meta<typeof OrderCard> = {
-  title: 'Components/OrderCard',
+  title: 'Layout & Structure/OrderCard',
   component: OrderCard,
   tags: ['autodocs'],
   parameters: {

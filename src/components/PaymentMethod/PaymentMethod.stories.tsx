@@ -15,7 +15,7 @@ import {
 // =============================================================================
 
 const cardMeta: Meta<typeof PaymentMethodCard> = {
-  title: 'Components/PaymentMethod/Card',
+  title: 'Commerce & Payments/PaymentMethod/Card',
   component: PaymentMethodCard,
   tags: ['autodocs'],
   parameters: {

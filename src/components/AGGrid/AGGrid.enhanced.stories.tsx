@@ -162,7 +162,7 @@ const enhancedColumnDefs: Record<string, unknown>[] = [
 // ============================================================================
 
 const meta: Meta<typeof AGGrid> = {
-  title: 'Components/AGGrid/Enhanced',
+  title: 'Data Display/AGGrid/Enhanced',
   component: AGGrid,
   parameters: {
     layout: 'padded',
