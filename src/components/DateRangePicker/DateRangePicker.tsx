@@ -2,6 +2,8 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { isStorybookDocsMode } from '../../utils/environment';
 import { Button } from '../Button';
 import { Dropdown, DropdownItem } from '../Dropdown';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -44,6 +46,8 @@ export interface DateRangePickerProps {
   className?: string;
   /** Whether to show the preset sidebar in the calendar popup (default: true) */
   showPresets?: boolean;
+  /** Display variant: desktop (default), mobile (bottom sheet), or responsive (auto-adapts at md breakpoint) */
+  variant?: 'desktop' | 'mobile' | 'responsive';
   /** Labels for i18n */
   labels?: {
     today?: string;
@@ -54,6 +58,7 @@ export interface DateRangePickerProps {
     last7Days?: string;
     last30Days?: string;
     filter?: string;
+    done?: string;
   };
 }
 
@@ -183,6 +188,7 @@ export function DateRangePicker({
   placeholder = 'Pick a date range',
   className,
   showPresets = true,
+  variant = 'desktop',
   labels = {},
 }: DateRangePickerProps) {
   const finalPresets = presets || getDefaultPresets(labels);
@@ -206,6 +212,13 @@ export function DateRangePicker({
 
   const calendarRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  const isMobileVariant = variant === 'mobile';
+  const isResponsive = variant === 'responsive';
+
+  const focusTrapRef = useFocusTrap<HTMLDivElement>(
+    isMobileVariant && isCalendarOpen
+  );
 
   // Compute right panel month/year
   const rightMonth = leftMonth === 11 ? 0 : leftMonth + 1;
@@ -238,6 +251,18 @@ export function DateRangePicker({
     triggerRef.current?.focus();
   }, isCalendarOpen);
 
+  // Lock background scroll when mobile bottom sheet is open
+  React.useEffect(() => {
+    if (isStorybookDocsMode()) return;
+    if (isMobileVariant && isCalendarOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isMobileVariant, isCalendarOpen]);
+
   const handlePresetSelect = (presetKey: string) => {
     const range = calculateDateRange(presetKey);
     setRangeStart(range.start);
@@ -268,7 +293,10 @@ export function DateRangePicker({
       setRangeStart(start);
       setRangeEnd(end);
       setSelectingEnd(false);
-      setIsCalendarOpen(false);
+      // In mobile variant, don't auto-close — user clicks Done
+      if (variant !== 'mobile') {
+        setIsCalendarOpen(false);
+      }
       onChange({ start, end });
     }
   };
@@ -498,8 +526,95 @@ export function DateRangePicker({
         {displayValue || placeholder}
       </button>
 
-      {/* Calendar Popup */}
-      {isCalendarOpen && (
+      {/* Mobile bottom-sheet overlay */}
+      {isMobileVariant && isCalendarOpen && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
+          onClick={(event) => {
+            if (event.target !== event.currentTarget) return;
+            setIsCalendarOpen(false);
+            setSelectingEnd(false);
+            setHoverDate(null);
+            if (triggerRef.current instanceof HTMLElement) {
+              triggerRef.current.focus();
+            }
+          }}
+        >
+          <div
+            ref={(node) => {
+              (
+                calendarRef as React.MutableRefObject<HTMLDivElement | null>
+              ).current = node;
+              (
+                focusTrapRef as React.MutableRefObject<HTMLDivElement | null>
+              ).current = node;
+            }}
+            className="bg-background animate-in slide-in-from-bottom max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-2xl px-6 pt-4 pb-6 shadow-xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-date-range-title"
+          >
+            {/* Drag handle */}
+            <div className="bg-muted mx-auto mb-4 h-1 w-10 rounded-full" />
+            <h3
+              id="mobile-date-range-title"
+              className="mb-4 text-lg font-semibold"
+            >
+              {placeholder}
+            </h3>
+
+            {/* Single month navigation */}
+            <div className="mb-3 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={goToPrevMonth}
+                className="hover:bg-muted rounded-md p-1 transition-colors"
+                aria-label="Previous month"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="text-sm font-medium">
+                {monthNames[leftMonth]} {leftYear}
+              </div>
+              <button
+                type="button"
+                onClick={goToNextMonth}
+                className="hover:bg-muted rounded-md p-1 transition-colors"
+                aria-label="Next month"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Single calendar grid */}
+            <div
+              className="flex justify-center"
+              onMouseLeave={() => setHoverDate(null)}
+            >
+              {renderMonthGrid(leftMonth, leftYear)}
+            </div>
+
+            {/* Done button */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsCalendarOpen(false);
+                setSelectingEnd(false);
+                if (triggerRef.current instanceof HTMLElement) {
+                  triggerRef.current.focus();
+                }
+              }}
+              className="border-input hover:bg-muted mt-6 w-full rounded-lg border py-3 text-sm font-medium transition-colors"
+            >
+              {labels?.done ?? 'Done'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop / Responsive popup */}
+      {!isMobileVariant && isCalendarOpen && (
         <div
           ref={calendarRef}
           className={cn(
@@ -510,9 +625,14 @@ export function DateRangePicker({
           aria-label="Choose date range"
         >
           <div className="flex">
-            {/* Preset sidebar */}
+            {/* Preset sidebar — hidden on small screens in responsive mode */}
             {showPresets && (
-              <div className="border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3">
+              <div
+                className={cn(
+                  'border-border flex w-[200px] shrink-0 flex-col gap-0.5 border-r p-3',
+                  isResponsive && 'hidden md:flex'
+                )}
+              >
                 {finalPresets.map((preset) => (
                   <button
                     key={preset.key}
@@ -556,12 +676,23 @@ export function DateRangePicker({
                     <div className="flex-1 text-center text-sm font-medium">
                       {monthNames[leftMonth]} {leftYear}
                     </div>
+                    {/* Show right chevron on left month in responsive single-cal mode */}
+                    {isResponsive && (
+                      <button
+                        type="button"
+                        onClick={goToNextMonth}
+                        className="hover:bg-muted rounded-md p-1 transition-colors md:hidden"
+                        aria-label="Next month"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                   {renderMonthGrid(leftMonth, leftYear)}
                 </div>
 
-                {/* Right month */}
-                <div>
+                {/* Right month — hidden on small screens in responsive mode */}
+                <div className={cn(isResponsive && 'hidden md:block')}>
                   <div className="mb-3 flex items-center">
                     <div className="flex-1 text-center text-sm font-medium">
                       {monthNames[rightMonth]} {rightYear}

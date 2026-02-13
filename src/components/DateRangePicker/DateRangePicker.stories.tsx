@@ -47,6 +47,12 @@ const meta: Meta<typeof DateRangePicker> = {
       control: 'boolean',
       description: 'Show the preset sidebar in the calendar popup',
     },
+    variant: {
+      control: 'select',
+      options: ['desktop', 'mobile', 'responsive'],
+      description:
+        'Display variant: desktop (two-month popup), mobile (bottom sheet), or responsive (auto-adapts at md breakpoint)',
+    },
     showPrint: { table: { disable: true } },
     onPrint: { table: { disable: true } },
     showExport: { table: { disable: true } },
@@ -68,6 +74,7 @@ interface PlaygroundProps {
   placeholder?: string;
   className?: string;
   showPresets?: boolean;
+  variant?: 'desktop' | 'mobile' | 'responsive';
   onChange?: (range: DateRange, presetKey?: string) => void;
 }
 
@@ -75,6 +82,7 @@ function PlaygroundDemo({
   placeholder,
   className,
   showPresets,
+  variant,
   onChange,
 }: PlaygroundProps) {
   const [range, setRange] = useState<DateRange>({ start: null, end: null });
@@ -93,6 +101,7 @@ function PlaygroundDemo({
         placeholder={placeholder}
         className={className}
         showPresets={showPresets}
+        variant={variant}
       />
     </div>
   );
@@ -199,6 +208,77 @@ export const CustomLabels: Story = {
       description: {
         story:
           'Date range picker with Spanish labels for internationalization.',
+      },
+    },
+  },
+};
+
+/**
+ * Mobile bottom-sheet variant with a single-month calendar and a Done button.
+ * Ideal for touch devices.
+ */
+export const Mobile: Story = {
+  render: function Render() {
+    const [range, setRange] = useState<DateRange>({ start: null, end: null });
+
+    return (
+      <div
+        className="relative min-h-[600px]"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <DateRangePicker
+          value={range}
+          onChange={(newRange) => setRange(newRange)}
+          variant="mobile"
+          showPresets={false}
+        />
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Mobile bottom-sheet variant with single-month calendar and Done button.',
+      },
+    },
+  },
+};
+
+/**
+ * Responsive variant that auto-adapts at the md breakpoint.
+ * On small screens: hides presets, shows single calendar.
+ * On larger screens: shows full two-month calendar with preset sidebar.
+ */
+export const Responsive: Story = {
+  render: function Render() {
+    const [range, setRange] = useState<DateRange>({ start: null, end: null });
+    const [preset, setPreset] = useState<string>();
+
+    return (
+      <div className="relative min-h-[500px]">
+        <DateRangePicker
+          value={range}
+          onChange={(newRange, presetKey) => {
+            setRange(newRange);
+            setPreset(presetKey);
+          }}
+          activePreset={preset}
+          variant="responsive"
+        />
+        <p className="text-muted-foreground mt-4 text-sm">
+          Resize the viewport to see the responsive behavior. Below md
+          breakpoint: single calendar, no presets. Above md: full two-month
+          layout with preset sidebar.
+        </p>
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Auto-adapts at md breakpoint. Small screens: single calendar, no presets. Large screens: full layout.',
       },
     },
   },
