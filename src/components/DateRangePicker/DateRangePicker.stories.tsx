@@ -213,10 +213,6 @@ export const CustomLabels: Story = {
   },
 };
 
-// ============================================================================
-// DateRangeFilter Stories
-// ============================================================================
-
 /**
  * Mobile bottom-sheet variant with a single-month calendar and a Done button.
  * Ideal for touch devices.
@@ -226,7 +222,7 @@ export const Mobile: Story = {
     const [range, setRange] = useState<DateRange>({ start: null, end: null });
 
     return (
-      <div className="relative min-h-[600px]">
+      <div className="relative min-h-[600px]" style={{ transform: 'translateZ(0)' }}>
         <DateRangePicker
           value={range}
           onChange={(newRange) => setRange(newRange)}
@@ -284,6 +280,10 @@ export const Responsive: Story = {
     },
   },
 };
+
+// ============================================================================
+// DateRangeFilter Stories
+// ============================================================================
 
 export const FilterDropdown: StoryObj<typeof DateRangeFilter> = {
   render: function Render() {

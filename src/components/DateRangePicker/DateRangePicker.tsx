@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
@@ -240,6 +241,17 @@ export function DateRangePicker({
     setSelectingEnd(false);
     triggerRef.current?.focus();
   }, isCalendarOpen);
+
+  // Lock background scroll when mobile bottom sheet is open
+  useEffect(() => {
+    if (isMobileVariant && isCalendarOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isMobileVariant, isCalendarOpen]);
 
   const handlePresetSelect = (presetKey: string) => {
     const range = calculateDateRange(presetKey);
@@ -514,11 +526,12 @@ export function DateRangePicker({
             ref={calendarRef}
             className="bg-background animate-in slide-in-from-bottom w-full max-w-md rounded-t-2xl px-6 pt-4 pb-6 shadow-xl"
             role="dialog"
-            aria-label="Choose date range"
+            aria-modal="true"
+            aria-labelledby="mobile-date-range-title"
           >
             {/* Drag handle */}
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-300" />
-            <h3 className="mb-4 text-lg font-semibold">{placeholder}</h3>
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted" />
+            <h3 id="mobile-date-range-title" className="mb-4 text-lg font-semibold">{placeholder}</h3>
 
             {/* Single month navigation */}
             <div className="mb-3 flex items-center justify-center gap-4">
@@ -557,6 +570,9 @@ export function DateRangePicker({
               onClick={() => {
                 setIsCalendarOpen(false);
                 setSelectingEnd(false);
+                if (triggerRef.current instanceof HTMLElement) {
+                  triggerRef.current.focus();
+                }
               }}
               className="border-input hover:bg-muted mt-6 w-full rounded-lg border py-3 text-sm font-medium transition-colors"
             >
