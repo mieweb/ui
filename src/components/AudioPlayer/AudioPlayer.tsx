@@ -13,6 +13,22 @@ export type AudioPlayerState =
   | 'paused'
   | 'error';
 
+/** Ref handle for controlling AudioPlayer programmatically */
+export interface AudioPlayerRef {
+  /** The underlying container element */
+  container: HTMLDivElement | null;
+  /** Seek to a specific time in seconds */
+  seekTo: (time: number) => void;
+  /** Start playback */
+  play: () => void;
+  /** Pause playback */
+  pause: () => void;
+  /** Get current playback time in seconds */
+  getCurrentTime: () => number;
+  /** Get total duration in seconds */
+  getDuration: () => number;
+}
+
 export interface AudioPlayerProps extends VariantProps<
   typeof audioPlayerVariants
 > {
@@ -265,6 +281,15 @@ function ProgressBar({
 // Waveform Component (lazy-loaded WaveSurfer)
 // ============================================================================
 
+/** Methods exposed by Waveform via ref */
+export interface WaveformMethods {
+  seekTo: (time: number) => void;
+  play: () => void;
+  pause: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+}
+
 interface WaveformProps {
   src: string;
   isPlaying: boolean;
@@ -279,6 +304,8 @@ interface WaveformProps {
   showHoverCursor?: boolean;
   onHoverTimeChange?: (time: number | null) => void;
   cursorColor?: string;
+  /** Ref to expose waveform control methods */
+  waveformRef?: React.MutableRefObject<WaveformMethods | null>;
 }
 
 function Waveform({
@@ -293,6 +320,7 @@ function Waveform({
   progressColor,
   height = 64,
   showHoverCursor = false,
+  waveformRef,
   onHoverTimeChange,
   cursorColor = 'var(--color-red-500, rgb(239, 68, 68))',
 }: WaveformProps) {
@@ -302,6 +330,43 @@ function Waveform({
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [isHovering, setIsHovering] = React.useState(false);
   const [hoverPosition, setHoverPosition] = React.useState(0);
+
+  // Expose methods via ref for external control
+  React.useEffect(() => {
+    if (waveformRef) {
+      waveformRef.current = {
+        seekTo: (time: number) => {
+          if (wavesurferRef.current && isLoaded) {
+            const duration = wavesurferRef.current.getDuration();
+            if (duration > 0) {
+              wavesurferRef.current.seekTo(time / duration);
+            }
+          }
+        },
+        play: () => {
+          if (wavesurferRef.current && isLoaded) {
+            wavesurferRef.current.play();
+          }
+        },
+        pause: () => {
+          if (wavesurferRef.current && isLoaded) {
+            wavesurferRef.current.pause();
+          }
+        },
+        getCurrentTime: () => {
+          return wavesurferRef.current?.getCurrentTime?.() ?? 0;
+        },
+        getDuration: () => {
+          return wavesurferRef.current?.getDuration?.() ?? 0;
+        },
+      };
+    }
+    return () => {
+      if (waveformRef) {
+        waveformRef.current = null;
+      }
+    };
+  }, [waveformRef, isLoaded]);
 
   // Initialize WaveSurfer
   React.useEffect(() => {
@@ -502,9 +567,17 @@ function Waveform({
  *
  * // Waveform - full visualization with WaveSurfer
  * <AudioPlayer src="/audio.mp3" variant="waveform" showTime />
+ *
+ * // With ref for programmatic control
+ * const playerRef = useRef<AudioPlayerRef>(null);
+ * <AudioPlayer ref={playerRef} src="/audio.mp3" variant="waveform" />
+ * // Then: playerRef.current?.seekTo(30); playerRef.current?.play();
  * ```
  */
-function AudioPlayer({
+const AudioPlayer = React.forwardRef<
+  AudioPlayerRef,
+  AudioPlayerProps & { preload?: boolean; fallbackDuration?: number }
+>(function AudioPlayer({
   src,
   title,
   variant = 'compact',
@@ -529,17 +602,61 @@ function AudioPlayer({
   preload = false,
   /** Fallback duration in seconds to display before audio is loaded */
   fallbackDuration,
-}: AudioPlayerProps & { preload?: boolean; fallbackDuration?: number }) {
+}, ref) {
   const [state, setState] = React.useState<AudioPlayerState>('idle');
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
   const [playbackRate, setPlaybackRate] = React.useState(1);
   const [audioInitialized, setAudioInitialized] = React.useState(false);
   const [hoverTime, setHoverTime] = React.useState<number | null>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const audioRef = React.useRef<globalThis.HTMLAudioElement | null>(null);
+  const waveformMethodsRef = React.useRef<WaveformMethods | null>(null);
 
   const isPlaying = state === 'playing';
   const isLoading = state === 'loading';
+
+  // Expose methods via ref for external control
+  React.useImperativeHandle(ref, () => ({
+    get container() {
+      return containerRef.current;
+    },
+    seekTo: (time: number) => {
+      if (variant === 'waveform') {
+        waveformMethodsRef.current?.seekTo(time);
+      } else if (audioRef.current) {
+        audioRef.current.currentTime = time;
+      }
+    },
+    play: () => {
+      if (variant === 'waveform') {
+        waveformMethodsRef.current?.play();
+        setState('playing');
+      } else if (audioRef.current) {
+        audioRef.current.play();
+      }
+    },
+    pause: () => {
+      if (variant === 'waveform') {
+        waveformMethodsRef.current?.pause();
+        setState('paused');
+      } else if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    },
+    getCurrentTime: () => {
+      if (variant === 'waveform') {
+        return waveformMethodsRef.current?.getCurrentTime() ?? 0;
+      }
+      return audioRef.current?.currentTime ?? 0;
+    },
+    getDuration: () => {
+      if (variant === 'waveform') {
+        return waveformMethodsRef.current?.getDuration() ?? 0;
+      }
+      return audioRef.current?.duration ?? 0;
+    },
+  }), [variant]);
 
   // Update state helper
   const updateState = React.useCallback(
@@ -777,7 +894,10 @@ function AudioPlayer({
   if (variant === 'inline') {
     const displayDuration = duration > 0 ? duration : (fallbackDuration ?? 0);
     return (
-      <div className={cn(audioPlayerVariants({ variant, size }), className)}>
+      <div
+        ref={containerRef}
+        className={cn(audioPlayerVariants({ variant, size }), className)}
+      >
         {renderPlayButton()}
         {title && (
           <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
@@ -793,12 +913,14 @@ function AudioPlayer({
     );
   }
 
-  // ============================================================================
   // Compact Variant
   // ============================================================================
   if (variant === 'compact') {
     return (
-      <div className={cn(audioPlayerVariants({ variant, size }), className)}>
+      <div
+        ref={containerRef}
+        className={cn(audioPlayerVariants({ variant, size }), className)}
+      >
         {renderPlayButton()}
         <ProgressBar
           currentTime={currentTime}
@@ -816,7 +938,10 @@ function AudioPlayer({
   // Waveform Variant
   // ============================================================================
   return (
-    <div className={cn(audioPlayerVariants({ variant, size }), className)}>
+    <div
+      ref={containerRef}
+      className={cn(audioPlayerVariants({ variant, size }), className)}
+    >
       {title && (
         <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
           {title}
@@ -836,6 +961,7 @@ function AudioPlayer({
         showHoverCursor={showWaveformHoverCursor}
         onHoverTimeChange={handleHoverTimeChange}
         cursorColor={waveformCursorColor}
+        waveformRef={waveformMethodsRef}
       />
       <div className="flex items-center gap-3">
         {renderPlayButton()}
@@ -846,7 +972,7 @@ function AudioPlayer({
       </div>
     </div>
   );
-}
+});
 
 AudioPlayer.displayName = 'AudioPlayer';
 

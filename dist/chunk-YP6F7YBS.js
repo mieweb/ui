@@ -206,6 +206,7 @@ function Waveform({
   progressColor,
   height = 64,
   showHoverCursor = false,
+  waveformRef,
   onHoverTimeChange,
   cursorColor = "var(--color-red-500, rgb(239, 68, 68))"
 }) {
@@ -214,6 +215,41 @@ function Waveform({
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [isHovering, setIsHovering] = React.useState(false);
   const [hoverPosition, setHoverPosition] = React.useState(0);
+  React.useEffect(() => {
+    if (waveformRef) {
+      waveformRef.current = {
+        seekTo: (time) => {
+          if (wavesurferRef.current && isLoaded) {
+            const duration = wavesurferRef.current.getDuration();
+            if (duration > 0) {
+              wavesurferRef.current.seekTo(time / duration);
+            }
+          }
+        },
+        play: () => {
+          if (wavesurferRef.current && isLoaded) {
+            wavesurferRef.current.play();
+          }
+        },
+        pause: () => {
+          if (wavesurferRef.current && isLoaded) {
+            wavesurferRef.current.pause();
+          }
+        },
+        getCurrentTime: () => {
+          return wavesurferRef.current?.getCurrentTime?.() ?? 0;
+        },
+        getDuration: () => {
+          return wavesurferRef.current?.getDuration?.() ?? 0;
+        }
+      };
+    }
+    return () => {
+      if (waveformRef) {
+        waveformRef.current = null;
+      }
+    };
+  }, [waveformRef, isLoaded]);
   React.useEffect(() => {
     if (!containerRef.current) return;
     const initWaveSurfer = async () => {
@@ -351,7 +387,7 @@ function Waveform({
     }
   );
 }
-function AudioPlayer({
+var AudioPlayer = React.forwardRef(function AudioPlayer2({
   src,
   title,
   variant = "compact",
@@ -376,16 +412,58 @@ function AudioPlayer({
   preload = false,
   /** Fallback duration in seconds to display before audio is loaded */
   fallbackDuration
-}) {
+}, ref) {
   const [state, setState] = React.useState("idle");
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
   const [playbackRate, setPlaybackRate] = React.useState(1);
   const [audioInitialized, setAudioInitialized] = React.useState(false);
   const [hoverTime, setHoverTime] = React.useState(null);
+  const containerRef = React.useRef(null);
   const audioRef = React.useRef(null);
+  const waveformMethodsRef = React.useRef(null);
   const isPlaying = state === "playing";
   const isLoading = state === "loading";
+  React.useImperativeHandle(ref, () => ({
+    get container() {
+      return containerRef.current;
+    },
+    seekTo: (time) => {
+      if (variant === "waveform") {
+        waveformMethodsRef.current?.seekTo(time);
+      } else if (audioRef.current) {
+        audioRef.current.currentTime = time;
+      }
+    },
+    play: () => {
+      if (variant === "waveform") {
+        waveformMethodsRef.current?.play();
+        setState("playing");
+      } else if (audioRef.current) {
+        audioRef.current.play();
+      }
+    },
+    pause: () => {
+      if (variant === "waveform") {
+        waveformMethodsRef.current?.pause();
+        setState("paused");
+      } else if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    },
+    getCurrentTime: () => {
+      if (variant === "waveform") {
+        return waveformMethodsRef.current?.getCurrentTime() ?? 0;
+      }
+      return audioRef.current?.currentTime ?? 0;
+    },
+    getDuration: () => {
+      if (variant === "waveform") {
+        return waveformMethodsRef.current?.getDuration() ?? 0;
+      }
+      return audioRef.current?.duration ?? 0;
+    }
+  }), [variant]);
   const updateState = React.useCallback(
     (newState) => {
       setState(newState);
@@ -579,59 +657,81 @@ function AudioPlayer({
   };
   if (variant === "inline") {
     const displayDuration = duration > 0 ? duration : fallbackDuration ?? 0;
-    return /* @__PURE__ */ jsxs("div", { className: cn(audioPlayerVariants({ variant, size }), className), children: [
-      renderPlayButton(),
-      title && /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
-      showDuration && displayDuration > 0 && /* @__PURE__ */ jsx("span", { className: "font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400", children: isPlaying ? formatTime(currentTime) : formatTime(displayDuration) })
-    ] });
+    return /* @__PURE__ */ jsxs(
+      "div",
+      {
+        ref: containerRef,
+        className: cn(audioPlayerVariants({ variant, size }), className),
+        children: [
+          renderPlayButton(),
+          title && /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
+          showDuration && displayDuration > 0 && /* @__PURE__ */ jsx("span", { className: "font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400", children: isPlaying ? formatTime(currentTime) : formatTime(displayDuration) })
+        ]
+      }
+    );
   }
   if (variant === "compact") {
-    return /* @__PURE__ */ jsxs("div", { className: cn(audioPlayerVariants({ variant, size }), className), children: [
-      renderPlayButton(),
-      /* @__PURE__ */ jsx(
-        ProgressBar,
-        {
-          currentTime,
-          duration,
-          onSeek: handleSeek,
-          disabled
-        }
-      ),
-      renderTime(),
-      renderPlaybackRateControl()
-    ] });
-  }
-  return /* @__PURE__ */ jsxs("div", { className: cn(audioPlayerVariants({ variant, size }), className), children: [
-    title && /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
-    /* @__PURE__ */ jsx(
-      Waveform,
+    return /* @__PURE__ */ jsxs(
+      "div",
       {
-        src,
-        isPlaying,
-        playbackRate,
-        onReady: handleWaveformReady,
-        onTimeUpdate: handleWaveformTimeUpdate,
-        onFinish: handleWaveformFinish,
-        onSeek: handleWaveformSeek,
-        waveColor,
-        progressColor,
-        height: waveformHeight,
-        showHoverCursor: showWaveformHoverCursor,
-        onHoverTimeChange: handleHoverTimeChange,
-        cursorColor: waveformCursorColor
+        ref: containerRef,
+        className: cn(audioPlayerVariants({ variant, size }), className),
+        children: [
+          renderPlayButton(),
+          /* @__PURE__ */ jsx(
+            ProgressBar,
+            {
+              currentTime,
+              duration,
+              onSeek: handleSeek,
+              disabled
+            }
+          ),
+          renderTime(),
+          renderPlaybackRateControl()
+        ]
       }
-    ),
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
-      renderPlayButton(),
-      /* @__PURE__ */ jsxs("div", { className: "flex flex-1 items-center justify-between", children: [
-        renderTime(true),
-        renderPlaybackRateControl()
-      ] })
-    ] })
-  ] });
-}
+    );
+  }
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      ref: containerRef,
+      className: cn(audioPlayerVariants({ variant, size }), className),
+      children: [
+        title && /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-neutral-700 dark:text-neutral-300", children: title }),
+        /* @__PURE__ */ jsx(
+          Waveform,
+          {
+            src,
+            isPlaying,
+            playbackRate,
+            onReady: handleWaveformReady,
+            onTimeUpdate: handleWaveformTimeUpdate,
+            onFinish: handleWaveformFinish,
+            onSeek: handleWaveformSeek,
+            waveColor,
+            progressColor,
+            height: waveformHeight,
+            showHoverCursor: showWaveformHoverCursor,
+            onHoverTimeChange: handleHoverTimeChange,
+            cursorColor: waveformCursorColor,
+            waveformRef: waveformMethodsRef
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+          renderPlayButton(),
+          /* @__PURE__ */ jsxs("div", { className: "flex flex-1 items-center justify-between", children: [
+            renderTime(true),
+            renderPlaybackRateControl()
+          ] })
+        ] })
+      ]
+    }
+  );
+});
 AudioPlayer.displayName = "AudioPlayer";
 
 export { AudioPlayer, ProgressBar, audioPlayerVariants, formatTime, playButtonVariants };
-//# sourceMappingURL=chunk-UBRDKNLQ.js.map
-//# sourceMappingURL=chunk-UBRDKNLQ.js.map
+//# sourceMappingURL=chunk-YP6F7YBS.js.map
+//# sourceMappingURL=chunk-YP6F7YBS.js.map

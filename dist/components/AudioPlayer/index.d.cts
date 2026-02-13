@@ -1,8 +1,24 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as class_variance_authority_types from 'class-variance-authority/types';
+import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 
 type AudioPlayerState = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
+/** Ref handle for controlling AudioPlayer programmatically */
+interface AudioPlayerRef {
+    /** The underlying container element */
+    container: HTMLDivElement | null;
+    /** Seek to a specific time in seconds */
+    seekTo: (time: number) => void;
+    /** Start playback */
+    play: () => void;
+    /** Pause playback */
+    pause: () => void;
+    /** Get current playback time in seconds */
+    getCurrentTime: () => number;
+    /** Get total duration in seconds */
+    getDuration: () => number;
+}
 interface AudioPlayerProps extends VariantProps<typeof audioPlayerVariants> {
     /** Audio source URL */
     src: string;
@@ -70,18 +86,16 @@ declare function ProgressBar({ currentTime, duration, onSeek, disabled, }: Progr
  *
  * // Waveform - full visualization with WaveSurfer
  * <AudioPlayer src="/audio.mp3" variant="waveform" showTime />
+ *
+ * // With ref for programmatic control
+ * const playerRef = useRef<AudioPlayerRef>(null);
+ * <AudioPlayer ref={playerRef} src="/audio.mp3" variant="waveform" />
+ * // Then: playerRef.current?.seekTo(30); playerRef.current?.play();
  * ```
  */
-declare function AudioPlayer({ src, title, variant, size, onStateChange, onEnded, onError, onTimeUpdate, showTime, showDuration, waveColor, progressColor, waveformHeight, showWaveformHoverCursor, waveformCursorColor, disabled, className, 'aria-label': ariaLabel, playbackRates, showPlaybackRate, 
-/** Whether to preload audio (set to false for lists with many items) */
-preload, 
-/** Fallback duration in seconds to display before audio is loaded */
-fallbackDuration, }: AudioPlayerProps & {
+declare const AudioPlayer: React.ForwardRefExoticComponent<AudioPlayerProps & {
     preload?: boolean;
     fallbackDuration?: number;
-}): react_jsx_runtime.JSX.Element;
-declare namespace AudioPlayer {
-    var displayName: string;
-}
+} & React.RefAttributes<AudioPlayerRef>>;
 
-export { AudioPlayer, type AudioPlayerProps, type AudioPlayerState, ProgressBar, audioPlayerVariants, formatTime as formatAudioTime, playButtonVariants };
+export { AudioPlayer, type AudioPlayerProps, type AudioPlayerRef, type AudioPlayerState, ProgressBar, audioPlayerVariants, formatTime as formatAudioTime, playButtonVariants };
