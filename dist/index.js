@@ -69,7 +69,7 @@ export { isStorybookDocsMode } from './chunk-VSQF22GL.js';
 export { miewebUIPreset, miewebUISafelist } from './chunk-O7WRE2WX.js';
 import { Alert, AlertTitle, AlertDescription } from './chunk-B26RIQ5R.js';
 export { Alert, AlertDescription, AlertTitle, alertVariants } from './chunk-B26RIQ5R.js';
-export { AudioPlayer, ProgressBar, audioPlayerVariants, formatTime as formatAudioTime, playButtonVariants } from './chunk-UBRDKNLQ.js';
+export { AudioPlayer, ProgressBar, audioPlayerVariants, formatTime as formatAudioTime, playButtonVariants } from './chunk-YP6F7YBS.js';
 export { AudioRecorder, audioRecorderVariants, controlButtonVariants, formatTime, waveformContainerVariants } from './chunk-QZLRB3UG.js';
 import { Avatar } from './chunk-NIHESA7O.js';
 export { Avatar, AvatarGroup, avatarVariants, getInitials } from './chunk-NIHESA7O.js';

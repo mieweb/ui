@@ -10,7 +10,7 @@ export { ColDef as AGColDef, CellClickedEvent, CellValueChangedEvent, FilterChan
 import { BrandConfig } from './brands/types.cjs';
 export { BrandBorderRadius, BrandBoxShadow, BrandColors, BrandTypography, ColorScale, SemanticColors, createBrandPreset, generateBrandCSS, generateTailwindTheme } from './brands/types.cjs';
 export { Alert, AlertDescription, AlertProps, AlertTitle, alertVariants } from './components/Alert/index.cjs';
-export { AudioPlayer, AudioPlayerProps, AudioPlayerState, ProgressBar, audioPlayerVariants, formatAudioTime, playButtonVariants } from './components/AudioPlayer/index.cjs';
+export { AudioPlayer, AudioPlayerProps, AudioPlayerRef, AudioPlayerState, ProgressBar, audioPlayerVariants, formatAudioTime, playButtonVariants } from './components/AudioPlayer/index.cjs';
 export { AudioRecorder, AudioRecorderControlsRenderProps, AudioRecorderProps, AudioRecorderState, audioRecorderVariants, controlButtonVariants, formatTime, waveformContainerVariants } from './components/AudioRecorder/index.cjs';
 export { Avatar, AvatarGroup, AvatarGroupProps, AvatarProps, avatarVariants, getInitials } from './components/Avatar/index.cjs';
 export { Badge, BadgeProps, badgeVariants } from './components/Badge/index.cjs';

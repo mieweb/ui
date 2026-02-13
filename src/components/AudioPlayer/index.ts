@@ -6,4 +6,5 @@ export {
   formatTime as formatAudioTime,
   type AudioPlayerProps,
   type AudioPlayerState,
+  type AudioPlayerRef,
 } from './AudioPlayer';
