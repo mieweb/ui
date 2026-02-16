@@ -206,17 +206,52 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     
     /* Selected story item highlight */
     [data-selected="true"] {
-      background-color: ${brand.primary}15 !important;
+      background-color: ${isDark ? `${brand.primary}30` : `${brand.primary}15`} !important;
+      border-right: none !important;
     }
     
     [data-selected="true"]::before {
       background-color: ${brand.primary} !important;
     }
     
-    /* Sidebar item hover */
-    [data-nodetype] button:hover,
-    [data-nodetype] a:hover {
-      background-color: ${brand.primary}10 !important;
+    /* Selected sidebar item text styling */
+    [data-selected="true"] span,
+    [data-selected="true"] a,
+    [data-selected="true"] button {
+      color: ${textColor} !important;
+      font-weight: 700 !important;
+    }
+    
+    [data-selected="true"] svg {
+      color: ${isDark ? textColor : textMuted} !important;
+    }
+    
+    /*
+     * Context menu (3-dot) buttons - transparent bg, no box-shadow.
+     * The doubled attribute selector [attr][attr] is intentional: Storybook uses
+     * emotion-generated class selectors (e.g. .css-1eylbss) with high specificity
+     * that override single attribute selectors even with !important. Doubling the
+     * attribute selector raises our specificity to match.
+     */
+    [data-testid="context-menu"][data-testid="context-menu"],
+    [data-testid="context-menu"][data-testid="context-menu"]:hover,
+    [data-testid="context-menu"][data-testid="context-menu"]:active,
+    [data-testid="context-menu"][data-testid="context-menu"]:focus {
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
+      border: none !important;
+    }
+    
+    /* Restore keyboard focus indicator for accessibility */
+    [data-testid="context-menu"][data-testid="context-menu"]:focus-visible {
+      outline: 2px solid ${isDark ? '#e5e7eb' : brand.primary} !important;
+      outline-offset: 2px;
+    }
+    
+    /* Sidebar item hover - row level so hovering 3-dot also highlights the row */
+    [data-nodetype]:not([data-selected="true"]):hover {
+      background-color: ${isDark ? `${brand.primary}20` : `${brand.primary}10`} !important;
     }
     
     /* Toolbar selected button */
@@ -268,8 +303,13 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
        DARK MODE OVERRIDES FOR MANAGER UI
        ============================================ */
     ${isDark ? `
-    /* Sidebar background */
-    [class*="sidebar"] {
+    /*
+     * Sidebar background - The :not() exclusions are necessary because
+     * sidebar-item elements also match [class*="sidebar"] (they have
+     * class="sidebar-item"). Without these, the !important bg override
+     * would clobber both the selected state and hover highlights.
+     */
+    [class*="sidebar"]:not([data-selected="true"]):not(:hover) {
       background-color: ${bgColor} !important;
     }
     
