@@ -1,5 +1,6 @@
 import type { Preview, Decorator } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
+import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import './preview.css';
 import { bluehiveBrand } from '../src/brands/bluehive';
@@ -19,6 +20,59 @@ const brands: Record<string, BrandConfig> = {
   waggleline: wagglelineBrand,
   webchart: webchartBrand,
 };
+
+/*
+ * Global theme listener — ensures data-theme and brand styles are applied
+ * even on docs-only MDX pages (like Introduction) where no story decorator runs.
+ */
+function applyGlobalTheme(globals: Record<string, unknown>) {
+  const brandName = (globals?.brand || 'bluehive') as string;
+  const isDark = globals?.theme === 'dark';
+  const brand = brands[brandName] || brands.bluehive;
+  const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
+
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+  document.body.style.backgroundColor = semanticColors.background;
+  document.body.style.color = semanticColors.foreground;
+  applyBrandStyles(brand, isDark);
+}
+
+// Listen for globals changes at the channel level (fires for all pages, including docs-only MDX)
+const handleGlobalsUpdated = ({ globals }: { globals: Record<string, unknown> }) => {
+  applyGlobalTheme(globals);
+};
+
+const channel = addons.getChannel();
+// Ensure we don't register duplicate listeners across HMR updates
+channel.off('globalsUpdated', handleGlobalsUpdated);
+channel.on('globalsUpdated', handleGlobalsUpdated);
+
+// Clean up listener on HMR dispose
+import.meta.hot?.dispose(() => {
+  channel.off('globalsUpdated', handleGlobalsUpdated);
+});
+
+// Apply initial theme from URL params
+try {
+  const params = new URLSearchParams(window.location.search);
+  const globalsParam = params.get('globals') || '';
+  const globals: Record<string, string> = {};
+  for (const pair of globalsParam.split(';')) {
+    const [key, value] = pair.split(':');
+    if (key && value) globals[key] = value;
+  }
+  if (globals.theme || globals.brand) {
+    applyGlobalTheme(globals);
+  }
+} catch {
+  // Ignore URL parsing errors
+}
 
 // Function to apply brand CSS variables to document
 function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
@@ -90,20 +144,8 @@ const withBrand: Decorator = (Story, context) => {
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
   useEffect(() => {
-    applyBrandStyles(brand, isDark);
-
-    // Update dark mode class
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-    
-    // Apply to body with actual values (not CSS vars) to ensure immediate update
-    document.body.style.backgroundColor = semanticColors.background;
-    document.body.style.color = semanticColors.foreground;
+    // Delegate to shared applyGlobalTheme to keep a single source of truth
+    applyGlobalTheme(context.globals);
   }, [brand, isDark, semanticColors]);
 
   // Load Google Fonts for the brand
