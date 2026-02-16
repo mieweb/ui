@@ -215,36 +215,38 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     }
     
     /* Selected sidebar item text styling */
-    ${!isDark ? `
     [data-selected="true"] span,
     [data-selected="true"] a,
     [data-selected="true"] button {
-      color: #000000 !important;
+      color: ${textColor} !important;
       font-weight: 700 !important;
     }
     
     [data-selected="true"] svg {
-      color: #374151 !important;
+      color: ${isDark ? textColor : textMuted} !important;
     }
-    ` : `
-    [data-selected="true"] span,
-    [data-selected="true"] a,
-    [data-selected="true"] button {
-      color: #ffffff !important;
-      font-weight: 700 !important;
-    }
-    `}
     
-    /* Context menu (3-dot) buttons - transparent bg, no box-shadow */
+    /*
+     * Context menu (3-dot) buttons - transparent bg, no box-shadow.
+     * The doubled attribute selector [attr][attr] is intentional: Storybook uses
+     * emotion-generated class selectors (e.g. .css-1eylbss) with high specificity
+     * that override single attribute selectors even with !important. Doubling the
+     * attribute selector raises our specificity to match.
+     */
     [data-testid="context-menu"][data-testid="context-menu"],
     [data-testid="context-menu"][data-testid="context-menu"]:hover,
     [data-testid="context-menu"][data-testid="context-menu"]:active,
     [data-testid="context-menu"][data-testid="context-menu"]:focus {
-      background-color: transparent !important;
       background: transparent !important;
       box-shadow: none !important;
       outline: none !important;
       border: none !important;
+    }
+    
+    /* Restore keyboard focus indicator for accessibility */
+    [data-testid="context-menu"][data-testid="context-menu"]:focus-visible {
+      outline: 2px solid ${isDark ? '#e5e7eb' : brand.primary} !important;
+      outline-offset: 2px;
     }
     
     /* Sidebar item hover - row level so hovering 3-dot also highlights the row */
@@ -301,7 +303,12 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
        DARK MODE OVERRIDES FOR MANAGER UI
        ============================================ */
     ${isDark ? `
-    /* Sidebar background - exclude selected items and hovered items */
+    /*
+     * Sidebar background - The :not() exclusions are necessary because
+     * sidebar-item elements also match [class*="sidebar"] (they have
+     * class="sidebar-item"). Without these, the !important bg override
+     * would clobber both the selected state and hover highlights.
+     */
     [class*="sidebar"]:not([data-selected="true"]):not(:hover) {
       background-color: ${bgColor} !important;
     }
