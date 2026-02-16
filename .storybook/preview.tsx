@@ -44,9 +44,18 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
 }
 
 // Listen for globals changes at the channel level (fires for all pages, including docs-only MDX)
-const channel = addons.getChannel();
-channel.on('globalsUpdated', ({ globals }: { globals: Record<string, unknown> }) => {
+const handleGlobalsUpdated = ({ globals }: { globals: Record<string, unknown> }) => {
   applyGlobalTheme(globals);
+};
+
+const channel = addons.getChannel();
+// Ensure we don't register duplicate listeners across HMR updates
+channel.off('globalsUpdated', handleGlobalsUpdated);
+channel.on('globalsUpdated', handleGlobalsUpdated);
+
+// Clean up listener on HMR dispose
+import.meta.hot?.dispose(() => {
+  channel.off('globalsUpdated', handleGlobalsUpdated);
 });
 
 // Apply initial theme from URL params
@@ -135,20 +144,8 @@ const withBrand: Decorator = (Story, context) => {
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
   useEffect(() => {
-    applyBrandStyles(brand, isDark);
-
-    // Update dark mode class
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-    
-    // Apply to body with actual values (not CSS vars) to ensure immediate update
-    document.body.style.backgroundColor = semanticColors.background;
-    document.body.style.color = semanticColors.foreground;
+    // Delegate to shared applyGlobalTheme to keep a single source of truth
+    applyGlobalTheme(context.globals);
   }, [brand, isDark, semanticColors]);
 
   // Load Google Fonts for the brand
