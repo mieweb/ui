@@ -206,17 +206,50 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     
     /* Selected story item highlight */
     [data-selected="true"] {
-      background-color: ${brand.primary}15 !important;
+      background-color: ${isDark ? `${brand.primary}30` : `${brand.primary}15`} !important;
+      border-right: none !important;
     }
     
     [data-selected="true"]::before {
       background-color: ${brand.primary} !important;
     }
     
-    /* Sidebar item hover */
-    [data-nodetype] button:hover,
-    [data-nodetype] a:hover {
-      background-color: ${brand.primary}10 !important;
+    /* Selected sidebar item text styling */
+    ${!isDark ? `
+    [data-selected="true"] span,
+    [data-selected="true"] a,
+    [data-selected="true"] button {
+      color: #000000 !important;
+      font-weight: 700 !important;
+    }
+    
+    [data-selected="true"] svg {
+      color: #374151 !important;
+    }
+    ` : `
+    [data-selected="true"] span,
+    [data-selected="true"] a,
+    [data-selected="true"] button {
+      color: #ffffff !important;
+      font-weight: 700 !important;
+    }
+    `}
+    
+    /* Context menu (3-dot) buttons - transparent bg, no box-shadow */
+    [data-testid="context-menu"][data-testid="context-menu"],
+    [data-testid="context-menu"][data-testid="context-menu"]:hover,
+    [data-testid="context-menu"][data-testid="context-menu"]:active,
+    [data-testid="context-menu"][data-testid="context-menu"]:focus {
+      background-color: transparent !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
+      border: none !important;
+    }
+    
+    /* Sidebar item hover - row level so hovering 3-dot also highlights the row */
+    [data-nodetype]:not([data-selected="true"]):hover {
+      background-color: ${isDark ? `${brand.primary}20` : `${brand.primary}10`} !important;
     }
     
     /* Toolbar selected button */
@@ -268,8 +301,8 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
        DARK MODE OVERRIDES FOR MANAGER UI
        ============================================ */
     ${isDark ? `
-    /* Sidebar background */
-    [class*="sidebar"] {
+    /* Sidebar background - exclude selected items and hovered items */
+    [class*="sidebar"]:not([data-selected="true"]):not(:hover) {
       background-color: ${bgColor} !important;
     }
     
