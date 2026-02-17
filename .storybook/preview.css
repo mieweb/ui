@@ -38,7 +38,8 @@ html, body {
 
 [data-theme="dark"] .sbdocs p,
 [data-theme="dark"] .sbdocs span,
-[data-theme="dark"] .sbdocs label {
+[data-theme="dark"] .sbdocs label,
+[data-theme="dark"] .sbdocs li {
   color: var(--mieweb-muted-foreground, #a1a1aa) !important;
 }
 
