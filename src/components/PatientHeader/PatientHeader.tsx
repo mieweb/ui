@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { useClickOutside } from '../../hooks/useClickOutside';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
-import { Dropdown } from '../Dropdown';
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -70,7 +71,10 @@ export interface PatientData {
   familyProvider?: string;
 }
 
-export interface PatientHeaderProps {
+export interface PatientHeaderProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'className'
+> {
   /** Patient data object */
   patient: PatientData;
   /** List of known allergies */
@@ -182,8 +186,12 @@ function AllergyRow({ allergies }: { allergies: AllergyItem[] }) {
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        {allergies.map((a) => (
-          <Badge key={a.name} variant="danger" size="sm">
+        {allergies.map((a, i) => (
+          <Badge
+            key={`${a.name}-${a.severity ?? i}`}
+            variant="danger"
+            size="sm"
+          >
             {a.name}
           </Badge>
         ))}
@@ -212,8 +220,8 @@ function MedicationRow({
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        {visible.map((m) => (
-          <Badge key={m.name} variant="secondary" size="sm">
+        {visible.map((m, i) => (
+          <Badge key={`${m.name}-${m.dose ?? i}`} variant="secondary" size="sm">
             {m.name}
             {m.dose ? ` ${m.dose}` : ''}
           </Badge>
@@ -313,6 +321,18 @@ export const PatientHeader = React.forwardRef<
       detailsExpandedProp ?? true
     );
 
+    const [actionsMenuOpen, setActionsMenuOpen] = React.useState(false);
+    const actionsMenuRef = React.useRef<HTMLDivElement>(null);
+
+    useClickOutside(
+      actionsMenuRef,
+      React.useCallback(() => setActionsMenuOpen(false), [])
+    );
+    useEscapeKey(
+      React.useCallback(() => setActionsMenuOpen(false), []),
+      actionsMenuOpen
+    );
+
     React.useEffect(() => {
       if (detailsExpandedProp !== undefined) {
         setDetailsExpanded(detailsExpandedProp);
@@ -336,11 +356,12 @@ export const PatientHeader = React.forwardRef<
         {/* ─── Main header row ─── */}
         <div className="flex items-start gap-4 px-5 py-4">
           {/* Back button */}
-          {showBackButton && onBack && (
+          {showBackButton && (
             <Button
               variant="ghost"
               size="icon"
               onClick={onBack}
+              disabled={!onBack}
               aria-label="Go back"
               className="mt-1 -ml-2 h-8 w-8 shrink-0"
             >
@@ -399,24 +420,34 @@ export const PatientHeader = React.forwardRef<
               {/* Desktop: inline */}
               <div className="hidden items-center gap-2 md:flex">{actions}</div>
 
-              {/* Mobile: accessible dropdown menu */}
-              <div className="md:hidden">
-                <Dropdown
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Open actions menu"
-                      className="h-8 w-8"
-                    >
-                      <MenuIcon size={18} />
-                    </Button>
-                  }
-                  placement="bottom-end"
-                  className="flex flex-col gap-1.5 p-2"
+              {/* Mobile: popover menu */}
+              <div className="md:hidden" ref={actionsMenuRef}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
+                  aria-label="Open actions menu"
+                  aria-expanded={actionsMenuOpen}
+                  className="h-8 w-8"
                 >
-                  {actions}
-                </Dropdown>
+                  <MenuIcon size={18} />
+                </Button>
+
+                {actionsMenuOpen && (
+                  <div
+                    role="group"
+                    aria-label="Patient actions"
+                    className={cn(
+                      'absolute top-full right-0 z-50 mt-1',
+                      'min-w-[12rem] rounded-xl border',
+                      'border-border bg-card shadow-lg',
+                      'flex flex-col gap-1.5 p-2',
+                      'motion-safe:animate-fade-in'
+                    )}
+                  >
+                    {actions}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -459,7 +490,7 @@ export const PatientHeader = React.forwardRef<
             </div>
 
             {detailsExpanded && (
-              <div className="border-border animate-fade-in space-y-3 border-t px-5 py-4">
+              <div className="border-border motion-safe:animate-fade-in space-y-3 border-t px-5 py-4">
                 {/* Row 1 */}
                 <div className="flex flex-wrap gap-x-10 gap-y-3">
                   <DetailItem

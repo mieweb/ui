@@ -24,7 +24,7 @@ const meta: Meta<typeof PatientHeader> = {
     medications: { table: { disable: true } },
     comments: { table: { disable: true } },
     actions: { table: { disable: true } },
-    onBack: { table: { disable: true } },
+    onBack: { action: 'back-clicked' },
   },
 };
 
@@ -96,7 +96,7 @@ export const WithBackButton: Story = {
     showAllergyBanner: true,
     showMedicationBanner: true,
     showBackButton: true,
-    onBack: () => console.log('Back clicked'),
+
     showDetails: true,
   },
 };
