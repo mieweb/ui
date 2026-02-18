@@ -1,6 +1,7 @@
 import { BrandConfig } from './types.js';
 export { BrandBorderRadius, BrandBoxShadow, BrandColors, BrandTypography, ColorScale, SemanticColors, createBrandPreset, generateBrandCSS, generateTailwindTheme } from './types.js';
 export { default as bluehiveBrand } from './bluehive.js';
+export { ozwellBrand } from './ozwell.js';
 
 /**
  * Default Brand Configuration
@@ -93,6 +94,7 @@ declare const brands: {
     readonly default: () => Promise<BrandConfig>;
     readonly 'enterprise-health': () => Promise<BrandConfig>;
     readonly mieweb: () => Promise<BrandConfig>;
+    readonly ozwell: () => Promise<BrandConfig>;
     readonly waggleline: () => Promise<BrandConfig>;
     readonly webchart: () => Promise<BrandConfig>;
 };

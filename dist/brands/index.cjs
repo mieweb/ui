@@ -1,19 +1,24 @@
 'use strict';
 
-var chunkCLJZHS7Y_cjs = require('../chunk-CLJZHS7Y.cjs');
+var chunkFYKPFNDX_cjs = require('../chunk-FYKPFNDX.cjs');
+var chunkO5HS7ZND_cjs = require('../chunk-O5HS7ZND.cjs');
 var chunkP52GA3GJ_cjs = require('../chunk-P52GA3GJ.cjs');
 var chunkS6UNPMAS_cjs = require('../chunk-S6UNPMAS.cjs');
 var chunkSWV5E75F_cjs = require('../chunk-SWV5E75F.cjs');
 var chunkZ3TFPXVN_cjs = require('../chunk-Z3TFPXVN.cjs');
 var chunkFFJVCQ5R_cjs = require('../chunk-FFJVCQ5R.cjs');
 var chunk4LNS5QDP_cjs = require('../chunk-4LNS5QDP.cjs');
-var chunkO5HS7ZND_cjs = require('../chunk-O5HS7ZND.cjs');
+var chunkVZN73Z7A_cjs = require('../chunk-VZN73Z7A.cjs');
 
 
 
 Object.defineProperty(exports, "brands", {
   enumerable: true,
-  get: function () { return chunkCLJZHS7Y_cjs.brands; }
+  get: function () { return chunkFYKPFNDX_cjs.brands; }
+});
+Object.defineProperty(exports, "defaultBrand", {
+  enumerable: true,
+  get: function () { return chunkO5HS7ZND_cjs.defaultBrand; }
 });
 Object.defineProperty(exports, "enterpriseHealthBrand", {
   enumerable: true,
@@ -47,9 +52,9 @@ Object.defineProperty(exports, "bluehiveBrand", {
   enumerable: true,
   get: function () { return chunk4LNS5QDP_cjs.bluehiveBrand; }
 });
-Object.defineProperty(exports, "defaultBrand", {
+Object.defineProperty(exports, "ozwellBrand", {
   enumerable: true,
-  get: function () { return chunkO5HS7ZND_cjs.defaultBrand; }
+  get: function () { return chunkVZN73Z7A_cjs.ozwellBrand; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

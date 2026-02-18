@@ -26,6 +26,7 @@ export { bluehiveBrand } from './bluehive';
 export { defaultBrand } from './default';
 export { enterpriseHealthBrand } from './enterprise-health';
 export { miewebBrand } from './mieweb';
+export { ozwellBrand } from './ozwell';
 export { wagglelineBrand } from './waggleline';
 export { webchartBrand } from './webchart';
 
@@ -36,6 +37,7 @@ export const brands = {
   'enterprise-health': () =>
     import('./enterprise-health').then((m) => m.enterpriseHealthBrand),
   mieweb: () => import('./mieweb').then((m) => m.miewebBrand),
+  ozwell: () => import('./ozwell').then((m) => m.ozwellBrand),
   waggleline: () => import('./waggleline').then((m) => m.wagglelineBrand),
   webchart: () => import('./webchart').then((m) => m.webchartBrand),
 } as const;

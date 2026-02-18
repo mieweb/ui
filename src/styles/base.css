@@ -41,6 +41,10 @@
   --color-success-foreground: var(--mieweb-success-foreground, #ffffff);
   --color-warning: var(--mieweb-warning, #f59e0b);
   --color-warning-foreground: var(--mieweb-warning-foreground, #ffffff);
+
+  /* Typography - bridge brand font to Tailwind font-sans utility */
+  --font-sans: var(--mieweb-font-sans, ui-sans-serif);
+  --font-mono: var(--mieweb-font-mono, ui-monospace);
 }
 
 /* ============================================

@@ -43,6 +43,7 @@ export default defineConfig({
     'brands/index': 'src/brands/index.ts',
     'brands/types': 'src/brands/types.ts',
     'brands/bluehive': 'src/brands/bluehive.ts',
+    'brands/ozwell': 'src/brands/ozwell.ts',
   },
   format: ['esm', 'cjs'],
   target: 'es2022',

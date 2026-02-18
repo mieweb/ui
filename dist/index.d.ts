@@ -49,6 +49,7 @@ export { calculateAge, cn, formatDateValue, formatPhoneNumber, isDateEmpty, isDa
 export { default as miewebUIPreset, miewebUISafelist } from './tailwind-preset.js';
 export { brands, defaultBrand, enterpriseHealthBrand, miewebBrand, wagglelineBrand, webchartBrand } from './brands/index.js';
 export { default as bluehiveBrand } from './brands/bluehive.js';
+export { ozwellBrand } from './brands/ozwell.js';
 import 'clsx';
 
 interface ContactAddress {

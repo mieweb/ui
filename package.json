@@ -94,6 +94,7 @@
     },
     "./brands/bluehive.css": "./dist/brands/bluehive.css",
     "./brands/mieweb.css": "./dist/brands/mieweb.css",
+    "./brands/ozwell.css": "./dist/brands/ozwell.css",
     "./brands/webchart.css": "./dist/brands/webchart.css",
     "./brands/enterprise-health.css": "./dist/brands/enterprise-health.css",
     "./brands/*": {
