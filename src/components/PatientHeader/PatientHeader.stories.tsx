@@ -76,7 +76,7 @@ export const Default: Story = {
     showCommentsBanner: true,
     showDetails: true,
     actions: (
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         <CountBadge label="Tasks" count={3} />
         <CountBadge label="Open Enc" count={5} />
         <CountBadge label="Due List" count={4} />
@@ -163,8 +163,12 @@ export const WithActions: Story = {
     showDetails: true,
     actions: (
       <div className="flex gap-2">
-        <Button variant="outline" size="sm">Edit</Button>
-        <Button variant="ghost" size="sm">Print</Button>
+        <Button variant="outline" size="sm">
+          Edit
+        </Button>
+        <Button variant="ghost" size="sm">
+          Print
+        </Button>
       </div>
     ),
   },
@@ -205,8 +209,10 @@ export const Sticky: Story = {
     (Story) => (
       <div className="h-[200vh]">
         <Story />
-        <div className="p-6 text-muted-foreground">
-          <p className="mb-4">Scroll down to see the sticky header in action.</p>
+        <div className="text-muted-foreground p-6">
+          <p className="mb-4">
+            Scroll down to see the sticky header in action.
+          </p>
           {Array.from({ length: 20 }, (_, i) => (
             <p key={i} className="mb-4">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do

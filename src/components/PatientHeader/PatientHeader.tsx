@@ -126,9 +126,7 @@ function formatFullName(name: PatientName): string {
   return parts.filter(Boolean).join(' ');
 }
 
-function getStatusVariant(
-  status?: string
-): 'success' | 'danger' | 'secondary' {
+function getStatusVariant(status?: string): 'success' | 'danger' | 'secondary' {
   switch (status) {
     case 'active':
       return 'success';
@@ -163,9 +161,9 @@ function DetailItem({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-      <span className="shrink-0 text-muted-foreground/60">{icon}</span>
-      <span className="font-semibold uppercase text-xs tracking-wide text-muted-foreground/80">
+    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+      <span className="text-muted-foreground/60 shrink-0">{icon}</span>
+      <span className="text-muted-foreground/80 text-xs font-semibold tracking-wide uppercase">
         {label}
       </span>
       <span className="text-foreground">{value}</span>
@@ -176,23 +174,16 @@ function DetailItem({
 /** Allergy row with badge pills */
 function AllergyRow({ allergies }: { allergies: AllergyItem[] }) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <div className="flex items-center gap-1.5 shrink-0">
-        <AlertCircleIcon
-          size={16}
-          className="text-red-500 dark:text-red-400"
-        />
-        <span className="text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1.5">
+        <AlertCircleIcon size={16} className="text-red-500 dark:text-red-400" />
+        <span className="text-xs font-semibold tracking-wide text-red-600 uppercase dark:text-red-400">
           Allergies
         </span>
       </div>
-      <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex flex-wrap items-center gap-1.5">
         {allergies.map((a) => (
-          <Badge
-            key={a.name}
-            variant="danger"
-            size="sm"
-          >
+          <Badge key={a.name} variant="danger" size="sm">
             {a.name}
           </Badge>
         ))}
@@ -213,30 +204,22 @@ function MedicationRow({
   const remaining = medications.length - maxVisible;
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <div className="flex items-center gap-1.5 shrink-0">
-        <PaperclipIcon
-          size={16}
-          className="text-muted-foreground/60"
-        />
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1.5">
+        <PaperclipIcon size={16} className="text-muted-foreground/60" />
+        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
           Meds
         </span>
       </div>
-      <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex flex-wrap items-center gap-1.5">
         {visible.map((m) => (
-          <Badge
-            key={m.name}
-            variant="secondary"
-            size="sm"
-          >
-            {m.name}{m.dose ? ` ${m.dose}` : ''}
+          <Badge key={m.name} variant="secondary" size="sm">
+            {m.name}
+            {m.dose ? ` ${m.dose}` : ''}
           </Badge>
         ))}
         {remaining > 0 && (
-          <span className="text-xs text-primary">
-            +{remaining} more
-          </span>
+          <span className="text-primary text-xs">+{remaining} more</span>
         )}
       </div>
     </div>
@@ -247,16 +230,13 @@ function MedicationRow({
 function AlertRow({ comments }: { comments: string[] }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1.5 shrink-0">
-        <ClipboardListIcon
-          size={16}
-          className="text-muted-foreground/60"
-        />
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="flex shrink-0 items-center gap-1.5">
+        <ClipboardListIcon size={16} className="text-muted-foreground/60" />
+        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
           Alert
         </span>
       </div>
-      <span className="text-sm text-foreground">{comments.join('; ')}</span>
+      <span className="text-foreground text-sm">{comments.join('; ')}</span>
     </div>
   );
 }
@@ -346,7 +326,7 @@ export const PatientHeader = React.forwardRef<
         ref={ref}
         data-testid={testId}
         className={cn(
-          'w-full border-b border-border bg-card text-card-foreground',
+          'border-border bg-card text-card-foreground w-full border-b',
           'transition-colors duration-200',
           sticky && 'sticky top-0 z-40',
           className
@@ -362,7 +342,7 @@ export const PatientHeader = React.forwardRef<
               size="icon"
               onClick={onBack}
               aria-label="Go back"
-              className="shrink-0 -ml-2 mt-1 h-8 w-8"
+              className="mt-1 -ml-2 h-8 w-8 shrink-0"
             >
               <ArrowLeftIcon size={18} />
             </Button>
@@ -373,26 +353,27 @@ export const PatientHeader = React.forwardRef<
             name={formatFullName(patient.name)}
             src={patient.photo}
             size="lg"
-            className="shrink-0 mt-0.5"
+            className="mt-0.5 shrink-0"
           />
 
           {/* Name block */}
           <div className="min-w-0 flex-1">
             {/* Top line: name, age/sex, MRN */}
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className="text-xl font-bold text-foreground truncate">
+              <h2 className="text-foreground truncate text-xl font-bold">
                 {displayName}
               </h2>
-              <span className="text-sm text-muted-foreground whitespace-nowrap">
+              <span className="text-muted-foreground text-sm whitespace-nowrap">
                 {patient.age} y/o {patient.sex}
               </span>
-              <span className="text-sm text-muted-foreground whitespace-nowrap">
+              <span className="text-muted-foreground text-sm whitespace-nowrap">
                 MRN: {patient.mrn}
               </span>
             </div>
 
             {/* Second line: status + flag badges */}
-            {(patient.status || (patient.flags && patient.flags.length > 0)) && (
+            {(patient.status ||
+              (patient.flags && patient.flags.length > 0)) && (
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                 {patient.status && (
                   <Badge
@@ -414,11 +395,9 @@ export const PatientHeader = React.forwardRef<
 
           {/* Right side: actions slot */}
           {actions && (
-            <div className="relative shrink-0 mt-1">
+            <div className="relative mt-1 shrink-0">
               {/* Desktop: inline */}
-              <div className="hidden md:flex items-center gap-2">
-                {actions}
-              </div>
+              <div className="hidden items-center gap-2 md:flex">{actions}</div>
 
               {/* Mobile: accessible dropdown menu */}
               <div className="md:hidden">
@@ -434,7 +413,7 @@ export const PatientHeader = React.forwardRef<
                     </Button>
                   }
                   placement="bottom-end"
-                  className="p-2 flex flex-col gap-1.5"
+                  className="flex flex-col gap-1.5 p-2"
                 >
                   {actions}
                 </Dropdown>
@@ -445,7 +424,7 @@ export const PatientHeader = React.forwardRef<
 
         {/* ─── Alerts section ─── */}
         {hasAlerts && (
-          <div className="mx-5 mb-3 rounded-lg border border-border bg-muted/30 px-4 py-3 space-y-2.5">
+          <div className="border-border bg-muted/30 mx-5 mb-3 space-y-2.5 rounded-lg border px-4 py-3">
             {hasAllergies && <AllergyRow allergies={allergies} />}
             {hasMedications && (
               <MedicationRow
@@ -460,14 +439,14 @@ export const PatientHeader = React.forwardRef<
         {/* ─── Details toggle + demographics ─── */}
         {showDetails && (
           <>
-            <div className="border-t border-border">
+            <div className="border-border border-t">
               <button
                 type="button"
                 onClick={() => setDetailsExpanded(!detailsExpanded)}
                 className={cn(
-                  'flex items-center gap-1 px-5 py-2 text-sm text-primary',
-                  'hover:text-primary/80 transition-colors w-full',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm'
+                  'text-primary flex items-center gap-1 px-5 py-2 text-sm',
+                  'hover:text-primary/80 w-full transition-colors',
+                  'focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
                 )}
               >
                 <span>{detailsExpanded ? 'Hide details' : 'Show details'}</span>
@@ -480,7 +459,7 @@ export const PatientHeader = React.forwardRef<
             </div>
 
             {detailsExpanded && (
-              <div className="border-t border-border px-5 py-4 space-y-3 animate-fade-in">
+              <div className="border-border animate-fade-in space-y-3 border-t px-5 py-4">
                 {/* Row 1 */}
                 <div className="flex flex-wrap gap-x-10 gap-y-3">
                   <DetailItem

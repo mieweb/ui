@@ -74,11 +74,15 @@ const countChipVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-muted text-foreground/70 dark:bg-muted dark:text-foreground/70',
+        default:
+          'bg-muted text-foreground/70 dark:bg-muted dark:text-foreground/70',
         info: 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200',
-        informative: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-        success: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-        warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        informative:
+          'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        success:
+          'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        warning:
+          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
         alert: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
       },
     },
@@ -93,7 +97,8 @@ const countChipVariants = cva(
 // =============================================================================
 
 export interface CountBadgeProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
+  extends
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
     VariantProps<typeof countBadgeVariants> {
   /** The label text displayed in the badge */
   label: string;
@@ -133,9 +138,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
       >
         {icon && <span className="shrink-0">{icon}</span>}
         <span>{label}</span>
-        <span className={cn(countChipVariants({ variant }))}>
-          {count}
-        </span>
+        <span className={cn(countChipVariants({ variant }))}>{count}</span>
       </button>
     );
   }

@@ -12,7 +12,14 @@ const meta: Meta<typeof CountBadge> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'info', 'informative', 'success', 'warning', 'alert'],
+      options: [
+        'default',
+        'info',
+        'informative',
+        'success',
+        'warning',
+        'alert',
+      ],
     },
     icon: {
       table: { disable: true },
@@ -111,7 +118,9 @@ export const AllVariants: Story = {
         <CountBadge label="Warning" count={5} variant="warning" />
         <CountBadge label="Alert" count={6} variant="alert" />
       </div>
-      <p className="text-sm text-muted-foreground">Hover over any badge to see the hover state.</p>
+      <p className="text-muted-foreground text-sm">
+        Hover over any badge to see the hover state.
+      </p>
     </div>
   ),
 };
@@ -120,9 +129,24 @@ export const AllVariants: Story = {
 export const WithIcons: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
-      <CountBadge label="Info" count={2} variant="informative" icon={<InfoIcon size={14} />} />
-      <CountBadge label="Success" count={4} variant="success" icon={<CheckCircleIcon size={14} />} />
-      <CountBadge label="Alert" count={1} variant="alert" icon={<AlertCircleIcon size={14} />} />
+      <CountBadge
+        label="Info"
+        count={2}
+        variant="informative"
+        icon={<InfoIcon size={14} />}
+      />
+      <CountBadge
+        label="Success"
+        count={4}
+        variant="success"
+        icon={<CheckCircleIcon size={14} />}
+      />
+      <CountBadge
+        label="Alert"
+        count={1}
+        variant="alert"
+        icon={<AlertCircleIcon size={14} />}
+      />
     </div>
   ),
 };
