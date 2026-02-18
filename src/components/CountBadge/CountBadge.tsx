@@ -15,6 +15,8 @@ const countBadgeVariants = cva(
     'px-3 py-1',
     'transition-colors duration-150',
     'cursor-pointer select-none',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+    'disabled:cursor-default disabled:opacity-50 disabled:pointer-events-none',
   ],
   {
     variants: {

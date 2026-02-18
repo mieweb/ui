@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PatientHeader, type PatientData } from './PatientHeader';
 import { CountBadge } from '../CountBadge';
 import { Button } from '../Button';
@@ -19,6 +19,12 @@ const meta: Meta<typeof PatientHeader> = {
     showDetails: { control: 'boolean' },
     detailsExpanded: { control: 'boolean' },
     maxVisibleMeds: { control: { type: 'number', min: 1, max: 20 } },
+    patient: { table: { disable: true } },
+    allergies: { table: { disable: true } },
+    medications: { table: { disable: true } },
+    comments: { table: { disable: true } },
+    actions: { table: { disable: true } },
+    onBack: { table: { disable: true } },
   },
 };
 
@@ -90,7 +96,7 @@ export const WithBackButton: Story = {
     showAllergyBanner: true,
     showMedicationBanner: true,
     showBackButton: true,
-    onBack: () => window.alert('Back clicked'),
+    onBack: () => console.log('Back clicked'),
     showDetails: true,
   },
 };

@@ -3,6 +3,7 @@ import { cn } from '../../utils/cn';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
+import { Dropdown } from '../Dropdown';
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -233,7 +234,7 @@ function MedicationRow({
           </Badge>
         ))}
         {remaining > 0 && (
-          <span className="text-xs text-primary cursor-pointer hover:underline">
+          <span className="text-xs text-primary">
             +{remaining} more
           </span>
         )}
@@ -332,24 +333,6 @@ export const PatientHeader = React.forwardRef<
       detailsExpandedProp ?? true
     );
 
-    const [actionsMenuOpen, setActionsMenuOpen] = React.useState(false);
-    const actionsMenuRef = React.useRef<HTMLDivElement>(null);
-
-    // Close dropdown on outside click
-    React.useEffect(() => {
-      if (!actionsMenuOpen) return;
-      function handleClick(e: MouseEvent) {
-        if (
-          actionsMenuRef.current &&
-          !actionsMenuRef.current.contains(e.target as Node)
-        ) {
-          setActionsMenuOpen(false);
-        }
-      }
-      document.addEventListener('mousedown', handleClick);
-      return () => document.removeEventListener('mousedown', handleClick);
-    }, [actionsMenuOpen]);
-
     React.useEffect(() => {
       if (detailsExpandedProp !== undefined) {
         setDetailsExpanded(detailsExpandedProp);
@@ -373,7 +356,7 @@ export const PatientHeader = React.forwardRef<
         {/* ─── Main header row ─── */}
         <div className="flex items-start gap-4 px-5 py-4">
           {/* Back button */}
-          {showBackButton && (
+          {showBackButton && onBack && (
             <Button
               variant="ghost"
               size="icon"
@@ -437,32 +420,24 @@ export const PatientHeader = React.forwardRef<
                 {actions}
               </div>
 
-              {/* Mobile: hamburger menu */}
-              <div className="md:hidden" ref={actionsMenuRef}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
-                  aria-label="Open actions menu"
-                  aria-expanded={actionsMenuOpen}
-                  className="h-8 w-8"
+              {/* Mobile: accessible dropdown menu */}
+              <div className="md:hidden">
+                <Dropdown
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Open actions menu"
+                      className="h-8 w-8"
+                    >
+                      <MenuIcon size={18} />
+                    </Button>
+                  }
+                  placement="bottom-end"
+                  className="p-2 flex flex-col gap-1.5"
                 >
-                  <MenuIcon size={18} />
-                </Button>
-
-                {actionsMenuOpen && (
-                  <div
-                    className={cn(
-                      'absolute right-0 top-full mt-1 z-50',
-                      'min-w-[200px] rounded-lg border border-border',
-                      'bg-card shadow-lg',
-                      'p-2 flex flex-col gap-1.5',
-                      'animate-fade-in'
-                    )}
-                  >
-                    {actions}
-                  </div>
-                )}
+                  {actions}
+                </Dropdown>
               </div>
             </div>
           )}
@@ -491,7 +466,8 @@ export const PatientHeader = React.forwardRef<
                 onClick={() => setDetailsExpanded(!detailsExpanded)}
                 className={cn(
                   'flex items-center gap-1 px-5 py-2 text-sm text-primary',
-                  'hover:text-primary/80 transition-colors w-full'
+                  'hover:text-primary/80 transition-colors w-full',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm'
                 )}
               >
                 <span>{detailsExpanded ? 'Hide details' : 'Show details'}</span>

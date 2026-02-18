@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CountBadge } from './CountBadge';
 import { CheckCircleIcon, AlertCircleIcon, InfoIcon } from '../Icons';
 
@@ -13,6 +13,9 @@ const meta: Meta<typeof CountBadge> = {
     variant: {
       control: 'select',
       options: ['default', 'info', 'informative', 'success', 'warning', 'alert'],
+    },
+    icon: {
+      table: { disable: true },
     },
   },
 };
