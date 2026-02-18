@@ -117,7 +117,7 @@ function formatPatientName(name: PatientName): string {
   const parts: string[] = [];
   if (name.last) parts.push(name.last + ',');
   if (name.first) parts.push(name.first);
-  if (name.middle) parts.push(name.middle);
+  if (name.middle) parts.push(name.middle.charAt(0) + '.');
   if (name.suffix) parts.push(name.suffix);
   return parts.filter(Boolean).join(' ');
 }
@@ -416,38 +416,34 @@ export const PatientHeader = React.forwardRef<
 
           {/* Right side: actions slot */}
           {actions && (
-            <div className="relative mt-1 shrink-0">
-              {/* Desktop: inline */}
-              <div className="hidden items-center gap-2 md:flex">{actions}</div>
+            <div className="relative mt-1 shrink-0" ref={actionsMenuRef}>
+              {/* Mobile: popover toggle button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
+                aria-label="Open actions menu"
+                aria-haspopup="true"
+                aria-expanded={actionsMenuOpen}
+                aria-controls="patient-actions-menu"
+                className="h-8 w-8 md:hidden"
+              >
+                <MenuIcon size={18} />
+              </Button>
 
-              {/* Mobile: popover menu */}
-              <div className="md:hidden" ref={actionsMenuRef}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
-                  aria-label="Open actions menu"
-                  aria-expanded={actionsMenuOpen}
-                  className="h-8 w-8"
-                >
-                  <MenuIcon size={18} />
-                </Button>
-
-                {actionsMenuOpen && (
-                  <div
-                    role="group"
-                    aria-label="Patient actions"
-                    className={cn(
-                      'absolute top-full right-0 z-50 mt-1',
-                      'min-w-[12rem] rounded-xl border',
-                      'border-border bg-card shadow-lg',
-                      'flex flex-col gap-1.5 p-2',
-                      'motion-safe:animate-fade-in'
-                    )}
-                  >
-                    {actions}
-                  </div>
+              {/* Actions: inline on desktop, popover on mobile */}
+              <div
+                id="patient-actions-menu"
+                role="group"
+                aria-label="Patient actions"
+                className={cn(
+                  'hidden items-center gap-2 md:flex',
+                  actionsMenuOpen &&
+                    'border-border bg-card motion-safe:animate-fade-in absolute top-full right-0 z-50 mt-1 !flex min-w-[12rem] flex-col gap-1.5 rounded-xl border p-2 shadow-lg',
+                  'md:static md:z-auto md:mt-0 md:min-w-0 md:flex-row md:gap-2 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none'
                 )}
+              >
+                {actions}
               </div>
             </div>
           )}
@@ -474,6 +470,8 @@ export const PatientHeader = React.forwardRef<
               <button
                 type="button"
                 onClick={() => setDetailsExpanded(!detailsExpanded)}
+                aria-expanded={detailsExpanded}
+                aria-controls="patient-details-content"
                 className={cn(
                   'text-primary flex items-center gap-1 px-5 py-2 text-sm',
                   'hover:text-primary/80 w-full transition-colors',
@@ -490,7 +488,10 @@ export const PatientHeader = React.forwardRef<
             </div>
 
             {detailsExpanded && (
-              <div className="border-border motion-safe:animate-fade-in space-y-3 border-t px-5 py-4">
+              <div
+                id="patient-details-content"
+                className="border-border motion-safe:animate-fade-in space-y-3 border-t px-5 py-4"
+              >
                 {/* Row 1 */}
                 <div className="flex flex-wrap gap-x-10 gap-y-3">
                   <DetailItem
