@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import { Button } from '../Button';
+import { ChevronDownIcon, PlusIcon, TrashIcon } from '../Icons';
 import { Input } from '../Input';
 
 // =============================================================================
@@ -116,88 +118,57 @@ function AdditionalFields({
     <>
       {/* Existing entries */}
       {value.map((entry) => (
-        <div key={entry.id} className="mb-3 flex items-start gap-2">
+        <div key={entry.id} className="mb-3 flex items-center gap-2">
           {/* Field name */}
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <Input
               value={entry.name}
               onChange={(e) => handleNameChange(entry.id, e.target.value)}
               placeholder={namePlaceholder}
               disabled={disabled}
-              aria-label="Field name"
+              label="Field name"
+              hideLabel
             />
           </div>
 
           {/* Field value */}
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <Input
               value={entry.value}
               onChange={(e) => handleValueChange(entry.id, e.target.value)}
               placeholder={valuePlaceholder}
               disabled={disabled}
-              aria-label="Field value"
+              label="Field value"
+              hideLabel
             />
           </div>
 
           {/* Remove button */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => handleRemove(entry.id)}
             disabled={disabled}
-            className={cn(
-              'shrink-0 rounded-md p-2 transition-colors',
-              'text-red-600 hover:bg-red-50',
-              'disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent',
-              'dark:text-red-400 dark:hover:bg-red-900/20',
-              'dark:disabled:text-gray-600'
-            )}
             aria-label="Remove field"
+            className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </button>
+            <TrashIcon className="h-4 w-4" />
+          </Button>
         </div>
       ))}
 
       {/* Add button */}
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={handleAdd}
         disabled={disabled || !canAdd}
-        className={cn(
-          'flex w-full items-center justify-start gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-          'text-brand-600 hover:bg-brand-50',
-          'disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-transparent',
-          'dark:text-brand-400 dark:hover:bg-brand-900/20',
-          'dark:disabled:text-gray-600'
-        )}
+        leftIcon={<PlusIcon className="h-4 w-4" />}
+        className="text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-900/20"
       >
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
         {addButtonLabel}
-      </button>
+      </Button>
     </>
   );
 
@@ -230,22 +201,12 @@ function AdditionalFields({
         aria-controls={contentId}
       >
         <span>{title}</span>
-        <svg
+        <ChevronDownIcon
           className={cn(
             'h-4 w-4 transition-transform duration-200',
             isExpanded ? 'rotate-180' : ''
           )}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 15l7-7 7 7"
-          />
-        </svg>
+        />
         {value.length > 0 && (
           <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 ml-1 rounded-full px-2 py-0.5 text-xs">
             {value.length}
@@ -257,8 +218,8 @@ function AdditionalFields({
       <div
         id={contentId}
         className={cn(
-          'overflow-hidden transition-all duration-200',
-          isExpanded ? 'mt-4 opacity-100' : 'max-h-0 opacity-0'
+          'transition-all duration-200',
+          isExpanded ? 'mt-4 opacity-100' : 'max-h-0 overflow-hidden opacity-0'
         )}
         hidden={!isExpanded}
       >

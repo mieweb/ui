@@ -53,13 +53,39 @@ const meta: Meta<typeof SiteFooter> = {
   parameters: {
     layout: 'fullscreen',
   },
-};
-
-export default meta;
-type Story = StoryObj<typeof SiteFooter>;
-
-// Default full footer
-export const Default: Story = {
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'dark', 'primary', 'white'],
+      description: 'Visual style variant',
+    },
+    description: {
+      control: 'text',
+      description: 'Footer description text',
+    },
+    companyName: {
+      control: 'text',
+      description: 'Company name for copyright',
+    },
+    showNewsletter: {
+      control: 'boolean',
+      description: 'Show newsletter signup form',
+    },
+    emergencyDisclaimer: {
+      control: 'boolean',
+      description: 'Show emergency 911 disclaimer',
+    },
+    privacyHref: { control: 'text' },
+    termsHref: { control: 'text' },
+    cookiesHref: { control: 'text' },
+    newsletterPlaceholder: { control: 'text' },
+    additionalLegalLinks: { table: { disable: true } },
+    disclaimer: { table: { disable: true } },
+    logo: { table: { disable: true } },
+    linkGroups: { table: { disable: true } },
+    socialLinks: { table: { disable: true } },
+    onNewsletterSubmit: { action: 'newsletter-submitted' },
+  },
   args: {
     logo: { name: 'BlueHive', href: '/' },
     description:
@@ -67,8 +93,15 @@ export const Default: Story = {
     linkGroups: defaultLinkGroups,
     socialLinks: defaultSocialLinks,
     emergencyDisclaimer: true,
+    variant: 'default',
   },
 };
+
+export default meta;
+type Story = StoryObj<typeof SiteFooter>;
+
+// Default full footer
+export const Default: Story = {};
 
 // Dark variant
 export const DarkVariant: Story = {

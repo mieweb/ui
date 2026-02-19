@@ -94,7 +94,7 @@ const connectedProvider: HRISProvider = {
 };
 
 const meta: Meta<typeof HRISProviderSelector> = {
-  title: 'Components/HRISProviderSelector',
+  title: 'Inputs & Controls/HRISProviderSelector',
   component: HRISProviderSelector,
   tags: ['autodocs'],
   args: {

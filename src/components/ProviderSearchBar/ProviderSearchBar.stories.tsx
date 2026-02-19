@@ -9,18 +9,6 @@ import {
   type PostalCodeInfo,
 } from './ProviderSearchBar';
 
-const meta: Meta<typeof ProviderSearchBar> = {
-  title: 'Search/ProviderSearchBar',
-  component: ProviderSearchBar,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'padded',
-  },
-};
-
-export default meta;
-type Story = StoryObj<typeof ProviderSearchBar>;
-
 const mockPostalCode: PostalCodeInfo = {
   zipcode: '46220',
   city: 'Indianapolis',
@@ -29,13 +17,42 @@ const mockPostalCode: PostalCodeInfo = {
   longitude: -86.1255,
 };
 
-// Default search bar
-export const Default: Story = {
+const meta: Meta<typeof ProviderSearchBar> = {
+  title: 'Search/ProviderSearchBar',
+  component: ProviderSearchBar,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+  },
+  argTypes: {
+    geoStatus: {
+      control: 'select',
+      options: ['idle', 'loading', 'success', 'error'],
+      description: 'Current geolocation status',
+    },
+    variant: { table: { disable: true } },
+    size: { table: { disable: true } },
+    results: { table: { disable: true } },
+    onSearch: { action: 'searched' },
+    onGeolocate: { action: 'geolocated' },
+    onResultsClick: { action: 'results-clicked' },
+    onValueChange: { action: 'value-changed' },
+    loading: { control: 'boolean' },
+    showResults: { control: 'boolean' },
+  },
   args: {
-    onSearch: (zip) => console.log('Search:', zip),
     providerCount: 17500,
+    geoStatus: 'idle',
+    showResults: true,
+    results: { count: 42, postalCode: mockPostalCode, distance: 25 },
   },
 };
+
+export default meta;
+type Story = StoryObj<typeof ProviderSearchBar>;
+
+// Default search bar
+export const Default: Story = {};
 
 // All variants comparison
 export const AllVariants: Story = {

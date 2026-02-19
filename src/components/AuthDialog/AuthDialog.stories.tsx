@@ -113,7 +113,7 @@ function AuthDialogDemo({
 type AuthDialogStoryProps = DemoControls;
 
 const meta: Meta<AuthDialogStoryProps> = {
-  title: 'Components/AuthDialog',
+  title: 'Feedback & Overlays/AuthDialog',
   component: AuthDialogDemo,
   tags: ['autodocs'],
   parameters: {

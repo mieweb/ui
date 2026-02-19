@@ -83,7 +83,7 @@ const sampleReports: BackgroundCheckReport[] = [
 ];
 
 const meta: Meta<typeof CheckrIntegration> = {
-  title: 'Components/CheckrIntegration',
+  title: 'Feature Modules/CheckrIntegration',
   component: CheckrIntegration,
   tags: ['autodocs'],
   argTypes: {

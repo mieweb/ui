@@ -29,6 +29,33 @@ const meta: Meta<typeof SiteHeader> = {
   parameters: {
     layout: 'fullscreen',
   },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['primary', 'white', 'transparent', 'glass'],
+      description: 'Visual style variant',
+    },
+    showSignUp: {
+      control: 'boolean',
+      description: 'Show sign up button',
+    },
+    loginHref: { control: 'text' },
+    signUpHref: { control: 'text' },
+    user: { control: false, table: { disable: true } },
+    logo: { control: false, table: { disable: true } },
+    links: { control: false, table: { disable: true } },
+    userMenuItems: { control: false, table: { disable: true } },
+    onLogin: { action: 'login-clicked' },
+    onSignUp: { action: 'sign-up-clicked' },
+    onLogout: { action: 'logout-clicked' },
+    onProfile: { action: 'profile-clicked' },
+  },
+  args: {
+    logo: { name: 'BlueHive' },
+    links: defaultLinks,
+    variant: 'primary',
+    showSignUp: true,
+  },
   decorators: [
     (Story) => (
       <div className="min-h-[300px] bg-gray-100 dark:bg-gray-950">
@@ -47,23 +74,12 @@ export default meta;
 type Story = StoryObj<typeof SiteHeader>;
 
 // Default header (logged out)
-export const Default: Story = {
-  args: {
-    logo: { name: 'BlueHive' },
-    links: defaultLinks,
-    onLogin: () => window.alert('Login clicked'),
-    onSignUp: () => window.alert('Sign up clicked'),
-  },
-};
+export const Default: Story = {};
 
 // Logged in user
 export const LoggedIn: Story = {
   args: {
-    logo: { name: 'BlueHive' },
-    links: defaultLinks,
     user: sampleUser,
-    onLogout: () => window.alert('Logout clicked'),
-    onProfile: () => window.alert('Profile clicked'),
   },
 };
 
@@ -71,10 +87,6 @@ export const LoggedIn: Story = {
 export const WhiteVariant: Story = {
   args: {
     variant: 'white',
-    logo: { name: 'BlueHive' },
-    links: defaultLinks,
-    onLogin: () => {},
-    onSignUp: () => {},
   },
 };
 
@@ -82,9 +94,6 @@ export const WhiteVariant: Story = {
 export const GlassVariant: Story = {
   args: {
     variant: 'glass',
-    logo: { name: 'BlueHive' },
-    links: defaultLinks,
-    onLogin: () => {},
   },
   decorators: [
     (Story) => (

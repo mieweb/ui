@@ -270,7 +270,7 @@ function OnboardingWizardDemo({
 // =============================================================================
 
 const meta: Meta<typeof OnboardingWizardDemo> = {
-  title: 'Components/OnboardingWizard',
+  title: 'Feature Modules/OnboardingWizard',
   component: OnboardingWizardDemo,
   tags: ['autodocs'],
   parameters: {

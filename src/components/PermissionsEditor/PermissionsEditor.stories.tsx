@@ -9,7 +9,7 @@ import { Card } from '../Card';
 import { Button } from '../Button';
 
 const meta: Meta<typeof PermissionsEditor> = {
-  title: 'Components/PermissionsEditor',
+  title: 'Authentication & Permissions/PermissionsEditor',
   component: PermissionsEditor,
   tags: ['autodocs'],
   argTypes: {

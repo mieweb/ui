@@ -34,7 +34,7 @@ const sampleContacts: ProviderContact[] = [
 ];
 
 const meta: Meta<typeof ResultsEntryForm> = {
-  title: 'Components/ResultsEntryForm',
+  title: 'Inputs & Controls/ResultsEntryForm',
   component: ResultsEntryForm,
   tags: ['autodocs'],
   parameters: {

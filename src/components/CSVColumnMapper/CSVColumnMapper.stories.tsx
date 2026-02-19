@@ -7,7 +7,7 @@ import {
 } from './CSVColumnMapper';
 
 const meta: Meta<typeof CSVColumnMapper> = {
-  title: 'Components/CSVColumnMapper',
+  title: 'Inputs & Controls/CSVColumnMapper',
   component: CSVColumnMapper,
   tags: ['autodocs'],
   args: {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta = {
-  title: 'Examples/Colors',
+  title: 'Foundations/Colors',
   parameters: {
     layout: 'fullscreen',
   },

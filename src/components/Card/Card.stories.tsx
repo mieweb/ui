@@ -17,7 +17,7 @@ import {
 import { Button } from '../Button';
 
 const meta: Meta<typeof Card> = {
-  title: 'Components/Card',
+  title: 'Layout & Structure/Card',
   component: Card,
   parameters: {
     layout: 'centered',

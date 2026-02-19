@@ -3,7 +3,7 @@ import { SetupServiceModal } from './SetupServiceModal';
 
 const meta: Meta<typeof SetupServiceModal> = {
   component: SetupServiceModal,
-  title: 'Components/SetupServiceModal',
+  title: 'Feedback & Overlays/SetupServiceModal',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',

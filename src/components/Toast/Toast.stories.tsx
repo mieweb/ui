@@ -129,7 +129,7 @@ function ToastPositionsDemo() {
 // =============================================================================
 
 const meta: Meta<typeof Toast> = {
-  title: 'Components/Toast',
+  title: 'Feedback & Overlays/Toast',
   component: Toast,
   parameters: {
     layout: 'centered',

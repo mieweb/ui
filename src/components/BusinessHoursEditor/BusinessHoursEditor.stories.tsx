@@ -9,7 +9,7 @@ import {
 } from './BusinessHoursEditor';
 
 const meta: Meta<typeof BusinessHoursEditor> = {
-  title: 'Components/BusinessHoursEditor',
+  title: 'Inputs & Controls/BusinessHoursEditor',
   component: BusinessHoursEditor,
   tags: ['autodocs'],
   parameters: {
