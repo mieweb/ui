@@ -77,6 +77,7 @@ export default [
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         getComputedStyle: 'readonly',
+        MutationObserver: 'readonly',
         // File APIs
         File: 'readonly',
         FileList: 'readonly',
@@ -122,6 +123,16 @@ export default [
     files: ['src/**/*.stories.{ts,tsx}'],
     rules: {
       'no-console': 'off',
+    },
+  },
+  // DataVis shim files run in browser context and need browser globals
+  {
+    files: ['src/components/DataVis/*.js'],
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        console: 'readonly',
+      },
     },
   },
   {
