@@ -4,6 +4,12 @@
 
 import { DateTime } from 'luxon';
 
+/**
+ * Parses a date string to a Luxon DateTime object
+ * @param value - Date string in MM/DD/YYYY format (with or without separators)
+ * @returns DateTime object in local timezone, or null if invalid
+ * @remarks Dates are interpreted in the user's local timezone, consistent with typical user-input date handling
+ */
 function parseDateTimeValue(value: string): DateTime | null {
   const digits = value.replace(/\D/g, '');
   if (digits.length !== 8) return null;
