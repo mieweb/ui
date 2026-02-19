@@ -24,6 +24,7 @@
   --color-primary-800: var(--mieweb-primary-800);
   --color-primary-900: var(--mieweb-primary-900);
   --color-primary-950: var(--mieweb-primary-950);
+  --color-primary-foreground: var(--mieweb-primary-foreground, #ffffff);
 
   /* ── Secondary Color Scale ─────────────────────────────────────────── */
   --color-secondary: var(--mieweb-secondary-500);
