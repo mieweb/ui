@@ -2,6 +2,33 @@
  * Date formatting and validation utilities
  */
 
+import { DateTime } from 'luxon';
+
+/**
+ * Parses a date string to a Luxon DateTime object
+ * @param value - Date string in MM/DD/YYYY format (with or without separators)
+ * @returns DateTime object in local timezone, or null if invalid
+ * @remarks Dates are interpreted in the user's local timezone, consistent with typical user-input date handling
+ */
+function parseDateTimeValue(value: string): DateTime | null {
+  const digits = value.replace(/\D/g, '');
+  if (digits.length !== 8) return null;
+
+  const parsed = DateTime.fromFormat(digits, 'MMddyyyy', {
+    zone: 'local',
+  });
+
+  if (!parsed.isValid) {
+    return null;
+  }
+
+  if (parsed.year < 1900 || parsed.year > 2100) {
+    return null;
+  }
+
+  return parsed.startOf('day');
+}
+
 /**
  * Formats a date string to MM/DD/YYYY format
  */
@@ -18,29 +45,8 @@ export function formatDateValue(value: string): string {
  * Returns null if the date is invalid
  */
 export function parseDateValue(value: string): Date | null {
-  const digits = value.replace(/\D/g, '');
-  if (digits.length !== 8) return null;
-
-  const month = parseInt(digits.slice(0, 2), 10);
-  const day = parseInt(digits.slice(2, 4), 10);
-  const year = parseInt(digits.slice(4, 8), 10);
-
-  if (month < 1 || month > 12) return null;
-  if (day < 1 || day > 31) return null;
-  if (year < 1900 || year > 2100) return null;
-
-  const date = new Date(year, month - 1, day);
-
-  // Verify the date is valid (handles edge cases like Feb 30)
-  if (
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day ||
-    date.getFullYear() !== year
-  ) {
-    return null;
-  }
-
-  return date;
+  const parsed = parseDateTimeValue(value);
+  return parsed ? parsed.toJSDate() : null;
 }
 
 /**
@@ -62,17 +68,13 @@ export function isDateEmpty(value: string): boolean {
  * Returns null if the date is invalid
  */
 export function calculateAge(dob: string): number | null {
-  const birthDate = parseDateValue(dob);
+  const birthDate = parseDateTimeValue(dob);
   if (!birthDate) return null;
 
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const today = DateTime.now().startOf('day');
+  let age = today.year - birthDate.year;
 
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < birthDate.getDate())
-  ) {
+  if (today < birthDate.plus({ years: age })) {
     age--;
   }
 
@@ -91,16 +93,18 @@ export function isValidDrivingAge(dob: string): boolean {
  * Checks if a date is in the past
  */
 export function isDateInPast(value: string): boolean {
-  const date = parseDateValue(value);
+  const date = parseDateTimeValue(value);
   if (!date) return false;
-  return date < new Date();
+
+  return date.toMillis() < DateTime.now().toMillis();
 }
 
 /**
  * Checks if a date is in the future
  */
 export function isDateInFuture(value: string): boolean {
-  const date = parseDateValue(value);
+  const date = parseDateTimeValue(value);
   if (!date) return false;
-  return date > new Date();
+
+  return date.toMillis() > DateTime.now().toMillis();
 }
