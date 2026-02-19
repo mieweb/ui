@@ -26,6 +26,7 @@ export * from './components/ConnectionStatus';
 export * from './components/CountBadge';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
+export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
