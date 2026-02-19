@@ -10,8 +10,14 @@
  *   @import '@mieweb/ui/brands/ozwell.css' layer(theme);
  */
 
-/* Load Nunito from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+/*
+ * NOTE: The Google Fonts @import for Nunito was removed from this file
+ * because CSS @import url() inside an @imported file causes bundler
+ * warnings ("@import rules in the middle of a file").
+ *
+ * Consumers should load the font themselves, e.g. via an HTML <link> tag:
+ *   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" />
+ */
 
 /* ============================================
    Ozwell Design Tokens
