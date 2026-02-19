@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     'ag-grid': 'src/ag-grid.ts',
+    datavis: 'src/datavis.ts',
     'hooks/index': 'src/hooks/index.ts',
     'utils/index': 'src/utils/index.ts',
     'tailwind-preset': 'src/tailwind-preset.ts',
@@ -51,7 +52,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ['react', 'react-dom', 'ag-grid-community', 'ag-grid-react'],
+  external: ['react', 'react-dom', 'ag-grid-community', 'ag-grid-react', '@mieweb/wcdatavis', 'wcdatavis'],
   treeshake: true,
   splitting: true,
   minify: false,

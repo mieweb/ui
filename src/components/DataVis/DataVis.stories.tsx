@@ -30,14 +30,22 @@ in a declarative React interface with full integration into the MIE Web UI desig
 - **Size presets** (sm, md, lg)
 - **Lifecycle management** (mount, update, destroy)
 
+### Installation
+
+DataVis lives in a **separate entry point** so the heavy \`@mieweb/wcdatavis\`
+library is never pulled into your bundle unless you explicitly opt in:
+
+\`\`\`bash
+npm install @mieweb/wcdatavis font-awesome
+\`\`\`
+
 ### Prerequisites
 
-1. Install \`@mieweb/wcdatavis\` as a dependency
-2. Include FontAwesome 4.7 CSS for icons
-3. Import the DataVis theme CSS from this package
+1. Include FontAwesome 4.7 CSS for icons
+2. Import the DataVis theme CSS from this package
 
 \`\`\`tsx
-import { DataVis } from '@mieweb/ui';
+import { DataVis } from '@mieweb/ui/datavis';
 
 <DataVis
   source={{ type: 'http', url: '/api/data.csv' }}

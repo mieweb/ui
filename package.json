@@ -117,6 +117,16 @@
         "default": "./dist/ag-grid.cjs"
       }
     },
+    "./datavis": {
+      "import": {
+        "types": "./dist/datavis.d.ts",
+        "default": "./dist/datavis.js"
+      },
+      "require": {
+        "types": "./dist/datavis.d.cts",
+        "default": "./dist/datavis.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css"
   },
