@@ -107,6 +107,16 @@
         "default": "./dist/brands/*.cjs"
       }
     },
+    "./ag-grid": {
+      "import": {
+        "types": "./dist/ag-grid.d.ts",
+        "default": "./dist/ag-grid.js"
+      },
+      "require": {
+        "types": "./dist/ag-grid.d.cts",
+        "default": "./dist/ag-grid.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css"
   },

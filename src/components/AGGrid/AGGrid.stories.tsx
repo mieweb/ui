@@ -268,14 +268,30 @@ A themed AG Grid wrapper component that integrates with the MIE Web UI design sy
 - **Full AG Grid API**: Access all AG Grid features through the wrapper
 
 ## Installation
-AG Grid must be installed separately:
+
+AG Grid is **not** included in the default \`@mieweb/ui\` install — it's an opt-in dependency.
+This keeps the base package lightweight for consumers who don't need data grids.
+
+**1. Install AG Grid alongside \`@mieweb/ui\`:**
+
 \`\`\`bash
-npm install ag-grid-community ag-grid-react
+npm install @mieweb/ui ag-grid-community ag-grid-react
 \`\`\`
+
+**2. Import from the \`@mieweb/ui/ag-grid\` sub-path** (not the main entry):
+
+\`\`\`tsx
+import { AGGrid } from '@mieweb/ui/ag-grid';
+\`\`\`
+
+> **Why a separate import?** The main \`@mieweb/ui\` entry never references AG Grid,
+> so bundlers won't try to resolve \`ag-grid-community\` or \`ag-grid-react\` unless
+> you explicitly import from \`@mieweb/ui/ag-grid\`. No AG Grid installed? No problem —
+> everything else works fine.
 
 ## Basic Usage
 \`\`\`tsx
-import { AGGrid } from '@mieweb/ui';
+import { AGGrid } from '@mieweb/ui/ag-grid';
 import 'ag-grid-community/styles/ag-grid.css';
 
 const columnDefs = [
@@ -288,6 +304,18 @@ const rowData = [
 ];
 
 <AGGrid columnDefs={columnDefs} rowData={rowData} />
+\`\`\`
+
+## Cell Renderers
+
+Pre-built cell renderers are also available from the same sub-path:
+
+\`\`\`tsx
+import {
+  AGGrid,
+  MemoizedStatusBadgeRenderer,
+  MemoizedCurrencyRenderer,
+} from '@mieweb/ui/ag-grid';
 \`\`\`
         `,
       },

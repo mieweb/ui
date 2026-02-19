@@ -2,7 +2,9 @@
 export * from './components/AddContactModal';
 export * from './components/AdditionalFields';
 export * from './components/Address';
-export * from './components/AGGrid';
+// AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
+// This avoids forcing ag-grid-community/ag-grid-react on all consumers.
+// See: src/ag-grid.ts
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AppHeader';
