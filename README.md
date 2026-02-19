@@ -18,6 +18,7 @@ A themeable, accessible React component library built with Tailwind CSS 4.
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Development](#development)
+- [Date & Time Standard](#date--time-standard)
 - [Storybook](#storybook)
 - [Using in Other Projects](#using-in-other-projects)
 - [Brand System](#brand-system)
@@ -139,6 +140,33 @@ This will watch for changes and rebuild the library automatically.
 | `npm run format:fix`      | Fix code formatting with Prettier   |
 | `npm run test`            | Run tests                           |
 | `npm run test:watch`      | Run tests in watch mode             |
+
+## Date & Time Standard
+
+For UI/UX date and time behavior, this project uses **Luxon** as the preferred library.
+
+### Guidelines
+
+- Use `DateTime` from `luxon` for all new date/time parsing, formatting, and comparisons.
+- Keep timezone explicit when logic depends on business rules (for example: office hours, “open now”, appointment windows).
+- Use IANA timezone identifiers (for example: `America/New_York`) instead of abbreviations.
+- Prefer storing/transmitting ISO-8601 values and convert for display at the component edge.
+- Avoid adding new date logic with raw `Date` math unless there is a clear performance or compatibility reason.
+
+### Examples
+
+```ts
+import { DateTime } from 'luxon';
+
+const localDisplay = DateTime.fromISO(timestamp).toFormat('LLL d, yyyy h:mm a');
+
+const inProviderZone = DateTime.fromISO(timestamp, {
+  zone: 'America/New_York',
+});
+
+const isOpen = DateTime.now().setZone('America/New_York') <
+  inProviderZone.plus({ hours: 1 });
+```
 
 ## Storybook
 
