@@ -166,8 +166,8 @@ function DetailItem({
 }) {
   return (
     <div className="text-muted-foreground flex items-center gap-2 text-sm">
-      <span className="text-muted-foreground/60 shrink-0">{icon}</span>
-      <span className="text-muted-foreground/80 text-xs font-semibold tracking-wide uppercase">
+      <span className="text-muted-foreground shrink-0">{icon}</span>
+      <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
         {label}
       </span>
       <span className="text-foreground">{value}</span>
@@ -180,8 +180,8 @@ function AllergyRow({ allergies }: { allergies: AllergyItem[] }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div className="flex shrink-0 items-center gap-1.5">
-        <AlertCircleIcon size={16} className="text-red-500 dark:text-red-400" />
-        <span className="text-xs font-semibold tracking-wide text-red-600 uppercase dark:text-red-400">
+        <AlertCircleIcon size={16} className="text-red-600 dark:text-red-400" />
+        <span className="text-xs font-semibold tracking-wide text-red-700 uppercase dark:text-red-400">
           Allergies
         </span>
       </div>
@@ -473,8 +473,8 @@ export const PatientHeader = React.forwardRef<
                 aria-expanded={detailsExpanded}
                 aria-controls="patient-details-content"
                 className={cn(
-                  'text-primary flex items-center gap-1 px-5 py-2 text-sm',
-                  'hover:text-primary/80 w-full transition-colors',
+                  'text-primary-800 dark:text-primary-300 flex items-center gap-1 px-5 py-2 text-sm',
+                  'hover:text-primary-900 dark:hover:text-primary-200 w-full transition-colors',
                   'focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
                 )}
               >

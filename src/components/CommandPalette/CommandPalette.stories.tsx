@@ -132,7 +132,7 @@ function CommandPaletteDemo() {
     <div className="flex flex-col items-center gap-4">
       <p className="text-sm text-gray-500 dark:text-gray-400">
         Press{' '}
-        <kbd className="rounded bg-gray-100 px-2 py-1 dark:bg-gray-700">⌘K</kbd>{' '}
+        <kbd className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-700 dark:text-gray-300">⌘K</kbd>{' '}
         or click the button below
       </p>
       <CommandPaletteTrigger placeholder="Search pages, users, settings..." />
@@ -292,7 +292,7 @@ function PlaygroundDemo(props: React.ComponentProps<typeof CommandPalette>) {
     <div className="flex flex-col items-center gap-4">
       <p className="text-sm text-gray-500 dark:text-gray-400">
         Press{' '}
-        <kbd className="rounded bg-gray-100 px-2 py-1 dark:bg-gray-700">⌘K</kbd>{' '}
+        <kbd className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-700 dark:text-gray-300">⌘K</kbd>{' '}
         or click the button below
       </p>
       <CommandPaletteTrigger placeholder={props.placeholder} />
