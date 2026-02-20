@@ -166,70 +166,70 @@ export function OrderSidebar({
           </div>
 
           {/* Details */}
-          <dl className="space-y-4">
+          <div className="space-y-4">
             {patientName && (
-              <div>
+              <dl>
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Patient
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                   {patientName}
                 </dd>
-              </div>
+              </dl>
             )}
 
             {employerName && (
-              <div>
+              <dl>
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Employer
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                   {employerName}
                 </dd>
-              </div>
+              </dl>
             )}
 
             {serviceName && (
-              <div>
+              <dl>
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Service
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                   {serviceName}
                 </dd>
-              </div>
+              </dl>
             )}
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <dl>
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Created
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                   {formatDate(createdAt)}
                 </dd>
-              </div>
-              <div>
+              </dl>
+              <dl>
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Scheduled
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                   {formatDate(scheduledDate)}
                 </dd>
-              </div>
+              </dl>
             </div>
 
             {notes && (
-              <div>
+              <dl>
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Notes
                 </dt>
                 <dd className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                   {notes}
                 </dd>
-              </div>
+              </dl>
             )}
-          </dl>
+          </div>
 
           {/* Additional content */}
           {children && <div className="mt-6">{children}</div>}
