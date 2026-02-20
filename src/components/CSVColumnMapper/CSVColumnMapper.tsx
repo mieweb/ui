@@ -154,7 +154,7 @@ export function CSVColumnMapper({
         <h4 className="text-primary-800 dark:text-primary-200 mb-1 font-semibold">
           {ensureAccurateData}
         </h4>
-        <p className="text-primary-700 dark:text-primary-300 text-sm">
+        <p className="text-primary-800 dark:text-primary-300 text-sm">
           {ensureAccurateDataDescription}
         </p>
       </div>
@@ -246,7 +246,7 @@ function CSVColumnCard({
       <div className="flex items-center gap-2 px-4 py-3">
         {!column.ignored &&
           (isMapped ? (
-            <span className="bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+            <span className="bg-success-700 text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
               <svg
                 className="h-3 w-3"
                 fill="none"
@@ -262,7 +262,7 @@ function CSVColumnCard({
               </svg>
             </span>
           ) : (
-            <span className="bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+            <span className="bg-warning-700 text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
               <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" fill="currentColor" />
                 <circle cx="12" cy="12" r="4" className="fill-warning" />
@@ -286,7 +286,7 @@ function CSVColumnCard({
             title={column.sampleValue}
           >
             {column.sampleValue || (
-              <em className="text-muted-foreground">Empty</em>
+              <em className="text-neutral-600 dark:text-neutral-300">Empty</em>
             )}
           </div>
         </div>
@@ -299,7 +299,9 @@ function CSVColumnCard({
           <div
             className={cn(
               'rounded-md',
-              hasError && !column.ignored && 'ring-warning/50 ring-2'
+              hasError &&
+                !column.ignored &&
+                'ring-warning-700/50 dark:ring-warning-400/50 ring-2'
             )}
           >
             <Select
@@ -314,7 +316,7 @@ function CSVColumnCard({
               className={cn(
                 hasError &&
                   !column.ignored &&
-                  'border-warning text-warning placeholder:text-warning'
+                  'border-warning-700 text-warning-700 placeholder:text-warning-700 dark:border-warning-400 dark:text-warning-400 dark:placeholder:text-warning-400'
               )}
             />
           </div>
@@ -473,12 +475,16 @@ export function CSVFileUpload({
       {processing ? (
         <div className="flex flex-col items-center">
           <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-          <p className="text-muted-foreground mt-4">Processing file...</p>
+          <p className="mt-4 text-neutral-600 dark:text-neutral-300">
+            Processing file...
+          </p>
         </div>
       ) : (
         <>
-          <i className="fas fa-file-csv text-muted-foreground mb-4 text-5xl" />
-          <p className="text-muted-foreground mb-4 text-lg">{selectFile}</p>
+          <i className="fas fa-file-csv mb-4 text-5xl text-neutral-600 dark:text-neutral-300" />
+          <p className="mb-4 text-lg text-neutral-600 dark:text-neutral-300">
+            {selectFile}
+          </p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
