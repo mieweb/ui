@@ -86,7 +86,7 @@ function AuthDialogDemo({
     <div className="min-h-screen bg-gray-100 p-8 dark:bg-gray-900">
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white"
+        className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white"
       >
         Open Auth Dialog
       </button>
