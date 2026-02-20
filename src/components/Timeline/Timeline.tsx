@@ -229,7 +229,7 @@ export function TimelineProgress({
                       'relative z-10 flex items-center justify-center rounded-full transition-all duration-200',
                       state === 'completed' &&
                         cn(
-                          'bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2',
+                          'bg-primary-100 text-primary-800 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2',
                           sizes.completed
                         ),
                       state === 'current' &&
@@ -240,7 +240,7 @@ export function TimelineProgress({
                         ),
                       state === 'pending' &&
                         cn(
-                          'bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700',
+                          'bg-neutral-100 text-neutral-500 ring-2 ring-neutral-400 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-600',
                           sizes.pending
                         ),
                       state === 'error' &&
@@ -264,7 +264,7 @@ export function TimelineProgress({
                     {state === 'pending' && (
                       <div
                         className={cn(
-                          'rounded-full bg-neutral-300 dark:bg-neutral-600',
+                          'rounded-full bg-neutral-500 dark:bg-neutral-400',
                           sizes.pendingDot
                         )}
                       />
@@ -295,11 +295,11 @@ export function TimelineProgress({
                   sizes.label,
                   sizes.labelMargin,
                   state === 'completed' &&
-                    'text-primary-700 dark:text-primary-300',
+                    'text-primary-800 dark:text-primary-300',
                   state === 'current' &&
                     'font-semibold text-neutral-900 dark:text-white',
                   state === 'pending' &&
-                    'text-neutral-400 dark:text-neutral-500',
+                    'text-neutral-500 dark:text-neutral-400',
                   state === 'error' &&
                     'font-semibold text-red-600 dark:text-red-400'
                 )}
@@ -393,11 +393,11 @@ export function TimelineEventList({
       case 'message':
         return 'bg-blue-50 text-blue-500 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40';
       case 'status':
-        return 'bg-green-50 text-green-500 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40';
+        return 'bg-green-50 text-green-700 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40';
       case 'attachment':
         return 'bg-purple-50 text-purple-500 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40';
       case 'assignment':
-        return 'bg-orange-50 text-orange-500 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40';
+        return 'bg-orange-50 text-orange-700 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40';
       case 'note':
         return 'bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40';
       default:
@@ -449,7 +449,7 @@ export function TimelineEventList({
                     </p>
                   )}
                 </div>
-                <time className="shrink-0 pt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
+                <time className="shrink-0 pt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
                   {formatTime(event.timestamp)}
                 </time>
               </div>
@@ -552,8 +552,8 @@ export function OrderConfirmation({
           onClick={onClose}
           className={cn(
             'w-full rounded-lg px-4 py-3 font-medium',
-            'bg-primary-600 hover:bg-primary-700 text-white',
-            'dark:bg-primary-500 dark:hover:bg-primary-600',
+            'bg-primary-800 hover:bg-primary-900 text-white',
+            'dark:bg-primary-800 dark:hover:bg-primary-900',
             'transition-colors'
           )}
         >
