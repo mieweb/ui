@@ -190,7 +190,7 @@ export function CookieConsentBanner({
                     className={cn(
                       'underline hover:no-underline',
                       variant === 'default'
-                        ? 'text-primary-800 hover:text-primary-900 dark:text-primary-400'
+                        ? 'text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200'
                         : 'text-white hover:text-white/80'
                     )}
                   >

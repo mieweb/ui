@@ -296,6 +296,7 @@ export interface DialogOverlayProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  titleId?: string;
 }
 
 /**
@@ -317,6 +318,7 @@ export function DialogOverlay({
   onClose,
   children,
   className,
+  titleId,
 }: DialogOverlayProps) {
   React.useEffect(() => {
     // Skip scroll lock in Storybook docs mode where stories render inline
@@ -364,7 +366,7 @@ export function DialogOverlay({
           )}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="booking-dialog-title"
+          aria-labelledby={titleId}
         >
           {children}
         </div>
@@ -388,6 +390,7 @@ export function BookingDialog({
   isLoading = false,
   className,
 }: BookingDialogProps) {
+  const titleId = React.useId();
   const [formData, setFormData] = React.useState<BookingFormData>({
     firstName: defaultValues?.firstName || '',
     lastName: defaultValues?.lastName || '',
@@ -432,11 +435,16 @@ export function BookingDialog({
   )}`;
 
   return (
-    <DialogOverlay isOpen={isOpen} onClose={onClose} className={className}>
+    <DialogOverlay
+      isOpen={isOpen}
+      onClose={onClose}
+      className={className}
+      titleId={titleId}
+    >
       {/* Header */}
       <div className="border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
         <h2
-          id="booking-dialog-title"
+          id={titleId}
           className="text-lg leading-none font-semibold tracking-tight"
         >
           Book Appointment
