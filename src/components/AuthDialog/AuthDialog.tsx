@@ -314,7 +314,7 @@ export function AuthDialog({
           {/* Verification Message */}
           {mode === 'verify' && (
             <div className="py-4 text-center">
-              <MailIcon className="text-primary-800 mx-auto mb-4 h-12 w-12" />
+              <MailIcon className="text-primary-800 dark:text-primary-300 mx-auto mb-4 h-12 w-12" />
               <p className="mb-4 text-gray-600 dark:text-gray-400">
                 We&apos;ve sent a verification email to your inbox. Please click
                 the link to verify your account.
@@ -322,7 +322,7 @@ export function AuthDialog({
               <button
                 type="button"
                 onClick={() => setMode('login')}
-                className="text-primary-800 hover:text-primary-900 text-sm font-medium"
+                className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 text-sm font-medium"
               >
                 Return to login
               </button>
