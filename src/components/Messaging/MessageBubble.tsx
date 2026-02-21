@@ -17,7 +17,7 @@ const statusIconVariants = cva(
   {
     variants: {
       status: {
-        sending: 'text-neutral-400',
+        sending: 'text-neutral-500',
         sent: 'text-neutral-500',
         delivered: 'text-neutral-600 dark:text-neutral-400',
         read: 'text-primary-600 dark:text-primary-400',
@@ -586,7 +586,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
             )}
           >
             {showTimestamp && (
-              <span className="text-xs text-neutral-400 dark:text-neutral-500">
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
                 {formatTimestamp(message.timestamp)}
               </span>
             )}

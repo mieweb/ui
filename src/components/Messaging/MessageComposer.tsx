@@ -57,7 +57,7 @@ function CharacterCounter({
           ? 'font-medium text-red-500'
           : isWarning
             ? 'text-amber-500'
-            : 'text-neutral-400',
+            : 'text-neutral-500',
         className
       )}
       aria-live="polite"
@@ -443,8 +443,8 @@ const MessageComposer = React.forwardRef<
                 onClick={onCancelReply}
                 className={cn(
                   'shrink-0 rounded p-1',
-                  'text-neutral-400 hover:text-neutral-600',
-                  'dark:text-neutral-500 dark:hover:text-neutral-300',
+                  'text-neutral-500 hover:text-neutral-700',
+                  'dark:text-neutral-400 dark:hover:text-neutral-200',
                   'focus:ring-primary-500 focus:ring-2 focus:outline-none'
                 )}
                 aria-label="Cancel reply"

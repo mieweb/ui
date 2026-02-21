@@ -263,7 +263,7 @@ function EmptyState({
       {icon || (
         <div className="mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800">
           <svg
-            className="h-12 w-12 text-neutral-400"
+            className="h-12 w-12 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
