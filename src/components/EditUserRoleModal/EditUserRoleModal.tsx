@@ -89,7 +89,7 @@ export function EditUserRoleModal({
         {user && (
           <div className="bg-muted rounded-lg p-3">
             <p className="text-foreground font-medium">{user.name}</p>
-            <p className="text-muted-foreground text-sm">{user.email}</p>
+            <p className="text-foreground/70 text-sm">{user.email}</p>
           </div>
         )}
 
@@ -130,7 +130,7 @@ export function EditUserRoleModal({
         {/* Role description */}
         {selectedRole?.description && (
           <div className="bg-primary/10 rounded-lg p-3">
-            <p className="text-primary text-sm">{selectedRole.description}</p>
+            <p className="text-primary-800 dark:text-primary-300 text-sm">{selectedRole.description}</p>
           </div>
         )}
 
@@ -144,7 +144,7 @@ export function EditUserRoleModal({
               {selectedRole.permissions.map((permission) => (
                 <span
                   key={permission}
-                  className="bg-muted text-muted-foreground rounded-full px-2 py-1 text-xs font-medium"
+                  className="bg-muted text-foreground/70 rounded-full px-2 py-1 text-xs font-medium"
                 >
                   {permission}
                 </span>
