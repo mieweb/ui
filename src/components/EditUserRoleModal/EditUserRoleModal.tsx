@@ -130,7 +130,9 @@ export function EditUserRoleModal({
         {/* Role description */}
         {selectedRole?.description && (
           <div className="bg-primary/10 rounded-lg p-3">
-            <p className="text-primary-800 dark:text-primary-300 text-sm">{selectedRole.description}</p>
+            <p className="text-primary-800 dark:text-primary-300 text-sm">
+              {selectedRole.description}
+            </p>
           </div>
         )}
 
