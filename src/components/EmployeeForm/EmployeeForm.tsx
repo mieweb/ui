@@ -476,7 +476,7 @@ export function EmployeeForm({
           )}
           <button
             type="submit"
-            className="bg-primary-800 hover:bg-primary-900 rounded-md px-4 py-2 text-sm text-white"
+            className="bg-primary-600 hover:bg-primary-700 rounded-md px-4 py-2 text-sm text-white"
           >
             {mode === 'order' ? startOrder : save}
           </button>

@@ -491,7 +491,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
       <button
         type="submit"
         disabled={isLoading}
-        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? <Spinner className="mx-auto h-5 w-5" /> : 'Sign in'}
       </button>
@@ -636,7 +636,7 @@ function SignupForm({
       <button
         type="submit"
         disabled={isLoading || !passwordsMatch || !acceptedTerms}
-        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? <Spinner className="mx-auto h-5 w-5" /> : 'Create account'}
       </button>
@@ -689,7 +689,7 @@ function ForgotPasswordForm({
       <button
         type="submit"
         disabled={isLoading}
-        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <Spinner className="mx-auto h-5 w-5" />
@@ -789,7 +789,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
       <button
         type="submit"
         disabled={isLoading || !passwordsMatch}
-        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <Spinner className="mx-auto h-5 w-5" />
