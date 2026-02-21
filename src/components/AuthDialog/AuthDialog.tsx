@@ -625,7 +625,7 @@ function SignupForm({
           and{' '}
           <a
             href={privacyUrl}
-            className="text-primary-800 hover:underline"
+            className="text-primary-800 dark:text-primary-300 dark:hover:text-primary-200 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
