@@ -364,6 +364,7 @@ export function DialogOverlay({
           )}
           role="dialog"
           aria-modal="true"
+          aria-labelledby="booking-dialog-title"
         >
           {children}
         </div>
@@ -433,8 +434,13 @@ export function BookingDialog({
   return (
     <DialogOverlay isOpen={isOpen} onClose={onClose} className={className}>
       {/* Header */}
-      <div className="bg-primary-600 border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
-        <h2 className="text-xl font-semibold text-white">Book Appointment</h2>
+      <div className="bg-primary-800 border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
+        <h2
+          id="booking-dialog-title"
+          className="text-xl font-semibold text-white"
+        >
+          Book Appointment
+        </h2>
         <button
           type="button"
           onClick={onClose}
@@ -577,7 +583,7 @@ export function BookingDialog({
               type="submit"
               disabled={isLoading}
               className={cn(
-                'bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
+                'bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
                 isLoading && 'cursor-not-allowed opacity-50'
               )}
             >
@@ -704,7 +710,7 @@ export function InlineBookingForm({
         type="submit"
         disabled={isLoading}
         className={cn(
-          'bg-primary-600 hover:bg-primary-700 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
+          'bg-primary-800 hover:bg-primary-900 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -758,7 +764,7 @@ export function QuickBookCard({
         <button
           type="button"
           onClick={onBook}
-          className="bg-primary-600 hover:bg-primary-700 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          className="bg-primary-800 hover:bg-primary-900 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
         >
           <CalendarIcon className="h-4 w-4" />
           Book Online
