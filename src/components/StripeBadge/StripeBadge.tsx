@@ -82,7 +82,7 @@ export function StripeBadge({
   };
 
   const variantClasses = {
-    default: 'bg-[#635bff]/5 text-[#635bff] dark:bg-[#635bff]/20',
+    default: 'bg-[#635bff]/10 text-[#635bff] dark:bg-[#635bff]/20',
     outline: 'border border-[#635bff]/30 text-[#635bff]',
     minimal: 'text-muted-foreground hover:text-[#635bff]',
   };
