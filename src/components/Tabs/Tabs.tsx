@@ -213,7 +213,7 @@ const tabsTriggerVariants = cva(
         ],
         pills: [
           'px-3 py-1.5 rounded-md text-sm',
-          'text-neutral-600 dark:text-neutral-400 hover:text-foreground',
+          'text-muted-foreground hover:text-foreground',
           'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
         ],
         enclosed: [
