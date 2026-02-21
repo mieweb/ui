@@ -234,7 +234,7 @@ export function NewsletterForm({
         className={cn(
           'min-w-0 flex-1 rounded-lg px-4 py-2 text-sm transition-colors',
           variant === 'light'
-            ? 'border border-white/20 bg-white/10 text-white placeholder-white/60 focus:border-white/50 focus:outline-none'
+            ? 'border border-white/40 bg-white/20 text-white placeholder-white/60 focus:border-white/60 focus:outline-none'
             : 'focus:border-primary-500 border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400'
         )}
         disabled={isLoading}
@@ -245,7 +245,7 @@ export function NewsletterForm({
         className={cn(
           'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
           variant === 'light'
-            ? 'text-primary-600 bg-white hover:bg-white/90'
+            ? 'text-primary-900 bg-white hover:bg-white/90'
             : 'bg-primary-600 hover:bg-primary-700 text-white',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
