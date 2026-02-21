@@ -128,7 +128,7 @@ function renderOrderItem(order: SampleOrder) {
             </Badge>
           </div>
           <p className="text-muted-foreground text-sm">{order.employeeName}</p>
-          <p className="text-muted-foreground/70 mt-1 text-xs">
+          <p className="text-muted-foreground mt-1 text-xs">
             {order.services.join(' • ')}
           </p>
         </div>
@@ -239,7 +239,7 @@ function OrderItem({ order }: { order: SampleOrder }) {
             </Badge>
           </div>
           <p className="text-muted-foreground text-sm">{order.employeeName}</p>
-          <p className="text-muted-foreground/70 mt-1 text-xs">
+          <p className="text-muted-foreground mt-1 text-xs">
             {order.services.join(' • ')}
           </p>
         </div>
