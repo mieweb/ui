@@ -181,7 +181,7 @@ export function SocialMediaLinks({
               sizeClasses[size],
               variant === 'light'
                 ? 'text-white/70 hover:bg-white/10 hover:text-white'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
             )}
           >
             <Icon />
@@ -278,7 +278,7 @@ export function FooterLinkSection({
           'mb-4 text-sm font-semibold tracking-wider uppercase',
           variant === 'light'
             ? 'text-white/70'
-            : 'text-gray-500 dark:text-gray-400'
+            : 'text-gray-600 dark:text-gray-400'
         )}
       >
         {group.title}
@@ -332,7 +332,7 @@ export function CopyrightText({
         'text-sm',
         variant === 'light'
           ? 'text-white/60'
-          : 'text-gray-500 dark:text-gray-400',
+          : 'text-gray-600 dark:text-gray-400',
         className
       )}
     >
@@ -395,7 +395,7 @@ export function LegalLinks({
               'text-sm transition-colors',
               variant === 'light'
                 ? 'text-white/60 hover:text-white'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
             )}
           >
             {link.label}
@@ -427,7 +427,7 @@ export function DisclaimerText({
         'text-xs leading-relaxed',
         variant === 'light'
           ? 'text-white/50'
-          : 'text-gray-400 dark:text-gray-500',
+          : 'text-gray-500 dark:text-gray-400',
         className
       )}
     >
@@ -701,7 +701,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               )}
             >
               Privacy
@@ -712,7 +712,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               )}
             >
               Terms
