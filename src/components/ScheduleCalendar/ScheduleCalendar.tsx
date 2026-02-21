@@ -351,7 +351,7 @@ export function ScheduleCalendar({
                         <p className="truncate font-medium">
                           {appointment.patientName || appointment.title}
                         </p>
-                        <p className="truncate opacity-80">
+                        <p className="truncate">
                           {formatTime(appointment.startTime)}
                         </p>
                       </div>
