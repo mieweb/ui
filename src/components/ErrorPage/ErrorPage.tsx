@@ -169,7 +169,7 @@ export function ErrorPage({
 
       {/* Error Code */}
       {displayCode && (
-        <div className="mb-4 text-6xl font-bold text-gray-500 sm:text-8xl dark:text-gray-500">
+        <div className="mb-4 text-6xl font-bold text-gray-300 sm:text-8xl dark:text-gray-600">
           {displayCode}
         </div>
       )}

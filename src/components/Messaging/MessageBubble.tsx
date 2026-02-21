@@ -20,7 +20,7 @@ const statusIconVariants = cva(
         sending: 'text-neutral-500',
         sent: 'text-neutral-500',
         delivered: 'text-neutral-600 dark:text-neutral-400',
-        read: 'text-primary-600 dark:text-primary-400',
+        read: 'text-primary-800 dark:text-primary-300',
         failed: 'text-red-500',
       },
     },
