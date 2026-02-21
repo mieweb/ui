@@ -246,7 +246,7 @@ export function NewsletterForm({
           'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
           variant === 'light'
             ? 'text-primary-900 bg-white hover:bg-white/90'
-            : 'bg-primary-600 hover:bg-primary-700 text-white',
+            : 'bg-primary-700 hover:bg-primary-800 text-white',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >

@@ -552,7 +552,7 @@ export function OrderConfirmation({
           onClick={onClose}
           className={cn(
             'w-full rounded-lg px-4 py-3 font-medium',
-            'bg-primary-600 hover:bg-primary-700 text-white',
+            'bg-primary-700 hover:bg-primary-800 text-white',
             'dark:bg-primary-600 dark:hover:bg-primary-700',
             'transition-colors'
           )}

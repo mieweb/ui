@@ -245,7 +245,7 @@ export function MobileBackButton({
     <div className={cn('py-2 sm:hidden', className)}>
       <a
         href={href}
-        className="bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
       >
         <ChevronLeftIcon className="h-4 w-4" />
         {label}

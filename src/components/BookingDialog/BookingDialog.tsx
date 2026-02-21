@@ -591,7 +591,7 @@ export function BookingDialog({
               type="submit"
               disabled={isLoading}
               className={cn(
-                'bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
+                'bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
                 isLoading && 'cursor-not-allowed opacity-50'
               )}
             >
@@ -718,7 +718,7 @@ export function InlineBookingForm({
         type="submit"
         disabled={isLoading}
         className={cn(
-          'bg-primary-600 hover:bg-primary-700 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
+          'bg-primary-700 hover:bg-primary-800 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -772,7 +772,7 @@ export function QuickBookCard({
         <button
           type="button"
           onClick={onBook}
-          className="bg-primary-600 hover:bg-primary-700 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          className="bg-primary-700 hover:bg-primary-800 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
         >
           <CalendarIcon className="h-4 w-4" />
           Book Online

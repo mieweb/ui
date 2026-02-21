@@ -174,7 +174,7 @@ export function AuthButtons({
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
           ? 'text-primary-600 bg-white hover:bg-white/90'
-          : 'bg-primary-600 hover:bg-primary-700 text-white'
+          : 'bg-primary-700 hover:bg-primary-800 text-white'
       )}
     >
       Sign Up
@@ -206,7 +206,7 @@ export function AuthButtons({
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
                 ? 'text-primary-600 bg-white hover:bg-white/90'
-                : 'bg-primary-600 hover:bg-primary-700 text-white'
+                : 'bg-primary-700 hover:bg-primary-800 text-white'
             )}
           >
             Sign Up
@@ -575,7 +575,7 @@ export function MobileMenuPanel({
                   onSignUp?.();
                   onClose();
                 }}
-                className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-sm font-medium text-white"
+                className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-sm font-medium text-white"
               >
                 Sign Up
               </button>

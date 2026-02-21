@@ -243,7 +243,7 @@ export function CookieConsentBanner({
               className={cn(
                 'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                 variant === 'default'
-                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
+                  ? 'bg-primary-700 hover:bg-primary-800 text-white'
                   : 'bg-white text-gray-900 hover:bg-gray-100'
               )}
             >
