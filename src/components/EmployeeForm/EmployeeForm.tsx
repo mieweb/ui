@@ -415,7 +415,7 @@ export function EmployeeForm({
           <button
             type="button"
             onClick={addPhone}
-            className="text-primary-800 dark:text-primary-300 dark:hover:text-primary-200 text-sm hover:underline"
+            className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 text-sm hover:underline"
           >
             + Add another phone
           </button>
