@@ -93,9 +93,9 @@ export function ReportDashboard({
   const getTrendColor = (trend?: 'up' | 'down' | 'neutral') => {
     switch (trend) {
       case 'up':
-        return 'text-green-600 dark:text-green-400';
+        return 'text-green-700 dark:text-green-300';
       case 'down':
-        return 'text-red-600 dark:text-red-400';
+        return 'text-red-700 dark:text-red-300';
       default:
         return 'text-gray-500 dark:text-gray-400';
     }

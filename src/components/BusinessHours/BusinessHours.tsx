@@ -404,12 +404,14 @@ function DayScheduleRow({
       <span
         className={cn(
           'min-w-[80px] font-medium',
-          isToday && highlightToday && 'text-primary-700 dark:text-primary-400'
+          isToday && highlightToday && 'text-primary-900 dark:text-primary-300'
         )}
       >
         {dayName}
         {isToday && highlightToday && (
-          <span className="text-primary-500 ml-1 text-xs">(Today)</span>
+          <span className="text-primary-800 dark:text-primary-300 ml-1 text-xs">
+            (Today)
+          </span>
         )}
       </span>
 

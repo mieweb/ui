@@ -286,7 +286,7 @@ export function CommandPalette({
         >
           {/* Search Input */}
           <div className="relative border-b border-gray-200 dark:border-gray-700">
-            <div className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400">
+            <div className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-500">
               <SearchIcon />
             </div>
             <input
@@ -308,7 +308,7 @@ export function CommandPalette({
               <button
                 onClick={() => setQuery('')}
                 data-testid={`${testId}-clear`}
-                className="absolute top-1/2 right-12 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="absolute top-1/2 right-12 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
               >
                 <XIcon />
               </button>
@@ -329,7 +329,7 @@ export function CommandPalette({
                 className={cn(
                   'rounded px-2 py-1 text-xs font-medium transition-colors',
                   activeCategory === null
-                    ? 'bg-primary-500 text-white'
+                    ? 'bg-primary-800 text-white'
                     : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
                 )}
               >
@@ -343,7 +343,7 @@ export function CommandPalette({
                   className={cn(
                     'flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors',
                     activeCategory === cat.id
-                      ? 'bg-primary-500 text-white'
+                      ? 'bg-primary-800 text-white'
                       : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
                   )}
                 >
@@ -452,8 +452,8 @@ export function CommandPalette({
                                 className={cn(
                                   'mt-0.5 h-4 w-4 flex-shrink-0',
                                   isSelected
-                                    ? 'text-primary-600 dark:text-primary-400'
-                                    : 'text-gray-400'
+                                    ? 'text-primary-800 dark:text-primary-300'
+                                    : 'text-gray-500'
                                 )}
                               >
                                 {item.icon}
@@ -469,7 +469,7 @@ export function CommandPalette({
                                 </div>
                               )}
                               {item.description && (
-                                <div className="mt-0.5 truncate text-xs text-gray-400 dark:text-gray-500">
+                                <div className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
                                   {item.description}
                                 </div>
                               )}
@@ -556,9 +556,9 @@ export function CommandPaletteTrigger({
       onClick={open}
       data-testid={testId}
       className={cn(
-        'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-600',
-        'bg-white px-4 py-2.5 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-400',
-        'hover:border-gray-400 dark:hover:border-gray-500',
+        'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-400',
+        'bg-white px-4 py-2.5 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-300',
+        'hover:border-gray-400 dark:hover:border-gray-300',
         'transition-colors hover:bg-gray-50 dark:hover:bg-gray-600',
         'min-w-[200px] sm:min-w-[300px]',
         className
@@ -574,7 +574,7 @@ export function CommandPaletteTrigger({
             className={cn(
               'inline-flex items-center gap-0.5 px-2 py-0.5',
               'rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600',
-              'flex-shrink-0 text-xs text-gray-600 dark:text-gray-300'
+              'flex-shrink-0 text-xs text-gray-700 dark:text-gray-300'
             )}
           >
             {isMac ? '⌘' : 'Ctrl'}+K

@@ -98,7 +98,7 @@ const ProviderLogo: React.FC<{
     return (
       <div className={cn(logoContainerVariants({ variant }))}>
         <div className="bg-primary-100 dark:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-full">
-          <span className="text-primary-600 dark:text-primary-400 text-lg font-bold">
+          <span className="text-primary-800 dark:text-primary-300 text-lg font-bold">
             {name.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -149,7 +149,7 @@ const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
 
 const SafeFromWildfiresNotice: React.FC = () => (
   <Tooltip content="BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.">
-    <div className="bg-success/10 text-success inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs">
+    <div className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300">
       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -164,7 +164,7 @@ const SafeFromWildfiresNotice: React.FC = () => (
 
 const VerifiedBadge: React.FC = () => (
   <Tooltip content="This provider's information has been verified">
-    <span className="text-success inline-flex items-center gap-1 text-xs">
+    <span className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300">
       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -330,8 +330,8 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
           <div className="mb-1 flex items-start justify-between gap-2">
             <h3
               className={cn(
-                'text-primary-600 dark:text-primary-400 line-clamp-2 font-semibold',
-                'group-hover:text-primary-700 dark:group-hover:text-primary-300',
+                'text-primary-800 dark:text-primary-300 line-clamp-2 font-semibold',
+                'group-hover:text-primary-900 dark:group-hover:text-primary-200',
                 'transition-colors',
                 variant === 'featured' ? 'text-lg' : 'text-sm'
               )}
@@ -373,8 +373,8 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
               data-phone-link
               onClick={handlePhoneClick}
               className={cn(
-                'text-primary-600 hover:text-primary-700 mt-1',
-                'dark:text-primary-400 dark:hover:text-primary-300',
+                'text-primary-800 hover:text-primary-900 mt-1',
+                'dark:text-primary-300 dark:hover:text-primary-200',
                 'hover:underline',
                 variant === 'featured' ? 'text-sm' : 'text-xs'
               )}

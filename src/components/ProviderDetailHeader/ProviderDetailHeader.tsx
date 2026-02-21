@@ -57,7 +57,7 @@ const actionButtonVariants = cva(
         default:
           'text-gray-600 hover:text-primary-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800',
         active:
-          'text-primary-600 bg-primary-50 dark:text-primary-400 dark:bg-primary-900/20',
+          'text-primary-800 bg-primary-50 dark:text-primary-300 dark:bg-primary-900/20',
       },
     },
     defaultVariants: {
@@ -214,7 +214,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
             ) : (
               <a
                 href={item.href}
-                className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline"
+                className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 hover:underline"
               >
                 {item.label}
               </a>
@@ -245,7 +245,7 @@ export function MobileBackButton({
     <div className={cn('py-2 sm:hidden', className)}>
       <a
         href={href}
-        className="bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
       >
         <ChevronLeftIcon className="h-4 w-4" />
         {label}
@@ -588,7 +588,7 @@ const bookButtonVariants = cva(
         primary:
           'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
         outline:
-          'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/20',
+          'border-2 border-primary-800 text-primary-800 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-300 dark:text-primary-300 dark:hover:bg-primary-900/20',
       },
     },
     defaultVariants: {

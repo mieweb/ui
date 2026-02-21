@@ -140,7 +140,7 @@ export function ConnectionStatusOverlay({
             </p>
             {connection.retryCount !== undefined &&
               connection.retryCount > 0 && (
-                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Retry attempt #{connection.retryCount}
                   {retryTimeFormatted && ` • Retrying ${retryTimeFormatted}`}
                 </p>
@@ -152,7 +152,7 @@ export function ConnectionStatusOverlay({
             <button
               type="button"
               onClick={onReload || (() => window.location.reload())}
-              className="bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+              className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
             >
               <ReloadIcon className="h-4 w-4" />
               Reload
@@ -227,7 +227,7 @@ export function UpdateAvailableOverlay({
                 className="h-12 w-12 animate-pulse"
               />
             ) : (
-              <UpdateIcon className="text-primary-600 h-12 w-12 animate-pulse" />
+              <UpdateIcon className="text-primary-700 dark:text-primary-400 h-12 w-12 animate-pulse" />
             )}
           </div>
 

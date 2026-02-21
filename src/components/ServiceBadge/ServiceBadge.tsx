@@ -12,7 +12,7 @@ const serviceBadgeVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
+          'bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-300',
         secondary:
           'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
         success:

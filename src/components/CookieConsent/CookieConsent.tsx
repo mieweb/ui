@@ -31,7 +31,7 @@ const bannerVariants = cva(
         default:
           'bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg',
         minimal: 'bg-gray-900 text-white',
-        branded: 'bg-primary-600 text-white',
+        branded: 'bg-primary-800 text-white',
       },
     },
     defaultVariants: {
@@ -190,7 +190,7 @@ export function CookieConsentBanner({
                     className={cn(
                       'underline hover:no-underline',
                       variant === 'default'
-                        ? 'text-primary-600 hover:text-primary-700 dark:text-primary-400'
+                        ? 'text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200'
                         : 'text-white hover:text-white/80'
                     )}
                   >
@@ -243,7 +243,7 @@ export function CookieConsentBanner({
               className={cn(
                 'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                 variant === 'default'
-                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
+                  ? 'bg-primary-700 hover:bg-primary-800 text-white'
                   : 'bg-white text-gray-900 hover:bg-gray-100'
               )}
             >

@@ -475,7 +475,7 @@ export function SidebarNavItem({
   const baseClasses = cn(
     'flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors',
     isActive
-      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
+      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-800 dark:text-primary-300 font-medium'
       : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800',
     disabled && 'opacity-50 cursor-not-allowed',
     showCollapsed && 'justify-center',

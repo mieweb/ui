@@ -296,6 +296,7 @@ export interface DialogOverlayProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  titleId?: string;
 }
 
 /**
@@ -317,6 +318,7 @@ export function DialogOverlay({
   onClose,
   children,
   className,
+  titleId,
 }: DialogOverlayProps) {
   React.useEffect(() => {
     // Skip scroll lock in Storybook docs mode where stories render inline
@@ -364,6 +366,7 @@ export function DialogOverlay({
           )}
           role="dialog"
           aria-modal="true"
+          aria-labelledby={titleId}
         >
           {children}
         </div>
@@ -387,6 +390,7 @@ export function BookingDialog({
   isLoading = false,
   className,
 }: BookingDialogProps) {
+  const titleId = React.useId();
   const [formData, setFormData] = React.useState<BookingFormData>({
     firstName: defaultValues?.firstName || '',
     lastName: defaultValues?.lastName || '',
@@ -431,14 +435,24 @@ export function BookingDialog({
   )}`;
 
   return (
-    <DialogOverlay isOpen={isOpen} onClose={onClose} className={className}>
+    <DialogOverlay
+      isOpen={isOpen}
+      onClose={onClose}
+      className={className}
+      titleId={titleId}
+    >
       {/* Header */}
-      <div className="bg-primary-600 border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
-        <h2 className="text-xl font-semibold text-white">Book Appointment</h2>
+      <div className="border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
+        <h2
+          id={titleId}
+          className="text-lg leading-none font-semibold tracking-tight"
+        >
+          Book Appointment
+        </h2>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-2 text-white transition-colors hover:bg-white/10"
+          className="text-muted-foreground hover:text-foreground rounded-lg p-2 transition-colors"
           aria-label="Close dialog"
         >
           <CloseIcon className="h-5 w-5" />
@@ -567,7 +581,7 @@ export function BookingDialog({
               <button
                 type="button"
                 onClick={() => onCall(provider.phoneNumber!)}
-                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+                className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800"
               >
                 <PhoneIcon className="h-4 w-4" />
                 Call Now
@@ -577,7 +591,7 @@ export function BookingDialog({
               type="submit"
               disabled={isLoading}
               className={cn(
-                'bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
+                'bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
                 isLoading && 'cursor-not-allowed opacity-50'
               )}
             >
@@ -704,7 +718,7 @@ export function InlineBookingForm({
         type="submit"
         disabled={isLoading}
         className={cn(
-          'bg-primary-600 hover:bg-primary-700 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
+          'bg-primary-700 hover:bg-primary-800 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -758,7 +772,7 @@ export function QuickBookCard({
         <button
           type="button"
           onClick={onBook}
-          className="bg-primary-600 hover:bg-primary-700 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          className="bg-primary-700 hover:bg-primary-800 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
         >
           <CalendarIcon className="h-4 w-4" />
           Book Online

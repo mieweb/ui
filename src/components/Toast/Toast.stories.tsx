@@ -38,7 +38,7 @@ function ToastDemo() {
         </button>
         <button
           onClick={() => info('New features are available!')}
-          className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white transition-colors"
+          className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
         >
           Info
         </button>
@@ -70,7 +70,7 @@ function ToastWithTitleDemo() {
             },
           })
         }
-        className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-white transition-colors"
+        className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
       >
         Show Toast with Title & Action
       </button>
@@ -110,7 +110,7 @@ function ToastPositionsDemo() {
             }}
             className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
               position === pos
-                ? 'bg-primary-500 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
             }`}
           >

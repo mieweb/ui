@@ -433,7 +433,7 @@ export const CustomControls: Story = {
           {state === 'stopped' && (
             <button
               onClick={onPlay}
-              className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white transition-colors"
+              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ▶️ Play Recording
             </button>
@@ -441,7 +441,7 @@ export const CustomControls: Story = {
           {isPlaying && (
             <button
               onClick={onPause}
-              className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white transition-colors"
+              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ⏸️ Pause Playback
             </button>
@@ -534,7 +534,7 @@ export const InlineRecorder: Story = {
             showTime={false}
           />
         </div>
-        <button className="bg-primary-600 hover:bg-primary-700 rounded-lg px-3 py-1.5 text-sm text-white transition-colors">
+        <button className="bg-primary-700 hover:bg-primary-800 rounded-lg px-3 py-1.5 text-sm text-white transition-colors">
           Send
         </button>
       </div>

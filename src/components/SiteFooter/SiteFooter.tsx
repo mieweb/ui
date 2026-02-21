@@ -181,7 +181,7 @@ export function SocialMediaLinks({
               sizeClasses[size],
               variant === 'light'
                 ? 'text-white/70 hover:bg-white/10 hover:text-white'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
             )}
           >
             <Icon />
@@ -234,7 +234,7 @@ export function NewsletterForm({
         className={cn(
           'min-w-0 flex-1 rounded-lg px-4 py-2 text-sm transition-colors',
           variant === 'light'
-            ? 'border border-white/20 bg-white/10 text-white placeholder-white/60 focus:border-white/50 focus:outline-none'
+            ? 'border border-white/40 bg-white/20 text-white placeholder-white/60 focus:border-white/60 focus:outline-none'
             : 'focus:border-primary-500 border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400'
         )}
         disabled={isLoading}
@@ -245,8 +245,8 @@ export function NewsletterForm({
         className={cn(
           'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
           variant === 'light'
-            ? 'text-primary-600 bg-white hover:bg-white/90'
-            : 'bg-primary-600 hover:bg-primary-700 text-white',
+            ? 'text-primary-900 bg-white hover:bg-white/90'
+            : 'bg-primary-700 hover:bg-primary-800 text-white',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -278,7 +278,7 @@ export function FooterLinkSection({
           'mb-4 text-sm font-semibold tracking-wider uppercase',
           variant === 'light'
             ? 'text-white/70'
-            : 'text-gray-500 dark:text-gray-400'
+            : 'text-gray-600 dark:text-gray-400'
         )}
       >
         {group.title}
@@ -332,7 +332,7 @@ export function CopyrightText({
         'text-sm',
         variant === 'light'
           ? 'text-white/60'
-          : 'text-gray-500 dark:text-gray-400',
+          : 'text-gray-600 dark:text-gray-400',
         className
       )}
     >
@@ -395,7 +395,7 @@ export function LegalLinks({
               'text-sm transition-colors',
               variant === 'light'
                 ? 'text-white/60 hover:text-white'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
             )}
           >
             {link.label}
@@ -427,7 +427,7 @@ export function DisclaimerText({
         'text-xs leading-relaxed',
         variant === 'light'
           ? 'text-white/50'
-          : 'text-gray-400 dark:text-gray-500',
+          : 'text-gray-500 dark:text-gray-400',
         className
       )}
     >
@@ -701,7 +701,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               )}
             >
               Privacy
@@ -712,7 +712,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               )}
             >
               Terms

@@ -119,8 +119,10 @@ export function EmployerServiceModal({
           {/* Service info */}
           {service && (
             <div className="border-primary/30 bg-primary/10 rounded-lg border p-3">
-              <p className="text-primary text-sm font-medium">{service.name}</p>
-              <p className="text-primary/80 text-xs">
+              <p className="text-primary-900 dark:text-primary-300 text-sm font-medium">
+                {service.name}
+              </p>
+              <p className="text-primary-800 dark:text-primary-400 text-xs">
                 Base price: ${service.basePrice.toFixed(2)}
               </p>
             </div>

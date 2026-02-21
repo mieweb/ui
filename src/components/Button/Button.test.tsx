@@ -24,7 +24,7 @@ describe('Button', () => {
     const { rerender } = renderWithTheme(
       <Button variant="primary">Primary</Button>
     );
-    expect(screen.getByRole('button')).toHaveClass('bg-primary-800');
+    expect(screen.getByRole('button')).toHaveClass('bg-primary-700');
 
     rerender(<Button variant="secondary">Secondary</Button>);
     expect(screen.getByRole('button')).toHaveClass('bg-neutral-200');

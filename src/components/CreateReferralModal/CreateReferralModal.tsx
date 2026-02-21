@@ -134,19 +134,17 @@ export function CreateReferralModal({
           {/* Employee info */}
           {employee && (
             <div className="bg-muted rounded-lg p-4">
-              <p className="text-muted-foreground mb-1 text-xs tracking-wide uppercase">
+              <p className="text-foreground/70 mb-1 text-xs tracking-wide uppercase">
                 Employee
               </p>
               <p className="text-foreground font-medium">
                 {employee.firstName} {employee.lastName}
               </p>
               {employee.email && (
-                <p className="text-muted-foreground text-sm">
-                  {employee.email}
-                </p>
+                <p className="text-foreground/70 text-sm">{employee.email}</p>
               )}
               {employerName && (
-                <p className="text-muted-foreground text-sm">{employerName}</p>
+                <p className="text-foreground/70 text-sm">{employerName}</p>
               )}
             </div>
           )}
@@ -237,11 +235,11 @@ export function CreateReferralModal({
                   className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                     priority === p
                       ? p === 'stat'
-                        ? 'bg-destructive/10 text-destructive'
+                        ? 'bg-destructive/10 text-destructive-700 dark:text-destructive-300'
                         : p === 'urgent'
-                          ? 'bg-warning/10 text-warning'
-                          : 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                          ? 'bg-warning/10 text-warning-700 dark:text-warning-300'
+                          : 'bg-primary/10 text-primary-800 dark:text-primary-300'
+                      : 'bg-muted text-foreground/70 hover:bg-muted/80'
                   } `}
                 >
                   {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -266,15 +264,13 @@ export function CreateReferralModal({
             <div className="bg-muted rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-foreground/70 text-sm">
                     {selectedServices.size} service
                     {selectedServices.size > 1 ? 's' : ''} selected
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-muted-foreground text-xs">
-                    Estimated Total
-                  </p>
+                  <p className="text-foreground/70 text-xs">Estimated Total</p>
                   <p className="text-foreground text-xl font-bold">
                     {currency}
                     {totalPrice.toFixed(2)}

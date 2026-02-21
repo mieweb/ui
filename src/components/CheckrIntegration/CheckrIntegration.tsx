@@ -183,18 +183,22 @@ export function CheckrIntegration({
 
   // Status badge styles using design system tokens
   const statusStyles: Record<string, string> = {
-    pending: 'border-warning text-warning bg-warning/10',
-    running: 'border-warning text-warning bg-warning/10',
-    complete: 'border-success text-success bg-success/10',
-    failed: 'border-destructive text-destructive bg-destructive/10',
+    pending:
+      'border-warning text-warning-700 bg-warning/10 dark:text-warning-300',
+    running:
+      'border-warning text-warning-700 bg-warning/10 dark:text-warning-300',
+    complete:
+      'border-success text-success-700 bg-success/10 dark:text-success-300',
+    failed:
+      'border-destructive text-destructive-700 bg-destructive/10 dark:text-destructive-300',
     expired: 'border-muted-foreground text-muted-foreground bg-muted',
   };
 
   // Result text colors using design system tokens
   const resultStyles: Record<string, string> = {
-    clear: 'text-success',
-    consider: 'text-warning',
-    adverse_action: 'text-destructive',
+    clear: 'text-success-700 dark:text-success-300',
+    consider: 'text-warning-700 dark:text-warning-300',
+    adverse_action: 'text-destructive-700 dark:text-destructive-300',
   };
 
   // Status dot colors for summary
@@ -286,7 +290,7 @@ export function CheckrIntegration({
         <div className="flex items-center gap-3">
           <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg">
             <svg
-              className="text-success h-6 w-6"
+              className="text-success-700 dark:text-success-300 h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -338,7 +342,7 @@ export function CheckrIntegration({
 
       {/* Error State */}
       {error && (
-        <div className="bg-destructive/10 border-destructive/20 text-destructive mb-4 rounded-lg border p-4">
+        <div className="bg-destructive/10 border-destructive/20 text-destructive-700 dark:text-destructive-300 mb-4 rounded-lg border p-4">
           <svg
             className="mr-2 inline-block h-4 w-4"
             fill="none"

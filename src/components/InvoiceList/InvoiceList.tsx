@@ -221,16 +221,16 @@ export function InvoiceList({
           </p>
         </div>
         <div className="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-          <p className="text-xs text-green-600 dark:text-green-400">Paid</p>
-          <p className="text-lg font-bold text-green-600 dark:text-green-400">
+          <p className="text-xs text-green-700 dark:text-green-400">Paid</p>
+          <p className="text-lg font-bold text-green-700 dark:text-green-400">
             {formatCurrency(totals.paid)}
           </p>
         </div>
         <div className="rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
-          <p className="text-xs text-orange-600 dark:text-orange-400">
+          <p className="text-xs text-orange-700 dark:text-orange-400">
             Outstanding
           </p>
-          <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
+          <p className="text-lg font-bold text-orange-700 dark:text-orange-400">
             {formatCurrency(totals.outstanding)}
           </p>
         </div>

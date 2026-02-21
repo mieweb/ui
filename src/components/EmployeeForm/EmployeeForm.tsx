@@ -415,7 +415,7 @@ export function EmployeeForm({
           <button
             type="button"
             onClick={addPhone}
-            className="text-primary text-sm hover:underline"
+            className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 text-sm hover:underline"
           >
             + Add another phone
           </button>
@@ -476,7 +476,7 @@ export function EmployeeForm({
           )}
           <button
             type="submit"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2 text-sm"
+            className="bg-primary-700 hover:bg-primary-800 rounded-md px-4 py-2 text-sm text-white"
           >
             {mode === 'order' ? startOrder : save}
           </button>

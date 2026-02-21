@@ -112,7 +112,7 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
               {title}
             </h3>
             {count !== undefined && (
-              <span className="bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold">
+              <span className="bg-primary-100 text-primary-900 dark:bg-primary-900/50 dark:text-primary-300 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold">
                 {count}
               </span>
             )}
@@ -464,7 +464,7 @@ export interface WidgetAction {
 
 const actionColorMap: Record<string, string> = {
   primary:
-    'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300',
+    'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-300',
   green:
     'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
   red: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',

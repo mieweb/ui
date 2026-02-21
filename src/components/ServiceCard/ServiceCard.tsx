@@ -142,7 +142,7 @@ export function ServiceCard({
             {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="bg-muted text-muted-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium"
+                className="bg-muted text-foreground/70 inline-flex items-center rounded px-2 py-0.5 text-xs font-medium"
               >
                 {tag}
               </span>
@@ -221,7 +221,7 @@ export function ServiceCard({
                 <button
                   type="button"
                   onClick={handleManageClick}
-                  className="text-primary hover:bg-primary/10 ml-auto rounded px-3 py-1 text-sm font-medium transition-colors"
+                  className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 hover:bg-primary/10 ml-auto rounded px-3 py-1 text-sm font-medium transition-colors"
                 >
                   Manage
                 </button>

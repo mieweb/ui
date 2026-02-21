@@ -211,7 +211,7 @@ export function InvoicePaymentPage({
               {successMessage ||
                 'Thank you! Your payment has been processed successfully.'}
             </p>
-            <p className="text-sm text-gray-400 dark:text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Invoice {invoice.invoiceNumber}
             </p>
           </CardContent>
@@ -456,7 +456,7 @@ export function InvoicePaymentPage({
                   </Button>
 
                   {showStripeBranding && (
-                    <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+                    <p className="text-center text-xs text-gray-500 dark:text-gray-400">
                       Secured by Stripe
                     </p>
                   )}

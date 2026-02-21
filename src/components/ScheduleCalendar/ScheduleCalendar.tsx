@@ -74,17 +74,17 @@ export function ScheduleCalendar({
   const getStatusColor = (status?: CalendarAppointment['status']) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-blue-500 border-blue-600';
+        return 'bg-blue-700 border-blue-800';
       case 'pending':
-        return 'bg-yellow-500 border-yellow-600';
+        return 'bg-yellow-700 border-yellow-800';
       case 'completed':
-        return 'bg-green-500 border-green-600';
+        return 'bg-green-700 border-green-800';
       case 'cancelled':
-        return 'bg-gray-400 border-gray-500';
+        return 'bg-gray-600 border-gray-700';
       case 'no-show':
-        return 'bg-red-500 border-red-600';
+        return 'bg-red-700 border-red-800';
       default:
-        return 'bg-blue-500 border-blue-600';
+        return 'bg-blue-700 border-blue-800';
     }
   };
 
@@ -351,7 +351,7 @@ export function ScheduleCalendar({
                         <p className="truncate font-medium">
                           {appointment.patientName || appointment.title}
                         </p>
-                        <p className="truncate opacity-80">
+                        <p className="truncate">
                           {formatTime(appointment.startTime)}
                         </p>
                       </div>
@@ -367,19 +367,19 @@ export function ScheduleCalendar({
       {/* Legend */}
       <div className="flex items-center gap-4 border-t border-gray-200 p-4 text-xs dark:border-gray-700">
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-blue-500" />
+          <span className="h-3 w-3 rounded bg-blue-700" />
           <span className="text-gray-600 dark:text-gray-400">Confirmed</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-yellow-500" />
+          <span className="h-3 w-3 rounded bg-yellow-700" />
           <span className="text-gray-600 dark:text-gray-400">Pending</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-green-500" />
+          <span className="h-3 w-3 rounded bg-green-700" />
           <span className="text-gray-600 dark:text-gray-400">Completed</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-gray-400" />
+          <span className="h-3 w-3 rounded bg-gray-600" />
           <span className="text-gray-600 dark:text-gray-400">Cancelled</span>
         </div>
       </div>

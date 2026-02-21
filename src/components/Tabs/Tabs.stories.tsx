@@ -193,7 +193,7 @@ function PlaygroundTabs({
       </Tabs>
       <p className="text-muted-foreground mt-4 text-xs">
         Selected tab:{' '}
-        <code className="bg-muted rounded px-1 py-0.5 font-mono">
+        <code className="bg-muted text-foreground rounded px-1 py-0.5 font-mono">
           {selectedTab}
         </code>
       </p>
