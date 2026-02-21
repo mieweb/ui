@@ -90,7 +90,7 @@ export function StripeBadge({
   const content = (
     <>
       {showPoweredBy && (
-        <span className={cn('font-normal opacity-80', sizeClasses[size].text)}>
+        <span className={cn('font-normal', sizeClasses[size].text)}>
           Powered by
         </span>
       )}
