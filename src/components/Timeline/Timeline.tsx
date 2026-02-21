@@ -391,11 +391,11 @@ export function TimelineEventList({
   const getEventColor = (type: TimelineEvent['type']): string => {
     switch (type) {
       case 'message':
-        return 'bg-blue-50 text-blue-500 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40';
+        return 'bg-blue-50 text-blue-700 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40';
       case 'status':
         return 'bg-green-50 text-green-700 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40';
       case 'attachment':
-        return 'bg-purple-50 text-purple-500 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40';
+        return 'bg-purple-50 text-purple-700 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40';
       case 'assignment':
         return 'bg-orange-50 text-orange-700 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40';
       case 'note':
