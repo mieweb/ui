@@ -366,7 +366,7 @@ export function AuthDialog({
                   <button
                     type="button"
                     onClick={() => setMode('signup')}
-                    className="text-primary-800 hover:text-primary-900 font-medium"
+                    className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 font-medium"
                   >
                     Sign up
                   </button>
@@ -377,7 +377,7 @@ export function AuthDialog({
                   <button
                     type="button"
                     onClick={() => setMode('login')}
-                    className="text-primary-800 hover:text-primary-900 font-medium"
+                    className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 font-medium"
                   >
                     Sign in
                   </button>
@@ -483,7 +483,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
         <button
           type="button"
           onClick={onForgotPassword}
-          className="text-primary-800 hover:text-primary-900 text-sm"
+          className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 text-sm"
         >
           Forgot password?
         </button>
