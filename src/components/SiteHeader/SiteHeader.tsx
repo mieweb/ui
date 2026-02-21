@@ -53,7 +53,7 @@ export function SiteLogo({
             'flex h-8 w-8 items-center justify-center rounded-lg text-lg font-bold',
             variant === 'light'
               ? 'bg-white/20 text-white'
-              : 'bg-primary-800 text-white'
+              : 'bg-primary-600 text-white'
           )}
         >
           {name?.[0] || 'B'}
@@ -173,7 +173,7 @@ export function AuthButtons({
       className={cn(
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
-          ? 'text-primary-900 bg-white hover:bg-white/90'
+          ? 'text-primary-600 bg-white hover:bg-white/90'
           : 'bg-primary-600 hover:bg-primary-700 text-white'
       )}
     >
@@ -205,7 +205,7 @@ export function AuthButtons({
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
-                ? 'text-primary-900 bg-white hover:bg-white/90'
+                ? 'text-primary-600 bg-white hover:bg-white/90'
                 : 'bg-primary-600 hover:bg-primary-700 text-white'
             )}
           >
@@ -338,7 +338,7 @@ export function UserMenu({
               'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
               variant === 'light'
                 ? 'bg-white/20 text-white'
-                : 'bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-300'
+                : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
             )}
           >
             {initials}
@@ -528,7 +528,7 @@ export function MobileMenuPanel({
           {user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3 px-2">
-                <div className="bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-300 flex h-10 w-10 items-center justify-center rounded-full font-medium">
+                <div className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium">
                   {user.name
                     .split(' ')
                     .map((w) => w[0])
@@ -596,7 +596,7 @@ const headerVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-primary-800',
+        primary: 'bg-primary-600',
         white:
           'bg-white shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800',
         transparent: 'bg-transparent',
