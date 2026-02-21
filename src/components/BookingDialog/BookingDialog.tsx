@@ -434,17 +434,17 @@ export function BookingDialog({
   return (
     <DialogOverlay isOpen={isOpen} onClose={onClose} className={className}>
       {/* Header */}
-      <div className="bg-primary-800 border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
+      <div className="border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
         <h2
           id="booking-dialog-title"
-          className="text-xl font-semibold text-white"
+          className="text-lg leading-none font-semibold tracking-tight"
         >
           Book Appointment
         </h2>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-2 text-white transition-colors hover:bg-white/10"
+          className="text-muted-foreground hover:text-foreground rounded-lg p-2 transition-colors"
           aria-label="Close dialog"
         >
           <CloseIcon className="h-5 w-5" />
