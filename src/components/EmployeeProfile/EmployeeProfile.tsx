@@ -243,7 +243,7 @@ export function EmployeeProfileCard({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-primary mt-2 flex items-center gap-1 text-sm hover:underline"
+          className="text-primary-800 dark:text-primary-300 dark:hover:text-primary-200 mt-2 flex items-center gap-1 text-sm hover:underline"
           aria-expanded={isExpanded}
           aria-controls="employee-details"
         >
