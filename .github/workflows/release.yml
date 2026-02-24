@@ -3,11 +3,17 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags like v1.0.0, v1.2.3-beta.1
+      - 'v*'  # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
+    branches:
+      - main   # Auto dev-prerelease on every main push
+    paths-ignore:
+      - '*.md'
+      - '.github/**'
+      - '!.github/workflows/release.yml'
 
 permissions:
   contents: write
-  id-token: write
+  id-token: write  # Required for npm Trusted Publishing (OIDC)
 
 jobs:
   release:
@@ -16,6 +22,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -44,35 +52,62 @@ jobs:
         env:
           NODE_OPTIONS: '--max-old-space-size=8192'
 
-      - name: Set package version from tag
+      - name: Determine release info
+        id: release-info
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Setting version to $VERSION"
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            # Tag-based release (stable or tagged prerelease)
+            VERSION=${GITHUB_REF#refs/tags/v}
+            IS_TAG=true
+            if [[ "$VERSION" == *"-"* ]]; then
+              NPM_TAG=next
+              IS_PRERELEASE=true
+            else
+              NPM_TAG=latest
+              IS_PRERELEASE=false
+            fi
+          else
+            # Branch push — auto dev prerelease
+            BASE_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
+            VERSION="${BASE_VERSION}-dev.${GITHUB_RUN_NUMBER}"
+            IS_TAG=false
+            NPM_TAG=next
+            IS_PRERELEASE=true
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "npm_tag=$NPM_TAG" >> $GITHUB_OUTPUT
+          echo "is_tag=$IS_TAG" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "IS_TAG=$IS_TAG  version=$VERSION  npm_tag=$NPM_TAG"
+
+      - name: Set package version
+        run: |
+          VERSION="${{ steps.release-info.outputs.version }}"
           node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('./package.json'));p.version='$VERSION';fs.writeFileSync('./package.json',JSON.stringify(p,null,2)+'\n')"
 
-      - name: Determine npm tag
-        id: npm-tag
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          if [[ "$VERSION" == *"-"* ]]; then
-            # Prerelease version (contains hyphen, e.g., 1.0.0-beta.1)
-            echo "tag=next" >> $GITHUB_OUTPUT
-            echo "prerelease=true" >> $GITHUB_OUTPUT
-          else
-            # Stable version
-            echo "tag=latest" >> $GITHUB_OUTPUT
-            echo "prerelease=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Publish to npm
-        run: pnpm publish --access public --provenance --tag ${{ steps.npm-tag.outputs.tag }} --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_SECRET }}
+        # Trusted Publishing: OIDC token is obtained automatically via id-token permission.
+        # No NPM_PUBLISH_SECRET token is needed or used.
+        run: pnpm publish --access public --provenance --tag ${{ steps.release-info.outputs.npm_tag }} --no-git-checks
 
       - name: Create GitHub Release
+        if: steps.release-info.outputs.is_tag == 'true'
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          prerelease: ${{ steps.npm-tag.outputs.prerelease == 'true' }}
+          prerelease: ${{ steps.release-info.outputs.is_prerelease == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## 📦 Published to npm" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.release-info.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**npm tag:** \`${{ steps.release-info.outputs.npm_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.release-info.outputs.npm_tag }}" == "next" ]]; then
+            echo "Install with: \`npm install @mieweb/ui@next\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Install with: \`npm install @mieweb/ui\`" >> $GITHUB_STEP_SUMMARY
+          fi
