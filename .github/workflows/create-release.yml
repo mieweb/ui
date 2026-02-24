@@ -63,6 +63,7 @@ jobs:
         run: |
           git add package.json
           git commit -m "chore: release v${{ steps.bump.outputs.new_version }}"
+          git pull --rebase
           git push
 
       - name: Create and push tag
