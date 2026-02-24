@@ -984,7 +984,6 @@ export const PatientHeader = React.forwardRef<
               onClick={() => {
                 if (addModalType) {
                   onAddItem?.(addModalType, addForm);
-                  onOverflowAction?.(addModalType);
                 }
                 setAddModalType(null);
                 setAddForm({});

@@ -414,7 +414,9 @@ function HoverMenu({
                   </span>
                 </td>
                 <td className="px-1 py-1.5">
-                  <RowActionMenu item={item} actions={actions} />
+                  {actions.length > 0 && (
+                    <RowActionMenu item={item} actions={actions} />
+                  )}
                 </td>
               </tr>
             ))}
@@ -448,19 +450,6 @@ function buildDefaultActions(
       variant: 'danger',
       onClick: onDelete,
     });
-  }
-  // If none provided, give stubs so the menu still renders
-  if (actions.length === 0) {
-    actions.push(
-      { key: 'view', label: 'View', onClick: () => {} },
-      { key: 'edit', label: 'Edit', onClick: () => {} },
-      {
-        key: 'delete',
-        label: 'Delete',
-        variant: 'danger',
-        onClick: () => {},
-      }
-    );
   }
   return actions;
 }
@@ -1041,17 +1030,19 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
             <Button variant="secondary" onClick={() => setViewTarget(null)}>
               Close
             </Button>
-            <Button
-              onClick={() => {
-                if (viewTarget && onEdit) {
-                  // Transition to edit modal
-                  setViewTarget(null);
-                  handleEditRequest(viewTarget);
-                }
-              }}
-            >
-              Edit
-            </Button>
+            {onEdit && (
+              <Button
+                onClick={() => {
+                  if (viewTarget) {
+                    // Transition to edit modal
+                    setViewTarget(null);
+                    handleEditRequest(viewTarget);
+                  }
+                }}
+              >
+                Edit
+              </Button>
+            )}
           </ModalFooter>
         </Modal>
       </>
