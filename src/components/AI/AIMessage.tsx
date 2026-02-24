@@ -332,11 +332,14 @@ export function AIMessageDisplay({
 
       <div
         className={cn(
-          'flex flex-col gap-1',
+          'flex min-w-0 flex-1 flex-col gap-1',
           message.role === 'user' && 'items-end'
         )}
       >
-        <div className={bubbleVariants({ role: message.role })}>
+        <div className={cn(
+          bubbleVariants({ role: message.role }),
+          message.status === 'error' && 'border border-red-300 dark:border-red-700'
+        )}>
           {hasContent ? (
             <div className="space-y-3">
               {message.content.map((content, index) => (
@@ -361,7 +364,9 @@ export function AIMessageDisplay({
         )}
 
         {message.status === 'error' && (
-          <span className="px-2 text-xs text-red-500">Failed to send</span>
+          <span className="px-2 text-xs text-red-500">
+            {message.role === 'user' ? 'Failed to send' : 'An error occurred'}
+          </span>
         )}
       </div>
     </div>
