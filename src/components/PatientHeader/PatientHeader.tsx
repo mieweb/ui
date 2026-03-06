@@ -346,14 +346,14 @@ function PatientOverflowMenu({
           aria-label="Patient actions"
           className={cn(
             'absolute top-full right-0 z-50 mt-1',
+            'w-[calc(100vw-2rem)] md:w-auto',
             'border-border bg-card rounded-xl border py-1 shadow-lg',
-            'max-h-[calc(100vh-4rem)] overflow-y-auto',
-            'motion-safe:animate-fade-in',
-            'w-56 sm:w-auto'
+            'max-h-[calc(100vh-3rem)] overflow-y-auto md:max-h-[calc(100vh-4rem)]',
+            'motion-safe:animate-fade-in'
           )}
         >
-          {/* ── Quick Actions + Add side-by-side on sm+, stacked on mobile ── */}
-          <div className="flex flex-col sm:flex-row">
+          {/* ── Quick Actions + Add: stacked on mobile, side-by-side on md+ ── */}
+          <div className="flex flex-col md:flex-row">
             {/* Quick Actions column */}
             <div className="min-w-[13rem]">
               <div className="px-3 py-1.5">
@@ -394,16 +394,16 @@ function PatientOverflowMenu({
             </div>
 
             {/* Divider: horizontal on mobile, vertical on desktop */}
-            <div className="border-border my-1 border-t sm:my-0 sm:border-t-0 sm:border-l" />
+            <div className="border-border my-1 border-t md:my-0 md:border-t-0 md:border-l" />
 
             {/* Add column */}
-            <div className="min-w-[26rem]">
+            <div className="md:min-w-[26rem]">
               <div className="px-3 py-1.5">
                 <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
                   Add
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-1 md:grid-cols-2 md:gap-2">
                 <OverflowMenuItem
                   icon={<ClipboardPlusIcon size={15} />}
                   label="Task"
