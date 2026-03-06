@@ -730,7 +730,13 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
           >
             {icon && <span className="shrink-0">{icon}</span>}
             <span>{label}</span>
-            <span className={cn(countChipVariants({ variant: countVariant ?? variant }))}>{count}</span>
+            <span
+              className={cn(
+                countChipVariants({ variant: countVariant ?? variant })
+              )}
+            >
+              {count}
+            </span>
           </button>
 
           {showMenu && open && (

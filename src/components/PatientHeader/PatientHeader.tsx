@@ -552,7 +552,8 @@ export const PatientHeader = React.forwardRef<
     const hasProviders =
       showProviderBanner &&
       !!(patient.attendingProvider || patient.familyProvider);
-    const hasInfoRows = hasAllergies || hasMedications || hasComments || hasProviders;
+    const hasInfoRows =
+      hasAllergies || hasMedications || hasComments || hasProviders;
 
     const [actionsMenuOpen, setActionsMenuOpen] = React.useState(false);
     const actionsMenuRef = React.useRef<HTMLDivElement>(null);
@@ -665,7 +666,7 @@ export const PatientHeader = React.forwardRef<
           <div className="min-w-0 flex-1">
             {/* Top row: name + actions + overflow */}
             <div className="flex items-center gap-2">
-              <h2 className="text-foreground min-w-0 truncate text-xl font-bold flex-1">
+              <h2 className="text-foreground min-w-0 flex-1 truncate text-xl font-bold">
                 {displayName}
               </h2>
 
@@ -748,8 +749,6 @@ export const PatientHeader = React.forwardRef<
                 </span>
               )}
             </div>
-
-
           </div>
         </div>
 
@@ -787,8 +786,13 @@ export const PatientHeader = React.forwardRef<
 
         {/* ─── Flag ribbon (e.g. Duplicate) ─── */}
         {showFlagBanner && patient.flags && patient.flags.length > 0 && (
-          <div className="bg-amber-50 border-t border-amber-200 px-5 py-1.5 text-left text-xs font-medium tracking-wide text-amber-800 dark:bg-amber-950/40 dark:border-amber-800/40 dark:text-amber-300">
-            {patient.flags.map((flag) => flag.charAt(0).toUpperCase() + flag.slice(1).toLowerCase()).join(' · ')}
+          <div className="border-t border-amber-200 bg-amber-50 px-5 py-1.5 text-left text-xs font-medium tracking-wide text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-300">
+            {patient.flags
+              .map(
+                (flag) =>
+                  flag.charAt(0).toUpperCase() + flag.slice(1).toLowerCase()
+              )
+              .join(' · ')}
           </div>
         )}
 
@@ -808,7 +812,10 @@ export const PatientHeader = React.forwardRef<
             <div className="space-y-4">
               {patient.email && (
                 <div className="flex items-center gap-3">
-                  <MailIcon size={18} className="text-muted-foreground shrink-0" />
+                  <MailIcon
+                    size={18}
+                    className="text-muted-foreground shrink-0"
+                  />
                   <div>
                     <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                       Email
@@ -819,7 +826,10 @@ export const PatientHeader = React.forwardRef<
               )}
               {patient.phone && (
                 <div className="flex items-center gap-3">
-                  <PhoneIcon size={18} className="text-muted-foreground shrink-0" />
+                  <PhoneIcon
+                    size={18}
+                    className="text-muted-foreground shrink-0"
+                  />
                   <div>
                     <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                       Phone
