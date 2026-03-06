@@ -24,7 +24,6 @@ import {
   ClipboardListIcon,
   StethoscopeIcon,
   UsersIcon,
-  MenuIcon,
   MoreVerticalIcon,
   PencilIcon,
   ClipboardPlusIcon,
@@ -555,19 +554,6 @@ export const PatientHeader = React.forwardRef<
     const hasInfoRows =
       hasAllergies || hasMedications || hasComments || hasProviders;
 
-    const actionsMenuId = React.useId();
-    const [actionsMenuOpen, setActionsMenuOpen] = React.useState(false);
-    const actionsMenuRef = React.useRef<HTMLDivElement>(null);
-
-    useClickOutside(
-      actionsMenuRef,
-      React.useCallback(() => setActionsMenuOpen(false), [])
-    );
-    useEscapeKey(
-      React.useCallback(() => setActionsMenuOpen(false), []),
-      actionsMenuOpen
-    );
-
     // ─── Add-entity modal state ───
     const [addModalType, setAddModalType] =
       React.useState<PatientOverflowAction | null>(null);
@@ -655,109 +641,87 @@ export const PatientHeader = React.forwardRef<
             </Button>
           )}
 
-          {/* Avatar */}
+          {/* Avatar – hidden on mobile */}
           <Avatar
             name={formatFullName(patient.name)}
             src={patient.photo}
             size="md"
-            className="shrink-0"
+            className="hidden shrink-0 md:inline-flex"
           />
 
           {/* Content block */}
           <div className="min-w-0 flex-1">
-            {/* Top row: name + actions + overflow */}
-            <div className="flex items-center gap-2">
-              <h2 className="text-foreground min-w-0 flex-1 truncate text-xl font-bold">
+            {/* Flex-wrap container: order controls mobile vs desktop layout */}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              {/* Name */}
+              <h2 className="text-foreground order-1 min-w-0 flex-1 truncate text-xl font-bold">
                 {displayName}
               </h2>
 
-              {/* Actions + overflow menu inline with name */}
-              {(actions || showOverflowMenu) && (
-                <div className="flex shrink-0 items-center gap-1">
-                  {actions && (
-                    <div className="relative" ref={actionsMenuRef}>
-                      {/* Mobile: popover toggle button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
-                        aria-label="Open actions menu"
-                        aria-haspopup="true"
-                        aria-expanded={actionsMenuOpen}
-                        aria-controls={actionsMenuId}
-                        className="h-8 w-8 md:hidden"
-                      >
-                        <MenuIcon size={18} />
-                      </Button>
-
-                      {/* Actions: inline on desktop, popover on mobile */}
-                      <div
-                        id={actionsMenuId}
-                        role="group"
-                        aria-label="Patient actions"
-                        className={cn(
-                          'hidden items-center gap-2 md:flex',
-                          actionsMenuOpen &&
-                            'border-border bg-card motion-safe:animate-fade-in absolute top-full right-0 z-50 mt-1 !flex min-w-[12rem] flex-col gap-1.5 rounded-xl border p-2 shadow-lg',
-                          'md:static md:z-auto md:mt-0 md:min-w-0 md:flex-row md:gap-2 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none'
-                        )}
-                      >
-                        {actions}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Patient-level overflow menu */}
-                  {showOverflowMenu && (
-                    <PatientOverflowMenu onAction={handleOverflowAction} />
-                  )}
+              {/* Overflow menu: order-2 on mobile (right of name), order-3 on desktop (after actions) */}
+              {showOverflowMenu && (
+                <div className="order-2 shrink-0 md:order-3">
+                  <PatientOverflowMenu onAction={handleOverflowAction} />
                 </div>
               )}
-            </div>
 
-            {/* Second line: Status, MRN, Age/Sex, DOB, Employer */}
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-              {patient.status &&
-                (() => {
-                  const normalizedStatus = patient.status.toLowerCase();
-                  const statusColorMap: Record<string, string> = {
-                    active: 'bg-green-500',
-                    inactive: 'bg-gray-400',
-                    deceased: 'bg-red-500',
-                  };
-                  const statusColorClass =
-                    statusColorMap[normalizedStatus] ?? 'bg-yellow-500';
-
-                  return (
-                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      <span
-                        aria-hidden="true"
-                        className={`inline-block h-2 w-2 rounded-full ${statusColorClass}`}
-                      />
-                      <span className="text-muted-foreground capitalize">
-                        {normalizedStatus}
-                      </span>
-                    </span>
-                  );
-                })()}
-              <span className="text-muted-foreground whitespace-nowrap">
-                MRN: {patient.mrn}
-              </span>
-              <span className="text-muted-foreground whitespace-nowrap">
-                {patient.age} y/o {patient.sex}
-              </span>
-              <span className="text-muted-foreground whitespace-nowrap">
-                DOB: {patient.dob}
-              </span>
-              {patient.employer && (
-                <span className="text-muted-foreground whitespace-nowrap">
-                  {patient.employer}
-                </span>
+              {/* Actions (CountBadges): own row on mobile (order-4), inline on desktop (order-2) */}
+              {actions && (
+                <div
+                  className={cn(
+                    'order-4 w-full md:order-2 md:w-auto md:shrink-0',
+                    'mt-1 md:mt-0',
+                    '[&_button[data-count-badge]]:gap-1.5 [&_button[data-count-badge]]:px-2 [&_button[data-count-badge]]:py-0.5 [&_button[data-count-badge]]:text-xs',
+                    'md:[&_button[data-count-badge]]:gap-2 md:[&_button[data-count-badge]]:px-3 md:[&_button[data-count-badge]]:py-1 md:[&_button[data-count-badge]]:text-sm'
+                  )}
+                >
+                  {actions}
+                </div>
               )}
+
+              {/* Demographics: order-3 on mobile (before actions), order-4 on desktop (last) */}
+              <div className="order-3 mt-1 flex w-full flex-wrap items-center gap-x-3 gap-y-1 text-sm md:order-4">
+                {patient.status &&
+                  (() => {
+                    const normalizedStatus = patient.status.toLowerCase();
+                    const statusColorMap: Record<string, string> = {
+                      active: 'bg-green-500',
+                      inactive: 'bg-gray-400',
+                      deceased: 'bg-red-500',
+                    };
+                    const statusColorClass =
+                      statusColorMap[normalizedStatus] ?? 'bg-yellow-500';
+
+                    return (
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                        <span
+                          aria-hidden="true"
+                          className={`inline-block h-2 w-2 rounded-full ${statusColorClass}`}
+                        />
+                        <span className="text-muted-foreground capitalize">
+                          {normalizedStatus}
+                        </span>
+                      </span>
+                    );
+                  })()}
+                <span className="text-muted-foreground whitespace-nowrap">
+                  MRN: {patient.mrn}
+                </span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  {patient.age} y/o {patient.sex}
+                </span>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  DOB: {patient.dob}
+                </span>
+                {patient.employer && (
+                  <span className="text-muted-foreground whitespace-nowrap">
+                    {patient.employer}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
-
         {/* ─── Info rows: Allergies, Meds, Alerts, Providers ─── */}
         {hasInfoRows && (
           <div className="border-border bg-muted/30 mx-5 mb-3 space-y-2.5 rounded-lg border px-4 py-3">
