@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import type { Preview, Decorator } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
@@ -202,7 +203,6 @@ const preview: Preview = {
           { value: 'waggleline', title: '🍯 Waggleline' },
           { value: 'webchart', title: '🟠 WebChart' },
         ],
-        showName: true,
         dynamicTitle: true,
       },
     },
@@ -216,7 +216,6 @@ const preview: Preview = {
           { value: 'light', icon: 'sun', title: 'Light' },
           { value: 'dark', icon: 'moon', title: 'Dark' },
         ],
-        showName: true,
         dynamicTitle: true,
       },
     },
