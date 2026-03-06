@@ -22,9 +22,6 @@ import {
   AlertCircleIcon,
   PaperclipIcon,
   ClipboardListIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  BuildingIcon,
   StethoscopeIcon,
   UsersIcon,
   MenuIcon,
@@ -106,6 +103,7 @@ export type PatientOverflowAction =
   | 'add-alert'
   | 'add-condition'
   | 'add-vitals'
+  | 'contact'
   | 'send-message'
   | 'schedule-appointment'
   | 'print-summary'
@@ -151,10 +149,10 @@ export interface PatientHeaderProps extends Omit<
   showMedicationBanner?: boolean;
   /** Whether to show the comments row (default: false) */
   showCommentsBanner?: boolean;
-  /** Show collapsible demographics detail section (default: false) */
-  showDetails?: boolean;
-  /** Whether demographics details are expanded initially (default: true) */
-  detailsExpanded?: boolean;
+  /** Whether to show the attending/family provider row (default: false) */
+  showProviderBanner?: boolean;
+  /** Whether to show the flag ribbon at the bottom, e.g. Duplicate (default: false) */
+  showFlagBanner?: boolean;
   /** Maximum medications to display before "+N more" (default: 4) */
   maxVisibleMeds?: number;
   /** Show the patient-level overflow menu to the right of count badges (default: false) */
@@ -193,26 +191,6 @@ function formatFullName(name: PatientName): string {
   parts.push(name.last);
   if (name.suffix) parts.push(name.suffix);
   return parts.filter(Boolean).join(' ');
-}
-
-function getStatusVariant(status?: string): 'success' | 'danger' | 'secondary' {
-  switch (status) {
-    case 'active':
-      return 'success';
-    case 'deceased':
-      return 'danger';
-    case 'inactive':
-      return 'secondary';
-    default:
-      return 'secondary';
-  }
-}
-
-function getFlagVariant(flag: string): 'warning' | 'danger' | 'secondary' {
-  const lower = flag.toLowerCase();
-  if (lower === 'duplicate') return 'warning';
-  if (lower === 'deceased' || lower === 'restricted') return 'danger';
-  return 'secondary';
 }
 
 // =============================================================================
@@ -390,6 +368,11 @@ function PatientOverflowMenu({
                 onClick={() => handleAction('edit-patient')}
               />
               <OverflowMenuItem
+                icon={<PhoneIcon size={15} />}
+                label="Contact"
+                onClick={() => handleAction('contact')}
+              />
+              <OverflowMenuItem
                 icon={<SendIcon size={15} />}
                 label="Send Message"
                 onClick={() => handleAction('send-message')}
@@ -529,7 +512,7 @@ function AlertRow({ comments }: { comments: string[] }) {
  *   ]}
  *   showAllergyBanner
  *   showMedicationBanner
- *   showDetails
+ *   showProviderBanner
  * />
  * ```
  */
@@ -550,8 +533,8 @@ export const PatientHeader = React.forwardRef<
       showAllergyBanner = false,
       showMedicationBanner = false,
       showCommentsBanner = false,
-      showDetails = false,
-      detailsExpanded: detailsExpandedProp,
+      showProviderBanner = false,
+      showFlagBanner = false,
       showOverflowMenu = false,
       onOverflowAction,
       onAddItem,
@@ -566,12 +549,13 @@ export const PatientHeader = React.forwardRef<
     const hasAllergies = showAllergyBanner && allergies.length > 0;
     const hasMedications = showMedicationBanner && medications.length > 0;
     const hasComments = showCommentsBanner && comments.length > 0;
-    const hasAlerts = hasAllergies || hasMedications || hasComments;
+    const hasProviders =
+      showProviderBanner &&
+      !!(patient.attendingProvider || patient.familyProvider);
+    const hasInfoRows =
+      hasAllergies || hasMedications || hasComments || hasProviders;
 
-    const [detailsExpanded, setDetailsExpanded] = React.useState(
-      detailsExpandedProp ?? true
-    );
-
+    const actionsMenuId = React.useId();
     const [actionsMenuOpen, setActionsMenuOpen] = React.useState(false);
     const actionsMenuRef = React.useRef<HTMLDivElement>(null);
 
@@ -584,12 +568,6 @@ export const PatientHeader = React.forwardRef<
       actionsMenuOpen
     );
 
-    React.useEffect(() => {
-      if (detailsExpandedProp !== undefined) {
-        setDetailsExpanded(detailsExpandedProp);
-      }
-    }, [detailsExpandedProp]);
-
     // ─── Add-entity modal state ───
     const [addModalType, setAddModalType] =
       React.useState<PatientOverflowAction | null>(null);
@@ -599,16 +577,21 @@ export const PatientHeader = React.forwardRef<
       ? (ADD_ENTITY_LABELS[addModalType] ?? '')
       : '';
 
+    // ─── Contact modal state ───
+    const [contactModalOpen, setContactModalOpen] = React.useState(false);
+
     // ─── Edit Patient modal state ───
     const [editPatientOpen, setEditPatientOpen] = React.useState(false);
     const [editPatientForm, setEditPatientForm] = React.useState<
       Record<string, string>
     >({});
 
-    /** Intercept overflow actions — open add modal for add-* keys, edit-patient modal */
+    /** Intercept overflow actions — open contact modal, add-* modals, and edit-patient modal */
     const handleOverflowAction = React.useCallback(
       (action: PatientOverflowAction) => {
-        if (action === 'edit-patient') {
+        if (action === 'contact') {
+          setContactModalOpen(true);
+        } else if (action === 'edit-patient') {
           setEditPatientOpen(true);
           setEditPatientForm({
             firstName: patient.name.first,
@@ -676,93 +659,107 @@ export const PatientHeader = React.forwardRef<
           <Avatar
             name={formatFullName(patient.name)}
             src={patient.photo}
-            size="lg"
-            className="mt-0.5 shrink-0"
+            size="md"
+            className="shrink-0"
           />
 
-          {/* Name block */}
+          {/* Content block */}
           <div className="min-w-0 flex-1">
-            {/* Top line: name, age/sex, MRN */}
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className="text-foreground truncate text-xl font-bold">
+            {/* Top row: name + actions + overflow */}
+            <div className="flex items-center gap-2">
+              <h2 className="text-foreground min-w-0 flex-1 truncate text-xl font-bold">
                 {displayName}
               </h2>
-              <span className="text-muted-foreground text-sm whitespace-nowrap">
-                {patient.age} y/o {patient.sex}
-              </span>
-              <span className="text-muted-foreground text-sm whitespace-nowrap">
-                MRN: {patient.mrn}
-              </span>
-            </div>
 
-            {/* Second line: status + flag badges */}
-            {(patient.status ||
-              (patient.flags && patient.flags.length > 0)) && (
-              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                {patient.status && (
-                  <Badge
-                    variant={getStatusVariant(patient.status)}
-                    size="sm"
-                    className="uppercase"
-                  >
-                    {patient.status}
-                  </Badge>
-                )}
-                {patient.flags?.map((flag) => (
-                  <Badge key={flag} variant={getFlagVariant(flag)} size="sm">
-                    {flag.toUpperCase()}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
+              {/* Actions + overflow menu inline with name */}
+              {(actions || showOverflowMenu) && (
+                <div className="flex shrink-0 items-center gap-1">
+                  {actions && (
+                    <div className="relative" ref={actionsMenuRef}>
+                      {/* Mobile: popover toggle button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
+                        aria-label="Open actions menu"
+                        aria-haspopup="true"
+                        aria-expanded={actionsMenuOpen}
+                        aria-controls={actionsMenuId}
+                        className="h-8 w-8 md:hidden"
+                      >
+                        <MenuIcon size={18} />
+                      </Button>
 
-          {/* Right side: actions + overflow menu */}
-          {(actions || showOverflowMenu) && (
-            <div className="mt-1 flex shrink-0 items-start gap-1">
-              {actions && (
-                <div className="relative" ref={actionsMenuRef}>
-                  {/* Mobile: popover toggle button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
-                    aria-label="Open actions menu"
-                    aria-haspopup="true"
-                    aria-expanded={actionsMenuOpen}
-                    aria-controls="patient-actions-menu"
-                    className="h-8 w-8 md:hidden"
-                  >
-                    <MenuIcon size={18} />
-                  </Button>
+                      {/* Actions: inline on desktop, popover on mobile */}
+                      <div
+                        id={actionsMenuId}
+                        role="group"
+                        aria-label="Patient actions"
+                        className={cn(
+                          'hidden items-center gap-2 md:flex',
+                          actionsMenuOpen &&
+                            'border-border bg-card motion-safe:animate-fade-in absolute top-full right-0 z-50 mt-1 !flex min-w-[12rem] flex-col gap-1.5 rounded-xl border p-2 shadow-lg',
+                          'md:static md:z-auto md:mt-0 md:min-w-0 md:flex-row md:gap-2 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none'
+                        )}
+                      >
+                        {actions}
+                      </div>
+                    </div>
+                  )}
 
-                  {/* Actions: inline on desktop, popover on mobile */}
-                  <div
-                    id="patient-actions-menu"
-                    role="group"
-                    aria-label="Patient actions"
-                    className={cn(
-                      'hidden items-center gap-2 md:flex',
-                      actionsMenuOpen &&
-                        'border-border bg-card motion-safe:animate-fade-in absolute top-full right-0 z-50 mt-1 !flex min-w-[12rem] flex-col gap-1.5 rounded-xl border p-2 shadow-lg',
-                      'md:static md:z-auto md:mt-0 md:min-w-0 md:flex-row md:gap-2 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none'
-                    )}
-                  >
-                    {actions}
-                  </div>
+                  {/* Patient-level overflow menu */}
+                  {showOverflowMenu && (
+                    <PatientOverflowMenu onAction={handleOverflowAction} />
+                  )}
                 </div>
               )}
+            </div>
 
-              {/* Patient-level overflow menu */}
-              {showOverflowMenu && (
-                <PatientOverflowMenu onAction={handleOverflowAction} />
+            {/* Second line: Status, MRN, Age/Sex, DOB, Employer */}
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              {patient.status &&
+                (() => {
+                  const normalizedStatus = patient.status.toLowerCase();
+                  const statusColorMap: Record<string, string> = {
+                    active: 'bg-green-500',
+                    inactive: 'bg-gray-400',
+                    deceased: 'bg-red-500',
+                  };
+                  const statusColorClass =
+                    statusColorMap[normalizedStatus] ?? 'bg-yellow-500';
+
+                  return (
+                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                      <span
+                        aria-hidden="true"
+                        className={`inline-block h-2 w-2 rounded-full ${statusColorClass}`}
+                      />
+                      <span className="text-muted-foreground capitalize">
+                        {normalizedStatus}
+                      </span>
+                    </span>
+                  );
+                })()}
+              <span className="text-muted-foreground whitespace-nowrap">
+                MRN: {patient.mrn}
+              </span>
+              <span className="text-muted-foreground whitespace-nowrap">
+                {patient.age} y/o {patient.sex}
+              </span>
+              <span className="text-muted-foreground whitespace-nowrap">
+                DOB: {patient.dob}
+              </span>
+              {patient.employer && (
+                <span className="text-muted-foreground whitespace-nowrap">
+                  {patient.employer}
+                </span>
               )}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* ─── Alerts section ─── */}
-        {hasAlerts && (
+        {/* ─── Info rows: Allergies, Meds, Alerts, Providers ─── */}
+        {hasInfoRows && (
           <div className="border-border bg-muted/30 mx-5 mb-3 space-y-2.5 rounded-lg border px-4 py-3">
             {hasAllergies && <AllergyRow allergies={allergies} />}
             {hasMedications && (
@@ -772,91 +769,97 @@ export const PatientHeader = React.forwardRef<
               />
             )}
             {hasComments && <AlertRow comments={comments} />}
-          </div>
-        )}
-
-        {/* ─── Details toggle + demographics ─── */}
-        {showDetails && (
-          <>
-            <div className="border-border border-t">
-              <button
-                type="button"
-                onClick={() => setDetailsExpanded(!detailsExpanded)}
-                aria-expanded={detailsExpanded}
-                aria-controls="patient-details-content"
-                className={cn(
-                  'text-primary-800 dark:text-primary-300 flex items-center gap-1 px-5 py-2 text-sm',
-                  'hover:text-primary-900 dark:hover:text-primary-200 w-full transition-colors',
-                  'focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
-                )}
-              >
-                <span>{detailsExpanded ? 'Hide details' : 'Show details'}</span>
-                {detailsExpanded ? (
-                  <ChevronUpIcon size={14} />
-                ) : (
-                  <ChevronDownIcon size={14} />
-                )}
-              </button>
-            </div>
-
-            {detailsExpanded && (
-              <div
-                id="patient-details-content"
-                className="border-border motion-safe:animate-fade-in space-y-3 border-t px-5 py-4"
-              >
-                {/* Row 1 */}
-                <div className="flex flex-wrap gap-x-10 gap-y-3">
+            {hasProviders && (
+              <div className="flex flex-wrap gap-x-8 gap-y-2">
+                {patient.attendingProvider && (
                   <DetailItem
-                    icon={<CalendarIcon size={14} />}
-                    label="DOB"
-                    value={patient.dob}
+                    icon={<StethoscopeIcon size={14} />}
+                    label="Attending"
+                    value={patient.attendingProvider}
                   />
-                  {patient.email && (
-                    <DetailItem
-                      icon={<MailIcon size={14} />}
-                      label="Email"
-                      value={patient.email}
-                    />
-                  )}
-                  {patient.phone && (
-                    <DetailItem
-                      icon={<PhoneIcon size={14} />}
-                      label="Phone"
-                      value={patient.phone}
-                    />
-                  )}
-                  {patient.employer && (
-                    <DetailItem
-                      icon={<BuildingIcon size={14} />}
-                      label="Employer"
-                      value={patient.employer}
-                    />
-                  )}
-                </div>
-
-                {/* Row 2 */}
-                {(patient.attendingProvider || patient.familyProvider) && (
-                  <div className="flex flex-wrap gap-x-10 gap-y-3">
-                    {patient.attendingProvider && (
-                      <DetailItem
-                        icon={<StethoscopeIcon size={14} />}
-                        label="Attending"
-                        value={patient.attendingProvider}
-                      />
-                    )}
-                    {patient.familyProvider && (
-                      <DetailItem
-                        icon={<UsersIcon size={14} />}
-                        label="Family MD"
-                        value={patient.familyProvider}
-                      />
-                    )}
-                  </div>
+                )}
+                {patient.familyProvider && (
+                  <DetailItem
+                    icon={<UsersIcon size={14} />}
+                    label="Family MD"
+                    value={patient.familyProvider}
+                  />
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
+
+        {/* ─── Flag ribbon (e.g. Duplicate) ─── */}
+        {showFlagBanner && patient.flags && patient.flags.length > 0 && (
+          <div className="border-t border-amber-200 bg-amber-50 px-5 py-1.5 text-left text-xs font-medium tracking-wide text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-300">
+            {patient.flags
+              .map(
+                (flag) =>
+                  flag.charAt(0).toUpperCase() + flag.slice(1).toLowerCase()
+              )
+              .join(' · ')}
+          </div>
+        )}
+
+        {/* ─── Contact modal ─── */}
+        <Modal
+          open={contactModalOpen}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setContactModalOpen(false);
+          }}
+          size="sm"
+        >
+          <ModalHeader>
+            <ModalTitle>Contact Information</ModalTitle>
+            <ModalClose />
+          </ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              {patient.email && (
+                <div className="flex items-center gap-3">
+                  <MailIcon
+                    size={18}
+                    className="text-muted-foreground shrink-0"
+                  />
+                  <div>
+                    <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                      Email
+                    </span>
+                    <p className="text-foreground text-sm">{patient.email}</p>
+                  </div>
+                </div>
+              )}
+              {patient.phone && (
+                <div className="flex items-center gap-3">
+                  <PhoneIcon
+                    size={18}
+                    className="text-muted-foreground shrink-0"
+                  />
+                  <div>
+                    <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                      Phone
+                    </span>
+                    <p className="text-foreground text-sm">{patient.phone}</p>
+                  </div>
+                </div>
+              )}
+              {!patient.email && !patient.phone && (
+                <p className="text-muted-foreground text-sm">
+                  No contact information available.
+                </p>
+              )}
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setContactModalOpen(false)}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </Modal>
 
         {/* ─── Add entity modal ─── */}
         <Modal

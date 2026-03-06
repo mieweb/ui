@@ -101,7 +101,7 @@ const countChipVariants = cva(
           'bg-muted text-foreground/70 dark:bg-muted dark:text-foreground/70',
         info: 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200',
         informative:
-          'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+          'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300',
         success:
           'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
         warning:
@@ -190,6 +190,8 @@ export interface CountBadgeProps
   onDelete?: (item: CountBadgeItem) => void;
   /** Label used in the delete confirmation dialog (e.g. "task", "encounter"). Defaults to "item". */
   deleteLabel?: string;
+  /** Independent variant for the count chip. When set, overrides `variant` for just the number. */
+  countVariant?: VariantProps<typeof countChipVariants>['variant'];
 }
 
 // =============================================================================
@@ -632,6 +634,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
       onEdit,
       onDelete,
       deleteLabel,
+      countVariant,
       ...props
     },
     ref
@@ -727,7 +730,13 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
           >
             {icon && <span className="shrink-0">{icon}</span>}
             <span>{label}</span>
-            <span className={cn(countChipVariants({ variant }))}>{count}</span>
+            <span
+              className={cn(
+                countChipVariants({ variant: countVariant ?? variant })
+              )}
+            >
+              {count}
+            </span>
           </button>
 
           {showMenu && open && (

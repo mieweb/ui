@@ -493,7 +493,8 @@ export const PatientSummary: StoryObj = {
         medications={sampleMedications}
         showAllergyBanner
         showMedicationBanner
-        showDetails
+        showProviderBanner
+        showFlagBanner
         sticky={false}
         showOverflowMenu
         onOverflowAction={(action: PatientOverflowAction) =>
