@@ -712,11 +712,6 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
 
     const entityLabel = deleteLabel ?? 'item';
 
-    // Hide badge when count is 0 and there are no items
-    if (count === 0 && (!items || items.length === 0)) {
-      return null;
-    }
-
     return (
       <>
         <div ref={containerRef} className="relative inline-flex">
