@@ -723,7 +723,9 @@ export const PatientHeader = React.forwardRef<
                         ? 'bg-green-500'
                         : patient.status.toLowerCase() === 'inactive'
                           ? 'bg-gray-400'
-                          : 'bg-yellow-500'
+                          : patient.status.toLowerCase() === 'deceased'
+                            ? 'bg-red-500'
+                            : 'bg-yellow-500'
                     }`}
                   />
                   <span className="text-muted-foreground capitalize">
@@ -751,7 +753,7 @@ export const PatientHeader = React.forwardRef<
           </div>
         </div>
 
-        {/* ─── Info rows: Allergies, Meds, Alerts ─── */}
+        {/* ─── Info rows: Allergies, Meds, Alerts, Providers ─── */}
         {hasInfoRows && (
           <div className="border-border bg-muted/30 mx-5 mb-3 space-y-2.5 rounded-lg border px-4 py-3">
             {hasAllergies && <AllergyRow allergies={allergies} />}
