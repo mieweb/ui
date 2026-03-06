@@ -346,9 +346,9 @@ function PatientOverflowMenu({
           aria-label="Patient actions"
           className={cn(
             'absolute top-full right-0 z-50 mt-1',
-            'w-[calc(100vw-2rem)] md:w-auto',
+            'w-[calc(100vw_-_2rem)] md:w-auto',
             'border-border bg-card rounded-xl border py-1 shadow-lg',
-            'max-h-[calc(100vh-3rem)] overflow-y-auto md:max-h-[calc(100vh-4rem)]',
+            'max-h-[calc(100vh_-_3rem)] overflow-y-auto md:max-h-[calc(100vh_-_4rem)]',
             'motion-safe:animate-fade-in'
           )}
         >
