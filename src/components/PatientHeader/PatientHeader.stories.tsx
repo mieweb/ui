@@ -20,8 +20,8 @@ const meta: Meta<typeof PatientHeader> = {
     showAllergyBanner: { control: 'boolean' },
     showMedicationBanner: { control: 'boolean' },
     showCommentsBanner: { control: 'boolean' },
-    showDetails: { control: 'boolean' },
-    detailsExpanded: { control: 'boolean' },
+    showProviderBanner: { control: 'boolean' },
+    showFlagBanner: { control: 'boolean' },
     maxVisibleMeds: { control: { type: 'number', min: 1, max: 20 } },
     patient: { table: { disable: true } },
     allergies: { table: { disable: true } },
@@ -118,13 +118,14 @@ export const Default: Story = {
     showAllergyBanner: true,
     showMedicationBanner: true,
     showCommentsBanner: true,
-    showDetails: true,
+    showProviderBanner: true,
+    showFlagBanner: true,
     actions: (
       <div className="flex flex-wrap gap-2">
         <CountBadge
           label="Tasks"
           count={3}
-          variant="warning"
+          countVariant="informative"
           items={sampleTasks}
           deleteLabel="task"
           onView={(item) => console.log('View task', item)}
@@ -134,7 +135,7 @@ export const Default: Story = {
         <CountBadge
           label="Open Enc"
           count={5}
-          variant="info"
+          countVariant="informative"
           items={sampleEncounters}
           deleteLabel="encounter"
           onView={(item) => console.log('View encounter', item)}
@@ -146,7 +147,7 @@ export const Default: Story = {
         <CountBadge
           label="Due List"
           count={4}
-          variant="alert"
+          countVariant="informative"
           items={sampleDueList}
           deleteLabel="due list item"
           onView={(item) => console.log('View due item', item)}
@@ -158,6 +159,7 @@ export const Default: Story = {
         <CountBadge
           label="Order Req"
           count={4}
+          countVariant="informative"
           items={sampleOrders}
           deleteLabel="order"
           onView={(item) => console.log('View order', item)}
@@ -169,7 +171,7 @@ export const Default: Story = {
         <CountBadge
           label="eSign"
           count={7}
-          variant="warning"
+          countVariant="informative"
           items={sampleEsigns}
           deleteLabel="e-sign request"
           onView={(item) => console.log('View esign', item)}
@@ -201,8 +203,7 @@ export const WithBackButton: Story = {
     showAllergyBanner: true,
     showMedicationBanner: true,
     showBackButton: true,
-
-    showDetails: true,
+    showProviderBanner: true,
   },
 };
 
@@ -220,16 +221,15 @@ export const HeaderOnly: Story = {
   },
 };
 
-/** Alerts visible but demographics details collapsed. */
-export const DetailsCollapsed: Story = {
+/** Alerts visible, providers shown in info rows. */
+export const WithProviders: Story = {
   args: {
     patient: samplePatient,
     allergies: sampleAllergies,
     medications: sampleMedications,
     showAllergyBanner: true,
     showMedicationBanner: true,
-    showDetails: true,
-    detailsExpanded: false,
+    showProviderBanner: true,
   },
 };
 
@@ -241,7 +241,7 @@ export const InactivePatient: Story = {
       status: 'inactive',
       flags: undefined,
     },
-    showDetails: true,
+    showProviderBanner: true,
   },
 };
 
@@ -253,7 +253,7 @@ export const DeceasedPatient: Story = {
       status: 'deceased',
       flags: ['DECEASED'],
     },
-    showDetails: true,
+    showProviderBanner: true,
   },
 };
 
@@ -265,7 +265,7 @@ export const WithActions: Story = {
     medications: sampleMedications,
     showAllergyBanner: true,
     showMedicationBanner: true,
-    showDetails: true,
+    showProviderBanner: true,
     actions: (
       <div className="flex gap-2">
         <Button variant="outline" size="sm">
@@ -295,7 +295,7 @@ export const FemaleWithPhoto: Story = {
     },
     allergies: [{ name: 'Latex' }],
     showAllergyBanner: true,
-    showDetails: true,
+    showProviderBanner: true,
   },
 };
 
@@ -308,7 +308,7 @@ export const Sticky: Story = {
     showAllergyBanner: true,
     showMedicationBanner: true,
     sticky: true,
-    showDetails: true,
+    showProviderBanner: true,
   },
   decorators: [
     (Story) => (
