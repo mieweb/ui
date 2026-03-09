@@ -17,6 +17,7 @@ export default defineConfig({
     'components/Button/index': 'src/components/Button/index.ts',
     'components/Card/index': 'src/components/Card/index.ts',
     'components/Checkbox/index': 'src/components/Checkbox/index.ts',
+    'components/CountryCodeDropdown/index': 'src/components/CountryCodeDropdown/index.ts',
     'components/DateInput/index': 'src/components/DateInput/index.ts',
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
