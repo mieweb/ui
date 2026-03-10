@@ -3,31 +3,56 @@
  *
  * Provides <DataVisSource> and <DataVisGrid> components that declaratively
  * create and manage DataVis Source, ComputedView, and Grid instances.
+ *
+ * All browser-only side-effect imports (jQuery, plugins, CSS, wcdatavis) are
+ * deferred to dynamic imports that run inside useEffect so this module is safe
+ * to import in SSR / Node environments without crashing or bloating the bundle.
  */
 
-import React, { createContext, useContext, useEffect, useId, useRef } from 'react';
-// setup.ts must be first — it sets window.jQuery before plugins load
-import './setup';
-// jQuery plugins (side-effect imports — attach to window.jQuery set above)
-import 'jquery-ui/dist/jquery-ui.min.js';
-import 'block-ui';
-import 'flatpickr';
-import 'jquery-contextmenu';
-import 'sumoselect';
-// CSS
-import 'jquery-ui/dist/themes/base/jquery-ui.min.css';
-import 'jquery-contextmenu/dist/jquery.contextMenu.min.css';
-import 'sumoselect/sumoselect.min.css';
-import 'wcdatavis/wcdatavis.css';
-// @ts-expect-error — wcdatavis does not ship type declarations
-import { Source } from 'wcdatavis/src/source.js';
-// @ts-expect-error — wcdatavis does not ship type declarations
-import { ComputedView } from 'wcdatavis/src/computed_view.js';
-// @ts-expect-error — wcdatavis does not ship type declarations
-import { Grid } from 'wcdatavis/src/grid.js';
+import React, { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
+
+/** Shape returned by the lazy module loader. */
+interface DvModules {
+  Source: any;
+  ComputedView: any;
+  Grid: any;
+}
+
+/**
+ * Module-level cache for the lazy-loaded DataVis dependencies.
+ * Ensures that setup and plugin registration happen exactly once per page load.
+ */
+let _modulesPromise: Promise<DvModules> | null = null;
+
+function loadDvModules(): Promise<DvModules> {
+  if (_modulesPromise !== null) return _modulesPromise;
+  _modulesPromise = (async (): Promise<DvModules> => {
+    // setup.ts must be first — it sets window.jQuery before plugins load
+    await import('./setup');
+    // jQuery plugins (side-effect imports — attach to window.jQuery set above)
+    await import('jquery-ui/dist/jquery-ui.min.js');
+    await import('block-ui');
+    await import('flatpickr');
+    await import('jquery-contextmenu');
+    await import('sumoselect');
+    // CSS
+    await import('jquery-ui/dist/themes/base/jquery-ui.min.css');
+    await import('jquery-contextmenu/dist/jquery.contextMenu.min.css');
+    await import('sumoselect/sumoselect.min.css');
+    await import('wcdatavis/wcdatavis.css');
+    // @ts-expect-error — wcdatavis does not ship type declarations
+    const { Source } = await import('wcdatavis/src/source.js');
+    // @ts-expect-error — wcdatavis does not ship type declarations
+    const { ComputedView } = await import('wcdatavis/src/computed_view.js');
+    // @ts-expect-error — wcdatavis does not ship type declarations
+    const { Grid } = await import('wcdatavis/src/grid.js');
+    return { Source, ComputedView, Grid };
+  })();
+  return _modulesPromise;
+}
 
 /** React context used to pass the ComputedView from DataVisSource to DataVisGrid. */
-const SourceContext = createContext<InstanceType<typeof ComputedView> | null>(null);
+const SourceContext = createContext<any | null>(null);
 
 // — DataVisSource —
 
@@ -42,24 +67,33 @@ export interface DataVisSourceProps {
 /**
  * Creates a DataVis Source and ComputedView, providing them to children
  * via context. The Source is recreated when `type` or `url` change.
+ * Modules are loaded lazily on first render so this is safe in SSR contexts.
  */
 function DataVisSource({ type, url, children }: DataVisSourceProps) {
-  const viewRef = useRef<any>(null);
+  const [view, setView] = useState<any>(null);
 
-  if (
-    viewRef.current === null ||
-    viewRef.current._dvType !== type ||
-    viewRef.current._dvUrl !== url
-  ) {
-    const source = new Source({ type, url });
-    const view = new ComputedView(source);
-    view._dvType = type;
-    view._dvUrl = url;
-    viewRef.current = view;
-  }
+  useEffect(() => {
+    let cancelled = false;
+    loadDvModules()
+      .then(({ Source, ComputedView }) => {
+        if (cancelled) return;
+        const source = new Source({ type, url });
+        const cv = new ComputedView(source);
+        cv._dvType = type;
+        cv._dvUrl = url;
+        setView(cv);
+      })
+      .catch((err) => {
+        if (!cancelled) console.error('[DataVis] Failed to load modules:', err);
+      });
+    return () => {
+      cancelled = true;
+      setView(null);
+    };
+  }, [type, url]);
 
   return (
-    <SourceContext.Provider value={viewRef.current}>
+    <SourceContext.Provider value={view}>
       {children}
     </SourceContext.Provider>
   );
@@ -89,6 +123,7 @@ export interface DataVisGridProps {
 /**
  * Renders a DataVis Grid into a container div. Must be a descendant of
  * DataVisSource so that a ComputedView is available via context.
+ * Modules are loaded lazily so this is safe in SSR contexts.
  */
 function DataVisGrid({
   id,
@@ -101,7 +136,7 @@ function DataVisGrid({
 }: DataVisGridProps) {
   const computedView = useContext(SourceContext);
   const containerRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<InstanceType<typeof Grid> | null>(null);
+  const gridRef = useRef<any>(null);
   const reactId = useId();
 
   const domId = id || 'dv-grid-' + reactId.replace(/:/g, '');
@@ -109,27 +144,38 @@ function DataVisGrid({
   useEffect(() => {
     if (containerRef.current === null || computedView === null) return;
 
-    if (gridRef.current !== null) {
-      containerRef.current.innerHTML = '';
-      gridRef.current = null;
-    }
+    let cancelled = false;
 
-    const defn: Record<string, any> = {
-      id: domId,
-      computedView,
-      table: {} as Record<string, unknown>,
-    };
+    loadDvModules()
+      .then(({ Grid }) => {
+        if (cancelled || containerRef.current === null) return;
 
-    if (columns !== undefined) defn.table.columns = columns;
-    if (features !== undefined) defn.table.features = features;
+        if (gridRef.current !== null) {
+          containerRef.current.innerHTML = '';
+          gridRef.current = null;
+        }
 
-    const opts: Record<string, unknown> = {};
-    if (title !== undefined) opts.title = title;
-    if (showControls !== undefined) opts.showControls = showControls;
+        const defn: Record<string, any> = {
+          id: domId,
+          computedView,
+          table: {} as Record<string, unknown>,
+        };
 
-    gridRef.current = new Grid(defn, opts);
+        if (columns !== undefined) defn.table.columns = columns;
+        if (features !== undefined) defn.table.features = features;
+
+        const opts: Record<string, unknown> = {};
+        if (title !== undefined) opts.title = title;
+        if (showControls !== undefined) opts.showControls = showControls;
+
+        gridRef.current = new Grid(defn, opts);
+      })
+      .catch((err) => {
+        if (!cancelled) console.error('[DataVis] Failed to load modules:', err);
+      });
 
     return () => {
+      cancelled = true;
       if (containerRef.current !== null) {
         containerRef.current.innerHTML = '';
       }
