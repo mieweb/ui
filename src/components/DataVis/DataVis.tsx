@@ -5,7 +5,7 @@
  * create and manage DataVis Source, ComputedView, and Grid instances.
  */
 
-import React, { createContext, useContext, useEffect, useId, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useId, useMemo, useRef } from 'react';
 // setup.ts must be first — it sets window.jQuery before plugins load
 import './setup';
 import { Source, ComputedView, Grid } from 'wcdatavis/index.js';
@@ -114,6 +114,18 @@ function DataVisGrid({
 
   const domId = id || 'dv-grid-' + reactId.replace(/:/g, '');
 
+  // Serialize to stable strings so that array/object literals passed by callers
+  // do not trigger a re-init on every render due to reference inequality.
+  const columnsKey = useMemo(() => JSON.stringify(columns), [columns]);
+  const featuresKey = useMemo(() => JSON.stringify(features), [features]);
+
+  // Keep refs to the latest values so the effect always uses up-to-date data
+  // without those values needing to be in the dependency array themselves.
+  const columnsRef = useRef(columns);
+  const featuresRef = useRef(features);
+  columnsRef.current = columns;
+  featuresRef.current = features;
+
   useEffect(() => {
     if (containerRef.current === null || computedView === null) return;
 
@@ -121,6 +133,9 @@ function DataVisGrid({
       containerRef.current.innerHTML = '';
       gridRef.current = null;
     }
+
+    const currentColumns = columnsRef.current;
+    const currentFeatures = featuresRef.current;
 
     const defn: {
       id: string;
@@ -132,8 +147,8 @@ function DataVisGrid({
       table: {},
     };
 
-    if (columns !== undefined) defn.table.columns = columns;
-    if (features !== undefined) defn.table.features = features;
+    if (currentColumns !== undefined) defn.table.columns = currentColumns;
+    if (currentFeatures !== undefined) defn.table.features = currentFeatures;
 
     const opts: Record<string, unknown> = {};
     if (title !== undefined) opts.title = title;
@@ -147,7 +162,7 @@ function DataVisGrid({
       }
       gridRef.current = null;
     };
-  }, [computedView, domId, title, showControls, columns, features]);
+  }, [computedView, domId, title, showControls, columnsKey, featuresKey]);
 
   return (
     <div
