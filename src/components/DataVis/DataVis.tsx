@@ -17,14 +17,32 @@ const SourceContext = createContext<InstanceType<typeof ComputedView> | null>(nu
 
 // — DataVisSource —
 
-export interface DataVisSourceProps {
-  /** Source type: 'http', 'local', or 'file'. */
-  type: string;
-  /** URL to fetch data from (when type is 'http'). */
-  url?: string;
+type DataVisSourceType = 'http' | 'local' | 'file';
+
+interface HttpDataVisSourceProps {
+  /** Source type: 'http'. */
+  type: 'http';
+  /** URL to fetch data from (required when type is 'http'). */
+  url: string;
   children?: React.ReactNode;
 }
 
+interface LocalDataVisSourceProps {
+  /** Source type: 'local'. */
+  type: 'local';
+  children?: React.ReactNode;
+}
+
+interface FileDataVisSourceProps {
+  /** Source type: 'file'. */
+  type: 'file';
+  children?: React.ReactNode;
+}
+
+export type DataVisSourceProps =
+  | HttpDataVisSourceProps
+  | LocalDataVisSourceProps
+  | FileDataVisSourceProps;
 /**
  * Creates a DataVis Source and ComputedView, providing them to children
  * via context. The Source is recreated when `type` or `url` change.
