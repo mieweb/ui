@@ -4,7 +4,11 @@
  * any Grid instances.
  */
 
-// @ts-expect-error — jquery does not ship default-export types for this usage
+// Minimal local typing shim so TypeScript recognizes the 'jquery' module.
+declare module 'jquery' {
+  const jQuery: any;
+  export default jQuery;
+}
 import jQuery from 'jquery';
 
 // Expose jQuery globally so plugins can install themselves on it.
