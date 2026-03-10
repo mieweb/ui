@@ -9,5 +9,9 @@ import jQuery from 'jquery';
 
 // Expose jQuery globally so plugins can install themselves on it.
 // NOTE: This runs before dynamic imports below, which is intentional.
-(window as any).jQuery = jQuery;
-(window as any).$ = jQuery;
+if (typeof window !== 'undefined') {
+  (window as any).jQuery = jQuery;
+  (window as any).$ = jQuery;
+}
+(globalThis as any).jQuery = jQuery;
+(globalThis as any).$ = jQuery;
