@@ -177,10 +177,12 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "font-awesome": "^4.7.0",
     "google-libphonenumber": "^3.2.44",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
-    "tailwind-merge": "^2.6.1"
+    "tailwind-merge": "^2.6.1",
+    "wcdatavis": "mieweb/wcdatavis.git#feature/react"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
