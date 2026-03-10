@@ -129,7 +129,7 @@ function DataVisGrid({
 
     const opts: Record<string, unknown> = {};
     if (title !== undefined) opts.title = title;
-    if (showControls !== undefined) opts.showControls = showControls;
+    opts.showControls = showControls ?? false;
 
     gridRef.current = new Grid(defn, opts);
 
