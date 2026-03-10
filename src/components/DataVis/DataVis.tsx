@@ -122,10 +122,14 @@ function DataVisGrid({
       gridRef.current = null;
     }
 
-    const defn: Record<string, any> = {
+    const defn: {
+      id: string;
+      computedView: InstanceType<typeof ComputedView>;
+      table: { columns?: typeof columns; features?: typeof features };
+    } = {
       id: domId,
       computedView,
-      table: {} as Record<string, unknown>,
+      table: {},
     };
 
     if (columns !== undefined) defn.table.columns = columns;
