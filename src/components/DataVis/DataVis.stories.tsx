@@ -75,7 +75,7 @@ export const WithControls: Story = {
 
 /**
  * Multiple grids sharing the same data source. Both grids read from the same
- * `<DVSource>` so the data is fetched only once.
+ * `<DataVisSource>` so the data is fetched only once.
  */
 export const MultipleGrids: Story = {
   render: () => (
