@@ -178,7 +178,8 @@
     "google-libphonenumber": "^3.2.44",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
-    "tailwind-merge": "^2.6.1"
+    "tailwind-merge": "^2.6.1",
+    "wcdatavis": "mieweb/wcdatavis.git#feature/react"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",

@@ -16,6 +16,29 @@ const config: StorybookConfig = {
     reactDocgen: 'react-docgen-typescript',
   },
   staticDirs: ['./public'],
+  async viteFinal(config) {
+    config.optimizeDeps = config.optimizeDeps || {};
+    config.optimizeDeps.include = [
+      ...(config.optimizeDeps.include || []),
+      'jquery',
+      'jquery-ui',
+      'block-ui',
+      'flatpickr',
+      'jquery-contextmenu',
+      'sumoselect',
+      'wcdatavis/src/source.js',
+      'wcdatavis/src/computed_view.js',
+      'wcdatavis/src/grid.js',
+    ];
+    config.optimizeDeps.esbuildOptions = config.optimizeDeps.esbuildOptions || {};
+    config.optimizeDeps.esbuildOptions.define = {
+      ...config.optimizeDeps.esbuildOptions.define,
+      // Some jQuery plugins reference the bare global `jQuery` — tell esbuild
+      // to rewrite it to `window.jQuery` so it survives bundling.
+      jQuery: 'window.jQuery',
+    };
+    return config;
+  },
 };
 
 export default config;
