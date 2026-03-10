@@ -8,23 +8,9 @@
 import React, { createContext, useContext, useEffect, useId, useRef } from 'react';
 // setup.ts must be first — it sets window.jQuery before plugins load
 import './setup';
-// jQuery plugins (side-effect imports — attach to window.jQuery set above)
-import 'jquery-ui/dist/jquery-ui.min.js';
-import 'block-ui';
-import 'flatpickr';
-import 'jquery-contextmenu';
-import 'sumoselect';
-// CSS
-import 'jquery-ui/dist/themes/base/jquery-ui.min.css';
-import 'jquery-contextmenu/dist/jquery.contextMenu.min.css';
-import 'sumoselect/sumoselect.min.css';
+import { Source, ComputedView, Grid } from 'wcdatavis/index.js';
+
 import 'wcdatavis/wcdatavis.css';
-// @ts-expect-error — wcdatavis does not ship type declarations
-import { Source } from 'wcdatavis/src/source.js';
-// @ts-expect-error — wcdatavis does not ship type declarations
-import { ComputedView } from 'wcdatavis/src/computed_view.js';
-// @ts-expect-error — wcdatavis does not ship type declarations
-import { Grid } from 'wcdatavis/src/grid.js';
 
 /** React context used to pass the ComputedView from DataVisSource to DataVisGrid. */
 const SourceContext = createContext<InstanceType<typeof ComputedView> | null>(null);
