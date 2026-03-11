@@ -60,7 +60,7 @@ type RadioGroupStoryArgs = Omit<
 };
 
 const meta = {
-  title: 'Inputs & Controls/Radio',
+  title: 'Components/Forms & Inputs/Radio',
   component: RadioGroup,
   parameters: {
     layout: 'centered',

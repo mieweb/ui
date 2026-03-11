@@ -38,7 +38,7 @@ const mockServices: ServiceOption[] = [
 ];
 
 const meta: Meta<typeof ProviderSearchFilters> = {
-  title: 'Search/ProviderSearchFilters',
+  title: 'Product/Provider/ProviderSearchFilters',
   component: ProviderSearchFilters,
   tags: ['autodocs'],
   parameters: {

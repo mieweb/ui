@@ -38,7 +38,7 @@ function StatefulAdditionalFields({
 // =============================================================================
 
 const meta: Meta<typeof AdditionalFields> = {
-  title: 'Forms/AdditionalFields',
+  title: 'Components/Forms & Inputs/AdditionalFields',
   component: AdditionalFields,
   render: (args) => <StatefulAdditionalFields {...args} />,
   parameters: {

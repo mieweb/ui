@@ -5,7 +5,7 @@ import {
 } from './ProviderSettings';
 
 const meta: Meta<typeof ProviderSettings> = {
-  title: 'Provider/ProviderSettings',
+  title: 'Product/Provider/ProviderSettings',
   component: ProviderSettings,
   tags: ['autodocs'],
   parameters: {

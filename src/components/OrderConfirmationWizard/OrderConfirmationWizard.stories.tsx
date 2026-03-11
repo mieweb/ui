@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { OrderConfirmationWizard } from './OrderConfirmationWizard';
 
 const meta: Meta<typeof OrderConfirmationWizard> = {
-  title: 'Provider/OrderConfirmationWizard',
+  title: 'Components/Forms & Inputs/OrderConfirmationWizard',
   component: OrderConfirmationWizard,
   parameters: {
     layout: 'padded',

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { NotificationCenter, type Notification } from './NotificationCenter';
 
 const meta: Meta<typeof NotificationCenter> = {
-  title: 'Provider/NotificationCenter',
+  title: 'Product/Provider/NotificationCenter',
   component: NotificationCenter,
   tags: ['autodocs'],
   parameters: {

@@ -18,7 +18,7 @@ const mockPostalCode: PostalCodeInfo = {
 };
 
 const meta: Meta<typeof ProviderSearchBar> = {
-  title: 'Search/ProviderSearchBar',
+  title: 'Product/Provider/ProviderSearchBar',
   component: ProviderSearchBar,
   tags: ['autodocs'],
   parameters: {

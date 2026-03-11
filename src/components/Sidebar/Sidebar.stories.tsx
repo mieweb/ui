@@ -377,7 +377,7 @@ function ConfigurableSidebarDemo({
 // =============================================================================
 
 const meta: Meta<SidebarStoryArgs> = {
-  title: 'Navigation/Sidebar',
+  title: 'Components/Navigation/Sidebar',
   component: Sidebar,
   parameters: {
     layout: 'fullscreen',

@@ -7,7 +7,7 @@ import {
 } from './ReportDashboard';
 
 const meta: Meta<typeof ReportDashboard> = {
-  title: 'Provider/ReportDashboard',
+  title: 'Product/Provider/ReportDashboard',
   component: ReportDashboard,
   tags: ['autodocs'],
   parameters: {

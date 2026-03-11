@@ -201,7 +201,7 @@ function LoadingPageDemo({
 // =============================================================================
 
 const meta: Meta<typeof LoadingPageDemo> = {
-  title: 'Feature Modules/LoadingPage',
+  title: 'Product/Feature Modules/LoadingPage',
   component: LoadingPageDemo,
   tags: ['autodocs'],
   parameters: {

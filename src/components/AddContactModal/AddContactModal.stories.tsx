@@ -4,7 +4,7 @@ import { AddContactModal, ContactFormData } from './AddContactModal';
 import { Button } from '../Button/Button';
 
 const meta: Meta<typeof AddContactModal> = {
-  title: 'Feedback & Overlays/AddContactModal',
+  title: 'Components/Forms & Inputs/AddContactModal',
   component: AddContactModal,
   tags: ['autodocs'],
   parameters: {

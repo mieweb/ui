@@ -29,7 +29,7 @@ import {
 } from '../Icons';
 
 const meta: Meta<typeof Table> = {
-  title: 'Data Display/Table',
+  title: 'Components/Layout & Structure/Table',
   component: Table,
   parameters: {
     layout: 'centered',

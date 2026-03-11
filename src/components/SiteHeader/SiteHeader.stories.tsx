@@ -23,7 +23,7 @@ const sampleUser: UserProfile = {
 };
 
 const meta: Meta<typeof SiteHeader> = {
-  title: 'Layout/SiteHeader',
+  title: 'Components/Layout & Structure/SiteHeader',
   component: SiteHeader,
   tags: ['autodocs'],
   parameters: {

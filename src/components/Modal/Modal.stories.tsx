@@ -12,7 +12,7 @@ import { Button } from '../Button';
 import { Input } from '../Input';
 
 const meta: Meta<typeof Modal> = {
-  title: 'Feedback & Overlays/Modal',
+  title: 'Components/Overlays & Layering/Modal',
   component: Modal,
   parameters: {
     layout: 'fullscreen',

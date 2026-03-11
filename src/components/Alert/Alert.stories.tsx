@@ -26,7 +26,7 @@ const iconRegistry: Record<string, React.ReactElement | null> = {
 };
 
 const meta: Meta<typeof Alert> = {
-  title: 'Feedback & Overlays/Alert',
+  title: 'Components/Status Indicators/Alert',
   component: Alert,
   parameters: {
     layout: 'centered',

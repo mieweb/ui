@@ -64,7 +64,7 @@ const inactiveEmployee: EmployeeData = {
 // ============================================================================
 
 const meta: Meta<typeof EmployeeProfileCard> = {
-  title: 'Feature Modules/EmployeeProfile/Card',
+  title: 'Product/Feature Modules/EmployeeProfile/Card',
   component: EmployeeProfileCard,
   tags: ['autodocs'],
   parameters: {

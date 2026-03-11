@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Textarea } from './Textarea';
 
 const meta: Meta<typeof Textarea> = {
-  title: 'Inputs & Controls/Textarea',
+  title: 'Components/Forms & Inputs/Textarea',
   component: Textarea,
   parameters: {
     layout: 'centered',

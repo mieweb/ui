@@ -138,7 +138,7 @@ function getLongAudio(): string {
 // ============================================================================
 
 const meta: Meta<typeof AudioPlayer> = {
-  title: 'Media & Device/AudioPlayer',
+  title: 'Components/Images & Media/AudioPlayer',
   component: AudioPlayer,
   parameters: {
     layout: 'centered',

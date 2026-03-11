@@ -3,7 +3,7 @@ import { EmployerPricingCard } from './EmployerPricingCard';
 
 const meta: Meta<typeof EmployerPricingCard> = {
   component: EmployerPricingCard,
-  title: 'Layout & Structure/EmployerPricingCard',
+  title: 'Product/Provider/EmployerPricingCard',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

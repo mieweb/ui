@@ -8,7 +8,7 @@ import { CountBadge, type CountBadgeItem } from '../CountBadge';
 import { Button } from '../Button';
 
 const meta: Meta<typeof PatientHeader> = {
-  title: 'Data Display/PatientHeader',
+  title: 'Components/Text & Data Display/PatientHeader',
   component: PatientHeader,
   tags: ['autodocs'],
   parameters: {

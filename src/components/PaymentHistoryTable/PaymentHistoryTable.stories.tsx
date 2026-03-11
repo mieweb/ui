@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PaymentHistoryTable } from './PaymentHistoryTable';
 
 const meta: Meta<typeof PaymentHistoryTable> = {
-  title: 'Provider/PaymentHistoryTable',
+  title: 'Product/Provider/PaymentHistoryTable',
   component: PaymentHistoryTable,
   parameters: {
     layout: 'padded',

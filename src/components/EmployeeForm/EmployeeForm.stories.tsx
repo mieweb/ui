@@ -3,7 +3,7 @@ import { EmployeeForm } from './EmployeeForm';
 
 const meta: Meta<typeof EmployeeForm> = {
   component: EmployeeForm,
-  title: 'Forms/EmployeeForm',
+  title: 'Components/Forms & Inputs/EmployeeForm',
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',

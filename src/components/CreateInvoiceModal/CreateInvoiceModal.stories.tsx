@@ -52,7 +52,7 @@ const mockOrders = [
 ];
 
 const meta: Meta<typeof CreateInvoiceModal> = {
-  title: 'Provider/CreateInvoiceModal',
+  title: 'Components/Forms & Inputs/CreateInvoiceModal',
   component: CreateInvoiceModal,
   tags: ['autodocs'],
   parameters: {

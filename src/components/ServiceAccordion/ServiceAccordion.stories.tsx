@@ -71,7 +71,7 @@ const mockCategories: ServiceCategory[] = [
 ];
 
 const meta: Meta<typeof ServiceAccordion> = {
-  title: 'Search/ServiceAccordion',
+  title: 'Product/Provider/ServiceAccordion',
   component: ServiceAccordion,
   tags: ['autodocs'],
   parameters: {

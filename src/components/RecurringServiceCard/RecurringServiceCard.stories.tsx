@@ -11,7 +11,7 @@ import {
 } from './RecurringServiceCard';
 
 const meta: Meta<typeof RecurringServiceCard> = {
-  title: 'Layout & Structure/RecurringServiceCard',
+  title: 'Product/Provider/RecurringServiceCard',
   component: RecurringServiceCard,
   tags: ['autodocs'],
   argTypes: {

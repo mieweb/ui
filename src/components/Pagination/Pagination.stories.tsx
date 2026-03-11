@@ -29,7 +29,7 @@ function PaginationWithState({
 }
 
 const meta: Meta<typeof Pagination> = {
-  title: 'Navigation/Pagination',
+  title: 'Components/Navigation/Pagination',
   component: Pagination,
   parameters: {
     layout: 'centered',

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { AudioRecorder } from './AudioRecorder';
 
 const meta: Meta<typeof AudioRecorder> = {
-  title: 'Media & Device/AudioRecorder',
+  title: 'Components/Images & Media/AudioRecorder',
   component: AudioRecorder,
   parameters: {
     layout: 'centered',

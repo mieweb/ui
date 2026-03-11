@@ -239,7 +239,7 @@ const mockConversations: Conversation[] = [
 // ============================================================================
 
 const bubbleMeta: Meta<typeof MessageBubble> = {
-  title: 'Messaging/MessageBubble',
+  title: 'Components/Messaging/MessageBubble',
   component: MessageBubble,
   parameters: {
     layout: 'centered',

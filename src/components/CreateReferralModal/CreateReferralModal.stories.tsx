@@ -44,7 +44,7 @@ const mockServices = [
 ];
 
 const meta: Meta<typeof CreateReferralModal> = {
-  title: 'Provider/CreateReferralModal',
+  title: 'Components/Forms & Inputs/CreateReferralModal',
   component: CreateReferralModal,
   parameters: {
     layout: 'fullscreen',

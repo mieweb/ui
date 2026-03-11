@@ -39,7 +39,7 @@ const mockServices = [
 ];
 
 const meta: Meta<ServiceBadgeStoryArgs> = {
-  title: 'Provider/ServiceBadge',
+  title: 'Components/Status Indicators/ServiceBadge',
   component: ServiceBadge,
   parameters: {
     layout: 'centered',

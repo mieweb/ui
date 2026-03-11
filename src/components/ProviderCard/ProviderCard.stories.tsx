@@ -64,7 +64,7 @@ const sampleProviders: Provider[] = [
 ];
 
 const meta: Meta<typeof ProviderCard> = {
-  title: 'Directory/ProviderCard',
+  title: 'Product/Provider/ProviderCard',
   component: ProviderCard,
   tags: ['autodocs'],
   parameters: {

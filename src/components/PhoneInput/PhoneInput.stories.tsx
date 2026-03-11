@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PhoneInput } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInput> = {
-  title: 'Inputs & Controls/PhoneInput',
+  title: 'Components/Forms & Inputs/PhoneInput',
   component: PhoneInput,
   parameters: {
     layout: 'centered',
