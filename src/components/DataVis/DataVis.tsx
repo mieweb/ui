@@ -43,6 +43,12 @@ export type DataVisSourceProps =
   | HttpDataVisSourceProps
   | LocalDataVisSourceProps
   | FileDataVisSourceProps;
+/** ComputedView augmented with bookkeeping fields used to detect prop changes. */
+type TrackedComputedView = InstanceType<typeof ComputedView> & {
+  _dvType: DataVisSourceType;
+  _dvUrl: string | undefined;
+};
+
 /**
  * Creates a DataVis Source and ComputedView, providing them to children
  * via context. The Source is recreated when `type` or `url` change.
@@ -50,7 +56,7 @@ export type DataVisSourceProps =
 function DataVisSource(props: DataVisSourceProps) {
   const { type, children } = props;
   const url = props.type === 'http' ? props.url : undefined;
-  const viewRef = useRef<any>(null);
+  const viewRef = useRef<TrackedComputedView | null>(null);
 
   if (
     viewRef.current === null ||
@@ -60,10 +66,7 @@ function DataVisSource(props: DataVisSourceProps) {
     const source = props.type === 'http'
       ? new Source({ type, url: props.url })
       : new Source({ type });
-    const view = new ComputedView(source);
-    view._dvType = type;
-    view._dvUrl = url;
-    viewRef.current = view;
+    viewRef.current = Object.assign(new ComputedView(source), { _dvType: type, _dvUrl: url });
   }
 
   return (
