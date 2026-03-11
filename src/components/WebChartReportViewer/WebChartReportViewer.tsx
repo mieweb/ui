@@ -2,13 +2,13 @@
 
 import * as React from 'react';
 import { AlertTriangle, Check, Link, RefreshCw } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, dateToDisplayFormat, displayFormatToDateString, isValidDate } from '../../utils';
 import { Button } from '../Button';
 import { Card, CardContent } from '../Card';
 import { Alert, AlertDescription, AlertTitle } from '../Alert';
 import { Skeleton } from '../Skeleton';
 import { Spinner } from '../Spinner';
-import { Input } from '../Input';
+import { DateInput } from '../DateInput';
 import {
   Modal,
   ModalHeader,
@@ -149,9 +149,17 @@ export function WebChartReportViewer({
     onClose?.();
   };
 
-  const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toISOString().split('T')[0];
+  // Handle date input change - only propagate when valid
+  const handleStartDateChange = (value: string) => {
+    if (isValidDate(value)) {
+      onDateRangeChange?.(displayFormatToDateString(value), dateRange?.end || new Date());
+    }
+  };
+
+  const handleEndDateChange = (value: string) => {
+    if (isValidDate(value)) {
+      onDateRangeChange?.(dateRange?.start || new Date(), displayFormatToDateString(value));
+    }
   };
 
   return (
@@ -269,24 +277,20 @@ export function WebChartReportViewer({
               <label className="text-muted-foreground text-sm">
                 {dateFrom}:
               </label>
-              <Input
-                type="date"
+              <DateInput
                 size="sm"
-                value={formatDate(dateRange.start)}
-                onChange={(e) =>
-                  onDateRangeChange(e.target.value, dateRange.end)
-                }
-                className="w-auto"
+                showCalendar
+                width="fixed"
+                value={dateToDisplayFormat(dateRange.start)}
+                onChange={handleStartDateChange}
               />
               <label className="text-muted-foreground text-sm">{dateTo}:</label>
-              <Input
-                type="date"
+              <DateInput
                 size="sm"
-                value={formatDate(dateRange.end)}
-                onChange={(e) =>
-                  onDateRangeChange(dateRange.start, e.target.value)
-                }
-                className="w-auto"
+                showCalendar
+                width="fixed"
+                value={dateToDisplayFormat(dateRange.end)}
+                onChange={handleEndDateChange}
               />
             </div>
           )}
@@ -382,9 +386,9 @@ export function WebChartReportViewer({
   );
 }
 
-/* Date Picker for Reports */
+/* Time Range Selector for Reports */
 
-export interface ReportDatePickerProps {
+export interface ReportTimeRangeProps {
   /** Start date */
   startDate?: Date | string;
   /** End date */
@@ -397,7 +401,7 @@ export interface ReportDatePickerProps {
   className?: string;
 }
 
-export function ReportDatePicker({
+export function ReportTimeRange({
   startDate,
   endDate,
   onChange,
@@ -410,14 +414,8 @@ export function ReportDatePicker({
     { label: 'Custom', value: 'custom' },
   ],
   className,
-}: ReportDatePickerProps) {
+}: ReportTimeRangeProps) {
   const [preset, setPreset] = React.useState('this-month');
-
-  const formatDate = (date?: Date | string) => {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toISOString().split('T')[0];
-  };
 
   const handlePresetChange = (value: string) => {
     setPreset(value);
@@ -456,6 +454,19 @@ export function ReportDatePicker({
     label: p.label,
   }));
 
+  // Only propagate changes when we have a valid complete date
+  const handleStartChange = (value: string) => {
+    if (isValidDate(value)) {
+      onChange?.(displayFormatToDateString(value), endDate || new Date());
+    }
+  };
+
+  const handleEndChange = (value: string) => {
+    if (isValidDate(value)) {
+      onChange?.(startDate || new Date(), displayFormatToDateString(value));
+    }
+  };
+
   return (
     <div className={cn('flex flex-wrap items-center gap-3', className)}>
       <Select
@@ -467,27 +478,31 @@ export function ReportDatePicker({
 
       {preset === 'custom' && (
         <>
-          <Input
-            type="date"
+          <DateInput
             size="sm"
-            value={formatDate(startDate)}
-            onChange={(e) => onChange?.(e.target.value, endDate || new Date())}
-            className="w-auto"
+            showCalendar
+            width="fixed"
+            value={dateToDisplayFormat(startDate || '')}
+            onChange={handleStartChange}
           />
           <span className="text-muted-foreground">to</span>
-          <Input
-            type="date"
+          <DateInput
             size="sm"
-            value={formatDate(endDate)}
-            onChange={(e) =>
-              onChange?.(startDate || new Date(), e.target.value)
-            }
-            className="w-auto"
+            showCalendar
+            width="fixed"
+            value={dateToDisplayFormat(endDate || '')}
+            onChange={handleEndChange}
           />
         </>
       )}
     </div>
   );
 }
+
+/** @deprecated Use ReportTimeRange instead */
+export const ReportDatePicker = ReportTimeRange;
+
+/** @deprecated Use ReportTimeRangeProps instead */
+export type ReportDatePickerProps = ReportTimeRangeProps;
 
 export default WebChartReportViewer;

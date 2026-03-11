@@ -108,3 +108,43 @@ export function isDateInFuture(value: string): boolean {
 
   return date.toMillis() > DateTime.now().toMillis();
 }
+
+/**
+ * Converts a Date object or date string to MM/DD/YYYY format for display.
+ * Handles both Date objects and YYYY-MM-DD strings, parsing them in local timezone
+ * to avoid off-by-one day issues from UTC interpretation.
+ */
+export function dateToDisplayFormat(date: Date | string): string {
+  if (!date) return '';
+
+  let dt: DateTime;
+  if (typeof date === 'string') {
+    // Check if it's a YYYY-MM-DD format (ISO date-only)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      // Parse as local date to avoid UTC offset issues
+      const [year, month, day] = date.split('-').map(Number);
+      dt = DateTime.local(year, month, day);
+    } else {
+      // Try parsing as full ISO or other format
+      dt = DateTime.fromISO(date, { zone: 'local' });
+    }
+  } else {
+    dt = DateTime.fromJSDate(date);
+  }
+
+  if (!dt.isValid) return '';
+
+  return dt.toFormat('MM/dd/yyyy');
+}
+
+/**
+ * Converts MM/DD/YYYY format to YYYY-MM-DD date string.
+ * Returns the original value if not a valid complete date.
+ */
+export function displayFormatToDateString(value: string): string {
+  const [month, day, year] = value.split('/');
+  if (month && day && year && year.length === 4) {
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+  return value;
+}
