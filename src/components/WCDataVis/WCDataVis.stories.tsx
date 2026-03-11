@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DataVisSource, DataVisGrid } from './DataVis';
+import { WCDVSOURCE, WCDVGRID } from './WCDataVis';
 
-const meta: Meta<typeof DataVisGrid> = {
-  title: 'Data Display/DataVis',
-  component: DataVisGrid,
+const meta: Meta<typeof WCDVGRID> = {
+  title: 'Data Display/WC DataVis',
+  component: WCDVGRID,
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         component:
-          'React wrapper around the wcdatavis library. `<DataVisSource>` creates a data source and provides it to child `<DataVisGrid>` components via context.',
+          'React wrapper around the wcdatavis library. `<WCDVSOURCE>` creates a data source and provides it to child `<WCDVGRID>` components via context.',
       },
     },
   },
@@ -24,20 +24,20 @@ const meta: Meta<typeof DataVisGrid> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof DataVisGrid>;
+type Story = StoryObj<typeof WCDVGRID>;
 
 /**
  * Basic grid that fetches data from an HTTP JSON source and renders all columns.
  */
 export const Default: Story = {
   render: () => (
-    <DataVisSource type="http" url="/sample-data.json">
-      <DataVisGrid
+    <WCDVSOURCE type="http" url="/sample-data.json">
+      <WCDVGRID
         title="Employees"
         columns={['id', 'name', 'email', 'department', 'status', 'start_date']}
         style={{ width: '100%', minHeight: 350 }}
       />
-    </DataVisSource>
+    </WCDVSOURCE>
   ),
 };
 
@@ -46,13 +46,13 @@ export const Default: Story = {
  */
 export const SubsetColumns: Story = {
   render: () => (
-    <DataVisSource type="http" url="/sample-data.json">
-      <DataVisGrid
+    <WCDVSOURCE type="http" url="/sample-data.json">
+      <WCDVGRID
         title="Employee Directory"
         columns={['name', 'department', 'status']}
         style={{ width: '100%', minHeight: 350 }}
       />
-    </DataVisSource>
+    </WCDVSOURCE>
   ),
 };
 
@@ -62,36 +62,36 @@ export const SubsetColumns: Story = {
  */
 export const WithControls: Story = {
   render: () => (
-    <DataVisSource type="http" url="/sample-data.json">
-      <DataVisGrid
+    <WCDVSOURCE type="http" url="/sample-data.json">
+      <WCDVGRID
         title="Employee Management"
         columns={['id', 'name', 'email', 'department', 'status', 'start_date']}
         showControls
         style={{ width: '100%', minHeight: 400 }}
       />
-    </DataVisSource>
+    </WCDVSOURCE>
   ),
 };
 
 /**
  * Multiple grids sharing the same data source. Both grids read from the same
- * `<DataVisSource>` so the data is fetched only once.
+ * `<WCDVSOURCE>` so the data is fetched only once.
  */
 export const MultipleGrids: Story = {
   render: () => (
-    <DataVisSource type="http" url="/sample-data.json">
+    <WCDVSOURCE type="http" url="/sample-data.json">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <DataVisGrid
+        <WCDVGRID
           title="Contact Info"
           columns={['name', 'email']}
           style={{ width: '100%', minHeight: 250 }}
         />
-        <DataVisGrid
+        <WCDVGRID
           title="Department Overview"
           columns={['name', 'department', 'status']}
           style={{ width: '100%', minHeight: 250 }}
         />
       </div>
-    </DataVisSource>
+    </WCDVSOURCE>
   ),
 };

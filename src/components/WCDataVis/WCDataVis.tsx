@@ -1,7 +1,7 @@
 /**
  * React wrapper components for wcdatavis.
  *
- * Provides <DataVisSource> and <DataVisGrid> components that declaratively
+ * Provides <WCDVSOURCE> and <WCDVGRID> components that declaratively
  * create and manage DataVis Source, ComputedView, and Grid instances.
  */
 
@@ -12,14 +12,14 @@ import { Source, ComputedView, Grid } from 'wcdatavis/index.js';
 
 import 'wcdatavis/wcdatavis.css';
 
-/** React context used to pass the ComputedView from DataVisSource to DataVisGrid. */
+/** React context used to pass the ComputedView from WCDVSOURCE to WCDVGRID. */
 const SourceContext = createContext<InstanceType<typeof ComputedView> | null>(null);
 
-// — DataVisSource —
+// — WCDVSOURCE —
 
-type DataVisSourceType = 'http' | 'local' | 'file';
+type WCDVSOURCEType = 'http' | 'local' | 'file';
 
-interface HttpDataVisSourceProps {
+interface HttpWCDVSOURCEProps {
   /** Source type: 'http'. */
   type: 'http';
   /** URL to fetch data from (required when type is 'http'). */
@@ -27,25 +27,25 @@ interface HttpDataVisSourceProps {
   children?: React.ReactNode;
 }
 
-interface LocalDataVisSourceProps {
+interface LocalWCDVSOURCEProps {
   /** Source type: 'local'. */
   type: 'local';
   children?: React.ReactNode;
 }
 
-interface FileDataVisSourceProps {
+interface FileWCDVSOURCEProps {
   /** Source type: 'file'. */
   type: 'file';
   children?: React.ReactNode;
 }
 
-export type DataVisSourceProps =
-  | HttpDataVisSourceProps
-  | LocalDataVisSourceProps
-  | FileDataVisSourceProps;
+export type WCDVSOURCEProps =
+  | HttpWCDVSOURCEProps
+  | LocalWCDVSOURCEProps
+  | FileWCDVSOURCEProps;
 /** ComputedView augmented with bookkeeping fields used to detect prop changes. */
 type TrackedComputedView = InstanceType<typeof ComputedView> & {
-  _dvType: DataVisSourceType;
+  _dvType: WCDVSOURCEType;
   _dvUrl: string | undefined;
 };
 
@@ -53,7 +53,7 @@ type TrackedComputedView = InstanceType<typeof ComputedView> & {
  * Creates a DataVis Source and ComputedView, providing them to children
  * via context. The Source is recreated when `type` or `url` change.
  */
-function DataVisSource(props: DataVisSourceProps) {
+function WCDVSOURCE(props: WCDVSOURCEProps) {
   const { type, children } = props;
   const url = props.type === 'http' ? props.url : undefined;
   const viewRef = useRef<TrackedComputedView | null>(null);
@@ -76,11 +76,11 @@ function DataVisSource(props: DataVisSourceProps) {
   );
 }
 
-DataVisSource.displayName = 'DataVisSource';
+WCDVSOURCE.displayName = 'WCDVSOURCE';
 
-// — DataVisGrid —
+// — WCDVGRID —
 
-export interface DataVisGridProps {
+export interface WCDVGRIDProps {
   /** DOM id for the grid container. Auto-generated if omitted. */
   id?: string;
   /** Title shown in the grid's title bar. */
@@ -99,9 +99,9 @@ export interface DataVisGridProps {
 
 /**
  * Renders a DataVis Grid into a container div. Must be a descendant of
- * DataVisSource so that a ComputedView is available via context.
+ * WCDVSOURCE so that a ComputedView is available via context.
  */
-function DataVisGrid({
+function WCDVGRID({
   id,
   title,
   showControls,
@@ -109,7 +109,7 @@ function DataVisGrid({
   features,
   className,
   style,
-}: DataVisGridProps) {
+}: WCDVGRIDProps) {
   const computedView = useContext(SourceContext);
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<InstanceType<typeof Grid> | null>(null);
@@ -118,10 +118,12 @@ function DataVisGrid({
   const domId = id || 'dv-grid-' + reactId.replace(/:/g, '');
 
   useEffect(() => {
-    if (containerRef.current === null || computedView === null) return;
+    const container = containerRef.current;
+
+    if (container === null || computedView === null) return;
 
     if (gridRef.current !== null) {
-      containerRef.current.innerHTML = '';
+      container.innerHTML = '';
       gridRef.current = null;
     }
 
@@ -145,9 +147,7 @@ function DataVisGrid({
     gridRef.current = new Grid(defn, opts);
 
     return () => {
-      if (containerRef.current !== null) {
-        containerRef.current.innerHTML = '';
-      }
+      container.innerHTML = '';
       gridRef.current = null;
     };
   }, [computedView, domId, title, showControls, columns, features]);
@@ -162,6 +162,6 @@ function DataVisGrid({
   );
 }
 
-DataVisGrid.displayName = 'DataVisGrid';
+WCDVGRID.displayName = 'WCDVGRID';
 
-export { DataVisSource, DataVisGrid, SourceContext };
+export { WCDVSOURCE, WCDVGRID, SourceContext };
