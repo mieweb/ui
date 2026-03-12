@@ -16,6 +16,22 @@ const config: StorybookConfig = {
     reactDocgen: 'react-docgen-typescript',
   },
   staticDirs: ['./public'],
+  async viteFinal(config) {
+    config.esbuild = {
+      ...config.esbuild,
+      jsx: 'automatic',
+      jsxImportSource: 'react',
+    };
+
+    config.optimizeDeps ??= {};
+    config.optimizeDeps.esbuildOptions = {
+      ...config.optimizeDeps.esbuildOptions,
+      jsx: 'automatic',
+      jsxImportSource: 'react',
+    };
+
+    return config;
+  },
 };
 
 export default config;
