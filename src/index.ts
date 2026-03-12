@@ -28,6 +28,7 @@ export * from './components/CountryCodeDropdown';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
 export * from './components/DashboardWidget';
+export * from './components/DataVisNITRO';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
@@ -146,6 +147,7 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Tooltip';
 export * from './components/VisuallyHidden';
+export * from './components/WCDataVis';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
   WebChartReportViewer,
