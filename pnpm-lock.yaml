@@ -17,6 +17,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      datavis:
+        specifier: mieweb/datavis.git#7e3511539e933d20f54914b84036b114ae1763f4
+        version: '@mieweb/datavis@git+https://git@github.com:mieweb/datavis.git#7e3511539e933d20f54914b84036b114ae1763f4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(wavesurfer.js@7.12.1)'
       font-awesome:
         specifier: ^4.7.0
         version: 4.7.0
@@ -33,8 +36,8 @@ importers:
         specifier: ^2.6.1
         version: 2.6.1
       wcdatavis:
-        specifier: mieweb/wcdatavis.git#feature/react
-        version: '@mieweb/wcdatavis@git+https://git@github.com:mieweb/wcdatavis.git#d4439f8335a447a81d9e4efb53d2a8c660db7cee'
+        specifier: mieweb/wcdatavis.git#8219021d456820ece579c6418f1406c0d4f9dbe0
+        version: '@mieweb/wcdatavis@git+https://git@github.com:mieweb/wcdatavis.git#8219021d456820ece579c6418f1406c0d4f9dbe0'
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.3
@@ -278,6 +281,28 @@ packages:
   '@csstools/css-tokenizer@3.0.4':
     resolution: {integrity: sha512-Vd/9EVDiu6PPJt9yAh6roZP6El1xHrdvIVGjyBsHR0RYwNHgL7FJPyIIW4fANJNG6FtyZfvlRPpFI4ZM/lubvw==}
     engines: {node: '>=18'}
+
+  '@dnd-kit/accessibility@3.1.1':
+    resolution: {integrity: sha512-2P+YgaXF+gRsIihwwY1gCsQSYnu9Zyj2py8kY5fFvUM1qm2WA2u639R6YNVfU4GWr+ZM5mqEsfHZZLoRONbemw==}
+    peerDependencies:
+      react: '>=16.8.0'
+
+  '@dnd-kit/core@6.3.1':
+    resolution: {integrity: sha512-xkGBRQQab4RLwgXxoqETICr6S5JlogafbhNsidmrkVv2YRs5MLwpjoF2qpiGjQt8S9AoxtIV603s0GIUpY5eYQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
+  '@dnd-kit/sortable@10.0.0':
+    resolution: {integrity: sha512-+xqhmIIzvAYMGfBYYnbKuNicfSsk4RksY2XdmJhT+HAC01nix6fHCztU68jooFiMUB01Ky3F0FyOvhG/BZrWkg==}
+    peerDependencies:
+      '@dnd-kit/core': ^6.3.0
+      react: '>=16.8.0'
+
+  '@dnd-kit/utilities@3.2.2':
+    resolution: {integrity: sha512-+MKAJEOfaBe5SmV6t34p80MMKhjvUz0vRrvVJbPT0WElzaOJ/1xs+D+KDv+tD/NE5ujfrChEcshd4fLn0wpiqg==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   '@esbuild/aix-ppc64@0.27.3':
     resolution: {integrity: sha512-9fJMTNFTWZMh5qwrBItuziu834eOCUcEqymSH7pY+zoMVEZg3gcPuBNxH1EvfVYe9h0x/Ptw8KBzv7qxb7l8dg==}
@@ -531,8 +556,29 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@mieweb/wcdatavis@git+https://git@github.com:mieweb/wcdatavis.git#d4439f8335a447a81d9e4efb53d2a8c660db7cee':
-    resolution: {commit: d4439f8335a447a81d9e4efb53d2a8c660db7cee, repo: git@github.com:mieweb/wcdatavis.git, type: git}
+  '@mieweb/datavis@git+https://git@github.com:mieweb/datavis.git#7e3511539e933d20f54914b84036b114ae1763f4':
+    resolution: {commit: 7e3511539e933d20f54914b84036b114ae1763f4, repo: git@github.com:mieweb/datavis.git, type: git}
+    version: 0.1.0
+
+  '@mieweb/ui@0.2.4':
+    resolution: {integrity: sha512-1OBv6wCgxCGY+s2Di5LVGyqFoYWmX14/zLX1+kUc/qRjI+2NGywvLht73pOvcqomvHhzEtVp3hRuHm5bCsHx3g==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      ag-grid-community: '>=32.0.0'
+      ag-grid-react: '>=32.0.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+      wavesurfer.js: '>=7.0.0'
+    peerDependenciesMeta:
+      ag-grid-community:
+        optional: true
+      ag-grid-react:
+        optional: true
+      wavesurfer.js:
+        optional: true
+
+  '@mieweb/wcdatavis@git+https://git@github.com:mieweb/wcdatavis.git#8219021d456820ece579c6418f1406c0d4f9dbe0':
+    resolution: {commit: 8219021d456820ece579c6418f1406c0d4f9dbe0, repo: git@github.com:mieweb/wcdatavis.git, type: git}
     version: 3.3.0
 
   '@parcel/watcher-android-arm64@2.5.6':
@@ -3312,6 +3358,31 @@ snapshots:
 
   '@csstools/css-tokenizer@3.0.4': {}
 
+  '@dnd-kit/accessibility@3.1.1(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
+      tslib: 2.8.1
+
+  '@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@dnd-kit/accessibility': 3.1.1(react@19.2.4)
+      '@dnd-kit/utilities': 3.2.2(react@19.2.4)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      tslib: 2.8.1
+
+  '@dnd-kit/sortable@10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@dnd-kit/utilities': 3.2.2(react@19.2.4)
+      react: 19.2.4
+      tslib: 2.8.1
+
+  '@dnd-kit/utilities@3.2.2(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
+      tslib: 2.8.1
+
   '@esbuild/aix-ppc64@0.27.3':
     optional: true
 
@@ -3493,7 +3564,36 @@ snapshots:
       '@types/react': 19.2.14
       react: 19.2.4
 
-  '@mieweb/wcdatavis@git+https://git@github.com:mieweb/wcdatavis.git#d4439f8335a447a81d9e4efb53d2a8c660db7cee':
+  '@mieweb/datavis@git+https://git@github.com:mieweb/datavis.git#7e3511539e933d20f54914b84036b114ae1763f4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(wavesurfer.js@7.12.1)':
+    dependencies:
+      '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      '@dnd-kit/utilities': 3.2.2(react@19.2.4)
+      '@mieweb/ui': 0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      wcdatavis: '@mieweb/wcdatavis@git+https://git@github.com:mieweb/wcdatavis.git#8219021d456820ece579c6418f1406c0d4f9dbe0'
+    transitivePeerDependencies:
+      - ag-grid-community
+      - ag-grid-react
+      - wavesurfer.js
+
+  '@mieweb/ui@0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
+    dependencies:
+      '@swc/helpers': 0.5.19
+      class-variance-authority: 0.7.1
+      clsx: 2.1.1
+      lucide-react: 0.562.0(react@19.2.4)
+      luxon: 3.7.2
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      tailwind-merge: 2.6.1
+    optionalDependencies:
+      ag-grid-community: 35.1.0
+      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      wavesurfer.js: 7.12.1
+
+  '@mieweb/wcdatavis@git+https://git@github.com:mieweb/wcdatavis.git#8219021d456820ece579c6418f1406c0d4f9dbe0':
     dependencies:
       bignumber.js: 9.3.1
       block-ui: 2.70.1

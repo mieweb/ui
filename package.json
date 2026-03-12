@@ -175,12 +175,13 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "datavis": "mieweb/datavis.git#7e3511539e933d20f54914b84036b114ae1763f4",
     "font-awesome": "^4.7.0",
     "google-libphonenumber": "^3.2.44",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
     "tailwind-merge": "^2.6.1",
-    "wcdatavis": "mieweb/wcdatavis.git#feature/react"
+    "wcdatavis": "mieweb/wcdatavis.git#8219021d456820ece579c6418f1406c0d4f9dbe0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
