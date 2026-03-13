@@ -31,7 +31,7 @@
 --color-neutral-900: var(--mieweb-neutral-900);
 ```
 
-Since brand CSS files (and `generateBrandCSS()`) only emit the **primary** scale + semantic tokens, all other scales resolve to nothing (transparent). This means `dark:bg-neutral-900` renders as transparent — dark mode appears silently broken.
+This issue occurs specifically when a consumer imports **only** a brand CSS file (e.g., `bluehive.css`) or uses `generateBrandCSS()` output **without** importing the library's base stylesheet (`@mieweb/ui/styles.css` or `@mieweb/ui/init.css`). In that scenario, brand CSS files only emit the **primary** scale + semantic tokens, so other scales resolve to nothing (transparent). The library's `base.css` does define default values for all scales, but consumers who set up their own CSS entry point may not include it.
 
 **Fix:** Add Tailwind-default hex fallbacks to every `var()` for non-primary scales:
 
@@ -47,7 +47,7 @@ Since brand CSS files (and `generateBrandCSS()`) only emit the **primary** scale
 | Scale | Reference Palette |
 |-------|------------------|
 | neutral | Tailwind `neutral` (gray) |
-| secondary | Tailwind `gray` |
+| secondary | Tailwind `indigo` |
 | destructive | Tailwind `red` |
 | success | Tailwind `green` |
 | warning | Tailwind `amber` |

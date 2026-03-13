@@ -2,34 +2,30 @@
  * @mieweb/ui — Quick-Start Init
  *
  * A single import that gives consumers a complete working baseline for
- * Tailwind CSS 4 + @mieweb/ui. Instead of copying 100+ lines of CSS
- * configuration, just add:
+ * Tailwind CSS 4 + @mieweb/ui. Add this to your main CSS file:
  *
  *   @import '@mieweb/ui/init.css';
  *
  * This includes:
- *   - Tailwind CSS base
- *   - @source directive for @mieweb/ui component class discovery
  *   - Dark mode custom variant (data-theme="dark")
  *   - @theme with all color scales + fallback values
  *   - BlueHive brand tokens (default brand)
  *   - Base typography and reset styles
  *
+ * IMPORTANT: You must ALSO add these lines to your own CSS entry point
+ * (they cannot be imported from a package because the paths are relative
+ * to your project, not to node_modules):
+ *
+ *   @import 'tailwindcss';
+ *   @source "../node_modules/@mieweb/ui/dist";
+ *
  * For advanced usage (custom brand, selective imports), see the README
  * and import the pieces you need individually:
- *   - @mieweb/ui/styles.css        (theme + resets only)
- *   - @mieweb/ui/brands/bluehive.css (or another brand)
- *   - @mieweb/ui/setup.css          (setup directives reference)
- *
- * NOTE: The @source path below assumes your CSS entry point is at the
- * project root. If your CSS file is in a subdirectory, adjust the
- * relative path to node_modules accordingly.
+ *   - @mieweb/ui/styles.css          (theme + resets only)
+ *   - @mieweb/ui/brands/bluehive.css  (or another brand)
  */
 
-@import 'tailwindcss';
-
-/* ── Tailwind 4 Setup ────────────────────────────────────────────────── */
-@source "../node_modules/@mieweb/ui/dist";
+/* ── Dark Mode Variant ───────────────────────────────────────────────── */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 /* ── Theme: Color Scales with Fallbacks ──────────────────────────────── */

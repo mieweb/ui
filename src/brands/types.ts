@@ -271,12 +271,30 @@ ${scaleBlocks}
 export function generateTailwindTheme(brand: BrandConfig) {
   const { colors, typography, borderRadius, boxShadow } = brand;
 
+  // Build color config including all provided optional scales
+  const colorConfig: Record<string, ColorScale> = {
+    primary: colors.primary,
+    // Expose brand colors under the brand name for semantic usage
+    [brand.name]: colors.primary,
+  };
+
+  const optionalScales = [
+    'secondary',
+    'neutral',
+    'destructive',
+    'success',
+    'warning',
+    'info',
+  ] as const;
+
+  for (const scale of optionalScales) {
+    if (colors[scale]) {
+      colorConfig[scale] = colors[scale];
+    }
+  }
+
   return {
-    colors: {
-      primary: colors.primary,
-      // Expose brand colors under the brand name for semantic usage
-      [brand.name]: colors.primary,
-    },
+    colors: colorConfig,
     fontFamily: {
       sans: typography.fontFamily.sans,
       ...(typography.fontFamily.mono

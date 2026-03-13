@@ -120,7 +120,6 @@
     },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
-    "./setup.css": "./dist/styles/setup.css",
     "./init.css": "./dist/styles/init.css"
   },
   "files": [

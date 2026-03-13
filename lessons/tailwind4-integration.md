@@ -8,7 +8,7 @@
 
 **Problem:** After installing `@mieweb/ui` and using its React components, you get black borders, missing backgrounds, broken layouts. Utility classes exist in the component source but Tailwind doesn't generate them.
 
-**Root Cause:** Tailwind 4 only scans files it discovers via automatic content detection. `node_modules/` is excluded by default. Your `tailwind.config.cjs` `content` array is **ignored** by Tailwind 4's CSS-first engine — it's a leftover from Tailwind 3.
+**Root Cause:** Tailwind 4 uses automatic content detection and, by default, only scans files it discovers itself — it does **not** scan `node_modules/`. The `tailwind.config.cjs` `content` array is still supported, but it is not what Tailwind 4's CSS-first engine relies on to find classes in library code. To reliably include utilities from packages in `node_modules`, you must explicitly point Tailwind at them.
 
 **Fix:** Add an `@source` directive in your CSS entry point:
 
@@ -40,11 +40,11 @@ module.exports = {
 
 ---
 
-## Lesson 3: Brand Imports — Use the Barrel, Not Subpaths
+## Lesson 3: Brand Imports — Prefer the Barrel for Dynamic Loading
 
-**Problem:** TypeScript errors when importing individual brand configs like `import { bluehiveBrand } from '@mieweb/ui/brands/bluehive'`. The subpath exports may not line up with what TypeScript expects.
+**Problem:** Confusion when importing individual brand configs like `import { bluehiveBrand } from '@mieweb/ui/brands/bluehive'`. While `@mieweb/ui` does export `./brands/*` subpaths in `package.json` (so TypeScript and bundlers can resolve them), the real pitfall is mixing up CSS brand files (`.css`) with JavaScript brand configs (`.ts`), or importing named exports that don't match what each submodule actually exports.
 
-**Fix:** Use the barrel import with lazy loader pattern:
+**Fix:** Use the barrel import with the lazy loader pattern for dynamic brand switching:
 
 ```typescript
 import { generateBrandCSS, brands } from '@mieweb/ui/brands';
@@ -72,7 +72,9 @@ The `brands` object returns `() => Promise<BrandConfig>` for each brand — this
 --color-neutral-900: var(--mieweb-neutral-900);
 ```
 
-But the brand CSS files (e.g., `bluehive.css`) only define `--mieweb-primary-*` and semantic tokens. They do **NOT** define `--mieweb-neutral-*`, `--mieweb-secondary-*`, `--mieweb-destructive-*`, `--mieweb-success-*`, `--mieweb-warning-*`, or `--mieweb-info-*` scales. Those `var()` calls resolve to **nothing** (transparent), so `dark:bg-neutral-900` renders as transparent.
+If you are consuming **only** a brand CSS file (e.g., `bluehive.css`) or `generateBrandCSS()` output **without** importing the library's base stylesheet (`@mieweb/ui/styles.css` or `@mieweb/ui/init.css`), those brand files only define `--mieweb-primary-*` and semantic tokens. They do **NOT** define `--mieweb-neutral-*`, `--mieweb-secondary-*`, etc. In that scenario, those `var()` calls resolve to **nothing** (transparent), so `dark:bg-neutral-900` renders as transparent.
+
+> **Note:** If you import `@mieweb/ui/styles.css` or `@mieweb/ui/init.css`, the library ships default values for all scales and this issue does not occur.
 
 **Fix:** Add CSS fallback values using Tailwind's standard palette to EVERY `var()` reference in `@theme inline`:
 
@@ -87,7 +89,7 @@ The fallback (`#171717`) ensures colors work even when the brand CSS doesn't def
 | Scale | 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950 |
 |-------|-----|------|------|------|------|------|------|------|------|------|------|
 | neutral | #fafafa | #f5f5f5 | #e5e5e5 | #d4d4d4 | #a3a3a3 | #737373 | #525252 | #404040 | #262626 | #171717 | #0a0a0a |
-| secondary | #f9fafb | #f3f4f6 | #e5e7eb | #d1d5db | #9ca3af | #6b7280 | #4b5563 | #374151 | #1f2937 | #111827 | #030712 |
+| secondary (Indigo) | #eef2ff | #e0e7ff | #c7d2fe | #a5b4fc | #818cf8 | #6366f1 | #4f46e5 | #4338ca | #3730a3 | #312e81 | #1e1b4b |
 | destructive | #fef2f2 | #fee2e2 | #fecaca | #fca5a5 | #f87171 | #ef4444 | #dc2626 | #b91c1c | #991b1b | #7f1d1d | #450a0a |
 | success | #f0fdf4 | #dcfce7 | #bbf7d0 | #86efac | #4ade80 | #22c55e | #16a34a | #15803d | #166534 | #14532d | #052e16 |
 | warning | #fffbeb | #fef3c7 | #fde68a | #fcd34d | #fbbf24 | #f59e0b | #d97706 | #b45309 | #92400e | #78350f | #451a03 |
@@ -135,7 +137,7 @@ This is the full `styles.css` a consumer needs. Every line is here for a reason:
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 /* 5. Map @mieweb/ui CSS variables to Tailwind color tokens WITH fallbacks */
-@theme inline {
+@theme {
   /* Primary — no fallbacks needed, brand CSS always defines these */
   --color-primary: var(--mieweb-primary-500);
   --color-primary-50: var(--mieweb-primary-50);
@@ -151,19 +153,19 @@ This is the full `styles.css` a consumer needs. Every line is here for a reason:
   --color-primary-950: var(--mieweb-primary-950);
   --color-primary-foreground: var(--mieweb-primary-foreground, #ffffff);
 
-  /* Secondary — MUST have fallbacks */
-  --color-secondary: var(--mieweb-secondary-500, #6b7280);
-  --color-secondary-50: var(--mieweb-secondary-50, #f9fafb);
-  --color-secondary-100: var(--mieweb-secondary-100, #f3f4f6);
-  --color-secondary-200: var(--mieweb-secondary-200, #e5e7eb);
-  --color-secondary-300: var(--mieweb-secondary-300, #d1d5db);
-  --color-secondary-400: var(--mieweb-secondary-400, #9ca3af);
-  --color-secondary-500: var(--mieweb-secondary-500, #6b7280);
-  --color-secondary-600: var(--mieweb-secondary-600, #4b5563);
-  --color-secondary-700: var(--mieweb-secondary-700, #374151);
-  --color-secondary-800: var(--mieweb-secondary-800, #1f2937);
-  --color-secondary-900: var(--mieweb-secondary-900, #111827);
-  --color-secondary-950: var(--mieweb-secondary-950, #030712);
+  /* Secondary — MUST have fallbacks (Indigo defaults match library baseline) */
+  --color-secondary: var(--mieweb-secondary-500, #6366f1);
+  --color-secondary-50: var(--mieweb-secondary-50, #eef2ff);
+  --color-secondary-100: var(--mieweb-secondary-100, #e0e7ff);
+  --color-secondary-200: var(--mieweb-secondary-200, #c7d2fe);
+  --color-secondary-300: var(--mieweb-secondary-300, #a5b4fc);
+  --color-secondary-400: var(--mieweb-secondary-400, #818cf8);
+  --color-secondary-500: var(--mieweb-secondary-500, #6366f1);
+  --color-secondary-600: var(--mieweb-secondary-600, #4f46e5);
+  --color-secondary-700: var(--mieweb-secondary-700, #4338ca);
+  --color-secondary-800: var(--mieweb-secondary-800, #3730a3);
+  --color-secondary-900: var(--mieweb-secondary-900, #312e81);
+  --color-secondary-950: var(--mieweb-secondary-950, #1e1b4b);
   --color-secondary-foreground: var(--mieweb-secondary-foreground, #ffffff);
 
   /* Neutral — MUST have fallbacks */
@@ -288,7 +290,7 @@ const { miewebUIPreset } = require('@mieweb/ui/tailwind-preset');
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   presets: [miewebUIPreset],
-  darkMode: ['class', '.dark &'],
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     './src/**/*.{js,ts,jsx,tsx,html}',
     './node_modules/@mieweb/ui/dist/**/*.js',
