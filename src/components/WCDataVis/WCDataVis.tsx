@@ -19,7 +19,7 @@ const SourceContext = createContext<InstanceType<typeof ComputedView> | null>(nu
 
 type WCDVSOURCEType = 'http' | 'local' | 'file';
 
-interface HttpWCDVSOURCEProps {
+interface HttpWCDVSOURCE_props {
   /** Source type: 'http'. */
   type: 'http';
   /** URL to fetch data from (required when type is 'http'). */
@@ -27,22 +27,22 @@ interface HttpWCDVSOURCEProps {
   children?: React.ReactNode;
 }
 
-interface LocalWCDVSOURCEProps {
+interface LocalWCDVSOURCE_props {
   /** Source type: 'local'. */
   type: 'local';
   children?: React.ReactNode;
 }
 
-interface FileWCDVSOURCEProps {
+interface FileWCDVSOURCE_props {
   /** Source type: 'file'. */
   type: 'file';
   children?: React.ReactNode;
 }
 
-export type WCDVSOURCEProps =
-  | HttpWCDVSOURCEProps
-  | LocalWCDVSOURCEProps
-  | FileWCDVSOURCEProps;
+export type WCDVSOURCE_props =
+  | HttpWCDVSOURCE_props
+  | LocalWCDVSOURCE_props
+  | FileWCDVSOURCE_props;
 /** ComputedView augmented with bookkeeping fields used to detect prop changes. */
 type TrackedComputedView = InstanceType<typeof ComputedView> & {
   _dvType: WCDVSOURCEType;
@@ -53,7 +53,7 @@ type TrackedComputedView = InstanceType<typeof ComputedView> & {
  * Creates a DataVis Source and ComputedView, providing them to children
  * via context. The Source is recreated when `type` or `url` change.
  */
-function WCDVSOURCE(props: WCDVSOURCEProps) {
+function WCDVSOURCE(props: WCDVSOURCE_props) {
   const { type, children } = props;
   const url = props.type === 'http' ? props.url : undefined;
   const viewRef = useRef<TrackedComputedView | null>(null);
@@ -80,7 +80,7 @@ WCDVSOURCE.displayName = 'WCDVSOURCE';
 
 // — WCDVGRID —
 
-export interface WCDVGRIDProps {
+export interface WCDVGRID_props {
   /** DOM id for the grid container. Auto-generated if omitted. */
   id?: string;
   /** Title shown in the grid's title bar. */
@@ -109,7 +109,7 @@ function WCDVGRID({
   features,
   className,
   style,
-}: WCDVGRIDProps) {
+}: WCDVGRID_props) {
   const computedView = useContext(SourceContext);
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<InstanceType<typeof Grid> | null>(null);

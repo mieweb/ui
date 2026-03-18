@@ -82,6 +82,7 @@ export interface DataVisNitroGridProps
   aggregateFunctions?: AggregateFunction[];
   groupFunctionDefs?: GroupFunctionDef[];
   style?: React.CSSProperties;
+  trans?: TranslateFn;
 }
 
 export const DataVisNitroContext = createContext<ViewInstance | null>(null);
@@ -327,7 +328,6 @@ function DataVisNitroGridInner({
     <div style={style}>
       <DataGrid
         {...dataGridProps}
-        trans={trans}
         view={computedView}
         tableDef={effectiveTableDef}
         allColumns={resolvedAllColumns}
@@ -344,7 +344,6 @@ function DataVisNitroGridInner({
           totalRows={viewState.totalRowCount || viewState.rowCount}
           loading={viewState.loading || !viewState.ready}
           formatCell={formatCell}
-          trans={trans}
           aggFnLabels={aggFnLabels}
           onColumnReorder={onColumnReorder}
           onColumnResize={onColumnResize}
