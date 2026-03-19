@@ -253,6 +253,94 @@ Use the **sidebar on the left** to browse available components. Each component p
 
 ---
 
+## 🤖 Migrating Your App to MIE Web UI
+
+Have an existing React + Tailwind project and want to adopt `@mieweb/ui`? We've built a **step-by-step execution plan** designed for AI agents (like GitHub Copilot) and human developers alike. Point your AI at the plan and it will systematically convert your app — one validated step at a time.
+
+The execution plan and supporting guides live in the [`lessons/`](https://github.com/mieweb/ui/tree/main/lessons) directory of the repository.
+
+### How It Works
+
+1. **Feed the plan to your AI agent** — share the [execution-plan.md](https://github.com/mieweb/ui/blob/main/lessons/execution-plan.md) with your coding assistant
+2. **The agent audits your project** — identifies your framework, existing components, theme system, and gaps
+3. **Migration proceeds step by step** — each step is validated before the next begins
+
+### What the AI Will Do
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', marginTop: '16px', marginBottom: '24px' }}>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 1 — Install</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Add <code>@mieweb/ui</code> as a dependency using your project's package manager.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 2 — CSS Foundation</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Wire up the brand CSS, Tailwind 4 theme block, dark mode variant, and PostCSS configuration — the foundation everything else depends on.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 3 — Brand Switching</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Set up runtime brand switching with a <code>useBrand</code> hook and <code>BrandInitializer</code> so users can change themes on the fly.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 4 — Component Swap</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Replace local or shadcn/ui components with <code>@mieweb/ui</code> equivalents — Buttons first, then Modals, Forms, Data Display, Feedback, Navigation, and Overlays.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 5 — Icon Migration</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Standardize on <code>lucide-react</code> icons, replacing any other icon libraries or inline SVGs.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 6 — Clean Up</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Replace local utility imports with <code>@mieweb/ui</code> exports, remove unused dependencies (Radix, clsx, cva), and delete empty wrapper files.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 7 — Accessibility Pass</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Audit interactive elements for missing ARIA labels, verify keyboard navigation, and ensure screen reader compatibility.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 8 — Testing & Verification</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Visual smoke tests across light/dark/brand combinations, responsive checks, build verification, and a final compliance report.
+    </span>
+  </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong>Step 9 — Gap Detection</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Identify components without <code>@mieweb/ui</code> equivalents, document remaining local components, and flag candidates for upstream contribution.
+    </span>
+  </div>
+</div>
+
+### Supporting Guides
+
+The `lessons/` directory includes companion documents that provide deeper detail:
+
+| Guide | Purpose |
+|-------|---------|
+| [adopting-mieweb-ui.md](https://github.com/mieweb/ui/blob/main/lessons/adopting-mieweb-ui.md) | Audit methodology and component mapping |
+| [tailwind4-integration.md](https://github.com/mieweb/ui/blob/main/lessons/tailwind4-integration.md) | Full CSS variable tables and PostCSS setup |
+| [component-policy.md](https://github.com/mieweb/ui/blob/main/lessons/component-policy.md) | When to use, build locally, or contribute upstream |
+| [compliance-prompt.md](https://github.com/mieweb/ui/blob/main/lessons/compliance-prompt.md) | Copy-paste AI prompt for a single-session migration |
+
+### Framework Support
+
+The plan works across frameworks — **Next.js**, **Vite**, **Remix**, **Meteor**, and more. Each step includes framework-specific notes where setup differs.
+
+---
+
 <div style={{ marginTop: '32px', padding: '16px', borderRadius: '8px', backgroundColor: 'var(--mieweb-muted, #f5f5f5)' }}>
   <strong>💡 Tip:</strong> Use the toolbar above to toggle dark mode and switch between brand themes while browsing components.
 </div>
