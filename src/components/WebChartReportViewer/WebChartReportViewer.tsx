@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { AlertTriangle, Check, Link, RefreshCw } from 'lucide-react';
-import { cn, dateToDisplayFormat, displayFormatToDateString, isValidDate } from '../../utils';
+import {
+  cn,
+  dateToDisplayFormat,
+  displayFormatToDateString,
+  isValidDate,
+} from '../../utils';
 import { Button } from '../Button';
 import { Card, CardContent } from '../Card';
 import { Alert, AlertDescription, AlertTitle } from '../Alert';
@@ -152,13 +157,19 @@ export function WebChartReportViewer({
   // Handle date input change - only propagate when valid
   const handleStartDateChange = (value: string) => {
     if (isValidDate(value)) {
-      onDateRangeChange?.(displayFormatToDateString(value), dateRange?.end || new Date());
+      onDateRangeChange?.(
+        displayFormatToDateString(value),
+        dateRange?.end || new Date()
+      );
     }
   };
 
   const handleEndDateChange = (value: string) => {
     if (isValidDate(value)) {
-      onDateRangeChange?.(dateRange?.start || new Date(), displayFormatToDateString(value));
+      onDateRangeChange?.(
+        dateRange?.start || new Date(),
+        displayFormatToDateString(value)
+      );
     }
   };
 

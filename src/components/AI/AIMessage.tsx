@@ -336,10 +336,13 @@ export function AIMessageDisplay({
           message.role === 'user' && 'items-end'
         )}
       >
-        <div className={cn(
-          bubbleVariants({ role: message.role }),
-          message.status === 'error' && 'border border-red-300 dark:border-red-700'
-        )}>
+        <div
+          className={cn(
+            bubbleVariants({ role: message.role }),
+            message.status === 'error' &&
+              'border border-red-300 dark:border-red-700'
+          )}
+        >
           {hasContent ? (
             <div className="space-y-3">
               {message.content.map((content, index) => (

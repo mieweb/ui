@@ -73,7 +73,10 @@
   --color-neutral-950: var(--mieweb-neutral-950, #0a0a0a);
 
   /* ── Destructive / Error Scale ─────────────────────────────────────── */
-  --color-destructive: var(--mieweb-destructive, var(--mieweb-destructive-500, #ef4444));
+  --color-destructive: var(
+    --mieweb-destructive,
+    var(--mieweb-destructive-500, #ef4444)
+  );
   --color-destructive-50: var(--mieweb-destructive-50, #fef2f2);
   --color-destructive-100: var(--mieweb-destructive-100, #fee2e2);
   --color-destructive-200: var(--mieweb-destructive-200, #fecaca);

@@ -175,37 +175,32 @@ function makeScale(
   return colors;
 }
 
-const secondaryColors = makeScale(
-  'Secondary',
-  'secondary',
-  { description500: 'Secondary brand / accent', hasForeground: true }
-);
+const secondaryColors = makeScale('Secondary', 'secondary', {
+  description500: 'Secondary brand / accent',
+  hasForeground: true,
+});
 
 const neutralColors = makeScale('Neutral', 'neutral');
 
-const destructiveScale = makeScale(
-  'Destructive',
-  'destructive',
-  { description500: 'Error / danger', hasForeground: true }
-);
+const destructiveScale = makeScale('Destructive', 'destructive', {
+  description500: 'Error / danger',
+  hasForeground: true,
+});
 
-const successScale = makeScale(
-  'Success',
-  'success',
-  { description500: 'Success / positive', hasForeground: true }
-);
+const successScale = makeScale('Success', 'success', {
+  description500: 'Success / positive',
+  hasForeground: true,
+});
 
-const warningScale = makeScale(
-  'Warning',
-  'warning',
-  { description500: 'Warning / caution', hasForeground: true }
-);
+const warningScale = makeScale('Warning', 'warning', {
+  description500: 'Warning / caution',
+  hasForeground: true,
+});
 
-const infoScale = makeScale(
-  'Info',
-  'info',
-  { description500: 'Informational', hasForeground: true }
-);
+const infoScale = makeScale('Info', 'info', {
+  description500: 'Informational',
+  hasForeground: true,
+});
 
 const chartColors: ColorInfo[] = [
   {
@@ -400,96 +395,96 @@ function ColorsPage() {
     <ThemeVersionProvider>
       <div className="bg-background min-h-screen p-8">
         <div className="mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-foreground mb-2 text-3xl font-bold">
-            Color System
-          </h1>
-          <p className="text-muted-foreground">
-            All colors are defined as CSS custom properties (variables) and can
-            be overridden per brand. Click any value to copy it to your
-            clipboard.
-          </p>
-        </div>
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-foreground mb-2 text-3xl font-bold">
+              Color System
+            </h1>
+            <p className="text-muted-foreground">
+              All colors are defined as CSS custom properties (variables) and
+              can be overridden per brand. Click any value to copy it to your
+              clipboard.
+            </p>
+          </div>
 
-        {/* Primary Colors */}
-        <ColorSection
-          title="Primary Colors"
-          description="The primary brand color scale. Override these to match your brand."
-          colors={primaryColors}
-        />
+          {/* Primary Colors */}
+          <ColorSection
+            title="Primary Colors"
+            description="The primary brand color scale. Override these to match your brand."
+            colors={primaryColors}
+          />
 
-        {/* Secondary Colors */}
-        <ColorSection
-          title="Secondary Colors"
-          description="The secondary/accent color scale. Defaults to Indigo — can be overridden per brand."
-          colors={secondaryColors}
-        />
+          {/* Secondary Colors */}
+          <ColorSection
+            title="Secondary Colors"
+            description="The secondary/accent color scale. Defaults to Indigo — can be overridden per brand."
+            colors={secondaryColors}
+          />
 
-        {/* Neutral / Gray Scale */}
-        <ColorSection
-          title="Neutral / Gray Scale"
-          description="A neutral gray scale for text, backgrounds, and structural elements."
-          colors={neutralColors}
-        />
+          {/* Neutral / Gray Scale */}
+          <ColorSection
+            title="Neutral / Gray Scale"
+            description="A neutral gray scale for text, backgrounds, and structural elements."
+            colors={neutralColors}
+          />
 
-        {/* Semantic Colors */}
-        <ColorSection
-          title="Layout Semantics"
-          description="Context-aware colors that adapt to light and dark modes."
-          colors={semanticColors}
-        />
+          {/* Semantic Colors */}
+          <ColorSection
+            title="Layout Semantics"
+            description="Context-aware colors that adapt to light and dark modes."
+            colors={semanticColors}
+          />
 
-        {/* Status Overview */}
-        <ColorSection
-          title="Status Colors (Quick Reference)"
-          description="Primary status values at a glance. See full scales below."
-          colors={statusColors}
-        />
+          {/* Status Overview */}
+          <ColorSection
+            title="Status Colors (Quick Reference)"
+            description="Primary status values at a glance. See full scales below."
+            colors={statusColors}
+          />
 
-        {/* Destructive Scale */}
-        <ColorSection
-          title="Destructive / Error Scale"
-          description="Full red scale for error states, alerts, and destructive actions."
-          colors={destructiveScale}
-        />
+          {/* Destructive Scale */}
+          <ColorSection
+            title="Destructive / Error Scale"
+            description="Full red scale for error states, alerts, and destructive actions."
+            colors={destructiveScale}
+          />
 
-        {/* Success Scale */}
-        <ColorSection
-          title="Success Scale"
-          description="Full green scale for success states, confirmations, and positive feedback."
-          colors={successScale}
-        />
+          {/* Success Scale */}
+          <ColorSection
+            title="Success Scale"
+            description="Full green scale for success states, confirmations, and positive feedback."
+            colors={successScale}
+          />
 
-        {/* Warning Scale */}
-        <ColorSection
-          title="Warning Scale"
-          description="Full amber scale for warnings, caution states, and pending actions."
-          colors={warningScale}
-        />
+          {/* Warning Scale */}
+          <ColorSection
+            title="Warning Scale"
+            description="Full amber scale for warnings, caution states, and pending actions."
+            colors={warningScale}
+          />
 
-        {/* Info Scale */}
-        <ColorSection
-          title="Info Scale"
-          description="Full sky blue scale for informational messages, tips, and highlights."
-          colors={infoScale}
-        />
+          {/* Info Scale */}
+          <ColorSection
+            title="Info Scale"
+            description="Full sky blue scale for informational messages, tips, and highlights."
+            colors={infoScale}
+          />
 
-        {/* Chart Colors */}
-        <ColorSection
-          title="Chart / Data Visualization"
-          description="Five-color palette for charts, graphs, and data series. Adapts between light and dark modes."
-          colors={chartColors}
-        />
+          {/* Chart Colors */}
+          <ColorSection
+            title="Chart / Data Visualization"
+            description="Five-color palette for charts, graphs, and data series. Adapts between light and dark modes."
+            colors={chartColors}
+          />
 
-        {/* Usage Example */}
-        <div className="bg-card border-border mt-12 rounded-xl border p-6">
-          <h2 className="text-foreground mb-4 text-xl font-bold">Usage</h2>
-          <div className="space-y-4 text-sm">
-            <div>
-              <h3 className="text-foreground mb-2 font-semibold">In CSS:</h3>
-              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
-                {`.my-component {
+          {/* Usage Example */}
+          <div className="bg-card border-border mt-12 rounded-xl border p-6">
+            <h2 className="text-foreground mb-4 text-xl font-bold">Usage</h2>
+            <div className="space-y-4 text-sm">
+              <div>
+                <h3 className="text-foreground mb-2 font-semibold">In CSS:</h3>
+                <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+                  {`.my-component {
   background-color: var(--mieweb-primary-500);
   color: var(--mieweb-foreground);
   border: 1px solid var(--mieweb-border);
@@ -500,14 +495,14 @@ function ColorsPage() {
   color: var(--mieweb-destructive-700);
   border: 1px solid var(--mieweb-destructive-200);
 }`}
-              </pre>
-            </div>
-            <div>
-              <h3 className="text-foreground mb-2 font-semibold">
-                With Tailwind:
-              </h3>
-              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
-                {`<!-- Semantic tokens -->
+                </pre>
+              </div>
+              <div>
+                <h3 className="text-foreground mb-2 font-semibold">
+                  With Tailwind:
+                </h3>
+                <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+                  {`<!-- Semantic tokens -->
 <div className="bg-primary-500 text-foreground border border-border">
 
 <!-- Full status scales for subtle backgrounds -->
@@ -518,11 +513,11 @@ function ColorsPage() {
 
 <!-- Chart colors -->
 <div className="bg-chart-1 text-white">`}
-              </pre>
+                </pre>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </ThemeVersionProvider>
   );
