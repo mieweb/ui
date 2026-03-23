@@ -177,7 +177,7 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "datavis": "https://github.com/mieweb/datavis.git#60f3233e516b318d28ff03478e1c4f2eb4fcc718",
+    "datavis": "https://github.com/mieweb/datavis.git#2b32e15c013eabb6008949f4ed7021737ae67377",
     "font-awesome": "^4.7.0",
     "google-libphonenumber": "^3.2.44",
     "jquery": "^3.7.1",

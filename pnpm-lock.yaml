@@ -18,8 +18,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       datavis:
-        specifier: https://github.com/mieweb/datavis.git#60f3233e516b318d28ff03478e1c4f2eb4fcc718
-        version: '@mieweb/datavis@https://codeload.github.com/mieweb/datavis/tar.gz/60f3233e516b318d28ff03478e1c4f2eb4fcc718(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)'
+        specifier: https://github.com/mieweb/datavis.git#2b32e15c013eabb6008949f4ed7021737ae67377
+        version: '@mieweb/datavis@https://codeload.github.com/mieweb/datavis/tar.gz/2b32e15c013eabb6008949f4ed7021737ae67377(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)'
       font-awesome:
         specifier: ^4.7.0
         version: 4.7.0
@@ -559,8 +559,8 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@mieweb/datavis@https://codeload.github.com/mieweb/datavis/tar.gz/60f3233e516b318d28ff03478e1c4f2eb4fcc718':
-    resolution: {tarball: https://codeload.github.com/mieweb/datavis/tar.gz/60f3233e516b318d28ff03478e1c4f2eb4fcc718}
+  '@mieweb/datavis@https://codeload.github.com/mieweb/datavis/tar.gz/2b32e15c013eabb6008949f4ed7021737ae67377':
+    resolution: {tarball: https://codeload.github.com/mieweb/datavis/tar.gz/2b32e15c013eabb6008949f4ed7021737ae67377}
     version: 0.1.0
 
   '@mieweb/ui@0.2.4':
@@ -3601,7 +3601,7 @@ snapshots:
       '@types/react': 19.2.14
       react: 19.2.4
 
-  '@mieweb/datavis@https://codeload.github.com/mieweb/datavis/tar.gz/60f3233e516b318d28ff03478e1c4f2eb4fcc718(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)':
+  '@mieweb/datavis@https://codeload.github.com/mieweb/datavis/tar.gz/2b32e15c013eabb6008949f4ed7021737ae67377(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
