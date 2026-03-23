@@ -2,6 +2,14 @@
 
 > Step-by-step execution plan for an AI agent (or human developer) to migrate any React + Tailwind CSS 4 project to `@mieweb/ui`. Designed to be repeatable across projects with different frameworks (Next.js, Vite, Remix, Meteor, etc.) and different source component libraries (shadcn/ui, Radix, Material UI, Chakra, custom, or raw HTML).
 
+> **AI Agent — Read This First:**
+> 1. Before making ANY code changes, create `MIEWEB-UI-MIGRATION.md` in the project root using the **exact template** from Step 10. Use every section and table heading shown. Do NOT invent your own report structure — do NOT rewrite sections as prose or rename headings.
+> 2. The **Steps Completed** section has 17 pre-populated checkboxes (Steps 1–10 including sub-steps). **Use them as-is** — check each box as you complete it. Do NOT replace the checklist with a narrative summary.
+> 3. After completing each step, update the report with what you did, which files you touched, and any issues.
+> 4. Do NOT skip steps. Do NOT batch steps. Complete each one fully, validate, then move to the next.
+> 5. If companion files (`tailwind4-integration.md`, `component-policy.md`) were provided, use them — they contain critical reference data (the full `@theme` block, available component list).
+> 6. **Sections AIs commonly skip — don't be that AI:** (a) the aggregated **Files Modified / Created / Deleted** tables, (b) the **Compliance Summary** with before/after numbers, (c) the **Known Gaps** table, and (d) the **Notes** section. These are required for PR review and cross-project comparison.
+
 ---
 
 ## How to Use This Document
@@ -10,6 +18,16 @@
 2. Follow this plan **in order** — later steps depend on earlier ones.
 3. **Validate after every step** — don't batch. Catch regressions early.
 4. For AI agents: Each step is a discrete, completable unit of work. Mark steps done as you go.
+
+### Required Companion Files
+
+This execution plan references data from companion documents. When feeding this to an AI agent in an external session (not in this workspace), include these files **in this order** so the reference data is in context before the procedure:
+
+1. **`tailwind4-integration.md`** — Full `@theme` block with all CSS variable mappings and hex fallbacks. **Critical** — Step 2 cannot be completed without it.
+2. **`component-policy.md`** — Complete list of 126+ available `@mieweb/ui` components. Needed for Steps 4–5 to know what replacements exist.
+3. **`execution-plan.md`** (this file) — The step-by-step procedure.
+
+> **Why this order?** AI models lose attention on earlier content as the prompt grows. Putting reference data *before* the procedure ensures the AI has the `@theme` block and component list fresh in context when it starts executing steps.
 
 ---
 
@@ -645,6 +663,12 @@ If you encounter additional gaps, document them in your project's migration note
 
 ---
 
+> **⚠️ CHECKPOINT — You are approximately 50% complete.**
+>
+> If you are an AI agent and feel like the migration is "done" because components are replaced — it is not. Steps 5–9 below (icon migration, cleanup, accessibility, testing, gap detection) are **required steps**, not optional follow-up. The wrapper files must be deleted, `cn()` must be migrated, unused packages must be removed, and the compliance audit must be run with real numbers. Do NOT stop here.
+
+---
+
 ## Step 5: Icon Migration
 
 `@mieweb/ui` standardises on **lucide-react** as its icon library. It re-exports ~150 commonly used icons with an `*Icon` suffix (e.g. `HomeIcon`, `TrashIcon`, `CalendarIcon`) and also re-exports the `LucideIcon` and `LucideProps` types. Consumers can import these convenience aliases from `@mieweb/ui` or import directly from `lucide-react` for the full set of 1 400+ icons.
@@ -763,7 +787,9 @@ Visually spot-check pages that previously used non-lucide icons to confirm corre
 
 ## Step 6: Clean Up
 
-### 6.1 Replace Utility Imports
+> **⚠️ Do Step 6.1 FIRST.** AIs consistently skip the `cn()` migration and jump straight to deleting wrappers and removing packages. If you skip 6.1, you'll leave `clsx` and `tailwind-merge` as dependencies when they should have been removed. Do 6.1 → 6.2 → 6.3 in order.
+
+### 6.1 Replace Utility Imports (cn)
 
 ```typescript
 // BEFORE — local cn utility
@@ -828,6 +854,12 @@ ls -la components/ui/   # or src/components/ui/
 ```
 
 If only kept files remain (hooks, third-party wrappers), consider renaming to clarify they're local extensions, not shadcn/ui.
+
+---
+
+> **⚠️ CHECKPOINT — You are approximately 75% complete.**
+>
+> Steps 7–9 below are **audits and verification**, not optional polish. The accessibility pass catches missing ARIA labels. The testing step runs the compliance audit commands and fills in the Compliance Summary with **real before/after numbers**. The gap detection step documents what's left. These steps take 5–10 minutes each. Do NOT skip them.
 
 ---
 
@@ -923,6 +955,188 @@ App-specific variables (e.g. `--sidebar-*`) are expected. Hardcoded color variab
 
 ---
 
+## Step 10: Migration Report
+
+> **REQUIRED.** After completing all migration work, create a `MIEWEB-UI-MIGRATION.md` file in the project root documenting what was done. This file serves as the permanent record of the migration — for PR reviewers, future maintainers, and for comparing across projects.
+
+### 10.1 Create the Report File
+
+Create `MIEWEB-UI-MIGRATION.md` in the project root with the following sections:
+
+```markdown
+# @mieweb/ui Migration Report — [Project Name]
+
+> Auto-generated migration report. Documents all changes made during the @mieweb/ui integration.
+> **Use every section below.** Do not reorganize, merge, or skip sections — the structure enables cross-project comparison.
+
+## Project Profile
+
+| Attribute | Value |
+|-----------|-------|
+| Framework | [e.g. Next.js 16 / Meteor 3.4 / Vite 6] |
+| React | [version] |
+| CSS | [e.g. Tailwind CSS 4 + @tailwindcss/postcss] |
+| Previous UI library | [e.g. shadcn/ui / Radix / custom / raw HTML] |
+| Component library | @mieweb/ui [version] ([export count] exports) |
+| Package manager | [npm / pnpm / yarn] |
+
+## @mieweb/ui Export Availability
+
+[Verified exports needed for THIS project. Only list components you actually used or evaluated — not the full 126+ catalog.]
+
+| Component | Available | Notes |
+|-----------|-----------|-------|
+| Button | ✅ | Variants: primary, danger, ghost, outline, secondary, link |
+| Modal | ✅ | Replaces Dialog. Uses `open`/`onOpenChange` |
+| [ScrollArea] | ❌ | Not exported — kept local wrapper |
+| ... | ... | ... |
+
+## Wrapper File Audit
+
+[If the project had a `components/ui/` directory (shadcn, custom, etc.), audit EVERY file. Show disposition for each.]
+
+| # | File | @mieweb/ui Replacement | App Imports? | Status |
+|---|------|------------------------|-------------|--------|
+| 1 | `button.tsx` | `Button` | Yes (12 files) | ✅ Migrated + deleted |
+| 2 | `scroll-area.tsx` | ❌ Not available | Yes (2 files) | 🔒 Kept |
+| 3 | `carousel.tsx` | ❌ Not available | No | 🗑️ Deleted (unused) |
+| ... | ... | ... | ... | ... |
+
+**Summary:** [X] wrapper files audited. [Y] deleted. [Z] kept.
+
+## Pattern Audit
+
+[Raw HTML elements and custom patterns (badge spans, card divs, toast systems) that were replaced with @mieweb/ui components.]
+
+### Raw HTML Elements Replaced
+
+| # | File | Element | Replacement | Status |
+|---|------|---------|-------------|--------|
+| 1 | `footer-nav.tsx` | `<button>` (clock in/out) | `Button` | ✅ Done |
+| ... | ... | ... | ... | ... |
+
+### Badge/Pill Patterns (Styled Spans)
+
+| # | File | Description | Replacement | Status |
+|---|------|-------------|-------------|--------|
+| 1 | `ticket-card.tsx` | Status badge (open/in-progress/etc.) | `Badge` | ✅ Done |
+| ... | ... | ... | ... | ... |
+
+### Card Patterns (Styled Divs)
+
+| # | File | Description | Replacement | Status |
+|---|------|-------------|-------------|--------|
+| 1 | `account/page.tsx` | Profile card (`rounded-xl border bg-card p-6`) | `Card padding="lg"` | ✅ Done |
+| ... | ... | ... | ... | ... |
+
+### Custom Systems (Toast, Sidebar, etc.)
+
+| System | Original Implementation | New Implementation | Status |
+|--------|------------------------|-------------------|--------|
+| Toast | Custom container + Zustand | @mieweb/ui `ToastContainer` + Zustand | ✅ Done |
+| ... | ... | ... | ... |
+
+## Steps Completed
+
+[Check off each step that was performed, with brief notes]
+
+- [ ] Step 1: Install @mieweb/ui — [version, export count]
+- [ ] Step 2: CSS Foundation — [what changed in globals.css]
+- [ ] Step 3: Brand Switching — [added/skipped, how many brand files]
+- [ ] Step 4a: Buttons — [count replaced, count raw HTML converted]
+- [ ] Step 4b: Dialog/Modal — [count replaced]
+- [ ] Step 4c: Form Elements — [count replaced]
+- [ ] Step 4d: Data Display — [Avatar, Badge, Card, Tabs, etc.]
+- [ ] Step 4e: Feedback — [Toast, Skeleton, etc.]
+- [ ] Step 4f: Navigation — [Sidebar, Breadcrumb, etc.]
+- [ ] Step 4g: Overlays — [Dropdown, Tooltip, Command, etc.]
+- [ ] Step 4h: Evaluate & Decide — [components kept local, components deleted unused]
+- [ ] Step 5: Icon Migration — [already lucide / migrated N icons / skipped]
+- [ ] Step 6: Clean Up — [cn() migrated, N wrapper files deleted, N packages removed]
+- [ ] Step 7: Accessibility Pass — [N issues found and fixed]
+- [ ] Step 8: Testing & Verification — [build passes, compliance numbers filled in]
+- [ ] Step 9: Gap Detection — [N gaps documented]
+- [ ] Step 10: Migration Report — [this file completed with all sections]
+
+## Post-Migration Import Map
+
+[For each feature file that imports UI components, show what it imports and from where. Confirms no leftover shadcn/local imports.]
+
+| Feature File | Imports from @mieweb/ui | Imports from local | Notes |
+|-------------|------------------------|-------------------|-------|
+| `account/page.tsx` | Avatar, Button, Badge, Card, cn | ScrollArea | ScrollArea not in @mieweb/ui |
+| ... | ... | ... | ... |
+
+## Files Modified
+
+| File | Change Summary |
+|------|---------------|
+| `app/globals.css` | Replaced color variables with @mieweb/ui CSS variable mappings |
+| `components/...` | Migrated from shadcn Button to @mieweb/ui Button |
+| ... | ... |
+
+## Files Created
+
+| File | Purpose |
+|------|---------|
+| `hooks/use-brand.ts` | Brand switching hook |
+| `public/brands/*.css` | Brand CSS files |
+| ... | ... |
+
+## Files Deleted
+
+| File | Reason |
+|------|--------|
+| `components/ui/button.tsx` | Replaced by @mieweb/ui Button |
+| ... | ... |
+
+## Compliance Summary
+
+[Run the audit commands from the execution plan BEFORE and AFTER migration. Fill in real numbers — do not leave X/Y placeholders.]
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Raw `<button>` elements | X | Y |
+| Raw `<input>` elements | X | Y |
+| Raw `<select>` elements | X | Y |
+| Raw `<textarea>` elements | X | Y |
+| shadcn/local wrapper files | X | Y |
+| `@mieweb/ui` import lines | 0 | Y |
+| Total dependencies | X | Y |
+
+## Known Gaps
+
+[Components kept local because no @mieweb/ui equivalent exists. Be specific — table format required.]
+
+| Component | Reason Kept | File(s) |
+|-----------|-------------|---------|
+| ScrollArea | Not exported from @mieweb/ui | `components/ui/scroll-area.tsx` |
+| ... | ... | ... |
+
+## Notes
+
+[Issues encountered, workarounds applied, variant mappings discovered, recommendations for follow-up. At minimum, list any variant renames and API differences you discovered.]
+
+- `variant="destructive"` → `variant="danger"` (Button only)
+- ...
+```
+
+### 10.2 Populate from Actual Work
+
+Fill in the report using:
+- The git diff (`git diff --stat main`) for the file list
+- The pre/post audit commands from Step 8.3 for compliance numbers
+- Your working notes from each step for change summaries
+
+### 10.3 Why This Matters
+
+- **PR reviewers** can quickly understand the scope and intent of changes
+- **Future migrations** on other projects can compare reports to spot patterns
+- **Reproducibility** — if the migration is re-run or continued later, the report shows where things left off
+- **Accountability** — documents what the AI agent actually did vs. what was planned
+
+---
+
 ## Common Traps (Quick Reference)
 
 | Symptom | Cause | Fix |
@@ -955,6 +1169,9 @@ When an AI agent is executing this plan:
 5. **Check the Storybook** at [ui.mieweb.org](https://ui.mieweb.org) to verify component API before mapping.
 6. **When in doubt, keep the local component.** It's better to have a working local component than a broken `@mieweb/ui` replacement.
 7. **Never commit or push without explicit user confirmation.**
+8. **Create the migration report FIRST, update it as you go.** Before starting any code changes, create `MIEWEB-UI-MIGRATION.md` in the project root using the **exact template** from Step 10 — every section, every table heading. Do NOT invent your own report structure. After completing each numbered step, append a status line: `- [x] Step N: [what you did] ([count] files changed)`. Do NOT wait until the end to write the report — by then you'll forget details.
+9. **After each step, update the report.** Append files modified, files created, files deleted, and any issues encountered to the appropriate section in `MIEWEB-UI-MIGRATION.md`. This is your working log, not just a final summary.
+10. **Do not skip the aggregated sections.** The **Files Modified/Created/Deleted** tables, **Compliance Summary** (with real before/after numbers), **Known Gaps** table, and **Notes** section are required even if you also documented details per-step. These are what PR reviewers and cross-project comparisons depend on.
 
 ### Audit Commands for AI Agents
 
