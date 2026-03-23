@@ -9,7 +9,7 @@ beforeAll(() => {
     typeof window.localStorage.getItem !== 'function'
   ) {
     const storage = new Map<string, string>();
-    const localStorageMock: Storage = {
+    const localStorageMock = {
       get length() {
         return storage.size;
       },

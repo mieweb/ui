@@ -5,7 +5,10 @@ import { ThemeProvider } from '../components/ThemeProvider';
 /**
  * Custom render function that includes theme provider
  */
-export const renderWithTheme = (ui: ReactElement, options = {}): RenderResult => {
+export const renderWithTheme = (
+  ui: ReactElement,
+  options = {}
+): RenderResult => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <ThemeProvider defaultTheme="light">{children}</ThemeProvider>
   );
@@ -16,7 +19,10 @@ export const renderWithTheme = (ui: ReactElement, options = {}): RenderResult =>
 /**
  * Custom render function with dark mode
  */
-export const renderWithDarkTheme = (ui: ReactElement, options = {}): RenderResult => {
+export const renderWithDarkTheme = (
+  ui: ReactElement,
+  options = {}
+): RenderResult => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <ThemeProvider defaultTheme="dark">{children}</ThemeProvider>
   );

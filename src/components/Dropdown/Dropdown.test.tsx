@@ -115,8 +115,12 @@ describe('Dropdown', () => {
 
     renderWithTheme(
       <Dropdown searchable trigger={<Button>Open menu</Button>}>
-        <DropdownItem searchText="schedule appointment">Schedule Visit</DropdownItem>
-        <DropdownItem searchText="send secure message">Message Patient</DropdownItem>
+        <DropdownItem searchText="schedule appointment">
+          Schedule Visit
+        </DropdownItem>
+        <DropdownItem searchText="send secure message">
+          Message Patient
+        </DropdownItem>
       </Dropdown>
     );
 

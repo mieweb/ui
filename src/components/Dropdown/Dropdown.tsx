@@ -259,7 +259,7 @@ function filterDropdownChildren(
         ? React.cloneElement(child, undefined, filteredNestedChildren)
         : null;
     })
-    .filter((child): child is React.ReactNode => child !== null);
+    .filter((child) => child !== null);
 
   return normalizeDropdownSiblings(filteredChildren);
 }
@@ -700,6 +700,7 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
   ) => {
     const dropdownContext = React.useContext(DropdownContext);
     const itemValue = typeof value === 'string' ? value : undefined;
+    const contextSelectedValues = dropdownContext?.selectedValues ?? [];
     const isMultiSelectItem =
       (dropdownContext?.multiSelect === true && itemValue !== undefined) ||
       checked !== undefined ||
@@ -707,12 +708,17 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
     const isChecked =
       checked ??
       (isMultiSelectItem
-        ? dropdownContext.selectedValues.includes(itemValue)
+        ? itemValue !== undefined && contextSelectedValues.includes(itemValue)
         : false);
 
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
-        if (isMultiSelectItem && itemValue && !disabled) {
+        if (
+          dropdownContext &&
+          isMultiSelectItem &&
+          itemValue !== undefined &&
+          !disabled
+        ) {
           dropdownContext.toggleSelectedValue(itemValue);
           onCheckedChange?.(!isChecked);
         }

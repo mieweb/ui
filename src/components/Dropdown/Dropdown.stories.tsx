@@ -8,6 +8,66 @@ import {
 } from './Dropdown';
 import { Button } from '../Button';
 
+function MultiSelectStoryDemo() {
+  const [selectedValues, setSelectedValues] = React.useState(['schedule']);
+
+  return (
+    <Dropdown
+      multiSelect
+      showSelectAll
+      width={280}
+      selectedValues={selectedValues}
+      onSelectedValuesChange={setSelectedValues}
+      trigger={<Button>Multi-Select Menu</Button>}
+    >
+      <DropdownLabel>Patient Actions</DropdownLabel>
+      <DropdownItem value="schedule">Schedule Visit</DropdownItem>
+      <DropdownItem value="message">Message Patient</DropdownItem>
+      <DropdownItem value="forms">Upload Forms</DropdownItem>
+      <DropdownSeparator />
+      <DropdownLabel>Billing</DropdownLabel>
+      <DropdownItem value="claim">Create Claim</DropdownItem>
+      <DropdownItem value="payment">Collect Payment</DropdownItem>
+    </Dropdown>
+  );
+}
+
+function SearchableMultiSelectStoryDemo() {
+  const [selectedValues, setSelectedValues] = React.useState(['message']);
+
+  return (
+    <Dropdown
+      searchable
+      multiSelect
+      showSelectAll
+      width={300}
+      searchPlaceholder="Search actions..."
+      selectedValues={selectedValues}
+      onSelectedValuesChange={setSelectedValues}
+      trigger={<Button>Searchable Multi-Select</Button>}
+    >
+      <DropdownLabel>Patient Actions</DropdownLabel>
+      <DropdownItem value="schedule" searchText="schedule appointment">
+        Schedule Visit
+      </DropdownItem>
+      <DropdownItem value="message" searchText="send secure message">
+        Message Patient
+      </DropdownItem>
+      <DropdownItem value="forms" searchText="upload intake form">
+        Upload Forms
+      </DropdownItem>
+      <DropdownSeparator />
+      <DropdownLabel>Billing</DropdownLabel>
+      <DropdownItem value="claim" searchText="create insurance claim">
+        Create Claim
+      </DropdownItem>
+      <DropdownItem value="payment" searchText="collect payment">
+        Collect Payment
+      </DropdownItem>
+    </Dropdown>
+  );
+}
+
 const meta: Meta<typeof Dropdown> = {
   title: 'Inputs & Controls/Dropdown',
   component: Dropdown,
@@ -175,65 +235,9 @@ export const Searchable: Story = {
 };
 
 export const MultiSelect: Story = {
-  render: () => {
-    const [selectedValues, setSelectedValues] = React.useState(['schedule']);
-
-    return (
-      <Dropdown
-        multiSelect
-        showSelectAll
-        width={280}
-        selectedValues={selectedValues}
-        onSelectedValuesChange={setSelectedValues}
-        trigger={<Button>Multi-Select Menu</Button>}
-      >
-        <DropdownLabel>Patient Actions</DropdownLabel>
-        <DropdownItem value="schedule">Schedule Visit</DropdownItem>
-        <DropdownItem value="message">Message Patient</DropdownItem>
-        <DropdownItem value="forms">Upload Forms</DropdownItem>
-        <DropdownSeparator />
-        <DropdownLabel>Billing</DropdownLabel>
-        <DropdownItem value="claim">Create Claim</DropdownItem>
-        <DropdownItem value="payment">Collect Payment</DropdownItem>
-      </Dropdown>
-    );
-  },
+  render: () => <MultiSelectStoryDemo />,
 };
 
 export const SearchableMultiSelect: Story = {
-  render: () => {
-    const [selectedValues, setSelectedValues] = React.useState(['message']);
-
-    return (
-      <Dropdown
-        searchable
-        multiSelect
-        showSelectAll
-        width={300}
-        searchPlaceholder="Search actions..."
-        selectedValues={selectedValues}
-        onSelectedValuesChange={setSelectedValues}
-        trigger={<Button>Searchable Multi-Select</Button>}
-      >
-        <DropdownLabel>Patient Actions</DropdownLabel>
-        <DropdownItem value="schedule" searchText="schedule appointment">
-          Schedule Visit
-        </DropdownItem>
-        <DropdownItem value="message" searchText="send secure message">
-          Message Patient
-        </DropdownItem>
-        <DropdownItem value="forms" searchText="upload intake form">
-          Upload Forms
-        </DropdownItem>
-        <DropdownSeparator />
-        <DropdownLabel>Billing</DropdownLabel>
-        <DropdownItem value="claim" searchText="create insurance claim">
-          Create Claim
-        </DropdownItem>
-        <DropdownItem value="payment" searchText="collect payment">
-          Collect Payment
-        </DropdownItem>
-      </Dropdown>
-    );
-  },
+  render: () => <SearchableMultiSelectStoryDemo />,
 };
