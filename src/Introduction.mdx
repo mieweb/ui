@@ -255,17 +255,62 @@ Use the **sidebar on the left** to browse available components. Each component p
 
 ## 🤖 Migrating Your App to MIE Web UI
 
-Have an existing React + Tailwind project and want to adopt `@mieweb/ui`? We've built a **step-by-step execution plan** designed for AI agents (like GitHub Copilot) and human developers alike. Point your AI at the plan and it will systematically convert your app — one validated step at a time.
+Have an existing React + Tailwind project and want to adopt `@mieweb/ui`? We've built a **10-step execution plan** designed for AI agents (like GitHub Copilot, Claude, etc.) and human developers alike. Feed your AI the plan and it will systematically convert your app — replacing local/shadcn components, wiring up brand theming, cleaning up dead dependencies, and producing a structured migration report.
 
-The execution plan and supporting guides live in the [`lessons/`](https://github.com/mieweb/ui/tree/main/lessons) directory of the repository.
+This process has been **iteratively tested and validated** across 5 test cycles to achieve 100% single-pass completion.
 
 ### How It Works
 
-1. **Feed the plan to your AI agent** — share the [execution-plan.md](https://github.com/mieweb/ui/blob/main/lessons/execution-plan.md) with your coding assistant
-2. **The agent audits your project** — identifies your framework, existing components, theme system, and gaps
-3. **Migration proceeds step by step** — each step is validated before the next begins
+<div style={{ 
+  padding: '20px', 
+  borderRadius: '12px', 
+  border: '2px solid var(--mieweb-primary-500, #27aae1)',
+  backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+  marginTop: '16px',
+  marginBottom: '24px'
+}}>
+  <strong style={{ fontSize: '16px', display: 'block', marginBottom: '12px' }}>📋 Feed these 3 files to your AI agent — in this order:</strong>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <span style={{ fontWeight: '700', fontSize: '18px', color: 'var(--mieweb-primary-500, #27aae1)', minWidth: '24px' }}>1.</span>
+      <div>
+        <a href="https://github.com/mieweb/ui/blob/main/lessons/tailwind4-integration.md" style={{ fontWeight: '600' }}>tailwind4-integration.md</a>
+        <span style={{ fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+          Full <code>@theme</code> block with all CSS variable mappings and hex fallbacks. <strong>Critical</strong> — Step 2 cannot be completed without it.
+        </span>
+      </div>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <span style={{ fontWeight: '700', fontSize: '18px', color: 'var(--mieweb-primary-500, #27aae1)', minWidth: '24px' }}>2.</span>
+      <div>
+        <a href="https://github.com/mieweb/ui/blob/main/lessons/component-policy.md" style={{ fontWeight: '600' }}>component-policy.md</a>
+        <span style={{ fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+          Complete list of 126+ available <code>@mieweb/ui</code> components. Needed for Steps 4–5 to know what replacements exist.
+        </span>
+      </div>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <span style={{ fontWeight: '700', fontSize: '18px', color: 'var(--mieweb-primary-500, #27aae1)', minWidth: '24px' }}>3.</span>
+      <div>
+        <a href="https://github.com/mieweb/ui/blob/main/lessons/execution-plan.md" style={{ fontWeight: '600' }}>execution-plan.md</a>
+        <span style={{ fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+          The 10-step procedure. Must come last so the reference data from files 1–2 is in context when the AI starts executing.
+        </span>
+      </div>
+    </div>
+  </div>
+  <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)', fontStyle: 'italic' }}>
+    Order matters — AI models lose attention on earlier content as the prompt grows. Reference data before procedure ensures the best results.
+  </div>
+  <div style={{ marginTop: '16px', padding: '12px 16px', borderRadius: '8px', backgroundColor: 'white', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+    <strong style={{ fontSize: '13px', display: 'block', marginBottom: '6px', color: 'var(--mieweb-muted-foreground, #737373)' }}>Then send this prompt:</strong>
+    <code style={{ fontSize: '14px', display: 'block', lineHeight: '1.5' }}>Migrate this project to @mieweb/ui following the execution plan. Work step by step, create the migration report first, and update it after each step.</code>
+  </div>
+</div>
 
-### What the AI Will Do
+Once the AI has all 3 files, it will audit your project, identify your framework, existing components, and theme system, then proceed through the migration step by step — validating each step before the next begins.
+
+### The 10 Steps
 
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', marginTop: '16px', marginBottom: '24px' }}>
   <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
@@ -301,7 +346,7 @@ The execution plan and supporting guides live in the [`lessons/`](https://github
   <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
     <strong>Step 6 — Clean Up</strong>
     <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
-      Replace local utility imports with <code>@mieweb/ui</code> exports, remove unused dependencies (Radix, clsx, cva), and delete empty wrapper files.
+      Migrate <code>cn()</code> imports to <code>@mieweb/ui</code>, remove unused dependencies (Radix, clsx, cva), and delete empty wrapper files.
     </span>
   </div>
   <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
@@ -313,7 +358,7 @@ The execution plan and supporting guides live in the [`lessons/`](https://github
   <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
     <strong>Step 8 — Testing & Verification</strong>
     <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
-      Visual smoke tests across light/dark/brand combinations, responsive checks, build verification, and a final compliance report.
+      Visual smoke tests across light/dark/brand combinations, responsive checks, build verification, and a compliance audit.
     </span>
   </div>
   <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
@@ -322,17 +367,46 @@ The execution plan and supporting guides live in the [`lessons/`](https://github
       Identify components without <code>@mieweb/ui</code> equivalents, document remaining local components, and flag candidates for upstream contribution.
     </span>
   </div>
+  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderColor: 'var(--mieweb-primary-500, #27aae1)' }}>
+    <strong>Step 10 — Migration Report</strong>
+    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+      Generate a structured <code>MIEWEB-UI-MIGRATION.md</code> documenting everything: wrapper audit, compliance metrics, import map, files changed, known gaps, and variant mappings.
+    </span>
+  </div>
 </div>
 
-### Supporting Guides
+### What You'll Get
 
-The `lessons/` directory includes companion documents that provide deeper detail:
+<div style={{ 
+  padding: '20px', 
+  borderRadius: '12px', 
+  border: '1px solid var(--mieweb-border, #e5e7eb)',
+  backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+  marginBottom: '24px'
+}}>
+  <strong style={{ fontSize: '16px', display: 'block', marginBottom: '8px' }}>📄 A complete <code>MIEWEB-UI-MIGRATION.md</code> report including:</strong>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', marginTop: '8px' }}>
+    <span style={{ fontSize: '14px' }}>✅ Project profile & framework details</span>
+    <span style={{ fontSize: '14px' }}>✅ Export availability matrix</span>
+    <span style={{ fontSize: '14px' }}>✅ Full wrapper file audit (every file)</span>
+    <span style={{ fontSize: '14px' }}>✅ Pattern audit (raw HTML, badges, cards)</span>
+    <span style={{ fontSize: '14px' }}>✅ Post-migration import map</span>
+    <span style={{ fontSize: '14px' }}>✅ Before/after compliance metrics</span>
+    <span style={{ fontSize: '14px' }}>✅ Known gaps & kept components</span>
+    <span style={{ fontSize: '14px' }}>✅ Files modified, created, and deleted</span>
+  </div>
+  <span style={{ fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block', marginTop: '12px' }}>
+    This report serves as the permanent record for PR reviewers, future maintainers, and cross-project comparison.
+  </span>
+</div>
+
+### Additional Guides
+
+The [`lessons/`](https://github.com/mieweb/ui/tree/main/lessons) directory also includes optional reference guides:
 
 | Guide | Purpose |
 |-------|---------|
 | [adopting-mieweb-ui.md](https://github.com/mieweb/ui/blob/main/lessons/adopting-mieweb-ui.md) | Audit methodology and component mapping |
-| [tailwind4-integration.md](https://github.com/mieweb/ui/blob/main/lessons/tailwind4-integration.md) | Full CSS variable tables and PostCSS setup |
-| [component-policy.md](https://github.com/mieweb/ui/blob/main/lessons/component-policy.md) | When to use, build locally, or contribute upstream |
 | [compliance-prompt.md](https://github.com/mieweb/ui/blob/main/lessons/compliance-prompt.md) | Copy-paste AI prompt for a single-session migration |
 
 ### Framework Support
