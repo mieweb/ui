@@ -1130,33 +1130,13 @@ body.condensed [data-slot='input-wrapper'] {
   gap: 0.25rem !important;
 }
 
-/* Input field: reduced height & padding */
+/* Input field: single condensed size regardless of size prop */
 body.condensed [data-slot='input'] {
+  height: 1.75rem !important;
   padding-top: 0.0625rem !important;
   padding-bottom: 0.0625rem !important;
+  font-size: 0.8125rem !important;
   border-radius: 0.375rem !important;
-}
-
-/* Condensed typography per input size */
-body.condensed [data-slot='input'].text-sm {
-  font-size: 0.75rem !important;
-}
-body.condensed [data-slot='input'].text-base {
-  font-size: 0.875rem !important;
-}
-body.condensed [data-slot='input'].text-lg {
-  font-size: 1rem !important;
-}
-
-/* Size overrides: reduce each variant's fixed height */
-body.condensed [data-slot='input'].h-8 {
-  height: 1.5rem !important;
-}
-body.condensed [data-slot='input'].h-10 {
-  height: 1.75rem !important;
-}
-body.condensed [data-slot='input'].h-12 {
-  height: 2rem !important;
 }
 
 /* Label: smaller text */
@@ -1179,33 +1159,13 @@ body.condensed [data-slot='textarea-wrapper'] {
   gap: 0.25rem !important;
 }
 
-/* Textarea field: reduced padding */
+/* Textarea field: single condensed size regardless of size prop */
 body.condensed [data-slot='textarea'] {
+  min-height: 2.25rem !important;
   padding-top: 0.0625rem !important;
   padding-bottom: 0.0625rem !important;
+  font-size: 0.8125rem !important;
   border-radius: 0.375rem !important;
-}
-
-/* Condensed typography per textarea size */
-body.condensed [data-slot='textarea'].text-sm {
-  font-size: 0.75rem !important;
-}
-body.condensed [data-slot='textarea'].text-base {
-  font-size: 0.875rem !important;
-}
-body.condensed [data-slot='textarea'].text-lg {
-  font-size: 1rem !important;
-}
-
-/* Size overrides: reduce each variant's min-height */
-body.condensed [data-slot='textarea'].min-h-\[60px\] {
-  min-height: 2.25rem !important;
-}
-body.condensed [data-slot='textarea'].min-h-\[80px\] {
-  min-height: 3rem !important;
-}
-body.condensed [data-slot='textarea'].min-h-\[100px\] {
-  min-height: 3.75rem !important;
 }
 
 /* Label: smaller text */
@@ -1237,30 +1197,11 @@ body.condensed [data-slot='select-wrapper'] {
   gap: 0.25rem !important;
 }
 
-/* Trigger button: reduced height & border-radius */
+/* Trigger button: single condensed size regardless of size prop */
 body.condensed [data-slot='select-trigger'] {
-  border-radius: 0.375rem !important;
-}
-
-/* Condensed typography per select trigger size */
-body.condensed [data-slot='select-trigger'].text-sm {
-  font-size: 0.75rem !important;
-}
-body.condensed [data-slot='select-trigger'].text-base {
-  font-size: 0.875rem !important;
-}
-body.condensed [data-slot='select-trigger'].text-lg {
-  font-size: 1rem !important;
-}
-
-body.condensed [data-slot='select-trigger'].h-8 {
-  height: 1.5rem !important;
-}
-body.condensed [data-slot='select-trigger'].h-10 {
   height: 1.75rem !important;
-}
-body.condensed [data-slot='select-trigger'].h-12 {
-  height: 2rem !important;
+  font-size: 0.8125rem !important;
+  border-radius: 0.375rem !important;
 }
 
 /* Dropdown panel: tighter border-radius */
