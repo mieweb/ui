@@ -617,6 +617,7 @@ export const PatientHeader = React.forwardRef<
       <div
         ref={ref}
         data-testid={testId}
+        data-slot="patient-header"
         className={cn(
           'border-border bg-card text-card-foreground w-full border-b',
           'transition-colors duration-200',

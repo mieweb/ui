@@ -170,6 +170,7 @@ export function TimelineProgress({
 
   return (
     <div
+      data-slot="timeline-progress"
       className={cn(sizes.padding, 'overflow-x-auto', className)}
       role="progressbar"
       aria-valuenow={currentIndex + 1}
@@ -414,7 +415,7 @@ export function TimelineEventList({
   }
 
   return (
-    <div className={cn('relative', className)}>
+    <div data-slot="timeline-event-list" className={cn('relative', className)}>
       {/* Continuous vertical connector line */}
       {events.length > 1 && (
         <div
@@ -509,6 +510,7 @@ export function OrderConfirmation({
 
   return (
     <div
+      data-slot="order-confirmation"
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4',
         className

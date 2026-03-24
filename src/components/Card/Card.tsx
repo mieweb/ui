@@ -121,6 +121,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           accent && 'pl-4',
           className
         )}
+        data-slot="card"
         data-loading={loading || undefined}
         aria-busy={loading || undefined}
         {...props}

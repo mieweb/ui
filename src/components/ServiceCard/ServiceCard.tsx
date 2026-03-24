@@ -110,6 +110,7 @@ export function ServiceCard({
 
   return (
     <Card
+      data-slot="service-card"
       className={`h-full transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-md' : ''} ${selected ? 'ring-primary ring-2' : ''} ${!currentlyOffered ? 'opacity-60' : ''} ${className} `.trim()}
       onClick={onClick ? handleCardClick : undefined}
     >
@@ -250,10 +251,11 @@ export function AddServiceCard({
 }: AddServiceCardProps) {
   return (
     <Card
+      data-slot="add-service-card"
       className={`border-border bg-muted/50 hover:border-primary hover:bg-muted h-full cursor-pointer border-2 border-dashed transition-all duration-200 ${className} `.trim()}
       onClick={onClick}
     >
-      <div className="flex h-full min-h-[160px] flex-col items-center justify-center p-4">
+      <div className="flex h-full min-h-[120px] flex-col items-center justify-center p-4">
         <div className="bg-muted mb-3 flex h-12 w-12 items-center justify-center rounded-full">
           <Plus className="text-muted-foreground h-6 w-6" />
         </div>
