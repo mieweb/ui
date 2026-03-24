@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import {
   Table,
   TableHeader,
@@ -12,9 +11,8 @@ import {
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Avatar } from '../Avatar/Avatar';
+import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import { MoreVerticalIcon, SendIcon, PencilIcon, TrashIcon } from '../Icons';
-import { cn } from '../../utils/cn';
-import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 export interface ProviderUser {
   id: string;
@@ -64,102 +62,58 @@ function RowActionsMenu({
   onRemove?: (user: ProviderUser) => void;
   onResendInvite?: (user: ProviderUser) => void;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (!open) return;
-    const handleClick = (event: Event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    document.addEventListener('touchstart', handleClick);
-    return () => {
-      document.removeEventListener('mousedown', handleClick);
-      document.removeEventListener('touchstart', handleClick);
-    };
-  }, [open]);
-  useEscapeKey(
-    React.useCallback(() => setOpen(false), []),
-    open
-  );
-
   const hasActions =
     (isPending && !!onResendInvite) ||
     !!onEditRole ||
     (!!onRemove && !isCurrentUser);
   if (!hasActions) return null;
 
+  const showResend = isPending && onResendInvite;
+  const showRemove = onRemove && !isCurrentUser;
+  const needsSeparator = (showResend || onEditRole) && showRemove;
+
   return (
-    <div className="relative inline-flex" ref={menuRef}>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Row actions"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        className="h-7 w-7"
-      >
-        <MoreVerticalIcon size={16} />
-      </Button>
-      {open && (
-        <div
-          role="menu"
-          className={cn(
-            'absolute top-full right-0 z-50 mt-1',
-            'min-w-[10rem] rounded-lg border border-neutral-200 bg-white py-1 shadow-lg',
-            'dark:border-neutral-700 dark:bg-neutral-800'
-          )}
+    <Dropdown
+      trigger={
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Row actions"
+          className="h-7 w-7"
         >
-          {isPending && onResendInvite && (
-            <button
-              type="button"
-              role="menuitem"
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
-              onClick={() => {
-                onResendInvite(user);
-                setOpen(false);
-              }}
-            >
-              <SendIcon size={14} />
-              Resend Invite
-            </button>
-          )}
-          {onEditRole && (
-            <button
-              type="button"
-              role="menuitem"
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
-              onClick={() => {
-                onEditRole(user);
-                setOpen(false);
-              }}
-            >
-              <PencilIcon size={14} />
-              Edit Role
-            </button>
-          )}
-          {onRemove && !isCurrentUser && (
-            <button
-              type="button"
-              role="menuitem"
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-              onClick={() => {
-                onRemove(user);
-                setOpen(false);
-              }}
-            >
-              <TrashIcon size={14} />
-              Remove
-            </button>
-          )}
-        </div>
+          <MoreVerticalIcon size={16} />
+        </Button>
+      }
+      placement="bottom-end"
+    >
+      {showResend && (
+        <DropdownItem
+          icon={<SendIcon size={14} />}
+          onClick={() => onResendInvite(user)}
+        >
+          Resend Invite
+        </DropdownItem>
       )}
-    </div>
+      {onEditRole && (
+        <DropdownItem
+          icon={<PencilIcon size={14} />}
+          onClick={() => onEditRole(user)}
+        >
+          Edit Role
+        </DropdownItem>
+      )}
+      {needsSeparator && <DropdownSeparator />}
+      {showRemove && (
+        <DropdownItem
+          variant="danger"
+          icon={<TrashIcon size={14} />}
+          onClick={() => onRemove(user)}
+        >
+          Remove
+        </DropdownItem>
+      )}
+    </Dropdown>
   );
 }
 
