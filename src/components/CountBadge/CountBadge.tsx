@@ -720,6 +720,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
             ref={ref}
             type="button"
             data-slot="count-badge"
+            data-count-badge=""
             className={cn(countBadgeVariants({ variant }), className)}
             onClick={(e) => {
               if (showMenu) {

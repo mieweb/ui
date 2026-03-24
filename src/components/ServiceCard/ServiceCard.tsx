@@ -255,7 +255,7 @@ export function AddServiceCard({
       className={`border-border bg-muted/50 hover:border-primary hover:bg-muted h-full cursor-pointer border-2 border-dashed transition-all duration-200 ${className} `.trim()}
       onClick={onClick}
     >
-      <div className="flex h-full min-h-[120px] flex-col items-center justify-center p-4">
+      <div className="flex h-full min-h-[160px] flex-col items-center justify-center p-4">
         <div className="bg-muted mb-3 flex h-12 w-12 items-center justify-center rounded-full">
           <Plus className="text-muted-foreground h-6 w-6" />
         </div>

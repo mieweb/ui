@@ -14,7 +14,6 @@ import { Button } from '../Button/Button';
 import { Avatar } from '../Avatar/Avatar';
 import { MoreVerticalIcon, SendIcon, PencilIcon, TrashIcon } from '../Icons';
 import { cn } from '../../utils/cn';
-import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 export interface ProviderUser {
@@ -68,10 +67,20 @@ function RowActionsMenu({
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
-  useClickOutside(
-    menuRef,
-    React.useCallback(() => setOpen(false), [])
-  );
+  React.useEffect(() => {
+    if (!open) return;
+    const handleClick = (event: Event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('touchstart', handleClick);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('touchstart', handleClick);
+    };
+  }, [open]);
   useEscapeKey(
     React.useCallback(() => setOpen(false), []),
     open
