@@ -174,7 +174,10 @@ export function WebChartReportViewer({
   };
 
   return (
-    <div className={cn('webchart-report-viewer', className)}>
+    <div
+      data-slot="webchart-report-viewer"
+      className={cn('webchart-report-viewer', className)}
+    >
       {/* Error State */}
       {error && (
         <Alert variant="warning" icon={<AlertTriangle />} className="mb-4">
@@ -206,7 +209,10 @@ export function WebChartReportViewer({
       )}
 
       {/* Reports Grid */}
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        data-slot="report-grid"
+        className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+      >
         {loading ? (
           // Loading placeholders
           <>
@@ -252,7 +258,10 @@ export function WebChartReportViewer({
             </Card>
           ))
         ) : (
-          <div className="text-muted-foreground col-span-full py-8 text-center">
+          <div
+            data-slot="report-empty"
+            className="text-muted-foreground col-span-full py-8 text-center"
+          >
             {noReports}
           </div>
         )}
@@ -269,7 +278,10 @@ export function WebChartReportViewer({
         size="4xl"
       >
         <ModalHeader>
-          <div className="flex items-center gap-3">
+          <div
+            data-slot="report-modal-header"
+            className="flex items-center gap-3"
+          >
             <ModalTitle>{currentReport?.name || 'Report Results'}</ModalTitle>
             {reportResult?.error ? (
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
@@ -281,7 +293,10 @@ export function WebChartReportViewer({
         </ModalHeader>
 
         {/* Toolbar */}
-        <div className="bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4">
+        <div
+          data-slot="report-toolbar"
+          className="bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4"
+        >
           {/* Date Range */}
           {onDateRangeChange && dateRange && (
             <div className="flex items-center gap-2">
@@ -319,7 +334,10 @@ export function WebChartReportViewer({
 
         <ModalBody className="max-h-[60vh] overflow-auto">
           {loadingReport ? (
-            <div className="flex h-64 flex-col items-center justify-center">
+            <div
+              data-slot="report-loading"
+              className="flex h-64 flex-col items-center justify-center"
+            >
               <Spinner size="xl" />
               <span className="text-muted-foreground mt-4">{loadingData}</span>
             </div>
@@ -387,7 +405,10 @@ export function WebChartReportViewer({
               </Table>
             )
           ) : (
-            <div className="text-muted-foreground py-8 text-center">
+            <div
+              data-slot="report-empty"
+              className="text-muted-foreground py-8 text-center"
+            >
               No data available
             </div>
           )}
@@ -479,7 +500,10 @@ export function ReportTimeRange({
   };
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-3', className)}>
+    <div
+      data-slot="report-time-range"
+      className={cn('flex flex-wrap items-center gap-3', className)}
+    >
       <Select
         value={preset}
         onValueChange={(value) => handlePresetChange(value)}
