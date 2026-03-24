@@ -77,7 +77,7 @@ try {
     const [key, value] = pair.split(':');
     if (key && value) globals[key] = value;
   }
-  if (globals.theme || globals.brand) {
+  if (globals.theme || globals.brand || globals.density) {
     applyGlobalTheme(globals);
   }
 } catch {

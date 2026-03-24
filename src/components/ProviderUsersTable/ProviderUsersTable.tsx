@@ -95,6 +95,7 @@ function RowActionsMenu({
   return (
     <div className="relative inline-flex" ref={menuRef}>
       <Button
+        type="button"
         variant="ghost"
         size="icon"
         onClick={() => setOpen((v) => !v)}

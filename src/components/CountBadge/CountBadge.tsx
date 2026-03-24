@@ -373,7 +373,10 @@ function HoverMenu({
       </div>
 
       {/* Table */}
-      <div className="max-h-[240px] overflow-y-auto">
+      <div
+        data-slot="count-badge-menu-scroll"
+        className="max-h-[240px] overflow-y-auto"
+      >
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-neutral-700">
