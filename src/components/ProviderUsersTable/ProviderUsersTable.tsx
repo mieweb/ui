@@ -90,7 +90,7 @@ function RowActionsMenu({
       {showResend && (
         <DropdownItem
           icon={<SendIcon size={14} />}
-          onClick={() => onResendInvite(user)}
+          onClick={() => onResendInvite?.(user)}
         >
           Resend Invite
         </DropdownItem>
@@ -108,7 +108,7 @@ function RowActionsMenu({
         <DropdownItem
           variant="danger"
           icon={<TrashIcon size={14} />}
-          onClick={() => onRemove(user)}
+          onClick={() => onRemove?.(user)}
         >
           Remove
         </DropdownItem>

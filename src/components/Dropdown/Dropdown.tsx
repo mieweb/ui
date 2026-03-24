@@ -86,7 +86,7 @@ function Dropdown({
     setOpen(false);
   }, [setOpen]);
 
-  useClickOutside(containerRef, handleClose);
+  useClickOutside(containerRef, handleClose, isOpen);
   useEscapeKey(handleClose, isOpen);
 
   // Clone trigger to add event handlers
