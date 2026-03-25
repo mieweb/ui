@@ -439,7 +439,10 @@ export function CreateInvoiceModal({
                 </Button>
               )}
             </div>
-            <div className="flex gap-2">
+            <div
+              data-slot="invoice-modal-footer-buttons"
+              className="flex gap-2"
+            >
               <Button
                 type="button"
                 variant="outline"

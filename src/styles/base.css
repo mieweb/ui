@@ -1931,8 +1931,8 @@ body.condensed [data-slot='invoice-modal-summary-total'] {
   font-size: 0.875rem !important;
 }
 
-/* Footer: tighter gap */
-body.condensed [data-slot='invoice-modal-footer'] .flex {
+/* Footer button row: tighter gap */
+body.condensed [data-slot='invoice-modal-footer-buttons'] {
   gap: 0.25rem !important;
 }
 
