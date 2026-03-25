@@ -118,7 +118,7 @@ export function CreateReferralModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} size="lg">
-      <form onSubmit={handleSubmit}>
+      <form data-slot="referral-modal" onSubmit={handleSubmit}>
         <ModalHeader>
           <ModalTitle>Create Referral</ModalTitle>
         </ModalHeader>
@@ -126,14 +126,20 @@ export function CreateReferralModal({
         <ModalBody className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
+            <div
+              data-slot="referral-modal-error"
+              className="border-destructive/30 bg-destructive/10 rounded-lg border p-3"
+            >
               <p className="text-destructive text-sm">{errorMessage}</p>
             </div>
           )}
 
           {/* Employee info */}
           {employee && (
-            <div className="bg-muted rounded-lg p-4">
+            <div
+              data-slot="referral-modal-employee"
+              className="bg-muted rounded-lg p-4"
+            >
               <p className="text-foreground/70 mb-1 text-xs tracking-wide uppercase">
                 Employee
               </p>
@@ -151,7 +157,10 @@ export function CreateReferralModal({
 
           {/* Services selection */}
           <div>
-            <p className="text-foreground mb-2 text-sm font-medium">
+            <p
+              data-slot="referral-modal-section-label"
+              className="text-foreground mb-2 text-sm font-medium"
+            >
               Select Services
             </p>
             {services.length === 0 ? (
@@ -159,7 +168,10 @@ export function CreateReferralModal({
                 No services available
               </p>
             ) : (
-              <div className="max-h-60 space-y-2 overflow-y-auto">
+              <div
+                data-slot="referral-modal-service-list"
+                className="max-h-60 space-y-2 overflow-y-auto"
+              >
                 {services.map((service) => {
                   const isSelected = selectedServices.has(service.id);
                   return (
@@ -167,6 +179,7 @@ export function CreateReferralModal({
                       key={service.id}
                       type="button"
                       aria-pressed={isSelected}
+                      data-slot="referral-modal-service"
                       onClick={() => toggleService(service.id)}
                       className={`w-full rounded-lg border p-3 text-left transition-colors ${
                         isSelected
@@ -177,6 +190,7 @@ export function CreateReferralModal({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div
+                            data-slot="referral-modal-service-check"
                             className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
                               isSelected
                                 ? 'border-primary bg-primary'
@@ -200,17 +214,26 @@ export function CreateReferralModal({
                             )}
                           </div>
                           <div>
-                            <p className="text-foreground font-medium">
+                            <p
+                              data-slot="referral-modal-service-name"
+                              className="text-foreground font-medium"
+                            >
                               {service.name}
                             </p>
                             {service.description && (
-                              <p className="text-muted-foreground text-xs">
+                              <p
+                                data-slot="referral-modal-service-desc"
+                                className="text-muted-foreground text-xs"
+                              >
                                 {service.description}
                               </p>
                             )}
                           </div>
                         </div>
-                        <span className="text-foreground font-medium">
+                        <span
+                          data-slot="referral-modal-service-price"
+                          className="text-foreground font-medium"
+                        >
                           {currency}
                           {service.price.toFixed(2)}
                         </span>
@@ -224,14 +247,20 @@ export function CreateReferralModal({
 
           {/* Priority */}
           <div>
-            <p className="text-foreground mb-2 text-sm font-medium">Priority</p>
-            <div className="flex gap-2">
+            <p
+              data-slot="referral-modal-section-label"
+              className="text-foreground mb-2 text-sm font-medium"
+            >
+              Priority
+            </p>
+            <div data-slot="referral-modal-priority-row" className="flex gap-2">
               {(['normal', 'urgent', 'stat'] as const).map((p) => (
                 <button
                   key={p}
                   type="button"
                   aria-pressed={priority === p}
                   onClick={() => setPriority(p)}
+                  data-slot="referral-modal-priority"
                   className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                     priority === p
                       ? p === 'stat'
@@ -261,7 +290,10 @@ export function CreateReferralModal({
 
           {/* Cost summary */}
           {selectedServices.size > 0 && (
-            <div className="bg-muted rounded-lg p-4">
+            <div
+              data-slot="referral-modal-summary"
+              className="bg-muted rounded-lg p-4"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-foreground/70 text-sm">
@@ -271,7 +303,10 @@ export function CreateReferralModal({
                 </div>
                 <div className="text-right">
                   <p className="text-foreground/70 text-xs">Estimated Total</p>
-                  <p className="text-foreground text-xl font-bold">
+                  <p
+                    data-slot="referral-modal-summary-total"
+                    className="text-foreground text-xl font-bold"
+                  >
                     {currency}
                     {totalPrice.toFixed(2)}
                   </p>

@@ -1935,3 +1935,118 @@ body.condensed [data-slot='invoice-modal-summary-total'] {
 body.condensed [data-slot='invoice-modal-footer'] .flex {
   gap: 0.25rem !important;
 }
+
+/* ============================================================
+   CreateReferralModal – condensed density overrides
+   ============================================================ */
+
+/* Error box: reduced padding and font */
+body.condensed [data-slot='referral-modal-error'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='referral-modal-error'] p {
+  font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Employee info box: compact */
+body.condensed [data-slot='referral-modal-employee'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='referral-modal-employee'] p:first-child {
+  font-size: 0.5625rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='referral-modal-employee'] p:nth-child(2) {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='referral-modal-employee'] p:nth-child(n + 3) {
+  font-size: 0.6875rem !important;
+}
+
+/* Section labels: smaller font and margin */
+body.condensed [data-slot='referral-modal-section-label'] {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Service list: shorter max-height, tighter spacing (space-y uses margin-bottom) */
+body.condensed [data-slot='referral-modal-service-list'] {
+  max-height: 12rem !important;
+}
+
+body.condensed [data-slot='referral-modal-service-list'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+/* Service card: reduced padding, border-radius */
+body.condensed [data-slot='referral-modal-service'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='referral-modal-service'] > div {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='referral-modal-service'] > div > div:first-child {
+  gap: 0.375rem !important;
+}
+
+/* Custom checkbox: smaller */
+body.condensed [data-slot='referral-modal-service-check'] {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+body.condensed [data-slot='referral-modal-service-check'] svg {
+  height: 0.5rem !important;
+  width: 0.5rem !important;
+}
+
+/* Service name: smaller */
+body.condensed [data-slot='referral-modal-service-name'] {
+  font-size: 0.75rem !important;
+}
+
+/* Service description: smaller */
+body.condensed [data-slot='referral-modal-service-desc'] {
+  font-size: 0.625rem !important;
+}
+
+/* Service price: smaller */
+body.condensed [data-slot='referral-modal-service-price'] {
+  font-size: 0.75rem !important;
+}
+
+/* Priority row: tighter gap */
+body.condensed [data-slot='referral-modal-priority-row'] {
+  gap: 0.25rem !important;
+}
+
+/* Priority pills: smaller */
+body.condensed [data-slot='referral-modal-priority'] {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Cost summary box: compact */
+body.condensed [data-slot='referral-modal-summary'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='referral-modal-summary'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* Summary total: smaller but still prominent */
+body.condensed [data-slot='referral-modal-summary-total'] {
+  font-size: 0.875rem !important;
+}
