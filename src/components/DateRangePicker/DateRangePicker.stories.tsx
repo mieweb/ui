@@ -53,10 +53,6 @@ const meta: Meta<typeof DateRangePicker> = {
       description:
         'Display variant: desktop (two-month popup), mobile (bottom sheet), or responsive (auto-adapts at md breakpoint)',
     },
-    showPrint: { table: { disable: true } },
-    onPrint: { table: { disable: true } },
-    showExport: { table: { disable: true } },
-    onExport: { table: { disable: true } },
   },
   args: {
     placeholder: 'Pick a date range',
@@ -196,8 +192,6 @@ export const CustomLabels: Story = {
             lastMonth: 'Mes Pasado',
             last7Days: 'Últimos 7 Días',
             last30Days: 'Últimos 30 Días',
-            thisYear: 'Este Año',
-            lastYear: 'Año Pasado',
           }}
         />
       </div>
