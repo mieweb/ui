@@ -494,10 +494,7 @@ function Dropdown({
                 />
               </div>
             )}
-            <div
-              id={menuId}
-              role="menu"
-            >
+            <div id={menuId} role="menu">
               {multiSelect &&
                 showSelectAll &&
                 visibleSelectableValues.length > 0 && (
@@ -505,7 +502,9 @@ function Dropdown({
                     <div className="p-2">
                       <DropdownItem
                         checked={allVisibleSelected}
-                        indeterminate={!allVisibleSelected && someVisibleSelected}
+                        indeterminate={
+                          !allVisibleSelected && someVisibleSelected
+                        }
                         onClick={handleSelectAll}
                       >
                         {selectAllLabel}
