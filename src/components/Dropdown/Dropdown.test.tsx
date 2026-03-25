@@ -28,6 +28,25 @@ describe('Dropdown', () => {
     ).toBeInTheDocument();
   });
 
+  it('does not render the search input inside the role="menu" element', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Dropdown searchable trigger={<Button>Open menu</Button>}>
+        <DropdownItem>Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+
+    const menu = screen.getByRole('menu');
+    const searchInput = screen.getByRole('searchbox', {
+      name: 'Search dropdown items',
+    });
+
+    expect(menu).not.toContainElement(searchInput);
+  });
+
   it('filters dropdown items based on the search query', async () => {
     const user = userEvent.setup();
 

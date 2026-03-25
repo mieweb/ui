@@ -465,8 +465,6 @@ function Dropdown({
         {triggerElement}
         {isOpen && (
           <div
-            id={menuId}
-            role="menu"
             style={widthStyle}
             className={cn(
               'absolute z-50 min-w-[12rem]',
@@ -486,6 +484,8 @@ function Dropdown({
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder={searchPlaceholder}
                   aria-label={searchAriaLabel}
+                  aria-controls={menuId}
+                  aria-autocomplete="list"
                   className={cn(
                     inputVariants({ size: 'sm' }),
                     'text-sm',
@@ -494,33 +494,38 @@ function Dropdown({
                 />
               </div>
             )}
-            {multiSelect &&
-              showSelectAll &&
-              visibleSelectableValues.length > 0 && (
-                <>
-                  <div className="p-2">
-                    <DropdownItem
-                      checked={allVisibleSelected}
-                      indeterminate={!allVisibleSelected && someVisibleSelected}
-                      onClick={handleSelectAll}
-                    >
-                      {selectAllLabel}
-                    </DropdownItem>
+            <div
+              id={menuId}
+              role="menu"
+            >
+              {multiSelect &&
+                showSelectAll &&
+                visibleSelectableValues.length > 0 && (
+                  <>
+                    <div className="p-2">
+                      <DropdownItem
+                        checked={allVisibleSelected}
+                        indeterminate={!allVisibleSelected && someVisibleSelected}
+                        onClick={handleSelectAll}
+                      >
+                        {selectAllLabel}
+                      </DropdownItem>
+                    </div>
+                    <DropdownSeparator />
+                  </>
+                )}
+              {searchable ? (
+                hasSearchResults ? (
+                  filteredChildren
+                ) : (
+                  <div className="px-3 py-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                    {searchEmptyState}
                   </div>
-                  <DropdownSeparator />
-                </>
-              )}
-            {searchable ? (
-              hasSearchResults ? (
-                filteredChildren
+                )
               ) : (
-                <div className="px-3 py-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
-                  {searchEmptyState}
-                </div>
-              )
-            ) : (
-              children
-            )}
+                children
+              )}
+            </div>
           </div>
         )}
       </div>
