@@ -171,9 +171,12 @@ export function CreateInvoiceModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} size="lg">
-      <form onSubmit={handleSubmit}>
+      <form data-slot="invoice-modal" onSubmit={handleSubmit}>
         <ModalHeader>
-          <div className="flex items-center gap-3">
+          <div
+            data-slot="invoice-modal-header"
+            className="flex items-center gap-3"
+          >
             <ModalTitle>Create Invoice</ModalTitle>
             <Badge variant="secondary">Step {step} of 3</Badge>
           </div>
@@ -182,7 +185,10 @@ export function CreateInvoiceModal({
         <ModalBody className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
+            <div
+              data-slot="invoice-modal-error"
+              className="border-destructive/30 bg-destructive/10 rounded-lg border p-3"
+            >
               <p className="text-destructive text-sm">{errorMessage}</p>
             </div>
           )}
@@ -190,7 +196,10 @@ export function CreateInvoiceModal({
           {/* Step 1: Select Employer */}
           {step === 1 && (
             <div className="space-y-4">
-              <p className="text-muted-foreground text-sm">
+              <p
+                data-slot="invoice-modal-step-desc"
+                className="text-muted-foreground text-sm"
+              >
                 Select the employer you want to create an invoice for.
               </p>
               <Select
@@ -207,12 +216,16 @@ export function CreateInvoiceModal({
           {step === 2 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-muted-foreground text-sm">
+                <p
+                  data-slot="invoice-modal-step-desc"
+                  className="text-muted-foreground text-sm"
+                >
                   Select the completed orders to include in this invoice.
                 </p>
                 {orders.length > 0 && (
                   <button
                     type="button"
+                    data-slot="invoice-modal-toggle-all"
                     onClick={toggleAllOrders}
                     className="text-primary text-sm hover:underline"
                   >
@@ -233,8 +246,12 @@ export function CreateInvoiceModal({
                   ))}
                 </div>
               ) : orders.length === 0 ? (
-                <div className="border-border rounded-lg border border-dashed py-8 text-center">
+                <div
+                  data-slot="invoice-modal-empty"
+                  className="border-border rounded-lg border border-dashed py-8 text-center"
+                >
                   <svg
+                    data-slot="invoice-modal-empty-icon"
                     className="text-muted-foreground/60 mx-auto mb-2 h-10 w-10"
                     fill="none"
                     stroke="currentColor"
@@ -252,13 +269,17 @@ export function CreateInvoiceModal({
                   </p>
                 </div>
               ) : (
-                <div className="max-h-60 space-y-2 overflow-y-auto">
+                <div
+                  data-slot="invoice-modal-order-list"
+                  className="max-h-60 space-y-2 overflow-y-auto"
+                >
                   {orders.map((order) => {
                     const isSelected = selectedOrders.has(order.id);
                     return (
                       <button
                         key={order.id}
                         type="button"
+                        data-slot="invoice-modal-order"
                         onClick={() => toggleOrder(order.id)}
                         className={`w-full rounded-lg border p-3 text-left transition-colors ${
                           isSelected
@@ -268,6 +289,7 @@ export function CreateInvoiceModal({
                       >
                         <div className="flex items-center gap-3">
                           <div
+                            data-slot="invoice-modal-order-check"
                             className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
                               isSelected
                                 ? 'border-primary bg-primary'
@@ -292,14 +314,23 @@ export function CreateInvoiceModal({
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
-                              <p className="text-foreground font-medium">
+                              <p
+                                data-slot="invoice-modal-order-number"
+                                className="text-foreground font-medium"
+                              >
                                 {order.orderNumber}
                               </p>
-                              <span className="text-foreground font-medium">
+                              <span
+                                data-slot="invoice-modal-order-amount"
+                                className="text-foreground font-medium"
+                              >
                                 {formatCurrency(order.amount)}
                               </span>
                             </div>
-                            <p className="text-muted-foreground text-xs">
+                            <p
+                              data-slot="invoice-modal-order-detail"
+                              className="text-muted-foreground text-xs"
+                            >
                               {order.employeeName} • {order.serviceName} •{' '}
                               {formatDate(order.date)}
                             </p>
@@ -313,12 +344,18 @@ export function CreateInvoiceModal({
 
               {/* Selected summary */}
               {selectedOrders.size > 0 && (
-                <div className="bg-muted flex items-center justify-between rounded-lg p-3">
+                <div
+                  data-slot="invoice-modal-summary"
+                  className="bg-muted flex items-center justify-between rounded-lg p-3"
+                >
                   <span className="text-muted-foreground text-sm">
                     {selectedOrders.size} order
                     {selectedOrders.size > 1 ? 's' : ''} selected
                   </span>
-                  <span className="text-foreground text-lg font-bold">
+                  <span
+                    data-slot="invoice-modal-summary-total"
+                    className="text-foreground text-lg font-bold"
+                  >
                     {formatCurrency(totalAmount)}
                   </span>
                 </div>
@@ -329,12 +366,18 @@ export function CreateInvoiceModal({
           {/* Step 3: Review & Configure */}
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-muted-foreground text-sm">
+              <p
+                data-slot="invoice-modal-step-desc"
+                className="text-muted-foreground text-sm"
+              >
                 Review and configure the invoice details.
               </p>
 
               {/* Summary */}
-              <div className="bg-muted space-y-2 rounded-lg p-4">
+              <div
+                data-slot="invoice-modal-summary"
+                className="bg-muted space-y-2 rounded-lg p-4"
+              >
                 <div className="flex justify-between">
                   <span className="text-muted-foreground text-sm">
                     Employer
@@ -351,7 +394,10 @@ export function CreateInvoiceModal({
                 </div>
                 <div className="border-border flex justify-between border-t pt-2">
                   <span className="text-foreground font-medium">Total</span>
-                  <span className="text-foreground text-xl font-bold">
+                  <span
+                    data-slot="invoice-modal-summary-total"
+                    className="text-foreground text-xl font-bold"
+                  >
                     {formatCurrency(totalAmount)}
                   </span>
                 </div>
@@ -377,7 +423,10 @@ export function CreateInvoiceModal({
         </ModalBody>
 
         <ModalFooter>
-          <div className="flex w-full justify-between">
+          <div
+            data-slot="invoice-modal-footer"
+            className="flex w-full justify-between"
+          >
             <div>
               {step > 1 && (
                 <Button

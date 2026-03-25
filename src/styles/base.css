@@ -1822,3 +1822,116 @@ body.condensed [data-slot='country-dropdown-option-flag'] {
 body.condensed [data-slot='country-dropdown-option-dialcode'] {
   font-size: 0.625rem !important;
 }
+
+/* ============================================================
+   CreateInvoiceModal – condensed density overrides
+   ============================================================ */
+
+/* Header row: tighter gap between title and badge */
+body.condensed [data-slot='invoice-modal-header'] {
+  gap: 0.375rem !important;
+}
+
+/* Error box: reduced padding and font */
+body.condensed [data-slot='invoice-modal-error'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-error'] p {
+  font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Step description text: smaller */
+body.condensed [data-slot='invoice-modal-step-desc'] {
+  font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Toggle all link: smaller */
+body.condensed [data-slot='invoice-modal-toggle-all'] {
+  font-size: 0.6875rem !important;
+}
+
+/* Empty state: compact */
+body.condensed [data-slot='invoice-modal-empty'] {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-empty-icon'] {
+  height: 1.5rem !important;
+  width: 1.5rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-empty'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* Order list: shorter max-height, tighter spacing (space-y uses margin-bottom) */
+body.condensed [data-slot='invoice-modal-order-list'] {
+  max-height: 12rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-order-list'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+/* Order card: reduced padding, gap, border-radius */
+body.condensed [data-slot='invoice-modal-order'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-order'] > div {
+  gap: 0.375rem !important;
+}
+
+/* Custom checkbox: smaller */
+body.condensed [data-slot='invoice-modal-order-check'] {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-order-check'] svg {
+  height: 0.5rem !important;
+  width: 0.5rem !important;
+}
+
+/* Order number and amount: smaller font */
+body.condensed [data-slot='invoice-modal-order-number'],
+body.condensed [data-slot='invoice-modal-order-amount'] {
+  font-size: 0.75rem !important;
+}
+
+/* Order detail line: smaller */
+body.condensed [data-slot='invoice-modal-order-detail'] {
+  font-size: 0.625rem !important;
+}
+
+/* Summary bar: reduced padding, smaller fonts */
+body.condensed [data-slot='invoice-modal-summary'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-summary'] span {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='invoice-modal-summary'] > :not(:last-child) {
+  margin-bottom: 0.125rem !important;
+}
+
+/* Summary total: smaller but still prominent */
+body.condensed [data-slot='invoice-modal-summary-total'] {
+  font-size: 0.875rem !important;
+}
+
+/* Footer: tighter gap */
+body.condensed [data-slot='invoice-modal-footer'] .flex {
+  gap: 0.25rem !important;
+}
