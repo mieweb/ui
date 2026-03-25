@@ -4,6 +4,34 @@ import { cleanup } from '@testing-library/react';
 
 // Add missing browser globals for jsdom environment
 beforeAll(() => {
+  if (
+    typeof window.localStorage === 'undefined' ||
+    typeof window.localStorage.getItem !== 'function'
+  ) {
+    const storage = new Map<string, string>();
+    const localStorageMock = {
+      get length() {
+        return storage.size;
+      },
+      clear: () => {
+        storage.clear();
+      },
+      getItem: (key: string) => storage.get(key) ?? null,
+      key: (index: number) => Array.from(storage.keys())[index] ?? null,
+      removeItem: (key: string) => {
+        storage.delete(key);
+      },
+      setItem: (key: string, value: string) => {
+        storage.set(key, String(value));
+      },
+    };
+
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: localStorageMock,
+    });
+  }
+
   // matchMedia is not available in jsdom
   if (!window.matchMedia) {
     Object.defineProperty(window, 'matchMedia', {
@@ -87,5 +115,6 @@ beforeAll(() => {
 
 // Cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
+  window.localStorage.clear();
   cleanup();
 });
