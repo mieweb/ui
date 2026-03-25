@@ -107,14 +107,25 @@ export function ClaimProviderForm({
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle className="text-lg">Claim Provider Listing</CardTitle>
+        <CardTitle data-slot="claim-form-title" className="text-lg">
+          Claim Provider Listing
+        </CardTitle>
         {providerName && (
-          <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
-            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+          <div
+            data-slot="claim-form-provider"
+            className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20"
+          >
+            <p
+              data-slot="claim-form-provider-name"
+              className="text-sm font-medium text-blue-900 dark:text-blue-100"
+            >
               {providerName}
             </p>
             {providerAddress && (
-              <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">
+              <p
+                data-slot="claim-form-provider-addr"
+                className="mt-0.5 text-xs text-blue-600 dark:text-blue-400"
+              >
                 {providerAddress}
               </p>
             )}
@@ -123,23 +134,36 @@ export function ClaimProviderForm({
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          data-slot="claim-form-body"
+          className="space-y-4"
+        >
           {/* Error message */}
           {errorMessage && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-              <p className="text-sm text-red-600 dark:text-red-400">
+            <div
+              data-slot="claim-form-error"
+              className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+            >
+              <p
+                data-slot="claim-form-error-text"
+                className="text-sm text-red-600 dark:text-red-400"
+              >
                 {errorMessage}
               </p>
             </div>
           )}
 
           {/* Contact Information */}
-          <div className="space-y-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div data-slot="claim-form-section" className="space-y-4">
+            <p
+              data-slot="claim-form-section-title"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Contact Information
             </p>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div data-slot="claim-form-grid" className="grid grid-cols-2 gap-4">
               <Input
                 label="First Name"
                 value={formData.firstName}
@@ -186,8 +210,14 @@ export function ClaimProviderForm({
           </div>
 
           {/* Role Selection */}
-          <div className="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div
+            data-slot="claim-form-section"
+            className="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700"
+          >
+            <p
+              data-slot="claim-form-section-title"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Your Role
             </p>
 
@@ -217,7 +247,10 @@ export function ClaimProviderForm({
           </div>
 
           {/* Language Preference */}
-          <div className="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700">
+          <div
+            data-slot="claim-form-section"
+            className="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700"
+          >
             <Select
               label="Preferred Language"
               value={formData.preferredLanguage || 'en'}
@@ -229,8 +262,14 @@ export function ClaimProviderForm({
           </div>
 
           {/* Terms Agreement */}
-          <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
-            <label className="flex cursor-pointer items-start gap-3">
+          <div
+            data-slot="claim-form-terms"
+            className="border-t border-gray-200 pt-4 dark:border-gray-700"
+          >
+            <label
+              data-slot="claim-form-terms-label"
+              className="flex cursor-pointer items-start gap-3"
+            >
               <Checkbox
                 checked={formData.agreedToTerms}
                 onChange={(e) =>
@@ -241,7 +280,10 @@ export function ClaimProviderForm({
                 }
                 className="mt-0.5"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span
+                data-slot="claim-form-terms-text"
+                className="text-sm text-gray-600 dark:text-gray-400"
+              >
                 I agree to the{' '}
                 <a
                   href={termsUrl}
@@ -257,7 +299,7 @@ export function ClaimProviderForm({
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-3 pt-4">
+          <div data-slot="claim-form-actions" className="flex gap-3 pt-4">
             {onCancel && (
               <Button
                 type="button"
