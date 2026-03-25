@@ -2168,3 +2168,91 @@ body.condensed [data-slot='date-range-mobile-done'] {
   font-size: 0.6875rem !important;
   border-radius: 0.375rem !important;
 }
+
+/* ============================================================
+   Dropdown – condensed density overrides
+   ============================================================ */
+
+/* Menu panel: tighter radius, smaller gap from trigger */
+body.condensed [data-slot='dropdown-menu'] {
+  border-radius: 0.5rem !important;
+  min-width: 8rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* Search wrapper: tighter padding */
+body.condensed [data-slot='dropdown-search'] {
+  padding: 0.25rem !important;
+}
+
+/* Search input: condensed height and font */
+body.condensed [data-slot='dropdown-search-input'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding: 0.125rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Select-all wrapper: tighter padding */
+body.condensed [data-slot='dropdown-select-all'] {
+  padding: 0.25rem !important;
+}
+
+/* Empty state: smaller padding and font */
+body.condensed [data-slot='dropdown-empty'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Header: tighter padding and gap */
+body.condensed [data-slot='dropdown-header'] {
+  padding: 0.5rem !important;
+}
+
+body.condensed [data-slot='dropdown-header-row'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='dropdown-header-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='dropdown-header-subtitle'] {
+  font-size: 0.625rem !important;
+}
+
+/* Content wrapper: tighter padding */
+body.condensed [data-slot='dropdown-content'] {
+  padding: 0.25rem !important;
+}
+
+/* Item: smaller padding, gap, font, radius */
+body.condensed [data-slot='dropdown-item'] {
+  padding: 0.25rem 0.5rem !important;
+  gap: 0.375rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Item icon: smaller */
+body.condensed [data-slot='dropdown-item-icon'] {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Multi-select checkbox: smaller */
+body.condensed [data-slot='dropdown-checkbox'] {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='dropdown-checkbox'] svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* Label: smaller padding and font */
+body.condensed [data-slot='dropdown-label'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.5625rem !important;
+}

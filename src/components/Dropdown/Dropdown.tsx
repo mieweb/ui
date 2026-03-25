@@ -466,6 +466,7 @@ function Dropdown({
         {isOpen && (
           <div
             style={widthStyle}
+            data-slot="dropdown-menu"
             className={cn(
               'absolute z-50 min-w-[12rem]',
               'rounded-xl border border-neutral-200 bg-white shadow-lg',
@@ -476,7 +477,10 @@ function Dropdown({
             )}
           >
             {searchable && (
-              <div className="border-b border-neutral-200 p-2 dark:border-neutral-700">
+              <div
+                className="border-b border-neutral-200 p-2 dark:border-neutral-700"
+                data-slot="dropdown-search"
+              >
                 <input
                   ref={searchInputRef}
                   type="search"
@@ -486,6 +490,7 @@ function Dropdown({
                   aria-label={searchAriaLabel}
                   aria-controls={menuId}
                   aria-autocomplete="list"
+                  data-slot="dropdown-search-input"
                   className={cn(
                     inputVariants({ size: 'sm' }),
                     'text-sm',
@@ -499,7 +504,7 @@ function Dropdown({
                 showSelectAll &&
                 visibleSelectableValues.length > 0 && (
                   <>
-                    <div className="p-2">
+                    <div className="p-2" data-slot="dropdown-select-all">
                       <DropdownItem
                         checked={allVisibleSelected}
                         indeterminate={
@@ -517,7 +522,10 @@ function Dropdown({
                 hasSearchResults ? (
                   filteredChildren
                 ) : (
-                  <div className="px-3 py-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                  <div
+                    className="px-3 py-4 text-center text-sm text-neutral-500 dark:text-neutral-400"
+                    data-slot="dropdown-empty"
+                  >
                     {searchEmptyState}
                   </div>
                 )
@@ -567,20 +575,30 @@ const DropdownHeader = React.forwardRef<HTMLDivElement, DropdownHeaderProps>(
     return (
       <div
         ref={ref}
+        data-slot="dropdown-header"
         className={cn(
           'border-b border-neutral-200 p-4 dark:border-neutral-700',
           className
         )}
         {...props}
       >
-        <div className="flex items-center gap-3">
+        <div
+          className="flex items-center gap-3"
+          data-slot="dropdown-header-row"
+        >
           {avatar}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-neutral-900 dark:text-white">
+            <p
+              className="truncate text-sm font-semibold text-neutral-900 dark:text-white"
+              data-slot="dropdown-header-title"
+            >
               {title}
             </p>
             {subtitle && (
-              <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">
+              <p
+                className="truncate text-xs text-neutral-500 dark:text-neutral-400"
+                data-slot="dropdown-header-subtitle"
+              >
                 {subtitle}
               </p>
             )}
@@ -605,7 +623,14 @@ export type DropdownContentProps = React.HTMLAttributes<HTMLDivElement>;
  */
 const DropdownContent = React.forwardRef<HTMLDivElement, DropdownContentProps>(
   ({ className, ...props }, ref) => {
-    return <div ref={ref} className={cn('p-2', className)} {...props} />;
+    return (
+      <div
+        ref={ref}
+        data-slot="dropdown-content"
+        className={cn('p-2', className)}
+        {...props}
+      />
+    );
   }
 );
 
@@ -640,6 +665,7 @@ function DropdownItemCheckbox({
   return (
     <span
       aria-hidden="true"
+      data-slot="dropdown-checkbox"
       className={cn(
         'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors duration-150',
         checked || indeterminate
@@ -749,6 +775,7 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
           isMultiSelectItem ? (indeterminate ? 'mixed' : isChecked) : undefined
         }
         disabled={disabled}
+        data-slot="dropdown-item"
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
           'transition-colors duration-150',
@@ -776,8 +803,14 @@ const DropdownItem = React.forwardRef<HTMLButtonElement, DropdownItemProps>(
             indeterminate={indeterminate}
           />
         )}
-        {icon && <span className="h-4 w-4 shrink-0">{icon}</span>}
-        <span className="font-medium">{children}</span>
+        {icon && (
+          <span className="h-4 w-4 shrink-0" data-slot="dropdown-item-icon">
+            {icon}
+          </span>
+        )}
+        <span className="font-medium" data-slot="dropdown-item-label">
+          {children}
+        </span>
       </button>
     );
   }
@@ -795,6 +828,7 @@ DropdownItem.displayName = 'DropdownItem';
 function DropdownSeparator({ className }: { className?: string }) {
   return (
     <hr
+      data-slot="dropdown-separator"
       className={cn(
         'border-t border-neutral-200 dark:border-neutral-700',
         className
@@ -821,6 +855,7 @@ function DropdownLabel({
 }) {
   return (
     <div
+      data-slot="dropdown-label"
       className={cn(
         'px-3 py-1.5 text-xs font-semibold tracking-wider uppercase',
         'text-neutral-500 dark:text-neutral-400',
