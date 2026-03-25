@@ -1467,3 +1467,36 @@ body.condensed [data-slot='address-card-title'] {
   line-height: 1rem !important;
   margin-bottom: 0.25rem !important;
 }
+
+/* Address card phone: smaller */
+body.condensed [data-slot='address-card-phone'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  margin-top: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+/* ── AdditionalFields ── */
+
+/* Wrapper: tighter spacing */
+body.condensed [data-slot='additional-fields'] {
+  gap: 0.25rem !important;
+}
+
+/* Title / collapsible header: smaller */
+body.condensed [data-slot='additional-fields-title'],
+body.condensed [data-slot='additional-fields-header'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+/* Entry rows: tighter margin and gap */
+body.condensed [data-slot='additional-fields-row'] {
+  margin-bottom: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+/* Expanded content: tighter top margin */
+body.condensed [data-slot='additional-fields-content'] {
+  margin-top: 0.5rem !important;
+}

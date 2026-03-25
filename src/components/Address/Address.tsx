@@ -361,6 +361,7 @@ export function AddressCard({
       <Address address={address} showIcon {...addressProps} />
       {phoneNumber && (
         <a
+          data-slot="address-card-phone"
           href={`tel:${phoneNumber.replace(/\D/g, '')}`}
           onClick={handlePhoneClick}
           className="hover:text-primary-600 dark:hover:text-primary-400 mt-2 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
