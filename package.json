@@ -118,6 +118,16 @@
         "default": "./dist/ag-grid.cjs"
       }
     },
+    "./datavis": {
+      "import": {
+        "types": "./dist/datavis.d.ts",
+        "default": "./dist/datavis.js"
+      },
+      "require": {
+        "types": "./dist/datavis.d.cts",
+        "default": "./dist/datavis.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./init.css": "./dist/styles/init.css"
@@ -152,6 +162,7 @@
   "peerDependencies": {
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
+    "font-awesome": "^4.7.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "wavesurfer.js": ">=7.0.0"
@@ -161,6 +172,9 @@
       "optional": true
     },
     "ag-grid-react": {
+      "optional": true
+    },
+    "font-awesome": {
       "optional": true
     },
     "react": {
@@ -177,13 +191,14 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "datavis": "https://github.com/mieweb/datavis.git#2b32e15c013eabb6008949f4ed7021737ae67377",
-    "font-awesome": "^4.7.0",
     "google-libphonenumber": "^3.2.44",
-    "jquery": "^3.7.1",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
-    "tailwind-merge": "^2.6.1",
+    "tailwind-merge": "^2.6.1"
+  },
+  "optionalDependencies": {
+    "datavis": "https://github.com/mieweb/datavis.git#2b32e15c013eabb6008949f4ed7021737ae67377",
+    "jquery": "^3.7.1",
     "wcdatavis": "https://github.com/mieweb/wcdatavis.git#fa0f081f7d4d2eb7525633bbfed8e833d7f26f52"
   },
   "devDependencies": {
@@ -210,11 +225,14 @@
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
+    "datavis": "https://github.com/mieweb/datavis.git#2b32e15c013eabb6008949f4ed7021737ae67377",
     "eslint": "^9.39.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-storybook": "^10.2.11",
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.7.1",
     "jsdom": "^26.1.0",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
@@ -227,7 +245,8 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^3.2.4",
-    "wavesurfer.js": "^7.12.1"
+    "wavesurfer.js": "^7.12.1",
+    "wcdatavis": "https://github.com/mieweb/wcdatavis.git#fa0f081f7d4d2eb7525633bbfed8e833d7f26f52"
   },
   "engines": {
     "node": ">=18.0.0"

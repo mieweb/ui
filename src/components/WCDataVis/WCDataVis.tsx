@@ -5,7 +5,13 @@
  * create and manage DataVis Source, ComputedView, and Grid instances.
  */
 
-import React, { createContext, useContext, useEffect, useId, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+} from 'react';
 // setup.ts must be first — it sets window.jQuery before plugins load
 import './setup';
 import { Source, ComputedView, Grid } from 'wcdatavis/index.js';
@@ -13,7 +19,9 @@ import { Source, ComputedView, Grid } from 'wcdatavis/index.js';
 import 'wcdatavis/wcdatavis.css';
 
 /** React context used to pass the ComputedView from WCDVSOURCE to WCDVGRID. */
-const SourceContext = createContext<InstanceType<typeof ComputedView> | null>(null);
+const SourceContext = createContext<InstanceType<typeof ComputedView> | null>(
+  null
+);
 
 // — WCDVSOURCE —
 
@@ -63,10 +71,14 @@ function WCDVSOURCE(props: WCDVSOURCE_props) {
     viewRef.current._dvType !== type ||
     viewRef.current._dvUrl !== url
   ) {
-    const source = props.type === 'http'
-      ? new Source({ type, url: props.url })
-      : new Source({ type });
-    viewRef.current = Object.assign(new ComputedView(source), { _dvType: type, _dvUrl: url });
+    const source =
+      props.type === 'http'
+        ? new Source({ type, url: props.url })
+        : new Source({ type });
+    viewRef.current = Object.assign(new ComputedView(source), {
+      _dvType: type,
+      _dvUrl: url,
+    });
   }
 
   return (
@@ -153,12 +165,7 @@ function WCDVGRID({
   }, [computedView, domId, title, showControls, columns, features]);
 
   return (
-    <div
-      id={domId}
-      ref={containerRef}
-      className={className}
-      style={style}
-    />
+    <div id={domId} ref={containerRef} className={className} style={style} />
   );
 }
 

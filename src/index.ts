@@ -5,6 +5,7 @@ export * from './components/Address';
 // AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
 // This avoids forcing ag-grid-community/ag-grid-react on all consumers.
 // See: src/ag-grid.ts
+// Same with DataVis (src/datavis.ts)
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AppHeader';
@@ -28,7 +29,6 @@ export * from './components/CountryCodeDropdown';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
 export * from './components/DashboardWidget';
-export * from './components/DataVisNITRO';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
@@ -147,7 +147,6 @@ export * from './components/Timeline';
 export * from './components/Toast';
 export * from './components/Tooltip';
 export * from './components/VisuallyHidden';
-export * from './components/WCDataVis';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
   WebChartReportViewer,
