@@ -128,6 +128,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
     const switchElement = (
       <button
         ref={ref}
+        data-slot="switch"
         id={switchId}
         type="button"
         role="switch"
@@ -141,6 +142,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         {...props}
       >
         <span
+          data-slot="switch-thumb"
           data-state={isChecked ? 'checked' : 'unchecked'}
           className={switchThumbVariants({ size })}
         />
@@ -163,6 +165,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
       <div className="flex flex-col gap-0.5">
         <label
           htmlFor={switchId}
+          data-slot="switch-label"
           className={cn(
             'text-foreground cursor-pointer font-medium select-none',
             labelSizeClasses[size || 'md'],
@@ -174,6 +177,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         {description && (
           <p
             id={descriptionId}
+            data-slot="switch-description"
             className={cn(
               'text-muted-foreground',
               descriptionSizeClasses[size || 'md']
@@ -187,6 +191,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
 
     return (
       <div
+        data-slot="switch-wrapper"
         className={cn(
           'flex items-center gap-3',
           labelPosition === 'left' && 'flex-row-reverse'

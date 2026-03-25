@@ -1404,3 +1404,43 @@ body.condensed [data-slot='radio-group-error'] {
   font-size: 0.6875rem !important;
   line-height: 0.875rem !important;
 }
+
+/* ── Switch ── */
+
+/* Wrapper: tighter gap between switch and label */
+body.condensed [data-slot='switch-wrapper'] {
+  gap: 0.375rem !important;
+}
+
+/* Track: single condensed size */
+body.condensed [data-slot='switch'] {
+  height: 1rem !important;
+  width: 1.75rem !important;
+  border-radius: 9999px !important;
+}
+
+/* Thumb: condensed size with adjusted translation */
+body.condensed [data-slot='switch-thumb'] {
+  height: 0.75rem !important;
+  width: 0.75rem !important;
+}
+
+body.condensed [data-slot='switch-thumb'][data-state='checked'] {
+  transform: translateX(0.75rem) !important;
+}
+
+body.condensed [data-slot='switch-thumb'][data-state='unchecked'] {
+  transform: translateX(0.125rem) !important;
+}
+
+/* Label: smaller */
+body.condensed [data-slot='switch-label'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+/* Description: smaller */
+body.condensed [data-slot='switch-description'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
