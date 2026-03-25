@@ -140,17 +140,33 @@ export function CreateReferralModal({
               data-slot="referral-modal-employee"
               className="bg-muted rounded-lg p-4"
             >
-              <p className="text-foreground/70 mb-1 text-xs tracking-wide uppercase">
+              <p
+                className="text-foreground/70 mb-1 text-xs tracking-wide uppercase"
+                data-slot="referral-modal-employee-label"
+              >
                 Employee
               </p>
-              <p className="text-foreground font-medium">
+              <p
+                className="text-foreground font-medium"
+                data-slot="referral-modal-employee-name"
+              >
                 {employee.firstName} {employee.lastName}
               </p>
               {employee.email && (
-                <p className="text-foreground/70 text-sm">{employee.email}</p>
+                <p
+                  className="text-foreground/70 text-sm"
+                  data-slot="referral-modal-employee-detail"
+                >
+                  {employee.email}
+                </p>
               )}
               {employerName && (
-                <p className="text-foreground/70 text-sm">{employerName}</p>
+                <p
+                  className="text-foreground/70 text-sm"
+                  data-slot="referral-modal-employee-detail"
+                >
+                  {employerName}
+                </p>
               )}
             </div>
           )}
