@@ -390,7 +390,7 @@ function Dropdown({
     [multiSelect, selectedValues, toggleSelectedValue]
   );
 
-  useClickOutside(containerRef, handleClose);
+  useClickOutside(containerRef, handleClose, isOpen);
   useEscapeKey(handleClose, isOpen);
 
   React.useEffect(() => {

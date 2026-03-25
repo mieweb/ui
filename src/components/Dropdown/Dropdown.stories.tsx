@@ -69,7 +69,7 @@ function SearchableMultiSelectStoryDemo() {
 }
 
 const meta: Meta<typeof Dropdown> = {
-  title: 'Inputs & Controls/Dropdown',
+  title: 'Components/Forms & Inputs/Dropdown',
   component: Dropdown,
   parameters: {
     layout: 'centered',

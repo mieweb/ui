@@ -149,10 +149,12 @@ export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
   WebChartReportViewer,
+  ReportTimeRange,
   ReportDatePicker,
   type WebChartReportViewerProps,
   type SystemReport,
   type ReportResult,
+  type ReportTimeRangeProps,
   type ReportDatePickerProps,
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';

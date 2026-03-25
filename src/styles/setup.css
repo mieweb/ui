@@ -1,0 +1,36 @@
+/**
+ * @mieweb/ui — Tailwind CSS 4 Setup Reference
+ *
+ * DOCUMENTATION ONLY — This file is a reference snippet, not an
+ * importable stylesheet. It is NOT exported in package.json and is
+ * NOT copied to dist/. The @source directive uses a relative path
+ * that must resolve from YOUR project's CSS file, not from inside
+ * node_modules. Copy the lines below into your main CSS entry point.
+ *
+ * Required lines for your CSS entry point:
+ *
+ *   @source "../node_modules/@mieweb/ui/dist";
+ *   @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+ *
+ * Adjust the @source path if your CSS file is not at the project root.
+ * For example, if your CSS is in src/, use:
+ *
+ *   @source "../../node_modules/@mieweb/ui/dist";
+ *
+ * Why these are needed:
+ *
+ * 1. @source tells Tailwind 4 to scan @mieweb/ui's dist folder for class
+ *    names. Without it, component classes like `bg-primary` won't be
+ *    generated (Tailwind 4 doesn't scan node_modules by default).
+ *
+ * 2. @custom-variant dark registers the dark mode variant so that
+ *    `dark:bg-neutral-900` works with the `data-theme="dark"` attribute
+ *    that @mieweb/ui uses for theme switching.
+ */
+
+/* Reference — copy into your project's CSS entry point:
+
+@source "../node_modules/@mieweb/ui/dist";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+*/

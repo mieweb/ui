@@ -119,7 +119,8 @@
       }
     },
     "./styles.css": "./dist/styles.css",
-    "./styles": "./dist/styles.css"
+    "./styles": "./dist/styles.css",
+    "./init.css": "./dist/styles/init.css"
   },
   "files": [
     "dist",
@@ -128,9 +129,10 @@
   ],
   "scripts": {
     "dev": "tsup --watch",
-    "build": "tsup && npm run build:css && npm run copy:brand-css",
+    "build": "tsup && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
+    "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",

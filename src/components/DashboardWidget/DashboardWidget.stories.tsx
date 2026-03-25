@@ -27,7 +27,7 @@ import { Printer } from 'lucide-react';
 // =============================================================================
 
 const meta: Meta<typeof DashboardWidget> = {
-  title: 'Data Display/DashboardWidget',
+  title: 'Components/Layout & Structure/DashboardWidget',
   component: DashboardWidget,
   parameters: {
     layout: 'centered',

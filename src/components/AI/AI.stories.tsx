@@ -16,7 +16,7 @@ import {
 // ============================================================================
 
 const meta: Meta<typeof MCPToolCallDisplay> = {
-  title: 'Feature Modules/AI/MCPToolCall',
+  title: 'Product/Feature Modules/AI/MCPToolCall',
   component: MCPToolCallDisplay,
   parameters: {
     layout: 'padded',
@@ -113,7 +113,7 @@ export const Compact: Story = {
 // Note: AIMessageDisplay has its own meta but we keep stories in one file for organization
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _MessageMeta: Meta<typeof AIMessageDisplay> = {
-  title: 'Feature Modules/AI/AIMessage',
+  title: 'Product/Feature Modules/AI/AIMessage',
   component: AIMessageDisplay,
   parameters: {
     layout: 'padded',
@@ -222,7 +222,7 @@ export const ThinkingBlock: StoryObj<typeof AIMessageDisplay> = {
 // Note: AIChat has its own meta but we keep stories in one file for organization
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _ChatMeta: Meta<typeof AIChat> = {
-  title: 'Feature Modules/AI/AIChat',
+  title: 'Product/Feature Modules/AI/AIChat',
   component: AIChat,
   parameters: {
     layout: 'fullscreen',

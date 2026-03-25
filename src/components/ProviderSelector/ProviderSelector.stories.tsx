@@ -42,7 +42,7 @@ const sampleProviders: ProviderOption[] = [
 ];
 
 const meta: Meta<typeof ProviderSelector> = {
-  title: 'Inputs & Controls/ProviderSelector',
+  title: 'Components/Forms & Inputs/ProviderSelector',
   component: ProviderSelector,
   tags: ['autodocs'],
   parameters: {

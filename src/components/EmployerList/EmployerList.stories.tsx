@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EmployerList } from './EmployerList';
 
 const meta: Meta<typeof EmployerList> = {
-  title: 'Provider/EmployerList',
+  title: 'Product/Provider/EmployerList',
   component: EmployerList,
   parameters: {
     layout: 'padded',

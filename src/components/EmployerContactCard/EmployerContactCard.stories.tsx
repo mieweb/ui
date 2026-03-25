@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EmployerContactCard } from './EmployerContactCard';
 
 const meta: Meta<typeof EmployerContactCard> = {
-  title: 'Provider/EmployerContactCard',
+  title: 'Product/Provider/EmployerContactCard',
   component: EmployerContactCard,
   parameters: {
     layout: 'centered',

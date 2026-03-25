@@ -7,7 +7,7 @@ import {
 } from './ErrorPage';
 
 const meta: Meta<typeof ErrorPage> = {
-  title: 'Feature Modules/ErrorPage',
+  title: 'Product/Feature Modules/ErrorPage',
   component: ErrorPage,
   tags: ['autodocs'],
   parameters: {

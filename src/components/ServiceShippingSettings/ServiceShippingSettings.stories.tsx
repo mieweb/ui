@@ -3,7 +3,7 @@ import { ServiceShippingSettings } from './ServiceShippingSettings';
 
 const meta: Meta<typeof ServiceShippingSettings> = {
   component: ServiceShippingSettings,
-  title: 'Feature Modules/ServiceShippingSettings',
+  title: 'Product/Feature Modules/ServiceShippingSettings',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

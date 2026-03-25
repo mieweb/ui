@@ -40,7 +40,7 @@ import {
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Examples/Dashboard (Widgets)',
+  title: 'Product/Feature Modules/Dashboard (Widgets)',
   parameters: {
     layout: 'fullscreen',
   },

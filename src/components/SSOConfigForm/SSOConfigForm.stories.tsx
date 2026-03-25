@@ -3,7 +3,7 @@ import { SSOConfigForm } from './SSOConfigForm';
 
 const meta: Meta<typeof SSOConfigForm> = {
   component: SSOConfigForm,
-  title: 'Forms/SSOConfigForm',
+  title: 'Components/Forms & Inputs/SSOConfigForm',
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',

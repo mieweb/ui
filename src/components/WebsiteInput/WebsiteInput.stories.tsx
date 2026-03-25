@@ -11,7 +11,7 @@ import {
 // =============================================================================
 
 const meta: Meta<typeof WebsiteInput> = {
-  title: 'Forms/WebsiteInput',
+  title: 'Components/Forms & Inputs/WebsiteInput',
   component: WebsiteInput,
   parameters: {
     layout: 'centered',

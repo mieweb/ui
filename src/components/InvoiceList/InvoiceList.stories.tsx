@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { InvoiceList } from './InvoiceList';
 
 const meta: Meta<typeof InvoiceList> = {
-  title: 'Provider/InvoiceList',
+  title: 'Product/Provider/InvoiceList',
   component: InvoiceList,
   parameters: {
     layout: 'padded',

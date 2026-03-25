@@ -124,6 +124,7 @@ export function ServiceGrid({
 
   return (
     <div
+      data-slot="service-grid"
       className={cn('grid', columnClasses[columns], gapClasses[gap], className)}
     >
       {/* Add card first if enabled */}

@@ -76,7 +76,7 @@ type QuickActionStoryArgs = Omit<
 };
 
 const meta: Meta<typeof QuickAction> = {
-  title: 'Layout & Structure/QuickAction',
+  title: 'Components/Layout & Structure/QuickAction',
   component: QuickAction,
   parameters: {
     layout: 'centered',

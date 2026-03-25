@@ -12,7 +12,7 @@ import { DocumentScanner } from './DocumentScanner';
  * data from scanned documents.
  */
 const meta: Meta<typeof DocumentScanner> = {
-  title: 'Media & Device/DocumentScanner',
+  title: 'Components/Images & Media/DocumentScanner',
   component: DocumentScanner,
   tags: ['autodocs'],
   parameters: {

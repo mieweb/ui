@@ -10,7 +10,7 @@ import {
 } from '../Icons';
 
 const meta: Meta<typeof CountBadge> = {
-  title: 'Data Display/CountBadge',
+  title: 'Components/Text & Data Display/CountBadge',
   component: CountBadge,
   tags: ['autodocs'],
   parameters: {

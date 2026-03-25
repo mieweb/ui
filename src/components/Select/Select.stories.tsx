@@ -140,7 +140,7 @@ function SelectWithState({
 // =============================================================================
 
 const meta = {
-  title: 'Inputs & Controls/Select',
+  title: 'Components/Forms & Inputs/Select',
   component: SelectWithState,
   parameters: {
     layout: 'centered',

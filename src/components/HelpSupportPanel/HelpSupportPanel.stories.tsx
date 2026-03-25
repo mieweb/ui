@@ -6,7 +6,7 @@ import {
 } from './HelpSupportPanel';
 
 const meta: Meta<typeof HelpSupportPanel> = {
-  title: 'Provider/HelpSupportPanel',
+  title: 'Product/Provider/HelpSupportPanel',
   component: HelpSupportPanel,
   tags: ['autodocs'],
   parameters: {

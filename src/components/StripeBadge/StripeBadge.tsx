@@ -113,6 +113,7 @@ export function StripeBadge({
         target="_blank"
         rel="noopener noreferrer"
         className={cn(badgeClasses, 'hover:opacity-80')}
+        data-slot="stripe-badge"
         aria-label="Powered by Stripe - Visit Stripe website"
       >
         {content}
@@ -121,7 +122,12 @@ export function StripeBadge({
   }
 
   return (
-    <div className={badgeClasses} role="img" aria-label="Powered by Stripe">
+    <div
+      className={badgeClasses}
+      data-slot="stripe-badge"
+      role="img"
+      aria-label="Powered by Stripe"
+    >
       {content}
     </div>
   );
@@ -173,6 +179,7 @@ export function StripeSecureBadge({
         sizeClasses[size].container,
         className
       )}
+      data-slot="stripe-secure-badge"
       role="img"
       aria-label="Secure payments powered by Stripe"
     >

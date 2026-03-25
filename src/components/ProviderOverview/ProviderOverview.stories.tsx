@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ProviderOverview } from './ProviderOverview';
 
 const meta: Meta<typeof ProviderOverview> = {
-  title: 'Provider/ProviderOverview',
+  title: 'Product/Provider/ProviderOverview',
   component: ProviderOverview,
   parameters: {
     layout: 'padded',

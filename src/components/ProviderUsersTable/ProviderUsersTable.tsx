@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import {
   Table,
   TableHeader,
@@ -12,6 +11,8 @@ import {
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Avatar } from '../Avatar/Avatar';
+import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
+import { MoreVerticalIcon, SendIcon, PencilIcon, TrashIcon } from '../Icons';
 
 export interface ProviderUser {
   id: string;
@@ -43,6 +44,77 @@ export interface ProviderUsersTableProps {
   emptyMessage?: string;
   /** Additional CSS classes */
   className?: string;
+}
+
+/** Row-level overflow menu for user actions */
+function RowActionsMenu({
+  user,
+  isCurrentUser,
+  isPending,
+  onEditRole,
+  onRemove,
+  onResendInvite,
+}: {
+  user: ProviderUser;
+  isCurrentUser: boolean;
+  isPending: boolean;
+  onEditRole?: (user: ProviderUser) => void;
+  onRemove?: (user: ProviderUser) => void;
+  onResendInvite?: (user: ProviderUser) => void;
+}) {
+  const hasActions =
+    (isPending && !!onResendInvite) ||
+    !!onEditRole ||
+    (!!onRemove && !isCurrentUser);
+  if (!hasActions) return null;
+
+  const showResend = isPending && onResendInvite;
+  const showRemove = onRemove && !isCurrentUser;
+  const needsSeparator = (showResend || onEditRole) && showRemove;
+
+  return (
+    <Dropdown
+      trigger={
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Row actions"
+          className="h-7 w-7"
+        >
+          <MoreVerticalIcon size={16} />
+        </Button>
+      }
+      placement="bottom-end"
+    >
+      {showResend && (
+        <DropdownItem
+          icon={<SendIcon size={14} />}
+          onClick={() => onResendInvite?.(user)}
+        >
+          Resend Invite
+        </DropdownItem>
+      )}
+      {onEditRole && (
+        <DropdownItem
+          icon={<PencilIcon size={14} />}
+          onClick={() => onEditRole(user)}
+        >
+          Edit Role
+        </DropdownItem>
+      )}
+      {needsSeparator && <DropdownSeparator />}
+      {showRemove && (
+        <DropdownItem
+          variant="danger"
+          icon={<TrashIcon size={14} />}
+          onClick={() => onRemove?.(user)}
+        >
+          Remove
+        </DropdownItem>
+      )}
+    </Dropdown>
+  );
 }
 
 /**
@@ -121,7 +193,10 @@ export function ProviderUsersTable({
   }
 
   return (
-    <div className={`overflow-x-auto ${className}`}>
+    <div
+      data-slot="provider-users-table"
+      className={`overflow-x-auto ${className}`}
+    >
       <Table>
         <TableHeader>
           <TableRow>
@@ -130,7 +205,9 @@ export function ProviderUsersTable({
             <TableHead>Status</TableHead>
             <TableHead>Last Active</TableHead>
             {showActions && (
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="w-10">
+                <span className="sr-only">Actions</span>
+              </TableHead>
             )}
           </TableRow>
         </TableHeader>
@@ -178,75 +255,14 @@ export function ProviderUsersTable({
                 </TableCell>
                 {showActions && (
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {isPending && onResendInvite && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onResendInvite(user)}
-                          title="Resend invitation"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </Button>
-                      )}
-                      {onEditRole && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditRole(user)}
-                          title="Edit role"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                            />
-                          </svg>
-                        </Button>
-                      )}
-                      {onRemove && !isCurrentUser && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onRemove(user)}
-                          title="Remove user"
-                          className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </Button>
-                      )}
-                    </div>
+                    <RowActionsMenu
+                      user={user}
+                      isCurrentUser={isCurrentUser}
+                      isPending={isPending}
+                      onEditRole={onEditRole}
+                      onRemove={onRemove}
+                      onResendInvite={onResendInvite}
+                    />
                   </TableCell>
                 )}
               </TableRow>

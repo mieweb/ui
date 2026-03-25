@@ -10,7 +10,7 @@ import {
 } from './ConnectionStatus';
 
 const meta: Meta<typeof ConnectionStatusOverlay> = {
-  title: 'Feature Modules/ConnectionStatus',
+  title: 'Components/Status Indicators/ConnectionStatus',
   component: ConnectionStatusOverlay,
   tags: ['autodocs'],
   parameters: {

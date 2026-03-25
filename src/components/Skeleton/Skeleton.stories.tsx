@@ -244,7 +244,7 @@ function SkeletonExample({
 // =============================================================================
 
 const meta = {
-  title: 'Data Display/Skeleton',
+  title: 'Components/Loaders/Skeleton',
   component: SkeletonExample,
   parameters: {
     layout: 'centered',

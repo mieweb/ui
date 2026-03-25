@@ -350,6 +350,7 @@ function HoverMenu({
   return (
     /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
     <div
+      data-slot="count-badge-menu"
       className={cn(
         'absolute top-full right-0 z-50 mt-2',
         'w-[320px] rounded-lg border border-neutral-200 bg-white shadow-xl',
@@ -372,7 +373,10 @@ function HoverMenu({
       </div>
 
       {/* Table */}
-      <div className="max-h-[240px] overflow-y-auto">
+      <div
+        data-slot="count-badge-menu-scroll"
+        className="max-h-[240px] overflow-y-auto"
+      >
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-neutral-700">
@@ -718,7 +722,8 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
           <button
             ref={ref}
             type="button"
-            data-count-badge
+            data-slot="count-badge"
+            data-count-badge=""
             className={cn(countBadgeVariants({ variant }), className)}
             onClick={(e) => {
               if (showMenu) {
@@ -732,6 +737,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
             {icon && <span className="shrink-0">{icon}</span>}
             <span>{label}</span>
             <span
+              data-slot="count-chip"
               className={cn(
                 countChipVariants({ variant: countVariant ?? variant })
               )}

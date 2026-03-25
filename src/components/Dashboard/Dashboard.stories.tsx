@@ -55,7 +55,7 @@ import { ThemeProvider, useThemeContext } from '../ThemeProvider';
 // ============================================================================
 
 const meta: Meta = {
-  title: 'Examples/Dashboard',
+  title: 'Product/Feature Modules/Dashboard',
   parameters: {
     layout: 'fullscreen',
   },

@@ -5,7 +5,7 @@ import {
 } from './ServicePricingManager';
 
 const meta: Meta<typeof ServicePricingManager> = {
-  title: 'Provider/ServicePricingManager',
+  title: 'Product/Provider/ServicePricingManager',
   component: ServicePricingManager,
   tags: ['autodocs'],
   parameters: {

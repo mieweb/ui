@@ -27,92 +27,95 @@
   --color-primary-foreground: var(--mieweb-primary-foreground, #ffffff);
 
   /* ── Secondary Color Scale ─────────────────────────────────────────── */
-  --color-secondary: var(--mieweb-secondary-500);
-  --color-secondary-50: var(--mieweb-secondary-50);
-  --color-secondary-100: var(--mieweb-secondary-100);
-  --color-secondary-200: var(--mieweb-secondary-200);
-  --color-secondary-300: var(--mieweb-secondary-300);
-  --color-secondary-400: var(--mieweb-secondary-400);
-  --color-secondary-500: var(--mieweb-secondary-500);
-  --color-secondary-600: var(--mieweb-secondary-600);
-  --color-secondary-700: var(--mieweb-secondary-700);
-  --color-secondary-800: var(--mieweb-secondary-800);
-  --color-secondary-900: var(--mieweb-secondary-900);
-  --color-secondary-950: var(--mieweb-secondary-950);
+  --color-secondary: var(--mieweb-secondary-500, #6366f1);
+  --color-secondary-50: var(--mieweb-secondary-50, #eef2ff);
+  --color-secondary-100: var(--mieweb-secondary-100, #e0e7ff);
+  --color-secondary-200: var(--mieweb-secondary-200, #c7d2fe);
+  --color-secondary-300: var(--mieweb-secondary-300, #a5b4fc);
+  --color-secondary-400: var(--mieweb-secondary-400, #818cf8);
+  --color-secondary-500: var(--mieweb-secondary-500, #6366f1);
+  --color-secondary-600: var(--mieweb-secondary-600, #4f46e5);
+  --color-secondary-700: var(--mieweb-secondary-700, #4338ca);
+  --color-secondary-800: var(--mieweb-secondary-800, #3730a3);
+  --color-secondary-900: var(--mieweb-secondary-900, #312e81);
+  --color-secondary-950: var(--mieweb-secondary-950, #1e1b4b);
   --color-secondary-foreground: var(--mieweb-secondary-foreground, #ffffff);
 
   /* ── Neutral / Gray Scale ──────────────────────────────────────────── */
-  --color-neutral: var(--mieweb-neutral-500);
-  --color-neutral-50: var(--mieweb-neutral-50);
-  --color-neutral-100: var(--mieweb-neutral-100);
-  --color-neutral-200: var(--mieweb-neutral-200);
-  --color-neutral-300: var(--mieweb-neutral-300);
-  --color-neutral-400: var(--mieweb-neutral-400);
-  --color-neutral-500: var(--mieweb-neutral-500);
-  --color-neutral-600: var(--mieweb-neutral-600);
-  --color-neutral-700: var(--mieweb-neutral-700);
-  --color-neutral-800: var(--mieweb-neutral-800);
-  --color-neutral-900: var(--mieweb-neutral-900);
-  --color-neutral-950: var(--mieweb-neutral-950);
+  --color-neutral: var(--mieweb-neutral-500, #737373);
+  --color-neutral-50: var(--mieweb-neutral-50, #fafafa);
+  --color-neutral-100: var(--mieweb-neutral-100, #f5f5f5);
+  --color-neutral-200: var(--mieweb-neutral-200, #e5e5e5);
+  --color-neutral-300: var(--mieweb-neutral-300, #d4d4d4);
+  --color-neutral-400: var(--mieweb-neutral-400, #a3a3a3);
+  --color-neutral-500: var(--mieweb-neutral-500, #737373);
+  --color-neutral-600: var(--mieweb-neutral-600, #525252);
+  --color-neutral-700: var(--mieweb-neutral-700, #404040);
+  --color-neutral-800: var(--mieweb-neutral-800, #262626);
+  --color-neutral-900: var(--mieweb-neutral-900, #171717);
+  --color-neutral-950: var(--mieweb-neutral-950, #0a0a0a);
 
   /* ── Destructive / Error Scale ─────────────────────────────────────── */
-  --color-destructive: var(--mieweb-destructive, var(--mieweb-destructive-500));
-  --color-destructive-50: var(--mieweb-destructive-50);
-  --color-destructive-100: var(--mieweb-destructive-100);
-  --color-destructive-200: var(--mieweb-destructive-200);
-  --color-destructive-300: var(--mieweb-destructive-300);
-  --color-destructive-400: var(--mieweb-destructive-400);
-  --color-destructive-500: var(--mieweb-destructive-500);
-  --color-destructive-600: var(--mieweb-destructive-600);
-  --color-destructive-700: var(--mieweb-destructive-700);
-  --color-destructive-800: var(--mieweb-destructive-800);
-  --color-destructive-900: var(--mieweb-destructive-900);
-  --color-destructive-950: var(--mieweb-destructive-950);
+  --color-destructive: var(
+    --mieweb-destructive,
+    var(--mieweb-destructive-500, #ef4444)
+  );
+  --color-destructive-50: var(--mieweb-destructive-50, #fef2f2);
+  --color-destructive-100: var(--mieweb-destructive-100, #fee2e2);
+  --color-destructive-200: var(--mieweb-destructive-200, #fecaca);
+  --color-destructive-300: var(--mieweb-destructive-300, #fca5a5);
+  --color-destructive-400: var(--mieweb-destructive-400, #f87171);
+  --color-destructive-500: var(--mieweb-destructive-500, #ef4444);
+  --color-destructive-600: var(--mieweb-destructive-600, #dc2626);
+  --color-destructive-700: var(--mieweb-destructive-700, #b91c1c);
+  --color-destructive-800: var(--mieweb-destructive-800, #991b1b);
+  --color-destructive-900: var(--mieweb-destructive-900, #7f1d1d);
+  --color-destructive-950: var(--mieweb-destructive-950, #450a0a);
   --color-destructive-foreground: var(--mieweb-destructive-foreground, #ffffff);
 
   /* ── Success Scale ─────────────────────────────────────────────────── */
-  --color-success: var(--mieweb-success, var(--mieweb-success-500));
-  --color-success-50: var(--mieweb-success-50);
-  --color-success-100: var(--mieweb-success-100);
-  --color-success-200: var(--mieweb-success-200);
-  --color-success-300: var(--mieweb-success-300);
-  --color-success-400: var(--mieweb-success-400);
-  --color-success-500: var(--mieweb-success-500);
-  --color-success-600: var(--mieweb-success-600);
-  --color-success-700: var(--mieweb-success-700);
-  --color-success-800: var(--mieweb-success-800);
-  --color-success-900: var(--mieweb-success-900);
-  --color-success-950: var(--mieweb-success-950);
+  --color-success: var(--mieweb-success, var(--mieweb-success-500, #22c55e));
+  --color-success-50: var(--mieweb-success-50, #f0fdf4);
+  --color-success-100: var(--mieweb-success-100, #dcfce7);
+  --color-success-200: var(--mieweb-success-200, #bbf7d0);
+  --color-success-300: var(--mieweb-success-300, #86efac);
+  --color-success-400: var(--mieweb-success-400, #4ade80);
+  --color-success-500: var(--mieweb-success-500, #22c55e);
+  --color-success-600: var(--mieweb-success-600, #16a34a);
+  --color-success-700: var(--mieweb-success-700, #15803d);
+  --color-success-800: var(--mieweb-success-800, #166534);
+  --color-success-900: var(--mieweb-success-900, #14532d);
+  --color-success-950: var(--mieweb-success-950, #052e16);
   --color-success-foreground: var(--mieweb-success-foreground, #ffffff);
 
   /* ── Warning Scale ─────────────────────────────────────────────────── */
-  --color-warning: var(--mieweb-warning, var(--mieweb-warning-500));
-  --color-warning-50: var(--mieweb-warning-50);
-  --color-warning-100: var(--mieweb-warning-100);
-  --color-warning-200: var(--mieweb-warning-200);
-  --color-warning-300: var(--mieweb-warning-300);
-  --color-warning-400: var(--mieweb-warning-400);
-  --color-warning-500: var(--mieweb-warning-500);
-  --color-warning-600: var(--mieweb-warning-600);
-  --color-warning-700: var(--mieweb-warning-700);
-  --color-warning-800: var(--mieweb-warning-800);
-  --color-warning-900: var(--mieweb-warning-900);
-  --color-warning-950: var(--mieweb-warning-950);
+  --color-warning: var(--mieweb-warning, var(--mieweb-warning-500, #f59e0b));
+  --color-warning-50: var(--mieweb-warning-50, #fffbeb);
+  --color-warning-100: var(--mieweb-warning-100, #fef3c7);
+  --color-warning-200: var(--mieweb-warning-200, #fde68a);
+  --color-warning-300: var(--mieweb-warning-300, #fcd34d);
+  --color-warning-400: var(--mieweb-warning-400, #fbbf24);
+  --color-warning-500: var(--mieweb-warning-500, #f59e0b);
+  --color-warning-600: var(--mieweb-warning-600, #d97706);
+  --color-warning-700: var(--mieweb-warning-700, #b45309);
+  --color-warning-800: var(--mieweb-warning-800, #92400e);
+  --color-warning-900: var(--mieweb-warning-900, #78350f);
+  --color-warning-950: var(--mieweb-warning-950, #451a03);
   --color-warning-foreground: var(--mieweb-warning-foreground, #ffffff);
 
   /* ── Info Scale ────────────────────────────────────────────────────── */
-  --color-info: var(--mieweb-info, var(--mieweb-info-500));
-  --color-info-50: var(--mieweb-info-50);
-  --color-info-100: var(--mieweb-info-100);
-  --color-info-200: var(--mieweb-info-200);
-  --color-info-300: var(--mieweb-info-300);
-  --color-info-400: var(--mieweb-info-400);
-  --color-info-500: var(--mieweb-info-500);
-  --color-info-600: var(--mieweb-info-600);
-  --color-info-700: var(--mieweb-info-700);
-  --color-info-800: var(--mieweb-info-800);
-  --color-info-900: var(--mieweb-info-900);
-  --color-info-950: var(--mieweb-info-950);
+  --color-info: var(--mieweb-info, var(--mieweb-info-500, #0ea5e9));
+  --color-info-50: var(--mieweb-info-50, #f0f9ff);
+  --color-info-100: var(--mieweb-info-100, #e0f2fe);
+  --color-info-200: var(--mieweb-info-200, #bae6fd);
+  --color-info-300: var(--mieweb-info-300, #7dd3fc);
+  --color-info-400: var(--mieweb-info-400, #38bdf8);
+  --color-info-500: var(--mieweb-info-500, #0ea5e9);
+  --color-info-600: var(--mieweb-info-600, #0284c7);
+  --color-info-700: var(--mieweb-info-700, #0369a1);
+  --color-info-800: var(--mieweb-info-800, #075985);
+  --color-info-900: var(--mieweb-info-900, #0c4a6e);
+  --color-info-950: var(--mieweb-info-950, #082f49);
   --color-info-foreground: var(--mieweb-info-foreground, #ffffff);
 
   /* ── Layout Semantic Colors ────────────────────────────────────────── */
@@ -280,7 +283,8 @@
 }
 
 /* Dark Mode */
-[data-theme='dark'] {
+[data-theme='dark'],
+.dark {
   /* Layout */
   --mieweb-background: #171717;
   --mieweb-foreground: #fafafa;
@@ -330,29 +334,6 @@ kbd {
   outline-offset: 2px;
 }
 
-/* Also support .dark class for Storybook compatibility */
-.dark {
-  --mieweb-background: #171717;
-  --mieweb-foreground: #fafafa;
-  --mieweb-card: #262626;
-  --mieweb-card-foreground: #fafafa;
-  --mieweb-muted: #404040;
-  --mieweb-muted-foreground: #a1a1aa;
-  --mieweb-border: #404040;
-  --mieweb-input: #404040;
-  --mieweb-ring: #27aae1;
-  --mieweb-destructive-foreground: #fafafa;
-  --mieweb-success-foreground: #fafafa;
-  --mieweb-warning-foreground: #fafafa;
-  --mieweb-info-foreground: #fafafa;
-  --mieweb-secondary-foreground: #fafafa;
-  --mieweb-chart-1: #38bdf8;
-  --mieweb-chart-2: #4ade80;
-  --mieweb-chart-3: #fbbf24;
-  --mieweb-chart-4: #f87171;
-  --mieweb-chart-5: #818cf8;
-}
-
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -380,4 +361,764 @@ kbd {
 
 .animate-waveform {
   animation: waveform 0.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Condensed Density Mode
+   Activated via body.condensed class.
+   Targets medical professional users who need
+   maximum information density on screen.
+   ============================================ */
+
+/* Badge — tighter padding, square corners, smaller text */
+body.condensed [data-slot='badge'],
+body.condensed .mw-badge {
+  border-radius: 2px;
+  padding-inline: 0.25rem;
+  padding-block: 0;
+  font-size: 0.6875rem;
+  line-height: 1.125rem;
+  gap: 0.125rem;
+}
+
+/* CountBadge — compact pill with tighter chip */
+body.condensed [data-slot='count-badge'] {
+  border-radius: 3px;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+  gap: 0.25rem;
+}
+
+body.condensed [data-slot='count-badge'] [data-slot='count-chip'] {
+  border-radius: 2px;
+  padding: 0 0.25rem;
+  font-size: 0.625rem;
+  min-width: 1rem;
+  line-height: 1rem;
+}
+
+/* CountBadge hover menu — denser table rows */
+body.condensed [data-slot='count-badge-menu'] {
+  width: 280px;
+  border-radius: 4px;
+}
+
+body.condensed [data-slot='count-badge-menu'] th,
+body.condensed [data-slot='count-badge-menu'] td {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+}
+
+body.condensed
+  [data-slot='count-badge-menu']
+  [data-slot='count-badge-menu-scroll'] {
+  max-height: 200px;
+}
+
+/* Avatar — single condensed size, square corners */
+body.condensed [data-slot='avatar'] {
+  font-size: 0.625rem;
+  border-radius: 2px;
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+/* AvatarGroup — tighter overlap */
+body.condensed [data-slot='avatar-group'] > * + * {
+  margin-inline-start: -0.625rem;
+}
+
+/* InventoryManager — compact header, tighter table rows */
+body.condensed [data-slot='inventory-manager'] h3 {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+body.condensed [data-slot='inventory-manager'] h4 {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+body.condensed [data-slot='inventory-manager'] .mb-4 {
+  margin-bottom: 0.5rem;
+}
+
+body.condensed [data-slot='inventory-manager'] hr {
+  margin-bottom: 0.5rem;
+}
+
+/* Inventory count number */
+body.condensed [data-slot='inventory-manager'] .text-2xl {
+  font-size: 1.125rem;
+}
+
+/* Table cells */
+body.condensed [data-slot='inventory-manager'] th {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  font-size: 0.625rem;
+}
+
+body.condensed [data-slot='inventory-manager'] td {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  font-size: 0.75rem;
+}
+
+/* Memo rows */
+body.condensed [data-slot='inventory-manager'] td[colspan] {
+  padding: 0.0625rem 0.5rem;
+}
+
+/* Empty state */
+body.condensed [data-slot='inventory-manager'] .py-8 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+body.condensed [data-slot='inventory-manager'] .py-8 svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ── PatientHeader ── condensed density overrides ── */
+
+/* Main header row — tighter padding, align avatar to first text line */
+body.condensed [data-slot='patient-header'] > .px-5 {
+  padding: 0.375rem 0.75rem;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+/* Nudge condensed avatar down to align with the name text */
+body.condensed [data-slot='patient-header'] > .px-5 > [data-slot='avatar'] {
+  margin-top: 0.4rem;
+}
+
+/* Patient name */
+body.condensed [data-slot='patient-header'] h2 {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Demographics row — smaller text, tighter gaps */
+body.condensed [data-slot='patient-header'] .text-sm {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+body.condensed [data-slot='patient-header'] .gap-x-3 {
+  column-gap: 0.5rem;
+}
+
+/* Status dot */
+body.condensed [data-slot='patient-header'] .h-2.w-2 {
+  height: 0.375rem;
+  width: 0.375rem;
+}
+
+/* Info rows container (allergies, meds, alerts, providers) */
+body.condensed [data-slot='patient-header'] .space-y-2\.5 > * + * {
+  margin-top: 0.25rem;
+}
+
+body.condensed [data-slot='patient-header'] .rounded-lg.border.px-4.py-3 {
+  padding: 0.375rem 0.5rem;
+  margin-bottom: 0.375rem;
+  margin-inline: 0.75rem;
+  border-radius: 4px;
+}
+
+/* Icon sizes in info rows */
+body.condensed [data-slot='patient-header'] .gap-1\.5 {
+  gap: 0.25rem;
+}
+
+body.condensed [data-slot='patient-header'] .gap-2 {
+  gap: 0.25rem;
+}
+
+/* Info row label text */
+body.condensed [data-slot='patient-header'] .tracking-wide.uppercase {
+  font-size: 0.5625rem;
+  letter-spacing: 0.03em;
+}
+
+/* Provider detail items */
+body.condensed [data-slot='patient-header'] .gap-x-8 {
+  column-gap: 1rem;
+}
+
+/* Flag ribbon */
+body.condensed [data-slot='patient-header'] .py-1\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  font-size: 0.625rem;
+}
+
+/* ── ProviderUsersTable ── condensed density overrides ── */
+
+body.condensed [data-slot='provider-users-table'] th {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.625rem;
+}
+
+body.condensed [data-slot='provider-users-table'] td {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* User cell — tighter avatar gap, smaller text */
+body.condensed [data-slot='provider-users-table'] .gap-3 {
+  gap: 0.375rem;
+}
+
+body.condensed [data-slot='provider-users-table'] td p {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+body.condensed [data-slot='provider-users-table'] td p.text-sm {
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+}
+
+/* Role / date text */
+body.condensed [data-slot='provider-users-table'] td span.text-sm {
+  font-size: 0.6875rem;
+}
+
+/* Loading skeleton */
+body.condensed [data-slot='provider-users-table'] .h-16 {
+  height: 2rem;
+}
+
+/* Empty state */
+body.condensed [data-slot='provider-users-table'] .py-12 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+body.condensed [data-slot='provider-users-table'] .py-12 svg {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+/* ── Card ── condensed density overrides ── */
+
+body.condensed [data-slot='card'] {
+  border-radius: 0.375rem;
+  padding-top: 0.375rem !important;
+  padding-right: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+}
+
+/* ── ServiceGrid + ServiceCard ── condensed density overrides ── */
+
+/* Tighter grid gap */
+body.condensed [data-slot='service-grid'] {
+  gap: 0.5rem;
+}
+
+/* Service card inner padding */
+body.condensed [data-slot='service-card'] > div {
+  padding: 0.5rem 0.625rem;
+}
+
+/* Service card border-radius & remove Card's own padding (inner div handles it) */
+body.condensed [data-slot='service-card'] {
+  border-radius: 0.375rem;
+  padding: 0 !important;
+}
+
+/* Header – name & badge row */
+body.condensed [data-slot='service-card'] h3 {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+body.condensed [data-slot='service-card'] h3 + p {
+  font-size: 0.625rem;
+}
+
+/* Description */
+body.condensed [data-slot='service-card'] .line-clamp-2 {
+  font-size: 0.6875rem;
+  line-height: 0.9375rem;
+  margin-bottom: 0.375rem;
+}
+
+/* Tags */
+body.condensed [data-slot='service-card'] .flex-wrap span {
+  font-size: 0.5625rem;
+  padding: 0 0.25rem;
+}
+
+body.condensed [data-slot='service-card'] .flex-wrap {
+  gap: 0.25rem;
+  margin-bottom: 0.375rem;
+}
+
+/* Price row */
+body.condensed [data-slot='service-card'] .items-baseline span.text-xs {
+  font-size: 0.5625rem;
+}
+
+body.condensed [data-slot='service-card'] .items-baseline span.text-lg {
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+}
+
+/* Inventory row */
+body.condensed [data-slot='service-card'] .items-center.text-sm span {
+  font-size: 0.6875rem;
+}
+
+/* Custom pricing indicator */
+body.condensed [data-slot='service-card'] .items-center.gap-2.text-xs {
+  font-size: 0.5625rem;
+  margin-bottom: 0.375rem;
+}
+
+body.condensed [data-slot='service-card'] .items-center.gap-2.text-xs svg {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+/* Actions bar */
+body.condensed [data-slot='service-card'] .border-t {
+  padding-top: 0.25rem;
+}
+
+body.condensed [data-slot='service-card'] .border-t button {
+  padding: 0.125rem;
+}
+
+body.condensed [data-slot='service-card'] .border-t button svg {
+  height: 0.875rem;
+  width: 0.875rem;
+}
+
+body.condensed [data-slot='service-card'] .border-t .text-sm {
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.375rem;
+}
+
+/* Add service card */
+body.condensed [data-slot='add-service-card'] {
+  border-radius: 0.375rem;
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='add-service-card'] > div {
+  min-height: 80px;
+  padding: 0.5rem;
+}
+
+body.condensed [data-slot='add-service-card'] > div > div {
+  height: 2rem;
+  width: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+body.condensed [data-slot='add-service-card'] > div > div svg {
+  height: 1rem;
+  width: 1rem;
+}
+
+body.condensed [data-slot='add-service-card'] p {
+  font-size: 0.6875rem;
+}
+
+/* Skeleton cards */
+body.condensed [data-slot='service-grid'] .animate-pulse {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+/* Empty state */
+body.condensed [data-slot='service-grid'] .py-12 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+body.condensed [data-slot='service-grid'] .py-12 svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+body.condensed [data-slot='service-grid'] .py-12 p {
+  font-size: 0.75rem;
+}
+
+/* ── StripeBadge ── condensed density overrides ── */
+
+body.condensed [data-slot='stripe-badge'] {
+  gap: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+}
+
+body.condensed [data-slot='stripe-badge'] svg {
+  height: 0.625rem;
+}
+
+body.condensed [data-slot='stripe-badge'] span {
+  font-size: 0.5625rem;
+}
+
+/* ── StripeSecureBadge ── condensed density overrides ── */
+
+body.condensed [data-slot='stripe-secure-badge'] {
+  gap: 0.25rem;
+}
+
+body.condensed [data-slot='stripe-secure-badge'] svg {
+  height: 0.625rem;
+  width: 0.625rem;
+}
+
+body.condensed [data-slot='stripe-secure-badge'] span {
+  font-size: 0.5625rem;
+}
+
+/* ── TimelineProgress ── condensed density overrides ── */
+
+body.condensed [data-slot='timeline-progress'] {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Step circles — shrink */
+body.condensed [data-slot='timeline-progress'] .h-10 {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+body.condensed [data-slot='timeline-progress'] .h-8 {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+/* Current dot */
+body.condensed [data-slot='timeline-progress'] .h-2\.5 {
+  height: 0.375rem;
+  width: 0.375rem;
+}
+
+/* Pending dot */
+body.condensed [data-slot='timeline-progress'] .h-2 {
+  height: 0.25rem;
+  width: 0.25rem;
+}
+
+/* Check / X icons */
+body.condensed [data-slot='timeline-progress'] .h-4.w-4 {
+  height: 0.625rem;
+  width: 0.625rem;
+}
+
+body.condensed [data-slot='timeline-progress'] .h-5.w-5 {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+/* Connector height */
+body.condensed [data-slot='timeline-progress'] .h-0\.5 {
+  height: 1px;
+}
+
+/* Timestamps */
+body.condensed [data-slot='timeline-progress'] .text-xs {
+  font-size: 0.5625rem;
+}
+
+/* Labels */
+body.condensed [data-slot='timeline-progress'] .font-medium,
+body.condensed [data-slot='timeline-progress'] .font-semibold {
+  font-size: 0.5625rem;
+  line-height: 0.75rem;
+}
+
+/* Label/timestamp margins */
+body.condensed [data-slot='timeline-progress'] .mt-2\.5 {
+  margin-top: 0.25rem;
+}
+
+body.condensed [data-slot='timeline-progress'] .mb-2 {
+  margin-bottom: 0.25rem;
+}
+
+/* ── TimelineEventList ── condensed density overrides ── */
+
+/* Spacing between events */
+body.condensed [data-slot='timeline-event-list'] .space-y-6 > * + * {
+  margin-top: 0.75rem;
+}
+
+/* Event icon circles */
+body.condensed [data-slot='timeline-event-list'] .h-10.w-10 {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+body.condensed [data-slot='timeline-event-list'] .h-10.w-10 svg {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+/* Vertical connector line position */
+body.condensed [data-slot='timeline-event-list'] .left-5 {
+  left: 0.75rem;
+}
+
+/* Event gap */
+body.condensed [data-slot='timeline-event-list'] .gap-4 {
+  gap: 0.5rem;
+}
+
+/* Title */
+body.condensed [data-slot='timeline-event-list'] h4 {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+/* Author text */
+body.condensed [data-slot='timeline-event-list'] .text-sm {
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+}
+
+/* Timestamp */
+body.condensed [data-slot='timeline-event-list'] time {
+  font-size: 0.5625rem;
+}
+
+/* Content */
+body.condensed [data-slot='timeline-event-list'] .mt-1\.5 {
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  line-height: 0.9375rem;
+}
+
+/* Empty state */
+body.condensed [data-slot='timeline-event-list'] .py-8 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 0.75rem;
+}
+
+/* ── OrderConfirmation ── condensed density overrides ── */
+
+body.condensed [data-slot='order-confirmation'] .max-w-md {
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+body.condensed [data-slot='order-confirmation'] .h-20 {
+  height: 3rem;
+  width: 3rem;
+}
+
+body.condensed [data-slot='order-confirmation'] .h-10 {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+body.condensed [data-slot='order-confirmation'] h2 {
+  font-size: 1.125rem;
+  margin-bottom: 0.25rem;
+}
+
+body.condensed [data-slot='order-confirmation'] .mb-6.flex {
+  margin-bottom: 0.75rem;
+}
+
+body.condensed [data-slot='order-confirmation'] .mb-6.text-center {
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+}
+
+body.condensed [data-slot='order-confirmation'] button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  border-radius: 0.375rem;
+}
+
+/* ── AGGrid ── condensed density overrides ── */
+
+body.condensed [data-slot='ag-grid'] {
+  font-size: 0.6875rem;
+}
+
+/* Force smaller row & header heights */
+body.condensed [data-slot='ag-grid'] .ag-row {
+  height: 24px !important;
+  line-height: 24px;
+}
+
+body.condensed [data-slot='ag-grid'] .ag-header-row {
+  height: 24px !important;
+}
+
+/* Force header container height to match row */
+body.condensed [data-slot='ag-grid'] .ag-header {
+  height: 24px !important;
+  min-height: 24px !important;
+}
+
+body.condensed [data-slot='ag-grid'] .ag-header-viewport {
+  height: 24px !important;
+}
+
+body.condensed [data-slot='ag-grid'] .ag-header-cell {
+  height: 24px !important;
+  padding: 0 0.375rem;
+  font-size: 0.625rem;
+  line-height: 24px;
+}
+
+/* Shrink header icons (filter, sort, menu) */
+body.condensed [data-slot='ag-grid'] .ag-header-cell .ag-icon {
+  font-size: 10px;
+  width: 10px;
+  height: 10px;
+  line-height: 10px;
+}
+
+body.condensed [data-slot='ag-grid'] .ag-header-icon {
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+body.condensed [data-slot='ag-grid'] .ag-cell {
+  padding-left: 0.375rem;
+  padding-right: 0.375rem;
+  font-size: 0.6875rem;
+  line-height: 24px;
+}
+
+/* Wrapper border-radius */
+body.condensed [data-slot='ag-grid'] .ag-root-wrapper {
+  border-radius: 0.375rem;
+}
+
+/* Pagination */
+body.condensed [data-slot='ag-grid'] .ag-paging-panel {
+  height: 1.5rem;
+  font-size: 0.625rem;
+}
+
+/* Floating filters */
+body.condensed [data-slot='ag-grid'] .ag-floating-filter-input {
+  font-size: 0.625rem;
+  height: 1.25rem;
+}
+
+/* Scrollbar — thinner + auto-hide when not needed */
+body.condensed [data-slot='ag-grid'] {
+  --ag-scrollbar-size: 6px;
+}
+
+body.condensed [data-slot='ag-grid'] .ag-body-horizontal-scroll {
+  height: 6px !important;
+  min-height: 6px !important;
+  max-height: 6px !important;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+body.condensed [data-slot='ag-grid']:hover .ag-body-horizontal-scroll,
+body.condensed [data-slot='ag-grid']:focus-within .ag-body-horizontal-scroll {
+  opacity: 1;
+}
+
+body.condensed [data-slot='ag-grid'] .ag-body-vertical-scroll {
+  width: 6px !important;
+  min-width: 6px !important;
+  max-width: 6px !important;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+body.condensed [data-slot='ag-grid']:hover .ag-body-vertical-scroll,
+body.condensed [data-slot='ag-grid']:focus-within .ag-body-vertical-scroll {
+  opacity: 1;
+}
+
+/* Overlay messages */
+body.condensed [data-slot='ag-grid'] .text-center {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 0.75rem;
+}
+
+/* ── WebChartReportViewer ── */
+
+/* Report grid: tighter gaps */
+body.condensed [data-slot='report-grid'] {
+  margin-top: 0.25rem;
+  gap: 0.375rem;
+}
+
+/* Report card content: reduce padding */
+body.condensed [data-slot='report-grid'] [data-slot='card'] > div {
+  padding: 0.175rem 0.5rem !important;
+}
+
+/* Report card text: smaller font */
+body.condensed [data-slot='report-grid'] [data-slot='card'] span {
+  font-size: 0.75rem;
+}
+
+/* Report card: reduce border radius */
+body.condensed [data-slot='report-grid'] [data-slot='card'] {
+  border-radius: 0.375rem;
+}
+
+/* Modal toolbar: tighter padding */
+body.condensed [data-slot='report-toolbar'] {
+  padding: 0.375rem 0.75rem;
+  gap: 0.5rem;
+}
+
+/* Modal header title row: tighter gap */
+body.condensed [data-slot='report-modal-header'] {
+  gap: 0.5rem;
+}
+
+/* Modal header status icons: smaller */
+body.condensed [data-slot='report-modal-header'] svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Loading state: less vertical space */
+body.condensed [data-slot='report-loading'] {
+  height: 10rem;
+}
+
+body.condensed [data-slot='report-loading'] span {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Empty / no-data states: reduced padding */
+body.condensed [data-slot='report-empty'] {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 0.75rem;
+}
+
+/* ReportTimeRange: tighter gap */
+body.condensed [data-slot='report-time-range'] {
+  gap: 0.5rem;
+}
+
+body.condensed [data-slot='report-time-range'] span {
+  font-size: 0.75rem;
 }

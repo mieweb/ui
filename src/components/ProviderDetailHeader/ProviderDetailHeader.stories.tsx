@@ -46,7 +46,7 @@ const mockBreadcrumbs: BreadcrumbItem[] = [
 ];
 
 const meta: Meta<typeof ProviderDetailHeader> = {
-  title: 'Provider/ProviderDetailHeader',
+  title: 'Product/Provider/ProviderDetailHeader',
   component: ProviderDetailHeader,
   parameters: {
     layout: 'fullscreen',

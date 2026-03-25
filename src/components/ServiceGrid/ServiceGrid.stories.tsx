@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ServiceGrid, ServiceGridProps } from './ServiceGrid';
 
 const meta: Meta<typeof ServiceGrid> = {
-  title: 'Data Display/ServiceGrid',
+  title: 'Components/Text & Data Display/ServiceGrid',
   component: ServiceGrid,
   tags: ['autodocs'],
   parameters: {

@@ -29,7 +29,7 @@ const mockServices: BookingService[] = [
 ];
 
 const meta: Meta<typeof BookingDialog> = {
-  title: 'Provider/BookingDialog',
+  title: 'Components/Overlays & Layering/BookingDialog',
   component: BookingDialog,
   tags: ['autodocs'],
   parameters: {

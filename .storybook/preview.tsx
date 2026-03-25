@@ -29,6 +29,7 @@ const brands: Record<string, BrandConfig> = {
 function applyGlobalTheme(globals: Record<string, unknown>) {
   const brandName = (globals?.brand || 'bluehive') as string;
   const isDark = globals?.theme === 'dark';
+  const isCondensed = globals?.density === 'condensed';
   const brand = brands[brandName] || brands.bluehive;
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
@@ -39,6 +40,14 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
     document.documentElement.classList.remove('dark');
     document.documentElement.setAttribute('data-theme', 'light');
   }
+
+  // Toggle condensed density class on body
+  if (isCondensed) {
+    document.body.classList.add('condensed');
+  } else {
+    document.body.classList.remove('condensed');
+  }
+
   document.body.style.backgroundColor = semanticColors.background;
   document.body.style.color = semanticColors.foreground;
   applyBrandStyles(brand, isDark);
@@ -68,7 +77,7 @@ try {
     const [key, value] = pair.split(':');
     if (key && value) globals[key] = value;
   }
-  if (globals.theme || globals.brand) {
+  if (globals.theme || globals.brand || globals.density) {
     applyGlobalTheme(globals);
   }
 } catch {
@@ -144,10 +153,12 @@ const withBrand: Decorator = (Story, context) => {
   // Get the actual color values for this brand/mode
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
+  const isCondensed = context.globals.density === 'condensed';
+
   useEffect(() => {
     // Delegate to shared applyGlobalTheme to keep a single source of truth
     applyGlobalTheme(context.globals);
-  }, [brand, isDark, semanticColors]);
+  }, [brand, isDark, isCondensed, semanticColors]);
 
   // Load Google Fonts for the brand
   const fontLink = useMemo(() => {
@@ -188,11 +199,15 @@ const withBrand: Decorator = (Story, context) => {
 };
 
 const preview: Preview = {
+  initialGlobals: {
+    brand: 'bluehive',
+    theme: 'light',
+    density: 'standard',
+  },
   globalTypes: {
     brand: {
       name: 'Brand',
       description: 'Switch between brand themes',
-      defaultValue: 'bluehive',
       toolbar: {
         icon: 'paintbrush',
         items: [
@@ -209,12 +224,23 @@ const preview: Preview = {
     theme: {
       name: 'Theme',
       description: 'Color mode',
-      defaultValue: 'light',
       toolbar: {
         icon: 'circlehollow',
         items: [
           { value: 'light', icon: 'sun', title: 'Light' },
           { value: 'dark', icon: 'moon', title: 'Dark' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+    density: {
+      name: 'Density',
+      description: 'UI density mode',
+      toolbar: {
+        icon: 'collapse',
+        items: [
+          { value: 'standard', title: 'Standard' },
+          { value: 'condensed', title: 'Condensed' },
         ],
         dynamicTitle: true,
       },

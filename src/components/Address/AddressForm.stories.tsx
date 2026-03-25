@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AddressForm, type AddressFormData } from './AddressForm';
 
 const meta: Meta<typeof AddressForm> = {
-  title: 'Inputs & Controls/AddressForm',
+  title: 'Components/Forms & Inputs/AddressForm',
   component: AddressForm,
   tags: ['autodocs'],
   parameters: {

@@ -188,7 +188,7 @@ type AppHeaderStoryProps = React.ComponentProps<typeof AppHeader> &
 // =============================================================================
 
 const meta: Meta<AppHeaderStoryProps> = {
-  title: 'Navigation/AppHeader',
+  title: 'Components/Layout & Structure/AppHeader',
   component: AppHeader,
   parameters: {
     layout: 'fullscreen',

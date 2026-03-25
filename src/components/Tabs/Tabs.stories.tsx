@@ -15,7 +15,7 @@ import {
 import { Badge } from '../Badge';
 
 const meta: Meta<typeof Tabs> = {
-  title: 'Navigation/Tabs',
+  title: 'Components/Layout & Structure/Tabs',
   component: Tabs,
   parameters: {
     layout: 'centered',

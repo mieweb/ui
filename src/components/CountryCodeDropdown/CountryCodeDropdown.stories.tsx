@@ -8,7 +8,7 @@ import {
 import { Input } from '../Input';
 
 const meta: Meta<typeof CountryCodeDropdown> = {
-  title: 'Inputs & Controls/CountryCodeDropdown',
+  title: 'Components/Forms & Inputs/CountryCodeDropdown',
   component: CountryCodeDropdown,
   parameters: {
     layout: 'centered',
