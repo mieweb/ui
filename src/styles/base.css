@@ -1547,3 +1547,121 @@ body.condensed [data-slot='business-hours-separator'] {
   font-size: 0.75rem !important;
   line-height: 1rem !important;
 }
+
+/* ============================================================
+   CSVColumnMapper – condensed density overrides
+   ============================================================ */
+
+/* Bulk actions bar: tighter margin and gap */
+body.condensed [data-slot='csv-mapper-actions'] {
+  margin-bottom: 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+/* Info alert box: compact padding, smaller text */
+body.condensed [data-slot='csv-mapper-alert'] {
+  padding: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='csv-mapper-alert-title'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='csv-mapper-alert-desc'] {
+  font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Instructions text: smaller, tighter margin */
+body.condensed [data-slot='csv-mapper-instructions'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Card grid: tighter gap */
+body.condensed [data-slot='csv-mapper-grid'] {
+  gap: 0.5rem !important;
+}
+
+/* Import footer: tighter top margin */
+body.condensed [data-slot='csv-mapper-footer'] {
+  margin-top: 0.75rem !important;
+}
+
+/* Progress modal: compact */
+body.condensed [data-slot='csv-mapper-progress'] {
+  max-width: 24rem !important;
+}
+
+body.condensed [data-slot='csv-mapper-progress'] h4 {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='csv-mapper-progress'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* --- CSV Column Card --- */
+
+/* Card: tighter border-radius */
+body.condensed [data-slot='csv-card'] {
+  border-radius: 0.5rem !important;
+  border-width: 1.5px !important;
+}
+
+/* Card header: compact padding */
+body.condensed [data-slot='csv-card-header'] {
+  padding: 0.375rem 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+/* Status indicator icons in header: smaller */
+body.condensed [data-slot='csv-card-header'] span {
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+body.condensed [data-slot='csv-card-header'] span svg {
+  height: 0.625rem !important;
+  width: 0.625rem !important;
+}
+
+/* Card title: smaller font */
+body.condensed [data-slot='csv-card-title'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+/* Card body: tighter spacing and padding */
+body.condensed [data-slot='csv-card-body'] {
+  padding: 0 0.5rem 0.5rem !important;
+}
+
+body.condensed [data-slot='csv-card-body'] > :not(:last-child) {
+  margin-bottom: 0.375rem !important;
+}
+
+/* Section labels: smaller */
+body.condensed [data-slot='csv-card-label'] {
+  font-size: 0.5625rem !important;
+  line-height: 0.75rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+/* Sample value box: compact */
+body.condensed [data-slot='csv-card-sample'] {
+  padding: 0.25rem 0.375rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Ignore/Include toggle: smaller */
+body.condensed [data-slot='csv-card-ignore'] {
+  font-size: 0.625rem !important;
+  gap: 0.125rem !important;
+}
