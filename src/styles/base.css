@@ -2585,3 +2585,81 @@ body.condensed [data-slot='hris-no-results'] {
   padding-bottom: 1rem !important;
   font-size: 0.75rem !important;
 }
+
+/* ==========================================================================
+   InviteUserModal – condensed density overrides
+   ========================================================================== */
+
+/* Body: tighter vertical spacing (space-y-4 → 0.25rem) */
+body.condensed [data-slot='invite-user-body'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+/* Entity info box: condensed padding and font */
+body.condensed [data-slot='invite-user-entity'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invite-user-entity'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* Success alert: condensed */
+body.condensed [data-slot='invite-user-success'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invite-user-success'] svg {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+body.condensed [data-slot='invite-user-success'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* Error alert: condensed */
+body.condensed [data-slot='invite-user-error'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invite-user-error'] svg {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+body.condensed [data-slot='invite-user-error'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* Name grid: tighter gap */
+body.condensed [data-slot='invite-user-name-grid'] {
+  gap: 0.25rem !important;
+}
+
+/* Textarea label: condensed */
+body.condensed [data-slot='invite-user-label'] {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+/* Textarea: condensed */
+body.condensed [data-slot='invite-user-textarea'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Info text: smaller */
+body.condensed [data-slot='invite-user-info'] {
+  font-size: 0.625rem !important;
+}
+
+/* Spinner: condensed */
+body.condensed [data-slot='invite-user-spinner'] {
+  height: 0.75rem !important;
+  width: 0.75rem !important;
+}
