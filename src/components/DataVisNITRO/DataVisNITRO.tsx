@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useRef } from 'react';
-import { ComputedView } from 'wcdatavis/src/computed_view.js';
-import { Source } from 'wcdatavis/src/source.js';
+import { ComputedView } from 'datavis/wcdatavis-lib/src/computed_view.js';
+import { Source } from 'datavis/wcdatavis-lib/src/source.js';
 
 import {
   DataGrid,

@@ -1,0 +1,3 @@
+[submodule "packages/datavis"]
+	path = packages/datavis
+	url = https://github.com/mieweb/datavis.git

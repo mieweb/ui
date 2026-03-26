@@ -52,6 +52,33 @@ const localUiAliases = [
   },
 ] as const;
 
+const datavisCjsInteropDependencies = [
+  'underscore',
+  'sprintf-js',
+  'jquery',
+  'bignumber.js',
+  'numeral',
+  'moment',
+  'json-formatter-js',
+  'papaparse',
+  'handlebars',
+] as const;
+
+const datavisLegacySubpathDependencies = [
+  'core-js/es/string/replace-all',
+  'chart.js/auto',
+  'squirrelly/dist/browser/squirrelly.min.js',
+] as const;
+
+const datavisSourceEntries = [
+  'datavis/src/components/DataGrid.tsx',
+  'datavis/src/adapters/colconfig-adapter.ts',
+  'datavis/src/adapters/group-adapter.ts',
+  'datavis/src/adapters/wcdatavis-interop.ts',
+  'datavis/src/adapters/use-data.ts',
+  'datavis/src/components/table/TableRenderer.tsx',
+] as const;
+
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   addons: [
@@ -87,9 +114,14 @@ const config: StorybookConfig = {
     };
 
     config.optimizeDeps ??= {};
+    config.optimizeDeps.force = true;
     config.optimizeDeps.include = Array.from(
       new Set([
         ...(config.optimizeDeps.include ?? []),
+        ...datavisSourceEntries,
+        ...datavisDependencyNames,
+        ...datavisCjsInteropDependencies,
+        ...datavisLegacySubpathDependencies,
         ...missingRootDependencies,
       ]),
     );

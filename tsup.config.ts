@@ -53,7 +53,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ['react', 'react-dom', 'ag-grid-community', 'ag-grid-react', 'datavis', 'datavis/*', 'wcdatavis', 'wcdatavis/*', 'jquery', 'font-awesome'],
+  external: ['react', 'react-dom', 'ag-grid-community', 'ag-grid-react', 'font-awesome'],
   treeshake: true,
   splitting: true,
   minify: false,

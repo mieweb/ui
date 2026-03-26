@@ -197,9 +197,8 @@
     "tailwind-merge": "^2.6.1"
   },
   "optionalDependencies": {
-    "datavis": "https://github.com/mieweb/datavis.git#2b32e15c013eabb6008949f4ed7021737ae67377",
-    "jquery": "^3.7.1",
-    "wcdatavis": "https://github.com/mieweb/wcdatavis.git#fa0f081f7d4d2eb7525633bbfed8e833d7f26f52"
+    "datavis": "file:./packages/datavis",
+    "jquery": "^3.7.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
@@ -225,7 +224,7 @@
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
-    "datavis": "https://github.com/mieweb/datavis.git#2b32e15c013eabb6008949f4ed7021737ae67377",
+    "datavis": "file:./packages/datavis",
     "eslint": "^9.39.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -245,8 +244,7 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^3.2.4",
-    "wavesurfer.js": "^7.12.1",
-    "wcdatavis": "https://github.com/mieweb/wcdatavis.git#fa0f081f7d4d2eb7525633bbfed8e833d7f26f52"
+    "wavesurfer.js": "^7.12.1"
   },
   "engines": {
     "node": ">=18.0.0"
