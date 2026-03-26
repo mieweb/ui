@@ -2352,3 +2352,99 @@ body.condensed [data-slot='employee-form-submit'] {
   font-size: 0.6875rem !important;
   border-radius: 0.375rem !important;
 }
+
+/* ==========================================================================
+   EmployerServiceModal – condensed density overrides
+   ========================================================================== */
+
+/* Body: tighter vertical spacing (space-y-4 → 0.25rem) */
+body.condensed [data-slot='employer-service-body'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+/* Error alert: condensed padding and font */
+body.condensed [data-slot='employer-service-error'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='employer-service-error'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* Service info card: condensed padding and font */
+body.condensed [data-slot='employer-service-info'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='employer-service-info-name'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='employer-service-info-price'] {
+  font-size: 0.625rem !important;
+}
+
+/* Sections: tighter vertical spacing (space-y-3 → 0.25rem) */
+body.condensed [data-slot='employer-service-section'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+/* Section titles: condensed font */
+body.condensed [data-slot='employer-service-section-title'] {
+  font-size: 0.6875rem !important;
+}
+
+/* Switch rows: tighter gap */
+body.condensed [data-slot='employer-service-switch-row'] {
+  gap: 0.25rem !important;
+}
+
+/* Switch label group: condensed text */
+body.condensed [data-slot='employer-service-switch-label'] p:first-child {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='employer-service-switch-label'] p:last-child {
+  font-size: 0.625rem !important;
+}
+
+/* Indented conditional sections: tighter spacing */
+body.condensed [data-slot='employer-service-indent'] {
+  margin-left: 0.5rem !important;
+  padding-left: 0.5rem !important;
+}
+
+/* Labels: condensed font */
+body.condensed [data-slot='employer-service-label'] {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+/* Custom price input: condensed height/font/radius */
+body.condensed [data-slot='employer-service-price-input'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Price prefix ($): condensed font */
+body.condensed [data-slot='employer-service-price-prefix'] {
+  font-size: 0.75rem !important;
+}
+
+/* Textarea: condensed font/padding/radius */
+body.condensed [data-slot='employer-service-textarea'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Spinner: condensed size */
+body.condensed [data-slot='employer-service-spinner'] {
+  height: 0.75rem !important;
+  width: 0.75rem !important;
+}
