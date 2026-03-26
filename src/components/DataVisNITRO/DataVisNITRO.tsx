@@ -99,6 +99,12 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function normalizeTypeInfo(typeInfo: unknown): DataVisTypeInfoMap {
+  if (Array.isArray(typeInfo)) {
+    return Object.fromEntries(
+      typeInfo.filter(isObject).map((entry) => [entry.field, entry])
+    ) as DataVisTypeInfoMap;
+  }
+
   if (!isObject(typeInfo)) {
     return {};
   }
@@ -383,7 +389,7 @@ function DataVisNitroGridInner({
             (effectiveTableDef?.features as TableFeatures | undefined) ??
             features
           }
-          totalRows={viewState.totalRowCount || viewState.rowCount}
+          totalRows={viewState.totalRowCount ?? viewState.rowCount}
           loading={viewState.loading || !viewState.ready}
           formatCell={formatCell}
           aggFnLabels={aggFnLabels}
