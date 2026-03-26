@@ -257,12 +257,24 @@ export function EmployeeForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn('space-y-6', className)}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn('space-y-6', className)}
+      data-slot="employee-form"
+    >
       {/* Required Section */}
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">{required}</h3>
+      <div data-slot="employee-form-section">
+        <h3
+          className="mb-4 text-lg font-semibold"
+          data-slot="employee-form-section-title"
+        >
+          {required}
+        </h3>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+          data-slot="employee-form-grid"
+        >
           <Input
             label={firstNameLabel}
             value={firstName}
@@ -279,7 +291,10 @@ export function EmployeeForm({
           />
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div
+          className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2"
+          data-slot="employee-form-grid"
+        >
           <Input
             type="email"
             label={emailLabel}
@@ -301,8 +316,13 @@ export function EmployeeForm({
 
       {/* Department Section */}
       {departments.length > 0 && (
-        <div>
-          <h3 className="mb-4 text-lg font-semibold">{departmentLabel}</h3>
+        <div data-slot="employee-form-section">
+          <h3
+            className="mb-4 text-lg font-semibold"
+            data-slot="employee-form-section-title"
+          >
+            {departmentLabel}
+          </h3>
           <Select
             label={selectDepartments}
             value={selectedDepartments[0] ?? ''}
@@ -325,10 +345,15 @@ export function EmployeeForm({
       />
 
       {/* Address Section */}
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">{addressLabel}</h3>
+      <div data-slot="employee-form-section">
+        <h3
+          className="mb-4 text-lg font-semibold"
+          data-slot="employee-form-section-title"
+        >
+          {addressLabel}
+        </h3>
 
-        <div className="space-y-4">
+        <div className="space-y-4" data-slot="employee-form-address">
           <Input
             label="Address Line 1"
             value={address.street1 ?? ''}
@@ -343,7 +368,10 @@ export function EmployeeForm({
               setAddress((prev) => ({ ...prev, street2: e.target.value }))
             }
           />
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div
+            className="grid grid-cols-2 gap-4 sm:grid-cols-4"
+            data-slot="employee-form-grid"
+          >
             <Input
               label="City"
               value={address.city ?? ''}
@@ -377,12 +405,21 @@ export function EmployeeForm({
       </div>
 
       {/* Phone Section */}
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">{phoneLabel}</h3>
+      <div data-slot="employee-form-section">
+        <h3
+          className="mb-4 text-lg font-semibold"
+          data-slot="employee-form-section-title"
+        >
+          {phoneLabel}
+        </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-3" data-slot="employee-form-phones">
           {phones.map((phone, index) => (
-            <div key={index} className="flex items-end gap-3">
+            <div
+              key={index}
+              className="flex items-end gap-3"
+              data-slot="employee-form-phone-row"
+            >
               <div className="flex-1">
                 <Input
                   label={index === 0 ? 'Phone Number' : undefined}
@@ -406,6 +443,7 @@ export function EmployeeForm({
                   type="button"
                   onClick={() => removePhone(index)}
                   className="text-destructive hover:text-destructive/80 p-2"
+                  data-slot="employee-form-phone-remove"
                 >
                   ✕
                 </button>
@@ -416,6 +454,7 @@ export function EmployeeForm({
             type="button"
             onClick={addPhone}
             className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 text-sm hover:underline"
+            data-slot="employee-form-add-phone"
           >
             + Add another phone
           </button>
@@ -423,13 +462,17 @@ export function EmployeeForm({
       </div>
 
       {/* Account Status */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" data-slot="employee-form-status">
         <Switch
           checked={isActive}
           onCheckedChange={setIsActive}
           id="account-status"
         />
-        <label htmlFor="account-status" className="text-sm">
+        <label
+          htmlFor="account-status"
+          className="text-sm"
+          data-slot="employee-form-status-label"
+        >
           {accountStatus}: <strong>{isActive ? active : inactive}</strong>
         </label>
       </div>
@@ -446,17 +489,27 @@ export function EmployeeForm({
       {customFields}
 
       {/* Footer Actions */}
-      <div className="flex flex-col justify-between gap-4 border-t pt-4 sm:flex-row">
+      <div
+        className="flex flex-col justify-between gap-4 border-t pt-4 sm:flex-row"
+        data-slot="employee-form-footer"
+      >
         {/* Invite Option */}
         <div>
           {isNew && !isUserLinked && (
-            <div className="flex items-center gap-3">
+            <div
+              className="flex items-center gap-3"
+              data-slot="employee-form-invite"
+            >
               <Switch
                 checked={sendInvite}
                 onCheckedChange={setSendInvite}
                 id="invite-employee"
               />
-              <label htmlFor="invite-employee" className="text-sm">
+              <label
+                htmlFor="invite-employee"
+                className="text-sm"
+                data-slot="employee-form-invite-label"
+              >
                 {inviteEmployee}
               </label>
             </div>
@@ -464,12 +517,16 @@ export function EmployeeForm({
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-3">
+        <div
+          className="flex justify-end gap-3"
+          data-slot="employee-form-actions"
+        >
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
               className="border-input hover:bg-muted rounded-md border px-4 py-2 text-sm"
+              data-slot="employee-form-cancel"
             >
               {cancel}
             </button>
@@ -477,6 +534,7 @@ export function EmployeeForm({
           <button
             type="submit"
             className="bg-primary-700 hover:bg-primary-800 rounded-md px-4 py-2 text-sm text-white"
+            data-slot="employee-form-submit"
           >
             {mode === 'order' ? startOrder : save}
           </button>

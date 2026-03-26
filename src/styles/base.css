@@ -2256,3 +2256,97 @@ body.condensed [data-slot='dropdown-label'] {
   padding: 0.25rem 0.5rem !important;
   font-size: 0.5625rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EmployeeForm – condensed density overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Form: tighter section spacing (space-y-6 → ~0.5rem) */
+body.condensed [data-slot='employee-form'] > :not(:last-child) {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Section titles: smaller, tighter bottom margin */
+body.condensed [data-slot='employee-form-section-title'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Grids: tighter gap */
+body.condensed [data-slot='employee-form-grid'] {
+  gap: 0.25rem !important;
+}
+
+/* Address fields: tighter spacing (space-y-4 → 0.25rem) */
+body.condensed [data-slot='employee-form-address'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+/* Phone rows container: tighter spacing (space-y-3 → 0.25rem) */
+body.condensed [data-slot='employee-form-phones'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+/* Phone row: tighter gap */
+body.condensed [data-slot='employee-form-phone-row'] {
+  gap: 0.25rem !important;
+}
+
+/* Phone remove button: smaller */
+body.condensed [data-slot='employee-form-phone-remove'] {
+  padding: 0.125rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Add phone link: smaller */
+body.condensed [data-slot='employee-form-add-phone'] {
+  font-size: 0.6875rem !important;
+}
+
+/* Account status row: tighter gap */
+body.condensed [data-slot='employee-form-status'] {
+  gap: 0.25rem !important;
+}
+
+/* Account status label: smaller */
+body.condensed [data-slot='employee-form-status-label'] {
+  font-size: 0.6875rem !important;
+}
+
+/* Footer: tighter gap and padding */
+body.condensed [data-slot='employee-form-footer'] {
+  gap: 0.25rem !important;
+  padding-top: 0.5rem !important;
+}
+
+/* Invite row: tighter gap */
+body.condensed [data-slot='employee-form-invite'] {
+  gap: 0.25rem !important;
+}
+
+/* Invite label: smaller */
+body.condensed [data-slot='employee-form-invite-label'] {
+  font-size: 0.6875rem !important;
+}
+
+/* Action buttons row: tighter gap */
+body.condensed [data-slot='employee-form-actions'] {
+  gap: 0.25rem !important;
+}
+
+/* Cancel button: condensed height/padding/font/radius */
+body.condensed [data-slot='employee-form-cancel'] {
+  height: 1.75rem !important;
+  padding: 0 0.5rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Submit button: condensed height/padding/font/radius */
+body.condensed [data-slot='employee-form-submit'] {
+  height: 1.75rem !important;
+  padding: 0 0.5rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.375rem !important;
+}
