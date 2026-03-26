@@ -2663,3 +2663,161 @@ body.condensed [data-slot='invite-user-spinner'] {
   height: 0.75rem !important;
   width: 0.75rem !important;
 }
+
+/* ==========================================================================
+   OrderConfirmationWizard – condensed density overrides
+   ========================================================================== */
+
+/* --- Progress Indicator --- */
+
+/* Progress bar: tighter bottom margin */
+body.condensed [data-slot='ocw-progress'] {
+  margin-bottom: 1rem !important;
+}
+
+/* Step circles: match StepIndicator sm size (1.5rem / 24px) */
+body.condensed [data-slot='ocw-step-circle'] {
+  height: 1.5rem !important;
+  width: 1.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='ocw-step-circle'] svg {
+  height: 0.75rem !important;
+  width: 0.75rem !important;
+}
+
+/* Step labels: smaller */
+body.condensed [data-slot='ocw-step-label'] {
+  font-size: 0.625rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* Step connectors: vertically center with condensed circles (1.5rem / 24px → top 12px) */
+body.condensed [data-slot='ocw-step-connector'] {
+  margin-top: 0.75rem !important;
+}
+
+/* --- Order Summary Card --- */
+
+body.condensed [data-slot='ocw-summary-card'] {
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='ocw-summary-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='ocw-summary-subtitle'] {
+  font-size: 0.6875rem !important;
+}
+
+/* --- Step Content Card --- */
+
+body.condensed [data-slot='ocw-step-card'] {
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='ocw-step-content'] {
+  padding: 0.75rem !important;
+}
+
+/* Step body: tighter vertical spacing (space-y-6 → 0.5rem) */
+body.condensed [data-slot='ocw-step-body'] > :not(:last-child) {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Step titles: smaller */
+body.condensed [data-slot='ocw-step-title'] {
+  font-size: 0.875rem !important;
+}
+
+/* Step descriptions: smaller */
+body.condensed [data-slot='ocw-step-desc'] {
+  font-size: 0.6875rem !important;
+}
+
+/* --- Step 1: Employee Detail Grid --- */
+
+body.condensed [data-slot='ocw-detail-grid'] {
+  gap: 0.5rem !important;
+  padding: 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='ocw-detail-grid'] p:first-child {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='ocw-detail-grid'] p:last-child {
+  font-size: 0.75rem !important;
+}
+
+/* --- Checkboxes (Step 1 simple, Step 2 card style) --- */
+
+body.condensed [data-slot='ocw-checkbox-row'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='ocw-checkbox'] {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+  margin-top: 0.125rem !important;
+}
+
+body.condensed [data-slot='ocw-checkbox-label'] {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='ocw-checkbox-card'] {
+  padding: 0.5rem !important;
+  gap: 0.375rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='ocw-checkbox-card-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='ocw-checkbox-card-desc'] {
+  font-size: 0.6875rem !important;
+}
+
+/* --- Labels & Textareas --- */
+
+body.condensed [data-slot='ocw-label'] {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='ocw-textarea'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* --- Step 3: Confirmation Rows --- */
+
+body.condensed [data-slot='ocw-confirm-list'] > :not(:last-child) {
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='ocw-confirm-row'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='ocw-confirm-row'] svg {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+body.condensed [data-slot='ocw-confirm-label'] {
+  font-size: 0.75rem !important;
+}
+
+/* --- Navigation --- */
+
+body.condensed [data-slot='ocw-nav'] {
+  gap: 0.25rem !important;
+}
