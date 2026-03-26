@@ -9,7 +9,7 @@ const meta: Meta<typeof DataVisNitroGrid> = {
     docs: {
       description: {
         component:
-          "React wrapper around the new datavis package. `<DataVisNitroSource>` creates a wcdatavis source/view pair and `<DataVisNitroGrid>` renders that view through DataVis NITRO's React `DataGrid` and `TableRenderer`.",
+          "React wrapper around the `datavis/wcdatavis-lib` package. `<DataVisNitroSource>` creates a datavis source/view pair using that library and `<DataVisNitroGrid>` renders that view through DataVis NITRO's React `DataGrid` and `TableRenderer`.",
       },
     },
   },

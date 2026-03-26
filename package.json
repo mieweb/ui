@@ -197,7 +197,6 @@
     "tailwind-merge": "^2.6.1"
   },
   "optionalDependencies": {
-    "datavis": "file:./packages/datavis",
     "jquery": "^3.7.1"
   },
   "devDependencies": {

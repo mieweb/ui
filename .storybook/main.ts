@@ -13,17 +13,26 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function readDependencyNames(packageDirName: 'datavis' | 'wcdatavis'): string[] {
+function readDependencyNames(packageDirName: string): string[] {
   const packageJsonPath = path.join(rootNodeModulesDir, packageDirName, 'package.json');
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as {
-    dependencies?: Record<string, string>;
-  };
 
-  return Object.keys(packageJson.dependencies ?? {});
+  if (!existsSync(packageJsonPath)) {
+    return [];
+  }
+
+  try {
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as {
+      dependencies?: Record<string, string>;
+    };
+
+    return Object.keys(packageJson.dependencies ?? {});
+  } catch {
+    return [];
+  }
 }
 
 const datavisDependencyNames = Array.from(
-  new Set([...readDependencyNames('datavis'), ...readDependencyNames('wcdatavis')]),
+  new Set(readDependencyNames('datavis')),
 );
 
 const missingRootDependencies = datavisDependencyNames.filter(
