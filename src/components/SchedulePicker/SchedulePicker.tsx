@@ -43,16 +43,26 @@ const DateButton = React.forwardRef<HTMLButtonElement, DateButtonProps>(
       <button
         ref={ref}
         type="button"
+        data-slot="schedule-date-btn"
         className={cn(dateButtonVariants({ selected }), className)}
         {...props}
       >
-        <div className="text-xs text-neutral-500 dark:text-neutral-400">
+        <div
+          data-slot="schedule-date-weekday"
+          className="text-xs text-neutral-500 dark:text-neutral-400"
+        >
           {date.toLocaleDateString('en-US', { weekday: 'short' })}
         </div>
-        <div className="text-lg font-semibold text-neutral-900 dark:text-white">
+        <div
+          data-slot="schedule-date-day"
+          className="text-lg font-semibold text-neutral-900 dark:text-white"
+        >
           {date.getDate()}
         </div>
-        <div className="text-xs text-neutral-500 dark:text-neutral-400">
+        <div
+          data-slot="schedule-date-month"
+          className="text-xs text-neutral-500 dark:text-neutral-400"
+        >
           {date.toLocaleDateString('en-US', { month: 'short' })}
         </div>
       </button>
@@ -103,6 +113,7 @@ const TimeButton = React.forwardRef<HTMLButtonElement, TimeButtonProps>(
       <button
         ref={ref}
         type="button"
+        data-slot="schedule-time-btn"
         className={cn(timeButtonVariants({ selected }), className)}
         {...props}
       >
@@ -159,6 +170,7 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
     return (
       <div
         ref={ref}
+        data-slot="schedule-radio"
         className={cn(radioOptionVariants({ selected }), className)}
         onClick={onClick}
         role="button"
@@ -173,6 +185,7 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
       >
         <div className="flex items-center gap-3">
           <div
+            data-slot="schedule-radio-indicator"
             className={cn(
               'flex h-5 w-5 items-center justify-center rounded-full border-2',
               selected
@@ -180,14 +193,25 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
                 : 'border-neutral-300'
             )}
           >
-            {selected && <div className="h-2 w-2 rounded-full bg-white" />}
+            {selected && (
+              <div
+                data-slot="schedule-radio-dot"
+                className="h-2 w-2 rounded-full bg-white"
+              />
+            )}
           </div>
           <div>
-            <div className="font-medium text-neutral-900 dark:text-white">
+            <div
+              data-slot="schedule-radio-title"
+              className="font-medium text-neutral-900 dark:text-white"
+            >
               {title}
             </div>
             {description && (
-              <div className="text-sm text-neutral-500 dark:text-neutral-400">
+              <div
+                data-slot="schedule-radio-desc"
+                className="text-sm text-neutral-500 dark:text-neutral-400"
+              >
                 {description}
               </div>
             )}
@@ -232,12 +256,23 @@ const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     ref
   ) => {
     return (
-      <div ref={ref} className={className} {...props}>
-        <label className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+      <div
+        ref={ref}
+        data-slot="schedule-date-picker"
+        className={className}
+        {...props}
+      >
+        <label
+          data-slot="schedule-date-label"
+          className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+        >
           {label}
         </label>
         {/* Negative margin + padding allows focus ring to render without clipping */}
-        <div className="-m-1 flex gap-2 overflow-x-auto p-1">
+        <div
+          data-slot="schedule-date-list"
+          className="-m-1 flex gap-2 overflow-x-auto p-1"
+        >
           {dates.map((date, index) => (
             <DateButton
               key={index}
@@ -291,12 +326,21 @@ const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
     ref
   ) => {
     return (
-      <div ref={ref} className={className} {...props}>
-        <label className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+      <div
+        ref={ref}
+        data-slot="schedule-time-picker"
+        className={className}
+        {...props}
+      >
+        <label
+          data-slot="schedule-time-label"
+          className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+        >
           {label}
         </label>
         {/* Negative margin + padding allows focus ring to render without clipping */}
         <div
+          data-slot="schedule-time-grid"
           className={cn(
             '-m-1 grid gap-2 p-1',
             columns === 4 ? 'grid-cols-4' : 'grid-cols-4 sm:grid-cols-6'
@@ -382,7 +426,12 @@ const SchedulePicker = React.forwardRef<HTMLDivElement, SchedulePickerProps>(
     ref
   ) => {
     return (
-      <div ref={ref} className={cn('space-y-4', className)} {...props}>
+      <div
+        ref={ref}
+        data-slot="schedule-picker"
+        className={cn('space-y-4', className)}
+        {...props}
+      >
         <DatePicker
           dates={dates}
           selectedDate={selectedDate}

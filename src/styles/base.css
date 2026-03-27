@@ -3256,3 +3256,74 @@ body.condensed [data-slot='ref-employee-banner'] {
 body.condensed [data-slot='ref-employee-text'] {
   font-size: 0.6875rem !important;
 }
+
+/* ── SchedulePicker ── condensed density overrides ── */
+
+/* Root: tighter vertical spacing (space-y-4 uses margin on children) */
+body.condensed [data-slot='schedule-picker'] > * + * {
+  margin-top: 0.25rem !important;
+}
+
+/* Date button: compact card */
+body.condensed [data-slot='schedule-date-btn'] {
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='schedule-date-weekday'],
+body.condensed [data-slot='schedule-date-month'] {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='schedule-date-day'] {
+  font-size: 0.875rem !important;
+}
+
+/* Date/time picker labels: smaller */
+body.condensed [data-slot='schedule-date-label'],
+body.condensed [data-slot='schedule-time-label'] {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Date list: tighter gap */
+body.condensed [data-slot='schedule-date-list'] {
+  gap: 0.25rem !important;
+}
+
+/* Time button: condensed single size */
+body.condensed [data-slot='schedule-time-btn'] {
+  height: 1.75rem !important;
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Time grid: tighter gap */
+body.condensed [data-slot='schedule-time-grid'] {
+  gap: 0.25rem !important;
+}
+
+/* Radio option: compact card */
+body.condensed [data-slot='schedule-radio'] {
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='schedule-radio-indicator'] {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+body.condensed [data-slot='schedule-radio-dot'] {
+  height: 0.375rem !important;
+  width: 0.375rem !important;
+}
+
+body.condensed [data-slot='schedule-radio-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='schedule-radio-desc'] {
+  font-size: 0.6875rem !important;
+}
