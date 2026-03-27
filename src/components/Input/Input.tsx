@@ -81,7 +81,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const describedByIds = [
       error ? errorId : null,
-      helperText ? helperId : null,
+      helperText && !error ? helperId : null,
       ariaDescribedBy,
     ]
       .filter(Boolean)
