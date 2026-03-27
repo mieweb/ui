@@ -3327,3 +3327,121 @@ body.condensed [data-slot='schedule-radio-title'] {
 body.condensed [data-slot='schedule-radio-desc'] {
   font-size: 0.6875rem !important;
 }
+
+/* ── ServicePicker ── condensed density overrides ── */
+
+/* Root card: tighter radius */
+body.condensed [data-slot='service-picker'] {
+  border-radius: 0.375rem !important;
+}
+
+/* Header & body: tighter padding */
+body.condensed [data-slot='service-picker-header'],
+body.condensed [data-slot='service-picker-body'] {
+  padding: 0.375rem !important;
+}
+
+/* Heading: smaller */
+body.condensed [data-slot='service-picker-heading'] {
+  font-size: 0.875rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+/* Search icon: smaller */
+body.condensed [data-slot='service-picker-search'] svg {
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+/* Error & empty: compact */
+body.condensed [data-slot='service-picker-error'],
+body.condensed [data-slot='service-picker-empty'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Loading: smaller text & icon */
+body.condensed [data-slot='service-picker-loading'] {
+  font-size: 0.75rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='service-picker-loading'] svg {
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+/* Service list: tighter spacing */
+body.condensed [data-slot='service-picker-list'] > * + * {
+  margin-top: 0.0625rem !important;
+}
+
+/* Group button: compact */
+body.condensed [data-slot='service-picker-group-btn'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-picker-group-btn'] svg {
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+/* Group selection dot: smaller */
+body.condensed [data-slot='service-picker-group-dot'] {
+  height: 0.375rem !important;
+  width: 0.375rem !important;
+}
+
+/* Group list: tighter indent & spacing */
+body.condensed [data-slot='service-picker-group-list'] {
+  padding-left: 0.5rem !important;
+  margin-top: 0.0625rem !important;
+}
+
+body.condensed [data-slot='service-picker-group-list'] > * + * {
+  margin-top: 0.0625rem !important;
+}
+
+/* Service item row: compact */
+body.condensed [data-slot='service-picker-item'] {
+  padding: 0.25rem 0.5rem !important;
+  gap: 0.375rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Checkbox/radio indicators: condensed size */
+body.condensed [data-slot='service-picker-check'] input,
+body.condensed [data-slot='service-picker-radio'] input {
+  height: 0.875rem !important;
+  width: 0.875rem !important;
+}
+
+body.condensed [data-slot='service-picker-check'] svg {
+  height: 0.625rem !important;
+  width: 0.625rem !important;
+}
+
+body.condensed [data-slot='service-picker-radio-dot'] {
+  height: 0.375rem !important;
+  width: 0.375rem !important;
+}
+
+/* Item text: smaller */
+body.condensed [data-slot='service-picker-item-name'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-picker-item-code'] {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='service-picker-item-desc'] {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='service-picker-item-price'] {
+  font-size: 0.75rem !important;
+}

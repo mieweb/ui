@@ -223,19 +223,25 @@ export function ServicePicker({
 
   return (
     <div
+      data-slot="service-picker"
       className={cn(
         'bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border',
         !fullWidth && 'lg:max-w-md',
         className
       )}
     >
-      <div className="p-3">
+      <div data-slot="service-picker-header" className="p-3">
         {!hideHeading && (
-          <h2 className="text-foreground mb-3 text-xl font-bold">{heading}</h2>
+          <h2
+            data-slot="service-picker-heading"
+            className="text-foreground mb-3 text-xl font-bold"
+          >
+            {heading}
+          </h2>
         )}
 
         {showSearch && (
-          <div className="relative">
+          <div data-slot="service-picker-search" className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <SearchIcon className="text-muted-foreground h-5 w-5" />
             </div>
@@ -251,21 +257,30 @@ export function ServicePicker({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">
+      <div
+        data-slot="service-picker-body"
+        className="flex-1 overflow-y-auto p-3"
+      >
         {error && (
-          <div className="bg-destructive/10 text-destructive mb-4 rounded-lg p-4">
+          <div
+            data-slot="service-picker-error"
+            className="bg-destructive/10 text-destructive mb-4 rounded-lg p-4"
+          >
             <strong>{error}</strong>
           </div>
         )}
 
         {loading ? (
-          <div className="text-muted-foreground flex items-center gap-2">
+          <div
+            data-slot="service-picker-loading"
+            className="text-muted-foreground flex items-center gap-2"
+          >
             <SpinnerIcon className="h-5 w-5 animate-spin" />
             <span>Loading available services...</span>
           </div>
         ) : isSearching ? (
           // Search results - flat list
-          <ul className="space-y-1">
+          <ul data-slot="service-picker-list" className="space-y-1">
             {searchResults.length > 0 ? (
               searchResults.map((service) => (
                 <ServiceItem
@@ -278,7 +293,10 @@ export function ServicePicker({
               ))
             ) : (
               <li>
-                <div className="bg-muted text-muted-foreground rounded-lg p-4">
+                <div
+                  data-slot="service-picker-empty"
+                  className="bg-muted text-muted-foreground rounded-lg p-4"
+                >
                   <strong>{emptyMessage}</strong>
                 </div>
               </li>
@@ -286,7 +304,7 @@ export function ServicePicker({
           </ul>
         ) : (
           // Grouped list - accordion style
-          <ul className="space-y-1">
+          <ul data-slot="service-picker-list" className="space-y-1">
             {filteredGroups.length > 0 ? (
               filteredGroups.map((group) => (
                 <ServiceGroupItem
@@ -302,7 +320,10 @@ export function ServicePicker({
               ))
             ) : (
               <li>
-                <div className="bg-muted text-muted-foreground rounded-lg p-4">
+                <div
+                  data-slot="service-picker-empty"
+                  className="bg-muted text-muted-foreground rounded-lg p-4"
+                >
                   <strong>{emptyMessage}</strong>
                 </div>
               </li>
@@ -348,6 +369,7 @@ function ServiceGroupItem({
     <li className="service-group">
       <button
         type="button"
+        data-slot="service-picker-group-btn"
         onClick={() => onToggleGroup(group.id)}
         className={cn(
           'flex w-full items-center justify-between rounded-lg px-3 py-2',
@@ -358,10 +380,14 @@ function ServiceGroupItem({
         )}
         aria-expanded={isExpanded}
       >
-        <span className="flex items-center gap-2">
+        <span
+          data-slot="service-picker-group-name"
+          className="flex items-center gap-2"
+        >
           <span>{group.name}</span>
           {hasSelection && (
             <span
+              data-slot="service-picker-group-dot"
               className="bg-primary h-2 w-2 rounded-full"
               aria-label="Has selected items"
             />
@@ -376,7 +402,10 @@ function ServiceGroupItem({
       </button>
 
       {isExpanded && (
-        <ul className="mt-1 space-y-1 pl-4">
+        <ul
+          data-slot="service-picker-group-list"
+          className="mt-1 space-y-1 pl-4"
+        >
           {/* Direct services */}
           {group.services.map((service) => (
             <ServiceItem
@@ -428,6 +457,7 @@ function ServiceItem({
   return (
     <li>
       <label
+        data-slot="service-picker-item"
         className={cn(
           'flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2',
           'hover:bg-muted',
@@ -436,7 +466,10 @@ function ServiceItem({
         )}
       >
         {multiple ? (
-          <span className="relative inline-flex shrink-0 items-center justify-center">
+          <span
+            data-slot="service-picker-check"
+            className="relative inline-flex shrink-0 items-center justify-center"
+          >
             <input
               type="checkbox"
               checked={selected}
@@ -454,7 +487,10 @@ function ServiceItem({
             <CheckIcon className="pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
           </span>
         ) : (
-          <span className="relative inline-flex shrink-0 items-center justify-center">
+          <span
+            data-slot="service-picker-radio"
+            className="relative inline-flex shrink-0 items-center justify-center"
+          >
             <input
               type="radio"
               checked={selected}
@@ -469,28 +505,43 @@ function ServiceItem({
                 'checked:border-primary-500'
               )}
             />
-            <span className="bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" />
+            <span
+              data-slot="service-picker-radio-dot"
+              className="bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100"
+            />
           </span>
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-foreground text-sm font-medium">
+            <span
+              data-slot="service-picker-item-name"
+              className="text-foreground text-sm font-medium"
+            >
               {service.name}
             </span>
             {service.code && (
-              <span className="text-muted-foreground text-xs">
+              <span
+                data-slot="service-picker-item-code"
+                className="text-muted-foreground text-xs"
+              >
                 ({service.code})
               </span>
             )}
           </div>
           {service.description && (
-            <p className="text-muted-foreground truncate text-xs">
+            <p
+              data-slot="service-picker-item-desc"
+              className="text-muted-foreground truncate text-xs"
+            >
               {service.description}
             </p>
           )}
         </div>
         {service.price !== undefined && (
-          <span className="text-foreground text-sm font-medium">
+          <span
+            data-slot="service-picker-item-price"
+            className="text-foreground text-sm font-medium"
+          >
             ${service.price.toFixed(2)}
           </span>
         )}
