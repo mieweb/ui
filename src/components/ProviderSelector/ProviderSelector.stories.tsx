@@ -118,7 +118,10 @@ export const Default: Story = {
           onSelect={setSelected}
         />
         {selected && (
-          <div className="bg-muted mt-4 rounded-lg p-3">
+          <div
+            data-slot="provider-selector-result"
+            className="bg-muted mt-4 rounded-lg p-3"
+          >
             <p className="text-muted-foreground text-sm">
               Selected:{' '}
               <strong className="text-foreground">{selected.name}</strong>
@@ -147,7 +150,10 @@ function InteractiveDemo(
         {...props}
       />
       {selected && (
-        <div className="bg-muted mt-4 rounded-lg p-3">
+        <div
+          data-slot="provider-selector-result"
+          className="bg-muted mt-4 rounded-lg p-3"
+        >
           <p className="text-muted-foreground text-sm">
             Selected:{' '}
             <strong className="text-foreground">{selected.name}</strong>

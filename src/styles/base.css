@@ -3022,3 +3022,104 @@ body.condensed [data-slot='phone-remove-icon'] {
   width: 0.875rem !important;
   height: 0.875rem !important;
 }
+
+/* =============================================================================
+   ProviderSelector — condensed density overrides
+   ============================================================================= */
+
+/* Label: smaller */
+body.condensed [data-slot='provider-selector-label'] {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+/* Trigger button: condensed height, font, padding, border-radius */
+body.condensed [data-slot='provider-selector-trigger'] {
+  height: 1.75rem !important;
+  min-height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  gap: 0.375rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Trigger avatar: smaller */
+body.condensed [data-slot='provider-selector-trigger-avatar'] {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  font-size: 0.5rem !important;
+}
+
+/* Trigger name: smaller */
+body.condensed [data-slot='provider-selector-trigger-name'] {
+  font-size: 0.75rem !important;
+}
+
+/* Trigger location: smaller */
+body.condensed [data-slot='provider-selector-trigger-loc'] {
+  font-size: 0.5625rem !important;
+  display: none !important;
+}
+
+/* Dropdown arrow: smaller */
+body.condensed [data-slot='provider-selector-arrow'] {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Dropdown panel: tighter border-radius */
+body.condensed [data-slot='provider-selector-dropdown'] {
+  border-radius: 0.375rem !important;
+}
+
+/* Search input: condensed */
+body.condensed [data-slot='provider-selector-search'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Option rows: tighter padding */
+body.condensed [data-slot='provider-selector-option'] {
+  padding: 0.375rem 0.5rem !important;
+  gap: 0.375rem !important;
+}
+
+/* Option avatar: smaller */
+body.condensed [data-slot='provider-selector-option-avatar'] {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* Option name: smaller */
+body.condensed [data-slot='provider-selector-option-name'] {
+  font-size: 0.75rem !important;
+}
+
+/* Option code: smaller */
+body.condensed [data-slot='provider-selector-option-code'] {
+  font-size: 0.625rem !important;
+}
+
+/* Option inactive badge: smaller */
+body.condensed [data-slot='provider-selector-option-badge'] {
+  font-size: 0.5625rem !important;
+  padding: 0.0625rem 0.25rem !important;
+}
+
+/* Option detail: smaller */
+body.condensed [data-slot='provider-selector-option-detail'] {
+  font-size: 0.6875rem !important;
+}
+
+/* Story result box: condensed */
+body.condensed [data-slot='provider-selector-result'] {
+  margin-top: 0.5rem !important;
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+  font-size: 0.75rem !important;
+}
