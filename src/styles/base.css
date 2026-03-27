@@ -2997,7 +2997,7 @@ body.condensed [data-slot='phone-type-select'] {
 
 /* Shrink the type select column in condensed */
 body.condensed [data-slot='phone-row'] > .w-24,
-body.condensed [data-slot='phone-row'] > .sm\\:w-32 {
+body.condensed [data-slot='phone-row'] > .sm\:w-32 {
   width: 5rem !important;
 }
 
