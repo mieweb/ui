@@ -216,15 +216,20 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
 
     return (
       <div
+        data-slot="slider"
         className={cn('w-full', className)}
         data-disabled={disabled || undefined}
       >
         {/* Label row */}
         {(label || showValue) && (
-          <div className="mb-1.5 flex items-baseline justify-between">
+          <div
+            data-slot="slider-label-row"
+            className="mb-1.5 flex items-baseline justify-between"
+          >
             {label && (
               <label
                 htmlFor={inputId}
+                data-slot="slider-label"
                 className={cn(
                   'text-foreground text-sm font-medium',
                   disabled && 'opacity-50'
@@ -232,14 +237,20 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
               >
                 {label}
                 {showValue && (
-                  <span className="text-muted-foreground ml-1">
+                  <span
+                    data-slot="slider-value"
+                    className="text-muted-foreground ml-1"
+                  >
                     {displayValue}
                   </span>
                 )}
               </label>
             )}
             {!label && showValue && (
-              <span className="text-muted-foreground text-sm">
+              <span
+                data-slot="slider-value"
+                className="text-muted-foreground text-sm"
+              >
                 {displayValue}
               </span>
             )}
@@ -249,6 +260,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         {/* Description */}
         {description && (
           <p
+            data-slot="slider-description"
             className={cn(
               'text-muted-foreground mb-2 text-xs',
               disabled && 'opacity-50'
@@ -259,11 +271,19 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         )}
 
         {/* Track + Thumb */}
-        <div className="group relative" data-disabled={disabled || undefined}>
+        <div
+          data-slot="slider-track-wrapper"
+          className="group relative"
+          data-disabled={disabled || undefined}
+        >
           {/* Visual track background */}
-          <div className={cn(sliderTrackVariants({ size }), trackClassName)}>
+          <div
+            data-slot="slider-track"
+            className={cn(sliderTrackVariants({ size }), trackClassName)}
+          >
             {/* Filled range */}
             <div
+              data-slot="slider-range"
               className={sliderRangeVariants({ variant })}
               style={{ width: `${percentage}%` }}
             />
@@ -298,6 +318,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
 
           {/* Thumb indicator (visual only) */}
           <div
+            data-slot="slider-thumb"
             className={sliderThumbVariants({ size, variant })}
             style={{ left: `${percentage}%` }}
             aria-hidden="true"
@@ -307,6 +328,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         {/* Min / Max labels */}
         {(minLabel || maxLabel) && (
           <div
+            data-slot="slider-minmax"
             className={cn(
               'text-muted-foreground mt-1 flex justify-between text-xs',
               disabled && 'opacity-50'
