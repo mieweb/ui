@@ -1,5 +1,11 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { addons } from 'storybook/preview-api';
+
+/** Toggle theme via Storybook's globals — preview.tsx handles all CSS vars. */
+function setStorybookTheme(mode: 'light' | 'dark') {
+  addons.getChannel().emit('updateGlobals', { globals: { theme: mode } });
+}
 
 // Import components
 import { Alert } from '../Alert';
@@ -48,7 +54,6 @@ import { Text } from '../Text';
 import { Tooltip } from '../Tooltip';
 import { QuickAction, QuickActionGroup } from '../QuickAction';
 import { PhoneInput } from '../PhoneInput';
-import { ThemeProvider, useThemeContext } from '../ThemeProvider';
 
 // ============================================================================
 // Meta
@@ -510,11 +515,11 @@ function UserMenu({ user, onProfile, onSettings, onLogout }: UserMenuProps) {
       width={256}
       trigger={
         <button
-          className="focus:ring-primary-500/40 flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+          className="focus:ring-primary-500/40 hover:bg-muted flex items-center gap-2 rounded-full p-1 transition-colors focus:ring-2 focus:outline-none"
           aria-label="User menu"
         >
           <Avatar src={user.avatarUrl} name={user.name} size="sm" ring />
-          <span className="hidden text-sm font-medium text-neutral-700 md:block dark:text-neutral-300">
+          <span className="text-foreground hidden text-sm font-medium md:block">
             {user.name}
           </span>
           <Icons.ChevronDown />
@@ -582,7 +587,7 @@ function NotificationsDropdown() {
       width={320}
       trigger={
         <button
-          className="focus:ring-primary-500/40 relative rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+          className="focus:ring-primary-500/40 hover:bg-muted relative rounded-lg p-2 transition-colors focus:ring-2 focus:outline-none"
           aria-label="Notifications"
         >
           <Icons.Bell />
@@ -594,14 +599,14 @@ function NotificationsDropdown() {
         </button>
       }
     >
-      <div className="border-b border-neutral-200 p-4 dark:border-neutral-700">
+      <div className="border-border border-b p-4">
         <Text weight="semibold">Notifications</Text>
       </div>
       <div className="max-h-80 overflow-y-auto">
         {mockNotifications.map((notification) => (
           <button
             key={notification.id}
-            className="flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-700/50"
+            className="hover:bg-muted/50 flex w-full items-start gap-3 p-4 text-left transition-colors"
           >
             <div
               className={`mt-1 h-2 w-2 rounded-full ${notification.unread ? 'bg-primary-500' : 'bg-transparent'}`}
@@ -620,7 +625,7 @@ function NotificationsDropdown() {
           </button>
         ))}
       </div>
-      <div className="border-t border-neutral-200 p-3 dark:border-neutral-700">
+      <div className="border-border border-t p-3">
         <Button variant="ghost" size="sm" className="w-full">
           View all notifications
         </Button>
@@ -634,18 +639,24 @@ function NotificationsDropdown() {
 // ============================================================================
 
 function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useThemeContext();
+  const [isDark, setIsDark] = React.useState(() =>
+    document.documentElement.classList.contains('dark')
+  );
+
+  const toggle = () => {
+    const next = !isDark;
+    setIsDark(next);
+    setStorybookTheme(next ? 'dark' : 'light');
+  };
 
   return (
-    <Tooltip
-      content={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
-    >
+    <Tooltip content={`Switch to ${isDark ? 'light' : 'dark'} mode`}>
       <button
-        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-        className="focus:ring-primary-500/40 rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+        onClick={toggle}
+        className="focus:ring-primary-500/40 hover:bg-muted rounded-lg p-2 transition-colors focus:ring-2 focus:outline-none"
         aria-label="Toggle theme"
       >
-        {resolvedTheme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
+        {isDark ? <Icons.Sun /> : <Icons.Moon />}
       </button>
     </Tooltip>
   );
@@ -692,10 +703,10 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:border-r lg:border-neutral-200 lg:shadow-none dark:bg-neutral-800 dark:lg:border-neutral-700 ${isOpen ? 'translate-x-0' : '-translate-x-full'} `}
+        className={`bg-card lg:border-border fixed inset-y-0 left-0 z-50 w-64 transform shadow-lg transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:border-r lg:shadow-none ${isOpen ? 'translate-x-0' : '-translate-x-full'} `}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-neutral-200 px-4 dark:border-neutral-700">
+        <div className="border-border flex h-16 items-center justify-between border-b px-4">
           <div className="flex items-center gap-2">
             <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
               M
@@ -706,7 +717,7 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-700"
+            className="hover:bg-muted rounded-lg p-1 lg:hidden"
             aria-label="Close sidebar"
           >
             <Icons.Close />
@@ -722,7 +733,7 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
                 currentPage === item.id
                   ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                  : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                  : 'text-muted-foreground hover:bg-muted'
               } `}
             >
               {item.icon}
@@ -737,13 +748,13 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Bottom section */}
-        <div className="border-t border-neutral-200 p-4 dark:border-neutral-700">
+        <div className="border-border border-t p-4">
           <button
             onClick={() => handleNavigate('settings')}
             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
               currentPage === 'settings'
                 ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                : 'text-muted-foreground hover:bg-muted'
             } `}
           >
             <Icons.Settings />
@@ -832,11 +843,11 @@ function Header({
   onLogout,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:px-6 dark:border-neutral-700 dark:bg-neutral-800">
+    <header className="border-border bg-card sticky top-0 z-30 flex h-16 items-center justify-between border-b px-4 lg:px-6">
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuToggle}
-          className="rounded-lg p-2 hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-700"
+          className="hover:bg-muted rounded-lg p-2 lg:hidden"
           aria-label="Toggle menu"
         >
           <Icons.Menu />
@@ -1134,7 +1145,7 @@ function UsersPage() {
             </TableBody>
           </Table>
         </CardContent>
-        <CardFooter className="border-t border-neutral-200 dark:border-neutral-700">
+        <CardFooter className="border-border border-t">
           <Pagination
             page={currentPage}
             totalPages={5}
@@ -1207,7 +1218,7 @@ function AnalyticsPage() {
                 />
               ))}
             </div>
-            <div className="mt-2 flex justify-around text-xs text-neutral-500">
+            <div className="text-muted-foreground mt-2 flex justify-around text-xs">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
                 <span key={day}>{day}</span>
               ))}
@@ -1333,7 +1344,7 @@ function OrdersPage() {
             </TableBody>
           </Table>
         </CardContent>
-        <CardFooter className="border-t border-neutral-200 dark:border-neutral-700">
+        <CardFooter className="border-border border-t">
           <SimplePagination
             page={currentPage}
             totalPages={3}
@@ -1470,7 +1481,7 @@ function ProfilePage({ user }: ProfilePageProps) {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700">
+          <CardFooter className="border-border flex justify-end gap-2 border-t">
             <Button variant="outline">Cancel</Button>
             <Button>Save Changes</Button>
           </CardFooter>
@@ -1697,7 +1708,7 @@ function VoiceNotesPage() {
           {notes.map((note) => (
             <div
               key={note.id}
-              className="flex items-start gap-4 rounded-lg border border-neutral-200 p-4 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800/50"
+              className="border-border hover:bg-muted/50 flex items-start gap-4 rounded-lg border p-4 transition-colors"
             >
               {/* Audio Player - inline variant for compact display */}
               {note.status === 'complete' && note.audioUrl ? (
@@ -1713,7 +1724,7 @@ function VoiceNotesPage() {
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
                     note.status === 'transcribing'
                       ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
-                      : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                      : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {note.status === 'transcribing' ? (
@@ -1733,9 +1744,7 @@ function VoiceNotesPage() {
                       </Text>
                       {note.duration > 0 && (
                         <>
-                          <span className="text-neutral-300 dark:text-neutral-600">
-                            •
-                          </span>
+                          <span className="text-muted-foreground/50">•</span>
                           <Text size="xs" variant="muted">
                             {formatDuration(note.duration)}
                           </Text>
@@ -1792,7 +1801,15 @@ type SettingsTab = 'notifications' | 'security' | 'appearance';
 function SettingsPage() {
   const [activeTab, setActiveTab] =
     React.useState<SettingsTab>('notifications');
-  const { resolvedTheme, setTheme } = useThemeContext();
+  const [resolvedTheme, setResolvedTheme] = React.useState<'light' | 'dark'>(
+    () =>
+      document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  );
+
+  const setTheme = (t: 'light' | 'dark') => {
+    setResolvedTheme(t);
+    setStorybookTheme(t);
+  };
 
   return (
     <div className="space-y-6">
@@ -1833,7 +1850,7 @@ function SettingsPage() {
                   className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
                     activeTab === item.id
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                      : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                      : 'text-muted-foreground hover:bg-muted'
                   } `}
                 >
                   {item.icon}
@@ -1927,7 +1944,7 @@ function SettingsPage() {
                     placeholder="Confirm new password"
                   />
                 </div>
-                <div className="border-t border-neutral-200 pt-6 dark:border-neutral-700">
+                <div className="border-border border-t pt-6">
                   <Text weight="medium" className="mb-4">
                     Two-Factor Authentication
                   </Text>
@@ -1938,7 +1955,7 @@ function SettingsPage() {
                   </CheckboxGroup>
                 </div>
               </CardContent>
-              <CardFooter className="border-t border-neutral-200 dark:border-neutral-700">
+              <CardFooter className="border-border border-t">
                 <Button>Update Security Settings</Button>
               </CardFooter>
             </>
@@ -1967,14 +1984,14 @@ function SettingsPage() {
                     <Radio value="dark" label="Dark" />
                   </RadioGroup>
                 </div>
-                <div className="border-t border-neutral-200 pt-6 dark:border-neutral-700">
+                <div className="border-border border-t pt-6">
                   <Text weight="medium" className="mb-4">
                     Preview
                   </Text>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <button
                       type="button"
-                      className={`w-full cursor-pointer rounded-lg border-2 p-4 ${resolvedTheme === 'light' ? 'border-primary-500' : 'border-neutral-200 dark:border-neutral-700'}`}
+                      className={`w-full cursor-pointer rounded-lg border-2 p-4 ${resolvedTheme === 'light' ? 'border-primary-500' : 'border-border'}`}
                       onClick={() => setTheme('light')}
                     >
                       <div className="rounded bg-white p-3 shadow-sm">
@@ -1987,7 +2004,7 @@ function SettingsPage() {
                     </button>
                     <button
                       type="button"
-                      className={`w-full cursor-pointer rounded-lg border-2 p-4 ${resolvedTheme === 'dark' ? 'border-primary-500' : 'border-neutral-200 dark:border-neutral-700'}`}
+                      className={`w-full cursor-pointer rounded-lg border-2 p-4 ${resolvedTheme === 'dark' ? 'border-primary-500' : 'border-border'}`}
                       onClick={() => setTheme('dark')}
                     >
                       <div className="rounded bg-neutral-800 p-3 shadow-sm">
@@ -2024,7 +2041,7 @@ function AppShell() {
 
   if (loggedOut) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-4 dark:bg-neutral-900">
+      <div className="bg-background flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="bg-primary-500 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold text-white">
@@ -2097,7 +2114,7 @@ function AppShell() {
   };
 
   return (
-    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="bg-background flex min-h-screen">
       <Sidebar
         currentPage={currentPage}
         onNavigate={setCurrentPage}
@@ -2130,11 +2147,7 @@ function AppShell() {
 // ============================================================================
 
 export const Dashboard: StoryObj = {
-  render: () => (
-    <ThemeProvider defaultTheme="light" storageKey="mieweb-dashboard-theme">
-      <AppShell />
-    </ThemeProvider>
-  ),
+  render: () => <AppShell />,
 };
 
 // ============================================================================
