@@ -356,7 +356,10 @@ function Select({
   }, [searchQuery, filteredFlatOptions.length]);
 
   // Build aria-describedby
-  const describedByIds = [error ? errorId : null, helperText ? helperId : null]
+  const describedByIds = [
+    error ? errorId : null,
+    helperText && !error ? helperId : null,
+  ]
     .filter(Boolean)
     .join(' ');
 

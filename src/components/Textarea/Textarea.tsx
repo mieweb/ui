@@ -142,7 +142,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     // Build aria-describedby
     const describedByIds = [
       error ? errorId : null,
-      helperText ? helperId : null,
+      helperText && !error ? helperId : null,
       showCount ? countId : null,
       ariaDescribedBy,
     ]
