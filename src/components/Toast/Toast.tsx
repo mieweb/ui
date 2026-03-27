@@ -90,22 +90,22 @@ const variantStyles: Record<ToastVariant, { container: string; icon: string }> =
   {
     success: {
       container:
-        'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
+        'bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
       icon: 'text-green-500 dark:text-green-400',
     },
     error: {
       container:
-        'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
+        'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
       icon: 'text-red-500 dark:text-red-400',
     },
     warning: {
       container:
-        'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
+        'bg-amber-50 dark:bg-amber-900 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
       icon: 'text-amber-500 dark:text-amber-400',
     },
     info: {
       container:
-        'bg-primary-50 dark:bg-primary-900/30 border-primary-200 dark:border-primary-800 text-primary-800 dark:text-primary-200',
+        'bg-primary-50 dark:bg-primary-900 border-primary-200 dark:border-primary-800 text-primary-800 dark:text-primary-200',
       icon: 'text-primary-500 dark:text-primary-400',
     },
   };
