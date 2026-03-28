@@ -123,9 +123,13 @@ export function ConnectionStatusOverlay({
       role="alertdialog"
       aria-label="Connection status"
       aria-live="assertive"
+      data-slot="connection-overlay"
       className={cn(overlayVariants({ animate }), className)}
     >
-      <div className={cn(cardVariants({ animate }))}>
+      <div
+        data-slot="connection-overlay-card"
+        className={cn(cardVariants({ animate }))}
+      >
         <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
           {/* Icon */}
           <div className="shrink-0">
@@ -133,7 +137,7 @@ export function ConnectionStatusOverlay({
           </div>
 
           {/* Content */}
-          <div className="flex-1">
+          <div data-slot="connection-overlay-content" className="flex-1">
             <p className="text-gray-700 dark:text-gray-300">{displayMessage}</p>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Please check your internet connection.
@@ -151,6 +155,7 @@ export function ConnectionStatusOverlay({
           <div className="shrink-0">
             <button
               type="button"
+              data-slot="connection-overlay-action"
               onClick={onReload || (() => window.location.reload())}
               className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
             >
@@ -203,7 +208,7 @@ export function UpdateAvailableOverlay({
   isVisible = true,
   onUpdateNow,
   onLater,
-  logoUrl = '/images/logos/bluehive-icon-blue.svg',
+  logoUrl,
   appName = 'BlueHive',
   className,
 }: UpdateAvailableOverlayProps) {
@@ -214,9 +219,13 @@ export function UpdateAvailableOverlay({
       role="alertdialog"
       aria-label="Update available"
       aria-live="polite"
+      data-slot="update-overlay"
       className={cn(overlayVariants({ animate: true }), className)}
     >
-      <div className={cn(cardVariants({ animate: true }))}>
+      <div
+        data-slot="update-overlay-card"
+        className={cn(cardVariants({ animate: true }))}
+      >
         <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
           {/* Logo */}
           <div className="shrink-0">
@@ -232,7 +241,7 @@ export function UpdateAvailableOverlay({
           </div>
 
           {/* Content */}
-          <div className="flex-1">
+          <div data-slot="update-overlay-content" className="flex-1">
             <p className="font-semibold text-gray-900 dark:text-white">
               Update Available
             </p>
@@ -326,7 +335,10 @@ export function ConnectionStatusBadge({
   };
 
   return (
-    <span className={cn(badgeVariants({ status }), className)}>
+    <span
+      data-slot="connection-badge"
+      className={cn(badgeVariants({ status }), className)}
+    >
       <ConnectionDot status={status} />
       {showLabel && labels[status]}
     </span>
@@ -374,6 +386,7 @@ export function ConnectionStatusBar({
     <div
       role="status"
       aria-live="polite"
+      data-slot="connection-bar"
       className={cn(
         'fixed right-0 left-0 z-40 px-4 py-2',
         position === 'top' ? 'top-0' : 'bottom-0',
@@ -383,7 +396,10 @@ export function ConnectionStatusBar({
         className
       )}
     >
-      <div className="container mx-auto flex items-center justify-center gap-2 text-sm">
+      <div
+        data-slot="connection-bar-content"
+        className="container mx-auto flex items-center justify-center gap-2 text-sm"
+      >
         <ConnectionDot status={connection.status} />
         <span>
           {connection.status === 'disconnected' && 'You are offline'}

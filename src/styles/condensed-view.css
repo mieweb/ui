@@ -91,6 +91,84 @@ body.condensed [data-slot='alert-dismiss'] svg {
   height: 0.75rem !important;
 }
 
+/* ConnectionStatusOverlay — compact card */
+body.condensed [data-slot='connection-overlay-card'] {
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+  max-width: 28rem !important;
+}
+
+body.condensed [data-slot='connection-overlay-card'] svg.h-12 {
+  height: 2rem !important;
+  width: 2rem !important;
+}
+
+body.condensed [data-slot='connection-overlay-content'] p {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='connection-overlay-action'] {
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='connection-overlay-action'] svg {
+  height: 0.75rem !important;
+  width: 0.75rem !important;
+}
+
+/* UpdateAvailableOverlay — compact card */
+body.condensed [data-slot='update-overlay-card'] {
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+  max-width: 28rem !important;
+}
+
+body.condensed [data-slot='update-overlay-card'] img {
+  height: 2rem !important;
+  width: 2rem !important;
+}
+
+body.condensed [data-slot='update-overlay-content'] p {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='update-overlay-card'] button {
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* ConnectionStatusBadge — tighter pill */
+body.condensed [data-slot='connection-badge'] {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.625rem !important;
+  line-height: 1rem !important;
+  gap: 0.25rem !important;
+  border-radius: 2px !important;
+}
+
+body.condensed [data-slot='connection-badge'] span {
+  height: 0.375rem !important;
+  width: 0.375rem !important;
+}
+
+/* ConnectionStatusBar — thinner bar */
+body.condensed [data-slot='connection-bar'] {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='connection-bar-content'] {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
 /* Avatar — single condensed size, square corners */
 body.condensed [data-slot='avatar'] {
   font-size: 0.625rem;
