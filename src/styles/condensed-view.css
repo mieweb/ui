@@ -419,9 +419,76 @@ body.condensed [data-slot='provider-users-table'] .py-12 svg {
 
 body.condensed [data-slot='card'] {
   border-radius: 0.375rem;
-  padding-top: 0.375rem !important;
-  padding-right: 0.375rem !important;
-  padding-bottom: 0.375rem !important;
+  padding: 0.375rem !important;
+}
+
+/* Accent bar: thinner in condensed */
+body.condensed [data-slot='card'].pl-4 {
+  padding-left: 1rem !important;
+}
+
+/* Card header: tighter gap and bottom spacing */
+body.condensed [data-slot='card-header'] {
+  gap: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+/* Card title: smaller */
+body.condensed [data-slot='card-title'] {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+/* Card description: smaller */
+body.condensed [data-slot='card-description'] {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Card footer / actions: tighter top spacing */
+body.condensed [data-slot='card-footer'],
+body.condensed [data-slot='card-actions'] {
+  padding-top: 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+/* Card divider: tighter margins */
+body.condensed [data-slot='card-divider'] {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Card media: tighter negative margins for condensed padding */
+body.condensed [data-slot='card-media'] {
+  margin-left: -0.375rem !important;
+  margin-right: -0.375rem !important;
+  margin-top: -0.375rem !important;
+}
+
+/* Card badge: smaller */
+body.condensed [data-slot='card-badge'] {
+  font-size: 0.625rem !important;
+  padding: 0.125rem 0.375rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Card collapsible: smaller toggle text */
+body.condensed [data-slot='card-collapsible'] button {
+  font-size: 0.75rem !important;
+}
+
+/* Card stat: tighter layout */
+body.condensed [data-slot='card-stat'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='card-stat'] .text-2xl {
+  font-size: 1.25rem !important;
+  line-height: 1.5rem !important;
+}
+
+body.condensed [data-slot='card-stat'] .text-sm {
+  font-size: 0.6875rem !important;
 }
 
 /* ── ServiceGrid + ServiceCard ── condensed density overrides ── */

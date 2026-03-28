@@ -158,6 +158,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    data-slot="card-header"
     className={cn('flex flex-col gap-1.5 pb-4', className)}
     {...props}
   />
@@ -174,6 +175,7 @@ const CardTitle = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <h3
     ref={ref}
+    data-slot="card-title"
     className={cn(
       'text-lg leading-none font-semibold tracking-tight',
       className
@@ -195,6 +197,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
+    data-slot="card-description"
     className={cn('text-muted-foreground text-sm', className)}
     {...props}
   />
@@ -209,7 +212,12 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('', className)} {...props} />
+  <div
+    ref={ref}
+    data-slot="card-content"
+    className={cn('', className)}
+    {...props}
+  />
 ));
 
 CardContent.displayName = 'CardContent';
@@ -223,6 +231,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    data-slot="card-footer"
     className={cn('flex items-center pt-4', className)}
     {...props}
   />
@@ -252,6 +261,7 @@ const CardMedia = React.forwardRef<HTMLDivElement, CardMediaProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-media"
         className={cn(
           'relative -mx-4 -mt-4 overflow-hidden first:rounded-t-xl',
           className
@@ -314,6 +324,7 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
     return (
       <span
         ref={ref}
+        data-slot="card-badge"
         className={cn(
           'absolute z-10 rounded-md px-2 py-1 text-xs font-medium',
           variantClasses[variant],
@@ -351,6 +362,7 @@ const CardActions = React.forwardRef<HTMLDivElement, CardActionsProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-actions"
         className={cn(
           'flex items-center gap-2 pt-4',
           alignClasses[align],
@@ -375,6 +387,7 @@ const CardDivider = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <hr
     ref={ref}
+    data-slot="card-divider"
     className={cn('border-border -mx-4 my-4', className)}
     {...props}
   />
@@ -419,7 +432,12 @@ const CardCollapsible = React.forwardRef<HTMLDivElement, CardCollapsibleProps>(
     };
 
     return (
-      <div ref={ref} className={cn('', className)} {...props}>
+      <div
+        ref={ref}
+        data-slot="card-collapsible"
+        className={cn('', className)}
+        {...props}
+      >
         <button
           type="button"
           onClick={handleToggle}
@@ -486,6 +504,7 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-stat"
         className={cn('flex items-start gap-3', className)}
         {...props}
       >
