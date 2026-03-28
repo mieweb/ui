@@ -101,7 +101,7 @@ export function AppHeaderBrand({
       data-slot="app-header-brand"
       className={cn('flex items-center gap-2', className)}
     >
-      {logo && <span data-slot="app-header-brand-logo">{logo}</span>}
+      {logo && <div data-slot="app-header-brand-logo">{logo}</div>}
       <span
         data-slot="app-header-brand-name"
         className="hidden font-semibold text-gray-900 sm:block dark:text-white"
