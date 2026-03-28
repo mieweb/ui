@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
 import {
   AppHeader,
+  AppHeaderBrand,
   AppHeaderSection,
   AppHeaderTitle,
   AppHeaderActions,
@@ -305,14 +306,15 @@ export const Default: Story = {
         <AppHeader {...args}>
           <AppHeaderSection align="left">
             {showBranding && (
-              <div className="flex items-center gap-2">
-                <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white">
-                  A
-                </div>
-                <span className="hidden font-semibold text-gray-900 sm:block dark:text-white">
-                  Acme Inc
-                </span>
-              </div>
+              <AppHeaderBrand
+                logo={
+                  <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white">
+                    A
+                  </div>
+                }
+              >
+                Acme Inc
+              </AppHeaderBrand>
             )}
             {!showMobileMenu && (
               <button

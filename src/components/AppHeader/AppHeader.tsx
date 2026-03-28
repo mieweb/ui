@@ -79,6 +79,40 @@ export function AppHeaderSection({
 }
 
 // =============================================================================
+// AppHeaderBrand Component
+// =============================================================================
+
+export interface AppHeaderBrandProps {
+  /** Brand/app name */
+  children: ReactNode;
+  /** Logo element (icon, image, or text) */
+  logo?: ReactNode;
+  /** Additional CSS classes */
+  className?: string;
+}
+
+export function AppHeaderBrand({
+  children,
+  logo,
+  className,
+}: AppHeaderBrandProps): React.JSX.Element {
+  return (
+    <div
+      data-slot="app-header-brand"
+      className={cn('flex items-center gap-2', className)}
+    >
+      {logo && <span data-slot="app-header-brand-logo">{logo}</span>}
+      <span
+        data-slot="app-header-brand-name"
+        className="hidden font-semibold text-gray-900 sm:block dark:text-white"
+      >
+        {children}
+      </span>
+    </div>
+  );
+}
+
+// =============================================================================
 // AppHeaderTitle Component
 // =============================================================================
 
