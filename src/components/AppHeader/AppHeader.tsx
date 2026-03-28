@@ -384,6 +384,7 @@ export function AppHeaderUserMenu({
     >
       {/* Avatar */}
       <div
+        data-slot="app-header-user-avatar"
         className={cn(
           'flex h-8 w-8 items-center justify-center overflow-hidden rounded-full',
           'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 text-sm font-medium'
@@ -402,11 +403,17 @@ export function AppHeaderUserMenu({
 
       {/* Name (hidden on small screens) */}
       <div className="hidden min-w-0 text-left lg:block">
-        <div className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white">
+        <div
+          data-slot="app-header-user-name"
+          className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white"
+        >
           {name}
         </div>
         {email && (
-          <div className="max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400">
+          <div
+            data-slot="app-header-user-email"
+            className="max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400"
+          >
             {email}
           </div>
         )}
