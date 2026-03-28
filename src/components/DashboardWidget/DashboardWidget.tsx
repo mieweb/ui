@@ -99,6 +99,7 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
       >
         {/* Header */}
         <CardHeader
+          data-slot="dashboard-widget-header"
           className={cn(
             'border-border flex flex-row items-center justify-between gap-2 border-b px-4 py-3 pb-3',
             accent && 'pl-6'
@@ -145,13 +146,17 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
         </CardHeader>
 
         {/* Body */}
-        <CardContent className={cn('px-4 py-3', accent && 'pl-6')}>
+        <CardContent
+          data-slot="dashboard-widget-body"
+          className={cn('px-4 py-3', accent && 'pl-6')}
+        >
           {children}
         </CardContent>
 
         {/* Footer */}
         {footer && (
           <div
+            data-slot="dashboard-widget-footer"
             className={cn('border-border border-t px-4 py-2', accent && 'pl-6')}
           >
             {footer}
@@ -217,6 +222,7 @@ const DashboardWidgetInfo = React.forwardRef<
   return (
     <div
       ref={ref}
+      data-slot="dashboard-widget-info"
       className={cn('grid gap-x-6 gap-y-3', gridCols[columns], className)}
       {...props}
     >
@@ -347,7 +353,12 @@ function DashboardWidgetTableInner<T extends Record<string, unknown>>(
   }
 
   return (
-    <div ref={ref} className={cn('-mx-4', className)} {...props}>
+    <div
+      ref={ref}
+      data-slot="dashboard-widget-table"
+      className={cn('-mx-4', className)}
+      {...props}
+    >
       <Table responsive>
         {showHeader && (
           <TableHeader>
@@ -512,6 +523,7 @@ const DashboardWidgetActions = React.forwardRef<
   return (
     <div
       ref={ref}
+      data-slot="dashboard-widget-actions"
       className={cn('grid gap-2', gridCols[columns], className)}
       {...props}
     >
@@ -617,7 +629,12 @@ const DashboardWidgetDataCards = React.forwardRef<
   };
 
   return (
-    <div ref={ref} className={cn('space-y-3', className)} {...props}>
+    <div
+      ref={ref}
+      data-slot="dashboard-widget-data-cards"
+      className={cn('space-y-3', className)}
+      {...props}
+    >
       <div className={cn('grid gap-x-6 gap-y-3', gridCols[columns])}>
         {items.map((item, i) => (
           <div key={`${item.label}-${i}`} className={cn('', item.className)}>

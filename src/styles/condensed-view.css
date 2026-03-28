@@ -572,6 +572,152 @@ body.condensed [data-slot='card-content'] svg.h-4 {
   height: 0.75rem !important;
 }
 
+/* ── DashboardWidget ── condensed density overrides ── */
+
+/* Widget header: tighter padding and smaller title */
+body.condensed [data-slot='dashboard-widget-header'] {
+  padding: 0.375rem 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-header'] h3 {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Count badge: smaller */
+body.condensed [data-slot='dashboard-widget-header'] span.rounded-full {
+  height: 1rem !important;
+  min-width: 1rem !important;
+  font-size: 0.5625rem !important;
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
+
+/* Header icon: smaller */
+body.condensed
+  [data-slot='dashboard-widget-header']
+  .text-muted-foreground
+  svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Header add button: smaller */
+body.condensed [data-slot='dashboard-widget-header'] button.h-7 {
+  height: 1.25rem !important;
+  width: 1.25rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-header'] button.h-7 svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Widget body: tighter padding */
+body.condensed [data-slot='dashboard-widget-body'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+/* Widget footer: tighter */
+body.condensed [data-slot='dashboard-widget-footer'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Info grid: tighter gaps and smaller text */
+body.condensed [data-slot='dashboard-widget-info'] {
+  gap: 0.25rem 0.75rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-info'] dt {
+  font-size: 0.5625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-info'] dd {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  margin-top: 0 !important;
+}
+
+/* Table: tighter cells */
+body.condensed [data-slot='dashboard-widget-table'] td,
+body.condensed [data-slot='dashboard-widget-table'] th {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-table'] th {
+  font-size: 0.625rem !important;
+}
+
+/* Table action buttons: smaller */
+body.condensed [data-slot='dashboard-widget-table'] button {
+  padding: 0.125rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-table'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Actions grid: tighter layout */
+body.condensed [data-slot='dashboard-widget-actions'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-actions'] button,
+body.condensed [data-slot='dashboard-widget-actions'] a {
+  padding: 0.25rem 0.5rem !important;
+  gap: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-actions'] span.rounded-md {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-actions'] span.rounded-md svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-actions'] span.text-sm {
+  font-size: 0.75rem !important;
+}
+
+/* Data cards: tighter grid */
+body.condensed [data-slot='dashboard-widget-data-cards'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-data-cards'] .grid {
+  gap: 0.25rem 0.75rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-data-cards'] dt {
+  font-size: 0.5625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed [data-slot='dashboard-widget-data-cards'] dd {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  margin-top: 0 !important;
+}
+
+body.condensed [data-slot='dashboard-widget-data-cards'] dd span {
+  font-size: 0.625rem !important;
+}
+
+/* Data cards footer */
+body.condensed [data-slot='dashboard-widget-data-cards'] .border-t {
+  padding-top: 0.25rem !important;
+  font-size: 0.625rem !important;
+}
+
 /* ── ServiceGrid + ServiceCard ── condensed density overrides ── */
 
 /* Tighter grid gap */
