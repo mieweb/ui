@@ -3717,3 +3717,63 @@ body.condensed [data-slot='app-header-user-menu'] > svg {
   width: 0.75rem !important;
   height: 0.75rem !important;
 }
+
+/* =========================================================================
+   PageHeader — condensed density overrides
+   ========================================================================= */
+
+/* Root: tighter vertical padding */
+body.condensed [data-slot='page-header'] {
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+}
+
+/* Row: tighter gap between title area and actions */
+body.condensed [data-slot='page-header-row'] {
+  gap: 0.5rem !important;
+}
+
+/* Icon: scale down */
+body.condensed [data-slot='page-header-icon'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+body.condensed [data-slot='page-header-icon'] svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Circular icon containers (e.g. ProviderExample avatar) */
+body.condensed [data-slot='page-header-icon'] > div {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+
+body.condensed [data-slot='page-header-icon'] > div svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Title: smaller text */
+body.condensed [data-slot='page-header-title'] {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+/* Subtitle: smaller, tighter top margin */
+body.condensed [data-slot='page-header-subtitle'] {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* Actions: tighter gap */
+body.condensed [data-slot='page-header-actions'] {
+  gap: 0.25rem !important;
+}
+
+/* Children area: tighter top margin */
+body.condensed [data-slot='page-header-content'] {
+  margin-top: 0.25rem !important;
+}

@@ -52,9 +52,11 @@ export function PageHeader({
 
   return (
     <div
+      data-slot="page-header"
       className={` ${sizeClasses[size]} ${bordered ? 'border-b border-gray-200 dark:border-gray-700' : ''} ${className} `.trim()}
     >
       <div
+        data-slot="page-header-row"
         className={`flex justify-between gap-4 ${iconAlign === 'top' ? 'items-start' : 'items-center'}`}
       >
         <div
@@ -62,6 +64,7 @@ export function PageHeader({
         >
           {icon && (
             <div
+              data-slot="page-header-icon"
               className={`flex-shrink-0 text-gray-500 dark:text-gray-400 ${iconAlign === 'top' ? 'mt-1' : ''}`}
             >
               {icon}
@@ -69,22 +72,35 @@ export function PageHeader({
           )}
           <div className="min-w-0">
             <h1
+              data-slot="page-header-title"
               className={`${titleSizeClasses[size]} truncate text-gray-900 dark:text-white`}
             >
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">
+              <p
+                data-slot="page-header-subtitle"
+                className="mt-1 truncate text-sm text-gray-500 dark:text-gray-400"
+              >
                 {subtitle}
               </p>
             )}
           </div>
         </div>
         {actions && (
-          <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>
+          <div
+            data-slot="page-header-actions"
+            className="flex flex-shrink-0 items-center gap-2"
+          >
+            {actions}
+          </div>
         )}
       </div>
-      {children && <div className="mt-4">{children}</div>}
+      {children && (
+        <div data-slot="page-header-content" className="mt-4">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
