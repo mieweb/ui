@@ -166,13 +166,17 @@ export function SocialMediaLinks({
   };
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div
+      data-slot="site-footer-social"
+      className={cn('flex items-center gap-2', className)}
+    >
       {links.map((link) => {
         const Icon = socialIcons[link.platform];
         return (
           <a
             key={link.platform}
             href={link.href}
+            data-slot="site-footer-social-link"
             target="_blank"
             rel="noopener noreferrer"
             aria-label={link.label || `Follow us on ${link.platform}`}
@@ -224,7 +228,11 @@ export function NewsletterForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className={cn('flex gap-2', className)}>
+    <form
+      data-slot="site-footer-newsletter-form"
+      onSubmit={handleSubmit}
+      className={cn('flex gap-2', className)}
+    >
       <input
         type="email"
         value={email}
@@ -272,8 +280,9 @@ export function FooterLinkSection({
   className,
 }: FooterLinkSectionProps) {
   return (
-    <div className={className}>
+    <div data-slot="site-footer-link-section" className={className}>
       <h3
+        data-slot="site-footer-link-title"
         className={cn(
           'mb-4 text-sm font-semibold tracking-wider uppercase',
           variant === 'light'
@@ -328,6 +337,7 @@ export function CopyrightText({
 }: CopyrightTextProps) {
   return (
     <span
+      data-slot="site-footer-copyright"
       className={cn(
         'text-sm',
         variant === 'light'
@@ -371,6 +381,7 @@ export function LegalLinks({
 
   return (
     <nav
+      data-slot="site-footer-legal"
       className={cn('flex flex-wrap items-center gap-x-4 gap-y-1', className)}
     >
       {links.map((link, index) => (
@@ -423,6 +434,7 @@ export function DisclaimerText({
 }: DisclaimerTextProps) {
   return (
     <p
+      data-slot="site-footer-disclaimer"
       className={cn(
         'text-xs leading-relaxed',
         variant === 'light'
@@ -501,16 +513,23 @@ export function SiteFooter({
 
   return (
     <footer
+      data-slot="site-footer"
       className={cn(
         footerVariants({ variant: variant ?? 'default' }),
         className
       )}
     >
-      <div className="container mx-auto px-4 py-12">
+      <div
+        data-slot="site-footer-container"
+        className="container mx-auto px-4 py-12"
+      >
         {/* Main Footer Content */}
-        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12">
+        <div
+          data-slot="site-footer-main"
+          className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12"
+        >
           {/* Brand & Description */}
-          <div className="lg:col-span-4">
+          <div data-slot="site-footer-brand" className="lg:col-span-4">
             {(logo.name || logo.src) && (
               <div className="mb-4">
                 {logo.href ? (
@@ -559,6 +578,7 @@ export function SiteFooter({
             )}
             {description && (
               <p
+                data-slot="site-footer-description"
                 className={cn(
                   'mb-4 text-sm',
                   colorVariant === 'light'
@@ -576,7 +596,10 @@ export function SiteFooter({
 
           {/* Link Groups */}
           {linkGroups.length > 0 && (
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4">
+            <div
+              data-slot="site-footer-links"
+              className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4"
+            >
               {linkGroups.map((group) => (
                 <FooterLinkSection
                   key={group.title}
@@ -591,6 +614,7 @@ export function SiteFooter({
         {/* Newsletter Section */}
         {showNewsletter && (
           <div
+            data-slot="site-footer-newsletter"
             className={cn(
               'mb-6 border-t py-6',
               colorVariant === 'light'
@@ -620,6 +644,7 @@ export function SiteFooter({
 
         {/* Bottom Section */}
         <div
+          data-slot="site-footer-bottom"
           className={cn(
             'border-t pt-6',
             colorVariant === 'light'
@@ -683,6 +708,7 @@ export function SimpleFooter({
 }: SimpleFooterProps) {
   return (
     <footer
+      data-slot="site-footer-simple"
       className={cn(
         'border-t py-4',
         variant === 'light'
