@@ -960,8 +960,10 @@ body.condensed [data-slot='step-indicator-circle'][aria-current='step'] {
 }
 
 /* Dark mode: adjust ring-offset color */
-body.condensed
-  :is(.dark, [data-theme='dark'])
+:is(.dark, [data-theme='dark'])
+  body.condensed
+  [data-slot='step-indicator-circle'][aria-current='step'],
+body.condensed:is(.dark, [data-theme='dark'])
   [data-slot='step-indicator-circle'][aria-current='step'] {
   box-shadow:
     0 0 0 1px var(--color-neutral-900, #171717),
@@ -4214,7 +4216,7 @@ body.condensed [data-slot='site-header-mobile-btn'] svg {
 }
 
 /* CompactHeader: shorter */
-body.condensed [data-slot='site-header-compact'] > div:first-child {
+body.condensed [data-slot='site-header-compact-row'] {
   height: 2.25rem !important;
 }
 

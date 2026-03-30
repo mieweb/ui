@@ -804,7 +804,10 @@ export function CompactHeader({
           className
         )}
       >
-        <div className="flex h-14 items-center justify-between px-4">
+        <div
+          data-slot="site-header-compact-row"
+          className="flex h-14 items-center justify-between px-4"
+        >
           <div className="flex items-center gap-2">
             {backButton}
             {title && (
