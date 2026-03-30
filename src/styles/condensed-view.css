@@ -643,10 +643,10 @@ body.condensed [data-slot='dashboard-widget-info'] dd {
   margin-top: 0 !important;
 }
 
-/* Table: tighter cells */
+/* Table: tighter cells (keep horizontal px-4 to align with card header through -mx-4 bleed) */
 body.condensed [data-slot='dashboard-widget-table'] td,
 body.condensed [data-slot='dashboard-widget-table'] th {
-  padding: 0.25rem 0.5rem !important;
+  padding: 0.25rem 1rem !important;
   font-size: 0.75rem !important;
 }
 
@@ -654,7 +654,7 @@ body.condensed [data-slot='dashboard-widget-table'] th {
   font-size: 0.625rem !important;
 }
 
-/* Table action buttons: smaller */
+/* Table overflow menu trigger: smaller */
 body.condensed [data-slot='dashboard-widget-table'] button {
   padding: 0.125rem !important;
 }
@@ -935,6 +935,13 @@ body.condensed [data-slot='table-footer'] td {
 body.condensed [data-slot='table-caption'] {
   font-size: 0.6875rem !important;
   margin-top: 0.25rem !important;
+}
+
+/* DashboardWidget table override: preserve horizontal padding (cells need px-4
+   to align with card header because the table wrapper uses -mx-4 bleed) */
+body.condensed [data-slot='dashboard-widget-table'] [data-slot='table-cell'],
+body.condensed [data-slot='dashboard-widget-table'] [data-slot='table-head'] {
+  padding: 0.25rem 1rem !important;
 }
 
 /* ── StepIndicator ── condensed density overrides ── */

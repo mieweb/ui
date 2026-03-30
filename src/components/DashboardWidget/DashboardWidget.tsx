@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { Card, CardContent, CardHeader } from '../Card';
@@ -11,6 +12,7 @@ import {
   TableHead,
   TableCell,
 } from '../Table';
+import { MoreHorizontalIcon } from '../Icons';
 
 // =============================================================================
 // DashboardWidget — shared wrapper
@@ -281,6 +283,8 @@ export interface WidgetTableAction<T = Record<string, unknown>> {
   onClick: (row: T, index: number) => void;
   /** Conditionally hide per row */
   hidden?: (row: T, index: number) => boolean;
+  /** Visual variant — 'danger' renders in red */
+  variant?: 'danger';
 }
 
 export interface DashboardWidgetTableProps<
@@ -409,32 +413,155 @@ function DashboardWidgetTableInner<T extends Record<string, unknown>>(
                 </TableCell>
               ))}
               {actions && actions.length > 0 && (
-                <TableCell className="px-2 py-2 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    {actions.map(
-                      (action, actionIndex) =>
-                        !action.hidden?.(row, rowIndex) && (
-                          <button
-                            key={actionIndex}
-                            type="button"
-                            className="text-muted-foreground hover:bg-muted hover:text-foreground rounded p-1 transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              action.onClick(row, rowIndex);
-                            }}
-                            aria-label={action.label}
-                          >
-                            {action.icon}
-                          </button>
-                        )
-                    )}
-                  </div>
+                <TableCell className="w-0 px-2 py-2 text-right">
+                  <WidgetRowActionMenu
+                    row={row}
+                    rowIndex={rowIndex}
+                    actions={actions}
+                  />
                 </TableCell>
               )}
             </TableRow>
           ))}
         </TableBody>
       </Table>
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Internal: row-level overflow menu (matches CountBadge RowActionMenu pattern)
+// -----------------------------------------------------------------------------
+
+function WidgetRowActionMenu<T extends Record<string, unknown>>({
+  row,
+  rowIndex,
+  actions,
+}: {
+  row: T;
+  rowIndex: number;
+  actions: WidgetTableAction<T>[];
+}) {
+  const [open, setOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  // Close on outside click
+  React.useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  // Close on Escape
+  React.useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open]);
+
+  const [menuPos, setMenuPos] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
+  React.useLayoutEffect(() => {
+    if (!open || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setMenuPos({
+      top: rect.bottom + 4,
+      left: rect.right,
+    });
+  }, [open]);
+
+  const visibleActions = actions.filter(
+    (action) => !action.hidden?.(row, rowIndex)
+  );
+
+  if (visibleActions.length === 0) return null;
+
+  return (
+    <div className="relative">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className={cn(
+          'inline-flex h-6 w-6 items-center justify-center rounded',
+          'text-neutral-400 transition-colors',
+          'hover:bg-neutral-100 hover:text-neutral-600',
+          'dark:hover:bg-neutral-700 dark:hover:text-neutral-300',
+          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none'
+        )}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Row actions"
+      >
+        <MoreHorizontalIcon size={14} />
+      </button>
+
+      {open &&
+        menuPos &&
+        ReactDOM.createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            style={{
+              position: 'fixed',
+              top: menuPos.top,
+              left: menuPos.left,
+              transform: 'translateX(-100%)',
+            }}
+            className={cn(
+              'z-[9999] min-w-[10rem]',
+              'rounded-lg border border-neutral-200 bg-white py-1 shadow-lg',
+              'dark:border-neutral-700 dark:bg-neutral-800',
+              'animate-in fade-in zoom-in-95 duration-100'
+            )}
+          >
+            {visibleActions.map((action, i) => (
+              <button
+                key={i}
+                role="menuitem"
+                type="button"
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs',
+                  'transition-colors duration-100',
+                  action.variant === 'danger'
+                    ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
+                    : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700'
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(false);
+                  action.onClick(row, rowIndex);
+                }}
+              >
+                {action.icon && (
+                  <span className="h-3.5 w-3.5 shrink-0">{action.icon}</span>
+                )}
+                <span>{action.label}</span>
+              </button>
+            ))}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
