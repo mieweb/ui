@@ -891,6 +891,86 @@ body.condensed [data-slot='stripe-secure-badge'] span {
   font-size: 0.5625rem;
 }
 
+/* ── StepIndicator ── condensed density overrides ── */
+
+/* Circles: shrink from md 2rem to 1.25rem */
+body.condensed [data-slot='step-indicator-circle'] {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* Icons inside circles */
+body.condensed [data-slot='step-indicator-circle'] svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* Ring for current step: thinner ring + offset so connector doesn't overlap the circle */
+body.condensed [data-slot='step-indicator-circle'][aria-current='step'] {
+  box-shadow:
+    0 0 0 1px var(--color-white, #fff),
+    0 0 0 2px var(--color-primary-600, #0891b2) !important;
+}
+
+/* Dark mode: adjust ring-offset color */
+body.condensed
+  :is(.dark, [data-theme='dark'])
+  [data-slot='step-indicator-circle'][aria-current='step'] {
+  box-shadow:
+    0 0 0 1px var(--color-neutral-900, #171717),
+    0 0 0 2px var(--color-primary-500, #06b6d4) !important;
+}
+
+/* Horizontal connectors: thinner */
+body.condensed [data-slot='step-indicator-connector'] {
+  height: 1px !important;
+}
+
+/* Vertical connector: narrower column, shorter min-height */
+body.condensed
+  [data-slot='step-indicator'][class*='flex-col']
+  [data-slot='step-indicator-connector'] {
+  width: 1.25rem !important;
+  min-height: 0.5rem !important;
+  height: auto !important;
+}
+
+body.condensed
+  [data-slot='step-indicator'][class*='flex-col']
+  [data-slot='step-indicator-connector']
+  > div {
+  min-height: 0.5rem !important;
+}
+
+/* Labels: smaller text */
+body.condensed [data-slot='step-indicator-label'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed [data-slot='step-indicator-label'] p {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Description: smaller */
+body.condensed [data-slot='step-indicator-description'] {
+  font-size: 0.5625rem !important;
+  line-height: 0.75rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* Label margin (horizontal layout): tighter */
+body.condensed [data-slot='step-indicator'] .mt-2 {
+  margin-top: 0.25rem !important;
+}
+
+/* Vertical gaps: tighter */
+body.condensed [data-slot='step-indicator'][class*='flex-col'] {
+  gap: 0.25rem !important;
+}
+
 /* ── TimelineProgress ── condensed density overrides ── */
 
 body.condensed [data-slot='timeline-progress'] {

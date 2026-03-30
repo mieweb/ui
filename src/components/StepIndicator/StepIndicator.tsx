@@ -131,6 +131,7 @@ export function StepIndicator({
   ) => (
     <button
       type="button"
+      data-slot="step-indicator-circle"
       onClick={() => handleStepClick(index)}
       disabled={!clickable}
       className={`${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
@@ -165,7 +166,10 @@ export function StepIndicator({
   );
 
   const stepLabel = (step: Step, status: string, horizontal: boolean) => (
-    <div className={`${horizontal ? 'text-center' : 'flex-1'} ${sizes.text}`}>
+    <div
+      data-slot="step-indicator-label"
+      className={`${horizontal ? 'text-center' : 'flex-1'} ${sizes.text}`}
+    >
       <p
         className={`font-medium ${
           step.hasError
@@ -184,7 +188,10 @@ export function StepIndicator({
         )}
       </p>
       {step.description && (
-        <p className="mt-0.5 text-neutral-500 dark:text-neutral-400">
+        <p
+          data-slot="step-indicator-description"
+          className="mt-0.5 text-neutral-500 dark:text-neutral-400"
+        >
           {step.description}
         </p>
       )}
@@ -193,7 +200,11 @@ export function StepIndicator({
 
   if (orientation === 'horizontal') {
     return (
-      <nav className={`flex ${className}`.trim()} aria-label="Progress">
+      <nav
+        data-slot="step-indicator"
+        className={`flex ${className}`.trim()}
+        aria-label="Progress"
+      >
         {steps.map((step, index) => {
           const status = getStepStatus(index);
           const isLast = index === steps.length - 1;
@@ -205,6 +216,7 @@ export function StepIndicator({
               <div className="flex w-full items-center">
                 {index > 0 ? (
                   <div
+                    data-slot="step-indicator-connector"
                     className={`flex-1 ${sizes.line} ${
                       index <= currentStep
                         ? 'bg-primary-600 dark:bg-primary-500'
@@ -220,6 +232,7 @@ export function StepIndicator({
 
                 {!isLast ? (
                   <div
+                    data-slot="step-indicator-connector"
                     className={`flex-1 ${sizes.line} ${
                       index < currentStep
                         ? 'bg-primary-600 dark:bg-primary-500'
@@ -244,6 +257,7 @@ export function StepIndicator({
   // Vertical orientation
   return (
     <nav
+      data-slot="step-indicator"
       className={`flex flex-col ${sizes.gap} ${className}`.trim()}
       aria-label="Progress"
     >
@@ -261,6 +275,7 @@ export function StepIndicator({
 
             {!isLast && (
               <div
+                data-slot="step-indicator-connector"
                 className={`flex min-h-4 justify-center ${size === 'sm' ? 'w-6' : size === 'lg' ? 'w-10' : 'w-8'}`}
                 aria-hidden="true"
               >
