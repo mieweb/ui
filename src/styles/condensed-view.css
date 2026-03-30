@@ -3876,37 +3876,42 @@ body.condensed [data-slot='quick-action-group-grid'] {
 
 /* Container: tighter vertical padding */
 body.condensed [data-slot='site-footer-container'] {
-  padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
 }
 
 /* Main grid: tighter gap and bottom margin */
 body.condensed [data-slot='site-footer-main'] {
-  gap: 1rem !important;
-  margin-bottom: 1rem !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Brand logo: tighter bottom margin */
+body.condensed [data-slot='site-footer-brand'] > div:first-child {
+  margin-bottom: 0.25rem !important;
 }
 
 /* Description: smaller */
 body.condensed [data-slot='site-footer-description'] {
   font-size: 0.75rem !important;
   line-height: 1.125rem !important;
-  margin-bottom: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
 /* Link groups grid: tighter gap */
 body.condensed [data-slot='site-footer-links'] {
-  gap: 1rem !important;
+  gap: 0.5rem !important;
 }
 
 /* Link section title: smaller, tighter margin */
 body.condensed [data-slot='site-footer-link-title'] {
   font-size: 0.6875rem !important;
-  margin-bottom: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
 /* Link section list items: tighter spacing */
 body.condensed [data-slot='site-footer-link-section'] ul {
-  --spacing: 0.25rem !important;
+  --spacing: 0.125rem !important;
 }
 
 body.condensed [data-slot='site-footer-link-section'] a {
@@ -3926,9 +3931,15 @@ body.condensed [data-slot='site-footer-social-link'] {
 
 /* Newsletter section: tighter padding */
 body.condensed [data-slot='site-footer-newsletter'] {
-  padding-top: 0.75rem !important;
-  padding-bottom: 0.75rem !important;
-  margin-bottom: 0.75rem !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Newsletter title: smaller */
+body.condensed [data-slot='site-footer-newsletter'] h3 {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
 /* Newsletter form: smaller inputs */
@@ -3938,9 +3949,13 @@ body.condensed [data-slot='site-footer-newsletter-form'] button {
   font-size: 0.75rem !important;
 }
 
-/* Bottom section: tighter top padding */
+/* Bottom section: tighter top padding and inner margin */
 body.condensed [data-slot='site-footer-bottom'] {
-  padding-top: 0.75rem !important;
+  padding-top: 0.5rem !important;
+}
+
+body.condensed [data-slot='site-footer-bottom'] > div:first-child {
+  margin-bottom: 0.25rem !important;
 }
 
 /* Copyright: smaller */
@@ -3950,7 +3965,7 @@ body.condensed [data-slot='site-footer-copyright'] {
 
 /* Legal links: smaller, tighter gaps */
 body.condensed [data-slot='site-footer-legal'] {
-  gap: 0.5rem !important;
+  gap: 0.25rem !important;
 }
 
 body.condensed [data-slot='site-footer-legal'] a {
@@ -3965,8 +3980,8 @@ body.condensed [data-slot='site-footer-disclaimer'] {
 
 /* SimpleFooter: tighter vertical padding */
 body.condensed [data-slot='site-footer-simple'] {
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
 }
 
 body.condensed [data-slot='site-footer-simple'] a {
