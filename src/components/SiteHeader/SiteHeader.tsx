@@ -44,11 +44,20 @@ export function SiteLogo({
   className,
 }: SiteLogoProps) {
   const content = (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div
+      data-slot="site-header-logo-content"
+      className={cn('flex items-center gap-2', className)}
+    >
       {logoSrc ? (
-        <img src={logoSrc} alt={logoAlt} className="h-8 w-8 object-contain" />
+        <img
+          data-slot="site-header-logo-icon"
+          src={logoSrc}
+          alt={logoAlt}
+          className="h-8 w-8 object-contain"
+        />
       ) : (
         <div
+          data-slot="site-header-logo-icon"
           className={cn(
             'flex h-8 w-8 items-center justify-center rounded-lg text-lg font-bold',
             variant === 'light'
@@ -70,6 +79,7 @@ export function SiteLogo({
         />
       ) : name ? (
         <span
+          data-slot="site-header-logo-name"
           className={cn(
             'hidden text-xl font-semibold sm:block',
             variant === 'light' ? 'text-white' : 'text-gray-900 dark:text-white'
@@ -82,7 +92,7 @@ export function SiteLogo({
   );
 
   return (
-    <a href={href} className="flex-shrink-0">
+    <a data-slot="site-header-logo" href={href} className="flex-shrink-0">
       {content}
     </a>
   );
@@ -104,11 +114,15 @@ export function NavLinks({
   className,
 }: NavLinksProps) {
   return (
-    <nav className={cn('hidden items-center gap-1 md:flex', className)}>
+    <nav
+      data-slot="site-header-nav"
+      className={cn('hidden items-center gap-1 md:flex', className)}
+    >
       {links.map((link) => (
         <a
           key={link.href}
           href={link.href}
+          data-slot="site-header-nav-link"
           target={link.external ? '_blank' : undefined}
           rel={link.external ? 'noopener noreferrer' : undefined}
           className={cn(
@@ -183,7 +197,10 @@ export function AuthButtons({
 
   if (loginHref || signUpHref) {
     return (
-      <div className={cn('flex items-center gap-2', className)}>
+      <div
+        data-slot="site-header-auth"
+        className={cn('flex items-center gap-2', className)}
+      >
         {loginHref ? (
           <a
             href={loginHref}
@@ -219,7 +236,10 @@ export function AuthButtons({
   }
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div
+      data-slot="site-header-auth"
+      className={cn('flex items-center gap-2', className)}
+    >
       {loginButton}
       {signUpButton}
     </div>
@@ -313,7 +333,11 @@ export function UserMenu({
   ];
 
   return (
-    <div ref={menuRef} className={cn('relative', className)}>
+    <div
+      data-slot="site-header-user-menu"
+      ref={menuRef}
+      className={cn('relative', className)}
+    >
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -328,12 +352,14 @@ export function UserMenu({
       >
         {user.avatarUrl ? (
           <img
+            data-slot="site-header-user-avatar"
             src={user.avatarUrl}
             alt={user.name}
             className="h-8 w-8 rounded-full object-cover"
           />
         ) : (
           <div
+            data-slot="site-header-user-avatar"
             className={cn(
               'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
               variant === 'light'
@@ -356,7 +382,10 @@ export function UserMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-56 rounded-lg bg-white shadow-lg ring-1 ring-black/5 dark:bg-gray-800 dark:ring-white/10">
+        <div
+          data-slot="site-header-user-dropdown"
+          className="absolute right-0 z-50 mt-2 w-56 rounded-lg bg-white shadow-lg ring-1 ring-black/5 dark:bg-gray-800 dark:ring-white/10"
+        >
           {/* User Info */}
           <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-700">
             <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
@@ -428,6 +457,7 @@ export function MobileMenuButton({
 }: MobileMenuButtonProps) {
   return (
     <button
+      data-slot="site-header-mobile-btn"
       type="button"
       onClick={onClick}
       className={cn(
@@ -655,13 +685,17 @@ export function SiteHeader({
       <div className="h-16" aria-hidden="true" />
 
       <header
+        data-slot="site-header"
         className={cn(
           headerVariants({ variant: variant ?? 'primary' }),
           className
         )}
       >
         <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
+          <div
+            data-slot="site-header-row"
+            className="flex h-16 items-center justify-between"
+          >
             {/* Logo */}
             <SiteLogo
               href={logo.href}
@@ -764,6 +798,7 @@ export function CompactHeader({
     <>
       <div className="h-14" aria-hidden="true" />
       <header
+        data-slot="site-header-compact"
         className={cn(
           'fixed top-0 right-0 left-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
           className
@@ -773,7 +808,10 @@ export function CompactHeader({
           <div className="flex items-center gap-2">
             {backButton}
             {title && (
-              <h1 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
+              <h1
+                data-slot="site-header-compact-title"
+                className="truncate text-lg font-semibold text-gray-900 dark:text-white"
+              >
                 {title}
               </h1>
             )}

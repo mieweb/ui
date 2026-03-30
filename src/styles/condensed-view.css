@@ -3987,3 +3987,115 @@ body.condensed [data-slot='site-footer-simple'] {
 body.condensed [data-slot='site-footer-simple'] a {
   font-size: 0.6875rem !important;
 }
+
+/* =========================================================================
+   SiteHeader — condensed density overrides
+   (mirrors AppHeader approach: reduced height, compact logo/nav/auth)
+   ========================================================================= */
+
+/* Main header: reduce height */
+body.condensed [data-slot='site-header'] {
+  /* nothing to force — height driven by row */
+}
+
+/* Row: shorter height, like AppHeader 2.5rem */
+body.condensed [data-slot='site-header-row'] {
+  height: 2.5rem !important;
+}
+
+/* Spacer: match reduced height (h-16 → 2.5rem) — handled via adjacent sibling */
+body.condensed [data-slot='site-header'] ~ div[aria-hidden],
+body.condensed div[aria-hidden] + [data-slot='site-header'] {
+  /* Can't target the spacer div directly; consumer must match */
+}
+
+/* Logo content: tighter gap */
+body.condensed [data-slot='site-header-logo-content'] {
+  gap: 0.375rem !important;
+}
+
+/* Logo icon/avatar: smaller */
+body.condensed [data-slot='site-header-logo-icon'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  font-size: 0.625rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Logo name: smaller */
+body.condensed [data-slot='site-header-logo-name'] {
+  font-size: 0.875rem !important;
+}
+
+/* Nav: tighter gap */
+body.condensed [data-slot='site-header-nav'] {
+  gap: 0.125rem !important;
+}
+
+/* Nav links: smaller padding and font */
+body.condensed [data-slot='site-header-nav-link'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Auth buttons: smaller */
+body.condensed [data-slot='site-header-auth'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='site-header-auth'] a,
+body.condensed [data-slot='site-header-auth'] button {
+  padding: 0.25rem 0.625rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* User menu: compact */
+body.condensed [data-slot='site-header-user-menu'] button {
+  gap: 0.25rem !important;
+  padding: 0.125rem !important;
+}
+
+/* User avatar: smaller */
+body.condensed [data-slot='site-header-user-avatar'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+/* User dropdown: smaller text and padding */
+body.condensed [data-slot='site-header-user-dropdown'] {
+  width: 12rem !important;
+}
+
+body.condensed [data-slot='site-header-user-dropdown'] p {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='site-header-user-dropdown'] a,
+body.condensed [data-slot='site-header-user-dropdown'] button {
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Mobile menu button: smaller */
+body.condensed [data-slot='site-header-mobile-btn'] {
+  padding: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='site-header-mobile-btn'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* CompactHeader: shorter */
+body.condensed [data-slot='site-header-compact'] > div:first-child {
+  height: 2.25rem !important;
+}
+
+body.condensed [data-slot='site-header-compact-title'] {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
