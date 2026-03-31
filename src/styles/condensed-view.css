@@ -4624,3 +4624,42 @@ body.condensed [data-slot='file-manager-empty'] p:first-of-type {
 body.condensed [data-slot='file-manager-empty'] p:last-of-type {
   font-size: 0.625rem !important;
 }
+
+/* ============================================================
+   RecordButton — condensed overrides
+   Sizes: sm=2.5rem, md=3rem, lg=3.5rem → condensed: 1.75rem
+   Icons: sm=1rem, md=1.25rem, lg=1.5rem → condensed: 0.875rem
+   All animations (pulse, waveform, spin) preserved untouched.
+   ============================================================ */
+
+/* Wrapper — tighter gap between button and labels */
+body.condensed [data-slot='record-button'] {
+  gap: 0.25rem !important;
+}
+
+/* Button trigger — uniform condensed size */
+body.condensed [data-slot='record-button-trigger'] {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+
+/* Icon inside button — scale down */
+body.condensed [data-slot='record-button-icon'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* Waveform bars — shorter */
+body.condensed [data-slot='record-button-waveform'] span {
+  height: 0.375rem !important;
+}
+
+/* Duration text — smaller */
+body.condensed [data-slot='record-button-duration'] {
+  font-size: 0.625rem !important;
+}
+
+/* Transcription label — smaller */
+body.condensed [data-slot='record-button-transcription'] {
+  font-size: 0.625rem !important;
+}
