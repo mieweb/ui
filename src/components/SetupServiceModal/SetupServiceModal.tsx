@@ -126,7 +126,10 @@ export function SetupServiceModal({
         <ModalBody className="min-w-[320px] space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+            <div
+              data-slot="setup-service-error"
+              className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+            >
               <p className="text-sm text-red-600 dark:text-red-400">
                 {errorMessage}
               </p>
@@ -160,7 +163,7 @@ export function SetupServiceModal({
           />
 
           {/* Description */}
-          <div>
+          <div data-slot="setup-service-description">
             <label
               htmlFor="setup-service-description"
               className="text-foreground mb-1 block text-sm font-medium"
@@ -199,7 +202,7 @@ export function SetupServiceModal({
           )}
 
           {/* Price */}
-          <div>
+          <div data-slot="setup-service-price">
             <label
               htmlFor="setup-service-price"
               className="text-foreground mb-1 block text-sm font-medium"
@@ -230,8 +233,11 @@ export function SetupServiceModal({
           </div>
 
           {/* Toggles */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between gap-4">
+          <div data-slot="setup-service-toggles" className="space-y-3 pt-2">
+            <div
+              data-slot="setup-service-toggle"
+              className="flex items-center justify-between gap-4"
+            >
               <div className="min-w-0">
                 <p className="text-foreground text-sm font-medium">
                   Currently Offered
@@ -252,7 +258,10 @@ export function SetupServiceModal({
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4">
+            <div
+              data-slot="setup-service-toggle"
+              className="flex items-center justify-between gap-4"
+            >
               <div className="min-w-0">
                 <p className="text-foreground text-sm font-medium">
                   Limited Inventory
@@ -274,7 +283,10 @@ export function SetupServiceModal({
             </div>
 
             {formData.limitedInventory && (
-              <div className="border-border ml-4 border-l-2 pl-4">
+              <div
+                data-slot="setup-service-inventory"
+                className="border-border ml-4 border-l-2 pl-4"
+              >
                 <Input
                   label="Initial Inventory"
                   type="number"
@@ -291,7 +303,10 @@ export function SetupServiceModal({
               </div>
             )}
 
-            <div className="flex items-center justify-between gap-4">
+            <div
+              data-slot="setup-service-toggle"
+              className="flex items-center justify-between gap-4"
+            >
               <div className="min-w-0">
                 <p className="text-foreground text-sm font-medium">
                   Auto-Accept Referrals

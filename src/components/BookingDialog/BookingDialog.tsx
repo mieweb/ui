@@ -89,10 +89,11 @@ export function FloatingInput({
   const inputId = id || label.toLowerCase().replace(/\s+/g, '-');
 
   return (
-    <div className="relative">
+    <div className="relative" data-slot="floating-input">
       <input
         id={inputId}
         placeholder=" "
+        data-slot="floating-input-field"
         className={cn(
           inputVariants({ state: error ? 'error' : (state ?? 'default') }),
           'peer pt-6 pb-2',
@@ -102,6 +103,7 @@ export function FloatingInput({
       />
       <label
         htmlFor={inputId}
+        data-slot="floating-input-label"
         className={cn(
           'text-muted-foreground absolute top-4 left-4 origin-left transform transition-all duration-200',
           'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
@@ -112,7 +114,14 @@ export function FloatingInput({
       >
         {label}
       </label>
-      {error && <p className="text-destructive mt-1 text-sm">{error}</p>}
+      {error && (
+        <p
+          className="text-destructive mt-1 text-sm"
+          data-slot="floating-input-error"
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -167,10 +176,15 @@ export function ServiceSelect({
     .map((s) => s.name);
 
   return (
-    <div ref={dropdownRef} className={cn('relative', className)}>
+    <div
+      ref={dropdownRef}
+      className={cn('relative', className)}
+      data-slot="service-select"
+    >
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        data-slot="service-select-trigger"
         className={cn(
           'w-full rounded-lg border px-4 py-3 text-left transition-colors',
           'bg-background',
@@ -185,6 +199,7 @@ export function ServiceSelect({
             {selectedServiceNames.map((name) => (
               <span
                 key={name}
+                data-slot="service-select-pill"
                 className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm"
               >
                 {name}
@@ -203,10 +218,14 @@ export function ServiceSelect({
       </button>
 
       {isOpen && (
-        <div className="border-border bg-card absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border shadow-lg">
+        <div
+          className="border-border bg-card absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border shadow-lg"
+          data-slot="service-select-dropdown"
+        >
           {services.map((service) => (
             <label
               key={service.slug}
+              data-slot="service-select-option"
               className="hover:bg-muted flex cursor-pointer items-center gap-3 px-4 py-3"
             >
               <input
@@ -252,35 +271,50 @@ export function ConsentSwitch({
   description,
   className,
 }: ConsentSwitchProps) {
+  const descriptionId = description ? `${id}-description` : undefined;
+
   return (
-    <div className={cn('flex items-start gap-3', className)}>
+    <div
+      className={cn('flex items-start gap-3', className)}
+      data-slot="consent-switch"
+    >
       <button
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-describedby={descriptionId}
         id={id}
         onClick={() => onChange(!checked)}
+        data-slot="consent-switch-toggle"
         className={cn(
-          'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
+          'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
           checked ? 'bg-primary-600' : 'bg-muted'
         )}
       >
         <span
+          data-slot="consent-switch-thumb"
           className={cn(
-            'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-            checked ? 'translate-x-5' : 'translate-x-0'
+            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out',
+            checked ? 'translate-x-5' : 'translate-x-0.5'
           )}
         />
       </button>
       <div className="flex-1">
         <label
           htmlFor={id}
+          data-slot="consent-switch-label"
           className="text-foreground cursor-pointer text-sm font-medium"
         >
           {label}
         </label>
         {description && (
-          <p className="text-muted-foreground text-sm">{description}</p>
+          <p
+            id={descriptionId}
+            className="text-muted-foreground text-sm"
+            data-slot="consent-switch-description"
+          >
+            {description}
+          </p>
         )}
       </div>
     </div>
@@ -367,6 +401,7 @@ export function DialogOverlay({
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
+          data-slot="dialog-overlay"
         >
           {children}
         </div>
@@ -442,10 +477,14 @@ export function BookingDialog({
       titleId={titleId}
     >
       {/* Header */}
-      <div className="border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4">
+      <div
+        className="border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4"
+        data-slot="booking-dialog-header"
+      >
         <h2
           id={titleId}
           className="text-lg leading-none font-semibold tracking-tight"
+          data-slot="booking-dialog-title"
         >
           Book Appointment
         </h2>
@@ -454,16 +493,23 @@ export function BookingDialog({
           onClick={onClose}
           className="text-muted-foreground hover:text-foreground rounded-lg p-2 transition-colors"
           aria-label="Close dialog"
+          data-slot="booking-dialog-close"
         >
           <CloseIcon className="h-5 w-5" />
         </button>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-6" data-slot="booking-dialog-body">
           {/* Provider Info */}
-          <div className="border-border border-b pb-4">
-            <h3 className="text-foreground mb-1 text-lg font-bold">
+          <div
+            className="border-border border-b pb-4"
+            data-slot="booking-dialog-provider"
+          >
+            <h3
+              className="text-foreground mb-1 text-lg font-bold"
+              data-slot="booking-dialog-provider-name"
+            >
               {provider.name}
             </h3>
             <a
@@ -471,6 +517,7 @@ export function BookingDialog({
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-primary-600 text-muted-foreground text-sm"
+              data-slot="booking-dialog-provider-address"
             >
               {provider.address.street1}
               {provider.address.street2 && ` ${provider.address.street2}`}{' '}
@@ -481,10 +528,16 @@ export function BookingDialog({
 
           {/* Contact Information */}
           <div>
-            <h4 className="text-foreground mb-4 text-sm font-semibold">
+            <h4
+              className="text-foreground mb-4 text-sm font-semibold"
+              data-slot="booking-dialog-section-title"
+            >
               Contact Information
             </h4>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              data-slot="booking-dialog-contact"
+            >
               <FloatingInput
                 label="First Name"
                 value={formData.firstName}
@@ -520,7 +573,10 @@ export function BookingDialog({
 
           {/* Service Selection */}
           <div>
-            <h4 className="text-foreground mb-4 text-sm font-semibold">
+            <h4
+              className="text-foreground mb-4 text-sm font-semibold"
+              data-slot="booking-dialog-section-title"
+            >
               Please select your services
             </h4>
             <ServiceSelect
@@ -535,7 +591,7 @@ export function BookingDialog({
           </div>
 
           {/* Consent Options */}
-          <div className="space-y-4">
+          <div className="space-y-4" data-slot="booking-dialog-consent">
             <ConsentSwitch
               id="alternate-providers"
               checked={formData.allowAlternateProviders}
@@ -568,10 +624,14 @@ export function BookingDialog({
         </div>
 
         {/* Footer */}
-        <div className="border-border flex items-center justify-between border-t px-6 py-4">
+        <div
+          className="border-border flex items-center justify-between border-t px-6 py-4"
+          data-slot="booking-dialog-footer"
+        >
           <button
             type="button"
             onClick={onClose}
+            data-slot="booking-dialog-footer-btn"
             className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
           >
             Close
@@ -581,6 +641,7 @@ export function BookingDialog({
               <button
                 type="button"
                 onClick={() => onCall(provider.phoneNumber!)}
+                data-slot="booking-dialog-footer-btn"
                 className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800"
               >
                 <PhoneIcon className="h-4 w-4" />
@@ -590,6 +651,7 @@ export function BookingDialog({
             <button
               type="submit"
               disabled={isLoading}
+              data-slot="booking-dialog-footer-btn"
               className={cn(
                 'bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
                 isLoading && 'cursor-not-allowed opacity-50'
@@ -669,7 +731,11 @@ export function InlineBookingForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn('space-y-6', className)}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn('space-y-6', className)}
+      data-slot="inline-booking-form"
+    >
       {/* Contact Fields */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FloatingInput
@@ -717,6 +783,7 @@ export function InlineBookingForm({
       <button
         type="submit"
         disabled={isLoading}
+        data-slot="inline-booking-form-submit"
         className={cn(
           'bg-primary-700 hover:bg-primary-800 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
           isLoading && 'cursor-not-allowed opacity-50'
@@ -751,19 +818,27 @@ export function QuickBookCard({
         'border-border bg-card rounded-lg border p-4 shadow-sm',
         className
       )}
+      data-slot="quick-book-card"
     >
-      <h3 className="text-card-foreground mb-2 text-lg font-semibold">
+      <h3
+        className="text-card-foreground mb-2 text-lg font-semibold"
+        data-slot="quick-book-card-title"
+      >
         Schedule an Appointment
       </h3>
-      <p className="text-muted-foreground mb-4 text-sm">
+      <p
+        className="text-muted-foreground mb-4 text-sm"
+        data-slot="quick-book-card-description"
+      >
         Book your appointment at {provider.name}
       </p>
-      <div className="flex gap-3">
+      <div className="flex gap-3" data-slot="quick-book-card-actions">
         {provider.phoneNumber && onCall && (
           <button
             type="button"
             onClick={() => onCall(provider.phoneNumber!)}
             className="border-border text-foreground hover:bg-muted inline-flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
+            data-slot="quick-book-card-btn"
           >
             <PhoneIcon className="h-4 w-4" />
             Call
@@ -773,6 +848,7 @@ export function QuickBookCard({
           type="button"
           onClick={onBook}
           className="bg-primary-700 hover:bg-primary-800 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          data-slot="quick-book-card-btn"
         >
           <CalendarIcon className="h-4 w-4" />
           Book Online

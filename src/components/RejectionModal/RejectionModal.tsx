@@ -114,7 +114,10 @@ export function RejectionModal({
         <ModalBody className="space-y-4">
           {/* Description or item info */}
           {(description || itemDescription) && (
-            <div className="bg-muted rounded-lg p-3">
+            <div
+              className="bg-muted rounded-lg p-3"
+              data-slot="rejection-modal-info"
+            >
               {description && (
                 <p className="text-muted-foreground text-sm">{description}</p>
               )}
@@ -128,7 +131,10 @@ export function RejectionModal({
 
           {/* Warning message */}
           {variant === 'danger' && (
-            <div className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-lg border p-3">
+            <div
+              className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-lg border p-3"
+              data-slot="rejection-modal-warning"
+            >
               <svg
                 className="text-destructive-700 dark:text-destructive-300 mt-0.5 h-5 w-5 flex-shrink-0"
                 fill="none"
@@ -150,7 +156,7 @@ export function RejectionModal({
           )}
 
           {/* Reason selection */}
-          <div>
+          <div data-slot="rejection-modal-reasons">
             <span className="text-foreground mb-2 block text-sm font-medium">
               Reason for rejection
             </span>
@@ -158,6 +164,7 @@ export function RejectionModal({
               {reasons.map((reason) => (
                 <label
                   key={reason.id}
+                  data-slot="rejection-modal-reason"
                   className={cn(
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     selectedReasonId === reason.id
@@ -188,7 +195,7 @@ export function RejectionModal({
 
           {/* Details textarea */}
           {showDetails && (
-            <div>
+            <div data-slot="rejection-modal-details">
               <label className="text-foreground mb-1 block text-sm font-medium">
                 {detailsLabel}
                 {needsDetails && (
