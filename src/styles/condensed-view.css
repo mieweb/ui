@@ -5157,3 +5157,28 @@ body.condensed [data-slot='tooltip'] {
   line-height: 0.875rem !important;
   border-radius: 0.25rem !important;
 }
+
+/* ========================================================================
+   Breadcrumb — condensed overrides
+   ======================================================================== */
+
+body.condensed [data-slot='breadcrumb-list'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='breadcrumb-link'] {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='breadcrumb-page'] {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='breadcrumb-separator'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
