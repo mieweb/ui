@@ -99,7 +99,9 @@ function Breadcrumb({
               ) : isLast || !item.href ? (
                 <BreadcrumbPage item={item} />
               ) : renderLink ? (
-                renderLink(item, index)
+                <span data-slot="breadcrumb-link">
+                  {renderLink(item, index)}
+                </span>
               ) : (
                 <BreadcrumbLink item={item} />
               )}

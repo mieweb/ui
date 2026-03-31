@@ -428,6 +428,7 @@ export function CommandPalette({
                               role="option"
                               aria-selected={isSelected}
                               data-index={currentIndex}
+                              data-slot="command-palette-item"
                               onClick={() => handleItemClick(item)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -466,6 +467,7 @@ export function CommandPalette({
                           >
                             {item.icon && (
                               <div
+                                data-slot="command-palette-item-icon"
                                 className={cn(
                                   'mt-0.5 h-4 w-4 flex-shrink-0',
                                   isSelected
