@@ -325,7 +325,7 @@ export function FileManager({
           </TableHeader>
           <TableBody>
             {files.length > 0 ? (
-              files.map((file, index) => (
+              files.map((file) => (
                 <TableRow key={file.id} data-slot="file-manager-row">
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -352,7 +352,7 @@ export function FileManager({
                     >
                       <FileRowActionMenu
                         fileId={file.id}
-                        rowIndex={index}
+                        filename={file.filename}
                         onPreview={onPreview}
                         onDownload={onDownload}
                         onDelete={onDelete}
@@ -401,13 +401,13 @@ export function FileManager({
 
 function FileRowActionMenu({
   fileId,
-  rowIndex,
+  filename,
   onPreview,
   onDownload,
   onDelete,
 }: {
   fileId: string;
-  rowIndex: number;
+  filename: string;
   onPreview?: (fileId: string) => void;
   onDownload?: (fileId: string) => void;
   onDelete?: (fileId: string) => void;
@@ -450,11 +450,25 @@ function FileRowActionMenu({
 
   React.useLayoutEffect(() => {
     if (!open || !buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    setMenuPos({
-      top: rect.bottom + 4,
-      left: rect.right,
-    });
+
+    function updatePosition() {
+      if (!buttonRef.current) return;
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({
+        top: rect.bottom + 4,
+        left: rect.right,
+      });
+    }
+
+    updatePosition();
+
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
   }, [open]);
 
   const actions = [
@@ -505,7 +519,7 @@ function FileRowActionMenu({
         )}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`File actions for row ${rowIndex + 1}`}
+        aria-label={`File actions for ${filename}`}
       >
         <MoreHorizontalIcon size={14} />
       </button>

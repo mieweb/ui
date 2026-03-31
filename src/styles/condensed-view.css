@@ -4581,11 +4581,12 @@ body.condensed [data-slot='file-manager-storage'] p {
   font-size: 0.6875rem !important;
 }
 
-/* Table header — tighter padding */
+/* Table header — tighter padding and height */
 body.condensed [data-slot='file-manager-table'] th {
   padding-top: 0.375rem !important;
   padding-bottom: 0.375rem !important;
   font-size: 0.625rem !important;
+  height: 2rem !important;
 }
 
 /* Table rows — tighter padding */
