@@ -4446,9 +4446,23 @@ body.condensed [data-slot='doc-scanner-dropzone'] {
   border-radius: 0.5rem !important;
 }
 
-/* DropZone content — tighter gap */
+/* DropZone content — tighter gap and smaller text */
 body.condensed [data-slot='doc-scanner-dropzone-content'] {
   gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='doc-scanner-dropzone-content'] [data-slot='text'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='doc-scanner-dropzone-content'] .space-y-1 {
+  gap: 0 !important;
+}
+
+body.condensed [data-slot='doc-scanner-dropzone-content'] .space-y-1 [data-slot='text'] {
+  font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
 }
 
 /* Upload icon circle — smaller */
