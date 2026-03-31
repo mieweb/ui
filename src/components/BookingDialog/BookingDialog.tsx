@@ -271,6 +271,8 @@ export function ConsentSwitch({
   description,
   className,
 }: ConsentSwitchProps) {
+  const descriptionId = description ? `${id}-description` : undefined;
+
   return (
     <div
       className={cn('flex items-start gap-3', className)}
@@ -280,6 +282,7 @@ export function ConsentSwitch({
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-describedby={descriptionId}
         id={id}
         onClick={() => onChange(!checked)}
         data-slot="consent-switch-toggle"
@@ -306,6 +309,7 @@ export function ConsentSwitch({
         </label>
         {description && (
           <p
+            id={descriptionId}
             className="text-muted-foreground text-sm"
             data-slot="consent-switch-description"
           >
