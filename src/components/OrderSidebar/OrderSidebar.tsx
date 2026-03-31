@@ -113,7 +113,7 @@ export function OrderSidebar({
       {/* Sidebar */}
       <aside
         data-slot="order-sidebar"
-        className={`fixed top-0 right-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className} `}
+        className={`fixed top-0 right-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className}`}
         role="dialog"
         aria-modal="true"
         aria-label="Order details"

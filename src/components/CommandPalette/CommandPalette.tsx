@@ -366,6 +366,7 @@ export function CommandPalette({
           <div
             ref={listRef}
             data-slot="command-palette-results"
+            role="listbox"
             className="max-h-[60vh] overflow-y-auto"
           >
             {filteredItems.length === 0 ? (
