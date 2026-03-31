@@ -278,7 +278,10 @@ function RecordingIndicator({
   if (!isRecording && !isPaused) return null;
 
   return (
-    <div className="flex items-center gap-2">
+    <div
+      className="flex items-center gap-2"
+      data-slot="audio-recorder-indicator"
+    >
       <div
         className={cn(
           'h-3 w-3 rounded-full',
@@ -313,7 +316,10 @@ function TimeDisplay({
   showMax,
 }: TimeDisplayProps) {
   return (
-    <div className="flex items-center gap-1 font-mono text-sm text-neutral-600 dark:text-neutral-400">
+    <div
+      className="flex items-center gap-1 font-mono text-sm text-neutral-600 dark:text-neutral-400"
+      data-slot="audio-recorder-time"
+    >
       <span>{formatTime(currentTime)}</span>
       <span>/</span>
       <span>{formatTime(showMax && maxDuration ? maxDuration : duration)}</span>
@@ -819,6 +825,7 @@ function AudioRecorder({
   return (
     <div
       className={cn(audioRecorderVariants({ size, variant }), className)}
+      data-slot="audio-recorder"
       role="group"
       aria-label={ariaLabel}
     >
@@ -826,6 +833,7 @@ function AudioRecorder({
       {showWaveform && (
         <div
           className={cn(waveformContainerVariants({ state }))}
+          data-slot="audio-recorder-waveform"
           style={{ height: waveformHeight }}
         >
           {(state === 'recording' || state === 'listening') && !hasRecording ? (
@@ -843,7 +851,10 @@ function AudioRecorder({
 
       {/* Status and Time */}
       {showTime && (
-        <div className="flex items-center justify-between">
+        <div
+          className="flex items-center justify-between"
+          data-slot="audio-recorder-status"
+        >
           <RecordingIndicator isRecording={isRecording} isPaused={isPaused} />
           <TimeDisplay
             currentTime={currentTime}
@@ -896,7 +907,10 @@ function DefaultControls({
   onDelete,
 }: DefaultControlsProps) {
   return (
-    <div className="flex items-center justify-center gap-3">
+    <div
+      className="flex items-center justify-center gap-3"
+      data-slot="audio-recorder-controls"
+    >
       {/* Delete button - only when we have a recording */}
       {hasRecording && !isRecording && (
         <button
