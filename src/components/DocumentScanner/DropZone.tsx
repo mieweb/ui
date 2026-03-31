@@ -128,6 +128,7 @@ export function DropZone({
         tabIndex={disabled ? -1 : 0}
         aria-label="Drop files here or click to browse"
         aria-disabled={disabled}
+        data-slot="doc-scanner-dropzone"
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         onDragEnter={handleDragEnter}

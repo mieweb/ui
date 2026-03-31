@@ -283,7 +283,10 @@ export function DocumentScanner({
           )}
 
           {/* Actions */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div
+            className="flex flex-wrap items-center justify-center gap-3"
+            data-slot="doc-scanner-actions"
+          >
             {multiple && (
               <>
                 {/* Add more files button */}
@@ -340,8 +343,14 @@ export function DocumentScanner({
           disabled={disabled}
           className="min-h-[240px]"
         >
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full">
+          <div
+            className="flex flex-col items-center gap-4 text-center"
+            data-slot="doc-scanner-dropzone-content"
+          >
+            <div
+              className="bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full"
+              data-slot="doc-scanner-upload-icon"
+            >
               <UploadIcon className="text-primary-600 dark:text-primary-400 h-7 w-7" />
             </div>
 
@@ -430,9 +439,10 @@ export function DocumentScanner({
         'shadow-sm',
         className
       )}
+      data-slot="doc-scanner"
     >
       {/* Header */}
-      <div className="mb-6 text-center">
+      <div className="mb-6 text-center" data-slot="doc-scanner-header">
         <Text as="h2" size="xl" weight="semibold" className="mb-1">
           {title}
         </Text>
