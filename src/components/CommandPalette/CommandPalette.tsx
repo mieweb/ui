@@ -269,6 +269,7 @@ export function CommandPalette({
     <>
       {/* Backdrop */}
       <div
+        data-slot="command-palette-backdrop"
         className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/70"
         aria-hidden="true"
       />
@@ -278,6 +279,7 @@ export function CommandPalette({
         <div
           ref={containerRef}
           data-testid={testId}
+          data-slot="command-palette"
           className={cn(
             'rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800',
             'overflow-hidden shadow-2xl',
@@ -285,7 +287,10 @@ export function CommandPalette({
           )}
         >
           {/* Search Input */}
-          <div className="relative border-b border-gray-200 dark:border-gray-700">
+          <div
+            data-slot="command-palette-search"
+            className="relative border-b border-gray-200 dark:border-gray-700"
+          >
             <div className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-500">
               <SearchIcon />
             </div>
@@ -322,7 +327,10 @@ export function CommandPalette({
 
           {/* Category Filters */}
           {categories.length > 0 && (
-            <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-100 p-2 dark:border-gray-700">
+            <div
+              data-slot="command-palette-filters"
+              className="flex items-center gap-1 overflow-x-auto border-b border-gray-100 p-2 dark:border-gray-700"
+            >
               <button
                 onClick={() => setActiveCategory(null)}
                 data-testid={`${testId}-filter-all`}
@@ -355,9 +363,16 @@ export function CommandPalette({
           )}
 
           {/* Results List */}
-          <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
+          <div
+            ref={listRef}
+            data-slot="command-palette-results"
+            className="max-h-[60vh] overflow-y-auto"
+          >
             {filteredItems.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <div
+                data-slot="command-palette-empty"
+                className="p-8 text-center text-gray-500 dark:text-gray-400"
+              >
                 {emptyState ?? (
                   <>
                     <div className="mx-auto mb-2 h-8 w-8 opacity-50">
@@ -379,6 +394,7 @@ export function CommandPalette({
                     <div key={categoryId}>
                       {/* Group Header */}
                       <div
+                        data-slot="command-palette-group"
                         className={cn(
                           'sticky top-0 px-3 py-2 text-xs font-semibold',
                           'text-gray-500 dark:text-gray-400',
@@ -436,6 +452,7 @@ export function CommandPalette({
                           <button
                             key={item.id}
                             data-index={currentIndex}
+                            data-slot="command-palette-item"
                             onClick={() => handleItemClick(item)}
                             onMouseEnter={() => setSelectedIndex(currentIndex)}
                             disabled={item.disabled}
@@ -499,6 +516,7 @@ export function CommandPalette({
           {/* Footer */}
           {footer ?? (
             <div
+              data-slot="command-palette-footer"
               className={cn(
                 'border-t border-gray-100 p-2 dark:border-gray-700',
                 'bg-gray-50 text-xs text-gray-500 dark:bg-gray-900/50 dark:text-gray-400',
@@ -555,6 +573,7 @@ export function CommandPaletteTrigger({
     <button
       onClick={open}
       data-testid={testId}
+      data-slot="command-palette-trigger"
       className={cn(
         'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-400',
         'bg-white px-4 py-2.5 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-300',
