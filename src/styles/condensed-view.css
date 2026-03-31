@@ -4996,3 +4996,80 @@ body.condensed [data-slot='modal-footer'] {
   padding: 0.5rem 0.75rem !important;
   gap: 0.375rem !important;
 }
+
+/* ============================================================
+   RejectionModal — condensed overrides
+   Inherits Modal slots (modal, modal-header, modal-title,
+   modal-close, modal-body, modal-footer) automatically.
+   These target RejectionModal's own visual regions.
+   ============================================================ */
+
+/* Info box — tighter padding */
+body.condensed [data-slot='rejection-modal-info'] {
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='rejection-modal-info'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* Warning alert — tighter */
+body.condensed [data-slot='rejection-modal-warning'] {
+  padding: 0.375rem 0.5rem !important;
+  gap: 0.375rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='rejection-modal-warning'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+body.condensed [data-slot='rejection-modal-warning'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Reasons section label */
+body.condensed [data-slot='rejection-modal-reasons'] > span {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Reason list spacing */
+body.condensed
+  [data-slot='rejection-modal-reasons']
+  > div
+  > :not([hidden])
+  ~ :not([hidden]) {
+  margin-top: 0.25rem !important;
+}
+
+/* Individual reason option */
+body.condensed [data-slot='rejection-modal-reason'] {
+  padding: 0.375rem 0.5rem !important;
+  gap: 0.375rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='rejection-modal-reason'] input[type='radio'] {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='rejection-modal-reason'] span {
+  font-size: 0.6875rem !important;
+}
+
+/* Details section */
+body.condensed [data-slot='rejection-modal-details'] label {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='rejection-modal-details'] textarea {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.25rem !important;
+}
