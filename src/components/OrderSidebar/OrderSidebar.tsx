@@ -104,6 +104,7 @@ export function OrderSidebar({
     <>
       {/* Backdrop */}
       <div
+        data-slot="order-sidebar-backdrop"
         className="fixed inset-0 z-40 bg-black/50 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
@@ -111,13 +112,17 @@ export function OrderSidebar({
 
       {/* Sidebar */}
       <aside
+        data-slot="order-sidebar"
         className={`fixed top-0 right-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className} `}
         role="dialog"
         aria-modal="true"
         aria-label="Order details"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+        <div
+          data-slot="order-sidebar-header"
+          className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700"
+        >
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Order Details
@@ -150,9 +155,15 @@ export function OrderSidebar({
         </div>
 
         {/* Content */}
-        <div className="h-[calc(100%-8rem)] overflow-y-auto p-4">
+        <div
+          data-slot="order-sidebar-content"
+          className="h-[calc(100%-8rem)] overflow-y-auto p-4"
+        >
           {/* Status & Priority */}
-          <div className="mb-4 flex items-center gap-2">
+          <div
+            data-slot="order-sidebar-status"
+            className="mb-4 flex items-center gap-2"
+          >
             {status && (
               <Badge variant={getStatusVariant(status)}>{status}</Badge>
             )}
@@ -166,9 +177,9 @@ export function OrderSidebar({
           </div>
 
           {/* Details */}
-          <dl className="space-y-4">
+          <dl data-slot="order-sidebar-details" className="space-y-4">
             {patientName && (
-              <div>
+              <div data-slot="order-sidebar-detail">
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Patient
                 </dt>
@@ -179,7 +190,7 @@ export function OrderSidebar({
             )}
 
             {employerName && (
-              <div>
+              <div data-slot="order-sidebar-detail">
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Employer
                 </dt>
@@ -190,7 +201,7 @@ export function OrderSidebar({
             )}
 
             {serviceName && (
-              <div>
+              <div data-slot="order-sidebar-detail">
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Service
                 </dt>
@@ -200,7 +211,10 @@ export function OrderSidebar({
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div
+              data-slot="order-sidebar-detail"
+              className="grid grid-cols-2 gap-4"
+            >
               <div>
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Created
@@ -220,11 +234,14 @@ export function OrderSidebar({
             </div>
 
             {notes && (
-              <div>
+              <div data-slot="order-sidebar-detail">
                 <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Notes
                 </dt>
-                <dd className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                <dd
+                  data-slot="order-sidebar-notes"
+                  className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                >
                   {notes}
                 </dd>
               </div>
@@ -237,7 +254,10 @@ export function OrderSidebar({
 
         {/* Actions */}
         {actions.length > 0 && (
-          <div className="absolute right-0 bottom-0 left-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+          <div
+            data-slot="order-sidebar-footer"
+            className="absolute right-0 bottom-0 left-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+          >
             <div className="flex flex-wrap gap-2">
               {actions.map((action) => (
                 <Button

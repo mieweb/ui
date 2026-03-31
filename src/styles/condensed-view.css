@@ -5374,3 +5374,92 @@ body.condensed [data-slot='language-selector-inline-option'] {
   padding: 0.125rem 0.375rem !important;
   font-size: 0.6875rem !important;
 }
+
+/* =============================================
+   OrderSidebar – condensed overrides
+   ============================================= */
+
+/* Sidebar panel – narrower max-width */
+body.condensed [data-slot='order-sidebar'] {
+  max-width: 22rem !important;
+}
+
+/* Header – tighter padding, smaller title & subtitle */
+body.condensed [data-slot='order-sidebar-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-header'] h2 {
+  font-size: 0.8125rem !important;
+  line-height: 1.25rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-header'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Close button – smaller hit area & icon */
+body.condensed [data-slot='order-sidebar-header'] button {
+  padding: 0.25rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-header'] button svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Content area – tighter padding, adjusted calc for smaller header/footer */
+body.condensed [data-slot='order-sidebar-content'] {
+  padding: 0.5rem 0.75rem !important;
+  height: calc(100% - 5.5rem) !important;
+}
+
+/* Status & priority row */
+body.condensed [data-slot='order-sidebar-status'] {
+  margin-bottom: 0.5rem !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-status'] span {
+  font-size: 0.625rem !important;
+}
+
+/* Details list – tighter vertical spacing */
+body.condensed [data-slot='order-sidebar-details'] {
+  gap: 0.5rem !important;
+}
+
+/* Individual detail items – labels & values */
+body.condensed [data-slot='order-sidebar-detail'] dt {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-detail'] dd {
+  margin-top: 0.125rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Date grid – tighter gap */
+body.condensed [data-slot='order-sidebar-detail'].grid {
+  gap: 0.5rem !important;
+}
+
+/* Notes box – compact padding */
+body.condensed [data-slot='order-sidebar-notes'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Footer – tighter padding & gap */
+body.condensed [data-slot='order-sidebar-footer'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-footer'] > div {
+  gap: 0.375rem !important;
+}
