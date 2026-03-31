@@ -5471,3 +5471,50 @@ body.condensed [data-slot='order-sidebar-footer'] {
 body.condensed [data-slot='order-sidebar-footer'] > div {
   gap: 0.375rem !important;
 }
+
+/* =============================================
+   Pagination – condensed overrides
+   ============================================= */
+
+/* Nav container – tighter gap */
+body.condensed [data-slot='pagination'],
+body.condensed [data-slot='simple-pagination'] {
+  gap: 0.25rem !important;
+}
+
+/* All pagination buttons – smaller than sm variant */
+body.condensed [data-slot='pagination-first'],
+body.condensed [data-slot='pagination-prev'],
+body.condensed [data-slot='pagination-next'],
+body.condensed [data-slot='pagination-last'],
+body.condensed [data-slot='pagination-page'],
+body.condensed [data-slot='pagination-ellipsis'] {
+  height: 1.5rem !important;
+  min-width: 1.5rem !important;
+  padding-left: 0.375rem !important;
+  padding-right: 0.375rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+/* Nav button icons – smaller */
+body.condensed [data-slot='pagination-first'] svg,
+body.condensed [data-slot='pagination-prev'] svg,
+body.condensed [data-slot='pagination-next'] svg,
+body.condensed [data-slot='pagination-last'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Page numbers container – tighter gap */
+body.condensed [data-slot='pagination-pages'] {
+  gap: 0.125rem !important;
+}
+
+/* Page info text (SimplePagination) */
+body.condensed [data-slot='pagination-info'] {
+  font-size: 0.6875rem !important;
+  padding-left: 0.375rem !important;
+  padding-right: 0.375rem !important;
+}
