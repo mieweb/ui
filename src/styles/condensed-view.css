@@ -4895,3 +4895,104 @@ body.condensed [data-slot='quick-book-card-btn'] svg {
   width: 0.75rem !important;
   height: 0.75rem !important;
 }
+
+/* ============================================================
+   CookieConsent — condensed overrides
+   Covers: CookieConsentBanner, CompactCookieBanner
+   ============================================================ */
+
+/* --- CookieConsentBanner --- */
+body.condensed [data-slot='cookie-consent-inner'] {
+  padding: 0.5rem !important;
+}
+
+body.condensed [data-slot='cookie-consent-message'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='cookie-consent-message'] p:first-child {
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='cookie-consent-message'] p:last-child {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='cookie-consent-actions'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='cookie-consent-btn'] {
+  padding: 0.25rem 0.625rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='cookie-consent-btn'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* --- CompactCookieBanner --- */
+body.condensed [data-slot='compact-cookie-banner'] {
+  padding: 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='compact-cookie-banner-message'] {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='compact-cookie-banner-btn'] {
+  padding: 0.25rem 0.625rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* ============================================================
+   Modal — condensed overrides
+   Covers: Modal, ModalHeader, ModalTitle, ModalClose,
+   ModalBody, ModalFooter
+   ============================================================ */
+
+/* Modal content — tighter border radius on desktop */
+body.condensed [data-slot='modal'] {
+  border-radius: 0.5rem !important;
+}
+
+/* Header — reduced padding */
+body.condensed [data-slot='modal-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Title — smaller font */
+body.condensed [data-slot='modal-title'] {
+  font-size: 0.8125rem !important;
+}
+
+/* Close button — smaller hit area */
+body.condensed [data-slot='modal-close'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='modal-close'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Body — reduced padding and text */
+body.condensed [data-slot='modal-body'] {
+  padding: 0.75rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+}
+
+/* Footer — reduced padding and gap */
+body.condensed [data-slot='modal-footer'] {
+  padding: 0.5rem 0.75rem !important;
+  gap: 0.375rem !important;
+}
