@@ -4287,6 +4287,10 @@ body.condensed [data-slot='audio-player'][data-variant='waveform'] {
 body.condensed [data-slot='audio-player-play-btn'] {
   height: 1.25rem !important;
   width: 1.25rem !important;
+}
+
+/* Extra spacing between play button and slider in compact variant */
+body.condensed [data-variant='compact'] [data-slot='audio-player-play-btn'] {
   margin-right: 0.25rem !important;
 }
 
@@ -4336,17 +4340,17 @@ body.condensed [data-slot='audio-player-rate'] {
   padding: 0.125rem 0.25rem !important;
 }
 
-/* Podcast story composition — cover art + header */
-body.condensed [data-slot='podcast-cover'] {
+/* Podcast story composition — cover art + header (Storybook-only) */
+body.sb-show-main.condensed [data-slot='podcast-cover'] {
   width: 3.5rem !important;
   height: 3.5rem !important;
   border-radius: 0.375rem !important;
 }
 
-body.condensed [data-slot='podcast-cover'] > div {
+body.sb-show-main.condensed [data-slot='podcast-cover'] > div {
   font-size: 1.125rem !important;
 }
 
-body.condensed [data-slot='podcast-header'] {
+body.sb-show-main.condensed [data-slot='podcast-header'] {
   gap: 0.625rem !important;
 }
