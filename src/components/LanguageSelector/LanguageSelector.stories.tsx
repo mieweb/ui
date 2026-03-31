@@ -66,7 +66,7 @@ function LanguageSelectorWithState({
 }
 
 const meta: Meta<typeof LanguageSelectorWithState> = {
-  title: 'Components/Navigation/LanguageSelector',
+  title: 'Components/Forms & Inputs/LanguageSelector',
   component: LanguageSelectorWithState,
   tags: ['autodocs'],
   parameters: {
