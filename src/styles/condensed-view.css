@@ -4323,9 +4323,10 @@ body.condensed [data-slot='audio-player-progress'] > div:last-child {
   width: 0.75rem !important;
 }
 
-/* Waveform container — scale down proportionally */
+/* Waveform container — shorter and scaled down */
 body.condensed [data-slot='audio-player-waveform'] {
-  transform: scaleY(0.625) !important;
+  height: 2.5rem !important;
+  transform: scaleY(0.5) !important;
   transform-origin: center !important;
 }
 
@@ -4361,14 +4362,17 @@ body.sb-show-main.condensed [data-slot='podcast-header'] {
 
 /* Container — tighter padding and gap */
 body.condensed [data-slot='audio-recorder'] {
-  padding: 0.5rem !important;
-  gap: 0.375rem !important;
-  border-radius: 0.5rem !important;
+  padding: 0.375rem !important;
+  gap: 0.25rem !important;
+  border-radius: 0.375rem !important;
 }
 
-/* Waveform container — shorter */
+/* Waveform container — shorter than sm variant (50px) */
 body.condensed [data-slot='audio-recorder-waveform'] {
-  border-radius: 0.375rem !important;
+  border-radius: 0.25rem !important;
+  height: 2.5rem !important;
+  transform: scaleY(0.5) !important;
+  transform-origin: center !important;
 }
 
 /* Status row — smaller gap */
@@ -4378,35 +4382,35 @@ body.condensed [data-slot='audio-recorder-status'] {
 
 /* Recording indicator — smaller dot and text */
 body.condensed [data-slot='audio-recorder-indicator'] {
-  gap: 0.25rem !important;
+  gap: 0.125rem !important;
 }
 
 body.condensed [data-slot='audio-recorder-indicator'] > div {
-  height: 0.5rem !important;
-  width: 0.5rem !important;
+  height: 0.375rem !important;
+  width: 0.375rem !important;
 }
 
 body.condensed [data-slot='audio-recorder-indicator'] > span {
-  font-size: 0.625rem !important;
+  font-size: 0.5625rem !important;
 }
 
 /* Time display — smaller font */
 body.condensed [data-slot='audio-recorder-time'] {
-  font-size: 0.625rem !important;
+  font-size: 0.5625rem !important;
 }
 
 /* Controls row — tighter gap */
 body.condensed [data-slot='audio-recorder-controls'] {
-  gap: 0.375rem !important;
+  gap: 0.25rem !important;
 }
 
-/* Control buttons — smaller */
+/* Control buttons — smaller than sm variant */
 body.condensed [data-slot='audio-recorder-controls'] button {
-  height: 2rem !important;
-  width: 2rem !important;
+  height: 1.5rem !important;
+  width: 1.5rem !important;
 }
 
 body.condensed [data-slot='audio-recorder-controls'] button svg {
-  height: 0.875rem !important;
-  width: 0.875rem !important;
+  height: 0.75rem !important;
+  width: 0.75rem !important;
 }
