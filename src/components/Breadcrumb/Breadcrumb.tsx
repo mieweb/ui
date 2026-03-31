@@ -95,7 +95,12 @@ function Breadcrumb({
                 </span>
               )}
               {isEllipsis ? (
-                <span className="text-muted-foreground text-sm">...</span>
+                <span
+                  data-slot="breadcrumb-ellipsis"
+                  className="text-muted-foreground text-sm"
+                >
+                  ...
+                </span>
               ) : isLast || !item.href ? (
                 <BreadcrumbPage item={item} />
               ) : renderLink ? (

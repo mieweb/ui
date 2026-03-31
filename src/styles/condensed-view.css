@@ -5164,10 +5164,6 @@ body.condensed [data-slot='tooltip'] {
 
 body.condensed [data-slot='breadcrumb-list'] {
   gap: 0.25rem !important;
-}
-
-body.condensed [data-slot='breadcrumb-list'] {
-  gap: 0.25rem !important;
   font-size: 0.6875rem !important;
   line-height: 1rem !important;
 }
@@ -5176,6 +5172,18 @@ body.condensed [data-slot='breadcrumb-link'] {
   font-size: 0.6875rem !important;
   line-height: 1rem !important;
   gap: 0.25rem !important;
+}
+
+/* Force condensed sizing on children inside renderLink wrapper (e.g. custom <a> with text-sm) */
+body.condensed [data-slot='breadcrumb-link'] > * {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Ellipsis – override explicit text-sm */
+body.condensed [data-slot='breadcrumb-ellipsis'] {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
 }
 
 body.condensed [data-slot='breadcrumb-page'] {
@@ -5425,9 +5433,9 @@ body.condensed [data-slot='order-sidebar-status'] span {
   font-size: 0.625rem !important;
 }
 
-/* Details list – tighter vertical spacing */
-body.condensed [data-slot='order-sidebar-details'] {
-  gap: 0.5rem !important;
+/* Details list – tighter vertical spacing (space-y-* is margin-based, not gap) */
+body.condensed [data-slot='order-sidebar-details'] > * + * {
+  margin-top: 0.5rem !important;
 }
 
 /* Individual detail items – labels & values */
