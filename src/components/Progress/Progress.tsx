@@ -110,11 +110,15 @@ function Progress({
     : `${Math.round(percentage)}%`;
 
   return (
-    <div className={cn('w-full', className)}>
+    <div data-slot="progress" className={cn('w-full', className)}>
       {(label || showValue) && (
-        <div className="mb-1.5 flex items-center justify-between">
+        <div
+          data-slot="progress-label-row"
+          className="mb-1.5 flex items-center justify-between"
+        >
           {label && (
             <label
+              data-slot="progress-label"
               id={`${progressId}-label`}
               className="text-foreground text-sm font-medium"
             >
@@ -122,13 +126,17 @@ function Progress({
             </label>
           )}
           {showValue && !indeterminate && (
-            <span className="text-muted-foreground text-sm">
+            <span
+              data-slot="progress-value"
+              className="text-muted-foreground text-sm"
+            >
               {displayValue}
             </span>
           )}
         </div>
       )}
       <div
+        data-slot="progress-track"
         role="progressbar"
         aria-valuenow={indeterminate ? undefined : value}
         aria-valuemin={0}
@@ -138,6 +146,7 @@ function Progress({
         className={cn(progressBarTrackVariants({ size }))}
       >
         <div
+          data-slot="progress-fill"
           className={cn(
             progressBarFillVariants({ variant, animated, striped }),
             indeterminate &&
@@ -234,6 +243,7 @@ function CircularProgress({
 
   return (
     <div
+      data-slot="circular-progress"
       role="progressbar"
       aria-valuenow={indeterminate ? undefined : value}
       aria-valuemin={0}
@@ -272,7 +282,10 @@ function CircularProgress({
         />
       </svg>
       {showValue && !indeterminate && (
-        <span className="text-foreground absolute inset-0 flex items-center justify-center text-xs font-medium">
+        <span
+          data-slot="circular-progress-value"
+          className="text-foreground absolute inset-0 flex items-center justify-center text-xs font-medium"
+        >
           {Math.round(percentage)}%
         </span>
       )}
