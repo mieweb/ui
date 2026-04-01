@@ -5961,3 +5961,60 @@ body.condensed [data-slot='toast-dismiss'] svg {
   width: 0.75rem !important;
   height: 0.75rem !important;
 }
+
+/* ============================================================================
+   Progress – condensed overrides
+   ============================================================================ */
+
+/* Label row – tighter margin */
+body.condensed [data-slot='progress-label-row'] {
+  margin-bottom: 0.125rem !important;
+}
+
+/* Label – smaller text */
+body.condensed [data-slot='progress-label'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Value – smaller text */
+body.condensed [data-slot='progress-value'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Track – all sizes collapse to sm (h-1 = 0.25rem) */
+body.condensed [data-slot='progress-track'].h-2 {
+  height: 0.25rem !important;
+}
+
+body.condensed [data-slot='progress-track'].h-3 {
+  height: 0.25rem !important;
+}
+
+body.condensed [data-slot='progress-track'].h-4 {
+  height: 0.25rem !important;
+}
+
+/* --- Circular Progress --- */
+
+/* All sizes collapse to sm (2rem = 32px) */
+body.condensed [data-slot='circular-progress'].h-12.w-12 {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+body.condensed [data-slot='circular-progress'].h-16.w-16 {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+body.condensed [data-slot='circular-progress'].h-24.w-24 {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+/* Circular value – smaller text */
+body.condensed [data-slot='circular-progress-value'] {
+  font-size: 0.5rem !important;
+}
