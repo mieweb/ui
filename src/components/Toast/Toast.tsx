@@ -141,6 +141,7 @@ export function Toast({
   return (
     <div
       role="alert"
+      data-slot="toast"
       className={cn(
         'flex items-start gap-3 rounded-lg border p-4 shadow-lg',
         'max-w-[420px] min-w-[300px]',
@@ -149,15 +150,24 @@ export function Toast({
       )}
     >
       {/* Icon */}
-      <div className={cn('flex-shrink-0', styles.icon)}>{displayIcon}</div>
+      <div data-slot="toast-icon" className={cn('flex-shrink-0', styles.icon)}>
+        {displayIcon}
+      </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1">
-        {title && <p className="mb-1 text-sm font-semibold">{title}</p>}
-        <div className="text-sm opacity-90">{message}</div>
+      <div data-slot="toast-content" className="min-w-0 flex-1">
+        {title && (
+          <p data-slot="toast-title" className="mb-1 text-sm font-semibold">
+            {title}
+          </p>
+        )}
+        <div data-slot="toast-message" className="text-sm opacity-90">
+          {message}
+        </div>
         {action && (
           <button
             onClick={action.onClick}
+            data-slot="toast-action"
             className="mt-2 rounded text-sm font-medium underline hover:no-underline focus:ring-2 focus:ring-current focus:ring-offset-2 focus:outline-none"
           >
             {action.label}
@@ -169,6 +179,7 @@ export function Toast({
       {dismissible && (
         <button
           onClick={onClose}
+          data-slot="toast-dismiss"
           className="flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10"
           aria-label="Dismiss notification"
         >
@@ -214,6 +225,7 @@ export function ToastContainer({
 
   return (
     <div
+      data-slot="toast-container"
       className={cn(
         'pointer-events-none fixed z-50 flex flex-col gap-2',
         positionStyles[position]

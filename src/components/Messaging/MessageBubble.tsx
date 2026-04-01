@@ -469,6 +469,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
       return (
         <div
           ref={ref}
+          data-slot="message-system"
           className={cn(bubbleVariants({ variant: 'system' }), className)}
           role="status"
           aria-live="polite"
@@ -482,6 +483,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
     return (
       <div
         ref={ref}
+        data-slot="message-bubble"
         className={cn(
           'group flex items-end gap-2',
           isOutgoing ? 'flex-row-reverse' : 'flex-row',
@@ -491,7 +493,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
       >
         {/* Avatar */}
         {showAvatar && !isOutgoing && (
-          <div className="mb-1 shrink-0">
+          <div data-slot="message-avatar" className="mb-1 shrink-0">
             <div
               className={cn(
                 'flex h-8 w-8 items-center justify-center rounded-full',
@@ -520,7 +522,10 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
         >
           {/* Sender name (for group chats) */}
           {showSenderName && !isOutgoing && (
-            <span className="mb-1 px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+            <span
+              data-slot="message-sender-name"
+              className="mb-1 px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400"
+            >
               {message.sender.name}
             </span>
           )}
@@ -528,6 +533,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {/* Reply preview */}
           {message.replyTo && (
             <div
+              data-slot="message-reply-preview"
               className={cn(
                 'mb-1 max-w-full rounded-lg px-3 py-1.5 text-xs',
                 isOutgoing
@@ -542,6 +548,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 
           {/* Bubble */}
           <div
+            data-slot="message-bubble-content"
             className={cn(bubbleVariants({ variant, status: message.status }))}
             role="article"
             aria-label={`Message from ${message.sender.name}`}
@@ -580,6 +587,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 
           {/* Footer: timestamp, status, read receipts */}
           <div
+            data-slot="message-footer"
             className={cn(
               'mt-1 flex items-center gap-2 px-1',
               isOutgoing ? 'flex-row-reverse' : 'flex-row'
@@ -636,6 +644,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {/* Reactions */}
           {message.reactions && message.reactions.length > 0 && (
             <div
+              data-slot="message-reactions"
               className={cn(
                 '-mt-1 flex flex-wrap gap-1',
                 isOutgoing ? 'justify-end' : 'justify-start'

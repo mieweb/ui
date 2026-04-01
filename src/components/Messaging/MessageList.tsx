@@ -110,6 +110,7 @@ function SkeletonMessage({
 }: SkeletonMessageProps) {
   return (
     <div
+      data-slot="skeleton-message"
       className={cn(
         'flex items-end gap-2',
         isOutgoing ? 'flex-row-reverse' : 'flex-row',
@@ -118,9 +119,13 @@ function SkeletonMessage({
       aria-hidden="true"
     >
       {showAvatar && !isOutgoing && (
-        <div className="h-8 w-8 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
+        <div
+          data-slot="skeleton-avatar"
+          className="h-8 w-8 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700"
+        />
       )}
       <div
+        data-slot="skeleton-bubble"
         className={cn(
           'animate-pulse rounded-2xl',
           isOutgoing
@@ -129,7 +134,9 @@ function SkeletonMessage({
           'h-10 w-48'
         )}
       />
-      {showAvatar && isOutgoing && <div className="w-8" />}
+      {showAvatar && isOutgoing && (
+        <div data-slot="skeleton-spacer" className="w-8" />
+      )}
     </div>
   );
 }
@@ -162,6 +169,7 @@ function TypingIndicator({ typingState, className }: TypingIndicatorProps) {
 
   return (
     <div
+      data-slot="typing-indicator"
       className={cn('flex items-center gap-2 px-4 py-2', className)}
       role="status"
       aria-live="polite"
@@ -206,6 +214,7 @@ export interface DateSeparatorProps {
 function DateSeparator({ label, className }: DateSeparatorProps) {
   return (
     <div
+      data-slot="date-separator"
       className={cn('flex items-center justify-center py-4', className)}
       role="separator"
       aria-label={label}
@@ -253,6 +262,7 @@ function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
+      data-slot="message-empty-state"
       className={cn(
         'flex flex-1 flex-col items-center justify-center p-8 text-center',
         className
@@ -261,7 +271,10 @@ function EmptyState({
       aria-label={title}
     >
       {icon || (
-        <div className="mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800">
+        <div
+          data-slot="message-empty-state-icon"
+          className="mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800"
+        >
           <svg
             className="h-12 w-12 text-neutral-500"
             fill="none"
@@ -309,7 +322,10 @@ function LoadMoreButton({
   className,
 }: LoadMoreButtonProps) {
   return (
-    <div className={cn('flex justify-center py-4', className)}>
+    <div
+      data-slot="load-more-button"
+      className={cn('flex justify-center py-4', className)}
+    >
       <button
         type="button"
         onClick={onClick}
@@ -518,6 +534,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
     return (
       <div
         ref={scrollContainerRef}
+        data-slot="message-list"
         className={cn(
           'flex flex-1 flex-col overflow-y-auto',
           'scroll-smooth',
@@ -534,7 +551,10 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
         )}
 
         {/* Messages grouped by date */}
-        <div className="flex flex-col gap-1 p-4">
+        <div
+          data-slot="message-list-content"
+          className="flex flex-col gap-1 p-4"
+        >
           {messageGroups.map((group) => (
             <React.Fragment key={group.date}>
               {/* Date separator */}

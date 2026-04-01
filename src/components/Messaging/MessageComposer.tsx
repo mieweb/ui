@@ -124,6 +124,7 @@ const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
         ref={ref}
         type="submit"
         disabled={disabled || !canSend || isLoading}
+        data-slot="composer-send-button"
         className={cn(sendButtonVariants({ variant, canSend }), className)}
         aria-label={isLoading ? 'Sending message' : 'Send message'}
         {...props}
@@ -420,10 +421,15 @@ const MessageComposer = React.forwardRef<
         onError={onError}
         className={cn('w-full', className)}
       >
-        <form onSubmit={handleSubmit} className="w-full">
+        <form
+          onSubmit={handleSubmit}
+          data-slot="message-composer"
+          className="w-full"
+        >
           {/* Reply preview */}
           {replyTo && (
             <div
+              data-slot="composer-reply-preview"
               className={cn(
                 'flex items-center gap-2 px-4 py-2',
                 'bg-neutral-50 dark:bg-neutral-800/50',
@@ -469,6 +475,7 @@ const MessageComposer = React.forwardRef<
           {/* Attachment previews */}
           {attachments.length > 0 && (
             <div
+              data-slot="composer-attachments"
               className={cn(
                 'flex flex-wrap gap-2 p-3',
                 'border-t border-neutral-200 dark:border-neutral-700'
@@ -486,6 +493,7 @@ const MessageComposer = React.forwardRef<
 
           {/* Input area */}
           <div
+            data-slot="composer-input-area"
             className={cn(
               'flex items-center gap-2 p-3',
               'bg-white dark:bg-neutral-900',
@@ -513,9 +521,10 @@ const MessageComposer = React.forwardRef<
             )}
 
             {/* Text input */}
-            <div className="relative flex-1">
+            <div data-slot="composer-input-wrapper" className="relative flex-1">
               <textarea
                 ref={textareaRef}
+                data-slot="composer-input"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -538,7 +547,11 @@ const MessageComposer = React.forwardRef<
 
               {/* Character count */}
               {showCharacterCount && (
-                <div id="char-count" className="absolute right-3 bottom-1.5">
+                <div
+                  data-slot="composer-char-count"
+                  id="char-count"
+                  className="absolute right-3 bottom-1.5"
+                >
                   <CharacterCounter current={content.length} max={maxLength} />
                 </div>
               )}

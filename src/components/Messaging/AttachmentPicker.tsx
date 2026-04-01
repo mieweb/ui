@@ -364,6 +364,7 @@ const AttachmentPicker = React.forwardRef<
           type="button"
           onClick={handleClick}
           disabled={disabled}
+          data-slot="attachment-picker-button"
           className={cn(
             'inline-flex items-center justify-center',
             'rounded-full p-2',
