@@ -64,19 +64,15 @@ const localUiAliases = [
 const datavisCjsInteropDependencies = [
   'underscore',
   'sprintf-js',
-  'jquery',
   'bignumber.js',
   'numeral',
   'moment',
   'json-formatter-js',
   'papaparse',
-  'handlebars',
 ] as const;
 
 const datavisLegacySubpathDependencies = [
   'core-js/es/string/replace-all',
-  'chart.js/auto',
-  'squirrelly/dist/browser/squirrelly.min.js',
 ] as const;
 
 const datavisSourceEntries = [

@@ -162,7 +162,7 @@
   "peerDependencies": {
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
-    "font-awesome": "^4.7.0",
+    "datavis-ace": "=4.0.0-PRE.1",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "wavesurfer.js": ">=7.0.0"
@@ -174,7 +174,7 @@
     "ag-grid-react": {
       "optional": true
     },
-    "font-awesome": {
+    "datavis-ace": {
       "optional": true
     },
     "react": {
@@ -195,9 +195,6 @@
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
     "tailwind-merge": "^2.6.1"
-  },
-  "optionalDependencies": {
-    "jquery": "^3.7.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
@@ -229,8 +226,6 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-storybook": "^10.2.11",
-    "font-awesome": "^4.7.0",
-    "jquery": "^3.7.1",
     "jsdom": "^26.1.0",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
