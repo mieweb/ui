@@ -118,6 +118,16 @@
         "default": "./dist/ag-grid.cjs"
       }
     },
+    "./datavis": {
+      "import": {
+        "types": "./dist/datavis.d.ts",
+        "default": "./dist/datavis.js"
+      },
+      "require": {
+        "types": "./dist/datavis.d.cts",
+        "default": "./dist/datavis.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./init.css": "./dist/styles/init.css"
@@ -152,6 +162,7 @@
   "peerDependencies": {
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
+    "datavis-ace": "=4.0.0-PRE.1",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "wavesurfer.js": ">=7.0.0"
@@ -161,6 +172,9 @@
       "optional": true
     },
     "ag-grid-react": {
+      "optional": true
+    },
+    "datavis-ace": {
       "optional": true
     },
     "react": {
@@ -206,6 +220,7 @@
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
+    "datavis": "file:./packages/datavis",
     "eslint": "^9.39.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",

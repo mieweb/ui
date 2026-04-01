@@ -5,6 +5,7 @@ export * from './components/Address';
 // AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
 // This avoids forcing ag-grid-community/ag-grid-react on all consumers.
 // See: src/ag-grid.ts
+// Same with DataVis (src/datavis.ts)
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AppHeader';
