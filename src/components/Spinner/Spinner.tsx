@@ -53,6 +53,7 @@ function Spinner({
 }: SpinnerProps) {
   return (
     <div
+      data-slot="spinner"
       role="status"
       aria-label={label}
       className={cn(spinnerVariants({ size, variant }), className)}
@@ -102,6 +103,7 @@ function SpinnerWithLabel({
 
   return (
     <div
+      data-slot="spinner-with-label"
       role="status"
       aria-label={label}
       className={cn(
@@ -112,10 +114,13 @@ function SpinnerWithLabel({
       {...props}
     >
       <div
+        data-slot="spinner"
         className={cn(spinnerVariants({ size, variant }))}
         aria-hidden="true"
       />
-      <span className="text-muted-foreground text-sm">{label}</span>
+      <span data-slot="spinner-label" className="text-muted-foreground text-sm">
+        {label}
+      </span>
     </div>
   );
 }
@@ -150,13 +155,18 @@ function FullPageSpinner({
 }: FullPageSpinnerProps) {
   return (
     <div
+      data-slot="full-page-spinner"
       className={cn(
         'fixed inset-0 z-50 flex flex-col items-center justify-center gap-4',
         backdrop && 'bg-background/80 backdrop-blur-sm'
       )}
     >
       <Spinner size={size} {...props} />
-      {text && <p className="text-muted-foreground text-sm">{text}</p>}
+      {text && (
+        <p data-slot="spinner-label" className="text-muted-foreground text-sm">
+          {text}
+        </p>
+      )}
     </div>
   );
 }

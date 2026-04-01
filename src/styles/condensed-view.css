@@ -6088,3 +6088,31 @@ body.condensed
   [data-slot='skeleton'] {
   height: 0.75rem !important;
 }
+
+/* ============================================================================
+   Spinner – condensed overrides
+   ============================================================================ */
+
+/* All spinner sizes collapse to sm (h-4 w-4 = 1rem) */
+body.condensed [data-slot='spinner'].h-3.w-3,
+body.condensed [data-slot='spinner'].h-6.w-6,
+body.condensed [data-slot='spinner'].h-8.w-8,
+body.condensed [data-slot='spinner'].h-12.w-12 {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* SpinnerWithLabel – tighter gap, smaller text */
+body.condensed [data-slot='spinner-with-label'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='spinner-label'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* FullPageSpinner – tighter gap */
+body.condensed [data-slot='full-page-spinner'] {
+  gap: 0.5rem !important;
+}
