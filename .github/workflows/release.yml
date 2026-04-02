@@ -32,9 +32,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.14.0'
+          check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm
+        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -87,9 +91,7 @@ jobs:
           node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('./package.json'));p.version='$VERSION';fs.writeFileSync('./package.json',JSON.stringify(p,null,2)+'\n')"
 
       - name: Publish to npm
-        # Trusted Publishing: OIDC token is obtained automatically via id-token permission.
-        # No NPM_PUBLISH_SECRET token is needed or used.
-        run: npm publish
+        run: npm publish --access public --tag ${{ steps.release-info.outputs.npm_tag }}
 
       - name: Create GitHub Release
         if: steps.release-info.outputs.is_tag == 'true'
