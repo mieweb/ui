@@ -6243,7 +6243,7 @@ body.condensed [data-slot='ai-chat-trigger'] svg {
 }
 
 /* Trigger badge */
-body.condensed [data-slot='ai-chat-trigger'] > span:first-child {
+body.condensed [data-slot='ai-chat-trigger'] > span.-top-1.-right-1 {
   width: 1rem !important;
   height: 1rem !important;
   font-size: 0.5625rem !important;
