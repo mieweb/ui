@@ -89,7 +89,7 @@ jobs:
       - name: Publish to npm
         # Trusted Publishing: OIDC token is obtained automatically via id-token permission.
         # No NPM_PUBLISH_SECRET token is needed or used.
-        run: npm publish
+        run: pnpm publish --access public --provenance --tag ${{ steps.release-info.outputs.npm_tag }} --no-git-checks
 
       - name: Create GitHub Release
         if: steps.release-info.outputs.is_tag == 'true'
