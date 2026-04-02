@@ -6123,3 +6123,333 @@ body.condensed [data-slot='spinner-label'] {
 body.condensed [data-slot='full-page-spinner'] {
   gap: 0.5rem !important;
 }
+
+/* ============================================================================
+   AI Components – condensed overrides
+   ============================================================================ 
+*/
+
+/* ---------------------------------------------------------------------------
+   AIChat – main container, header, messages area, input section
+   --------------------------------------------------------------------------- */
+
+/* Header – tighter padding */
+body.condensed [data-slot='ai-chat-header'] {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.375rem !important;
+}
+
+/* Header icon – smaller */
+body.condensed [data-slot='ai-chat-header-icon'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+body.condensed [data-slot='ai-chat-header-icon'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Header title */
+body.condensed [data-slot='ai-chat-header'] h2 {
+  font-size: 0.8125rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Header status text */
+body.condensed [data-slot='ai-chat-header'] p {
+  font-size: 0.5625rem !important;
+  line-height: 0.75rem !important;
+}
+
+/* Header action buttons – smaller */
+body.condensed [data-slot='ai-chat-header'] button {
+  padding: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Messages container – tighter padding */
+body.condensed [data-slot='ai-chat-messages'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Messages list – tighter gap (space-y-4 → margin override) */
+body.condensed
+  [data-slot='ai-chat-messages']
+  > div
+  > :not([hidden])
+  ~ :not([hidden]) {
+  margin-top: 0.5rem !important;
+}
+
+/* Input section – tighter padding */
+body.condensed [data-slot='ai-chat-input'] {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='ai-chat-input'] > .px-4 {
+  padding: 0.375rem 0.75rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIChat – Suggested Actions
+   --------------------------------------------------------------------------- */
+
+/* Suggestions container – tighter gap */
+body.condensed [data-slot='ai-chat-suggestions'] {
+  gap: 0.25rem !important;
+}
+
+/* Suggestion buttons – smaller */
+body.condensed [data-slot='ai-chat-suggestion-btn'] {
+  padding: 0.1875rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-chat-suggestion-btn'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIChat – Empty State icon
+   --------------------------------------------------------------------------- */
+
+body.condensed [data-slot='ai-empty-state-icon'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
+
+body.condensed [data-slot='ai-empty-state-icon'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIChatModal – trigger button and modal container
+   --------------------------------------------------------------------------- */
+
+/* Floating trigger – smaller */
+body.condensed [data-slot='ai-chat-trigger'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
+
+body.condensed [data-slot='ai-chat-trigger'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* Trigger badge */
+body.condensed [data-slot='ai-chat-trigger'] > span:first-child {
+  width: 1rem !important;
+  height: 1rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* Modal container – slightly smaller */
+body.condensed [data-slot='ai-chat-modal'] {
+  max-height: calc(100vh - 4rem) !important;
+}
+
+body.condensed [data-slot='ai-chat-modal'] > div {
+  border-radius: 0.75rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIMessage – message rows, avatars, bubbles, timestamps
+   --------------------------------------------------------------------------- */
+
+/* Message rows – tighter gap */
+body.condensed [data-slot='ai-message'] {
+  gap: 0.375rem !important;
+}
+
+/* All avatar sizes collapse to sm (h-6 w-6) */
+body.condensed
+  :is(
+    [data-slot='ai-message-avatar'].h-8.w-8,
+    [data-slot='ai-message-avatar'].h-10.w-10
+  ) {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='ai-message-avatar'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Message bubble – tighter padding, smaller text */
+body.condensed [data-slot='ai-message-bubble'] {
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.75rem !important;
+}
+
+body.condensed [data-slot='ai-message-bubble'] p {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Content blocks inside bubbles – tighter spacing */
+body.condensed
+  [data-slot='ai-message-bubble']
+  > .space-y-3
+  > :not([hidden])
+  ~ :not([hidden]) {
+  margin-top: 0.25rem !important;
+}
+
+/* Thinking block – tighter */
+body.condensed [data-slot='ai-message-thinking'] button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='ai-message-thinking'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='ai-message-thinking'] > div:last-child {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='ai-message-thinking'] > div:last-child p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Code blocks – smaller */
+body.condensed [data-slot='ai-message-code'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Typing indicator – smaller dots */
+body.condensed [data-slot='ai-typing-indicator'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-typing-indicator'] > span {
+  width: 4px !important;
+  height: 4px !important;
+  min-width: 4px !important;
+  min-height: 4px !important;
+}
+
+/* Timestamp – smaller */
+body.condensed [data-slot='ai-message-timestamp'] {
+  font-size: 0.5625rem !important;
+  line-height: 0.75rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   MCPToolCall – tool call cards, icons, content, parameters
+   --------------------------------------------------------------------------- */
+
+/* Tool call container – tighter padding */
+body.condensed [data-slot='ai-tool-call'] {
+  padding: 0.375rem !important;
+  border-radius: 0.5rem !important;
+}
+
+body.condensed [data-slot='ai-tool-call'] > div {
+  gap: 0.375rem !important;
+}
+
+/* Tool icon – smaller */
+body.condensed [data-slot='ai-tool-icon'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-icon'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Status icon – smaller */
+body.condensed [data-slot='ai-tool-status-icon'] {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='ai-tool-status-icon'] svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* Tool content text – smaller */
+body.condensed [data-slot='ai-tool-content'] span {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='ai-tool-content'] > .flex > .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='ai-tool-content'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Tool result section – tighter margin */
+body.condensed [data-slot='ai-tool-result'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-result'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Resource links inside results – smaller */
+body.condensed [data-slot='ai-tool-result'] a {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-result'] a svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Parameters section – tighter */
+body.condensed [data-slot='ai-tool-parameters'] {
+  margin-top: 0.25rem !important;
+  padding: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-parameters'] h4 {
+  font-size: 0.5625rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-parameters'] .text-xs {
+  font-size: 0.5625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Error display – smaller */
+body.condensed [data-slot='ai-tool-content'] .bg-red-100,
+body.condensed [data-slot='ai-tool-content'] .dark\:bg-red-900\/30 {
+  padding: 0.25rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* Show/hide details toggle – smaller */
+body.condensed [data-slot='ai-tool-content'] > button {
+  font-size: 0.5625rem !important;
+  margin-top: 0.25rem !important;
+  gap: 0.125rem !important;
+}

@@ -49,6 +49,7 @@ export function AIChatTrigger({
   return (
     <button
       onClick={onClick}
+      data-slot="ai-chat-trigger"
       className={cn(
         'fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg',
         'bg-primary-500 text-white',
@@ -147,6 +148,7 @@ export function AIChatModal({
       {/* Modal */}
       <div
         ref={modalRef}
+        data-slot="ai-chat-modal"
         className={cn(
           'fixed z-50',
           'animate-in fade-in-0 zoom-in-95',
