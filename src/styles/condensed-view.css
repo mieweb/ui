@@ -6162,10 +6162,14 @@ body.condensed [data-slot='ai-chat-header'] p {
   line-height: 0.75rem !important;
 }
 
-/* Header action buttons – smaller */
+/* Header action buttons – smaller text */
 body.condensed [data-slot='ai-chat-header'] button {
-  padding: 0.25rem !important;
   font-size: 0.6875rem !important;
+}
+
+/* Icon-only header actions – compact padding */
+body.condensed [data-slot='ai-chat-header-action'] {
+  padding: 0.25rem !important;
 }
 
 /* Messages container – tighter padding */
@@ -6187,17 +6191,14 @@ body.condensed [data-slot='ai-chat-input'] {
   padding: 0 !important;
 }
 
-body.condensed [data-slot='ai-chat-input'] > .px-4 {
-  padding: 0.375rem 0.75rem !important;
-}
-
 /* ---------------------------------------------------------------------------
    AIChat – Suggested Actions
    --------------------------------------------------------------------------- */
 
-/* Suggestions container – tighter gap */
+/* Suggestions container – tighter gap and padding */
 body.condensed [data-slot='ai-chat-suggestions'] {
   gap: 0.25rem !important;
+  padding: 0.375rem 0.75rem !important;
 }
 
 /* Suggestion buttons – smaller */
@@ -6243,7 +6244,7 @@ body.condensed [data-slot='ai-chat-trigger'] svg {
 }
 
 /* Trigger badge */
-body.condensed [data-slot='ai-chat-trigger'] > span.-top-1.-right-1 {
+body.condensed [data-slot='ai-chat-trigger-badge'] {
   width: 1rem !important;
   height: 1rem !important;
   font-size: 0.5625rem !important;
@@ -6387,8 +6388,8 @@ body.condensed [data-slot='ai-tool-status-icon'] svg {
   height: 0.5rem !important;
 }
 
-/* Tool content text – smaller */
-body.condensed [data-slot='ai-tool-content'] span {
+/* Tool content text – smaller (scoped to status line, not parameters) */
+body.condensed [data-slot='ai-tool-content'] > .flex > span {
   font-size: 0.75rem !important;
 }
 

@@ -376,6 +376,7 @@ export function AIChat({
             {onClear && messages.length > 0 && (
               <button
                 onClick={onClear}
+                data-slot="ai-chat-header-action"
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Clear chat"
               >
@@ -385,6 +386,7 @@ export function AIChat({
             {onClose && (
               <button
                 onClick={onClose}
+                data-slot="ai-chat-header-action"
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Close chat"
                 aria-label="Close chat"
