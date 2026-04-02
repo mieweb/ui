@@ -162,6 +162,7 @@
   "peerDependencies": {
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
+    "@mieweb/datavis": ">=0.1.0",
     "datavis-ace": "=4.0.0-PRE.1",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
@@ -172,6 +173,9 @@
       "optional": true
     },
     "ag-grid-react": {
+      "optional": true
+    },
+    "@mieweb/datavis": {
       "optional": true
     },
     "datavis-ace": {
