@@ -284,11 +284,20 @@ export function CheckrIntegration({
   };
 
   return (
-    <div className={cn('checkr-integration', className)}>
+    <div
+      data-slot="checkr-integration"
+      className={cn('checkr-integration', className)}
+    >
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div
+        data-slot="checkr-header"
+        className="mb-6 flex items-center justify-between"
+      >
         <div className="flex items-center gap-3">
-          <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg">
+          <div
+            data-slot="checkr-header-icon"
+            className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg"
+          >
             <svg
               className="text-success-700 dark:text-success-300 h-6 w-6"
               fill="none"
@@ -342,7 +351,10 @@ export function CheckrIntegration({
 
       {/* Error State */}
       {error && (
-        <div className="bg-destructive/10 border-destructive/20 text-destructive-700 dark:text-destructive-300 mb-4 rounded-lg border p-4">
+        <div
+          data-slot="checkr-error"
+          className="bg-destructive/10 border-destructive/20 text-destructive-700 dark:text-destructive-300 mb-4 rounded-lg border p-4"
+        >
           <svg
             className="mr-2 inline-block h-4 w-4"
             fill="none"
@@ -365,7 +377,10 @@ export function CheckrIntegration({
         <>
           {/* Status Summary */}
           {reports.length > 0 && (
-            <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm">
+            <div
+              data-slot="checkr-status-summary"
+              className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm"
+            >
               {Object.entries(statusCounts)
                 .filter(([, count]) => count > 0)
                 .map(([status, count]) => (
@@ -385,7 +400,7 @@ export function CheckrIntegration({
           )}
 
           {/* Actions */}
-          <div className="mb-6 flex flex-wrap gap-3">
+          <div data-slot="checkr-actions" className="mb-6 flex flex-wrap gap-3">
             <Button variant="primary" onClick={() => setShowInviteModal(true)}>
               <svg
                 className="mr-2 h-4 w-4"
@@ -421,8 +436,14 @@ export function CheckrIntegration({
           </div>
 
           {/* Reports Card */}
-          <div className="bg-card border-border overflow-hidden rounded-lg border">
-            <div className="border-border border-b px-4 py-3">
+          <div
+            data-slot="checkr-reports-card"
+            className="bg-card border-border overflow-hidden rounded-lg border"
+          >
+            <div
+              data-slot="checkr-reports-header"
+              className="border-border border-b px-4 py-3"
+            >
               <h4 className="text-card-foreground font-medium">
                 {viewReports}
               </h4>
@@ -438,6 +459,7 @@ export function CheckrIntegration({
                   {reports.map((report) => (
                     <div
                       key={report.id}
+                      data-slot="checkr-report-row"
                       className="hover:bg-muted/50 flex items-center justify-between px-4 py-4 transition-colors"
                     >
                       <div className="flex items-center gap-4">
@@ -517,7 +539,10 @@ export function CheckrIntegration({
                 </div>
 
                 {/* Footer */}
-                <div className="border-border bg-muted/30 flex items-center justify-between border-t px-4 py-3">
+                <div
+                  data-slot="checkr-reports-footer"
+                  className="border-border bg-muted/30 flex items-center justify-between border-t px-4 py-3"
+                >
                   <span className="text-muted-foreground text-sm">
                     {selectedReports.size > 0
                       ? `${selectedReports.size} report${selectedReports.size > 1 ? 's' : ''} selected`
@@ -544,7 +569,10 @@ export function CheckrIntegration({
                 </div>
               </>
             ) : (
-              <div className="text-muted-foreground py-8 text-center">
+              <div
+                data-slot="checkr-empty-state"
+                className="text-muted-foreground py-8 text-center"
+              >
                 <svg
                   className="text-muted-foreground/30 mx-auto mb-2 h-12 w-12"
                   fill="none"
@@ -567,7 +595,10 @@ export function CheckrIntegration({
 
       {/* Not Connected State */}
       {!connected && !error && (
-        <div className="border-border rounded-lg border border-dashed p-8 text-center">
+        <div
+          data-slot="checkr-not-connected"
+          className="border-border rounded-lg border border-dashed p-8 text-center"
+        >
           <svg
             className="text-muted-foreground/30 mx-auto mb-4 h-12 w-12"
             fill="none"

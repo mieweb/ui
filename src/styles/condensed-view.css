@@ -6460,3 +6460,187 @@ body.condensed [data-slot='ai-tool-content'] > button {
   margin-top: 0.25rem !important;
   gap: 0.125rem !important;
 }
+
+/* ============================================================================
+   CheckrIntegration – condensed overrides
+   ============================================================================ 
+*/
+
+/* Header – tighter margin and gap */
+body.condensed [data-slot='checkr-header'] {
+  margin-bottom: 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-header'] > div {
+  gap: 0.375rem !important;
+}
+
+/* Header icon – smaller */
+body.condensed [data-slot='checkr-header-icon'] {
+  width: 2rem !important;
+  height: 2rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='checkr-header-icon'] svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Header title */
+body.condensed [data-slot='checkr-header'] h3 {
+  font-size: 0.8125rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Header account info */
+body.condensed [data-slot='checkr-header'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-header'] p span {
+  font-size: 0.5625rem !important;
+}
+
+/* Error alert – tighter padding */
+body.condensed [data-slot='checkr-error'] {
+  padding: 0.5rem 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed [data-slot='checkr-error'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Status summary – smaller dots and text */
+body.condensed [data-slot='checkr-status-summary'] {
+  gap: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='checkr-status-summary'] span.rounded-full {
+  width: 0.375rem !important;
+  height: 0.375rem !important;
+}
+
+/* Actions bar – tighter gap and margin */
+body.condensed [data-slot='checkr-actions'] {
+  gap: 0.375rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-actions'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-right: 0.25rem !important;
+}
+
+/* Reports card – tighter border radius */
+body.condensed [data-slot='checkr-reports-card'] {
+  border-radius: 0.375rem !important;
+}
+
+/* Reports card header – tighter padding */
+body.condensed [data-slot='checkr-reports-header'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-reports-header'] h4 {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Report rows – tighter padding and gap */
+body.condensed [data-slot='checkr-report-row'] {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.5rem !important;
+}
+
+/* Checkbox in report rows – smaller */
+body.condensed [data-slot='checkr-report-row'] button[role='checkbox'] {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-report-row'] button[role='checkbox'] svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* Candidate info text */
+body.condensed [data-slot='checkr-report-row'] p {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-report-row'] .text-sm {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-report-row'] .text-xs {
+  font-size: 0.5625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Status badge – smaller */
+body.condensed [data-slot='checkr-report-row'] span.rounded-full {
+  padding: 0 0.375rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* Reports card footer – tighter */
+body.condensed [data-slot='checkr-reports-footer'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-reports-footer'] > span {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='checkr-reports-footer'] > div {
+  gap: 0.25rem !important;
+}
+
+/* Empty state – smaller */
+body.condensed [data-slot='checkr-empty-state'] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+body.condensed [data-slot='checkr-empty-state'] svg {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='checkr-empty-state'] p {
+  font-size: 0.75rem !important;
+}
+
+/* Not connected state – smaller */
+body.condensed [data-slot='checkr-not-connected'] {
+  padding: 1.5rem !important;
+}
+
+body.condensed [data-slot='checkr-not-connected'] svg.mx-auto {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='checkr-not-connected'] p {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Loading spinner – smaller */
+body.condensed [data-slot='checkr-reports-card'] .animate-spin {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
