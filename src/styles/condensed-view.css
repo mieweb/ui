@@ -6789,7 +6789,7 @@ body.condensed [data-slot='order-sidebar-tab'] {
 }
 
 /* ── OrderDetailSidebar ── */
-body.condensed [data-slot='order-detail-sidebar'] > .px-3 {
+body.condensed [data-slot='order-sidebar-profile'] {
   padding: 0.25rem !important;
 }
 

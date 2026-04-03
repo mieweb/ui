@@ -564,7 +564,7 @@ export function OrderDetailSidebar({
       data-slot="order-detail-sidebar"
     >
       {/* Employee Profile */}
-      <div className="px-3">
+      <div className="px-3" data-slot="order-sidebar-profile">
         <EmployeeProfileCard
           employee={employee}
           showPhotoEdit={showPhotoEdit}
