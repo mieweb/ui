@@ -164,7 +164,7 @@ export function CheckrIntegration({
   // Reset selected reports when the available reports change
   // or when the integration is disconnected to avoid stale selections.
   React.useEffect(() => {
-    setSelectedReports(new Set());
+    setSelectedReports((prev) => (prev.size > 0 ? new Set() : prev));
   }, [reports, connected]);
 
   const statusLabels: Record<string, string> = {
