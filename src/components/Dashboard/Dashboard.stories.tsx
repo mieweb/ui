@@ -54,6 +54,16 @@ import { Text } from '../Text';
 import { Tooltip } from '../Tooltip';
 import { QuickAction, QuickActionGroup } from '../QuickAction';
 import { PhoneInput } from '../PhoneInput';
+import {
+  Sidebar as SidebarComponent,
+  SidebarHeader,
+  SidebarContent,
+  SidebarNav,
+  SidebarNavItem,
+  SidebarFooter,
+  SidebarMobileToggle,
+} from '../Sidebar';
+import { SidebarProvider } from '../Sidebar/SidebarProvider';
 
 // ============================================================================
 // Meta
@@ -669,11 +679,9 @@ function ThemeToggle() {
 interface SidebarProps {
   currentPage: Page;
   onNavigate: (page: Page) => void;
-  isOpen: boolean;
-  onClose: () => void;
 }
 
-function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
+function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <Icons.Home /> },
     { id: 'users', label: 'Users', icon: <Icons.Users /> },
@@ -684,90 +692,46 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
 
   const handleNavigate = (page: Page) => {
     onNavigate(page);
-    onClose();
   };
 
   return (
-    <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={onClose}
-          onKeyDown={(e) => e.key === 'Escape' && onClose()}
-          role="button"
-          tabIndex={0}
-          aria-label="Close sidebar"
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`bg-card lg:border-border fixed inset-y-0 left-0 z-50 w-64 transform shadow-lg transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:border-r lg:shadow-none ${isOpen ? 'translate-x-0' : '-translate-x-full'} `}
-      >
-        {/* Logo */}
-        <div className="border-border flex h-16 items-center justify-between border-b px-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
-              M
-            </div>
-            <Text weight="bold" size="lg">
-              MieWeb UI
-            </Text>
+    <SidebarComponent>
+      <SidebarHeader>
+        <div className="flex items-center gap-2">
+          <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+            M
           </div>
-          <button
-            onClick={onClose}
-            className="hover:bg-muted rounded-lg p-1 lg:hidden"
-            aria-label="Close sidebar"
-          >
-            <Icons.Close />
-          </button>
+          <Text weight="bold" size="lg">
+            MieWeb UI
+          </Text>
         </div>
+      </SidebarHeader>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
+      <SidebarContent>
+        <SidebarNav>
           {navItems.map((item) => (
-            <button
+            <SidebarNavItem
               key={item.id}
+              label={item.label}
+              icon={item.icon}
+              isActive={currentPage === item.id}
               onClick={() => handleNavigate(item.id)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
-                currentPage === item.id
-                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                  : 'text-muted-foreground hover:bg-muted'
-              } `}
-            >
-              {item.icon}
-              <Text
-                size="sm"
-                weight={currentPage === item.id ? 'semibold' : 'medium'}
-              >
-                {item.label}
-              </Text>
-            </button>
+            />
           ))}
-        </nav>
+        </SidebarNav>
+      </SidebarContent>
 
-        {/* Bottom section */}
-        <div className="border-border border-t p-4">
-          <button
+      <SidebarFooter>
+        <SidebarNav>
+          <SidebarNavItem
+            label="Settings"
+            icon={<Icons.Settings />}
+            isActive={currentPage === 'settings'}
             onClick={() => handleNavigate('settings')}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
-              currentPage === 'settings'
-                ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                : 'text-muted-foreground hover:bg-muted'
-            } `}
-          >
-            <Icons.Settings />
-            <Text
-              size="sm"
-              weight={currentPage === 'settings' ? 'semibold' : 'medium'}
-            >
-              Settings
-            </Text>
-          </button>
-        </div>
-      </aside>
-    </>
+          />
+        </SidebarNav>
+      </SidebarFooter>
+    </SidebarComponent>
   );
 }
 
@@ -829,29 +793,16 @@ function VoiceSearch() {
 
 interface HeaderProps {
   user: UserData;
-  onMenuToggle: () => void;
   onProfile: () => void;
   onSettings: () => void;
   onLogout: () => void;
 }
 
-function Header({
-  user,
-  onMenuToggle,
-  onProfile,
-  onSettings,
-  onLogout,
-}: HeaderProps) {
+function Header({ user, onProfile, onSettings, onLogout }: HeaderProps) {
   return (
     <header className="border-border bg-card sticky top-0 z-30 flex h-16 items-center justify-between border-b px-4 lg:px-6">
       <div className="flex items-center gap-4">
-        <button
-          onClick={onMenuToggle}
-          className="hover:bg-muted rounded-lg p-2 lg:hidden"
-          aria-label="Toggle menu"
-        >
-          <Icons.Menu />
-        </button>
+        <SidebarMobileToggle />
 
         {/* Voice-Enabled Search */}
         <div className="hidden md:block">
@@ -2032,7 +1983,6 @@ function SettingsPage() {
 
 function AppShell() {
   const [currentPage, setCurrentPage] = React.useState<Page>('dashboard');
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [loggedOut, setLoggedOut] = React.useState(false);
 
   const handleLogout = () => {
@@ -2114,31 +2064,27 @@ function AppShell() {
   };
 
   return (
-    <div className="bg-background flex min-h-screen">
-      <Sidebar
-        currentPage={currentPage}
-        onNavigate={setCurrentPage}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+    <SidebarProvider persistCollapsed={false}>
+      <div className="bg-background flex min-h-screen">
+        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
 
-      <div className="flex flex-1 flex-col">
-        <Header
-          user={mockUser}
-          onMenuToggle={() => setSidebarOpen(true)}
-          onProfile={() => setCurrentPage('profile')}
-          onSettings={() => setCurrentPage('settings')}
-          onLogout={handleLogout}
-        />
+        <div className="flex flex-1 flex-col">
+          <Header
+            user={mockUser}
+            onProfile={() => setCurrentPage('profile')}
+            onSettings={() => setCurrentPage('settings')}
+            onLogout={handleLogout}
+          />
 
-        <main className="flex-1 p-4 lg:p-6">
-          <div className="mb-4">
-            <Breadcrumb items={getBreadcrumbs()} />
-          </div>
-          {renderPage()}
-        </main>
+          <main className="flex-1 p-4 lg:p-6">
+            <div className="mb-4">
+              <Breadcrumb items={getBreadcrumbs()} />
+            </div>
+            {renderPage()}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
 
