@@ -6195,9 +6195,13 @@ body.condensed [data-slot='ai-chat-input'] {
    AIChat – Suggested Actions
    --------------------------------------------------------------------------- */
 
-/* Suggestions container – tighter gap and padding */
+/* Suggestions container – tighter gap only; padding belongs to the outer wrapper */
 body.condensed [data-slot='ai-chat-suggestions'] {
   gap: 0.25rem !important;
+}
+
+/* Suggestions wrapper inside input – tighter padding */
+body.condensed [data-slot='ai-chat-input-suggestions'] {
   padding: 0.375rem 0.75rem !important;
 }
 
@@ -6443,7 +6447,9 @@ body.condensed [data-slot='ai-tool-parameters'] .text-xs {
 
 /* Error display – smaller */
 body.condensed [data-slot='ai-tool-content'] .bg-red-100,
-body.condensed [data-slot='ai-tool-content'] .dark\:bg-red-900\/30 {
+body.condensed [data-slot='ai-tool-content'] .dark\:bg-red-900\/30,
+body.condensed [data-slot='ai-tool-content'] .bg-red-50,
+body.condensed [data-slot='ai-tool-content'] .dark\:bg-red-900\/20 {
   padding: 0.25rem !important;
   margin-top: 0.25rem !important;
 }

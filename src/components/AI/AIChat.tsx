@@ -433,7 +433,7 @@ export function AIChat({
           suggestions.length > 0 &&
           messages.length > 0 &&
           !isGenerating && (
-            <div className="px-4 pt-3">
+            <div data-slot="ai-chat-input-suggestions" className="px-4 pt-3">
               <SuggestedActions
                 actions={suggestions}
                 onSelect={handleSuggestionSelect}
