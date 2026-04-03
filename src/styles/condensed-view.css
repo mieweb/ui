@@ -6802,3 +6802,103 @@ body.condensed
 body.condensed [data-slot='order-sidebar-content'] {
   padding: 0.375rem !important;
 }
+
+/* ==========================================================================
+   ErrorPage – condensed overrides
+   ========================================================================== */
+
+/* ── Root container ── */
+body.condensed [data-slot='error-page'] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+  min-height: 30vh !important;
+}
+
+/* Size sm variant */
+body.condensed [data-slot='error-page'].min-h-\[40vh\] {
+  min-height: 20vh !important;
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+/* ── Illustration ── */
+body.condensed [data-slot='error-page-illustration'] {
+  margin-bottom: 1rem !important;
+}
+
+body.condensed [data-slot='error-page-illustration'] svg {
+  width: 3rem !important;
+  height: 3rem !important;
+}
+
+/* ── Error code (404, 500, etc.) ── */
+body.condensed [data-slot='error-page-code'] {
+  margin-bottom: 0.5rem !important;
+  font-size: 2.5rem !important;
+}
+
+/* ── Title ── */
+body.condensed [data-slot='error-page-title'] {
+  margin-bottom: 0.375rem !important;
+  font-size: 1.125rem !important;
+}
+
+/* ── Description ── */
+body.condensed [data-slot='error-page-description'] {
+  margin-bottom: 1rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.4 !important;
+}
+
+/* ── Actions row ── */
+body.condensed [data-slot='error-page-actions'] {
+  gap: 0.375rem !important;
+}
+
+/* ── Action buttons (target via parent – Button hardcodes data-slot="button") ── */
+body.condensed [data-slot='error-page-actions'] > a {
+  height: 1.75rem !important;
+  min-width: 100px !important;
+  font-size: 0.6875rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-radius: 0.375rem !important;
+  gap: 0.25rem !important;
+}
+
+/* ── Additional content ── */
+body.condensed [data-slot='error-page-children'] {
+  margin-top: 1rem !important;
+}
+
+/* ── Error details (ServerErrorPage) ── */
+body.condensed [data-slot='error-page-details'] {
+  margin-top: 0.5rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] details {
+  padding: 0.5rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] summary {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed
+  [data-slot='error-page-details']
+  .space-y-2
+  > :not([hidden])
+  ~ :not([hidden]) {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] pre {
+  padding: 0.375rem !important;
+  font-size: 0.625rem !important;
+}
