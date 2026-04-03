@@ -6644,3 +6644,161 @@ body.condensed [data-slot='checkr-reports-card'] .animate-spin {
   width: 1.5rem !important;
   height: 1.5rem !important;
 }
+
+/* ==========================================================================
+   EmployeeProfile – condensed overrides
+   ========================================================================== */
+
+/* ── Card root ── */
+body.condensed [data-slot='employee-card'] {
+  border-radius: 0.375rem !important;
+}
+
+/* ── Profile header ── */
+body.condensed [data-slot='employee-card-header'] {
+  padding: 0.5rem 0.75rem !important;
+  gap: 0 !important;
+}
+
+/* ── Avatar wrapper ── */
+body.condensed [data-slot='employee-card-avatar'] {
+  margin-bottom: 0.375rem !important;
+}
+
+/* Shrink the avatar itself (Avatar uses size="xl" = 4rem) */
+body.condensed [data-slot='employee-card-avatar'] [data-slot='avatar'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  font-size: 0.875rem !important;
+}
+
+/* Photo edit button */
+body.condensed [data-slot='employee-card-photo-edit'] {
+  padding: 0.125rem !important;
+}
+
+body.condensed [data-slot='employee-card-photo-edit'] svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Name row ── */
+body.condensed [data-slot='employee-card-name'] {
+  margin-bottom: 0.125rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='employee-card-name'] h3 {
+  font-size: 0.8125rem !important;
+  line-height: 1.25 !important;
+}
+
+/* Active/inactive status icon */
+body.condensed [data-slot='employee-card-name'] > span {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='employee-card-name'] > span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Title / Company ── */
+body.condensed [data-slot='employee-card-title'] {
+  font-size: 0.6875rem !important;
+  line-height: 1.3 !important;
+}
+
+/* ── Expand/collapse toggle ── */
+body.condensed [data-slot='employee-card-toggle'] {
+  margin-top: 0.25rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='employee-card-toggle'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Details section ── */
+body.condensed [data-slot='employee-card-details'] {
+  padding: 0 0.5rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Override space-y-3 to space-y-1.5 */
+body.condensed
+  [data-slot='employee-card-details']
+  > :not([hidden])
+  ~ :not([hidden]) {
+  --tw-space-y-reverse: 0 !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0 !important;
+}
+
+/* ── Detail rows (DOB, phone, email, payment, address) ── */
+body.condensed [data-slot='employee-card-detail-row'] {
+  gap: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='employee-card-detail-row'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* Age text beside DOB */
+body.condensed [data-slot='employee-card-detail-row'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* Department badges – already have Badge condensed, but tighten wrapper */
+body.condensed [data-slot='employee-card-details'] > .flex-wrap {
+  gap: 0.25rem !important;
+}
+
+/* Extended fields separator */
+body.condensed [data-slot='employee-card-details'] > hr {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Extended field rows */
+body.condensed [data-slot='employee-card-details'] > .flex.gap-2 {
+  gap: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Blurb text */
+body.condensed [data-slot='employee-card-details'] > p {
+  font-size: 0.625rem !important;
+  line-height: 1.3 !important;
+}
+
+/* ── OrderSidebarTabs ── */
+body.condensed [data-slot='order-sidebar-tabs'] {
+  gap: 0 !important;
+}
+
+body.condensed [data-slot='order-sidebar-tab'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── OrderDetailSidebar ── */
+body.condensed [data-slot='order-detail-sidebar'] > .px-3 {
+  padding: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='order-detail-sidebar']
+  [data-slot='order-sidebar-tabs'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-content'] {
+  padding: 0.375rem !important;
+}

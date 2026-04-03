@@ -62,8 +62,8 @@ import {
   SidebarNavItem,
   SidebarFooter,
   SidebarMobileToggle,
+  SidebarProvider,
 } from '../Sidebar';
-import { SidebarProvider } from '../Sidebar/SidebarProvider';
 
 // ============================================================================
 // Meta
