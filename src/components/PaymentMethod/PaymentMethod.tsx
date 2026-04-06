@@ -145,6 +145,7 @@ export function PaymentMethodCard({
         disabled && 'cursor-not-allowed opacity-50',
         className
       )}
+      data-slot="payment-card"
       onClick={handleSelect}
       role={selectable ? 'button' : undefined}
       tabIndex={selectable ? 0 : undefined}
@@ -157,7 +158,10 @@ export function PaymentMethodCard({
       }
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+      <div
+        className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700"
+        data-slot="payment-card-header"
+      >
         <div className="flex items-center gap-2">
           <i
             className={cn(
@@ -167,19 +171,28 @@ export function PaymentMethodCard({
             )}
             aria-hidden="true"
           />
-          <span className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+          <span
+            className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400"
+            data-slot="payment-card-label"
+          >
             Credit Card
           </span>
         </div>
         {(card.isDefault || selected) && (
-          <span className="text-brand-600 dark:text-brand-400 text-xs font-medium">
+          <span
+            className="text-brand-600 dark:text-brand-400 text-xs font-medium"
+            data-slot="payment-card-badge"
+          >
             Default
           </span>
         )}
       </div>
 
       {/* Card Details */}
-      <div className="mt-3 flex items-center justify-between">
+      <div
+        className="mt-3 flex items-center justify-between"
+        data-slot="payment-card-details"
+      >
         <div className="font-mono text-sm text-gray-900 dark:text-gray-100">
           <span className="hidden lg:inline">•••• •••• </span>•••• {card.last4}
         </div>
@@ -189,7 +202,10 @@ export function PaymentMethodCard({
       </div>
 
       {/* Footer */}
-      <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
+      <div
+        className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700"
+        data-slot="payment-card-footer"
+      >
         {selectable && !card.isDefault && !selected ? (
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -318,6 +334,7 @@ export function PaymentMethodBank({
         disabled && 'cursor-not-allowed opacity-50',
         className
       )}
+      data-slot="payment-bank"
       onClick={handleSelect}
       role={selectable ? 'button' : undefined}
       tabIndex={selectable ? 0 : undefined}
@@ -330,10 +347,16 @@ export function PaymentMethodBank({
       }
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+      <div
+        className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700"
+        data-slot="payment-bank-header"
+      >
         <div className="flex items-center gap-2">
           <BankIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <span className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+          <span
+            className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400"
+            data-slot="payment-bank-label"
+          >
             ACH
           </span>
         </div>
@@ -357,7 +380,7 @@ export function PaymentMethodBank({
       </div>
 
       {/* Account Details */}
-      <div className="mt-3 space-y-1">
+      <div className="mt-3 space-y-1" data-slot="payment-bank-details">
         {account.bankName && (
           <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {account.bankName}
@@ -375,7 +398,10 @@ export function PaymentMethodBank({
       </div>
 
       {/* Footer */}
-      <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
+      <div
+        className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700"
+        data-slot="payment-bank-footer"
+      >
         {selectable && !account.isDefault && !selected ? (
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -478,14 +504,21 @@ export function PaymentMethodList({
           'dark:border-yellow-700 dark:bg-yellow-900/20',
           className
         )}
+        data-slot="payment-list-empty"
       >
         <div className="flex items-start gap-3">
           <WarningIcon className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
           <div>
-            <h4 className="font-medium text-yellow-800 dark:text-yellow-200">
+            <h4
+              className="font-medium text-yellow-800 dark:text-yellow-200"
+              data-slot="payment-list-empty-title"
+            >
               No Payment Methods
             </h4>
-            <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
+            <p
+              className="mt-1 text-sm text-yellow-700 dark:text-yellow-300"
+              data-slot="payment-list-empty-message"
+            >
               {emptyMessage}
             </p>
           </div>
@@ -495,7 +528,10 @@ export function PaymentMethodList({
   }
 
   return (
-    <div className={cn('grid gap-4 md:grid-cols-2', className)}>
+    <div
+      className={cn('grid gap-4 md:grid-cols-2', className)}
+      data-slot="payment-list"
+    >
       {methods.map((method) =>
         method.type === 'card' ? (
           <PaymentMethodCard

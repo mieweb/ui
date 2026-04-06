@@ -7206,3 +7206,130 @@ body.condensed [data-slot='order-list-items'] .mb-1 {
 body.condensed [data-slot='order-list-items'] .gap-2 {
   gap: 0.25rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PaymentMethod – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Shared card/bank root ── */
+body.condensed [data-slot='payment-card'],
+body.condensed [data-slot='payment-bank'] {
+  padding: 0.5rem !important;
+  border-radius: 0.5rem !important;
+}
+
+/* ── Headers ── */
+body.condensed [data-slot='payment-card-header'],
+body.condensed [data-slot='payment-bank-header'] {
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-header'] .gap-2,
+body.condensed [data-slot='payment-bank-header'] .gap-2 {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-header'] i {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-header'] svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='payment-card-label'],
+body.condensed [data-slot='payment-bank-label'] {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='payment-card-badge'] {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='payment-bank-header'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Details ── */
+body.condensed [data-slot='payment-card-details'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-details'] .font-mono,
+body.condensed [data-slot='payment-card-details'] .text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] {
+  margin-top: 0.25rem !important;
+  gap: 0.0625rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] .text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] .font-mono {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Footers ── */
+body.condensed [data-slot='payment-card-footer'],
+body.condensed [data-slot='payment-bank-footer'] {
+  margin-top: 0.25rem !important;
+  padding-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] .text-xs,
+body.condensed [data-slot='payment-bank-footer'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] .gap-2,
+body.condensed [data-slot='payment-bank-footer'] .gap-2 {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] button svg,
+body.condensed [data-slot='payment-bank-footer'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] button,
+body.condensed [data-slot='payment-bank-footer'] button {
+  padding: 0.125rem !important;
+}
+
+/* ── List grid ── */
+body.condensed [data-slot='payment-list'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Empty state ── */
+body.condensed [data-slot='payment-list-empty'] {
+  padding: 0.5rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty'] .gap-3 {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty'] svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty-message'] {
+  font-size: 0.6875rem !important;
+  margin-top: 0.125rem !important;
+}
