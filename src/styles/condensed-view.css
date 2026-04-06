@@ -7106,3 +7106,103 @@ body.condensed [data-slot='onboarding-completion-actions'] {
 body.condensed [data-slot='onboarding-wizard-preview'] {
   height: 350px !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OrderList – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Header ── */
+body.condensed [data-slot='order-list-header'] > div {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.25rem !important;
+}
+
+/* ── Tabs ── */
+body.condensed [data-slot='order-list-tabs'] {
+  gap: 0.125rem !important;
+}
+
+body.condensed [data-slot='order-list-tab'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='order-list-tab-count'] {
+  margin-left: 0.25rem !important;
+  padding: 0 0.25rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* ── Search ── */
+body.condensed [data-slot='order-list-search'] input {
+  padding: 0.25rem 0.5rem 0.25rem 1.75rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='order-list-search'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Actions ── */
+body.condensed [data-slot='order-list-actions'] {
+  gap: 0.25rem !important;
+}
+
+/* ── Loading ── */
+body.condensed [data-slot='order-list-loading'] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+body.condensed [data-slot='order-list-loading'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* ── Empty state ── */
+body.condensed [data-slot='order-list-empty'] {
+  padding: 1.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='order-list-empty'] svg {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='order-list-empty-message'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Order items (rendered by consumer renderOrder) ── */
+body.condensed [data-slot='order-list-items'] > div {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='order-list-items'] > div > div {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] span.font-medium {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  margin-top: 0.0625rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] .text-xs {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] .mb-1 {
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] .gap-2 {
+  gap: 0.25rem !important;
+}
