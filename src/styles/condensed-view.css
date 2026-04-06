@@ -7537,8 +7537,10 @@ body.condensed [data-slot='shipping-settings-description'] {
 
 /* ── Content spacing ── */
 
-body.condensed [data-slot='shipping-settings-content'] {
-  gap: 0.75rem !important;
+body.condensed
+  [data-slot='shipping-settings-content'].space-y-6
+  > :not(:first-child) {
+  margin-top: 0.75rem !important;
 }
 
 /* ── Kit shipping toggle ── */
@@ -7557,10 +7559,6 @@ body.condensed [data-slot='shipping-settings-kit-toggle'] p.text-xs {
 }
 
 /* ── Address section ── */
-
-body.condensed [data-slot='shipping-settings-address'] {
-  gap: 0.5rem !important;
-}
 
 body.condensed
   [data-slot='shipping-settings-address']
