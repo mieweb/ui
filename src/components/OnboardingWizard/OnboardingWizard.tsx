@@ -125,16 +125,28 @@ export function OnboardingWizard({
         'onboarding-wizard bg-background text-foreground fixed inset-0 z-50 flex flex-col',
         className
       )}
+      data-slot="onboarding-wizard"
     >
       {/* Header */}
       {showHeader && (
-        <nav className="bg-primary flex items-center px-4 py-3">
+        <nav
+          className="bg-primary flex items-center px-4 py-3"
+          data-slot="onboarding-header"
+        >
           <div className="flex items-center">
             <span className="flex items-center text-white">
               {logoUrl && (
-                <img src={logoUrl} alt={`${brandName} Logo`} className="h-8" />
+                <img
+                  src={logoUrl}
+                  alt={`${brandName} Logo`}
+                  className="h-8"
+                  data-slot="onboarding-header-logo"
+                />
               )}
-              <div className="ml-3 hidden flex-col lg:flex">
+              <div
+                className="ml-3 hidden flex-col lg:flex"
+                data-slot="onboarding-header-brand"
+              >
                 <span className="text-lg font-semibold">{brandName}</span>
                 {brandSubname && (
                   <span className="text-sm opacity-90">{brandSubname}</span>
@@ -148,14 +160,23 @@ export function OnboardingWizard({
 
       {/* Loading State */}
       {loading ? (
-        <div className="flex flex-1 flex-col items-center justify-center">
+        <div
+          className="flex flex-1 flex-col items-center justify-center"
+          data-slot="onboarding-loading"
+        >
           <Spinner size="xl" />
-          <p className="text-muted-foreground mt-4 text-center text-lg">
+          <p
+            className="text-muted-foreground mt-4 text-center text-lg"
+            data-slot="onboarding-loading-message"
+          >
             {loadingMessage}
           </p>
         </div>
       ) : (
-        <div className="container mx-auto flex flex-1 flex-col p-4">
+        <div
+          className="container mx-auto flex flex-1 flex-col p-4"
+          data-slot="onboarding-content"
+        >
           {/* Error Alert */}
           {error && (
             <Alert variant="danger" className="mb-4">
@@ -169,10 +190,16 @@ export function OnboardingWizard({
           </div>
 
           {/* Footer Buttons */}
-          <div className="border-border mt-auto border-t pt-4">
+          <div
+            className="border-border mt-auto border-t pt-4"
+            data-slot="onboarding-footer"
+          >
             {/* Skip Button (top right of footer) */}
             {!isLastStep && currentStepData?.skippable !== false && (
-              <div className="mb-3 flex justify-end">
+              <div
+                className="mb-3 flex justify-end"
+                data-slot="onboarding-skip"
+              >
                 <Button
                   variant="secondary"
                   size="sm"
@@ -185,7 +212,10 @@ export function OnboardingWizard({
             )}
 
             {/* Navigation Row */}
-            <div className="bg-background flex w-full items-center gap-4">
+            <div
+              className="bg-background flex w-full items-center gap-4"
+              data-slot="onboarding-nav"
+            >
               {/* Back Button - always visible, disabled on first step */}
               <Button
                 variant="outline"
@@ -263,23 +293,39 @@ export function OnboardingStepQuestion({
   children,
 }: OnboardingStepQuestionProps) {
   return (
-    <div className="py-4">
+    <div className="py-4" data-slot="onboarding-step-question">
       <div className="mb-4 flex items-start gap-3">
         {icon && (
-          <div className="bg-muted text-muted-foreground hidden rounded-full p-3">
+          <div
+            className="bg-muted text-muted-foreground hidden rounded-full p-3"
+            data-slot="onboarding-step-icon"
+          >
             <i className={cn(icon, 'text-lg')} />
           </div>
         )}
         <div>
-          <h3 className="text-foreground mb-2 text-2xl font-bold">{title}</h3>
+          <h3
+            className="text-foreground mb-2 text-2xl font-bold"
+            data-slot="onboarding-step-title"
+          >
+            {title}
+          </h3>
           {description && (
-            <p className="text-muted-foreground">{description}</p>
+            <p
+              className="text-muted-foreground"
+              data-slot="onboarding-step-description"
+            >
+              {description}
+            </p>
           )}
         </div>
       </div>
 
       {options.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div
+          className="flex flex-wrap gap-2"
+          data-slot="onboarding-step-options"
+        >
           {options.map((option) => (
             <Button
               key={option.id}
@@ -324,19 +370,28 @@ export function OnboardingCompletion({
 }: OnboardingCompletionProps) {
   if (completed) {
     return (
-      <div className="py-4">
+      <div className="py-4" data-slot="onboarding-completion">
         <div className="mb-4">
-          <p className="text-foreground mb-0 text-2xl">
+          <p
+            className="text-foreground mb-0 text-2xl"
+            data-slot="onboarding-completion-title"
+          >
             <i className="fas fa-check-circle mr-2 text-green-500" />
             Setup complete!
           </p>
-          <p className="text-muted-foreground">
+          <p
+            className="text-muted-foreground"
+            data-slot="onboarding-completion-description"
+          >
             You&apos;re all set up! You can now start using BlueHive to manage
             your employees.
           </p>
         </div>
 
-        <div className="my-6 flex flex-wrap gap-3">
+        <div
+          className="my-6 flex flex-wrap gap-3"
+          data-slot="onboarding-completion-actions"
+        >
           <Button variant="primary" onClick={onStartOrder}>
             <i className="fas fa-shopping-cart mr-2" />
             Start your first order
@@ -355,19 +410,28 @@ export function OnboardingCompletion({
   }
 
   return (
-    <div className="py-4">
+    <div className="py-4" data-slot="onboarding-completion">
       <div className="mb-4">
-        <h3 className="text-foreground mb-2 text-2xl font-bold">
+        <h3
+          className="text-foreground mb-2 text-2xl font-bold"
+          data-slot="onboarding-completion-title"
+        >
           Some steps not completed
         </h3>
-        <p className="text-muted-foreground">
+        <p
+          className="text-muted-foreground"
+          data-slot="onboarding-completion-description"
+        >
           You still need to complete some steps to finish the full guided
           onboarding. If you&apos;re in a hurry, you can skip them for now and
           come back later.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div
+        className="flex flex-wrap gap-3"
+        data-slot="onboarding-completion-actions"
+      >
         {incompleteSteps.map(({ step, label }) => (
           <Button
             key={step}

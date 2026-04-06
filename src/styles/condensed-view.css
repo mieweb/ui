@@ -6123,3 +6123,1396 @@ body.condensed [data-slot='spinner-label'] {
 body.condensed [data-slot='full-page-spinner'] {
   gap: 0.5rem !important;
 }
+
+/* ============================================================================
+   AI Components – condensed overrides
+   ============================================================================ 
+*/
+
+/* ---------------------------------------------------------------------------
+   AIChat – main container, header, messages area, input section
+   --------------------------------------------------------------------------- */
+
+/* Header – tighter padding */
+body.condensed [data-slot='ai-chat-header'] {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.375rem !important;
+}
+
+/* Header icon – smaller */
+body.condensed [data-slot='ai-chat-header-icon'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+body.condensed [data-slot='ai-chat-header-icon'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Header title */
+body.condensed [data-slot='ai-chat-header'] h2 {
+  font-size: 0.8125rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Header status text */
+body.condensed [data-slot='ai-chat-header'] p {
+  font-size: 0.5625rem !important;
+  line-height: 0.75rem !important;
+}
+
+/* Header action buttons – smaller text */
+body.condensed [data-slot='ai-chat-header'] button {
+  font-size: 0.6875rem !important;
+}
+
+/* Icon-only header actions – compact padding */
+body.condensed [data-slot='ai-chat-header-action'] {
+  padding: 0.25rem !important;
+}
+
+/* Messages container – tighter padding */
+body.condensed [data-slot='ai-chat-messages'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Messages list – tighter gap (space-y-4 → margin override) */
+body.condensed
+  [data-slot='ai-chat-messages']
+  > div
+  > :not([hidden])
+  ~ :not([hidden]) {
+  margin-top: 0.5rem !important;
+}
+
+/* Input section – tighter padding */
+body.condensed [data-slot='ai-chat-input'] {
+  padding: 0 !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIChat – Suggested Actions
+   --------------------------------------------------------------------------- */
+
+/* Suggestions container – tighter gap only; padding belongs to the outer wrapper */
+body.condensed [data-slot='ai-chat-suggestions'] {
+  gap: 0.25rem !important;
+}
+
+/* Suggestions wrapper inside input – tighter padding */
+body.condensed [data-slot='ai-chat-input-suggestions'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+/* Suggestion buttons – smaller */
+body.condensed [data-slot='ai-chat-suggestion-btn'] {
+  padding: 0.1875rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-chat-suggestion-btn'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIChat – Empty State icon
+   --------------------------------------------------------------------------- */
+
+body.condensed [data-slot='ai-empty-state-icon'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
+
+body.condensed [data-slot='ai-empty-state-icon'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIChatModal – trigger button and modal container
+   --------------------------------------------------------------------------- */
+
+/* Floating trigger – smaller */
+body.condensed [data-slot='ai-chat-trigger'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
+
+body.condensed [data-slot='ai-chat-trigger'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* Trigger badge */
+body.condensed [data-slot='ai-chat-trigger-badge'] {
+  width: 1rem !important;
+  height: 1rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* Modal container – slightly smaller */
+body.condensed [data-slot='ai-chat-modal'] {
+  max-height: calc(100vh - 4rem) !important;
+}
+
+body.condensed [data-slot='ai-chat-modal'] > div {
+  border-radius: 0.75rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   AIMessage – message rows, avatars, bubbles, timestamps
+   --------------------------------------------------------------------------- */
+
+/* Message rows – tighter gap */
+body.condensed [data-slot='ai-message'] {
+  gap: 0.375rem !important;
+}
+
+/* All avatar sizes collapse to sm (h-6 w-6) */
+body.condensed
+  :is(
+    [data-slot='ai-message-avatar'].h-8.w-8,
+    [data-slot='ai-message-avatar'].h-10.w-10
+  ) {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='ai-message-avatar'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Message bubble – tighter padding, smaller text */
+body.condensed [data-slot='ai-message-bubble'] {
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.75rem !important;
+}
+
+body.condensed [data-slot='ai-message-bubble'] p {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Content blocks inside bubbles – tighter spacing */
+body.condensed
+  [data-slot='ai-message-bubble']
+  > .space-y-3
+  > :not([hidden])
+  ~ :not([hidden]) {
+  margin-top: 0.25rem !important;
+}
+
+/* Thinking block – tighter */
+body.condensed [data-slot='ai-message-thinking'] button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='ai-message-thinking'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='ai-message-thinking'] > div:last-child {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='ai-message-thinking'] > div:last-child p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Code blocks – smaller */
+body.condensed [data-slot='ai-message-code'] {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Typing indicator – smaller dots */
+body.condensed [data-slot='ai-typing-indicator'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-typing-indicator'] > span {
+  width: 4px !important;
+  height: 4px !important;
+  min-width: 4px !important;
+  min-height: 4px !important;
+}
+
+/* Timestamp – smaller */
+body.condensed [data-slot='ai-message-timestamp'] {
+  font-size: 0.5625rem !important;
+  line-height: 0.75rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ---------------------------------------------------------------------------
+   MCPToolCall – tool call cards, icons, content, parameters
+   --------------------------------------------------------------------------- */
+
+/* Tool call container – tighter padding */
+body.condensed [data-slot='ai-tool-call'] {
+  padding: 0.375rem !important;
+  border-radius: 0.5rem !important;
+}
+
+body.condensed [data-slot='ai-tool-call'] > div {
+  gap: 0.375rem !important;
+}
+
+/* Tool icon – smaller */
+body.condensed [data-slot='ai-tool-icon'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-icon'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Status icon – smaller */
+body.condensed [data-slot='ai-tool-status-icon'] {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='ai-tool-status-icon'] svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* Tool content text – smaller (scoped to status line, not parameters) */
+body.condensed [data-slot='ai-tool-content'] > .flex > span {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='ai-tool-content'] > .flex > .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='ai-tool-content'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Tool result section – tighter margin */
+body.condensed [data-slot='ai-tool-result'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-result'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Resource links inside results – smaller */
+body.condensed [data-slot='ai-tool-result'] a {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-result'] a svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Parameters section – tighter */
+body.condensed [data-slot='ai-tool-parameters'] {
+  margin-top: 0.25rem !important;
+  padding: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-parameters'] h4 {
+  font-size: 0.5625rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='ai-tool-parameters'] .text-xs {
+  font-size: 0.5625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Error display – smaller */
+body.condensed [data-slot='ai-tool-content'] .bg-red-100,
+body.condensed [data-slot='ai-tool-content'] .dark\:bg-red-900\/30,
+body.condensed [data-slot='ai-tool-content'] .bg-red-50,
+body.condensed [data-slot='ai-tool-content'] .dark\:bg-red-900\/20 {
+  padding: 0.25rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* Show/hide details toggle – smaller */
+body.condensed [data-slot='ai-tool-content'] > button {
+  font-size: 0.5625rem !important;
+  margin-top: 0.25rem !important;
+  gap: 0.125rem !important;
+}
+
+/* ============================================================================
+   CheckrIntegration – condensed overrides
+   ============================================================================ 
+*/
+
+/* Header – tighter margin and gap */
+body.condensed [data-slot='checkr-header'] {
+  margin-bottom: 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-header'] > div {
+  gap: 0.375rem !important;
+}
+
+/* Header icon – smaller */
+body.condensed [data-slot='checkr-header-icon'] {
+  width: 2rem !important;
+  height: 2rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='checkr-header-icon'] svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Header title */
+body.condensed [data-slot='checkr-header'] h3 {
+  font-size: 0.8125rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Header account info */
+body.condensed [data-slot='checkr-header'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-header'] p span {
+  font-size: 0.5625rem !important;
+}
+
+/* Error alert – tighter padding */
+body.condensed [data-slot='checkr-error'] {
+  padding: 0.5rem 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed [data-slot='checkr-error'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Status summary – smaller dots and text */
+body.condensed [data-slot='checkr-status-summary'] {
+  gap: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='checkr-status-summary'] span.rounded-full {
+  width: 0.375rem !important;
+  height: 0.375rem !important;
+}
+
+/* Actions bar – tighter gap and margin */
+body.condensed [data-slot='checkr-actions'] {
+  gap: 0.375rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-actions'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-right: 0.25rem !important;
+}
+
+/* Reports card – tighter border radius */
+body.condensed [data-slot='checkr-reports-card'] {
+  border-radius: 0.375rem !important;
+}
+
+/* Reports card header – tighter padding */
+body.condensed [data-slot='checkr-reports-header'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-reports-header'] h4 {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Report rows – tighter padding and gap */
+body.condensed [data-slot='checkr-report-row'] {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.5rem !important;
+}
+
+/* Checkbox in report rows – smaller */
+body.condensed [data-slot='checkr-report-row'] button[role='checkbox'] {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-report-row'] button[role='checkbox'] svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* Candidate info text */
+body.condensed [data-slot='checkr-report-row'] p {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-report-row'] .text-sm {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='checkr-report-row'] .text-xs {
+  font-size: 0.5625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* Status badge – smaller */
+body.condensed [data-slot='checkr-report-row'] span.rounded-full {
+  padding: 0 0.375rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* Reports card footer – tighter */
+body.condensed [data-slot='checkr-reports-footer'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='checkr-reports-footer'] > span {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='checkr-reports-footer'] > div {
+  gap: 0.25rem !important;
+}
+
+/* Empty state – smaller */
+body.condensed [data-slot='checkr-empty-state'] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+body.condensed [data-slot='checkr-empty-state'] svg {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='checkr-empty-state'] p {
+  font-size: 0.75rem !important;
+}
+
+/* Not connected state – smaller */
+body.condensed [data-slot='checkr-not-connected'] {
+  padding: 1.5rem !important;
+}
+
+body.condensed [data-slot='checkr-not-connected'] svg.mx-auto {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='checkr-not-connected'] p {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Loading spinner – smaller */
+body.condensed [data-slot='checkr-reports-card'] .animate-spin {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+/* ==========================================================================
+   EmployeeProfile – condensed overrides
+   ========================================================================== */
+
+/* ── Card root ── */
+body.condensed [data-slot='employee-card'] {
+  border-radius: 0.375rem !important;
+}
+
+/* ── Profile header ── */
+body.condensed [data-slot='employee-card-header'] {
+  padding: 0.5rem 0.75rem !important;
+  gap: 0 !important;
+}
+
+/* ── Avatar wrapper ── */
+body.condensed [data-slot='employee-card-avatar'] {
+  margin-bottom: 0.375rem !important;
+}
+
+/* Shrink the avatar itself (Avatar uses size="xl" = 4rem) */
+body.condensed [data-slot='employee-card-avatar'] [data-slot='avatar'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  font-size: 0.875rem !important;
+}
+
+/* Photo edit button */
+body.condensed [data-slot='employee-card-photo-edit'] {
+  padding: 0.125rem !important;
+}
+
+body.condensed [data-slot='employee-card-photo-edit'] svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Name row ── */
+body.condensed [data-slot='employee-card-name'] {
+  margin-bottom: 0.125rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='employee-card-name'] h3 {
+  font-size: 0.8125rem !important;
+  line-height: 1.25 !important;
+}
+
+/* Active/inactive status icon */
+body.condensed [data-slot='employee-card-name'] > span {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='employee-card-name'] > span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Title / Company ── */
+body.condensed [data-slot='employee-card-title'] {
+  font-size: 0.6875rem !important;
+  line-height: 1.3 !important;
+}
+
+/* ── Expand/collapse toggle ── */
+body.condensed [data-slot='employee-card-toggle'] {
+  margin-top: 0.25rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='employee-card-toggle'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Details section ── */
+body.condensed [data-slot='employee-card-details'] {
+  padding: 0 0.5rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Override space-y-3 to space-y-1.5 */
+body.condensed
+  [data-slot='employee-card-details']
+  > :not([hidden])
+  ~ :not([hidden]) {
+  --tw-space-y-reverse: 0 !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0 !important;
+}
+
+/* ── Detail rows (DOB, phone, email, payment, address) ── */
+body.condensed [data-slot='employee-card-detail-row'] {
+  gap: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='employee-card-detail-row'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* Age text beside DOB */
+body.condensed [data-slot='employee-card-detail-row'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* Department badges – already have Badge condensed, but tighten wrapper */
+body.condensed [data-slot='employee-card-details'] > .flex-wrap {
+  gap: 0.25rem !important;
+}
+
+/* Extended fields separator */
+body.condensed [data-slot='employee-card-details'] > hr {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Extended field rows */
+body.condensed [data-slot='employee-card-details'] > .flex.gap-2 {
+  gap: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Blurb text */
+body.condensed [data-slot='employee-card-details'] > p {
+  font-size: 0.625rem !important;
+  line-height: 1.3 !important;
+}
+
+/* ── OrderSidebarTabs ── */
+body.condensed [data-slot='order-sidebar-tabs'] {
+  gap: 0 !important;
+}
+
+body.condensed [data-slot='order-sidebar-tab'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── OrderDetailSidebar ── */
+body.condensed [data-slot='order-sidebar-profile'] {
+  padding: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='order-detail-sidebar']
+  [data-slot='order-sidebar-tabs'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='order-sidebar-content'] {
+  padding: 0.375rem !important;
+}
+
+/* ==========================================================================
+   ErrorPage – condensed overrides
+   ========================================================================== */
+
+/* ── Root container ── */
+body.condensed [data-slot='error-page'] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+  min-height: 30vh !important;
+}
+
+/* Size sm variant */
+body.condensed [data-slot='error-page'].min-h-\[40vh\] {
+  min-height: 20vh !important;
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+/* ── Illustration ── */
+body.condensed [data-slot='error-page-illustration'] {
+  margin-bottom: 1rem !important;
+}
+
+body.condensed [data-slot='error-page-illustration'] svg {
+  width: 3rem !important;
+  height: 3rem !important;
+}
+
+/* ── Error code (404, 500, etc.) ── */
+body.condensed [data-slot='error-page-code'] {
+  margin-bottom: 0.5rem !important;
+  font-size: 2.5rem !important;
+}
+
+/* ── Title ── */
+body.condensed [data-slot='error-page-title'] {
+  margin-bottom: 0.375rem !important;
+  font-size: 1.125rem !important;
+}
+
+/* ── Description ── */
+body.condensed [data-slot='error-page-description'] {
+  margin-bottom: 1rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.4 !important;
+}
+
+/* ── Actions row ── */
+body.condensed [data-slot='error-page-actions'] {
+  gap: 0.375rem !important;
+}
+
+/* ── Action buttons (target via parent – Button hardcodes data-slot="button") ── */
+body.condensed [data-slot='error-page-actions'] > a {
+  height: 1.75rem !important;
+  min-width: 100px !important;
+  font-size: 0.6875rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-radius: 0.375rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='error-page-actions'] > [data-slot='button'] {
+  min-width: 100px !important;
+}
+
+/* ── Additional content ── */
+body.condensed [data-slot='error-page-children'] {
+  margin-top: 1rem !important;
+}
+
+/* ── Error details (ServerErrorPage) ── */
+body.condensed [data-slot='error-page-details'] {
+  margin-top: 0.5rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] details {
+  padding: 0.5rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] summary {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed
+  [data-slot='error-page-details']
+  .space-y-2
+  > :not([hidden])
+  ~ :not([hidden]) {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='error-page-details'] pre {
+  padding: 0.375rem !important;
+  font-size: 0.625rem !important;
+}
+
+/* ==========================================================================
+   LoadingPage – condensed overrides
+   ========================================================================== */
+
+/* ── LoadingPage root ── */
+body.condensed [data-slot='loading-page'] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+body.condensed [data-slot='loading-page'].min-h-\[400px\] {
+  min-height: 200px !important;
+}
+
+body.condensed [data-slot='loading-page'].min-h-\[200px\] {
+  min-height: 120px !important;
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+/* ── Indicator wrapper ── */
+body.condensed [data-slot='loading-page-indicator'] {
+  margin-bottom: 0.75rem !important;
+}
+
+/* ── Message ── */
+body.condensed [data-slot='loading-page-message'] {
+  margin-bottom: 0.25rem !important;
+  font-size: 0.8125rem !important;
+}
+
+/* ── Sub-message ── */
+body.condensed [data-slot='loading-page-submessage'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── LoadingOverlay ── */
+body.condensed [data-slot='loading-overlay-message'] {
+  margin-top: 0.375rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── LoadingDots ── */
+body.condensed [data-slot='loading-dots'] {
+  gap: 0.125rem !important;
+}
+
+body.condensed [data-slot='loading-dots'] > div {
+  width: 0.375rem !important;
+  height: 0.375rem !important;
+}
+
+/* ── LoadingBar ── */
+body.condensed [data-slot='loading-bar-track'] {
+  height: 0.375rem !important;
+}
+
+body.condensed [data-slot='loading-bar-percentage'] {
+  margin-top: 0.125rem !important;
+  font-size: 0.625rem !important;
+}
+
+/* ── LoadingSkeleton ── */
+body.condensed [data-slot='loading-skeleton'] + [data-slot='loading-skeleton'] {
+  margin-top: 0.25rem !important;
+}
+
+/* ── CardSkeleton ── */
+body.condensed [data-slot='card-skeleton'] {
+  padding: 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='card-skeleton'] [data-slot='loading-skeleton'] {
+  margin-bottom: 0.25rem !important;
+}
+
+/* ── PulseIndicator ── */
+body.condensed [data-slot='pulse-indicator'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OnboardingWizard – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Header ── */
+body.condensed [data-slot='onboarding-header'] {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='onboarding-header-logo'] {
+  height: 1.5rem !important;
+}
+
+body.condensed [data-slot='onboarding-header-brand'] {
+  margin-left: 0.5rem !important;
+}
+
+body.condensed [data-slot='onboarding-header-brand'] > span:first-child {
+  font-size: 0.8125rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed [data-slot='onboarding-header-brand'] > span:last-child {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Loading state ── */
+body.condensed [data-slot='onboarding-loading-message'] {
+  font-size: 0.8125rem !important;
+  margin-top: 0.5rem !important;
+}
+
+/* ── Content area ── */
+body.condensed [data-slot='onboarding-content'] {
+  padding: 0.5rem !important;
+}
+
+/* ── Footer ── */
+body.condensed [data-slot='onboarding-footer'] {
+  padding-top: 0.5rem !important;
+}
+
+body.condensed [data-slot='onboarding-skip'] {
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='onboarding-nav'] {
+  gap: 0.5rem !important;
+}
+
+/* ── StepQuestion ── */
+body.condensed [data-slot='onboarding-step-question'] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='onboarding-step-question'] > div:first-child {
+  margin-bottom: 0.25rem !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='onboarding-step-icon'] {
+  padding: 0.375rem !important;
+}
+
+body.condensed [data-slot='onboarding-step-icon'] i {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='onboarding-step-title'] {
+  font-size: 1.125rem !important;
+  line-height: 1.375rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='onboarding-step-description'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='onboarding-step-options'] {
+  gap: 0.25rem !important;
+}
+
+/* ── Completion ── */
+body.condensed [data-slot='onboarding-completion'] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='onboarding-completion'] > div:first-child {
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='onboarding-completion-title'] {
+  font-size: 1.125rem !important;
+  line-height: 1.375rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='onboarding-completion-description'] {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='onboarding-completion-actions'] {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+/* ── Story preview container ── */
+body.condensed [data-slot='onboarding-wizard-preview'] {
+  height: 350px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OrderList – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Header ── */
+body.condensed [data-slot='order-list-header'] > div {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.25rem !important;
+}
+
+/* ── Tabs ── */
+body.condensed [data-slot='order-list-tabs'] {
+  gap: 0.125rem !important;
+}
+
+body.condensed [data-slot='order-list-tab'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='order-list-tab-count'] {
+  margin-left: 0.25rem !important;
+  padding: 0 0.25rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* ── Search ── */
+body.condensed [data-slot='order-list-search'] input {
+  padding: 0.25rem 0.5rem 0.25rem 1.75rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='order-list-search'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Actions ── */
+body.condensed [data-slot='order-list-actions'] {
+  gap: 0.25rem !important;
+}
+
+/* ── Loading ── */
+body.condensed [data-slot='order-list-loading'] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+body.condensed [data-slot='order-list-loading'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* ── Empty state ── */
+body.condensed [data-slot='order-list-empty'] {
+  padding: 1.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='order-list-empty'] svg {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='order-list-empty-message'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Order items (rendered by consumer renderOrder) ── */
+body.condensed [data-slot='order-list-items'] > div {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='order-list-items'] > div > div {
+  padding: 0.375rem 0.75rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] span.font-medium {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  margin-top: 0.0625rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] .text-xs {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] .mb-1 {
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='order-list-items'] .gap-2 {
+  gap: 0.25rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PaymentMethod – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Shared card/bank root ── */
+body.condensed [data-slot='payment-card'],
+body.condensed [data-slot='payment-bank'] {
+  padding: 0.5rem !important;
+  border-radius: 0.5rem !important;
+}
+
+/* ── Headers ── */
+body.condensed [data-slot='payment-card-header'],
+body.condensed [data-slot='payment-bank-header'] {
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-header'] .gap-2,
+body.condensed [data-slot='payment-bank-header'] .gap-2 {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-header'] i {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-header'] svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='payment-card-label'],
+body.condensed [data-slot='payment-bank-label'] {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='payment-card-badge'] {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='payment-bank-header'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Details ── */
+body.condensed [data-slot='payment-card-details'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-details'] .font-mono,
+body.condensed [data-slot='payment-card-details'] .text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] {
+  margin-top: 0.25rem !important;
+  gap: 0.0625rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] .text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] .font-mono {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='payment-bank-details'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Footers ── */
+body.condensed [data-slot='payment-card-footer'],
+body.condensed [data-slot='payment-bank-footer'] {
+  margin-top: 0.25rem !important;
+  padding-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] .text-xs,
+body.condensed [data-slot='payment-bank-footer'] .text-xs {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] .gap-2,
+body.condensed [data-slot='payment-bank-footer'] .gap-2 {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] button svg,
+body.condensed [data-slot='payment-bank-footer'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='payment-card-footer'] button,
+body.condensed [data-slot='payment-bank-footer'] button {
+  padding: 0.125rem !important;
+}
+
+/* ── List grid ── */
+body.condensed [data-slot='payment-list'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Empty state ── */
+body.condensed [data-slot='payment-list-empty'] {
+  padding: 0.5rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty'] .gap-3 {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty'] svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='payment-list-empty-message'] {
+  font-size: 0.6875rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ProductVersion – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root wrapper ── */
+body.condensed [data-slot='product-version'] {
+  font-size: 0.625rem !important;
+}
+
+/* ── Inline variant ── */
+body.condensed [data-slot='product-version-inline'] {
+  gap: 0.25rem !important;
+}
+
+/* ── Stacked variant ── */
+body.condensed [data-slot='product-version-stacked'] {
+  gap: 0.125rem !important;
+}
+
+/* ── Minimal variant ── */
+body.condensed [data-slot='product-version-minimal'] {
+  font-size: inherit !important;
+}
+
+/* ── Environment badge ── */
+body.condensed [data-slot='product-version-env'] {
+  padding: 0.0625rem 0.25rem !important;
+  font-size: 0.5625rem !important;
+  border-radius: 0.1875rem !important;
+}
+
+/* ── Badge variant ── */
+body.condensed [data-slot='product-version-badge'] {
+  padding: 0.125rem 0.375rem !important;
+  gap: 0.25rem !important;
+  font-size: 0.5625rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed [data-slot='product-version-badge'] .text-\[10px\] {
+  font-size: 0.5rem !important;
+}
+
+/* ==========================================================================
+   ServiceGeneralSettings
+   ========================================================================== */
+
+/* ── Header ── */
+
+body.condensed [data-slot='service-settings-header'] {
+  padding-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-title'] {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='service-settings-description'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Content spacing ── */
+
+body.condensed [data-slot='service-settings-content'] {
+  gap: 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='service-settings-content']
+  > .space-y-6
+  > :not(:first-child) {
+  margin-top: 0.75rem !important;
+}
+
+/* ── Error message ── */
+
+body.condensed [data-slot='service-settings-error'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-error'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Status toggles ── */
+
+body.condensed [data-slot='service-settings-toggles'] {
+  gap: 0.75rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-toggles'] .gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-settings-toggles'] p.text-sm {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-settings-toggles'] p.text-xs {
+  font-size: 0.625rem !important;
+}
+
+/* ── Form sections ── */
+
+body.condensed [data-slot='service-settings-basic'],
+body.condensed [data-slot='service-settings-pricing'],
+body.condensed [data-slot='service-settings-billing'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='service-settings-basic']
+  .space-y-4
+  > :not(:first-child),
+body.condensed
+  [data-slot='service-settings-pricing']
+  .space-y-4
+  > :not(:first-child),
+body.condensed
+  [data-slot='service-settings-billing']
+  .space-y-4
+  > :not(:first-child) {
+  margin-top: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-section-label'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Textarea ── */
+
+body.condensed [data-slot='service-settings-basic'] textarea {
+  min-height: 2.75rem !important;
+  max-height: 4rem !important;
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Raw inputs (price, turnaround) ── */
+
+body.condensed [data-slot='service-settings-pricing'] input,
+body.condensed [data-slot='service-settings-pricing'] label {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] input {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] .mb-1 {
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] .relative > span {
+  font-size: 0.75rem !important;
+}
+
+/* Push "days" suffix to sit right after the number */
+body.condensed [data-slot='service-settings-pricing'] #turnaround-days {
+  padding-right: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] #turnaround-days + span {
+  right: auto !important;
+  left: 2.5rem !important;
+}
+
+/* ── Grid gap ── */
+
+body.condensed [data-slot='service-settings-basic'] .grid,
+body.condensed [data-slot='service-settings-pricing'] .grid {
+  gap: 0.5rem !important;
+}
+
+/* ── Actions ── */
+
+body.condensed [data-slot='service-settings-actions'] {
+  padding-top: 0.5rem !important;
+}

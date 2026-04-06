@@ -44,7 +44,10 @@ interface ToolStatusIconProps {
 
 function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
   return (
-    <span className={cn(statusIconVariants({ status }), className)}>
+    <span
+      data-slot="ai-tool-status-icon"
+      className={cn(statusIconVariants({ status }), className)}
+    >
       {status === 'pending' && (
         <svg
           className="h-3 w-3 text-neutral-500"
@@ -686,6 +689,7 @@ export function MCPToolCallDisplay({
 
   return (
     <div
+      data-slot="ai-tool-call"
       className={cn(
         toolCallVariants({ status: toolCall.status, compact }),
         className
@@ -694,12 +698,15 @@ export function MCPToolCallDisplay({
       {/* Main Content - Always Visible */}
       <div className="flex items-start gap-3">
         {/* Tool Icon */}
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400">
+        <div
+          data-slot="ai-tool-icon"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400"
+        >
           {getToolIcon(toolCall.toolName)}
         </div>
 
         {/* Content */}
-        <div className="min-w-0 flex-1">
+        <div data-slot="ai-tool-content" className="min-w-0 flex-1">
           {/* Friendly Status Line */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-neutral-900 dark:text-white">
@@ -722,7 +729,7 @@ export function MCPToolCallDisplay({
 
           {/* Result Summary & Links */}
           {toolCall.result && (
-            <div className="mt-2">
+            <div data-slot="ai-tool-result" className="mt-2">
               <ToolResultDisplay
                 result={toolCall.result}
                 onLinkClick={onLinkClick}
@@ -768,7 +775,10 @@ export function MCPToolCallDisplay({
 
           {/* Technical Details (collapsed by default) */}
           {showDetails && showParameters && toolCall.parameters.length > 0 && (
-            <div className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800">
+            <div
+              data-slot="ai-tool-parameters"
+              className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800"
+            >
               <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400">
                 Parameters
               </h4>

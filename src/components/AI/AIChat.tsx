@@ -141,10 +141,14 @@ export function SuggestedActions({
   className,
 }: SuggestedActionsProps) {
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div
+      data-slot="ai-chat-suggestions"
+      className={cn('flex flex-wrap gap-2', className)}
+    >
       {actions.map((action) => (
         <button
           key={action.id}
+          data-slot="ai-chat-suggestion-btn"
           onClick={() => onSelect(action)}
           className={cn(
             'flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5',
@@ -180,7 +184,10 @@ function AIEmptyState({
   ...props
 }: AIEmptyStateProps) {
   const aiIcon = (
-    <div className="bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white">
+    <div
+      data-slot="ai-empty-state-icon"
+      className="bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white"
+    >
       <SparklesIcon size="lg" className="h-8 w-8" />
     </div>
   );
@@ -325,14 +332,21 @@ export function AIChat({
 
   return (
     <div
+      data-slot="ai-chat"
       className={cn(chatVariants({ variant, size }), className)}
       style={{ height: height || undefined }}
     >
       {/* Header */}
       {showHeader && (
-        <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
+        <div
+          data-slot="ai-chat-header"
+          className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700"
+        >
           <div className="flex items-center gap-3">
-            <div className="bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white">
+            <div
+              data-slot="ai-chat-header-icon"
+              className="bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white"
+            >
               <SparklesIcon size="sm" />
             </div>
             <div>
@@ -362,6 +376,7 @@ export function AIChat({
             {onClear && messages.length > 0 && (
               <button
                 onClick={onClear}
+                data-slot="ai-chat-header-action"
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Clear chat"
               >
@@ -371,6 +386,7 @@ export function AIChat({
             {onClose && (
               <button
                 onClick={onClose}
+                data-slot="ai-chat-header-action"
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Close chat"
                 aria-label="Close chat"
@@ -383,7 +399,10 @@ export function AIChat({
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div
+        data-slot="ai-chat-messages"
+        className="flex-1 overflow-y-auto px-4 py-4"
+      >
         {messages.length === 0 ? (
           <AIEmptyState
             suggestions={suggestions}
@@ -406,12 +425,15 @@ export function AIChat({
       </div>
 
       {/* Input - Using MessageComposer from Messaging */}
-      <div className="shrink-0 border-t border-neutral-200 dark:border-neutral-700">
+      <div
+        data-slot="ai-chat-input"
+        className="shrink-0 border-t border-neutral-200 dark:border-neutral-700"
+      >
         {suggestions &&
           suggestions.length > 0 &&
           messages.length > 0 &&
           !isGenerating && (
-            <div className="px-4 pt-3">
+            <div data-slot="ai-chat-input-suggestions" className="px-4 pt-3">
               <SuggestedActions
                 actions={suggestions}
                 onSelect={handleSuggestionSelect}
