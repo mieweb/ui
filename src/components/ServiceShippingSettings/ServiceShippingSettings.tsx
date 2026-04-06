@@ -148,22 +148,30 @@ export function ServiceShippingSettings({
   };
 
   return (
-    <Card className={className}>
-      <CardHeader className="pb-4">
+    <Card className={className} data-slot="shipping-settings">
+      <CardHeader className="pb-4" data-slot="shipping-settings-header">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Shipping Settings</CardTitle>
+          <CardTitle className="text-lg" data-slot="shipping-settings-title">
+            Shipping Settings
+          </CardTitle>
           <Switch
             checked={shippingEnabled}
             onCheckedChange={onShippingEnabledChange}
           />
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p
+          className="text-sm text-gray-500 dark:text-gray-400"
+          data-slot="shipping-settings-description"
+        >
           Configure how kits and materials are shipped
         </p>
       </CardHeader>
 
       {shippingEnabled && (
-        <CardContent className="space-y-6">
+        <CardContent
+          className="space-y-6"
+          data-slot="shipping-settings-content"
+        >
           {/* Shipping method */}
           {shippingMethods.length > 0 && (
             <Select
@@ -179,7 +187,10 @@ export function ServiceShippingSettings({
           )}
 
           {/* Kit shipping toggle */}
-          <div className="flex items-center justify-between py-2">
+          <div
+            className="flex items-center justify-between py-2"
+            data-slot="shipping-settings-kit-toggle"
+          >
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Use Kit Shipping
@@ -195,8 +206,11 @@ export function ServiceShippingSettings({
           </div>
 
           {/* Default address */}
-          <div className="space-y-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="space-y-4" data-slot="shipping-settings-address">
+            <p
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              data-slot="shipping-settings-section-label"
+            >
               Default Return Address
             </p>
 
@@ -272,7 +286,7 @@ export function ServiceShippingSettings({
           />
 
           {/* Special instructions */}
-          <div>
+          <div data-slot="shipping-settings-instructions">
             <label
               htmlFor="shipping-instructions"
               className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -291,7 +305,10 @@ export function ServiceShippingSettings({
 
           {/* Save button */}
           {onSave && (
-            <div className="flex justify-end pt-2">
+            <div
+              className="flex justify-end pt-2"
+              data-slot="shipping-settings-actions"
+            >
               <Button onClick={onSave} disabled={isSaving}>
                 {isSaving ? 'Saving...' : 'Save Shipping Settings'}
               </Button>
