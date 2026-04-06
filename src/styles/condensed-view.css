@@ -7376,3 +7376,141 @@ body.condensed [data-slot='product-version-badge'] {
 body.condensed [data-slot='product-version-badge'] .text-\[10px\] {
   font-size: 0.5rem !important;
 }
+
+/* ==========================================================================
+   ServiceGeneralSettings
+   ========================================================================== */
+
+/* ── Header ── */
+
+body.condensed [data-slot='service-settings-header'] {
+  padding-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-title'] {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='service-settings-description'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Content spacing ── */
+
+body.condensed [data-slot='service-settings-content'] {
+  gap: 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='service-settings-content']
+  > .space-y-6
+  > :not(:first-child) {
+  margin-top: 0.75rem !important;
+}
+
+/* ── Error message ── */
+
+body.condensed [data-slot='service-settings-error'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-error'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Status toggles ── */
+
+body.condensed [data-slot='service-settings-toggles'] {
+  gap: 0.75rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-toggles'] .gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-settings-toggles'] p.text-sm {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-settings-toggles'] p.text-xs {
+  font-size: 0.625rem !important;
+}
+
+/* ── Form sections ── */
+
+body.condensed [data-slot='service-settings-basic'],
+body.condensed [data-slot='service-settings-pricing'],
+body.condensed [data-slot='service-settings-billing'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='service-settings-basic']
+  .space-y-4
+  > :not(:first-child),
+body.condensed
+  [data-slot='service-settings-pricing']
+  .space-y-4
+  > :not(:first-child),
+body.condensed
+  [data-slot='service-settings-billing']
+  .space-y-4
+  > :not(:first-child) {
+  margin-top: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-section-label'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Textarea ── */
+
+body.condensed [data-slot='service-settings-basic'] textarea {
+  rows: 2;
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Raw inputs (price, turnaround) ── */
+
+body.condensed [data-slot='service-settings-pricing'] input,
+body.condensed [data-slot='service-settings-pricing'] label {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] input {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] .mb-1 {
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] .relative > span {
+  font-size: 0.75rem !important;
+}
+
+/* Push "days" suffix to sit right after the number */
+body.condensed [data-slot='service-settings-pricing'] #turnaround-days {
+  padding-right: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-settings-pricing'] #turnaround-days + span {
+  right: auto !important;
+  left: 2.5rem !important;
+}
+
+/* ── Grid gap ── */
+
+body.condensed [data-slot='service-settings-basic'] .grid,
+body.condensed [data-slot='service-settings-pricing'] .grid {
+  gap: 0.5rem !important;
+}
+
+/* ── Actions ── */
+
+body.condensed [data-slot='service-settings-actions'] {
+  padding-top: 0.5rem !important;
+}
