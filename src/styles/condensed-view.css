@@ -1667,13 +1667,13 @@ body.condensed [data-slot='switch-thumb'] {
 }
 
 body.condensed [data-slot='switch-thumb'][data-state='checked'] {
-  translate: none !important;
-  transform: translateX(0.875rem) !important;
+  translate: 0.875rem !important;
+  transform: none !important;
 }
 
 body.condensed [data-slot='switch-thumb'][data-state='unchecked'] {
-  translate: none !important;
-  transform: translateX(0.125rem) !important;
+  translate: 0.125rem !important;
+  transform: none !important;
 }
 
 /* Label: smaller */
@@ -4830,15 +4830,15 @@ body.condensed [data-slot='consent-switch-thumb'] {
 body.condensed
   [data-slot='consent-switch-toggle'][aria-checked='true']
   [data-slot='consent-switch-thumb'] {
-  translate: none !important;
-  transform: translateX(0.875rem) !important;
+  translate: 0.875rem !important;
+  transform: none !important;
 }
 
 body.condensed
   [data-slot='consent-switch-toggle'][aria-checked='false']
   [data-slot='consent-switch-thumb'] {
-  translate: none !important;
-  transform: translateX(0.125rem) !important;
+  translate: 0.125rem !important;
+  transform: none !important;
 }
 
 body.condensed [data-slot='consent-switch-label'] {
