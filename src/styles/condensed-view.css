@@ -7516,3 +7516,83 @@ body.condensed [data-slot='service-settings-pricing'] .grid {
 body.condensed [data-slot='service-settings-actions'] {
   padding-top: 0.5rem !important;
 }
+
+/* ==========================================================================
+   ServiceShippingSettings
+   ========================================================================== */
+
+/* ── Header ── */
+
+body.condensed [data-slot='shipping-settings-header'] {
+  padding-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='shipping-settings-title'] {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='shipping-settings-description'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Content spacing ── */
+
+body.condensed
+  [data-slot='shipping-settings-content'].space-y-6
+  > :not(:first-child) {
+  margin-top: 0.75rem !important;
+}
+
+/* ── Kit shipping toggle ── */
+
+body.condensed [data-slot='shipping-settings-kit-toggle'] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='shipping-settings-kit-toggle'] p.text-sm {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='shipping-settings-kit-toggle'] p.text-xs {
+  font-size: 0.625rem !important;
+}
+
+/* ── Address section ── */
+
+body.condensed
+  [data-slot='shipping-settings-address']
+  .space-y-4
+  > :not(:first-child) {
+  margin-top: 0.5rem !important;
+}
+
+body.condensed [data-slot='shipping-settings-section-label'] {
+  font-size: 0.6875rem !important;
+}
+
+/* City/State/ZIP grid */
+body.condensed [data-slot='shipping-settings-address'] .grid {
+  gap: 0.375rem !important;
+}
+
+/* ── Instructions textarea ── */
+
+body.condensed [data-slot='shipping-settings-instructions'] label {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='shipping-settings-instructions'] textarea {
+  min-height: 2.75rem !important;
+  max-height: 4rem !important;
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Actions ── */
+
+body.condensed [data-slot='shipping-settings-actions'] {
+  padding-top: 0.25rem !important;
+}
