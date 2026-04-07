@@ -9142,3 +9142,298 @@ body.condensed [data-slot='invoice-payment-success'] h2 {
 body.condensed [data-slot='invoice-payment-success'] p {
   font-size: 0.75rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   InvoiceView – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root container ── */
+
+body.condensed [data-slot='invoice-view'] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-view'] > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+/* ── Header (title + badge + back button) ── */
+
+body.condensed [data-slot='invoice-view-header'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-view-header'] h1 {
+  font-size: 1rem !important;
+  line-height: 1.25rem !important;
+}
+
+body.condensed [data-slot='invoice-view-header'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='invoice-view-header'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+body.condensed [data-slot='invoice-view-header'] [data-slot='button'] {
+  font-size: 0.6875rem !important;
+  padding: 0.125rem 0.375rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+body.condensed [data-slot='invoice-view-header'] [data-slot='button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Action buttons ── */
+
+body.condensed [data-slot='invoice-view-actions'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='invoice-view-actions'] [data-slot='button'] {
+  font-size: 0.6875rem !important;
+  padding: 0.125rem 0.375rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+body.condensed [data-slot='invoice-view-actions'] [data-slot='button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-right: 0.125rem !important;
+}
+
+/* ── Invoice document card ── */
+
+body.condensed [data-slot='invoice-view-card'] {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='invoice-view-card'] [data-slot='card-content'] {
+  padding: 0.5rem !important;
+}
+
+/* ── Provider info + invoice meta row ── */
+
+body.condensed [data-slot='invoice-view-provider'] {
+  margin-bottom: 0.5rem !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-view-provider'] img {
+  height: 1.5rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-provider']
+  h2 {
+  font-size: 0.875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-provider']
+  p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Invoice meta (dates) ── */
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-meta']
+  h3 {
+  font-size: 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-meta']
+  > p {
+  font-size: 1rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-meta']
+  div
+  p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-meta']
+  div
+  p
+  span {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='invoice-view-meta'] div {
+  margin-top: 0.125rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.0625rem !important;
+}
+
+body.condensed [data-slot='invoice-view-meta'] div > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+/* ── Bill To ── */
+
+body.condensed [data-slot='invoice-view-bill-to'] {
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-bill-to']
+  p:first-child {
+  font-size: 0.5625rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-bill-to']
+  p:nth-child(2) {
+  font-size: 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-bill-to']
+  p:nth-child(n + 3) {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Line items table ── */
+
+body.condensed [data-slot='invoice-view-line-items'] {
+  margin-bottom: 0.375rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-line-items']
+  thead
+  th {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-line-items']
+  tbody
+  td {
+  padding: 0.25rem 0.375rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-line-items']
+  tbody
+  td
+  p {
+  font-size: 0.6875rem !important;
+  line-height: 0.9375rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-line-items']
+  tbody
+  td
+  p:last-child {
+  font-size: 0.5625rem !important;
+  line-height: 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-line-items']
+  tbody
+  td:last-child {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Totals ── */
+
+body.condensed [data-slot='invoice-view-totals'] > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.125rem !important;
+}
+
+body.condensed [data-slot='invoice-view-totals'] > div > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-totals']
+  > div
+  > div {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='invoice-view-totals'] > div > div:last-child {
+  padding-top: 0.125rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-totals']
+  > div
+  > div:last-child
+  span:last-child {
+  font-size: 0.875rem !important;
+}
+
+/* ── Notes / Payment Terms ── */
+
+body.condensed [data-slot='invoice-view-notes'] {
+  margin-top: 0.5rem !important;
+  padding-top: 0.375rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='invoice-view-notes'] > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-notes']
+  p:first-child {
+  font-size: 0.5625rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-view-card']
+  [data-slot='invoice-view-notes']
+  p:last-child {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
