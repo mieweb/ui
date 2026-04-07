@@ -8509,3 +8509,251 @@ body.condensed [data-slot='employer-view-contact-row'] button {
   height: auto !important;
   min-height: 0 !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HelpSupportPanel – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root container ── */
+
+body.condensed [data-slot='help-support-panel'] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+}
+
+body.condensed [data-slot='help-support-panel'] > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='help-support-header'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='help-support-header'] h1 {
+  font-size: 1rem !important;
+  line-height: 1.375rem !important;
+}
+
+body.condensed [data-slot='help-support-header'] p {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='help-support-header'] button {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.5rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+body.condensed [data-slot='help-support-header'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-right: 0.25rem !important;
+}
+
+/* ── Grid ── */
+
+body.condensed [data-slot='help-support-grid'] {
+  gap: 0.75rem !important;
+}
+
+/* ── FAQ card ── */
+
+body.condensed [data-slot='help-support-faq-card'] {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='help-support-faq-card'] [data-slot='card-header'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='help-support-faq-card'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='help-support-faq-card'] [data-slot='card-content'] {
+  padding: 0 0.5rem 0.375rem !important;
+}
+
+body.condensed
+  [data-slot='help-support-faq-card']
+  [data-slot='card-content']
+  > :not(:first-child) {
+  margin-top: 0.25rem !important;
+}
+
+/* ── FAQ search ── */
+
+body.condensed [data-slot='help-support-faq-card'] input {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.375rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* ── FAQ items ── */
+
+body.condensed [data-slot='help-support-faq-item'] button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='help-support-faq-item'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='help-support-faq-item'] > div {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='help-support-faq-item'] > div p {
+  font-size: 0.6875rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* ── Contact form card ── */
+
+body.condensed [data-slot='help-support-form-card'] {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] [data-slot='card-header'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] [data-slot='card-content'] {
+  padding: 0 0.5rem 0.375rem !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] label {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] input,
+body.condensed [data-slot='help-support-form-card'] textarea {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.375rem !important;
+  min-height: 0 !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] form > :not(:first-child) {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] form button[type='submit'] {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.5rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+body.condensed [data-slot='help-support-form-card'] .rounded-lg.bg-green-100 {
+  padding: 0.25rem 0.375rem !important;
+  margin-bottom: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── Contacts sidebar card ── */
+
+body.condensed [data-slot='help-support-contacts-card'] {
+  padding: 0 !important;
+}
+
+body.condensed
+  [data-slot='help-support-contacts-card']
+  [data-slot='card-header'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='help-support-contacts-card']
+  [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed
+  [data-slot='help-support-contacts-card']
+  [data-slot='card-content'] {
+  padding: 0 0.5rem 0.375rem !important;
+}
+
+body.condensed
+  [data-slot='help-support-contacts-card']
+  [data-slot='card-content']
+  > :not(:first-child) {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='help-support-contact-item'] {
+  padding: 0.25rem 0.375rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='help-support-contact-item'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+body.condensed [data-slot='help-support-contact-item'] p.font-medium {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='help-support-contact-item'] a,
+body.condensed [data-slot='help-support-contact-item'] p.text-sm {
+  font-size: 0.6875rem !important;
+  line-height: 0.9375rem !important;
+}
+
+body.condensed [data-slot='help-support-contact-item'] p.text-xs {
+  font-size: 0.5625rem !important;
+  margin-top: 0 !important;
+}
+
+/* ── Quick links sidebar card ── */
+
+body.condensed [data-slot='help-support-links-card'] {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='help-support-links-card'] [data-slot='card-header'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='help-support-links-card'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed
+  [data-slot='help-support-links-card']
+  [data-slot='card-content'] {
+  padding: 0 0.5rem 0.375rem !important;
+}
+
+body.condensed
+  [data-slot='help-support-links-card']
+  [data-slot='card-content']
+  > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+body.condensed [data-slot='help-support-links-card'] button {
+  padding: 0.125rem 0.25rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='help-support-links-card'] button svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
