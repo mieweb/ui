@@ -153,6 +153,7 @@ export function InvoicePaymentPage({
   if (!invoice) {
     return (
       <div
+        data-slot="invoice-payment"
         className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
         <Card
@@ -189,6 +190,7 @@ export function InvoicePaymentPage({
   if (successMessage || invoice.status === 'paid') {
     return (
       <div
+        data-slot="invoice-payment"
         className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
         <Card
