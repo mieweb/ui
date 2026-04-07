@@ -8905,3 +8905,247 @@ body.condensed [data-slot='invoice-list-row'] td [data-slot='badge'] {
   padding: 0 0.25rem !important;
   line-height: 0.875rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   InvoicePaymentPage – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root page ── */
+
+body.condensed [data-slot='invoice-payment'] {
+  padding: 0.5rem !important;
+  min-height: auto !important;
+}
+
+/* ── Header (provider logo/name) ── */
+
+body.condensed [data-slot='invoice-payment-header'] {
+  margin-bottom: 0.5rem !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-header'] img {
+  height: 1.5rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-header'] span {
+  font-size: 0.875rem !important;
+}
+
+/* ── Two-column grid ── */
+
+body.condensed [data-slot='invoice-payment'] .grid {
+  gap: 0.5rem !important;
+}
+
+/* ── Invoice Summary card ── */
+
+body.condensed [data-slot='invoice-payment-summary'] {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='invoice-payment-summary'] [data-slot='card-header'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-summary'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-payment-summary']
+  [data-slot='card-content'] {
+  padding: 0 0.5rem 0.375rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed
+  [data-slot='invoice-payment-summary']
+  [data-slot='card-content']
+  > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+body.condensed
+  [data-slot='invoice-payment-summary']
+  [data-slot='card-content']
+  .text-sm {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-summary'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ── Line items table ── */
+
+body.condensed [data-slot='invoice-payment-line-items'] {
+  padding-top: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-line-items'] th {
+  font-size: 0.625rem !important;
+  padding-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-line-items'] td {
+  font-size: 0.6875rem !important;
+  padding-top: 0.0625rem !important;
+  padding-bottom: 0.0625rem !important;
+}
+
+/* ── Totals section ── */
+
+body.condensed [data-slot='invoice-payment-totals'] {
+  padding-top: 0.375rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.125rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-totals'] > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+body.condensed [data-slot='invoice-payment-totals'] .text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-totals'] .text-lg {
+  font-size: 0.8125rem !important;
+}
+
+/* ── Payment Form card ── */
+
+body.condensed [data-slot='invoice-payment-form'] {
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] [data-slot='card-header'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] [data-slot='card-content'] {
+  padding: 0 0.5rem 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] form > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] input {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] label {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-form'] .grid {
+  gap: 0.375rem !important;
+}
+
+/* ── Error message ── */
+
+body.condensed [data-slot='invoice-payment-error'] {
+  padding: 0.25rem 0.375rem !important;
+  margin-bottom: 0 !important;
+}
+
+body.condensed [data-slot='invoice-payment-error'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Payment method toggle ── */
+
+body.condensed [data-slot='invoice-payment-methods'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-methods'] button {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* ── Submit button ── */
+
+body.condensed [data-slot='invoice-payment-form'] [data-slot='button'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  height: 1.75rem !important;
+}
+
+/* ── Stripe branding ── */
+
+body.condensed [data-slot='invoice-payment-form'] form > p.text-xs {
+  font-size: 0.5625rem !important;
+  margin-top: 0 !important;
+}
+
+/* ── Not-found state ── */
+
+body.condensed
+  [data-slot='invoice-payment-not-found']
+  [data-slot='card-content'] {
+  padding: 1.5rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-not-found'] svg {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-not-found'] h2 {
+  font-size: 0.875rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-not-found'] p {
+  font-size: 0.75rem !important;
+}
+
+/* ── Success state ── */
+
+body.condensed
+  [data-slot='invoice-payment-success']
+  [data-slot='card-content'] {
+  padding: 1.5rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-success'] .rounded-full {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-success'] .rounded-full svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-success'] h2 {
+  font-size: 0.875rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='invoice-payment-success'] p {
+  font-size: 0.75rem !important;
+}
