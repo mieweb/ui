@@ -7633,8 +7633,12 @@ body.condensed
 
 /* ── Open / Closed Badge ── */
 
+body.condensed [data-slot='business-hours'] [data-slot='business-hours-status'],
 body.condensed
-  [data-slot='business-hours']
+  [data-slot='business-hours-compact']
+  [data-slot='business-hours-status'],
+body.condensed
+  [data-slot='business-hours-summary']
   [data-slot='business-hours-status'] {
   font-size: 0.625rem !important;
   padding: 0 0.375rem !important;
@@ -7644,15 +7648,23 @@ body.condensed
 body.condensed
   [data-slot='business-hours']
   [data-slot='business-hours-status']
+  span,
+body.condensed
+  [data-slot='business-hours-compact']
+  [data-slot='business-hours-status']
+  span,
+body.condensed
+  [data-slot='business-hours-summary']
+  [data-slot='business-hours-status']
   span {
   width: 0.375rem !important;
   height: 0.375rem !important;
 }
 
-/* ── Content wrapper (card padding) ── */
+/* ── Content wrapper (card variant padding only) ── */
 
 body.condensed
-  [data-slot='business-hours']
+  [data-slot='business-hours'].rounded-lg
   [data-slot='business-hours-content'] {
   padding: 0.375rem !important;
 }
@@ -7920,22 +7932,12 @@ body.condensed [data-slot='employer-list-item-content'] {
 
 /* ── Logo / initial avatar ── */
 
-body.condensed [data-slot='employer-list-item-content'] img {
+body.condensed [data-slot='employer-list-item-logo'] {
   width: 1.5rem !important;
   height: 1.5rem !important;
 }
 
-body.condensed
-  [data-slot='employer-list-item-content']
-  > div:first-child:not([data-slot]) {
-  width: 1.5rem !important;
-  height: 1.5rem !important;
-}
-
-body.condensed
-  [data-slot='employer-list-item-content']
-  > div:first-child:not([data-slot])
-  span {
+body.condensed [data-slot='employer-list-item-logo'] span {
   font-size: 0.625rem !important;
 }
 

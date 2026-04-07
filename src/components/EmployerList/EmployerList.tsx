@@ -201,10 +201,14 @@ export function EmployerList({
                   <img
                     src={employer.logoUrl}
                     alt={employer.name}
+                    data-slot="employer-list-item-logo"
                     className="h-10 w-10 rounded bg-gray-50 object-contain dark:bg-gray-800"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-100 dark:bg-blue-900/30">
+                  <div
+                    data-slot="employer-list-item-logo"
+                    className="flex h-10 w-10 items-center justify-center rounded bg-blue-100 dark:bg-blue-900/30"
+                  >
                     <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
                       {employer.name.charAt(0)}
                     </span>
