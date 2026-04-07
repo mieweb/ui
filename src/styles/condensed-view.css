@@ -8040,6 +8040,8 @@ body.condensed [data-slot='employer-pricing-tiers'] > p {
 }
 
 body.condensed [data-slot='employer-pricing-tiers'] > div {
+  display: flex !important;
+  flex-direction: column !important;
   gap: 0.125rem !important;
 }
 
@@ -8101,6 +8103,8 @@ body.condensed [data-slot='employer-pricing-actions'] button svg {
 /* ── Root container ── */
 
 body.condensed [data-slot='employer-view'] {
+  display: flex !important;
+  flex-direction: column !important;
   gap: 0.75rem !important;
 }
 
@@ -8305,6 +8309,8 @@ body.condensed
   [data-slot='employer-view-orders-card']
   [data-slot='card-content']
   > div {
+  display: flex !important;
+  flex-direction: column !important;
   gap: 0.25rem !important;
 }
 
@@ -8385,6 +8391,8 @@ body.condensed
   [data-slot='employer-view-invoices-card']
   [data-slot='card-content']
   > div {
+  display: flex !important;
+  flex-direction: column !important;
   gap: 0.25rem !important;
 }
 
@@ -8456,6 +8464,8 @@ body.condensed
   [data-slot='employer-view-contacts-card']
   [data-slot='card-content']
   > div {
+  display: flex !important;
+  flex-direction: column !important;
   gap: 0.25rem !important;
 }
 
