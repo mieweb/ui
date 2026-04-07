@@ -134,7 +134,10 @@ export function EmployerView({
 
   if (isLoading) {
     return (
-      <div className={`animate-pulse space-y-4 ${className}`}>
+      <div
+        data-slot="employer-view"
+        className={`animate-pulse space-y-4 ${className}`}
+      >
         <div className="h-32 rounded-lg bg-gray-200 dark:bg-gray-700" />
         <div className="h-64 rounded-lg bg-gray-200 dark:bg-gray-700" />
       </div>
@@ -142,26 +145,30 @@ export function EmployerView({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div data-slot="employer-view" className={`space-y-6 ${className}`}>
       {/* Header */}
-      <Card>
-        <CardContent className="p-6">
+      <Card data-slot="employer-view-header-card">
+        <CardContent data-slot="employer-view-header" className="p-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div className="flex items-center gap-4">
               {employer.logoUrl ? (
                 <img
+                  data-slot="employer-view-logo"
                   src={employer.logoUrl}
                   alt={employer.name}
                   className="h-16 w-16 rounded-lg object-cover"
                 />
               ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                <div
+                  data-slot="employer-view-logo"
+                  className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"
+                >
                   <span className="text-2xl font-bold text-gray-500 dark:text-gray-400">
                     {employer.name.charAt(0)}
                   </span>
                 </div>
               )}
-              <div>
+              <div data-slot="employer-view-info">
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {employer.name}
@@ -189,7 +196,10 @@ export function EmployerView({
 
           {/* Stats */}
           {employer.stats && (
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-200 pt-6 md:grid-cols-5 dark:border-gray-700">
+            <div
+              data-slot="employer-view-stats"
+              className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-200 pt-6 md:grid-cols-5 dark:border-gray-700"
+            >
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {employer.stats.totalOrders}
@@ -249,7 +259,7 @@ export function EmployerView({
           <div className="grid gap-6 md:grid-cols-2">
             {/* Address Card */}
             {employer.address && (
-              <Card>
+              <Card data-slot="employer-view-address-card">
                 <CardHeader>
                   <CardTitle className="text-lg">Address</CardTitle>
                 </CardHeader>
@@ -272,7 +282,7 @@ export function EmployerView({
 
             {/* Primary Contact Card */}
             {employer.contacts.length > 0 && (
-              <Card>
+              <Card data-slot="employer-view-contact-card">
                 <CardHeader>
                   <CardTitle className="text-lg">Primary Contact</CardTitle>
                 </CardHeader>
@@ -317,7 +327,7 @@ export function EmployerView({
 
         {/* Orders Tab */}
         <TabsContent value="orders">
-          <Card>
+          <Card data-slot="employer-view-orders-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Recent Orders</CardTitle>
               {onCreateOrder && (
@@ -336,6 +346,7 @@ export function EmployerView({
                   {employer.recentOrders.map((order) => (
                     <div
                       key={order.id}
+                      data-slot="employer-view-order-row"
                       className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                     >
                       <div>
@@ -376,7 +387,7 @@ export function EmployerView({
 
         {/* Invoices Tab */}
         <TabsContent value="invoices">
-          <Card>
+          <Card data-slot="employer-view-invoices-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Recent Invoices</CardTitle>
               {onCreateInvoice && (
@@ -395,6 +406,7 @@ export function EmployerView({
                   {employer.recentInvoices.map((invoice) => (
                     <div
                       key={invoice.id}
+                      data-slot="employer-view-invoice-row"
                       className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                     >
                       <div>
@@ -432,7 +444,7 @@ export function EmployerView({
 
         {/* Contacts Tab */}
         <TabsContent value="contacts">
-          <Card>
+          <Card data-slot="employer-view-contacts-card">
             <CardHeader>
               <CardTitle className="text-lg">All Contacts</CardTitle>
             </CardHeader>
@@ -446,6 +458,7 @@ export function EmployerView({
                   {employer.contacts.map((contact) => (
                     <div
                       key={contact.id}
+                      data-slot="employer-view-contact-row"
                       className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                     >
                       <div className="flex items-center gap-3">
