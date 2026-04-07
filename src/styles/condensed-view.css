@@ -7952,7 +7952,7 @@ body.condensed [data-slot='employer-list-item-info'] span {
   font-size: 0.625rem !important;
 }
 
-body.condensed [data-slot='employer-list-item-info'] .mt-0\.5 {
+body.condensed [data-slot='employer-list-item-info'] h3 + * {
   margin-top: 0.0625rem !important;
 }
 
@@ -7962,12 +7962,12 @@ body.condensed [data-slot='employer-list-item-stats'] {
   gap: 0.5rem !important;
 }
 
-body.condensed [data-slot='employer-list-item-stats'] p.text-lg {
+body.condensed [data-slot='employer-list-item-stats'] > * p:first-of-type {
   font-size: 0.875rem !important;
   line-height: 1.125rem !important;
 }
 
-body.condensed [data-slot='employer-list-item-stats'] p.text-xs {
+body.condensed [data-slot='employer-list-item-stats'] > * p:last-of-type {
   font-size: 0.5625rem !important;
 }
 
@@ -8808,20 +8808,13 @@ body.condensed [data-slot='invoice-list-filters'] button {
 
 /* ── Create button ── */
 
-body.condensed
-  [data-slot='invoice-list-header']
-  > .flex
-  > [data-slot='button'] {
+body.condensed [data-slot='invoice-list-actions'] > [data-slot='button'] {
   padding: 0.125rem 0.375rem !important;
   font-size: 0.6875rem !important;
   height: 1.75rem !important;
 }
 
-body.condensed
-  [data-slot='invoice-list-header']
-  > .flex
-  > [data-slot='button']
-  svg {
+body.condensed [data-slot='invoice-list-actions'] > [data-slot='button'] svg {
   width: 0.75rem !important;
   height: 0.75rem !important;
 }

@@ -177,7 +177,7 @@ export function InvoiceList({
             className="pl-9"
           />
         </div>
-        <div className="flex gap-2">
+        <div data-slot="invoice-list-actions" className="flex gap-2">
           {/* Status filter tabs */}
           <div
             data-slot="invoice-list-filters"
