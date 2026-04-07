@@ -9507,18 +9507,38 @@ body.condensed [data-slot='notification-center-icon'] svg {
   width: 0.875rem !important;
 }
 
+/* ── Priority badges ── */
+
+body.condensed [data-slot='notification-center-badges'] {
+  gap: 0.25rem !important;
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+}
+
+body.condensed [data-slot='notification-center-badges'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+  padding: 0 0.375rem !important;
+  white-space: nowrap !important;
+}
+
 /* ── Content area ── */
+
+body.condensed [data-slot='notification-center-content'] > div:first-child {
+  overflow: hidden !important;
+}
 
 body.condensed [data-slot='notification-center-content'] > div:first-child p {
   font-size: 0.75rem !important;
   line-height: 1rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 body.condensed
-  [data-slot='notification-center-content']
-  > div:first-child
-  > div:last-child
-  span {
+  [data-slot='notification-center-badges']
+  > span:not([data-slot]) {
   height: 0.375rem !important;
   width: 0.375rem !important;
 }

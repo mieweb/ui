@@ -340,7 +340,10 @@ export function NotificationCenter({
                     >
                       {notification.title}
                     </p>
-                    <div className="flex flex-shrink-0 items-center gap-2">
+                    <div
+                      data-slot="notification-center-badges"
+                      className="flex flex-shrink-0 items-center gap-2"
+                    >
                       {notification.priority === 'urgent' && (
                         <Badge variant="danger">Urgent</Badge>
                       )}
