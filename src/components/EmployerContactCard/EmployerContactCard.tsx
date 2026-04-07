@@ -52,7 +52,7 @@ export function EmployerContactCard({
   if (isLoading) {
     return (
       <Card data-slot="employer-contact-card" className={className}>
-        <CardHeader>
+        <CardHeader data-slot="employer-contact-header">
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>

@@ -7661,12 +7661,6 @@ body.condensed
 
 body.condensed
   [data-slot='business-hours']
-  [data-slot='business-hours-schedule'] {
-  gap: 0 !important;
-}
-
-body.condensed
-  [data-slot='business-hours']
   [data-slot='business-hours-schedule']
   > :not(:first-child) {
   margin-top: 0 !important;
@@ -7686,6 +7680,7 @@ body.condensed
   [data-slot='business-hours']
   [data-slot='business-hours-day-name'] {
   font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
   min-width: 56px !important;
 }
 
