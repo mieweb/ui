@@ -7596,3 +7596,126 @@ body.condensed [data-slot='shipping-settings-instructions'] textarea {
 body.condensed [data-slot='shipping-settings-actions'] {
   padding-top: 0.25rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BusinessHours – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container ── */
+
+body.condensed [data-slot='business-hours'] {
+  font-size: 0.75rem !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='business-hours-header'] {
+  margin-bottom: 0.25rem !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='business-hours-title'] {
+  font-size: 0.8125rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='business-hours-title'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* ── Open / Closed Badge ── */
+
+body.condensed [data-slot='business-hours-status'] {
+  font-size: 0.625rem !important;
+  padding: 0 0.375rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='business-hours-status'] span {
+  width: 0.375rem !important;
+  height: 0.375rem !important;
+}
+
+/* ── Content wrapper (card padding) ── */
+
+body.condensed [data-slot='business-hours-content'] {
+  padding: 0.375rem !important;
+}
+
+/* ── Schedule grid ── */
+
+body.condensed [data-slot='business-hours-schedule'] {
+  gap: 0 !important;
+}
+
+body.condensed [data-slot='business-hours-schedule'] > :not(:first-child) {
+  margin-top: 0 !important;
+}
+
+/* ── Day rows ── */
+
+body.condensed [data-slot='business-hours-day-row'] {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='business-hours-day-name'] {
+  font-size: 0.6875rem !important;
+  min-width: 56px !important;
+}
+
+body.condensed [data-slot='business-hours-day-name'] span {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='business-hours-day-hours'] {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Timezone note ── */
+
+body.condensed [data-slot='business-hours-timezone'] {
+  margin-top: 0.25rem !important;
+  font-size: 0.5625rem !important;
+}
+
+/* ── Text-only hours ── */
+
+body.condensed [data-slot='business-hours-text'] {
+  font-size: 0.6875rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* ── Compact variant ── */
+
+body.condensed [data-slot='business-hours-compact'] {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='business-hours-compact'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Expandable Summary ── */
+
+body.condensed [data-slot='business-hours-summary'] button {
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='business-hours-summary'] button svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+body.condensed [data-slot='business-hours-summary-content'] {
+  margin-top: 0.25rem !important;
+  padding: 0.375rem !important;
+}
