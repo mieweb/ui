@@ -517,10 +517,15 @@ export function BusinessHours({
         {showHeader && (
           <div
             data-slot="business-hours-header"
-            className="mb-3 flex items-center gap-2 font-medium text-neutral-900 dark:text-white"
+            className="mb-3 flex items-center gap-2"
           >
-            <ClockIcon className="text-neutral-500" />
-            {headerText}
+            <div
+              data-slot="business-hours-title"
+              className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white"
+            >
+              <ClockIcon className="text-neutral-500" />
+              {headerText}
+            </div>
           </div>
         )}
         <p className="text-neutral-500 italic dark:text-neutral-400">
