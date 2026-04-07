@@ -276,7 +276,10 @@ export function HelpSupportPanel({
               </CardHeader>
               <CardContent>
                 {showSuccess && successMessage && (
-                  <div className="mb-4 rounded-lg bg-green-100 p-3 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                  <div
+                    data-slot="help-support-success"
+                    className="mb-4 rounded-lg bg-green-100 p-3 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                  >
                     {successMessage}
                   </div>
                 )}

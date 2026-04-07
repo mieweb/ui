@@ -188,7 +188,11 @@ export function EmployerView({
               </div>
             </div>
             {onEdit && (
-              <Button variant="outline" onClick={onEdit}>
+              <Button
+                data-slot="employer-view-edit-btn"
+                variant="outline"
+                onClick={onEdit}
+              >
                 Edit Employer
               </Button>
             )}
