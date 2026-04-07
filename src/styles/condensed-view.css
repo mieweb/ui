@@ -8513,12 +8513,21 @@ body.condensed [data-slot='employer-view-contact-row'] [data-slot='avatar'] {
   font-size: 0.5rem !important;
 }
 
-body.condensed [data-slot='employer-view-contact-row'] p.font-medium {
+body.condensed
+  [data-slot='employer-view-contact-row']
+  > div:first-child
+  > div:last-child
+  p:first-of-type {
   font-size: 0.75rem !important;
   line-height: 1rem !important;
 }
 
-body.condensed [data-slot='employer-view-contact-row'] p.text-sm {
+body.condensed
+  [data-slot='employer-view-contact-row']
+  > div:first-child
+  > div:last-child
+  p
+  + p {
   font-size: 0.6875rem !important;
   line-height: 0.9375rem !important;
 }
@@ -8989,7 +8998,7 @@ body.condensed
 body.condensed
   [data-slot='invoice-payment-summary']
   [data-slot='card-content']
-  .text-sm {
+  > div:first-child {
   font-size: 0.6875rem !important;
   line-height: 1rem !important;
 }
