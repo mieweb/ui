@@ -134,6 +134,7 @@ export function InvoicePaymentPage({
   if (isLoading) {
     return (
       <div
+        data-slot="invoice-payment"
         className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
       >
         <div className="mx-auto max-w-4xl">
@@ -195,7 +196,10 @@ export function InvoicePaymentPage({
           className="w-full max-w-md text-center"
         >
           <CardContent className="py-12">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+            <div
+              data-slot="invoice-payment-success-icon"
+              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+            >
               <svg
                 className="h-8 w-8 text-green-600 dark:text-green-400"
                 fill="none"
@@ -250,7 +254,10 @@ export function InvoicePaymentPage({
           )}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div
+          data-slot="invoice-payment-grid"
+          className="grid gap-6 lg:grid-cols-2"
+        >
           {/* Invoice Summary */}
           <div>
             <Card data-slot="invoice-payment-summary">

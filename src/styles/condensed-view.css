@@ -8927,7 +8927,7 @@ body.condensed [data-slot='invoice-payment-header'] span {
 
 /* ── Two-column grid ── */
 
-body.condensed [data-slot='invoice-payment'] .grid {
+body.condensed [data-slot='invoice-payment-grid'] {
   gap: 0.5rem !important;
 }
 
@@ -9004,11 +9004,11 @@ body.condensed [data-slot='invoice-payment-totals'] > :not(:first-child) {
   margin-top: 0 !important;
 }
 
-body.condensed [data-slot='invoice-payment-totals'] .text-sm {
+body.condensed [data-slot='invoice-payment-totals'] > * > span:first-child {
   font-size: 0.6875rem !important;
 }
 
-body.condensed [data-slot='invoice-payment-totals'] .text-lg {
+body.condensed [data-slot='invoice-payment-totals'] > div:last-child {
   font-size: 0.8125rem !important;
 }
 
@@ -9123,13 +9123,13 @@ body.condensed
   padding: 1.5rem !important;
 }
 
-body.condensed [data-slot='invoice-payment-success'] .rounded-full {
+body.condensed [data-slot='invoice-payment-success-icon'] {
   width: 2rem !important;
   height: 2rem !important;
   margin-bottom: 0.375rem !important;
 }
 
-body.condensed [data-slot='invoice-payment-success'] .rounded-full svg {
+body.condensed [data-slot='invoice-payment-success-icon'] svg {
   width: 1rem !important;
   height: 1rem !important;
 }
