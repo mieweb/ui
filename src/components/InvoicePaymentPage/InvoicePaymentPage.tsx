@@ -417,7 +417,10 @@ export function InvoicePaymentPage({
                         placeholder="4242 4242 4242 4242"
                         required
                       />
-                      <div className="grid grid-cols-2 gap-4">
+                      <div
+                        data-slot="invoice-payment-card-row"
+                        className="grid grid-cols-2 gap-4"
+                      >
                         <Input
                           label="Expiry"
                           value={expiry}
