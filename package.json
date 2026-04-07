@@ -138,6 +138,8 @@
     "LICENSE"
   ],
   "scripts": {
+    "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
+    "postinstall": "if [ -z \"$_DATAVIS_RELINK\" ] && [ ! -f node_modules/datavis/package.json ] && [ -f packages/datavis/package.json ]; then echo '⚠️  Stale datavis link detected — re-linking submodule...'; _DATAVIS_RELINK=1 pnpm install; fi",
     "dev": "tsup --watch",
     "build": "tsup && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
