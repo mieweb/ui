@@ -7841,3 +7841,137 @@ body.condensed [data-slot='employer-contact-empty'] svg {
 body.condensed [data-slot='employer-contact-empty'] p {
   font-size: 0.6875rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EmployerList – condensed overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container spacing ── */
+
+body.condensed [data-slot='employer-list'] > :not(:first-child) {
+  margin-top: 0.5rem !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='employer-list-header'] {
+  gap: 0.375rem !important;
+}
+
+/* ── Search ── */
+
+body.condensed [data-slot='employer-list-search'] input {
+  padding: 0.25rem 0.5rem 0.25rem 1.75rem !important;
+  font-size: 0.6875rem !important;
+  height: 1.75rem !important;
+}
+
+body.condensed [data-slot='employer-list-search'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Add button ── */
+
+body.condensed [data-slot='employer-list-header'] [data-slot='button'] {
+  font-size: 0.6875rem !important;
+  padding: 0.125rem 0.375rem !important;
+}
+
+body.condensed [data-slot='employer-list-header'] [data-slot='button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Empty state ── */
+
+body.condensed [data-slot='employer-list-empty'] {
+  padding: 1.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='employer-list-empty'] svg {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='employer-list-empty'] p {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+/* ── Items container ── */
+
+body.condensed [data-slot='employer-list-items'] > :not(:first-child) {
+  margin-top: 0.25rem !important;
+}
+
+/* ── Individual item ── */
+
+body.condensed [data-slot='employer-list-item'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+/* ── Item content row ── */
+
+body.condensed [data-slot='employer-list-item-content'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Logo / initial avatar ── */
+
+body.condensed [data-slot='employer-list-item-content'] img {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+body.condensed
+  [data-slot='employer-list-item-content']
+  > div:first-child:not([data-slot]) {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+body.condensed
+  [data-slot='employer-list-item-content']
+  > div:first-child:not([data-slot])
+  span {
+  font-size: 0.625rem !important;
+}
+
+/* ── Info block ── */
+
+body.condensed [data-slot='employer-list-item-info'] h3 {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='employer-list-item-info'] span {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='employer-list-item-info'] .mt-0\.5 {
+  margin-top: 0.0625rem !important;
+}
+
+/* ── Stats ── */
+
+body.condensed [data-slot='employer-list-item-stats'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='employer-list-item-stats'] p.text-lg {
+  font-size: 0.875rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed [data-slot='employer-list-item-stats'] p.text-xs {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Arrow icon ── */
+
+body.condensed [data-slot='employer-list-item-content'] > svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}

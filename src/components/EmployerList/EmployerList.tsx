@@ -86,7 +86,7 @@ export function EmployerList({
 
   if (isLoading) {
     return (
-      <div className={`space-y-4 ${className}`}>
+      <div data-slot="employer-list" className={`space-y-4 ${className}`}>
         {showSearch && (
           <div className="h-10 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
         )}
@@ -103,11 +103,11 @@ export function EmployerList({
   }
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div data-slot="employer-list" className={`space-y-4 ${className}`}>
       {/* Header with search and add button */}
-      <div className="flex items-center gap-3">
+      <div data-slot="employer-list-header" className="flex items-center gap-3">
         {showSearch && (
-          <div className="relative flex-1">
+          <div data-slot="employer-list-search" className="relative flex-1">
             <svg
               className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
               fill="none"
@@ -152,7 +152,10 @@ export function EmployerList({
 
       {/* List */}
       {filteredEmployers.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700">
+        <div
+          data-slot="employer-list-empty"
+          className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700"
+        >
           <svg
             className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
             fill="none"
@@ -176,10 +179,11 @@ export function EmployerList({
           )}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div data-slot="employer-list-items" className="space-y-2">
           {filteredEmployers.map((employer) => (
             <div
               key={employer.id}
+              data-slot="employer-list-item"
               role={onEmployerClick ? 'button' : undefined}
               tabIndex={onEmployerClick ? 0 : undefined}
               onClick={() => onEmployerClick?.(employer)}
@@ -188,7 +192,10 @@ export function EmployerList({
               }
               className={`rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900 ${onEmployerClick ? 'cursor-pointer transition-all hover:border-gray-300 hover:shadow-sm dark:hover:border-gray-600' : ''} `}
             >
-              <div className="flex items-center gap-4">
+              <div
+                data-slot="employer-list-item-content"
+                className="flex items-center gap-4"
+              >
                 {/* Logo */}
                 {employer.logoUrl ? (
                   <img
@@ -205,7 +212,10 @@ export function EmployerList({
                 )}
 
                 {/* Info */}
-                <div className="min-w-0 flex-1">
+                <div
+                  data-slot="employer-list-item-info"
+                  className="min-w-0 flex-1"
+                >
                   <div className="flex items-center gap-2">
                     <h3 className="truncate font-medium text-gray-900 dark:text-white">
                       {employer.name}
@@ -229,7 +239,10 @@ export function EmployerList({
                 </div>
 
                 {/* Stats */}
-                <div className="hidden items-center gap-4 text-center sm:flex">
+                <div
+                  data-slot="employer-list-item-stats"
+                  className="hidden items-center gap-4 text-center sm:flex"
+                >
                   {employer.activeEmployees !== undefined && (
                     <div>
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
