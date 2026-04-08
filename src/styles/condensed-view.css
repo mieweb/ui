@@ -9599,3 +9599,245 @@ body.condensed [data-slot='notification-center-meta'] span {
 body.condensed [data-slot='notification-center-footer'] {
   padding: 0.375rem 0.75rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PaymentHistoryTable – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root container ── */
+
+body.condensed [data-slot='payment-history'] {
+  font-size: 0.75rem !important;
+}
+
+/* ── Empty state ── */
+
+body.condensed
+  [data-slot='payment-history']:has([data-slot='payment-history-empty'])
+  > svg {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed
+  [data-slot='payment-history']
+  > svg
+  + [data-slot='payment-history-empty'] {
+  margin-top: 0 !important;
+}
+
+body.condensed
+  [data-slot='payment-history']:has([data-slot='payment-history-empty']) {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+body.condensed [data-slot='payment-history-empty'] {
+  font-size: 0.75rem !important;
+}
+
+/* ── Table ── */
+
+body.condensed [data-slot='payment-history-table'] thead th {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Table rows ── */
+
+body.condensed [data-slot='payment-history-row'] td {
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='payment-history-row'] td p {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='payment-history-row'] td p + p {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Invoice link ── */
+
+body.condensed [data-slot='payment-history-row'] td button {
+  font-size: 0.75rem !important;
+}
+
+/* ── Method column ── */
+
+body.condensed [data-slot='payment-history-row'] td > div {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='payment-history-row'] td > div svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='payment-history-row'] td > div span {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Status badge ── */
+
+body.condensed [data-slot='payment-history-row'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ── Refund button ── */
+
+body.condensed [data-slot='payment-history-row'] td > [data-slot='button'] {
+  font-size: 0.6875rem !important;
+  padding: 0.125rem 0.375rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PendingClaimsTable – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root container ── */
+
+body.condensed [data-slot='pending-claims'] {
+  font-size: 0.75rem !important;
+}
+
+/* ── Empty state ── */
+
+body.condensed
+  [data-slot='pending-claims']:has([data-slot='pending-claims-empty']) {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+body.condensed
+  [data-slot='pending-claims']:has([data-slot='pending-claims-empty'])
+  > svg {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='pending-claims-empty'] {
+  font-size: 0.75rem !important;
+}
+
+/* ── Desktop table header ── */
+
+body.condensed [data-slot='pending-claims-table'] thead th {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Desktop table rows ── */
+
+body.condensed [data-slot='pending-claims-row'] td {
+  padding: 0.25rem 0.5rem !important;
+}
+
+/* ── Claimant cell: avatar + info ── */
+
+body.condensed [data-slot='pending-claims-row'] td:first-child > div {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='pending-claims-row'] [data-slot='avatar'] {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  font-size: 0.5rem !important;
+}
+
+body.condensed [data-slot='pending-claims-row'] td p {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='pending-claims-row'] td p + p {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Status badge ── */
+
+body.condensed [data-slot='pending-claims-row'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ── Action buttons ── */
+
+body.condensed [data-slot='pending-claims-row'] td > div [data-slot='button'],
+body.condensed [data-slot='pending-claims-row'] td > div button {
+  font-size: 0.6875rem !important;
+  padding: 0.125rem 0.375rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* ── Mobile cards ── */
+
+body.condensed [data-slot='pending-claims-card'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] > div:first-child {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] > div:first-child > div {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] [data-slot='avatar'] {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  font-size: 0.5rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] p {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] p + p {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ── Mobile info row (role + date) ── */
+
+body.condensed [data-slot='pending-claims-card'] > div:nth-child(2) {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] > div:nth-child(2) > div {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Mobile action buttons ── */
+
+body.condensed [data-slot='pending-claims-card'] > div:last-child {
+  margin-top: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] [data-slot='button'],
+body.condensed [data-slot='pending-claims-card'] button {
+  font-size: 0.6875rem !important;
+  padding: 0.125rem 0.375rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
