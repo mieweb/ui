@@ -134,6 +134,7 @@ export function InvoicePaymentPage({
   if (isLoading) {
     return (
       <div
+        data-slot="invoice-payment"
         className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
       >
         <div className="mx-auto max-w-4xl">
@@ -152,9 +153,13 @@ export function InvoicePaymentPage({
   if (!invoice) {
     return (
       <div
+        data-slot="invoice-payment"
         className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
-        <Card className="w-full max-w-md text-center">
+        <Card
+          data-slot="invoice-payment-not-found"
+          className="w-full max-w-md text-center"
+        >
           <CardContent className="py-12">
             <svg
               className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-gray-600"
@@ -185,11 +190,18 @@ export function InvoicePaymentPage({
   if (successMessage || invoice.status === 'paid') {
     return (
       <div
+        data-slot="invoice-payment"
         className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
-        <Card className="w-full max-w-md text-center">
+        <Card
+          data-slot="invoice-payment-success"
+          className="w-full max-w-md text-center"
+        >
           <CardContent className="py-12">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+            <div
+              data-slot="invoice-payment-success-icon"
+              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+            >
               <svg
                 className="h-8 w-8 text-green-600 dark:text-green-400"
                 fill="none"
@@ -222,11 +234,15 @@ export function InvoicePaymentPage({
 
   return (
     <div
+      data-slot="invoice-payment"
       className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
     >
       <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
+        <div
+          data-slot="invoice-payment-header"
+          className="mb-8 flex items-center gap-4"
+        >
           {invoice.providerLogoUrl ? (
             <img
               src={invoice.providerLogoUrl}
@@ -240,10 +256,13 @@ export function InvoicePaymentPage({
           )}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div
+          data-slot="invoice-payment-grid"
+          className="grid gap-6 lg:grid-cols-2"
+        >
           {/* Invoice Summary */}
           <div>
-            <Card>
+            <Card data-slot="invoice-payment-summary">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Invoice {invoice.invoiceNumber}</CardTitle>
@@ -267,7 +286,10 @@ export function InvoicePaymentPage({
                   <p>Bill to: {invoice.employerName}</p>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
+                <div
+                  data-slot="invoice-payment-line-items"
+                  className="border-t border-gray-200 pt-4 dark:border-gray-700"
+                >
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-gray-500 dark:text-gray-400">
@@ -288,7 +310,10 @@ export function InvoicePaymentPage({
                   </table>
                 </div>
 
-                <div className="space-y-2 border-t border-gray-200 pt-4 dark:border-gray-700">
+                <div
+                  data-slot="invoice-payment-totals"
+                  className="space-y-2 border-t border-gray-200 pt-4 dark:border-gray-700"
+                >
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
                       Subtotal
@@ -314,14 +339,17 @@ export function InvoicePaymentPage({
 
           {/* Payment Form */}
           <div>
-            <Card>
+            <Card data-slot="invoice-payment-form">
               <CardHeader>
                 <CardTitle>Payment Details</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {errorMessage && (
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+                    <div
+                      data-slot="invoice-payment-error"
+                      className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+                    >
                       <p className="text-sm text-red-600 dark:text-red-400">
                         {errorMessage}
                       </p>
@@ -330,7 +358,10 @@ export function InvoicePaymentPage({
 
                   {/* Payment method toggle */}
                   {acceptedMethods.length > 1 && (
-                    <div className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div
+                      data-slot="invoice-payment-methods"
+                      className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                    >
                       {acceptedMethods.includes('card') && (
                         <button
                           type="button"
@@ -386,7 +417,10 @@ export function InvoicePaymentPage({
                         placeholder="4242 4242 4242 4242"
                         required
                       />
-                      <div className="grid grid-cols-2 gap-4">
+                      <div
+                        data-slot="invoice-payment-card-row"
+                        className="grid grid-cols-2 gap-4"
+                      >
                         <Input
                           label="Expiry"
                           value={expiry}

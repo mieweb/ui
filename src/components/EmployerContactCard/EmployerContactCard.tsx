@@ -51,8 +51,8 @@ export function EmployerContactCard({
 }: EmployerContactCardProps) {
   if (isLoading) {
     return (
-      <Card className={className}>
-        <CardHeader>
+      <Card data-slot="employer-contact-card" className={className}>
+        <CardHeader data-slot="employer-contact-header">
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>
@@ -73,8 +73,11 @@ export function EmployerContactCard({
   }
 
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card data-slot="employer-contact-card" className={className}>
+      <CardHeader
+        data-slot="employer-contact-header"
+        className="flex flex-row items-center justify-between"
+      >
         <CardTitle>{title}</CardTitle>
         {showActions && onAddContact && (
           <Button variant="ghost" size="sm" onClick={onAddContact}>
@@ -97,7 +100,7 @@ export function EmployerContactCard({
       </CardHeader>
       <CardContent>
         {contacts.length === 0 ? (
-          <div className="py-6 text-center">
+          <div data-slot="employer-contact-empty" className="py-6 text-center">
             <svg
               className="mx-auto mb-2 h-10 w-10 text-gray-400 dark:text-gray-600"
               fill="none"
@@ -126,10 +129,11 @@ export function EmployerContactCard({
             )}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div data-slot="employer-contact-list" className="space-y-3">
             {contacts.map((contact) => (
               <div
                 key={contact.id}
+                data-slot="employer-contact-item"
                 role={onContactClick ? 'button' : undefined}
                 tabIndex={onContactClick ? 0 : undefined}
                 className={`flex items-center gap-3 rounded-lg p-2 ${onContactClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
@@ -139,7 +143,10 @@ export function EmployerContactCard({
                 }
               >
                 <Avatar name={contact.name} size="sm" />
-                <div className="min-w-0 flex-1">
+                <div
+                  data-slot="employer-contact-info"
+                  className="min-w-0 flex-1"
+                >
                   <div className="flex items-center gap-2">
                     <p className="truncate font-medium text-gray-900 dark:text-white">
                       {contact.name}
@@ -157,7 +164,10 @@ export function EmployerContactCard({
                   )}
                 </div>
                 {showActions && (
-                  <div className="flex items-center gap-1">
+                  <div
+                    data-slot="employer-contact-actions"
+                    className="flex items-center gap-1"
+                  >
                     {contact.email && onEmail && (
                       <button
                         onClick={(e) => {

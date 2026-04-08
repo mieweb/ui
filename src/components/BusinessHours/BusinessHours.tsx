@@ -319,6 +319,7 @@ interface OpenStatusBadgeProps {
 export function OpenStatusBadge({ isOpen, className }: OpenStatusBadgeProps) {
   return (
     <span
+      data-slot="business-hours-status"
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-sm font-medium',
         isOpen
@@ -398,10 +399,12 @@ function DayScheduleRow({
 
   return (
     <div
+      data-slot="business-hours-day-row"
       className={cn(dayRowVariants({ isToday: isToday && highlightToday }))}
       data-cy={`provider-day-${dayHours.day}`}
     >
       <span
+        data-slot="business-hours-day-name"
         className={cn(
           'min-w-[80px] font-medium',
           isToday && highlightToday && 'text-primary-900 dark:text-primary-300'
@@ -416,6 +419,7 @@ function DayScheduleRow({
       </span>
 
       <div
+        data-slot="business-hours-day-hours"
         className={cn('text-right', hasMultipleRanges && 'flex flex-col gap-1')}
         data-cy={`provider-hours-${dayHours.day}`}
       >
@@ -474,17 +478,29 @@ export function BusinessHours({
   // If we only have text hours, render those
   if (!schedule.officeHours && schedule.officeHoursText) {
     return (
-      <div className={cn(containerVariants({ variant, size }), className)}>
+      <div
+        data-slot="business-hours"
+        className={cn(containerVariants({ variant, size }), className)}
+      >
         {showHeader && (
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white">
+          <div
+            data-slot="business-hours-header"
+            className="mb-3 flex items-center justify-between"
+          >
+            <div
+              data-slot="business-hours-title"
+              className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white"
+            >
               <ClockIcon className="text-neutral-500" />
               {headerText}
             </div>
             {showStatus && <OpenStatusBadge isOpen={false} />}
           </div>
         )}
-        <pre className="m-0 font-sans whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
+        <pre
+          data-slot="business-hours-text"
+          className="m-0 font-sans whitespace-pre-wrap text-neutral-700 dark:text-neutral-300"
+        >
           {schedule.officeHoursText}
         </pre>
       </div>
@@ -494,11 +510,22 @@ export function BusinessHours({
   // No hours available
   if (!schedule.officeHours || schedule.officeHours.length === 0) {
     return (
-      <div className={cn(containerVariants({ variant, size }), className)}>
+      <div
+        data-slot="business-hours"
+        className={cn(containerVariants({ variant, size }), className)}
+      >
         {showHeader && (
-          <div className="mb-3 flex items-center gap-2 font-medium text-neutral-900 dark:text-white">
-            <ClockIcon className="text-neutral-500" />
-            {headerText}
+          <div
+            data-slot="business-hours-header"
+            className="mb-3 flex items-center gap-2"
+          >
+            <div
+              data-slot="business-hours-title"
+              className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white"
+            >
+              <ClockIcon className="text-neutral-500" />
+              {headerText}
+            </div>
           </div>
         )}
         <p className="text-neutral-500 italic dark:text-neutral-400">
@@ -509,10 +536,19 @@ export function BusinessHours({
   }
 
   return (
-    <div className={cn(containerVariants({ variant, size }), className)}>
+    <div
+      data-slot="business-hours"
+      className={cn(containerVariants({ variant, size }), className)}
+    >
       {variant === 'card' && (
-        <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800">
-          <div className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white">
+        <div
+          data-slot="business-hours-header"
+          className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800"
+        >
+          <div
+            data-slot="business-hours-title"
+            className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white"
+          >
             <ClockIcon className="text-neutral-500" />
             {headerText}
           </div>
@@ -521,8 +557,14 @@ export function BusinessHours({
       )}
 
       {variant !== 'card' && showHeader && (
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white">
+        <div
+          data-slot="business-hours-header"
+          className="mb-3 flex items-center justify-between"
+        >
+          <div
+            data-slot="business-hours-title"
+            className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white"
+          >
             <ClockIcon className="text-neutral-500" />
             {headerText}
           </div>
@@ -530,8 +572,14 @@ export function BusinessHours({
         </div>
       )}
 
-      <div className={cn(variant === 'card' && 'p-4')}>
-        <div className="space-y-1 divide-y divide-neutral-100 dark:divide-neutral-800">
+      <div
+        data-slot="business-hours-content"
+        className={cn(variant === 'card' && 'p-4')}
+      >
+        <div
+          data-slot="business-hours-schedule"
+          className="space-y-1 divide-y divide-neutral-100 dark:divide-neutral-800"
+        >
           {schedule.officeHours.map((dayHours, idx) => (
             <DayScheduleRow
               key={idx}
@@ -545,7 +593,10 @@ export function BusinessHours({
         </div>
 
         {schedule.timezone && (
-          <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
+          <p
+            data-slot="business-hours-timezone"
+            className="mt-3 text-xs text-neutral-500 dark:text-neutral-400"
+          >
             All times are in {schedule.timezone}
           </p>
         )}
@@ -579,7 +630,10 @@ export function CompactHours({
   const todayHours = getTodayHours(schedule.officeHours, use24Hour);
 
   return (
-    <div className={cn('flex items-center gap-2 text-sm', className)}>
+    <div
+      data-slot="business-hours-compact"
+      className={cn('flex items-center gap-2 text-sm', className)}
+    >
       <ClockIcon className="h-4 w-4 text-neutral-400" />
       <span className="text-neutral-700 dark:text-neutral-300">
         {todayHours}
@@ -620,7 +674,10 @@ export function HoursSummary({
     schedule.officeHours && schedule.officeHours.length > 0;
 
   return (
-    <div className={cn('hours-summary', className)}>
+    <div
+      data-slot="business-hours-summary"
+      className={cn('hours-summary', className)}
+    >
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -656,7 +713,10 @@ export function HoursSummary({
       </button>
 
       {isExpanded && hasStructuredHours && (
-        <div className="mt-2 rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
+        <div
+          data-slot="business-hours-summary-content"
+          className="mt-2 rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900"
+        >
           <BusinessHours
             schedule={schedule}
             showHeader={false}

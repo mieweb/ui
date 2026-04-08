@@ -138,9 +138,12 @@ export function HelpSupportPanel({
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div data-slot="help-support-panel" className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div
+        data-slot="help-support-header"
+        className="flex flex-col justify-between gap-4 md:flex-row md:items-center"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Help & Support
@@ -192,11 +195,11 @@ export function HelpSupportPanel({
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div data-slot="help-support-grid" className="grid gap-6 md:grid-cols-3">
         {/* FAQs */}
         <div className="space-y-4 md:col-span-2">
           {faqs.length > 0 && (
-            <Card>
+            <Card data-slot="help-support-faq-card">
               <CardHeader>
                 <CardTitle className="text-lg">
                   Frequently Asked Questions
@@ -220,6 +223,7 @@ export function HelpSupportPanel({
                     {filteredFaqs.map((faq) => (
                       <div
                         key={faq.id}
+                        data-slot="help-support-faq-item"
                         className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
                       >
                         <button
@@ -266,13 +270,16 @@ export function HelpSupportPanel({
 
           {/* Contact Form */}
           {onSubmitRequest && (
-            <Card>
+            <Card data-slot="help-support-form-card">
               <CardHeader>
                 <CardTitle className="text-lg">Contact Support</CardTitle>
               </CardHeader>
               <CardContent>
                 {showSuccess && successMessage && (
-                  <div className="mb-4 rounded-lg bg-green-100 p-3 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                  <div
+                    data-slot="help-support-success"
+                    className="mb-4 rounded-lg bg-green-100 p-3 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                  >
                     {successMessage}
                   </div>
                 )}
@@ -351,7 +358,7 @@ export function HelpSupportPanel({
         {/* Sidebar - Contact Options */}
         <div className="space-y-4">
           {contacts.length > 0 && (
-            <Card>
+            <Card data-slot="help-support-contacts-card">
               <CardHeader>
                 <CardTitle className="text-lg">Contact Us</CardTitle>
               </CardHeader>
@@ -359,6 +366,7 @@ export function HelpSupportPanel({
                 {contacts.map((contact, index) => (
                   <div
                     key={index}
+                    data-slot="help-support-contact-item"
                     className="flex items-start gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                   >
                     <div className="text-gray-500 dark:text-gray-400">
@@ -400,7 +408,7 @@ export function HelpSupportPanel({
           )}
 
           {/* Quick Links */}
-          <Card>
+          <Card data-slot="help-support-links-card">
             <CardHeader>
               <CardTitle className="text-lg">Quick Links</CardTitle>
             </CardHeader>
