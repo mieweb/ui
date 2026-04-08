@@ -9841,3 +9841,184 @@ body.condensed [data-slot='pending-claims-card'] button {
   height: auto !important;
   min-height: 0 !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderCard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card root ── */
+
+body.condensed [data-slot='provider-card'] {
+  border-radius: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-card'][data-variant='list'] {
+  min-height: 5rem !important;
+}
+
+body.condensed [data-slot='provider-card'][data-variant='featured'] {
+  padding: 0 !important;
+}
+
+/* ── Logo (compact / featured) ── */
+
+body.condensed
+  [data-slot='provider-card'][data-variant='compact']
+  [data-slot='provider-card-logo'] {
+  height: 3rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-logo'] {
+  height: 3rem !important;
+  margin-bottom: 0.25rem !important;
+  border-radius: 0 !important;
+}
+
+/* ── Logo (list) ── */
+
+body.condensed
+  [data-slot='provider-card'][data-variant='list']
+  [data-slot='provider-card-logo'] {
+  width: 5rem !important;
+}
+
+/* ── Logo inner (fallback initial circle + image) ── */
+
+body.condensed [data-slot='provider-card-logo'] > div {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+
+body.condensed [data-slot='provider-card-logo'] > div span {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-card-logo'] img {
+  padding: 0.25rem !important;
+}
+
+/* ── Content ── */
+
+body.condensed [data-slot='provider-card-content'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-content'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+/* ── Header (name + verified) ── */
+
+body.condensed [data-slot='provider-card-header'] {
+  margin-bottom: 0.125rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-header'] h3 {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-header']
+  h3 {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='provider-card-header'] > span {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='provider-card-header'] > span svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Address ── */
+
+body.condensed [data-slot='provider-card-address'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-address'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Phone ── */
+
+body.condensed [data-slot='provider-card-phone'] {
+  font-size: 0.625rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* ── Services badges ── */
+
+body.condensed [data-slot='provider-card-services'] {
+  margin-top: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-services'] [data-slot='badge'] {
+  font-size: 0.5625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ── Footer (distance + actions) ── */
+
+body.condensed [data-slot='provider-card-footer'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-footer'] span {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='provider-card-footer'] span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Safe from wildfires notice ── */
+
+body.condensed [data-slot='provider-card-footer'] > div > div {
+  font-size: 0.5625rem !important;
+  padding: 0.0625rem 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-footer'] > div > div svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Grid ── */
+
+body.condensed [data-slot='provider-card-grid'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Grid empty state ── */
+
+body.condensed [data-slot='provider-card-grid'] > div > svg {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-card-grid'] > div > p:first-of-type {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='provider-card-grid'] > div > p + p {
+  font-size: 0.75rem !important;
+}
