@@ -173,9 +173,12 @@ export function ProviderOverview({
 
   if (isLoading) {
     return (
-      <div className={`space-y-6 ${className}`}>
+      <div data-slot="provider-overview" className={`space-y-6 ${className}`}>
         {/* Header skeleton */}
-        <div className="flex animate-pulse items-center gap-4">
+        <div
+          data-slot="provider-overview-header"
+          className="flex animate-pulse items-center gap-4"
+        >
           <div className="h-12 w-12 rounded-lg bg-gray-200 dark:bg-gray-700" />
           <div className="h-6 w-48 rounded bg-gray-200 dark:bg-gray-700" />
         </div>

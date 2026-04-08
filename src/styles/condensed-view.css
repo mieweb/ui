@@ -10357,8 +10357,18 @@ body.condensed
 body.condensed
   [data-slot='provider-overview-activity']
   [data-slot='card-content']
-  > div {
-  gap: 0.25rem !important;
+  > div
+  > * {
+  margin-top: 0 !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  > div
+  > *
+  + * {
+  margin-top: 0.25rem !important;
 }
 
 body.condensed
