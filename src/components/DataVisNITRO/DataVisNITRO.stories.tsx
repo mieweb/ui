@@ -32,7 +32,15 @@ export const Default: Story = {
     <DataVisNitroSource type="http" url="/sample-data.json">
       <DataVisNitroGrid
         title="Employees"
-        columns={['id', 'name', 'email', 'department', 'status', 'start_date']}
+        columns={[
+          'id',
+          'name',
+          'email',
+          'department',
+          'status',
+          'start_date',
+          'manager',
+        ]}
         height="420px"
       />
     </DataVisNitroSource>
@@ -44,7 +52,15 @@ export const WithControls: Story = {
     <DataVisNitroSource type="http" url="/sample-data.json">
       <DataVisNitroGrid
         title="Employee Management"
-        columns={['id', 'name', 'email', 'department', 'status', 'start_date']}
+        columns={[
+          'id',
+          'name',
+          'email',
+          'department',
+          'status',
+          'start_date',
+          'manager',
+        ]}
         showControls
         height="480px"
       />
