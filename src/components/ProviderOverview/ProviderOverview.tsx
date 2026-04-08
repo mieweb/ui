@@ -193,9 +193,12 @@ export function ProviderOverview({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div data-slot="provider-overview" className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div
+        data-slot="provider-overview-header"
+        className="flex items-center gap-4"
+      >
         {logoUrl ? (
           <img
             src={logoUrl}
@@ -220,7 +223,10 @@ export function ProviderOverview({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div
+        data-slot="provider-overview-stats"
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+      >
         <StatCard
           label="Pending Orders"
           value={stats.pendingOrders}
@@ -309,7 +315,7 @@ export function ProviderOverview({
 
       {/* Quick Actions */}
       {quickActions.length > 0 && (
-        <Card>
+        <Card data-slot="provider-overview-actions">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
@@ -353,7 +359,7 @@ export function ProviderOverview({
 
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
-        <Card>
+        <Card data-slot="provider-overview-activity">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
@@ -432,6 +438,7 @@ function StatCard({ label, value, icon, color, onClick }: StatCardProps) {
 
   return (
     <div
+      data-slot="provider-overview-stat"
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
