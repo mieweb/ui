@@ -10022,3 +10022,188 @@ body.condensed [data-slot='provider-card-grid'] > div > p:first-of-type {
 body.condensed [data-slot='provider-card-grid'] > div > p + p {
   font-size: 0.75rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderDetailHeader – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Action Buttons Bar ── */
+
+body.condensed [data-slot='provider-detail-actions'] {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='provider-detail-actions'] a,
+body.condensed [data-slot='provider-detail-actions'] button {
+  padding: 0.375rem 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-actions'] a > span:first-child,
+body.condensed [data-slot='provider-detail-actions'] button > span:first-child {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='provider-detail-actions'] a > span:last-child,
+body.condensed [data-slot='provider-detail-actions'] button > span:last-child {
+  font-size: 0.625rem !important;
+}
+
+/* ── Breadcrumb ── */
+
+body.condensed [data-slot='provider-detail-breadcrumb'] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-breadcrumb'] ol {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-breadcrumb'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-left: 0.25rem !important;
+  margin-right: 0.25rem !important;
+}
+
+/* ── Mobile Back Button ── */
+
+body.condensed [data-slot='provider-detail-back'] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-back'] a {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-back'] a svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Main Content Container ── */
+
+body.condensed [data-slot='provider-detail-content'] {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+/* ── Logo ── */
+
+body.condensed [data-slot='provider-detail-logo'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Provider Name ── */
+
+body.condensed [data-slot='provider-detail-name'] {
+  font-size: 1.125rem !important;
+  line-height: 1.375rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* ── Social Media Links ── */
+
+body.condensed [data-slot='provider-detail-social'] {
+  gap: 0.375rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-detail-social'] a {
+  font-size: 0.875rem !important;
+}
+
+/* ── Verified Badge ── */
+
+body.condensed [data-slot='provider-detail-verified'] {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-detail-verified'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Provider Info Section (logo + details flex row) ── */
+
+body.condensed [data-slot='provider-detail-content'] > :last-child {
+  gap: 0.75rem !important;
+}
+
+/* ── Address ── */
+
+body.condensed [data-slot='provider-detail-header'] a[href*='maps'],
+body.condensed [data-slot='provider-detail-header'] address {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+/* ── Divider ── */
+
+body.condensed [data-slot='provider-detail-content'] hr {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* ── Report/Claim links ── */
+
+body.condensed [data-slot='provider-detail-header'] a[href*='report'],
+body.condensed [data-slot='provider-detail-header'] a[href*='claim'] {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-header'] a[href*='report'] svg,
+body.condensed [data-slot='provider-detail-header'] a[href*='claim'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Book Appointment Button ── */
+
+body.condensed [data-slot='provider-detail-header'] button[type='button'] {
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-header'] button[type='button'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* ── Compact Header Variant ── */
+
+body.condensed [data-slot='provider-detail-compact'] {
+  padding: 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] > div {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] h2 {
+  font-size: 0.8125rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}

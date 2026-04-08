@@ -149,6 +149,7 @@ export function ActionButtonsBar({
 
   return (
     <div
+      data-slot="provider-detail-actions"
       className={cn(
         'flex justify-center border-b border-gray-200 dark:border-gray-700',
         className
@@ -200,7 +201,11 @@ export interface BreadcrumbProps {
 
 export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb" className={cn('py-2', className)}>
+    <nav
+      aria-label="Breadcrumb"
+      data-slot="provider-detail-breadcrumb"
+      className={cn('py-2', className)}
+    >
       <ol className="flex flex-wrap items-center gap-1 text-sm">
         {items.map((item, index) => (
           <li key={item.href} className="flex items-center">
@@ -242,7 +247,10 @@ export function MobileBackButton({
   className,
 }: MobileBackButtonProps) {
   return (
-    <div className={cn('py-2 sm:hidden', className)}>
+    <div
+      data-slot="provider-detail-back"
+      className={cn('py-2 sm:hidden', className)}
+    >
       <a
         href={href}
         className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
@@ -289,6 +297,7 @@ export function ProviderLogo({
   if (!src || hasError) {
     return (
       <div
+        data-slot="provider-detail-logo"
         className={cn(
           logoSizeClasses[size],
           'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex items-center justify-center rounded-lg font-bold',
@@ -308,6 +317,7 @@ export function ProviderLogo({
     <img
       src={src}
       alt={`${name} logo`}
+      data-slot="provider-detail-logo"
       className={cn(
         logoSizeClasses[size],
         'rounded-lg object-contain',
@@ -388,7 +398,10 @@ export function SocialMediaLinks({
   }
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-3', className)}>
+    <div
+      data-slot="provider-detail-social"
+      className={cn('flex flex-wrap items-center gap-3', className)}
+    >
       {socialLinks.map((link) => (
         <a
           key={link.key}
@@ -438,6 +451,7 @@ export function VerifiedBadge({
 
   return (
     <div
+      data-slot="provider-detail-verified"
       className={cn(
         'flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400',
         className
@@ -704,6 +718,7 @@ export function ProviderDetailHeader({
 
   return (
     <div
+      data-slot="provider-detail-header"
       className={cn(
         headerVariants({ variant: variant ?? 'default' }),
         className
@@ -720,7 +735,10 @@ export function ProviderDetailHeader({
       )}
 
       {/* Main Header Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div
+        data-slot="provider-detail-content"
+        className="container mx-auto px-4 py-6"
+      >
         {/* Breadcrumb (Desktop) */}
         {showBreadcrumb && (
           <Breadcrumb
@@ -741,7 +759,10 @@ export function ProviderDetailHeader({
 
           {/* Details */}
           <div className="flex-1">
-            <h1 className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+            <h1
+              data-slot="provider-detail-name"
+              className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
+            >
               {provider.name}
             </h1>
 
@@ -806,6 +827,7 @@ export function CompactProviderHeader({
 }: CompactProviderHeaderProps) {
   return (
     <div
+      data-slot="provider-detail-compact"
       className={cn(
         'rounded-lg bg-white p-4 shadow-sm dark:bg-gray-900',
         className
