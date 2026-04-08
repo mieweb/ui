@@ -310,10 +310,10 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
         tabIndex={interactive ? 0 : undefined}
         role={interactive ? 'button' : undefined}
         aria-label={`View ${provider.name}`}
+        {...props}
         data-slot="provider-card"
         data-variant={variant}
         data-testid="provider-card"
-        {...props}
       >
         {/* Logo Section */}
         {(variant === 'compact' || variant === 'featured') && (

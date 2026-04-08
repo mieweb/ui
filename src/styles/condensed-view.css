@@ -10172,13 +10172,13 @@ body.condensed [data-slot='provider-detail-header'] a[href*='claim'] svg {
 
 /* ── Book Appointment Button ── */
 
-body.condensed [data-slot='provider-detail-header'] button[type='button'] {
+body.condensed [data-slot='provider-detail-content'] button[type='button'] {
   padding: 0.375rem 0.75rem !important;
   font-size: 0.75rem !important;
   gap: 0.25rem !important;
 }
 
-body.condensed [data-slot='provider-detail-header'] button[type='button'] svg {
+body.condensed [data-slot='provider-detail-content'] button[type='button'] svg {
   width: 0.875rem !important;
   height: 0.875rem !important;
 }
