@@ -155,7 +155,10 @@ const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
 
 const SafeFromWildfiresNotice: React.FC = () => (
   <Tooltip content="BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.">
-    <div className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300">
+    <div
+      data-slot="provider-card-safe-notice"
+      className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300"
+    >
       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -170,7 +173,10 @@ const SafeFromWildfiresNotice: React.FC = () => (
 
 const VerifiedBadge: React.FC = () => (
   <Tooltip content="This provider's information has been verified">
-    <span className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300">
+    <span
+      data-slot="provider-card-verified"
+      className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300"
+    >
       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"

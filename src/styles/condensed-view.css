@@ -9931,11 +9931,11 @@ body.condensed
   line-height: 1rem !important;
 }
 
-body.condensed [data-slot='provider-card-header'] > span {
+body.condensed [data-slot='provider-card-verified'] {
   font-size: 0.5625rem !important;
 }
 
-body.condensed [data-slot='provider-card-header'] > span svg {
+body.condensed [data-slot='provider-card-verified'] svg {
   width: 0.625rem !important;
   height: 0.625rem !important;
 }
@@ -9990,13 +9990,13 @@ body.condensed [data-slot='provider-card-footer'] span svg {
 
 /* ── Safe from wildfires notice ── */
 
-body.condensed [data-slot='provider-card-footer'] > div > div {
+body.condensed [data-slot='provider-card-safe-notice'] {
   font-size: 0.5625rem !important;
   padding: 0.0625rem 0.25rem !important;
   gap: 0.25rem !important;
 }
 
-body.condensed [data-slot='provider-card-footer'] > div > div svg {
+body.condensed [data-slot='provider-card-safe-notice'] svg {
   width: 0.625rem !important;
   height: 0.625rem !important;
 }
