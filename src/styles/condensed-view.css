@@ -9744,7 +9744,7 @@ body.condensed [data-slot='pending-claims-row'] td {
 
 /* ── Claimant cell: avatar + info ── */
 
-body.condensed [data-slot='pending-claims-row'] td > div {
+body.condensed [data-slot='pending-claims-row'] td:first-child > div {
   gap: 0.375rem !important;
 }
 
@@ -9820,7 +9820,11 @@ body.condensed [data-slot='pending-claims-card'] [data-slot='badge'] {
 
 body.condensed [data-slot='pending-claims-card'] > div:nth-child(2) {
   margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='pending-claims-card'] > div:nth-child(2) > div {
   font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
 }
 
 /* ── Mobile action buttons ── */
