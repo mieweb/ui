@@ -183,7 +183,10 @@ export function ProviderOverview({
           <div className="h-6 w-48 rounded bg-gray-200 dark:bg-gray-700" />
         </div>
         {/* Stats skeleton */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div
+          data-slot="provider-overview-stats"
+          className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        >
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
