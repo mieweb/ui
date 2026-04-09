@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
@@ -149,7 +150,7 @@ export function ReportDashboard({
     return (
       <div
         data-slot="report-dashboard"
-        className={`animate-pulse space-y-6 ${className}`}
+        className={cn('animate-pulse space-y-6', className)}
       >
         <div className="h-12 w-1/3 rounded-lg bg-gray-200 dark:bg-gray-700" />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -166,7 +167,7 @@ export function ReportDashboard({
   }
 
   return (
-    <div data-slot="report-dashboard" className={`space-y-6 ${className}`}>
+    <div data-slot="report-dashboard" className={cn('space-y-6', className)}>
       {/* Header */}
       <div
         data-slot="report-dashboard-header"
