@@ -96,7 +96,10 @@ const ProviderLogo: React.FC<{
 
   if (!logoURL || hasError) {
     return (
-      <div className={cn(logoContainerVariants({ variant }))}>
+      <div
+        data-slot="provider-card-logo"
+        className={cn(logoContainerVariants({ variant }))}
+      >
         <div className="bg-primary-100 dark:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-full">
           <span className="text-primary-800 dark:text-primary-300 text-lg font-bold">
             {name.charAt(0).toUpperCase()}
@@ -107,7 +110,10 @@ const ProviderLogo: React.FC<{
   }
 
   return (
-    <div className={cn(logoContainerVariants({ variant }))}>
+    <div
+      data-slot="provider-card-logo"
+      className={cn(logoContainerVariants({ variant }))}
+    >
       <img
         src={logoURL}
         alt={`${name}'s logo`}
@@ -149,7 +155,10 @@ const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
 
 const SafeFromWildfiresNotice: React.FC = () => (
   <Tooltip content="BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.">
-    <div className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300">
+    <div
+      data-slot="provider-card-safe-notice"
+      className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300"
+    >
       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -164,7 +173,10 @@ const SafeFromWildfiresNotice: React.FC = () => (
 
 const VerifiedBadge: React.FC = () => (
   <Tooltip content="This provider's information has been verified">
-    <span className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300">
+    <span
+      data-slot="provider-card-verified"
+      className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300"
+    >
       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -298,8 +310,10 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
         tabIndex={interactive ? 0 : undefined}
         role={interactive ? 'button' : undefined}
         aria-label={`View ${provider.name}`}
-        data-testid="provider-card"
         {...props}
+        data-slot="provider-card"
+        data-variant={variant}
+        data-testid="provider-card"
       >
         {/* Logo Section */}
         {(variant === 'compact' || variant === 'featured') && (
@@ -319,6 +333,7 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
 
         {/* Content Section */}
         <div
+          data-slot="provider-card-content"
           className={cn(
             'flex flex-1 flex-col',
             variant === 'compact' && 'p-4',
@@ -327,7 +342,10 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
           )}
         >
           {/* Header: Name + Verified */}
-          <div className="mb-1 flex items-start justify-between gap-2">
+          <div
+            data-slot="provider-card-header"
+            className="mb-1 flex items-start justify-between gap-2"
+          >
             <h3
               className={cn(
                 'text-primary-800 dark:text-primary-300 line-clamp-2 font-semibold',
@@ -343,6 +361,7 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
 
           {/* Address */}
           <p
+            data-slot="provider-card-address"
             className={cn(
               'text-muted-foreground',
               variant === 'featured' ? 'text-sm' : 'text-xs'
@@ -370,6 +389,7 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
           {provider.workNumber && (
             <a
               href={`tel:${provider.workNumber}`}
+              data-slot="provider-card-phone"
               data-phone-link
               onClick={handlePhoneClick}
               className={cn(
@@ -385,7 +405,10 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
 
           {/* Services Badges */}
           {displayServices && displayServices.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div
+              data-slot="provider-card-services"
+              className="mt-3 flex flex-wrap gap-1.5"
+            >
               {displayServices.map((service) => (
                 <Badge
                   key={service._id}
@@ -408,7 +431,10 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
           <div className="flex-1" />
 
           {/* Footer: Distance + Actions */}
-          <div className="mt-3 flex items-center justify-between">
+          <div
+            data-slot="provider-card-footer"
+            className="mt-3 flex items-center justify-between"
+          >
             <div className="flex items-center gap-2">
               {provider.safeFromWildfires && <SafeFromWildfiresNotice />}
               {!provider.safeFromWildfires && (
@@ -468,6 +494,7 @@ export const ProviderCardGrid: React.FC<ProviderCardGridProps> = ({
   if (loading) {
     return (
       <div
+        data-slot="provider-card-grid"
         className={cn(
           'grid gap-4',
           variant === 'compact' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
@@ -484,7 +511,10 @@ export const ProviderCardGrid: React.FC<ProviderCardGridProps> = ({
 
   if (providers.length === 0) {
     return (
-      <div className={cn('py-12 text-center', className)}>
+      <div
+        data-slot="provider-card-grid"
+        className={cn('py-12 text-center', className)}
+      >
         {emptyState || (
           <div className="text-muted-foreground">
             <svg
@@ -512,6 +542,7 @@ export const ProviderCardGrid: React.FC<ProviderCardGridProps> = ({
 
   return (
     <div
+      data-slot="provider-card-grid"
       className={cn(
         'grid gap-4',
         variant === 'compact' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',

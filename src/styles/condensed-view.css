@@ -728,12 +728,12 @@ body.condensed [data-slot='service-grid'] {
 }
 
 /* Service card inner padding */
-body.condensed [data-slot='service-card'] > div {
+body.condensed [data-slot='service-card'] > [data-slot='card'] > div {
   padding: 0.5rem 0.625rem;
 }
 
 /* Service card border-radius & remove Card's own padding (inner div handles it) */
-body.condensed [data-slot='service-card'] {
+body.condensed [data-slot='service-card'] > [data-slot='card'] {
   border-radius: 0.375rem;
   padding: 0 !important;
 }
@@ -812,23 +812,28 @@ body.condensed [data-slot='service-card'] .border-t .text-sm {
 }
 
 /* Add service card */
-body.condensed [data-slot='add-service-card'] {
+body.condensed [data-slot='add-service-card'] > [data-slot='card'] {
   border-radius: 0.375rem;
   padding: 0 !important;
 }
 
-body.condensed [data-slot='add-service-card'] > div {
+body.condensed [data-slot='add-service-card'] > [data-slot='card'] > div {
   min-height: 80px;
   padding: 0.5rem;
 }
 
-body.condensed [data-slot='add-service-card'] > div > div {
+body.condensed [data-slot='add-service-card'] > [data-slot='card'] > div > div {
   height: 2rem;
   width: 2rem;
   margin-bottom: 0.25rem;
 }
 
-body.condensed [data-slot='add-service-card'] > div > div svg {
+body.condensed
+  [data-slot='add-service-card']
+  > [data-slot='card']
+  > div
+  > div
+  svg {
   height: 1rem;
   width: 1rem;
 }
@@ -9840,4 +9845,1592 @@ body.condensed [data-slot='pending-claims-card'] button {
   padding: 0.125rem 0.375rem !important;
   height: auto !important;
   min-height: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderCard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card root ── */
+
+body.condensed [data-slot='provider-card'] {
+  border-radius: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-card'][data-variant='list'] {
+  min-height: 5rem !important;
+}
+
+body.condensed [data-slot='provider-card'][data-variant='featured'] {
+  padding: 0 !important;
+}
+
+/* ── Logo (compact / featured) ── */
+
+body.condensed
+  [data-slot='provider-card'][data-variant='compact']
+  [data-slot='provider-card-logo'] {
+  height: 3rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-logo'] {
+  height: 3rem !important;
+  margin-bottom: 0.25rem !important;
+  border-radius: 0 !important;
+}
+
+/* ── Logo (list) ── */
+
+body.condensed
+  [data-slot='provider-card'][data-variant='list']
+  [data-slot='provider-card-logo'] {
+  width: 5rem !important;
+}
+
+/* ── Logo inner (fallback initial circle + image) ── */
+
+body.condensed [data-slot='provider-card-logo'] > div {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+
+body.condensed [data-slot='provider-card-logo'] > div span {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-card-logo'] img {
+  padding: 0.25rem !important;
+}
+
+/* ── Content ── */
+
+body.condensed [data-slot='provider-card-content'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-content'] {
+  padding: 0.375rem 0.5rem !important;
+}
+
+/* ── Header (name + verified) ── */
+
+body.condensed [data-slot='provider-card-header'] {
+  margin-bottom: 0.125rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-header'] h3 {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-header']
+  h3 {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed [data-slot='provider-card-verified'] {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='provider-card-verified'] svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Address ── */
+
+body.condensed [data-slot='provider-card-address'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+body.condensed
+  [data-slot='provider-card'][data-variant='featured']
+  [data-slot='provider-card-address'] {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Phone ── */
+
+body.condensed [data-slot='provider-card-phone'] {
+  font-size: 0.625rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* ── Services badges ── */
+
+body.condensed [data-slot='provider-card-services'] {
+  margin-top: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-services'] [data-slot='badge'] {
+  font-size: 0.5625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+/* ── Footer (distance + actions) ── */
+
+body.condensed [data-slot='provider-card-footer'] {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-footer'] span {
+  font-size: 0.5625rem !important;
+}
+
+body.condensed [data-slot='provider-card-footer'] span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Safe from wildfires notice ── */
+
+body.condensed [data-slot='provider-card-safe-notice'] {
+  font-size: 0.5625rem !important;
+  padding: 0.0625rem 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-card-safe-notice'] svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Grid ── */
+
+body.condensed [data-slot='provider-card-grid'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Grid empty state ── */
+
+body.condensed [data-slot='provider-card-grid'] > div > svg {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-card-grid'] > div > p:first-of-type {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='provider-card-grid'] > div > p + p {
+  font-size: 0.75rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderDetailHeader – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Action Buttons Bar ── */
+
+body.condensed [data-slot='provider-detail-actions'] {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='provider-detail-actions'] a,
+body.condensed [data-slot='provider-detail-actions'] button {
+  padding: 0.375rem 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-actions'] a > span:first-child,
+body.condensed [data-slot='provider-detail-actions'] button > span:first-child {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='provider-detail-actions'] a > span:last-child,
+body.condensed [data-slot='provider-detail-actions'] button > span:last-child {
+  font-size: 0.625rem !important;
+}
+
+/* ── Breadcrumb ── */
+
+body.condensed [data-slot='provider-detail-breadcrumb'] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-breadcrumb'] ol {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-breadcrumb'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-left: 0.25rem !important;
+  margin-right: 0.25rem !important;
+}
+
+/* ── Mobile Back Button ── */
+
+body.condensed [data-slot='provider-detail-back'] {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-back'] a {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-back'] a svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Main Content Container ── */
+
+body.condensed [data-slot='provider-detail-content'] {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+/* ── Logo ── */
+
+body.condensed [data-slot='provider-detail-logo'] {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Provider Name ── */
+
+body.condensed [data-slot='provider-detail-name'] {
+  font-size: 1.125rem !important;
+  line-height: 1.375rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* ── Social Media Links ── */
+
+body.condensed [data-slot='provider-detail-social'] {
+  gap: 0.375rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-detail-social'] a {
+  font-size: 0.875rem !important;
+}
+
+/* ── Verified Badge ── */
+
+body.condensed [data-slot='provider-detail-verified'] {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-detail-verified'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Provider Info Section (logo + details flex row) ── */
+
+body.condensed [data-slot='provider-detail-content'] > :last-child {
+  gap: 0.75rem !important;
+}
+
+/* ── Address ── */
+
+body.condensed [data-slot='provider-detail-content'] a[href*='maps'],
+body.condensed [data-slot='provider-detail-content'] address {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+/* ── Divider ── */
+
+body.condensed [data-slot='provider-detail-content'] hr {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* ── Report/Claim links ── */
+
+body.condensed [data-slot='provider-detail-header'] a[href*='report'],
+body.condensed [data-slot='provider-detail-header'] a[href*='claim'] {
+  font-size: 0.6875rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-header'] a[href*='report'] svg,
+body.condensed [data-slot='provider-detail-header'] a[href*='claim'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* ── Book Appointment Button ── */
+
+body.condensed [data-slot='provider-detail-content'] button[type='button'] {
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-detail-content'] button[type='button'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* ── Compact Header Variant ── */
+
+body.condensed [data-slot='provider-detail-compact'] {
+  padding: 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] > div {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] h2 {
+  font-size: 0.8125rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='provider-detail-compact'] button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderOverview – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root spacing ── */
+
+body.condensed [data-slot='provider-overview'] > * + * {
+  margin-top: 0.75rem !important;
+}
+
+/* ── Header (logo + name) ── */
+
+body.condensed [data-slot='provider-overview-header'] {
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-overview-header'] img,
+body.condensed [data-slot='provider-overview-header'] > div:first-child {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+body.condensed [data-slot='provider-overview-header'] > div:first-child span {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-overview-header'] h1 {
+  font-size: 0.9375rem !important;
+  line-height: 1.25rem !important;
+}
+
+body.condensed [data-slot='provider-overview-header'] p {
+  font-size: 0.6875rem !important;
+}
+
+/* ── Stats Grid ── */
+
+body.condensed [data-slot='provider-overview-stats'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Stat Card ── */
+
+body.condensed [data-slot='provider-overview-stat'] {
+  padding: 0.5rem !important;
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-overview-stat'] > div {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-overview-stat'] > div > div:first-child {
+  padding: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-stat']
+  > div
+  > div:first-child
+  svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-stat']
+  > div
+  > div:last-child
+  p:first-child {
+  font-size: 1.125rem !important;
+  line-height: 1.375rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-stat']
+  > div
+  > div:last-child
+  p:last-child {
+  font-size: 0.625rem !important;
+}
+
+/* ── Quick Actions Card ── */
+
+body.condensed
+  [data-slot='provider-overview-actions']
+  [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-actions']
+  [data-slot='card-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-actions']
+  [data-slot='card-content'] {
+  padding: 0 0.75rem 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-overview-actions'] button {
+  padding: 0.375rem !important;
+  gap: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-actions']
+  button
+  span:first-child
+  svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+body.condensed [data-slot='provider-overview-actions'] button span:last-child {
+  font-size: 0.625rem !important;
+}
+
+/* ── Recent Activity Card ── */
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-title'] {
+  font-size: 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content'] {
+  padding: 0 0.75rem 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  > div
+  > * {
+  margin-top: 0 !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  > div
+  > *
+  + * {
+  margin-top: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  > div
+  > div {
+  gap: 0.375rem !important;
+  padding: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Activity icon */
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  > div
+  > div
+  > div:first-child {
+  padding: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  > div
+  > div
+  > div:first-child
+  svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+/* Activity title */
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  p {
+  font-size: 0.6875rem !important;
+}
+
+/* Activity timestamp */
+body.condensed
+  [data-slot='provider-overview-activity']
+  [data-slot='card-content']
+  p:last-child {
+  font-size: 0.5625rem !important;
+  margin-top: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderSearchBar – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Search input row ── */
+
+body.condensed [data-slot='provider-search-input'] {
+  border-radius: 0.375rem !important;
+  gap: 0 !important;
+}
+
+body.condensed [data-slot='provider-search-input'] [data-slot='button'] {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+body.condensed [data-slot='provider-search-input'] [data-slot='button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-search-input'] [data-slot='input'] {
+  height: 2rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Error message ── */
+
+body.condensed [data-slot='provider-search'] p[role='alert'] {
+  font-size: 0.6875rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* ── Results message ── */
+
+body.condensed [data-slot='provider-search-results'] {
+  margin-top: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── Hero variant ── */
+
+body.condensed [data-slot='provider-search-hero'] {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-search-hero-title'] {
+  font-size: 0.9375rem !important;
+  line-height: 1.25rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='provider-search-hero'] > p {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-search-hero'] > div {
+  max-width: 20rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderSearchFilters – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Main filter container (horizontal / vertical / compact layouts) ── */
+
+body.condensed [data-slot='provider-search-filters'] {
+  gap: 0.375rem !important;
+}
+
+/* ── Labels ── */
+
+body.condensed [data-slot='provider-search-filters'] label {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+/* ── Inputs & selects ── */
+
+body.condensed [data-slot='provider-search-filters'] input,
+body.condensed [data-slot='provider-search-filters'] select {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+}
+
+/* ── Input icons ── */
+
+body.condensed [data-slot='provider-search-filters'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* ── Field groups (min-width overrides) ── */
+
+body.condensed [data-slot='provider-search-filters'] > div {
+  min-width: 80px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ServiceMultiSelect – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Selected tags ── */
+
+body.condensed [data-slot='provider-service-tag'] {
+  font-size: 0.6875rem !important;
+  padding: 0.0625rem 0.25rem !important;
+  gap: 0.125rem !important;
+}
+
+body.condensed [data-slot='provider-service-tag'] button svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Dropdown trigger button ── */
+
+body.condensed [data-slot='provider-service-select'] > div > button {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Dropdown panel items ── */
+
+body.condensed [data-slot='provider-service-select'] [role='listbox'] button {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-service-select'] [role='listbox'] input {
+  height: 1.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── Category headers ── */
+
+body.condensed
+  [data-slot='provider-service-select']
+  [role='listbox']
+  > div
+  > div:first-child {
+  font-size: 0.5625rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CompactFilterBar – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='provider-compact-filter'] {
+  gap: 0.25rem !important;
+  padding: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-compact-filter'] input,
+body.condensed [data-slot='provider-compact-filter'] select {
+  height: 1.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='provider-compact-filter'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-compact-filter'] button {
+  height: 1.5rem !important;
+  font-size: 0.6875rem !important;
+  padding: 0 0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ActiveFilters – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='provider-active-filters'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > span:first-child {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > span:not(:first-child) {
+  font-size: 0.6875rem !important;
+  padding: 0.0625rem 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > button {
+  font-size: 0.6875rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderSettings – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root spacing ── */
+
+body.condensed [data-slot='provider-settings'] > * + * {
+  margin-top: 0.5rem !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='provider-settings-header'] h1 {
+  font-size: 1rem !important;
+  line-height: 1.375rem !important;
+}
+
+body.condensed [data-slot='provider-settings-header'] [data-slot='button'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding: 0 0.625rem !important;
+}
+
+body.condensed [data-slot='provider-settings-header'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  padding: 0.0625rem 0.375rem !important;
+}
+
+/* ── Tabs ── */
+
+body.condensed [data-slot='provider-settings'] [data-slot='tabs-list'] {
+  height: auto !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='tabs-trigger'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.625rem !important;
+}
+
+/* ── Cards inside tabs ── */
+
+body.condensed [data-slot='provider-settings'] [data-slot='card'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* ── space-y-4 / space-y-6 inside card content ── */
+
+body.condensed
+  [data-slot='provider-settings']
+  [data-slot='card-content']
+  > *
+  + * {
+  margin-top: 0.375rem !important;
+}
+
+/* ── Labels ── */
+
+body.condensed [data-slot='provider-settings'] label {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+/* ── Inputs & textareas ── */
+
+body.condensed [data-slot='provider-settings'] [data-slot='input'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='textarea'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  min-height: 3rem !important;
+}
+
+/* ── Switch rows (notification/scheduling/payment toggles) ── */
+
+body.condensed
+  [data-slot='provider-settings']
+  .flex.items-center.justify-between
+  p {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed
+  [data-slot='provider-settings']
+  .flex.items-center.justify-between
+  p.text-sm,
+body.condensed
+  [data-slot='provider-settings']
+  .flex.items-center.justify-between
+  p.text-xs {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Grid gaps inside general tab ── */
+
+body.condensed [data-slot='provider-settings'] .grid {
+  gap: 0.375rem !important;
+}
+
+/* ── Payment method cards ── */
+
+body.condensed [data-slot='provider-settings-payments'] .rounded-lg.bg-gray-50,
+body.condensed
+  [data-slot='provider-settings-payments']
+  .rounded-lg.dark\:bg-gray-800 {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-settings-payments'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+body.condensed
+  [data-slot='provider-settings-payments']
+  .flex.items-center.gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-settings-payments'] span.font-medium {
+  font-size: 0.75rem !important;
+}
+
+/* ── Section dividers ── */
+
+body.condensed [data-slot='provider-settings'] .border-t {
+  padding-top: 0.5rem !important;
+}
+
+/* ── Section headings (h3) ── */
+
+body.condensed [data-slot='provider-settings'] h3 {
+  font-size: 0.8125rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+/* ── Helper text (xs) ── */
+
+body.condensed [data-slot='provider-settings'] p.text-xs {
+  font-size: 0.5625rem !important;
+  margin-top: 0.0625rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceCard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card root ── */
+
+body.condensed [data-slot='recurring-service-card'] {
+  border-radius: 0.5rem !important;
+  border-width: 1px !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='recurring-service-header'] {
+  padding: 0.375rem 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='recurring-service-header'] h6 {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-header'] span {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='recurring-service-header'] span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Body ── */
+
+body.condensed [data-slot='recurring-service-body'] {
+  padding: 0 0.5rem 0.375rem !important;
+}
+
+body.condensed [data-slot='recurring-service-body'] > * + * {
+  margin-top: 0.25rem !important;
+}
+
+/* ── Field labels ── */
+
+body.condensed [data-slot='recurring-service-body'] span {
+  font-size: 0.5625rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+/* ── Field values (bg-muted boxes) ── */
+
+body.condensed [data-slot='recurring-service-body'] > div > div {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.375rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* ── State-based notes (warning/error) ── */
+
+body.condensed
+  [data-slot='recurring-service-body']
+  > div:last-of-type[class*='bg-warning'],
+body.condensed
+  [data-slot='recurring-service-body']
+  > div:last-of-type[class*='bg-destructive'] {
+  font-size: 0.625rem !important;
+  padding: 0.25rem 0.375rem !important;
+}
+
+/* ── Delete button ── */
+
+body.condensed [data-slot='recurring-service-body'] > button {
+  font-size: 0.625rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='recurring-service-body'] > button svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceAddCard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='recurring-service-add'] {
+  min-height: 100px !important;
+  border-radius: 0.5rem !important;
+  border-width: 1px !important;
+  padding: 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-add'] i {
+  font-size: 1rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceSetupModal – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='recurring-service-modal'] {
+  max-width: 24rem !important;
+}
+
+/* ── Modal header ── */
+
+body.condensed [data-slot='recurring-service-modal'] > div:first-child {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] > div:first-child h4 {
+  font-size: 0.875rem !important;
+}
+
+/* ── Modal form ── */
+
+body.condensed [data-slot='recurring-service-modal'] form {
+  padding: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form > div {
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form label {
+  font-size: 0.625rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form select,
+body.condensed [data-slot='recurring-service-modal'] form input {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form p {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Modal action buttons ── */
+
+body.condensed
+  [data-slot='recurring-service-modal']
+  form
+  > div:last-child
+  button {
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceGrid – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='recurring-service-grid'] {
+  gap: 0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ReportDashboard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root spacing (space-y-6 → smaller) ── */
+
+body.condensed [data-slot='report-dashboard'] > * + * {
+  margin-top: 0.5rem !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='report-dashboard-header'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] h1 {
+  font-size: 1rem !important;
+  line-height: 1.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] [data-slot='button'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding: 0 0.625rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] [data-slot='button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-right: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-header']
+  [data-slot='select-trigger'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Metrics grid ── */
+
+body.condensed [data-slot='report-dashboard-metrics'] {
+  gap: 0.375rem !important;
+}
+
+/* ── Metric cards ── */
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content'] {
+  padding: 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > p:first-child {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > p:nth-child(2) {
+  font-size: 1.125rem !important;
+  margin-top: 0.125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > div {
+  font-size: 0.625rem !important;
+  margin-top: 0.125rem !important;
+  gap: 0.125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > div
+  svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Chart card ── */
+
+body.condensed [data-slot='report-dashboard-chart'] [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* ── Chart bar area ── */
+
+body.condensed [data-slot='report-dashboard-chart'] .h-48 {
+  height: 8rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] .h-40 {
+  height: 6.5rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] span {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Chart legend ── */
+
+body.condensed [data-slot='report-dashboard-chart'] .mt-4 {
+  margin-top: 0.375rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] .mt-4 .h-3 {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Top lists grid ── */
+
+body.condensed [data-slot='report-dashboard-top-lists'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Top Services card ── */
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-content']
+  > *
+  + * {
+  margin-top: 0.25rem !important;
+}
+
+/* ── Ranked items (services) ── */
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  .flex.items-center.gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] [data-slot='badge'] {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  font-size: 0.5625rem !important;
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] p.font-medium {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] p.text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] .h-2 {
+  height: 0.25rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* ── Top Employers card ── */
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-content']
+  > *
+  + * {
+  margin-top: 0.25rem !important;
+}
+
+/* ── Ranked items (employers) ── */
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  .flex.items-center.gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] [data-slot='badge'] {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  font-size: 0.5625rem !important;
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] p.font-medium {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] p.text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] .h-2 {
+  height: 0.25rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* ==========================================================================
+   ScheduleCalendar
+   ========================================================================== */
+
+/* Root — tighter border radius */
+body.condensed [data-slot='schedule-calendar'] {
+  border-radius: 0.375rem !important;
+}
+
+/* Header — compact padding, smaller title */
+body.condensed [data-slot='schedule-calendar-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-header'] h2 {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-header'] [data-slot='button'] {
+  height: 1.75rem !important;
+  padding: 0 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Day headers (week view) — smaller text, tighter padding */
+body.condensed [data-slot='schedule-calendar-day-headers'] > div {
+  padding: 0.25rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-day-headers'] p.text-xs {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-day-headers'] p.text-lg {
+  font-size: 0.875rem !important;
+}
+
+/* Time labels — narrower column, smaller text */
+body.condensed [data-slot='schedule-calendar-time-labels'] {
+  width: 2.75rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-time-labels'] > div {
+  height: 2.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+/* Time grid — shorter hour rows */
+body.condensed [data-slot='schedule-calendar-grid'] .h-16 {
+  height: 2.5rem !important;
+}
+
+/* Appointments — smaller text, tighter padding */
+body.condensed [data-slot='schedule-calendar-appointment'] {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.625rem !important;
+  border-left-width: 3px !important;
+}
+
+body.condensed [data-slot='schedule-calendar-appointment'] p {
+  line-height: 1.2 !important;
+}
+
+/* Legend — compact padding, smaller badges */
+body.condensed [data-slot='schedule-calendar-legend'] {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-legend'] span.h-3 {
+  height: 0.5rem !important;
+  width: 0.5rem !important;
+}
+
+/* ==========================================================================
+   ServiceAccordion
+   ========================================================================== */
+
+/* Category header — tighter padding, smaller text */
+body.condensed [data-slot='service-accordion-category-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='service-accordion-category-header']
+  span.font-semibold {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-accordion-category-header'] svg {
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+/* Category content — tighter inner padding */
+body.condensed [data-slot='service-accordion-category-content'] > div {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.125rem !important;
+}
+
+/* Service links — compact height, smaller text */
+body.condensed [data-slot='service-accordion-link'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-accordion-link'] svg {
+  height: 0.75rem !important;
+  width: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-accordion-link'] span.text-xs {
+  font-size: 0.625rem !important;
+}
+
+/* Sub-category — tighter button, reduced indent */
+body.condensed [data-slot='service-accordion-subcategory'] button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-accordion-subcategory'] .space-y-1 {
+  padding-left: 0.75rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+/* Cards variant — reduced spacing between cards */
+body.condensed [data-slot='service-accordion'].space-y-3 > * + * {
+  margin-top: 0.375rem !important;
+}
+
+/* ServiceTagCloud — smaller tags */
+body.condensed [data-slot='service-tag-cloud'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-tag-cloud'] a {
+  padding: 0.25rem 0.625rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ServiceList — tighter rows */
+body.condensed [data-slot='service-list'] a {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-list'] span.text-xs {
+  font-size: 0.625rem !important;
+}
+
+/* ==========================================================================
+   ServicePricingManager
+   ========================================================================== */
+
+/* Root — tighter vertical spacing */
+body.condensed [data-slot='service-pricing-manager'] > * + * {
+  margin-top: 0.75rem !important;
+}
+
+/* Header — smaller title, tighter layout */
+body.condensed [data-slot='service-pricing-header'] h1 {
+  font-size: 1.125rem !important;
+}
+
+body.condensed [data-slot='service-pricing-header'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='service-pricing-header'] [data-slot='button'] {
+  height: 1.75rem !important;
+  padding: 0 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Filters card — compact padding */
+body.condensed
+  [data-slot='service-pricing-filters']
+  [data-slot='card-content'] {
+  padding: 0.5rem !important;
+}
+
+body.condensed [data-slot='service-pricing-filters'] [data-slot='input'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-pricing-filters'] [data-slot='button'] {
+  height: 1.5rem !important;
+  padding: 0 0.375rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Table card — compact header and rows */
+body.condensed [data-slot='service-pricing-table'] [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='service-pricing-table'] [data-slot='card-title'] {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='service-pricing-table'] [data-slot='card-content'] {
+  padding: 0 0.75rem 0.5rem !important;
+}
+
+/* Table header row */
+body.condensed [data-slot='service-pricing-table'] .text-xs.uppercase {
+  font-size: 0.5625rem !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+/* Service rows — compact vertical spacing */
+body.condensed [data-slot='service-pricing-row'] {
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-pricing-row'] p.font-medium {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-pricing-row'] .text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='service-pricing-row'] p.font-semibold {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-pricing-row'] [data-slot='badge'] {
+  font-size: 0.5625rem !important;
+  padding: 0 0.25rem !important;
+}
+
+body.condensed [data-slot='service-pricing-row'] [data-slot='button'] {
+  height: 1.5rem !important;
+  padding: 0 0.375rem !important;
+  font-size: 0.6875rem !important;
 }
