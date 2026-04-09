@@ -321,103 +321,107 @@ export function ProviderOverview({
 
       {/* Quick Actions */}
       {quickActions.length > 0 && (
-        <Card data-slot="provider-overview-actions">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {quickActions.map((action) => (
-                <button
-                  key={action.id}
-                  onClick={() => {
-                    action.onClick?.();
-                    onQuickActionClick?.(action);
-                  }}
-                  className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                >
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {action.icon || (
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="text-center text-xs font-medium text-gray-700 dark:text-gray-300">
-                    {action.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div data-slot="provider-overview-actions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {quickActions.map((action) => (
+                  <button
+                    key={action.id}
+                    onClick={() => {
+                      action.onClick?.();
+                      onQuickActionClick?.(action);
+                    }}
+                    className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                  >
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {action.icon || (
+                        <svg
+                          className="h-5 w-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {action.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
-        <Card data-slot="provider-overview-activity">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  role={onActivityClick ? 'button' : undefined}
-                  tabIndex={onActivityClick ? 0 : undefined}
-                  onClick={() => onActivityClick?.(activity)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && onActivityClick?.(activity)
-                  }
-                  className={`flex items-start gap-3 rounded-lg p-2 ${onActivityClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
-                >
-                  <div className="rounded-full bg-gray-100 p-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate font-medium text-gray-900 dark:text-white">
-                        {activity.title}
-                      </p>
-                      {activity.status && (
-                        <Badge
-                          variant={
-                            activity.status === 'completed'
-                              ? 'success'
-                              : activity.status === 'cancelled'
-                                ? 'danger'
-                                : 'warning'
-                          }
-                        >
-                          {activity.status}
-                        </Badge>
-                      )}
+        <div data-slot="provider-overview-activity">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    role={onActivityClick ? 'button' : undefined}
+                    tabIndex={onActivityClick ? 0 : undefined}
+                    onClick={() => onActivityClick?.(activity)}
+                    onKeyDown={(e) =>
+                      e.key === 'Enter' && onActivityClick?.(activity)
+                    }
+                    className={`flex items-start gap-3 rounded-lg p-2 ${onActivityClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
+                  >
+                    <div className="rounded-full bg-gray-100 p-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                      {getActivityIcon(activity.type)}
                     </div>
-                    {activity.description && (
-                      <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                        {activity.description}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-medium text-gray-900 dark:text-white">
+                          {activity.title}
+                        </p>
+                        {activity.status && (
+                          <Badge
+                            variant={
+                              activity.status === 'completed'
+                                ? 'success'
+                                : activity.status === 'cancelled'
+                                  ? 'danger'
+                                  : 'warning'
+                            }
+                          >
+                            {activity.status}
+                          </Badge>
+                        )}
+                      </div>
+                      {activity.description && (
+                        <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+                          {activity.description}
+                        </p>
+                      )}
+                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        {formatTime(activity.timestamp)}
                       </p>
-                    )}
-                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      {formatTime(activity.timestamp)}
-                    </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

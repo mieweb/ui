@@ -10626,12 +10626,8 @@ body.condensed [data-slot='provider-active-filters'] > button {
 
 /* ── Root spacing ── */
 
-body.condensed [data-slot='provider-settings'] {
-  gap: 0.75rem !important;
-}
-
 body.condensed [data-slot='provider-settings'] > * + * {
-  margin-top: 0 !important;
+  margin-top: 0.5rem !important;
 }
 
 /* ── Header ── */
