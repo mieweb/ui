@@ -10938,3 +10938,253 @@ body.condensed
 body.condensed [data-slot='recurring-service-grid'] {
   gap: 0.5rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ReportDashboard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root spacing (space-y-6 → smaller) ── */
+
+body.condensed [data-slot='report-dashboard'] > * + * {
+  margin-top: 0.5rem !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='report-dashboard-header'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] h1 {
+  font-size: 1rem !important;
+  line-height: 1.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] p {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] [data-slot='button'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding: 0 0.625rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-header'] [data-slot='button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  margin-right: 0.25rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-header']
+  [data-slot='select-trigger'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Metrics grid ── */
+
+body.condensed [data-slot='report-dashboard-metrics'] {
+  gap: 0.375rem !important;
+}
+
+/* ── Metric cards ── */
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content'] {
+  padding: 0.5rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > p:first-child {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > p:nth-child(2) {
+  font-size: 1.125rem !important;
+  margin-top: 0.125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > div {
+  font-size: 0.625rem !important;
+  margin-top: 0.125rem !important;
+  gap: 0.125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-metrics']
+  [data-slot='card-content']
+  > div
+  svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* ── Chart card ── */
+
+body.condensed [data-slot='report-dashboard-chart'] [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* ── Chart bar area ── */
+
+body.condensed [data-slot='report-dashboard-chart'] .h-48 {
+  height: 8rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] .h-40 {
+  height: 6.5rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] span {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Chart legend ── */
+
+body.condensed [data-slot='report-dashboard-chart'] .mt-4 {
+  margin-top: 0.375rem !important;
+  font-size: 0.6875rem !important;
+  gap: 0.5rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-chart'] .mt-4 .h-3 {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Top lists grid ── */
+
+body.condensed [data-slot='report-dashboard-top-lists'] {
+  gap: 0.5rem !important;
+}
+
+/* ── Top Services card ── */
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  [data-slot='card-content']
+  > *
+  + * {
+  margin-top: 0.25rem !important;
+}
+
+/* ── Ranked items (services) ── */
+
+body.condensed
+  [data-slot='report-dashboard-services']
+  .flex.items-center.gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] [data-slot='badge'] {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  font-size: 0.5625rem !important;
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] p.font-medium {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] p.text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-services'] .h-2 {
+  height: 0.25rem !important;
+  margin-top: 0.125rem !important;
+}
+
+/* ── Top Employers card ── */
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  [data-slot='card-content']
+  > *
+  + * {
+  margin-top: 0.25rem !important;
+}
+
+/* ── Ranked items (employers) ── */
+
+body.condensed
+  [data-slot='report-dashboard-employers']
+  .flex.items-center.gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] [data-slot='badge'] {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  font-size: 0.5625rem !important;
+  padding: 0 !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] p.font-medium {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] p.text-sm {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='report-dashboard-employers'] .h-2 {
+  height: 0.25rem !important;
+  margin-top: 0.125rem !important;
+}
