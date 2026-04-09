@@ -10219,10 +10219,6 @@ body.condensed [data-slot='provider-detail-compact'] button {
 
 /* ── Root spacing ── */
 
-body.condensed [data-slot='provider-overview'] {
-  gap: 0.75rem !important;
-}
-
 body.condensed [data-slot='provider-overview'] > * + * {
   margin-top: 0.75rem !important;
 }
