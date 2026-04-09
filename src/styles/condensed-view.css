@@ -10480,3 +10480,142 @@ body.condensed [data-slot='provider-search-hero'] > p {
 body.condensed [data-slot='provider-search-hero'] > div {
   max-width: 20rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderSearchFilters – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Main filter container (horizontal / vertical / compact layouts) ── */
+
+body.condensed [data-slot='provider-search-filters'] {
+  gap: 0.375rem !important;
+}
+
+/* ── Labels ── */
+
+body.condensed [data-slot='provider-search-filters'] label {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+/* ── Inputs & selects ── */
+
+body.condensed [data-slot='provider-search-filters'] input,
+body.condensed [data-slot='provider-search-filters'] select {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+}
+
+/* ── Input icons ── */
+
+body.condensed [data-slot='provider-search-filters'] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* ── Field groups (min-width overrides) ── */
+
+body.condensed [data-slot='provider-search-filters'] > div {
+  min-width: 80px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ServiceMultiSelect – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Selected tags ── */
+
+body.condensed [data-slot='provider-service-select'] span {
+  font-size: 0.6875rem !important;
+  padding: 0.0625rem 0.25rem !important;
+  gap: 0.125rem !important;
+}
+
+body.condensed [data-slot='provider-service-select'] span button svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Dropdown trigger button ── */
+
+body.condensed [data-slot='provider-service-select'] > div > button {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Dropdown panel items ── */
+
+body.condensed [data-slot='provider-service-select'] [role='listbox'] button {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-service-select'] [role='listbox'] input {
+  height: 1.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── Category headers ── */
+
+body.condensed
+  [data-slot='provider-service-select']
+  [role='listbox']
+  > div
+  > div:first-child {
+  font-size: 0.5625rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CompactFilterBar – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='provider-compact-filter'] {
+  gap: 0.25rem !important;
+  padding: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-compact-filter'] input,
+body.condensed [data-slot='provider-compact-filter'] select {
+  height: 1.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='provider-compact-filter'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-compact-filter'] button {
+  height: 1.5rem !important;
+  font-size: 0.6875rem !important;
+  padding: 0 0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ActiveFilters – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='provider-active-filters'] {
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > span:first-child {
+  font-size: 0.6875rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > span:not(:first-child) {
+  font-size: 0.6875rem !important;
+  padding: 0.0625rem 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-active-filters'] > button {
+  font-size: 0.6875rem !important;
+}

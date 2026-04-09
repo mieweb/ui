@@ -386,7 +386,11 @@ export function ServiceMultiSelect({
   }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div
+      ref={containerRef}
+      className="relative"
+      data-slot="provider-service-select"
+    >
       {label && <label className={labelVariants()}>{label}</label>}
 
       {/* Selected tags display */}
@@ -613,6 +617,7 @@ export function ProviderSearchFilters({
     <FormWrapper
       {...formProps}
       className={cn(containerVariants({ layout }), className)}
+      data-slot="provider-search-filters"
     >
       {/* Provider Name Search */}
       {showNameSearch && (
@@ -737,6 +742,7 @@ export function CompactFilterBar({
         'dark:border-neutral-700 dark:bg-neutral-800',
         className
       )}
+      data-slot="provider-compact-filter"
     >
       {/* Search Input */}
       <div className="min-w-[150px] flex-1">
@@ -929,7 +935,10 @@ export function ActiveFilters({
   }
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2', className)}>
+    <div
+      className={cn('flex flex-wrap items-center gap-2', className)}
+      data-slot="provider-active-filters"
+    >
       <span className="text-sm text-neutral-500 dark:text-neutral-400">
         Active filters:
       </span>
