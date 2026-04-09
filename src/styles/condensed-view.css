@@ -10142,8 +10142,8 @@ body.condensed [data-slot='provider-detail-content'] > :last-child {
 
 /* ── Address ── */
 
-body.condensed [data-slot='provider-detail-header'] a[href*='maps'],
-body.condensed [data-slot='provider-detail-header'] address {
+body.condensed [data-slot='provider-detail-content'] a[href*='maps'],
+body.condensed [data-slot='provider-detail-content'] address {
   font-size: 0.75rem !important;
   line-height: 1.125rem !important;
   margin-bottom: 0.375rem !important;
@@ -10527,13 +10527,13 @@ body.condensed [data-slot='provider-search-filters'] > div {
 
 /* ── Selected tags ── */
 
-body.condensed [data-slot='provider-service-select'] span {
+body.condensed [data-slot='provider-service-tag'] {
   font-size: 0.6875rem !important;
   padding: 0.0625rem 0.25rem !important;
   gap: 0.125rem !important;
 }
 
-body.condensed [data-slot='provider-service-select'] span button svg {
+body.condensed [data-slot='provider-service-tag'] button svg {
   width: 0.5rem !important;
   height: 0.5rem !important;
 }

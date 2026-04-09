@@ -265,6 +265,7 @@ interface ServiceTagProps {
 function ServiceTag({ service, onRemove }: ServiceTagProps) {
   return (
     <span
+      data-slot="provider-service-tag"
       className={cn(
         'inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm',
         'bg-primary-100 text-primary-800',
