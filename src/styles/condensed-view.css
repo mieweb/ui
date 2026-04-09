@@ -11263,3 +11263,82 @@ body.condensed [data-slot='schedule-calendar-legend'] span.h-3 {
   height: 0.5rem !important;
   width: 0.5rem !important;
 }
+
+/* ==========================================================================
+   ServiceAccordion
+   ========================================================================== */
+
+/* Category header — tighter padding, smaller text */
+body.condensed [data-slot='service-accordion-category-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed
+  [data-slot='service-accordion-category-header']
+  span.font-semibold {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-accordion-category-header'] svg {
+  height: 1rem !important;
+  width: 1rem !important;
+}
+
+/* Category content — tighter inner padding */
+body.condensed [data-slot='service-accordion-category-content'] > div {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.125rem !important;
+}
+
+/* Service links — compact height, smaller text */
+body.condensed [data-slot='service-accordion-link'] {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-accordion-link'] svg {
+  height: 0.75rem !important;
+  width: 0.75rem !important;
+}
+
+body.condensed [data-slot='service-accordion-link'] span.text-xs {
+  font-size: 0.625rem !important;
+}
+
+/* Sub-category — tighter button, reduced indent */
+body.condensed [data-slot='service-accordion-subcategory'] button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-accordion-subcategory'] .space-y-1 {
+  padding-left: 0.75rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+/* Cards variant — reduced spacing between cards */
+body.condensed [data-slot='service-accordion'].space-y-3 > * + * {
+  margin-top: 0.375rem !important;
+}
+
+/* ServiceTagCloud — smaller tags */
+body.condensed [data-slot='service-tag-cloud'] {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='service-tag-cloud'] a {
+  padding: 0.25rem 0.625rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ServiceList — tighter rows */
+body.condensed [data-slot='service-list'] a {
+  padding-top: 0.125rem !important;
+  padding-bottom: 0.125rem !important;
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='service-list'] span.text-xs {
+  font-size: 0.625rem !important;
+}
