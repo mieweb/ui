@@ -10778,3 +10778,163 @@ body.condensed [data-slot='provider-settings'] p.text-xs {
   font-size: 0.5625rem !important;
   margin-top: 0.0625rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceCard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card root ── */
+
+body.condensed [data-slot='recurring-service-card'] {
+  border-radius: 0.5rem !important;
+  border-width: 1px !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='recurring-service-header'] {
+  padding: 0.375rem 0.5rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='recurring-service-header'] h6 {
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-header'] span {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+body.condensed [data-slot='recurring-service-header'] span svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ── Body ── */
+
+body.condensed [data-slot='recurring-service-body'] {
+  padding: 0 0.5rem 0.375rem !important;
+}
+
+body.condensed [data-slot='recurring-service-body'] > * + * {
+  margin-top: 0.25rem !important;
+}
+
+/* ── Field labels ── */
+
+body.condensed [data-slot='recurring-service-body'] span {
+  font-size: 0.5625rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+/* ── Field values (bg-muted boxes) ── */
+
+body.condensed [data-slot='recurring-service-body'] > div > div {
+  font-size: 0.6875rem !important;
+  padding: 0.25rem 0.375rem !important;
+  border-radius: 0.25rem !important;
+}
+
+/* ── State-based notes (warning/error) ── */
+
+body.condensed
+  [data-slot='recurring-service-body']
+  > div:last-of-type[class*='bg-warning'],
+body.condensed
+  [data-slot='recurring-service-body']
+  > div:last-of-type[class*='bg-destructive'] {
+  font-size: 0.625rem !important;
+  padding: 0.25rem 0.375rem !important;
+}
+
+/* ── Delete button ── */
+
+body.condensed [data-slot='recurring-service-body'] > button {
+  font-size: 0.625rem !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed [data-slot='recurring-service-body'] > button svg {
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceAddCard – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='recurring-service-add'] {
+  min-height: 100px !important;
+  border-radius: 0.5rem !important;
+  border-width: 1px !important;
+  padding: 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-add'] i {
+  font-size: 1rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceSetupModal – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='recurring-service-modal'] {
+  max-width: 24rem !important;
+}
+
+/* ── Modal header ── */
+
+body.condensed [data-slot='recurring-service-modal'] > div:first-child {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] > div:first-child h4 {
+  font-size: 0.875rem !important;
+}
+
+/* ── Modal form ── */
+
+body.condensed [data-slot='recurring-service-modal'] form {
+  padding: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form > div {
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form label {
+  font-size: 0.625rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form select,
+body.condensed [data-slot='recurring-service-modal'] form input {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='recurring-service-modal'] form p {
+  font-size: 0.5625rem !important;
+}
+
+/* ── Modal action buttons ── */
+
+body.condensed
+  [data-slot='recurring-service-modal']
+  form
+  > div:last-child
+  button {
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RecurringServiceGrid – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+body.condensed [data-slot='recurring-service-grid'] {
+  gap: 0.5rem !important;
+}
