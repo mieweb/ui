@@ -154,7 +154,10 @@ export function ProviderSettings({
 
   if (isLoading) {
     return (
-      <div className={`animate-pulse space-y-4 ${className}`}>
+      <div
+        data-slot="provider-settings"
+        className={`animate-pulse space-y-4 ${className}`}
+      >
         <div className="h-12 rounded-lg bg-gray-200 dark:bg-gray-700" />
         <div className="h-64 rounded-lg bg-gray-200 dark:bg-gray-700" />
       </div>
@@ -162,9 +165,12 @@ export function ProviderSettings({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div data-slot="provider-settings" className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div
+        data-slot="provider-settings-header"
+        className="flex items-center justify-between"
+      >
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Provider Settings
         </h1>
@@ -400,7 +406,10 @@ export function ProviderSettings({
         </TabsContent>
 
         {/* Notifications Tab */}
-        <TabsContent value="notifications">
+        <TabsContent
+          value="notifications"
+          data-slot="provider-settings-notifications"
+        >
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
@@ -508,7 +517,10 @@ export function ProviderSettings({
         </TabsContent>
 
         {/* Scheduling Tab */}
-        <TabsContent value="scheduling">
+        <TabsContent
+          value="scheduling"
+          data-slot="provider-settings-scheduling"
+        >
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Scheduling Settings</CardTitle>
@@ -602,7 +614,7 @@ export function ProviderSettings({
         </TabsContent>
 
         {/* Payments Tab */}
-        <TabsContent value="payments">
+        <TabsContent value="payments" data-slot="provider-settings-payments">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Payment Settings</CardTitle>

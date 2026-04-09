@@ -10619,3 +10619,166 @@ body.condensed [data-slot='provider-active-filters'] > span svg {
 body.condensed [data-slot='provider-active-filters'] > button {
   font-size: 0.6875rem !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderSettings – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root spacing ── */
+
+body.condensed [data-slot='provider-settings'] {
+  gap: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] > * + * {
+  margin-top: 0 !important;
+}
+
+/* ── Header ── */
+
+body.condensed [data-slot='provider-settings-header'] h1 {
+  font-size: 1rem !important;
+  line-height: 1.375rem !important;
+}
+
+body.condensed [data-slot='provider-settings-header'] [data-slot='button'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+  padding: 0 0.625rem !important;
+}
+
+body.condensed [data-slot='provider-settings-header'] [data-slot='badge'] {
+  font-size: 0.625rem !important;
+  padding: 0.0625rem 0.375rem !important;
+}
+
+/* ── Tabs ── */
+
+body.condensed [data-slot='provider-settings'] [data-slot='tabs-list'] {
+  height: auto !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='tabs-trigger'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.625rem !important;
+}
+
+/* ── Cards inside tabs ── */
+
+body.condensed [data-slot='provider-settings'] [data-slot='card'] {
+  border-radius: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='card-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='card-title'] {
+  font-size: 0.8125rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='card-content'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* ── space-y-4 / space-y-6 inside card content ── */
+
+body.condensed
+  [data-slot='provider-settings']
+  [data-slot='card-content']
+  > *
+  + * {
+  margin-top: 0.375rem !important;
+}
+
+/* ── Labels ── */
+
+body.condensed [data-slot='provider-settings'] label {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.0625rem !important;
+}
+
+/* ── Inputs & textareas ── */
+
+body.condensed [data-slot='provider-settings'] [data-slot='input'] {
+  height: 1.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-settings'] [data-slot='textarea'] {
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  min-height: 3rem !important;
+}
+
+/* ── Switch rows (notification/scheduling/payment toggles) ── */
+
+body.condensed
+  [data-slot='provider-settings']
+  .flex.items-center.justify-between
+  p {
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+body.condensed
+  [data-slot='provider-settings']
+  .flex.items-center.justify-between
+  p.text-sm,
+body.condensed
+  [data-slot='provider-settings']
+  .flex.items-center.justify-between
+  p.text-xs {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+}
+
+/* ── Grid gaps inside general tab ── */
+
+body.condensed [data-slot='provider-settings'] .grid {
+  gap: 0.375rem !important;
+}
+
+/* ── Payment method cards ── */
+
+body.condensed [data-slot='provider-settings-payments'] .rounded-lg.bg-gray-50,
+body.condensed
+  [data-slot='provider-settings-payments']
+  .rounded-lg.dark\:bg-gray-800 {
+  padding: 0.375rem 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-settings-payments'] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+body.condensed
+  [data-slot='provider-settings-payments']
+  .flex.items-center.gap-3 {
+  gap: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-settings-payments'] span.font-medium {
+  font-size: 0.75rem !important;
+}
+
+/* ── Section dividers ── */
+
+body.condensed [data-slot='provider-settings'] .border-t {
+  padding-top: 0.5rem !important;
+}
+
+/* ── Section headings (h3) ── */
+
+body.condensed [data-slot='provider-settings'] h3 {
+  font-size: 0.8125rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+/* ── Helper text (xs) ── */
+
+body.condensed [data-slot='provider-settings'] p.text-xs {
+  font-size: 0.5625rem !important;
+  margin-top: 0.0625rem !important;
+}
