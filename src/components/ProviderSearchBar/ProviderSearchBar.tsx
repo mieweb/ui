@@ -415,6 +415,7 @@ export const ProviderSearchBar = React.forwardRef<
 
     return (
       <div
+        data-slot="provider-search"
         className={cn(
           'w-full',
           searchBarVariants({ size, variant }),
@@ -430,6 +431,7 @@ export const ProviderSearchBar = React.forwardRef<
           {...props}
         >
           <div
+            data-slot="provider-search-input"
             className={cn(
               'bg-background flex items-center gap-1 rounded-lg border',
               'focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2',
@@ -499,7 +501,7 @@ export const ProviderSearchBar = React.forwardRef<
 
         {/* Results Message */}
         {showResults && (results || resultsLoading) && (
-          <div className="mt-3">
+          <div data-slot="provider-search-results" className="mt-3">
             <SearchResultsMessage
               results={results}
               loading={resultsLoading}
@@ -535,9 +537,15 @@ export const HeroSearchBar: React.FC<HeroSearchBarProps> = ({
   ...props
 }) => {
   return (
-    <div className={cn('text-center', className)}>
+    <div
+      data-slot="provider-search-hero"
+      className={cn('text-center', className)}
+    >
       {title && (
-        <h1 className="text-foreground mb-2 text-3xl font-bold md:text-4xl lg:text-5xl">
+        <h1
+          data-slot="provider-search-hero-title"
+          className="text-foreground mb-2 text-3xl font-bold md:text-4xl lg:text-5xl"
+        >
           {title}
         </h1>
       )}

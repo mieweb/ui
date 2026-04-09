@@ -10418,3 +10418,65 @@ body.condensed
   font-size: 0.5625rem !important;
   margin-top: 0 !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ProviderSearchBar – condensed overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Search input row ── */
+
+body.condensed [data-slot='provider-search-input'] {
+  border-radius: 0.375rem !important;
+  gap: 0 !important;
+}
+
+body.condensed [data-slot='provider-search-input'] [data-slot='button'] {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+body.condensed [data-slot='provider-search-input'] [data-slot='button'] svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+}
+
+body.condensed [data-slot='provider-search-input'] [data-slot='input'] {
+  height: 2rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Error message ── */
+
+body.condensed [data-slot='provider-search'] p[role='alert'] {
+  font-size: 0.6875rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* ── Results message ── */
+
+body.condensed [data-slot='provider-search-results'] {
+  margin-top: 0.25rem !important;
+  font-size: 0.6875rem !important;
+}
+
+/* ── Hero variant ── */
+
+body.condensed [data-slot='provider-search-hero'] {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+body.condensed [data-slot='provider-search-hero-title'] {
+  font-size: 0.9375rem !important;
+  line-height: 1.25rem !important;
+  margin-bottom: 0.125rem !important;
+}
+
+body.condensed [data-slot='provider-search-hero'] > p {
+  font-size: 0.6875rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
+body.condensed [data-slot='provider-search-hero'] > div {
+  max-width: 20rem !important;
+}
