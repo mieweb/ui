@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '../../utils/cn';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 import { Input } from '../Input/Input';
@@ -156,7 +157,7 @@ export function ProviderSettings({
     return (
       <div
         data-slot="provider-settings"
-        className={`animate-pulse space-y-4 ${className}`}
+        className={cn('animate-pulse space-y-4', className)}
       >
         <div className="h-12 rounded-lg bg-gray-200 dark:bg-gray-700" />
         <div className="h-64 rounded-lg bg-gray-200 dark:bg-gray-700" />
@@ -165,7 +166,7 @@ export function ProviderSettings({
   }
 
   return (
-    <div data-slot="provider-settings" className={`space-y-6 ${className}`}>
+    <div data-slot="provider-settings" className={cn('space-y-6', className)}>
       {/* Header */}
       <div
         data-slot="provider-settings-header"
@@ -406,359 +407,359 @@ export function ProviderSettings({
         </TabsContent>
 
         {/* Notifications Tab */}
-        <TabsContent
-          value="notifications"
-          data-slot="provider-settings-notifications"
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                Notification Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
-                  Email Notifications
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-700 dark:text-gray-300">
-                        New Orders
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Receive email when a new order is placed
-                      </p>
+        <TabsContent value="notifications">
+          <div data-slot="provider-settings-notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Notification Preferences
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
+                    Email Notifications
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">
+                          New Orders
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Receive email when a new order is placed
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.notifications.emailNewOrders}
+                        onCheckedChange={(checked) =>
+                          updateNotifications('emailNewOrders', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.notifications.emailNewOrders}
-                      onCheckedChange={(checked) =>
-                        updateNotifications('emailNewOrders', checked)
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-700 dark:text-gray-300">
-                        Order Updates
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Receive email when an order status changes
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">
+                          Order Updates
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Receive email when an order status changes
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.notifications.emailOrderUpdates}
+                        onCheckedChange={(checked) =>
+                          updateNotifications('emailOrderUpdates', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.notifications.emailOrderUpdates}
-                      onCheckedChange={(checked) =>
-                        updateNotifications('emailOrderUpdates', checked)
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-700 dark:text-gray-300">
-                        Invoice Notifications
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Receive email for invoice activity
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">
+                          Invoice Notifications
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Receive email for invoice activity
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.notifications.emailInvoices}
+                        onCheckedChange={(checked) =>
+                          updateNotifications('emailInvoices', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.notifications.emailInvoices}
-                      onCheckedChange={(checked) =>
-                        updateNotifications('emailInvoices', checked)
-                      }
-                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
-                <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
-                  SMS Notifications
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-700 dark:text-gray-300">
-                        New Orders
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Receive SMS when a new order is placed
-                      </p>
+                <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
+                  <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
+                    SMS Notifications
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">
+                          New Orders
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Receive SMS when a new order is placed
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.notifications.smsNewOrders}
+                        onCheckedChange={(checked) =>
+                          updateNotifications('smsNewOrders', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.notifications.smsNewOrders}
-                      onCheckedChange={(checked) =>
-                        updateNotifications('smsNewOrders', checked)
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-700 dark:text-gray-300">
-                        Order Updates
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Receive SMS when an order status changes
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">
+                          Order Updates
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Receive SMS when an order status changes
+                        </p>
+                      </div>
+                      <Switch
+                        checked={settings.notifications.smsOrderUpdates}
+                        onCheckedChange={(checked) =>
+                          updateNotifications('smsOrderUpdates', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.notifications.smsOrderUpdates}
-                      onCheckedChange={(checked) =>
-                        updateNotifications('smsOrderUpdates', checked)
-                      }
-                    />
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Scheduling Tab */}
-        <TabsContent
-          value="scheduling"
-          data-slot="provider-settings-scheduling"
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Scheduling Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-700 dark:text-gray-300">
-                      Accepting New Patients
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Allow new patients to schedule appointments
-                    </p>
+        <TabsContent value="scheduling">
+          <div data-slot="provider-settings-scheduling">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Scheduling Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-700 dark:text-gray-300">
+                        Accepting New Patients
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Allow new patients to schedule appointments
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.scheduling.acceptingNewPatients}
+                      onCheckedChange={(checked) =>
+                        updateScheduling('acceptingNewPatients', checked)
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={settings.scheduling.acceptingNewPatients}
-                    onCheckedChange={(checked) =>
-                      updateScheduling('acceptingNewPatients', checked)
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-700 dark:text-gray-300">
-                      Require Appointment
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Patients must schedule before arriving
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-700 dark:text-gray-300">
+                        Require Appointment
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Patients must schedule before arriving
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.scheduling.requireAppointment}
+                      onCheckedChange={(checked) =>
+                        updateScheduling('requireAppointment', checked)
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={settings.scheduling.requireAppointment}
-                    onCheckedChange={(checked) =>
-                      updateScheduling('requireAppointment', checked)
-                    }
-                  />
                 </div>
-              </div>
 
-              <div className="grid gap-4 border-t border-gray-200 pt-6 md:grid-cols-2 dark:border-gray-700">
-                <div>
-                  <label
-                    htmlFor="appointment-buffer"
-                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Appointment Buffer (minutes)
-                  </label>
-                  <Input
-                    id="appointment-buffer"
-                    type="number"
-                    min={0}
-                    value={settings.scheduling.appointmentBuffer}
-                    onChange={(e) =>
-                      updateScheduling(
-                        'appointmentBuffer',
-                        parseInt(e.target.value) || 0
-                      )
-                    }
-                  />
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Minimum time between appointments
-                  </p>
+                <div className="grid gap-4 border-t border-gray-200 pt-6 md:grid-cols-2 dark:border-gray-700">
+                  <div>
+                    <label
+                      htmlFor="appointment-buffer"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Appointment Buffer (minutes)
+                    </label>
+                    <Input
+                      id="appointment-buffer"
+                      type="number"
+                      min={0}
+                      value={settings.scheduling.appointmentBuffer}
+                      onChange={(e) =>
+                        updateScheduling(
+                          'appointmentBuffer',
+                          parseInt(e.target.value) || 0
+                        )
+                      }
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Minimum time between appointments
+                    </p>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="max-daily-appointments"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Max Daily Appointments
+                    </label>
+                    <Input
+                      id="max-daily-appointments"
+                      type="number"
+                      min={1}
+                      value={settings.scheduling.maxDailyAppointments}
+                      onChange={(e) =>
+                        updateScheduling(
+                          'maxDailyAppointments',
+                          parseInt(e.target.value) || 1
+                        )
+                      }
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Maximum appointments allowed per day
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <label
-                    htmlFor="max-daily-appointments"
-                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Max Daily Appointments
-                  </label>
-                  <Input
-                    id="max-daily-appointments"
-                    type="number"
-                    min={1}
-                    value={settings.scheduling.maxDailyAppointments}
-                    onChange={(e) =>
-                      updateScheduling(
-                        'maxDailyAppointments',
-                        parseInt(e.target.value) || 1
-                      )
-                    }
-                  />
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Maximum appointments allowed per day
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Payments Tab */}
-        <TabsContent value="payments" data-slot="provider-settings-payments">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Payment Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
-                  Accepted Payment Methods
-                </h3>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                    <div className="flex items-center gap-3">
-                      <svg
-                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                        />
-                      </svg>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
-                        Credit Card
-                      </span>
+        <TabsContent value="payments">
+          <div data-slot="provider-settings-payments">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Payment Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="mb-4 font-medium text-gray-900 dark:text-white">
+                    Accepted Payment Methods
+                  </h3>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                          />
+                        </svg>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          Credit Card
+                        </span>
+                      </div>
+                      <Switch
+                        checked={settings.payments.acceptsCreditCard}
+                        onCheckedChange={(checked) =>
+                          updatePayments('acceptsCreditCard', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.payments.acceptsCreditCard}
-                      onCheckedChange={(checked) =>
-                        updatePayments('acceptsCreditCard', checked)
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                    <div className="flex items-center gap-3">
-                      <svg
-                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                      </svg>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
-                        ACH / Bank Transfer
-                      </span>
+                    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          />
+                        </svg>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          ACH / Bank Transfer
+                        </span>
+                      </div>
+                      <Switch
+                        checked={settings.payments.acceptsACH}
+                        onCheckedChange={(checked) =>
+                          updatePayments('acceptsACH', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.payments.acceptsACH}
-                      onCheckedChange={(checked) =>
-                        updatePayments('acceptsACH', checked)
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                    <div className="flex items-center gap-3">
-                      <svg
-                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
-                        Cash
-                      </span>
+                    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          Cash
+                        </span>
+                      </div>
+                      <Switch
+                        checked={settings.payments.acceptsCash}
+                        onCheckedChange={(checked) =>
+                          updatePayments('acceptsCash', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.payments.acceptsCash}
-                      onCheckedChange={(checked) =>
-                        updatePayments('acceptsCash', checked)
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                    <div className="flex items-center gap-3">
-                      <svg
-                        className="h-8 w-8 text-gray-600 dark:text-gray-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
-                        Check
-                      </span>
+                    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          Check
+                        </span>
+                      </div>
+                      <Switch
+                        checked={settings.payments.acceptsCheck}
+                        onCheckedChange={(checked) =>
+                          updatePayments('acceptsCheck', checked)
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={settings.payments.acceptsCheck}
-                      onCheckedChange={(checked) =>
-                        updatePayments('acceptsCheck', checked)
-                      }
-                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
-                <div className="max-w-xs">
-                  <label
-                    htmlFor="payment-terms"
-                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Payment Terms (days)
-                  </label>
-                  <Input
-                    id="payment-terms"
-                    type="number"
-                    min={0}
-                    value={settings.payments.paymentTerms}
-                    onChange={(e) =>
-                      updatePayments(
-                        'paymentTerms',
-                        parseInt(e.target.value) || 0
-                      )
-                    }
-                  />
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Number of days until invoice is due (e.g., Net 30)
-                  </p>
+                <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
+                  <div className="max-w-xs">
+                    <label
+                      htmlFor="payment-terms"
+                      className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      Payment Terms (days)
+                    </label>
+                    <Input
+                      id="payment-terms"
+                      type="number"
+                      min={0}
+                      value={settings.payments.paymentTerms}
+                      onChange={(e) =>
+                        updatePayments(
+                          'paymentTerms',
+                          parseInt(e.target.value) || 0
+                        )
+                      }
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Number of days until invoice is due (e.g., Net 30)
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

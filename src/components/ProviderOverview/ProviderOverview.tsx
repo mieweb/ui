@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '../../utils/cn';
 import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
 import { Badge } from '../Badge/Badge';
 
@@ -173,7 +174,7 @@ export function ProviderOverview({
 
   if (isLoading) {
     return (
-      <div data-slot="provider-overview" className={`space-y-6 ${className}`}>
+      <div data-slot="provider-overview" className={cn('space-y-6', className)}>
         {/* Header skeleton */}
         <div
           data-slot="provider-overview-header"
@@ -199,7 +200,7 @@ export function ProviderOverview({
   }
 
   return (
-    <div data-slot="provider-overview" className={`space-y-6 ${className}`}>
+    <div data-slot="provider-overview" className={cn('space-y-6', className)}>
       {/* Header */}
       <div
         data-slot="provider-overview-header"
