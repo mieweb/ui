@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
@@ -159,7 +160,10 @@ export function ServicePricingManager({
 
   if (isLoading) {
     return (
-      <div className={`animate-pulse space-y-4 ${className}`}>
+      <div
+        data-slot="service-pricing-manager"
+        className={cn('animate-pulse space-y-4', className)}
+      >
         <div className="h-12 w-1/2 rounded-lg bg-gray-200 dark:bg-gray-700" />
         <div className="h-10 rounded-lg bg-gray-200 dark:bg-gray-700" />
         {[1, 2, 3, 4, 5].map((i) => (
@@ -173,9 +177,15 @@ export function ServicePricingManager({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div
+      data-slot="service-pricing-manager"
+      className={cn('space-y-6', className)}
+    >
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div
+        data-slot="service-pricing-header"
+        className="flex flex-col justify-between gap-4 md:flex-row md:items-center"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Service Pricing
@@ -192,148 +202,155 @@ export function ServicePricingManager({
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col gap-4 md:flex-row">
-            <div className="flex-1">
-              <Input
-                placeholder="Search services..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            {uniqueCategories.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={selectedCategory === null ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(null)}
-                >
-                  All
-                </Button>
-                {uniqueCategories.map((category) => (
-                  <Button
-                    key={category}
-                    variant={
-                      selectedCategory === category ? 'primary' : 'ghost'
-                    }
-                    size="sm"
-                    onClick={() => setSelectedCategory(category)}
-                  >
-                    {category}
-                  </Button>
-                ))}
+      <div data-slot="service-pricing-filters">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col gap-4 md:flex-row">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search services..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              {uniqueCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={selectedCategory === null ? 'primary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSelectedCategory(null)}
+                  >
+                    All
+                  </Button>
+                  {uniqueCategories.map((category) => (
+                    <Button
+                      key={category}
+                      variant={
+                        selectedCategory === category ? 'primary' : 'ghost'
+                      }
+                      size="sm"
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      {category}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Services List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">
-            Services ({filteredServices.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredServices.length === 0 ? (
-            <p className="py-8 text-center text-gray-500 dark:text-gray-400">
-              No services found
-            </p>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {/* Desktop header */}
-              <div className="hidden gap-4 py-3 text-xs font-medium text-gray-500 uppercase md:grid md:grid-cols-6 dark:text-gray-400">
-                <div className="col-span-2">Service</div>
-                <div className="text-right">Base Price</div>
-                <div className="text-right">Employer Price</div>
-                <div className="text-center">Status</div>
-                <div className="text-right">Actions</div>
-              </div>
+      <div data-slot="service-pricing-table">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              Services ({filteredServices.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {filteredServices.length === 0 ? (
+              <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+                No services found
+              </p>
+            ) : (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {/* Desktop header */}
+                <div className="hidden gap-4 py-3 text-xs font-medium text-gray-500 uppercase md:grid md:grid-cols-6 dark:text-gray-400">
+                  <div className="col-span-2">Service</div>
+                  <div className="text-right">Base Price</div>
+                  <div className="text-right">Employer Price</div>
+                  <div className="text-center">Status</div>
+                  <div className="text-right">Actions</div>
+                </div>
 
-              {filteredServices.map((service) => (
-                <div
-                  key={service.id}
-                  className="items-center gap-4 py-4 md:grid md:grid-cols-6"
-                >
-                  {/* Service info */}
-                  <div className="col-span-2 mb-2 md:mb-0">
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {service.serviceName}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                      {service.serviceCode && (
-                        <span>{service.serviceCode}</span>
+                {filteredServices.map((service) => (
+                  <div
+                    key={service.id}
+                    data-slot="service-pricing-row"
+                    className="items-center gap-4 py-4 md:grid md:grid-cols-6"
+                  >
+                    {/* Service info */}
+                    <div className="col-span-2 mb-2 md:mb-0">
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {service.serviceName}
+                      </p>
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        {service.serviceCode && (
+                          <span>{service.serviceCode}</span>
+                        )}
+                        {service.category && (
+                          <Badge variant="secondary">{service.category}</Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Base price */}
+                    <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
+                      <span className="text-sm text-gray-500 md:hidden">
+                        Base:
+                      </span>
+                      <p className="text-right font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(service.basePrice)}
+                      </p>
+                    </div>
+
+                    {/* Employer price */}
+                    <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
+                      <span className="text-sm text-gray-500 md:hidden">
+                        Employer:
+                      </span>
+                      <p className="text-right text-gray-600 dark:text-gray-300">
+                        {service.employerPrice
+                          ? formatCurrency(service.employerPrice)
+                          : '—'}
+                      </p>
+                    </div>
+
+                    {/* Status */}
+                    <div className="mb-2 flex items-center md:mb-0 md:justify-center">
+                      <span className="mr-2 text-sm text-gray-500 md:hidden">
+                        Status:
+                      </span>
+                      <Badge
+                        variant={service.isActive ? 'success' : 'secondary'}
+                      >
+                        {service.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-2">
+                      {onToggleStatus && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            onToggleStatus(service.id, !service.isActive)
+                          }
+                        >
+                          {service.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
                       )}
-                      {service.category && (
-                        <Badge variant="secondary">{service.category}</Badge>
+                      {onUpdatePrice && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          leftIcon={<PencilIcon className="h-3.5 w-3.5" />}
+                          onClick={() => handleEditClick(service)}
+                        >
+                          Edit
+                        </Button>
                       )}
                     </div>
                   </div>
-
-                  {/* Base price */}
-                  <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
-                    <span className="text-sm text-gray-500 md:hidden">
-                      Base:
-                    </span>
-                    <p className="text-right font-semibold text-gray-900 dark:text-white">
-                      {formatCurrency(service.basePrice)}
-                    </p>
-                  </div>
-
-                  {/* Employer price */}
-                  <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
-                    <span className="text-sm text-gray-500 md:hidden">
-                      Employer:
-                    </span>
-                    <p className="text-right text-gray-600 dark:text-gray-300">
-                      {service.employerPrice
-                        ? formatCurrency(service.employerPrice)
-                        : '—'}
-                    </p>
-                  </div>
-
-                  {/* Status */}
-                  <div className="mb-2 flex items-center md:mb-0 md:justify-center">
-                    <span className="mr-2 text-sm text-gray-500 md:hidden">
-                      Status:
-                    </span>
-                    <Badge variant={service.isActive ? 'success' : 'secondary'}>
-                      {service.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex justify-end gap-2">
-                    {onToggleStatus && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          onToggleStatus(service.id, !service.isActive)
-                        }
-                      >
-                        {service.isActive ? 'Deactivate' : 'Activate'}
-                      </Button>
-                    )}
-                    {onUpdatePrice && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        leftIcon={<PencilIcon className="h-3.5 w-3.5" />}
-                        onClick={() => handleEditClick(service)}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Edit Price Modal */}
       <Modal
