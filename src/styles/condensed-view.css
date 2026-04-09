@@ -11188,3 +11188,78 @@ body.condensed [data-slot='report-dashboard-employers'] .h-2 {
   height: 0.25rem !important;
   margin-top: 0.125rem !important;
 }
+
+/* ==========================================================================
+   ScheduleCalendar
+   ========================================================================== */
+
+/* Root — tighter border radius */
+body.condensed [data-slot='schedule-calendar'] {
+  border-radius: 0.375rem !important;
+}
+
+/* Header — compact padding, smaller title */
+body.condensed [data-slot='schedule-calendar-header'] {
+  padding: 0.5rem 0.75rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-header'] h2 {
+  font-size: 0.875rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-header'] [data-slot='button'] {
+  height: 1.75rem !important;
+  padding: 0 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* Day headers (week view) — smaller text, tighter padding */
+body.condensed [data-slot='schedule-calendar-day-headers'] > div {
+  padding: 0.25rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-day-headers'] p.text-xs {
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-day-headers'] p.text-lg {
+  font-size: 0.875rem !important;
+}
+
+/* Time labels — narrower column, smaller text */
+body.condensed [data-slot='schedule-calendar-time-labels'] {
+  width: 2.75rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-time-labels'] > div {
+  height: 2.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+/* Time grid — shorter hour rows */
+body.condensed [data-slot='schedule-calendar-grid'] .h-16 {
+  height: 2.5rem !important;
+}
+
+/* Appointments — smaller text, tighter padding */
+body.condensed [data-slot='schedule-calendar-appointment'] {
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.625rem !important;
+  border-left-width: 3px !important;
+}
+
+body.condensed [data-slot='schedule-calendar-appointment'] p {
+  line-height: 1.2 !important;
+}
+
+/* Legend — compact padding, smaller badges */
+body.condensed [data-slot='schedule-calendar-legend'] {
+  padding: 0.375rem 0.75rem !important;
+  gap: 0.5rem !important;
+  font-size: 0.625rem !important;
+}
+
+body.condensed [data-slot='schedule-calendar-legend'] span.h-3 {
+  height: 0.5rem !important;
+  width: 0.5rem !important;
+}
