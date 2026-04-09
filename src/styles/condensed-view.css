@@ -728,12 +728,12 @@ body.condensed [data-slot='service-grid'] {
 }
 
 /* Service card inner padding */
-body.condensed [data-slot='service-card'] > div {
+body.condensed [data-slot='service-card'] > [data-slot='card'] > div {
   padding: 0.5rem 0.625rem;
 }
 
 /* Service card border-radius & remove Card's own padding (inner div handles it) */
-body.condensed [data-slot='service-card'] {
+body.condensed [data-slot='service-card'] > [data-slot='card'] {
   border-radius: 0.375rem;
   padding: 0 !important;
 }
@@ -812,23 +812,28 @@ body.condensed [data-slot='service-card'] .border-t .text-sm {
 }
 
 /* Add service card */
-body.condensed [data-slot='add-service-card'] {
+body.condensed [data-slot='add-service-card'] > [data-slot='card'] {
   border-radius: 0.375rem;
   padding: 0 !important;
 }
 
-body.condensed [data-slot='add-service-card'] > div {
+body.condensed [data-slot='add-service-card'] > [data-slot='card'] > div {
   min-height: 80px;
   padding: 0.5rem;
 }
 
-body.condensed [data-slot='add-service-card'] > div > div {
+body.condensed [data-slot='add-service-card'] > [data-slot='card'] > div > div {
   height: 2rem;
   width: 2rem;
   margin-bottom: 0.25rem;
 }
 
-body.condensed [data-slot='add-service-card'] > div > div svg {
+body.condensed
+  [data-slot='add-service-card']
+  > [data-slot='card']
+  > div
+  > div
+  svg {
   height: 1rem;
   width: 1rem;
 }
