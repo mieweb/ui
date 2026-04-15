@@ -17,16 +17,10 @@ on:
         required: true
         type: choice
         options:
-          - 'stable'
           - 'alpha'
           - 'beta'
           - 'rc'
-        default: 'stable'
-      create_tag:
-        description: 'Create a release tag'
-        required: true
-        type: boolean
-        default: true
+        default: 'beta'
   push:
     tags:
       - 'v*'  # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
@@ -45,10 +39,8 @@ jobs:
   release:
     name: Build and Publish
     runs-on: ubuntu-latest
-    # Skip: (1) manual dispatch not on main, (2) tag pushes by github-actions[bot] (avoids double-run from manual dispatch)
-    if: |
-      (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main') &&
-      !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.actor == 'github-actions[bot]')
+    # Skip manual dispatch if not on main branch
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -66,9 +58,6 @@ jobs:
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Upgrade npm
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -91,7 +80,7 @@ jobs:
         id: release-info
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            # Manual dispatch — bump version based on latest git tag (not package.json)
+            # Manual dispatch — prerelease only, no tags
             LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo 'v0.0.0')
             CURRENT_VERSION=$(echo "${LATEST_TAG#v}" | sed 's/-.*//')
             IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
@@ -106,17 +95,10 @@ jobs:
             fi
             
             PRERELEASE="${{ github.event.inputs.prerelease }}"
-            if [[ "$PRERELEASE" != "stable" ]]; then
-              VERSION="${VERSION}-${PRERELEASE}.1"
-              NPM_TAG=next
-              IS_PRERELEASE=true
-            else
-              NPM_TAG=latest
-              IS_PRERELEASE=false
-            fi
-            
-            CREATE_TAG="${{ github.event.inputs.create_tag }}"
-            IS_TAG=$CREATE_TAG
+            VERSION="${VERSION}-${PRERELEASE}.1"
+            NPM_TAG=next
+            IS_PRERELEASE=true
+            IS_TAG=false
           elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             # Tag-based release (stable or tagged prerelease)
             VERSION=${GITHUB_REF#refs/tags/v}
@@ -142,8 +124,7 @@ jobs:
           echo "npm_tag=$NPM_TAG" >> $GITHUB_OUTPUT
           echo "is_tag=$IS_TAG" >> $GITHUB_OUTPUT
           echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
-          echo "create_tag=$CREATE_TAG" >> $GITHUB_OUTPUT
-          echo "IS_TAG=$IS_TAG  version=$VERSION  npm_tag=$NPM_TAG  create_tag=$CREATE_TAG"
+          echo "IS_TAG=$IS_TAG  version=$VERSION  npm_tag=$NPM_TAG"
 
       - name: Set package version
         run: |
@@ -152,19 +133,6 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --access public --tag ${{ steps.release-info.outputs.npm_tag }}
-
-      - name: Create and push tag
-        if: steps.release-info.outputs.create_tag == 'true'
-        run: |
-          TAG="v${{ steps.release-info.outputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
-            echo "Error: tag ${TAG} already exists on origin. This usually means a previous release attempt partially succeeded. Aborting to keep reruns predictable."
-            exit 1
-          fi
-          git tag -a "${TAG}" -m "Release ${TAG}"
-          git push origin "${TAG}"
 
       - name: Create GitHub Release
         if: steps.release-info.outputs.is_tag == 'true'
