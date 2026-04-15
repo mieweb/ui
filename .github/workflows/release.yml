@@ -146,17 +146,21 @@ jobs:
           VERSION="${{ steps.release-info.outputs.version }}"
           node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('./package.json'));p.version='$VERSION';fs.writeFileSync('./package.json',JSON.stringify(p,null,2)+'\n')"
 
+      - name: Publish to npm
+        run: npm publish --access public --tag ${{ steps.release-info.outputs.npm_tag }}
+
       - name: Create and push tag
         if: steps.release-info.outputs.create_tag == 'true'
         run: |
-          VERSION="${{ steps.release-info.outputs.version }}"
+          TAG="v${{ steps.release-info.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${VERSION}" -m "Release v${VERSION}"
-          git push origin "v${VERSION}"
-
-      - name: Publish to npm
-        run: npm publish --access public --tag ${{ steps.release-info.outputs.npm_tag }}
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Error: tag ${TAG} already exists on origin. This usually means a previous release attempt partially succeeded. Aborting to keep reruns predictable."
+            exit 1
+          fi
+          git tag -a "${TAG}" -m "Release ${TAG}"
+          git push origin "${TAG}"
 
       - name: Create GitHub Release
         if: steps.release-info.outputs.is_tag == 'true'
