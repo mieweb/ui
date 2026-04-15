@@ -102,7 +102,6 @@ jobs:
             # Tag-based release (stable or tagged prerelease)
             VERSION=${GITHUB_REF#refs/tags/v}
             IS_TAG=true
-            CREATE_TAG=false
             if [[ "$VERSION" == *"-"* ]]; then
               NPM_TAG=next
               IS_PRERELEASE=true
@@ -115,7 +114,6 @@ jobs:
             BASE_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
             VERSION="${BASE_VERSION}-dev.${GITHUB_RUN_NUMBER}"
             IS_TAG=false
-            CREATE_TAG=false
             NPM_TAG=next
             IS_PRERELEASE=true
           fi
