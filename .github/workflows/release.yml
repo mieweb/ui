@@ -81,8 +81,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             # Manual dispatch — prerelease only, no tags
-            LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo 'v0.0.0')
-            CURRENT_VERSION=$(echo "${LATEST_TAG#v}" | sed 's/-.*//')
+            CURRENT_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
             IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
             
             BUMP_INPUT="${{ github.event.inputs.bump }}"
