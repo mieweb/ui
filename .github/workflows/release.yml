@@ -45,7 +45,10 @@ jobs:
   release:
     name: Build and Publish
     runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    # Skip: (1) manual dispatch not on main, (2) tag pushes by github-actions[bot] (avoids double-run from manual dispatch)
+    if: |
+      (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main') &&
+      !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.actor == 'github-actions[bot]')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -88,8 +91,9 @@ jobs:
         id: release-info
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            # Manual dispatch — bump version based on input
-            CURRENT_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
+            # Manual dispatch — bump version based on latest git tag (not package.json)
+            LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo 'v0.0.0')
+            CURRENT_VERSION=$(echo "${LATEST_TAG#v}" | sed 's/-.*//')
             IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
             
             BUMP_INPUT="${{ github.event.inputs.bump }}"
