@@ -54,10 +54,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.14.0'
+          node-version: '24'
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Show tool versions
+        run: |
+          node -v
+          npm -v
+          pnpm -v
+
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
+      - name: Show npm version after upgrade
+        run: npm -v
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
