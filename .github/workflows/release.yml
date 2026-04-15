@@ -1,6 +1,26 @@
 name: Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump level'
+        required: true
+        type: choice
+        options:
+          - 'patch (0.0.x)'
+          - 'minor (0.x.0)'
+          - 'major (x.0.0)'
+        default: 'patch (0.0.x)'
+      prerelease:
+        description: 'Prerelease type'
+        required: true
+        type: choice
+        options:
+          - 'alpha'
+          - 'beta'
+          - 'rc'
+        default: 'beta'
   push:
     tags:
       - 'v*'  # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
@@ -19,6 +39,8 @@ jobs:
   release:
     name: Build and Publish
     runs-on: ubuntu-latest
+    # Skip manual dispatch if not on main branch
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,9 +58,6 @@ jobs:
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Upgrade npm
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -60,7 +79,26 @@ jobs:
       - name: Determine release info
         id: release-info
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Manual dispatch — prerelease only, no tags
+            CURRENT_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+            
+            BUMP_INPUT="${{ github.event.inputs.bump }}"
+            if [[ "$BUMP_INPUT" == "major"* ]]; then
+              VERSION="$((MAJOR + 1)).0.0"
+            elif [[ "$BUMP_INPUT" == "minor"* ]]; then
+              VERSION="${MAJOR}.$((MINOR + 1)).0"
+            else
+              VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+            fi
+            
+            PRERELEASE="${{ github.event.inputs.prerelease }}"
+            VERSION="${VERSION}-${PRERELEASE}.1"
+            NPM_TAG=next
+            IS_PRERELEASE=true
+            IS_TAG=false
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             # Tag-based release (stable or tagged prerelease)
             VERSION=${GITHUB_REF#refs/tags/v}
             IS_TAG=true
@@ -97,6 +135,7 @@ jobs:
         if: steps.release-info.outputs.is_tag == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.release-info.outputs.version }}
           generate_release_notes: true
           prerelease: ${{ steps.release-info.outputs.is_prerelease == 'true' }}
         env:
