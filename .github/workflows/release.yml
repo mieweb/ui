@@ -1,6 +1,32 @@
 name: Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump level'
+        required: true
+        type: choice
+        options:
+          - 'patch (0.0.x)'
+          - 'minor (0.x.0)'
+          - 'major (x.0.0)'
+        default: 'patch (0.0.x)'
+      prerelease:
+        description: 'Prerelease type'
+        required: true
+        type: choice
+        options:
+          - 'stable'
+          - 'alpha'
+          - 'beta'
+          - 'rc'
+        default: 'stable'
+      create_tag:
+        description: 'Create a release tag'
+        required: true
+        type: boolean
+        default: true
   push:
     tags:
       - 'v*'  # Stable and prerelease tags, e.g. v1.0.0 or v1.0.0-beta.1
@@ -60,10 +86,37 @@ jobs:
       - name: Determine release info
         id: release-info
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Manual dispatch — bump version based on input
+            CURRENT_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+            
+            BUMP_INPUT="${{ github.event.inputs.bump }}"
+            if [[ "$BUMP_INPUT" == "major"* ]]; then
+              VERSION="$((MAJOR + 1)).0.0"
+            elif [[ "$BUMP_INPUT" == "minor"* ]]; then
+              VERSION="${MAJOR}.$((MINOR + 1)).0"
+            else
+              VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+            fi
+            
+            PRERELEASE="${{ github.event.inputs.prerelease }}"
+            if [[ "$PRERELEASE" != "stable" ]]; then
+              VERSION="${VERSION}-${PRERELEASE}.1"
+              NPM_TAG=next
+              IS_PRERELEASE=true
+            else
+              NPM_TAG=latest
+              IS_PRERELEASE=false
+            fi
+            
+            CREATE_TAG="${{ github.event.inputs.create_tag }}"
+            IS_TAG=$CREATE_TAG
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             # Tag-based release (stable or tagged prerelease)
             VERSION=${GITHUB_REF#refs/tags/v}
             IS_TAG=true
+            CREATE_TAG=false
             if [[ "$VERSION" == *"-"* ]]; then
               NPM_TAG=next
               IS_PRERELEASE=true
@@ -76,6 +129,7 @@ jobs:
             BASE_VERSION=$(node -p "require('./package.json').version" | sed 's/-.*//')
             VERSION="${BASE_VERSION}-dev.${GITHUB_RUN_NUMBER}"
             IS_TAG=false
+            CREATE_TAG=false
             NPM_TAG=next
             IS_PRERELEASE=true
           fi
@@ -83,12 +137,22 @@ jobs:
           echo "npm_tag=$NPM_TAG" >> $GITHUB_OUTPUT
           echo "is_tag=$IS_TAG" >> $GITHUB_OUTPUT
           echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
-          echo "IS_TAG=$IS_TAG  version=$VERSION  npm_tag=$NPM_TAG"
+          echo "create_tag=$CREATE_TAG" >> $GITHUB_OUTPUT
+          echo "IS_TAG=$IS_TAG  version=$VERSION  npm_tag=$NPM_TAG  create_tag=$CREATE_TAG"
 
       - name: Set package version
         run: |
           VERSION="${{ steps.release-info.outputs.version }}"
           node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('./package.json'));p.version='$VERSION';fs.writeFileSync('./package.json',JSON.stringify(p,null,2)+'\n')"
+
+      - name: Create and push tag
+        if: steps.release-info.outputs.create_tag == 'true'
+        run: |
+          VERSION="${{ steps.release-info.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "v${VERSION}"
 
       - name: Publish to npm
         run: npm publish --access public --tag ${{ steps.release-info.outputs.npm_tag }}
@@ -97,6 +161,7 @@ jobs:
         if: steps.release-info.outputs.is_tag == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.release-info.outputs.version }}
           generate_release_notes: true
           prerelease: ${{ steps.release-info.outputs.is_prerelease == 'true' }}
         env:
