@@ -3,14 +3,14 @@
     { "field": "id", "type": "string", "displayText": "Order ID" },
     { "field": "customer", "type": "string", "displayText": "Customer" },
     { "field": "status", "type": "string", "displayText": "Status" },
-    { "field": "amount", "type": "string", "displayText": "Amount" },
+    { "field": "amount", "type": "number", "displayText": "Amount" },
     { "field": "date", "type": "string", "displayText": "Date" }
   ],
   "data": [
-    { "id": "ORD-001", "customer": "John Doe", "status": "completed", "amount": "$250.00", "date": "2024-01-15" },
-    { "id": "ORD-002", "customer": "Jane Smith", "status": "pending", "amount": "$150.00", "date": "2024-01-14" },
-    { "id": "ORD-003", "customer": "Bob Johnson", "status": "cancelled", "amount": "$75.00", "date": "2024-01-13" },
-    { "id": "ORD-004", "customer": "Alice Brown", "status": "completed", "amount": "$320.00", "date": "2024-01-12" },
-    { "id": "ORD-005", "customer": "Charlie Wilson", "status": "processing", "amount": "$180.00", "date": "2024-01-11" }
+    { "id": "ORD-001", "customer": "John Doe", "status": "completed", "amount": 250.00, "date": "2024-01-15" },
+    { "id": "ORD-002", "customer": "Jane Smith", "status": "pending", "amount": 150.00, "date": "2024-01-14" },
+    { "id": "ORD-003", "customer": "Bob Johnson", "status": "cancelled", "amount": 75.00, "date": "2024-01-13" },
+    { "id": "ORD-004", "customer": "Alice Brown", "status": "completed", "amount": 320.00, "date": "2024-01-12" },
+    { "id": "ORD-005", "customer": "Charlie Wilson", "status": "processing", "amount": 180.00, "date": "2024-01-11" }
   ]
 }
