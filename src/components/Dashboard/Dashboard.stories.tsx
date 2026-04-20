@@ -55,6 +55,10 @@ import { Tooltip } from '../Tooltip';
 import { QuickAction, QuickActionGroup } from '../QuickAction';
 import { PhoneInput } from '../PhoneInput';
 import {
+  DataVisNitroGrid,
+  DataVisNitroSource,
+} from '../DataVisNITRO/DataVisNITRO';
+import {
   Sidebar as SidebarComponent,
   SidebarHeader,
   SidebarContent,
@@ -915,40 +919,14 @@ function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockOrders.slice(0, 4).map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.customer}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          order.status === 'completed'
-                            ? 'success'
-                            : order.status === 'pending'
-                              ? 'warning'
-                              : order.status === 'processing'
-                                ? 'secondary'
-                                : 'danger'
-                        }
-                      >
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{order.amount}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="[&_.wcdv-grid]:border-border [&_.wcdv-grid]:bg-card [&_.wcdv-grid]:shadow-none [&_.wcdv-title-bar]:bg-muted [&_.wcdv-title-bar]:border-border [&_.wcdv-title]:text-foreground [&_.wcdv-status-info]:text-muted-foreground [&_.wcdv-th]:bg-muted [&_.wcdv-th]:border-border [&_.wcdv-th]:text-muted-foreground [&_.wcdv-tr]:border-border [&_.wcdv-td]:border-border [&_.wcdv-table-footer]:bg-muted [&_.wcdv-table-footer]:border-border [&_.wcdv-table-footer]:text-muted-foreground [&_.wcdv-agg-footer]:bg-muted [&_.wcdv-agg-footer]:border-border [&_table]:text-foreground">
+              <DataVisNitroSource type="http" url="/sample-orders.json">
+                <DataVisNitroGrid
+                  columns={['id', 'customer', 'status', 'amount', 'date']}
+                  height="280px"
+                />
+              </DataVisNitroSource>
+            </div>
           </CardContent>
         </Card>
 
