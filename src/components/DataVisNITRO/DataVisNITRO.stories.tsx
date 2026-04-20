@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DataVisNitroGrid, DataVisNitroSource } from './DataVisNITRO';
 
 const meta: Meta<typeof DataVisNitroGrid> = {
-  title: 'Data Display/DataVis NITRO',
+  title: 'Components/Text & Data Display/DataVis NITRO',
   component: DataVisNitroGrid,
   parameters: {
     layout: 'fullscreen',
