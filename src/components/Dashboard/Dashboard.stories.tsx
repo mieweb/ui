@@ -936,7 +936,6 @@ function DashboardPage() {
               <DataVisNitroSource type="http" url="/sample-orders.json">
                 <DataVisNitroGrid
                   columns={['id', 'customer', 'status', 'amount', 'date']}
-                  height="280px"
                 />
               </DataVisNitroSource>
             </div>
