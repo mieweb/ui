@@ -3,6 +3,11 @@
 @import './datavis-dark.css';
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
+/* Hide DataVis slider from layout when closed to prevent horizontal overflow */
+.wcdv-slider[aria-hidden='true'] {
+  display: none;
+}
+
 /**
  * BlueHive Brand Theme
  * Primary color: #27aae1 (BlueHive Blue)

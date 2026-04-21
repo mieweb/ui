@@ -118,11 +118,6 @@
 }
 
 /* ── Slider (detail panel) ───────────────────────────────────────────── */
-/* Hide slider from layout when closed to prevent horizontal overflow */
-.wcdv-slider[aria-hidden='true'] {
-  display: none;
-}
-
 .dark .wcdv-slider,
 [data-theme='dark'] .wcdv-slider {
   background-color: var(--color-card) !important;
