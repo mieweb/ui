@@ -10,6 +10,10 @@
  *   neutral-900: #171717  →  --color-background
  *   neutral-800: #262626  →  --color-card
  *   neutral-700: #404040  →  --color-border / --color-muted
+ *
+ * NOTE: These overrides are included via base.css (the full styles.css
+ * entrypoint). Consumers using only init.css (tokens-only) will not
+ * get DataVis dark-mode support.
  */
 
 /* ── Grid container ──────────────────────────────────────────────────── */
