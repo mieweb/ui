@@ -13,12 +13,6 @@
  */
 
 /* ── Grid container ──────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light):not([data-theme="light"]) {
-    /* only applies if the user hasn't forced light mode */
-  }
-}
-
 .dark .wcdv-grid,
 [data-theme="dark"] .wcdv-grid {
   background-color: var(--color-background) !important;
@@ -64,6 +58,7 @@
 
 .dark .wcdv-tr:nth-child(even),
 [data-theme="dark"] .wcdv-tr:nth-child(even) {
+  background-color: var(--color-card) !important;
   background-color: color-mix(in srgb, var(--color-card) 50%, transparent) !important;
 }
 
@@ -154,6 +149,7 @@
 /* ── Loading overlay ─────────────────────────────────────────────────── */
 .dark .wcdv-loading-overlay,
 [data-theme="dark"] .wcdv-loading-overlay {
+  background-color: var(--color-background) !important;
   background-color: color-mix(in srgb, var(--color-background) 70%, transparent) !important;
 }
 
@@ -175,6 +171,8 @@
 /* ── Progress bar ────────────────────────────────────────────────────── */
 .dark .wcdv-table-progress,
 [data-theme="dark"] .wcdv-table-progress {
+  background-color: var(--color-background) !important;
   background-color: color-mix(in srgb, var(--color-primary) 10%, var(--color-background)) !important;
+  border-color: var(--color-border) !important;
   border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border)) !important;
 }
