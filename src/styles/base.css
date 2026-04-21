@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './condensed-view.css';
+@import './datavis-dark.css';
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
 /**
