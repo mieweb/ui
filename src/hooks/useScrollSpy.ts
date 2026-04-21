@@ -65,63 +65,85 @@ export function useScrollSpy({
 
     const container = rootEl ?? document;
 
-    // Resolve target elements
-    let elements: Element[] = [];
-    if (ids && ids.length > 0) {
-      elements = ids
-        .map((id) => document.getElementById(id))
-        .filter((el): el is HTMLElement => el !== null);
-    } else if (selectors) {
-      elements = Array.from(container.querySelectorAll(selectors));
+    // Resolve target elements from the DOM
+    function resolveElements(): Element[] {
+      let els: Element[] = [];
+      if (ids && ids.length > 0) {
+        els = ids
+          .map((id) => document.getElementById(id))
+          .filter((el): el is HTMLElement => el !== null);
+      } else if (selectors) {
+        els = Array.from(container.querySelectorAll(selectors));
+      }
+      return els.filter((el) => el.id);
     }
 
-    // Filter to only elements that have an ID
-    elements = elements.filter((el) => el.id);
+    let intersectionObserver: IntersectionObserver | null = null;
+    let mutationObserver: MutationObserver | null = null;
 
-    if (elements.length === 0) return;
+    function startObserving(): boolean {
+      const elements = resolveElements();
+      if (elements.length === 0) return false;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            visibleEntries.current.set(entry.target.id, entry);
-          } else {
-            visibleEntries.current.delete(entry.target.id);
-          }
-        }
-
-        // Pick the topmost visible heading (by DOM order)
-        if (visibleEntries.current.size > 0) {
-          let topmost: string | null = null;
-          let topmostTop = Infinity;
-
-          for (const [id, entry] of visibleEntries.current) {
-            const top = entry.boundingClientRect.top;
-            if (top < topmostTop) {
-              topmostTop = top;
-              topmost = id;
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              visibleEntries.current.set(entry.target.id, entry);
+            } else {
+              visibleEntries.current.delete(entry.target.id);
             }
           }
 
-          if (topmost) {
-            setActiveId(topmost);
-          }
-        }
-      },
-      {
-        root: rootEl,
-        rootMargin,
-        threshold,
-      }
-    );
+          // Pick the topmost visible heading (by DOM order)
+          if (visibleEntries.current.size > 0) {
+            let topmost: string | null = null;
+            let topmostTop = Infinity;
 
-    for (const el of elements) {
-      observer.observe(el);
+            for (const [id, entry] of visibleEntries.current) {
+              const top = entry.boundingClientRect.top;
+              if (top < topmostTop) {
+                topmostTop = top;
+                topmost = id;
+              }
+            }
+
+            if (topmost) {
+              setActiveId(topmost);
+            }
+          }
+        },
+        {
+          root: rootEl,
+          rootMargin,
+          threshold,
+        }
+      );
+
+      for (const el of elements) {
+        intersectionObserver.observe(el);
+      }
+
+      // Elements found — stop watching for new DOM nodes
+      mutationObserver?.disconnect();
+      mutationObserver = null;
+      return true;
+    }
+
+    // If target elements don't exist yet (e.g. headings mount after ToC),
+    // watch for DOM changes and retry until they appear.
+    if (!startObserving()) {
+      const watchRoot = rootEl ?? document.body;
+      mutationObserver = new MutationObserver(() => {
+        startObserving();
+      });
+      mutationObserver.observe(watchRoot, { childList: true, subtree: true });
     }
 
     const entries = visibleEntries.current;
     return () => {
-      observer.disconnect();
+      mutationObserver?.disconnect();
+      intersectionObserver?.disconnect();
       entries.clear();
     };
   }, [selectors, ids, rootMargin, threshold, rootEl, enabled]);

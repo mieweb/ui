@@ -185,20 +185,48 @@ export function TableOfContents({
     if (manualItems) return; // skip when items are provided manually
 
     const container = contentEl ?? document;
+    let frameId: number | null = null;
 
     function discover() {
-      setDiscoveredItems(discoverHeadings(container, selector, maxDepth));
+      const next = discoverHeadings(container, selector, maxDepth);
+      // Only update state if headings actually changed (avoids re-renders
+      // from unrelated DOM mutations when observing document.body)
+      setDiscoveredItems((prev) => {
+        if (
+          prev.length === next.length &&
+          prev.every(
+            (p, i) =>
+              p.id === next[i].id &&
+              p.title === next[i].title &&
+              p.level === next[i].level
+          )
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    }
+
+    function scheduleDiscover() {
+      if (frameId !== null) return;
+      frameId = requestAnimationFrame(() => {
+        frameId = null;
+        discover();
+      });
     }
 
     // Initial discovery
     discover();
 
     // Re-discover on DOM mutations (handles dynamically rendered content)
-    const observer = new MutationObserver(discover);
+    const observer = new MutationObserver(scheduleDiscover);
     const target = container instanceof HTMLElement ? container : document.body;
     observer.observe(target, { childList: true, subtree: true });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (frameId !== null) cancelAnimationFrame(frameId);
+    };
   }, [manualItems, selector, maxDepth, contentEl]);
 
   // -------------------------------------------------------------------------
