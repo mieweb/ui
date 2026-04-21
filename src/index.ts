@@ -139,6 +139,7 @@ export * from './components/StepIndicator';
 export * from './components/StripeBadge';
 export * from './components/Switch';
 export * from './components/Table';
+export * from './components/TableOfContents';
 export * from './components/Tabs';
 export * from './components/Text';
 export * from './components/Textarea';

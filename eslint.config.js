@@ -84,6 +84,14 @@ export default [
         // Encoding APIs
         atob: 'readonly',
         btoa: 'readonly',
+        // Observer APIs
+        IntersectionObserver: 'readonly',
+        IntersectionObserverEntry: 'readonly',
+        MutationObserver: 'readonly',
+        // DOM types
+        Element: 'readonly',
+        Document: 'readonly',
+        ScrollBehavior: 'readonly',
         // Types
         PermissionName: 'readonly',
       },
