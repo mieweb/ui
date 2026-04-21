@@ -1,7 +1,10 @@
 /* eslint-disable no-undef */
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import { useScrollSpy, type UseScrollSpyOptions } from '../../hooks/useScrollSpy';
+import {
+  useScrollSpy,
+  type UseScrollSpyOptions,
+} from '../../hooks/useScrollSpy';
 
 // =============================================================================
 // Types
@@ -56,7 +59,10 @@ export interface TableOfContentsProps {
   /** Hide the component when there are no items. @default true */
   hideWhenEmpty?: boolean;
   /** Additional scroll-spy options forwarded to useScrollSpy */
-  scrollSpyOptions?: Omit<UseScrollSpyOptions, 'selectors' | 'ids' | 'root' | 'enabled'>;
+  scrollSpyOptions?: Omit<
+    UseScrollSpyOptions,
+    'selectors' | 'ids' | 'root' | 'enabled'
+  >;
   /** Additional class name for the root element */
   className?: string;
 }
@@ -187,8 +193,7 @@ export function TableOfContents({
 
     // Re-discover on DOM mutations (handles dynamically rendered content)
     const observer = new MutationObserver(discover);
-    const target =
-      container instanceof HTMLElement ? container : document.body;
+    const target = container instanceof HTMLElement ? container : document.body;
     observer.observe(target, { childList: true, subtree: true });
 
     return () => observer.disconnect();
@@ -226,9 +231,7 @@ export function TableOfContents({
       if (!target) return;
 
       const top =
-        target.getBoundingClientRect().top +
-        window.scrollY -
-        scrollOffset;
+        target.getBoundingClientRect().top + window.scrollY - scrollOffset;
 
       window.scrollTo({
         top,
@@ -252,13 +255,8 @@ export function TableOfContents({
   if (hideWhenEmpty && tree.length === 0) return null;
 
   return (
-    <nav
-      aria-label="Table of contents"
-      className={cn('text-sm', className)}
-    >
-      {title && (
-        <p className="mb-3 font-semibold text-foreground">{title}</p>
-      )}
+    <nav aria-label="Table of contents" className={cn('text-sm', className)}>
+      {title && <p className="text-foreground mb-3 font-semibold">{title}</p>}
       <TocList
         items={tree}
         activeId={activeId}
@@ -282,15 +280,20 @@ interface TocListProps {
   indentLines: boolean;
 }
 
-function TocList({ items, activeId, onClickItem, depth, indentLines }: TocListProps) {
+function TocList({
+  items,
+  activeId,
+  onClickItem,
+  depth,
+  indentLines,
+}: TocListProps) {
   return (
     <ul
       className={cn(
         'space-y-1',
-        depth > 0 && indentLines && 'ml-3 border-l border-border pl-3',
+        depth > 0 && indentLines && 'border-border ml-3 border-l pl-3',
         depth > 0 && !indentLines && 'ml-4'
       )}
-
     >
       {items.map((item) => (
         <li key={item.id}>
@@ -302,7 +305,7 @@ function TocList({ items, activeId, onClickItem, depth, indentLines }: TocListPr
               'block rounded-sm px-2 py-1 transition-colors duration-150',
               'hover:text-foreground',
               activeId === item.id
-                ? 'font-medium text-primary'
+                ? 'text-primary font-medium'
                 : 'text-muted-foreground'
             )}
           >

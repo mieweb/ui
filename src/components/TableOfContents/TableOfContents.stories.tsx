@@ -33,15 +33,18 @@ type Story = StoryObj<typeof meta>;
 /** A sample article with real headings the ToC can discover or reference. */
 function SampleArticle() {
   return (
-    <article className="prose max-w-none dark:prose-invert">
+    <article className="prose dark:prose-invert max-w-none">
       <h2 id="introduction">Introduction</h2>
       <p>
-        This is a demonstration of the TableOfContents component. Scroll down
-        to see the active heading highlight as you move through sections.
+        This is a demonstration of the TableOfContents component. Scroll down to
+        see the active heading highlight as you move through sections.
       </p>
 
       <h2 id="getting-started">Getting Started</h2>
-      <p>Follow these steps to set up the project in your development environment.</p>
+      <p>
+        Follow these steps to set up the project in your development
+        environment.
+      </p>
 
       <h3 id="prerequisites">Prerequisites</h3>
       <p>You&apos;ll need Node.js 18+ and a package manager like pnpm.</p>
@@ -50,12 +53,14 @@ function SampleArticle() {
       <p>Run `pnpm add @mieweb/ui` to install the library.</p>
 
       <h2 id="usage">Usage</h2>
-      <p>Import the TableOfContents component and drop it alongside your content.</p>
+      <p>
+        Import the TableOfContents component and drop it alongside your content.
+      </p>
 
       <h3 id="auto-discovery">Auto-Discovery Mode</h3>
       <p>
-        By default the component scans the page for h2, h3, and h4 elements
-        with id attributes and builds the navigation list automatically.
+        By default the component scans the page for h2, h3, and h4 elements with
+        id attributes and builds the navigation list automatically.
       </p>
 
       <h3 id="manual-items">Manual Items</h3>
@@ -77,7 +82,9 @@ function SampleArticle() {
       </p>
 
       <h2 id="customization">Customization</h2>
-      <p>Override styles with className or extend the component via composition.</p>
+      <p>
+        Override styles with className or extend the component via composition.
+      </p>
 
       <h2 id="accessibility">Accessibility</h2>
       <p>
@@ -229,7 +236,7 @@ function ControlledExample() {
               <button
                 key={i.id}
                 onClick={() => setActiveId(i.id)}
-                className="rounded border px-2 py-1 text-xs hover:bg-muted"
+                className="hover:bg-muted rounded border px-2 py-1 text-xs"
               >
                 {i.title}
               </button>
