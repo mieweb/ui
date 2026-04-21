@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import { useEffect, useState, useRef, type RefObject } from 'react';
 
 // =============================================================================
@@ -58,10 +57,13 @@ export function useScrollSpy({
     new Map()
   );
 
+  // Track root.current so the effect re-runs when the ref attaches
+  const rootEl = root?.current ?? null;
+
   useEffect(() => {
     if (!enabled) return;
 
-    const container = root?.current ?? document;
+    const container = rootEl ?? document;
 
     // Resolve target elements
     let elements: Element[] = [];
@@ -107,7 +109,7 @@ export function useScrollSpy({
         }
       },
       {
-        root: root?.current ?? null,
+        root: rootEl,
         rootMargin,
         threshold,
       }
@@ -122,7 +124,7 @@ export function useScrollSpy({
       observer.disconnect();
       entries.clear();
     };
-  }, [selectors, ids, rootMargin, threshold, root, enabled]);
+  }, [selectors, ids, rootMargin, threshold, rootEl, enabled]);
 
   return { activeId };
 }

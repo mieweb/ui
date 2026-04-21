@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import {
@@ -27,7 +26,7 @@ export interface TableOfContentsProps {
   /**
    * CSS selector for headings to auto-discover (e.g. 'h2, h3, h4').
    * Only used when `items` is not provided.
-   * @default 'h2, h3, h4'
+   * @default 'h2, h3'
    */
   selector?: string;
   /**
@@ -159,7 +158,7 @@ function nestItems(flat: TocItem[]): TocItem[] {
  */
 export function TableOfContents({
   items: manualItems,
-  selector = 'h2, h3, h4',
+  selector = 'h2, h3',
   contentRef,
   activeId: controlledActiveId,
   onActiveChange,
@@ -179,10 +178,13 @@ export function TableOfContents({
 
   const flatItems = manualItems ?? discoveredItems;
 
+  // Track contentRef.current so the effect re-runs when the ref attaches
+  const contentEl = contentRef?.current ?? null;
+
   React.useEffect(() => {
     if (manualItems) return; // skip when items are provided manually
 
-    const container = contentRef?.current ?? document;
+    const container = contentEl ?? document;
 
     function discover() {
       setDiscoveredItems(discoverHeadings(container, selector, maxDepth));
@@ -197,7 +199,7 @@ export function TableOfContents({
     observer.observe(target, { childList: true, subtree: true });
 
     return () => observer.disconnect();
-  }, [manualItems, selector, maxDepth, contentRef]);
+  }, [manualItems, selector, maxDepth, contentEl]);
 
   // -------------------------------------------------------------------------
   // Scroll spy
@@ -226,22 +228,36 @@ export function TableOfContents({
   // -------------------------------------------------------------------------
   const handleClick = React.useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+      // Allow Cmd/Ctrl+Click and other modified clicks to behave normally
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+        return;
+      }
       e.preventDefault();
       const target = document.getElementById(id);
       if (!target) return;
 
-      const top =
-        target.getBoundingClientRect().top + window.scrollY - scrollOffset;
+      const scrollContainer = contentEl;
+      const behavior: ScrollBehavior = smooth ? 'smooth' : 'auto';
 
-      window.scrollTo({
-        top,
-        behavior: smooth ? 'smooth' : 'instant',
-      });
+      if (scrollContainer) {
+        const top =
+          target.getBoundingClientRect().top -
+          scrollContainer.getBoundingClientRect().top +
+          scrollContainer.scrollTop -
+          scrollOffset;
+
+        scrollContainer.scrollTo({ top, behavior });
+      } else {
+        const top =
+          target.getBoundingClientRect().top + window.scrollY - scrollOffset;
+
+        window.scrollTo({ top, behavior });
+      }
 
       // Update URL hash without scrolling again
       window.history.pushState(null, '', `#${id}`);
     },
-    [scrollOffset, smooth]
+    [contentEl, scrollOffset, smooth]
   );
 
   // -------------------------------------------------------------------------
