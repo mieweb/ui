@@ -247,7 +247,7 @@ Medical Informatics Engineering (MIE) develops a suite of healthcare technology 
 
 ## Logos
 
-export function DownloadButton({ files, iconOnly }) {
+export function DownloadButton({ files }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
   React.useEffect(() => {
@@ -266,7 +266,7 @@ export function DownloadButton({ files, iconOnly }) {
           background: 'none',
           border: '1px solid var(--mieweb-border, #d1d5db)',
           borderRadius: '6px',
-          padding: iconOnly ? '6px' : '4px 8px',
+          padding: '4px 8px',
           cursor: 'pointer',
           fontSize: '13px',
           display: 'flex',
@@ -288,7 +288,7 @@ export function DownloadButton({ files, iconOnly }) {
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        {!iconOnly && 'Download'}
+        Download
       </button>
       {open && (
         <div
