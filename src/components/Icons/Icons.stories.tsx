@@ -259,13 +259,84 @@ function IconSection({ title, icons }: IconSectionProps) {
 }
 
 // ============================================================================
+// Brand Icons
+// ============================================================================
+
+interface BrandIconInfo {
+  name: string;
+  brand: string;
+  file: string;
+}
+
+const brandIcons: BrandIconInfo[] = [
+  { name: 'MIE', brand: 'mie', file: 'icon.svg' },
+  { name: 'Enterprise Health', brand: 'enterprise-health', file: 'icon.svg' },
+  { name: 'BlueHive', brand: 'bluehive', file: 'icon-lm.svg' },
+  { name: 'WebChart', brand: 'webchart', file: 'icon.svg' },
+  { name: 'Ozwell', brand: 'ozwell', file: 'icon.svg' },
+  { name: 'Waggleline', brand: 'waggleline', file: 'icon.svg' },
+];
+
+function BrandIconCard({ icon }: { icon: BrandIconInfo }) {
+  const [copied, setCopied] = React.useState(false);
+  const src = `/${icon.brand}/${icon.file}`;
+
+  const copySnippet = () => {
+    navigator.clipboard.writeText(
+      `<img src="${src}" alt="${icon.name}" className="h-5 w-5" />`
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <button
+      onClick={copySnippet}
+      className="border-border bg-card hover:bg-muted/50 hover:border-primary-300 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border p-4 transition-all"
+      title={`Click to copy <img> snippet for ${icon.name}`}
+    >
+      <img
+        src={src}
+        alt={icon.name}
+        className="h-6 w-6 object-contain transition-transform group-hover:scale-110"
+      />
+      <span className="text-muted-foreground group-hover:text-foreground text-center text-xs break-all transition-colors">
+        {copied ? '✓ Copied!' : icon.name}
+      </span>
+    </button>
+  );
+}
+
+function BrandIconSection({
+  icons,
+  visible,
+}: {
+  icons: BrandIconInfo[];
+  visible: boolean;
+}) {
+  if (!visible || icons.length === 0) return null;
+  return (
+    <div className="mb-8">
+      <h2 className="text-foreground mb-4 text-lg font-semibold">
+        Brand Icons
+      </h2>
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
+        {icons.map((icon) => (
+          <BrandIconCard key={icon.brand} icon={icon} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Main Icons Page
 // ============================================================================
 
 function IconsPage() {
   const [search, setSearch] = React.useState('');
 
-  // Filter icons based on search
+  // Filter Lucide icons based on search
   const filteredCategories = React.useMemo(() => {
     if (!search.trim()) return iconCategories;
 
@@ -284,7 +355,23 @@ function IconsPage() {
     return result;
   }, [search]);
 
-  const totalIcons = Object.values(iconCategories).flat().length;
+  // Filter brand icons based on search
+  const filteredBrandIcons = React.useMemo(() => {
+    if (!search.trim()) return brandIcons;
+    const searchLower = search.toLowerCase();
+    return brandIcons.filter(
+      (icon) =>
+        icon.name.toLowerCase().includes(searchLower) ||
+        icon.brand.toLowerCase().includes(searchLower) ||
+        'brand'.includes(searchLower)
+    );
+  }, [search]);
+
+  const totalIcons =
+    Object.values(iconCategories).flat().length + brandIcons.length;
+
+  const hasResults =
+    Object.keys(filteredCategories).length > 0 || filteredBrandIcons.length > 0;
 
   return (
     <div className="bg-background min-h-screen p-8">
@@ -293,16 +380,8 @@ function IconsPage() {
         <div className="mb-8">
           <h1 className="text-foreground mb-2 text-3xl font-bold">Icons</h1>
           <p className="text-muted-foreground mb-4">
-            {totalIcons} icons powered by{' '}
-            <a
-              href="https://lucide.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-500 hover:underline"
-            >
-              Lucide React
-            </a>
-            . Click any icon to copy its import statement.
+            {totalIcons} icons — Lucide React icons plus brand icons. Click any
+            icon to copy its import or snippet.
           </p>
 
           {/* Search */}
@@ -318,12 +397,18 @@ function IconsPage() {
           </div>
         </div>
 
-        {/* Icon Categories */}
+        {/* Lucide Icon Categories */}
         {Object.entries(filteredCategories).map(([category, icons]) => (
           <IconSection key={category} title={category} icons={icons} />
         ))}
 
-        {Object.keys(filteredCategories).length === 0 && (
+        {/* Brand Icons */}
+        <BrandIconSection
+          icons={filteredBrandIcons}
+          visible={filteredBrandIcons.length > 0}
+        />
+
+        {!hasResults && (
           <div className="text-muted-foreground py-12 text-center">
             No icons found matching &ldquo;{search}&rdquo;
           </div>
