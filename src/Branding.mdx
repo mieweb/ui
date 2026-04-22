@@ -247,7 +247,7 @@ Medical Informatics Engineering (MIE) develops a suite of healthcare technology 
 
 ## Logos
 
-export function DownloadButton({ files }) {
+export function DownloadButton({ files, iconOnly }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
   React.useEffect(() => {
@@ -266,7 +266,7 @@ export function DownloadButton({ files }) {
           background: 'none',
           border: '1px solid var(--mieweb-border, #d1d5db)',
           borderRadius: '6px',
-          padding: '4px 8px',
+          padding: iconOnly ? '6px' : '4px 8px',
           cursor: 'pointer',
           fontSize: '13px',
           display: 'flex',
@@ -288,7 +288,7 @@ export function DownloadButton({ files }) {
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        Download
+        {!iconOnly && 'Download'}
       </button>
       {open && (
         <div
@@ -349,7 +349,6 @@ export function LogoCard({ name, brand, lm, dm, color }) {
       style={{
         borderRadius: '12px',
         border: '1px solid var(--mieweb-border, #e5e7eb)',
-        overflow: 'hidden',
       }}
     >
       <div
@@ -360,6 +359,7 @@ export function LogoCard({ name, brand, lm, dm, color }) {
           padding: '24px',
           backgroundColor: '#ffffff',
           minHeight: '120px',
+          borderRadius: '12px 12px 0 0',
         }}
       >
         {lightSrc ? (
@@ -442,7 +442,6 @@ export function IconCard({ name, brand, icon, iconDm, color }) {
       style={{
         borderRadius: '12px',
         border: '1px solid var(--mieweb-border, #e5e7eb)',
-        overflow: 'hidden',
       }}
     >
       <div
@@ -453,6 +452,7 @@ export function IconCard({ name, brand, icon, iconDm, color }) {
           padding: '20px',
           backgroundColor: '#ffffff',
           minHeight: '100px',
+          borderRadius: '12px 12px 0 0',
         }}
       >
         {lightSrc ? (
@@ -568,7 +568,7 @@ export function IconCard({ name, brand, icon, iconDm, color }) {
 <div
   style={{
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: '20px',
     marginTop: '16px',
     marginBottom: '32px',
