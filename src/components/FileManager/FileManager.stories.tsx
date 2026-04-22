@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FileManager } from './FileManager';
 
 const meta: Meta<typeof FileManager> = {
-  title: 'Components/FileManager',
+  title: 'Components/Images & Media/FileManager',
   component: FileManager,
   tags: ['autodocs'],
   parameters: {

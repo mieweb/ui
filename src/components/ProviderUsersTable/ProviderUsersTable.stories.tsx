@@ -4,7 +4,7 @@ import { ProviderUsersTable } from './ProviderUsersTable';
 
 const meta: Meta<typeof ProviderUsersTable> = {
   component: ProviderUsersTable,
-  title: 'Components/ProviderUsersTable',
+  title: 'Components/Text & Data Display/ProviderUsersTable',
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',

@@ -8,7 +8,7 @@ import {
 } from './ReportDashboard';
 
 const meta: Meta<typeof ReportDashboard> = {
-  title: 'Provider/ReportDashboard',
+  title: 'Product/Provider/ReportDashboard',
   component: ReportDashboard,
   tags: ['autodocs'],
   parameters: {
@@ -17,6 +17,35 @@ const meta: Meta<typeof ReportDashboard> = {
   argTypes: {
     onDateRangeChange: { action: 'date range changed' },
     onExport: { action: 'export' },
+    dateRangeOptions: {
+      control: 'object',
+      description: 'Date range options',
+    },
+    selectedDateRange: {
+      control: 'text',
+      description: 'Current selected date range',
+    },
+    isLoading: {
+      control: 'boolean',
+      description: 'Whether data is loading',
+    },
+    title: {
+      control: 'text',
+      description: 'Title for the dashboard',
+    },
+    dateRangeLabel: {
+      control: 'text',
+      description: 'Date range label',
+    },
+  },
+  args: {
+    dateRangeOptions: [
+      { value: '7d', label: 'Last 7 Days' },
+      { value: '30d', label: 'Last 30 Days' },
+      { value: '90d', label: 'Last 90 Days' },
+      { value: 'ytd', label: 'Year to Date' },
+      { value: '12m', label: 'Last 12 Months' },
+    ],
   },
 };
 

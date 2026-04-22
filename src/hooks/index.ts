@@ -1,19 +1,24 @@
+export { useTheme, type Theme, type ResolvedTheme } from './useTheme';
+export { usePrefersReducedMotion } from './usePrefersReducedMotion';
 export { useClickOutside } from './useClickOutside';
 export { useEscapeKey } from './useEscapeKey';
 export { useFocusTrap } from './useFocusTrap';
 export {
-  type KeyboardShortcutOptions,
-  useCommandK,
   useKeyboardShortcut,
+  useCommandK,
+  type KeyboardShortcutOptions,
 } from './useKeyboardShortcut';
 export {
-  useIsDesktop,
-  useIsLargeDesktop,
+  useMediaQuery,
   useIsMobile,
-  useIsMobileOrTablet,
   useIsSmallTablet,
   useIsTablet,
-  useMediaQuery,
+  useIsDesktop,
+  useIsLargeDesktop,
+  useIsMobileOrTablet,
 } from './useMediaQuery';
-export { usePrefersReducedMotion } from './usePrefersReducedMotion';
-export { type ResolvedTheme, type Theme, useTheme } from './useTheme';
+export {
+  useScrollSpy,
+  type UseScrollSpyOptions,
+  type UseScrollSpyReturn,
+} from './useScrollSpy';

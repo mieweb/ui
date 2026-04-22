@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -14,8 +13,25 @@ export type AudioPlayerState =
   | 'paused'
   | 'error';
 
-export interface AudioPlayerProps
-  extends VariantProps<typeof audioPlayerVariants> {
+/** Ref handle for controlling AudioPlayer programmatically */
+export interface AudioPlayerRef {
+  /** The underlying container element */
+  container: HTMLDivElement | null;
+  /** Seek to a specific time in seconds */
+  seekTo: (time: number) => void;
+  /** Start playback */
+  play: () => void;
+  /** Pause playback */
+  pause: () => void;
+  /** Get current playback time in seconds */
+  getCurrentTime: () => number;
+  /** Get total duration in seconds */
+  getDuration: () => number;
+}
+
+export interface AudioPlayerProps extends VariantProps<
+  typeof audioPlayerVariants
+> {
   /** Audio source URL */
   src: string;
   /** Title/label for the audio (used for accessibility and display) */
@@ -227,6 +243,7 @@ function ProgressBar({
   return (
     <div
       ref={progressRef}
+      data-slot="audio-player-progress"
       role="slider"
       aria-label="Audio progress"
       aria-valuemin={0}
@@ -250,11 +267,11 @@ function ProgressBar({
       }}
     >
       <div
-        className="absolute inset-y-0 left-0 rounded-full bg-primary-600 transition-all"
+        className="bg-primary-600 absolute inset-y-0 left-0 rounded-full transition-all"
         style={{ width: `${progress}%` }}
       />
       <div
-        className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-primary-600 shadow-sm transition-all"
+        className="bg-primary-600 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all"
         style={{ left: `calc(${progress}% - 6px)` }}
       />
     </div>
@@ -264,6 +281,15 @@ function ProgressBar({
 // ============================================================================
 // Waveform Component (lazy-loaded WaveSurfer)
 // ============================================================================
+
+/** Methods exposed by Waveform via ref */
+export interface WaveformMethods {
+  seekTo: (time: number) => void;
+  play: () => void;
+  pause: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+}
 
 interface WaveformProps {
   src: string;
@@ -279,6 +305,8 @@ interface WaveformProps {
   showHoverCursor?: boolean;
   onHoverTimeChange?: (time: number | null) => void;
   cursorColor?: string;
+  /** Ref to expose waveform control methods */
+  waveformRef?: React.MutableRefObject<WaveformMethods | null>;
 }
 
 function Waveform({
@@ -293,6 +321,7 @@ function Waveform({
   progressColor,
   height = 64,
   showHoverCursor = false,
+  waveformRef,
   onHoverTimeChange,
   cursorColor = 'var(--color-red-500, rgb(239, 68, 68))',
 }: WaveformProps) {
@@ -302,6 +331,45 @@ function Waveform({
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [isHovering, setIsHovering] = React.useState(false);
   const [hoverPosition, setHoverPosition] = React.useState(0);
+
+  // Expose methods via ref for external control
+  React.useEffect(() => {
+    if (waveformRef) {
+      waveformRef.current = {
+        seekTo: (time: number) => {
+          if (wavesurferRef.current && isLoaded) {
+            const duration = wavesurferRef.current.getDuration();
+            if (duration > 0) {
+              const clampedTime = Math.min(Math.max(time, 0), duration);
+              const progress = clampedTime / duration;
+              wavesurferRef.current.seekTo(progress);
+            }
+          }
+        },
+        play: () => {
+          if (wavesurferRef.current && isLoaded) {
+            wavesurferRef.current.play();
+          }
+        },
+        pause: () => {
+          if (wavesurferRef.current && isLoaded) {
+            wavesurferRef.current.pause();
+          }
+        },
+        getCurrentTime: () => {
+          return wavesurferRef.current?.getCurrentTime?.() ?? 0;
+        },
+        getDuration: () => {
+          return wavesurferRef.current?.getDuration?.() ?? 0;
+        },
+      };
+    }
+    return () => {
+      if (waveformRef) {
+        waveformRef.current = null;
+      }
+    };
+  }, [waveformRef, isLoaded]);
 
   // Initialize WaveSurfer
   React.useEffect(() => {
@@ -357,6 +425,7 @@ function Waveform({
       }
     };
 
+    setIsLoaded(false);
     initWaveSurfer();
 
     return () => {
@@ -365,6 +434,7 @@ function Waveform({
         wavesurferRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, showHoverCursor]);
 
   // Handle play/pause
@@ -447,6 +517,7 @@ function Waveform({
   return (
     <div
       ref={containerRef}
+      data-slot="audio-player-waveform"
       role={showHoverCursor ? 'slider' : undefined}
       aria-label={showHoverCursor ? 'Audio progress' : undefined}
       aria-valuemin={showHoverCursor ? 0 : undefined}
@@ -476,7 +547,7 @@ function Waveform({
       {/* Hover cursor line */}
       {showHoverCursor && isHovering && isLoaded && (
         <div
-          className="pointer-events-none absolute bottom-0 top-0 z-10 w-0.5"
+          className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5"
           style={{ left: `${hoverPosition}%`, backgroundColor: cursorColor }}
         />
       )}
@@ -501,41 +572,54 @@ function Waveform({
  *
  * // Waveform - full visualization with WaveSurfer
  * <AudioPlayer src="/audio.mp3" variant="waveform" showTime />
+ *
+ * // With ref for programmatic control
+ * const playerRef = useRef<AudioPlayerRef>(null);
+ * <AudioPlayer ref={playerRef} src="/audio.mp3" variant="waveform" />
+ * // Then: playerRef.current?.seekTo(30); playerRef.current?.play();
  * ```
  */
-function AudioPlayer({
-  src,
-  title,
-  variant = 'compact',
-  size = 'md',
-  onStateChange,
-  onEnded,
-  onError,
-  onTimeUpdate,
-  showTime = true,
-  showDuration = true,
-  waveColor,
-  progressColor,
-  waveformHeight = 64,
-  showWaveformHoverCursor = true,
-  waveformCursorColor,
-  disabled = false,
-  className,
-  'aria-label': ariaLabel,
-  playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
-  showPlaybackRate = false,
-  /** Whether to preload audio (set to false for lists with many items) */
-  preload = false,
-  /** Fallback duration in seconds to display before audio is loaded */
-  fallbackDuration,
-}: AudioPlayerProps & { preload?: boolean; fallbackDuration?: number }) {
+const AudioPlayer = React.forwardRef<
+  AudioPlayerRef,
+  AudioPlayerProps & { preload?: boolean; fallbackDuration?: number }
+>(function AudioPlayer(
+  {
+    src,
+    title,
+    variant = 'compact',
+    size = 'md',
+    onStateChange,
+    onEnded,
+    onError,
+    onTimeUpdate,
+    showTime = true,
+    showDuration = true,
+    waveColor,
+    progressColor,
+    waveformHeight = 64,
+    showWaveformHoverCursor = true,
+    waveformCursorColor,
+    disabled = false,
+    className,
+    'aria-label': ariaLabel,
+    playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
+    showPlaybackRate = false,
+    /** Whether to preload audio (set to false for lists with many items) */
+    preload = false,
+    /** Fallback duration in seconds to display before audio is loaded */
+    fallbackDuration,
+  },
+  ref
+) {
   const [state, setState] = React.useState<AudioPlayerState>('idle');
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
   const [playbackRate, setPlaybackRate] = React.useState(1);
   const [audioInitialized, setAudioInitialized] = React.useState(false);
   const [hoverTime, setHoverTime] = React.useState<number | null>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const audioRef = React.useRef<globalThis.HTMLAudioElement | null>(null);
+  const waveformMethodsRef = React.useRef<WaveformMethods | null>(null);
 
   const isPlaying = state === 'playing';
   const isLoading = state === 'loading';
@@ -588,6 +672,74 @@ function AudioPlayer({
     onEnded,
     onError,
   ]);
+
+  // Expose methods via ref for external control
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      get container() {
+        return containerRef.current;
+      },
+      seekTo: (time: number) => {
+        if (variant === 'waveform') {
+          waveformMethodsRef.current?.seekTo(time);
+        } else {
+          // Lazily initialize audio if not yet created
+          if (!audioRef.current) {
+            initAudio();
+          }
+          if (audioRef.current) {
+            audioRef.current.currentTime = time;
+          }
+        }
+      },
+      play: () => {
+        if (variant === 'waveform') {
+          if (waveformMethodsRef.current) {
+            waveformMethodsRef.current.play();
+            updateState('playing');
+          }
+        } else {
+          // Lazily initialize audio if not yet created
+          if (!audioRef.current) {
+            initAudio();
+          }
+          if (audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              updateState('error');
+              onError?.(error);
+            });
+            updateState('playing');
+          }
+        }
+      },
+      pause: () => {
+        if (variant === 'waveform') {
+          if (waveformMethodsRef.current) {
+            waveformMethodsRef.current.pause();
+            updateState('paused');
+          }
+        } else if (audioRef.current) {
+          audioRef.current.pause();
+          updateState('paused');
+        }
+      },
+      getCurrentTime: () => {
+        if (variant === 'waveform') {
+          return waveformMethodsRef.current?.getCurrentTime() ?? 0;
+        }
+        return audioRef.current?.currentTime ?? 0;
+      },
+      getDuration: () => {
+        if (variant === 'waveform') {
+          return waveformMethodsRef.current?.getDuration() ?? 0;
+        }
+        const rawDuration = audioRef.current?.duration;
+        return Number.isFinite(rawDuration) ? rawDuration! : 0;
+      },
+    }),
+    [variant, initAudio, updateState, onError]
+  );
 
   // Auto-initialize if preload is true
   React.useEffect(() => {
@@ -717,6 +869,7 @@ function AudioPlayer({
   const renderPlayButton = () => (
     <button
       type="button"
+      data-slot="audio-player-play-btn"
       onClick={handlePlay}
       disabled={disabled || isLoading}
       className={cn(playButtonVariants({ variant, size }))}
@@ -740,6 +893,7 @@ function AudioPlayer({
     const isShowingHoverTime = useHoverTime && hoverTime !== null;
     return (
       <span
+        data-slot="audio-player-time"
         className={cn(
           'font-mono text-xs tabular-nums',
           isShowingHoverTime
@@ -756,6 +910,7 @@ function AudioPlayer({
     if (!showPlaybackRate) return null;
     return (
       <select
+        data-slot="audio-player-rate"
         value={playbackRate}
         onChange={(e) => setPlaybackRate(Number(e.target.value))}
         className="rounded border border-neutral-200 bg-transparent px-1 py-0.5 text-xs dark:border-neutral-700"
@@ -776,15 +931,26 @@ function AudioPlayer({
   if (variant === 'inline') {
     const displayDuration = duration > 0 ? duration : (fallbackDuration ?? 0);
     return (
-      <div className={cn(audioPlayerVariants({ variant, size }), className)}>
+      <div
+        ref={containerRef}
+        data-slot="audio-player"
+        data-variant="inline"
+        className={cn(audioPlayerVariants({ variant, size }), className)}
+      >
         {renderPlayButton()}
         {title && (
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <span
+            data-slot="audio-player-title"
+            className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+          >
             {title}
           </span>
         )}
         {showDuration && displayDuration > 0 && (
-          <span className="font-mono text-xs tabular-nums text-neutral-500 dark:text-neutral-400">
+          <span
+            data-slot="audio-player-duration"
+            className="font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400"
+          >
             {isPlaying ? formatTime(currentTime) : formatTime(displayDuration)}
           </span>
         )}
@@ -792,12 +958,16 @@ function AudioPlayer({
     );
   }
 
-  // ============================================================================
   // Compact Variant
   // ============================================================================
   if (variant === 'compact') {
     return (
-      <div className={cn(audioPlayerVariants({ variant, size }), className)}>
+      <div
+        ref={containerRef}
+        data-slot="audio-player"
+        data-variant="compact"
+        className={cn(audioPlayerVariants({ variant, size }), className)}
+      >
         {renderPlayButton()}
         <ProgressBar
           currentTime={currentTime}
@@ -815,9 +985,17 @@ function AudioPlayer({
   // Waveform Variant
   // ============================================================================
   return (
-    <div className={cn(audioPlayerVariants({ variant, size }), className)}>
+    <div
+      ref={containerRef}
+      data-slot="audio-player"
+      data-variant="waveform"
+      className={cn(audioPlayerVariants({ variant, size }), className)}
+    >
       {title && (
-        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        <span
+          data-slot="audio-player-title"
+          className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+        >
           {title}
         </span>
       )}
@@ -835,8 +1013,12 @@ function AudioPlayer({
         showHoverCursor={showWaveformHoverCursor}
         onHoverTimeChange={handleHoverTimeChange}
         cursorColor={waveformCursorColor}
+        waveformRef={waveformMethodsRef}
       />
-      <div className="flex items-center gap-3">
+      <div
+        data-slot="audio-player-controls"
+        className="flex items-center gap-3"
+      >
         {renderPlayButton()}
         <div className="flex flex-1 items-center justify-between">
           {renderTime(true)}
@@ -845,7 +1027,7 @@ function AudioPlayer({
       </div>
     </div>
   );
-}
+});
 
 AudioPlayer.displayName = 'AudioPlayer';
 

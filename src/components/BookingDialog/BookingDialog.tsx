@@ -1,7 +1,7 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { isStorybookDocsMode } from '../../utils/environment';
 
 // =============================================================================
 // Types
@@ -53,15 +53,15 @@ export interface BookingDialogProps {
 // =============================================================================
 
 const inputVariants = cva(
-  'w-full rounded-lg border bg-white px-4 py-3 text-gray-900 transition-colors focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-white',
+  'w-full rounded-lg border bg-background px-4 py-3 text-foreground transition-colors focus:outline-none focus:ring-2',
   {
     variants: {
       state: {
         default:
-          'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20 dark:border-gray-600 dark:focus:border-primary-400',
-        error: 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
-        success:
-          'border-green-500 focus:border-green-500 focus:ring-green-500/20',
+          'border-input focus:border-primary-500 focus:ring-primary-500/20',
+        error:
+          'border-destructive focus:border-destructive focus:ring-destructive/20',
+        success: 'border-success focus:border-success focus:ring-success/20',
       },
     },
     defaultVariants: {
@@ -71,7 +71,8 @@ const inputVariants = cva(
 );
 
 export interface FloatingInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement>,
+  extends
+    React.InputHTMLAttributes<HTMLInputElement>,
     VariantProps<typeof inputVariants> {
   label: string;
   error?: string;
@@ -88,31 +89,39 @@ export function FloatingInput({
   const inputId = id || label.toLowerCase().replace(/\s+/g, '-');
 
   return (
-    <div className="relative">
+    <div className="relative" data-slot="floating-input">
       <input
         id={inputId}
         placeholder=" "
+        data-slot="floating-input-field"
         className={cn(
           inputVariants({ state: error ? 'error' : (state ?? 'default') }),
-          'peer pb-2 pt-6',
+          'peer pt-6 pb-2',
           className
         )}
         {...props}
       />
       <label
         htmlFor={inputId}
+        data-slot="floating-input-label"
         className={cn(
-          'absolute left-4 top-4 origin-left transform text-gray-500 transition-all duration-200',
+          'text-muted-foreground absolute top-4 left-4 origin-left transform transition-all duration-200',
           'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
           'peer-focus:-translate-y-2 peer-focus:scale-75',
           'peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-75',
-          error && 'text-red-500',
-          'dark:text-gray-400'
+          error && 'text-destructive'
         )}
       >
         {label}
       </label>
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && (
+        <p
+          className="text-destructive mt-1 text-sm"
+          data-slot="floating-input-error"
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -167,17 +176,22 @@ export function ServiceSelect({
     .map((s) => s.name);
 
   return (
-    <div ref={dropdownRef} className={cn('relative', className)}>
+    <div
+      ref={dropdownRef}
+      className={cn('relative', className)}
+      data-slot="service-select"
+    >
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        data-slot="service-select-trigger"
         className={cn(
           'w-full rounded-lg border px-4 py-3 text-left transition-colors',
-          'bg-white dark:bg-gray-800',
-          'focus:outline-none focus:ring-2',
+          'bg-background',
+          'focus:ring-2 focus:outline-none',
           error
-            ? 'border-red-500 focus:ring-red-500/20'
-            : 'focus:ring-primary-500/20 border-gray-300 focus:border-primary-500 dark:border-gray-600 dark:focus:border-primary-400'
+            ? 'border-destructive focus:ring-destructive/20'
+            : 'border-input focus:border-primary-500 focus:ring-primary-500/20'
         )}
       >
         {selectedServiceNames.length > 0 ? (
@@ -185,52 +199,53 @@ export function ServiceSelect({
             {selectedServiceNames.map((name) => (
               <span
                 key={name}
-                className="dark:bg-primary-900/30 inline-flex items-center gap-1 rounded-full bg-primary-100 px-2 py-0.5 text-sm text-primary-700 dark:text-primary-400"
+                data-slot="service-select-pill"
+                className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm"
               >
                 {name}
               </span>
             ))}
           </div>
         ) : (
-          <span className="text-gray-500 dark:text-gray-400">
-            {placeholder}
-          </span>
+          <span className="text-muted-foreground">{placeholder}</span>
         )}
         <ChevronDownIcon
           className={cn(
-            'absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 transition-transform',
+            'text-muted-foreground absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 transition-transform',
             isOpen && 'rotate-180'
           )}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+        <div
+          className="border-border bg-card absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border shadow-lg"
+          data-slot="service-select-dropdown"
+        >
           {services.map((service) => (
             <label
               key={service.slug}
-              className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              data-slot="service-select-option"
+              className="hover:bg-muted flex cursor-pointer items-center gap-3 px-4 py-3"
             >
               <input
                 type="checkbox"
                 checked={selectedServices.includes(service.slug)}
                 onChange={() => toggleService(service.slug)}
-                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600"
+                className="text-primary-600 focus:ring-primary-500 border-input h-4 w-4 rounded"
               />
-              <span className="text-gray-900 dark:text-white">
-                {service.name}
-              </span>
+              <span className="text-foreground">{service.name}</span>
             </label>
           ))}
           {services.length === 0 && (
-            <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+            <div className="text-muted-foreground px-4 py-3 text-center">
               No services available
             </div>
           )}
         </div>
       )}
 
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && <p className="text-destructive mt-1 text-sm">{error}</p>}
     </div>
   );
 }
@@ -256,35 +271,48 @@ export function ConsentSwitch({
   description,
   className,
 }: ConsentSwitchProps) {
+  const descriptionId = description ? `${id}-description` : undefined;
+
   return (
-    <div className={cn('flex items-start gap-3', className)}>
+    <div
+      className={cn('flex items-start gap-3', className)}
+      data-slot="consent-switch"
+    >
       <button
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-describedby={descriptionId}
         id={id}
         onClick={() => onChange(!checked)}
+        data-slot="consent-switch-toggle"
         className={cn(
-          'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-          checked ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+          'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
+          checked ? 'bg-primary-600' : 'bg-muted'
         )}
       >
         <span
+          data-slot="consent-switch-thumb"
           className={cn(
-            'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-            checked ? 'translate-x-5' : 'translate-x-0'
+            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out',
+            checked ? 'translate-x-5' : 'translate-x-0.5'
           )}
         />
       </button>
       <div className="flex-1">
         <label
           htmlFor={id}
-          className="cursor-pointer text-sm font-medium text-gray-900 dark:text-white"
+          data-slot="consent-switch-label"
+          className="text-foreground cursor-pointer text-sm font-medium"
         >
           {label}
         </label>
         {description && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p
+            id={descriptionId}
+            className="text-muted-foreground text-sm"
+            data-slot="consent-switch-description"
+          >
             {description}
           </p>
         )}
@@ -302,22 +330,53 @@ export interface DialogOverlayProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  titleId?: string;
 }
+
+/**
+ * Scroll lock state manager for DialogOverlay.
+ * Uses a singleton pattern with ref-counting to handle multiple overlays
+ * and preserve the original body overflow value.
+ */
+const dialogScrollLockState = {
+  count: 0,
+  originalOverflow: null as string | null,
+  reset() {
+    this.count = 0;
+    this.originalOverflow = null;
+  },
+};
 
 export function DialogOverlay({
   isOpen,
   onClose,
   children,
   className,
+  titleId,
 }: DialogOverlayProps) {
   React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+    // Skip scroll lock in Storybook docs mode where stories render inline
+    if (!isOpen || isStorybookDocsMode()) {
+      return undefined;
     }
+
+    dialogScrollLockState.count++;
+    // Only capture and set overflow when first overlay opens
+    if (dialogScrollLockState.count === 1) {
+      dialogScrollLockState.originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+
     return () => {
-      document.body.style.overflow = '';
+      dialogScrollLockState.count--;
+      // Only restore overflow when last overlay closes
+      if (
+        dialogScrollLockState.count === 0 &&
+        dialogScrollLockState.originalOverflow !== null
+      ) {
+        document.body.style.overflow = dialogScrollLockState.originalOverflow;
+        dialogScrollLockState.originalOverflow = null;
+      }
     };
   }, [isOpen]);
 
@@ -325,7 +384,7 @@ export function DialogOverlay({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex min-h-full items-center justify-center p-4">
         {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black/50 transition-opacity"
@@ -336,11 +395,13 @@ export function DialogOverlay({
         {/* Dialog Content */}
         <div
           className={cn(
-            'relative w-full max-w-lg transform rounded-2xl bg-white shadow-2xl transition-all dark:bg-gray-900',
+            'bg-card relative w-full max-w-lg transform rounded-2xl shadow-2xl transition-all',
             className
           )}
           role="dialog"
           aria-modal="true"
+          aria-labelledby={titleId}
+          data-slot="dialog-overlay"
         >
           {children}
         </div>
@@ -364,6 +425,7 @@ export function BookingDialog({
   isLoading = false,
   className,
 }: BookingDialogProps) {
+  const titleId = React.useId();
   const [formData, setFormData] = React.useState<BookingFormData>({
     firstName: defaultValues?.firstName || '',
     lastName: defaultValues?.lastName || '',
@@ -408,32 +470,54 @@ export function BookingDialog({
   )}`;
 
   return (
-    <DialogOverlay isOpen={isOpen} onClose={onClose} className={className}>
+    <DialogOverlay
+      isOpen={isOpen}
+      onClose={onClose}
+      className={className}
+      titleId={titleId}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between rounded-t-2xl border-b border-gray-200 bg-primary-600 px-6 py-4 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-white">Book Appointment</h2>
+      <div
+        className="border-border flex items-center justify-between rounded-t-2xl border-b px-6 py-4"
+        data-slot="booking-dialog-header"
+      >
+        <h2
+          id={titleId}
+          className="text-lg leading-none font-semibold tracking-tight"
+          data-slot="booking-dialog-title"
+        >
+          Book Appointment
+        </h2>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-2 text-white transition-colors hover:bg-white/10"
+          className="text-muted-foreground hover:text-foreground rounded-lg p-2 transition-colors"
           aria-label="Close dialog"
+          data-slot="booking-dialog-close"
         >
           <CloseIcon className="h-5 w-5" />
         </button>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="max-h-[70vh] space-y-6 overflow-y-auto p-6">
+        <div className="space-y-6 p-6" data-slot="booking-dialog-body">
           {/* Provider Info */}
-          <div className="border-b border-gray-200 pb-4 dark:border-gray-700">
-            <h3 className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
+          <div
+            className="border-border border-b pb-4"
+            data-slot="booking-dialog-provider"
+          >
+            <h3
+              className="text-foreground mb-1 text-lg font-bold"
+              data-slot="booking-dialog-provider-name"
+            >
               {provider.name}
             </h3>
             <a
               href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
+              className="hover:text-primary-600 text-muted-foreground text-sm"
+              data-slot="booking-dialog-provider-address"
             >
               {provider.address.street1}
               {provider.address.street2 && ` ${provider.address.street2}`}{' '}
@@ -444,10 +528,16 @@ export function BookingDialog({
 
           {/* Contact Information */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
+            <h4
+              className="text-foreground mb-4 text-sm font-semibold"
+              data-slot="booking-dialog-section-title"
+            >
               Contact Information
             </h4>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              data-slot="booking-dialog-contact"
+            >
               <FloatingInput
                 label="First Name"
                 value={formData.firstName}
@@ -483,7 +573,10 @@ export function BookingDialog({
 
           {/* Service Selection */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
+            <h4
+              className="text-foreground mb-4 text-sm font-semibold"
+              data-slot="booking-dialog-section-title"
+            >
               Please select your services
             </h4>
             <ServiceSelect
@@ -498,7 +591,7 @@ export function BookingDialog({
           </div>
 
           {/* Consent Options */}
-          <div className="space-y-4">
+          <div className="space-y-4" data-slot="booking-dialog-consent">
             <ConsentSwitch
               id="alternate-providers"
               checked={formData.allowAlternateProviders}
@@ -531,11 +624,15 @@ export function BookingDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+        <div
+          className="border-border flex items-center justify-between border-t px-6 py-4"
+          data-slot="booking-dialog-footer"
+        >
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            data-slot="booking-dialog-footer-btn"
+            className="border-border text-foreground hover:bg-muted rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
           >
             Close
           </button>
@@ -544,7 +641,8 @@ export function BookingDialog({
               <button
                 type="button"
                 onClick={() => onCall(provider.phoneNumber!)}
-                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+                data-slot="booking-dialog-footer-btn"
+                className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800"
               >
                 <PhoneIcon className="h-4 w-4" />
                 Call Now
@@ -553,8 +651,9 @@ export function BookingDialog({
             <button
               type="submit"
               disabled={isLoading}
+              data-slot="booking-dialog-footer-btn"
               className={cn(
-                'inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700',
+                'bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
                 isLoading && 'cursor-not-allowed opacity-50'
               )}
             >
@@ -632,7 +731,11 @@ export function InlineBookingForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn('space-y-6', className)}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn('space-y-6', className)}
+      data-slot="inline-booking-form"
+    >
       {/* Contact Fields */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FloatingInput
@@ -680,8 +783,9 @@ export function InlineBookingForm({
       <button
         type="submit"
         disabled={isLoading}
+        data-slot="inline-booking-form-submit"
         className={cn(
-          'w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700',
+          'bg-primary-700 hover:bg-primary-800 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -711,22 +815,30 @@ export function QuickBookCard({
   return (
     <div
       className={cn(
-        'rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800',
+        'border-border bg-card rounded-lg border p-4 shadow-sm',
         className
       )}
+      data-slot="quick-book-card"
     >
-      <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+      <h3
+        className="text-card-foreground mb-2 text-lg font-semibold"
+        data-slot="quick-book-card-title"
+      >
         Schedule an Appointment
       </h3>
-      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+      <p
+        className="text-muted-foreground mb-4 text-sm"
+        data-slot="quick-book-card-description"
+      >
         Book your appointment at {provider.name}
       </p>
-      <div className="flex gap-3">
+      <div className="flex gap-3" data-slot="quick-book-card-actions">
         {provider.phoneNumber && onCall && (
           <button
             type="button"
             onClick={() => onCall(provider.phoneNumber!)}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="border-border text-foreground hover:bg-muted inline-flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
+            data-slot="quick-book-card-btn"
           >
             <PhoneIcon className="h-4 w-4" />
             Call
@@ -735,7 +847,8 @@ export function QuickBookCard({
         <button
           type="button"
           onClick={onBook}
-          className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+          className="bg-primary-700 hover:bg-primary-800 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          data-slot="quick-book-card-btn"
         >
           <CalendarIcon className="h-4 w-4" />
           Book Online

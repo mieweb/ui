@@ -4,16 +4,15 @@
  * Renders an MCP tool invocation with status, parameters, and results.
  */
 
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import type {
-  MCPResourceLink,
   MCPToolCall,
-  MCPToolParameter,
-  MCPToolResult,
   MCPToolStatus,
+  MCPToolResult,
+  MCPResourceLink,
+  MCPToolParameter,
 } from './types';
 
 // ============================================================================
@@ -45,7 +44,10 @@ interface ToolStatusIconProps {
 
 function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
   return (
-    <span className={cn(statusIconVariants({ status }), className)}>
+    <span
+      data-slot="ai-tool-status-icon"
+      className={cn(statusIconVariants({ status }), className)}
+    >
       {status === 'pending' && (
         <svg
           className="h-3 w-3 text-neutral-500"
@@ -57,7 +59,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'running' && (
         <svg
-          className="h-3 w-3 animate-spin text-primary-600 dark:text-primary-400"
+          className="text-primary-600 dark:text-primary-400 h-3 w-3 animate-spin"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -204,6 +206,27 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
       />
     </svg>
   ),
+  // Provider tools
+  search_providers: (
+    <svg
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+      />
+    </svg>
+  ),
   // Default tool icon
   default: (
     <svg
@@ -305,6 +328,26 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
         />
       </svg>
     ),
+    provider: (
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+        />
+      </svg>
+    ),
     external: (
       <svg
         className="h-4 w-4"
@@ -346,9 +389,9 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
         'bg-primary-50 text-primary-700 hover:bg-primary-100',
-        'dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-300',
+        'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
         'text-sm font-medium transition-colors',
-        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+        'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
         'dark:focus:ring-offset-neutral-900',
         className
       )}
@@ -524,6 +567,7 @@ const TOOL_FRIENDLY_NAMES: Record<string, string> = {
   create_order: 'Creating order',
   send_message: 'Sending message',
   search: 'Searching',
+  search_providers: 'Searching for providers',
 };
 
 function getToolFriendlyName(toolName: string, status: MCPToolStatus): string {
@@ -531,13 +575,16 @@ function getToolFriendlyName(toolName: string, status: MCPToolStatus): string {
 
   // Adjust tense based on status
   if (status === 'success') {
-    // Past tense approximation
+    // Past tense approximation — check longer prefixes first to avoid
+    // partial matches (e.g. "Searching for" before "Searching")
     if (baseName.startsWith('Creating'))
       return baseName.replace('Creating', 'Created');
     if (baseName.startsWith('Scheduling'))
       return baseName.replace('Scheduling', 'Scheduled');
+    if (baseName.startsWith('Searching for'))
+      return baseName.replace('Searching for', 'Found');
     if (baseName.startsWith('Searching'))
-      return baseName.replace('Searching', 'Searched');
+      return baseName.replace('Searching', 'Found');
     if (baseName.startsWith('Looking'))
       return baseName.replace('Looking', 'Found');
     if (baseName.startsWith('Updating'))
@@ -585,11 +632,20 @@ function getParameterSummary(
       : String(paramMap.patientName);
   }
 
+  // Provider search
+  if (toolName === 'search_providers' && paramMap.zipcode) {
+    const service = paramMap.service;
+    return service
+      ? `${service} near ${paramMap.zipcode}`
+      : `near ${paramMap.zipcode}`;
+  }
+
   return null;
 }
 
-export interface MCPToolCallDisplayProps
-  extends VariantProps<typeof toolCallVariants> {
+export interface MCPToolCallDisplayProps extends VariantProps<
+  typeof toolCallVariants
+> {
   /** The tool call to display */
   toolCall: MCPToolCall;
   /** Whether to show parameters (in detailed view) */
@@ -633,6 +689,7 @@ export function MCPToolCallDisplay({
 
   return (
     <div
+      data-slot="ai-tool-call"
       className={cn(
         toolCallVariants({ status: toolCall.status, compact }),
         className
@@ -641,12 +698,15 @@ export function MCPToolCallDisplay({
       {/* Main Content - Always Visible */}
       <div className="flex items-start gap-3">
         {/* Tool Icon */}
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400">
+        <div
+          data-slot="ai-tool-icon"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400"
+        >
           {getToolIcon(toolCall.toolName)}
         </div>
 
         {/* Content */}
-        <div className="min-w-0 flex-1">
+        <div data-slot="ai-tool-content" className="min-w-0 flex-1">
           {/* Friendly Status Line */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-neutral-900 dark:text-white">
@@ -669,7 +729,7 @@ export function MCPToolCallDisplay({
 
           {/* Result Summary & Links */}
           {toolCall.result && (
-            <div className="mt-2">
+            <div data-slot="ai-tool-result" className="mt-2">
               <ToolResultDisplay
                 result={toolCall.result}
                 onLinkClick={onLinkClick}
@@ -715,8 +775,11 @@ export function MCPToolCallDisplay({
 
           {/* Technical Details (collapsed by default) */}
           {showDetails && showParameters && toolCall.parameters.length > 0 && (
-            <div className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800">
-              <h4 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+            <div
+              data-slot="ai-tool-parameters"
+              className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800"
+            >
+              <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400">
                 Parameters
               </h4>
               <div className="space-y-0.5">
@@ -744,4 +807,4 @@ export function MCPToolCallDisplay({
   );
 }
 
-export { getToolIcon, ToolStatusIcon };
+export { ToolStatusIcon, getToolIcon };

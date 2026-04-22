@@ -1,9 +1,10 @@
 export {
   AudioPlayer,
-  type AudioPlayerProps,
-  type AudioPlayerState,
   audioPlayerVariants,
-  formatTime as formatAudioTime,
   playButtonVariants,
   ProgressBar,
+  formatTime as formatAudioTime,
+  type AudioPlayerProps,
+  type AudioPlayerState,
+  type AudioPlayerRef,
 } from './AudioPlayer';

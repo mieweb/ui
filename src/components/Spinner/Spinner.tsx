@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const spinnerVariants = cva(
@@ -28,7 +27,8 @@ const spinnerVariants = cva(
 );
 
 export interface SpinnerProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof spinnerVariants> {
   /** Accessible label for the spinner */
   label?: string;
@@ -53,6 +53,7 @@ function Spinner({
 }: SpinnerProps) {
   return (
     <div
+      data-slot="spinner"
       role="status"
       aria-label={label}
       className={cn(spinnerVariants({ size, variant }), className)}
@@ -102,6 +103,7 @@ function SpinnerWithLabel({
 
   return (
     <div
+      data-slot="spinner-with-label"
       role="status"
       aria-label={label}
       className={cn(
@@ -112,10 +114,13 @@ function SpinnerWithLabel({
       {...props}
     >
       <div
+        data-slot="spinner"
         className={cn(spinnerVariants({ size, variant }))}
         aria-hidden="true"
       />
-      <span className="text-sm text-muted-foreground">{label}</span>
+      <span data-slot="spinner-label" className="text-muted-foreground text-sm">
+        {label}
+      </span>
     </div>
   );
 }
@@ -150,17 +155,22 @@ function FullPageSpinner({
 }: FullPageSpinnerProps) {
   return (
     <div
+      data-slot="full-page-spinner"
       className={cn(
         'fixed inset-0 z-50 flex flex-col items-center justify-center gap-4',
         backdrop && 'bg-background/80 backdrop-blur-sm'
       )}
     >
       <Spinner size={size} {...props} />
-      {text && <p className="text-sm text-muted-foreground">{text}</p>}
+      {text && (
+        <p data-slot="spinner-label" className="text-muted-foreground text-sm">
+          {text}
+        </p>
+      )}
     </div>
   );
 }
 
 FullPageSpinner.displayName = 'FullPageSpinner';
 
-export { FullPageSpinner, Spinner, spinnerVariants, SpinnerWithLabel };
+export { Spinner, SpinnerWithLabel, FullPageSpinner, spinnerVariants };

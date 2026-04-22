@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -61,7 +60,8 @@ const progressBarFillVariants = cva(
 // ============================================================================
 
 export interface ProgressProps
-  extends VariantProps<typeof progressBarTrackVariants>,
+  extends
+    VariantProps<typeof progressBarTrackVariants>,
     VariantProps<typeof progressBarFillVariants> {
   /** Current progress value (0-100) */
   value: number;
@@ -110,25 +110,33 @@ function Progress({
     : `${Math.round(percentage)}%`;
 
   return (
-    <div className={cn('w-full', className)}>
+    <div data-slot="progress" className={cn('w-full', className)}>
       {(label || showValue) && (
-        <div className="mb-1.5 flex items-center justify-between">
+        <div
+          data-slot="progress-label-row"
+          className="mb-1.5 flex items-center justify-between"
+        >
           {label && (
             <label
+              data-slot="progress-label"
               id={`${progressId}-label`}
-              className="text-sm font-medium text-foreground"
+              className="text-foreground text-sm font-medium"
             >
               {label}
             </label>
           )}
           {showValue && !indeterminate && (
-            <span className="text-sm text-muted-foreground">
+            <span
+              data-slot="progress-value"
+              className="text-muted-foreground text-sm"
+            >
               {displayValue}
             </span>
           )}
         </div>
       )}
       <div
+        data-slot="progress-track"
         role="progressbar"
         aria-valuenow={indeterminate ? undefined : value}
         aria-valuemin={0}
@@ -138,6 +146,7 @@ function Progress({
         className={cn(progressBarTrackVariants({ size }))}
       >
         <div
+          data-slot="progress-fill"
           className={cn(
             progressBarFillVariants({ variant, animated, striped }),
             indeterminate &&
@@ -178,8 +187,9 @@ const circularProgressVariants = cva(['relative inline-flex'], {
 // Circular Progress Component
 // ============================================================================
 
-export interface CircularProgressProps
-  extends VariantProps<typeof circularProgressVariants> {
+export interface CircularProgressProps extends VariantProps<
+  typeof circularProgressVariants
+> {
   /** Current progress value (0-100) */
   value: number;
   /** Maximum value (default: 100) */
@@ -233,6 +243,7 @@ function CircularProgress({
 
   return (
     <div
+      data-slot="circular-progress"
       role="progressbar"
       aria-valuenow={indeterminate ? undefined : value}
       aria-valuemin={0}
@@ -271,7 +282,10 @@ function CircularProgress({
         />
       </svg>
       {showValue && !indeterminate && (
-        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-foreground">
+        <span
+          data-slot="circular-progress-value"
+          className="text-foreground absolute inset-0 flex items-center justify-center text-xs font-medium"
+        >
           {Math.round(percentage)}%
         </span>
       )}
@@ -282,9 +296,9 @@ function CircularProgress({
 CircularProgress.displayName = 'CircularProgress';
 
 export {
-  CircularProgress,
-  circularProgressVariants,
   Progress,
-  progressBarFillVariants,
+  CircularProgress,
   progressBarTrackVariants,
+  progressBarFillVariants,
+  circularProgressVariants,
 };

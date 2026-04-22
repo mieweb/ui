@@ -13,7 +13,7 @@ import {
 } from './Modal';
 
 const meta: Meta<typeof Modal> = {
-  title: 'Components/Modal',
+  title: 'Components/Overlays & Layering/Modal',
   component: Modal,
   parameters: {
     layout: 'fullscreen',

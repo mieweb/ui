@@ -2,10 +2,9 @@
 
 import * as React from 'react';
 import { useCallback } from 'react';
-
-import { cn } from '../../utils/cn';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import { cn } from '../../utils/cn';
 
 // ============================================================================
 // Types
@@ -200,7 +199,10 @@ export function BusinessHoursEditor({
   );
 
   return (
-    <div className={cn('business-hours-editor space-y-4', className)}>
+    <div
+      data-slot="business-hours-editor"
+      className={cn('business-hours-editor space-y-4', className)}
+    >
       {orderedDays.map((dayIndex) => {
         const daySchedule = schedule.find((d) => d.day === dayIndex);
         const hours = daySchedule?.hours || [];
@@ -208,11 +210,18 @@ export function BusinessHoursEditor({
         return (
           <div
             key={dayIndex}
+            data-slot="business-hours-day"
             className="border-b border-gray-200 pb-4 last:border-0 dark:border-gray-700"
           >
             {/* Day Header */}
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div
+              data-slot="business-hours-day-header"
+              className="mb-3 flex items-center justify-between"
+            >
+              <h4
+                data-slot="business-hours-day-name"
+                className="text-sm font-medium text-gray-900 dark:text-gray-100"
+              >
                 {DAY_NAMES[dayIndex]}
               </h4>
               <div className="flex items-center gap-2">
@@ -228,10 +237,10 @@ export function BusinessHoursEditor({
                       <CopyIcon className="mr-1 h-3 w-3" />
                       Copy
                     </Button>
-                    <div className="invisible absolute right-0 top-full z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="invisible absolute top-full right-0 z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800">
                       <button
                         type="button"
-                        className="block w-full whitespace-nowrap px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => handleCopyToAll(dayIndex)}
                         disabled={disabled}
                       >
@@ -239,7 +248,7 @@ export function BusinessHoursEditor({
                       </button>
                       <button
                         type="button"
-                        className="block w-full whitespace-nowrap px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => handleCopyToWeekdays(dayIndex)}
                         disabled={disabled}
                       >
@@ -264,14 +273,18 @@ export function BusinessHoursEditor({
 
             {/* Time Slots */}
             {hours.length === 0 ? (
-              <p className="text-sm italic text-gray-500 dark:text-gray-400">
+              <p
+                data-slot="business-hours-closed"
+                className="text-sm text-gray-500 italic dark:text-gray-400"
+              >
                 Closed
               </p>
             ) : (
-              <div className="space-y-2">
+              <div data-slot="business-hours-slots" className="space-y-2">
                 {hours.map((slot, slotIndex) => (
                   <div
                     key={slot.id || slotIndex}
+                    data-slot="business-hours-slot-row"
                     className="flex flex-wrap items-center gap-2 sm:flex-nowrap"
                   >
                     {/* Start Time */}
@@ -293,7 +306,12 @@ export function BusinessHoursEditor({
                       />
                     </div>
 
-                    <span className="text-gray-400">–</span>
+                    <span
+                      data-slot="business-hours-separator"
+                      className="text-gray-400"
+                    >
+                      –
+                    </span>
 
                     {/* End Time */}
                     <div className="w-24 sm:w-28">

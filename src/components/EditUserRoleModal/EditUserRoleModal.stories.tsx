@@ -45,7 +45,7 @@ const sampleUser = {
 };
 
 const meta: Meta<typeof EditUserRoleModal> = {
-  title: 'Components/EditUserRoleModal',
+  title: 'Components/Forms & Inputs/EditUserRoleModal',
   component: EditUserRoleModal,
   tags: ['autodocs'],
   parameters: {

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-
+import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
@@ -94,9 +94,9 @@ export function ReportDashboard({
   const getTrendColor = (trend?: 'up' | 'down' | 'neutral') => {
     switch (trend) {
       case 'up':
-        return 'text-green-600 dark:text-green-400';
+        return 'text-green-700 dark:text-green-300';
       case 'down':
-        return 'text-red-600 dark:text-red-400';
+        return 'text-red-700 dark:text-red-300';
       default:
         return 'text-gray-500 dark:text-gray-400';
     }
@@ -148,7 +148,10 @@ export function ReportDashboard({
 
   if (isLoading) {
     return (
-      <div className={`animate-pulse space-y-6 ${className}`}>
+      <div
+        data-slot="report-dashboard"
+        className={cn('animate-pulse space-y-6', className)}
+      >
         <div className="h-12 w-1/3 rounded-lg bg-gray-200 dark:bg-gray-700" />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
@@ -164,9 +167,12 @@ export function ReportDashboard({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div data-slot="report-dashboard" className={cn('space-y-6', className)}>
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div
+        data-slot="report-dashboard-header"
+        className="flex flex-col justify-between gap-4 md:flex-row md:items-center"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {title}
@@ -177,7 +183,20 @@ export function ReportDashboard({
         </div>
         <div className="flex items-center gap-3">
           <Select
-            options={dateRangeOptions}
+            options={
+              Array.isArray(dateRangeOptions) &&
+              dateRangeOptions.every(
+                (opt) =>
+                  opt &&
+                  typeof opt === 'object' &&
+                  'value' in opt &&
+                  'label' in opt &&
+                  typeof opt.value === 'string' &&
+                  typeof opt.label === 'string'
+              )
+                ? dateRangeOptions
+                : []
+            }
             value={selectedDateRange}
             onValueChange={(value) => onDateRangeChange?.(value)}
             className="w-40"
@@ -204,7 +223,10 @@ export function ReportDashboard({
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div
+        data-slot="report-dashboard-metrics"
+        className="grid grid-cols-2 gap-4 md:grid-cols-4"
+      >
         {metrics.map((metric, index) => (
           <Card key={index}>
             <CardContent className="p-4">
@@ -239,133 +261,148 @@ export function ReportDashboard({
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Order Volume</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex h-48 items-end gap-1">
-              {chartData.map((point, index) => (
-                <div
-                  key={index}
-                  className="flex flex-1 flex-col items-center gap-1"
-                >
-                  <div className="flex h-40 w-full items-end gap-0.5">
-                    {point.previousValue !== undefined && (
+        <div data-slot="report-dashboard-chart">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Order Volume</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex h-48 items-end gap-1">
+                {chartData.map((point, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-1 flex-col items-center gap-1"
+                  >
+                    <div className="flex h-40 w-full items-end gap-0.5">
+                      {point.previousValue !== undefined && (
+                        <div
+                          className="flex-1 rounded-t bg-gray-200 dark:bg-gray-700"
+                          style={{
+                            height: `${(point.previousValue / maxChartValue) * 100}%`,
+                          }}
+                          title={`Previous: ${point.previousValue}`}
+                        />
+                      )}
                       <div
-                        className="flex-1 rounded-t bg-gray-200 dark:bg-gray-700"
+                        className="flex-1 rounded-t bg-blue-500 dark:bg-blue-400"
                         style={{
-                          height: `${(point.previousValue / maxChartValue) * 100}%`,
+                          height: `${(point.value / maxChartValue) * 100}%`,
                         }}
-                        title={`Previous: ${point.previousValue}`}
+                        title={`Current: ${point.value}`}
                       />
-                    )}
-                    <div
-                      className="flex-1 rounded-t bg-blue-500 dark:bg-blue-400"
-                      style={{
-                        height: `${(point.value / maxChartValue) * 100}%`,
-                      }}
-                      title={`Current: ${point.value}`}
-                    />
+                    </div>
+                    <span className="w-full truncate text-center text-xs text-gray-500 dark:text-gray-400">
+                      {point.label}
+                    </span>
                   </div>
-                  <span className="w-full truncate text-center text-xs text-gray-500 dark:text-gray-400">
-                    {point.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex items-center justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded bg-blue-500 dark:bg-blue-400" />
-                <span className="text-gray-600 dark:text-gray-300">
-                  Current Period
-                </span>
+                ))}
               </div>
-              {chartData.some((d) => d.previousValue !== undefined) && (
+              <div className="mt-4 flex items-center justify-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="h-3 w-3 rounded bg-blue-500 dark:bg-blue-400" />
                   <span className="text-gray-600 dark:text-gray-300">
-                    Previous Period
+                    Current Period
                   </span>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                {chartData.some((d) => d.previousValue !== undefined) && (
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded bg-gray-200 dark:bg-gray-700" />
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Previous Period
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Top Lists */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div
+        data-slot="report-dashboard-top-lists"
+        className="grid gap-6 md:grid-cols-2"
+      >
         {/* Top Services */}
         {topServices.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Top Services</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {topServices.map((service, index) => (
-                <div key={service.id} className="flex items-center gap-3">
-                  <Badge variant="secondary" className="h-6 w-6 justify-center">
-                    {index + 1}
-                  </Badge>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {service.name}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {formatNumber(service.value)}
-                      </p>
-                    </div>
-                    {service.percentage !== undefined && (
-                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                        <div
-                          className="h-full rounded-full bg-blue-500 dark:bg-blue-400"
-                          style={{ width: `${service.percentage}%` }}
-                        />
+          <div data-slot="report-dashboard-services">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Top Services</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {topServices.map((service, index) => (
+                  <div key={service.id} className="flex items-center gap-3">
+                    <Badge
+                      variant="secondary"
+                      className="h-6 w-6 justify-center"
+                    >
+                      {index + 1}
+                    </Badge>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {service.name}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {formatNumber(service.value)}
+                        </p>
                       </div>
-                    )}
+                      {service.percentage !== undefined && (
+                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                          <div
+                            className="h-full rounded-full bg-blue-500 dark:bg-blue-400"
+                            style={{ width: `${service.percentage}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Top Employers */}
         {topEmployers.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Top Employers</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {topEmployers.map((employer, index) => (
-                <div key={employer.id} className="flex items-center gap-3">
-                  <Badge variant="secondary" className="h-6 w-6 justify-center">
-                    {index + 1}
-                  </Badge>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {employer.name}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {formatCurrency(employer.value)}
-                      </p>
-                    </div>
-                    {employer.percentage !== undefined && (
-                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                        <div
-                          className="h-full rounded-full bg-green-500 dark:bg-green-400"
-                          style={{ width: `${employer.percentage}%` }}
-                        />
+          <div data-slot="report-dashboard-employers">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Top Employers</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {topEmployers.map((employer, index) => (
+                  <div key={employer.id} className="flex items-center gap-3">
+                    <Badge
+                      variant="secondary"
+                      className="h-6 w-6 justify-center"
+                    >
+                      {index + 1}
+                    </Badge>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {employer.name}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {formatCurrency(employer.value)}
+                        </p>
                       </div>
-                    )}
+                      {employer.percentage !== undefined && (
+                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                          <div
+                            className="h-full rounded-full bg-green-500 dark:bg-green-400"
+                            style={{ width: `${employer.percentage}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

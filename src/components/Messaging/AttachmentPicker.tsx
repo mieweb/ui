@@ -147,7 +147,7 @@ function AttachmentPreviewItem({
         /* File preview */
         <div className="flex h-20 w-20 flex-col items-center justify-center p-2">
           <svg
-            className="h-8 w-8 text-neutral-400"
+            className="h-8 w-8 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -365,6 +365,7 @@ const AttachmentPicker = React.forwardRef<
           type="button"
           onClick={handleClick}
           disabled={disabled}
+          data-slot="attachment-picker-button"
           className={cn(
             'inline-flex items-center justify-center',
             'rounded-full p-2',

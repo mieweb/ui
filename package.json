@@ -1,6 +1,6 @@
 {
   "name": "@mieweb/ui",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "A themeable, accessible React component library built with Tailwind CSS",
   "author": "Medical Informatics Engineering, Inc.",
   "license": "SEE LICENSE IN LICENSE",
@@ -12,6 +12,7 @@
   "bugs": {
     "url": "https://github.com/mieweb/ui/issues"
   },
+  "packageManager": "pnpm@10.29.1",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -94,6 +95,7 @@
     },
     "./brands/bluehive.css": "./dist/brands/bluehive.css",
     "./brands/mieweb.css": "./dist/brands/mieweb.css",
+    "./brands/ozwell.css": "./dist/brands/ozwell.css",
     "./brands/webchart.css": "./dist/brands/webchart.css",
     "./brands/enterprise-health.css": "./dist/brands/enterprise-health.css",
     "./brands/*": {
@@ -106,8 +108,29 @@
         "default": "./dist/brands/*.cjs"
       }
     },
+    "./ag-grid": {
+      "import": {
+        "types": "./dist/ag-grid.d.ts",
+        "default": "./dist/ag-grid.js"
+      },
+      "require": {
+        "types": "./dist/ag-grid.d.cts",
+        "default": "./dist/ag-grid.cjs"
+      }
+    },
+    "./datavis": {
+      "import": {
+        "types": "./dist/datavis.d.ts",
+        "default": "./dist/datavis.js"
+      },
+      "require": {
+        "types": "./dist/datavis.d.cts",
+        "default": "./dist/datavis.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
-    "./styles": "./dist/styles.css"
+    "./styles": "./dist/styles.css",
+    "./init.css": "./dist/styles/init.css"
   },
   "files": [
     "dist",
@@ -115,13 +138,16 @@
     "LICENSE"
   ],
   "scripts": {
+    "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
+    "postinstall": "if [ -z \"$_DATAVIS_RELINK\" ] && [ ! -f node_modules/datavis/package.json ] && [ -f packages/datavis/package.json ]; then echo '⚠️  Stale datavis link detected — re-linking submodule...'; _DATAVIS_RELINK=1 pnpm install; fi",
     "dev": "tsup --watch",
-    "build": "rm -rf dist && tsup && npm run build:css && npm run copy:brand-css",
+    "build": "rm -rf dist && tsup && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "mkdir -p dist/brands && cp src/brands/*.css dist/brands/ 2>/dev/null || true",
+    "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "format": "prettier --check \"src/**/*.{ts,tsx,css}\"",
     "format:fix": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
@@ -138,6 +164,7 @@
   "peerDependencies": {
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
+    "datavis-ace": "=4.0.0-PRE.1",
     "mapbox-gl": ">=2.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
@@ -148,6 +175,9 @@
       "optional": true
     },
     "ag-grid-react": {
+      "optional": true
+    },
+    "datavis-ace": {
       "optional": true
     },
     "react": {
@@ -164,53 +194,59 @@
     }
   },
   "dependencies": {
-    "@swc/helpers": "^0.5.18",
+    "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "google-libphonenumber": "^3.2.44",
     "lucide-react": "^0.562.0",
-    "tailwind-merge": "^2.6.0"
+    "luxon": "^3.7.2",
+    "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.50.3",
-    "@storybook/addon-a11y": "^10.1.11",
-    "@storybook/addon-docs": "^10.1.11",
-    "@storybook/addon-links": "^10.1.11",
-    "@storybook/react": "^10.1.11",
-    "@storybook/react-vite": "^10.1.11",
-    "@tailwindcss/cli": "^4.1.18",
-    "@tailwindcss/postcss": "^4.1.3",
-    "@testing-library/jest-dom": "^6.6.5",
-    "@testing-library/react": "^16.1.0",
-    "@testing-library/user-event": "^14.5.3",
+    "@eslint/js": "^9.39.3",
+    "@playwright/test": "^1.58.2",
+    "@storybook/addon-a11y": "^10.2.11",
+    "@storybook/addon-docs": "^10.2.11",
+    "@storybook/addon-links": "^10.2.11",
+    "@storybook/react": "^10.2.11",
+    "@storybook/react-vite": "^10.2.11",
+    "@tailwindcss/cli": "^4.2.1",
+    "@tailwindcss/postcss": "^4.2.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/google-libphonenumber": "^7.4.30",
+    "@types/luxon": "^3.7.1",
     "@types/mapbox-gl": "^3.4.1",
-    "@types/node": "^22.13.0",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.22.0",
-    "@typescript-eslint/parser": "^8.22.0",
+    "@types/node": "^22.19.11",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
     "@vitest/coverage-v8": "^3.2.4",
-    "ag-grid-community": "^35.0.0",
-    "ag-grid-react": "^35.0.0",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.19.0",
+    "ag-grid-community": "^35.1.0",
+    "ag-grid-react": "^35.1.0",
+    "autoprefixer": "^10.4.24",
+    "datavis": "file:./packages/datavis",
+    "eslint": "^9.39.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.4",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-storybook": "^10.1.11",
-    "jsdom": "^26.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-storybook": "^10.2.11",
+    "jsdom": "^26.1.0",
     "mapbox-gl": "^3.18.1",
-    "postcss": "^8.5.1",
-    "prettier": "^3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.11",
+    "postcss": "^8.5.6",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "storybook": "^10.1.11",
-    "tailwindcss": "^4.1.18",
-    "tsup": "^8.3.6",
-    "typescript": "^5.7.3",
+    "storybook": "^10.2.11",
+    "tailwindcss": "^4.2.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vitest": "^3.0.4",
-    "wavesurfer.js": "^7.8.17"
+    "vitest": "^3.2.4",
+    "wavesurfer.js": "^7.12.1"
   },
   "engines": {
     "node": ">=18.0.0"

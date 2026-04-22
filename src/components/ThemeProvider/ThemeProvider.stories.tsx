@@ -4,7 +4,7 @@ import { Button } from '../Button';
 import { ThemeProvider, useThemeContext } from './ThemeProvider';
 
 const meta: Meta<typeof ThemeProvider> = {
-  title: 'Components/ThemeProvider',
+  title: 'Foundations/ThemeProvider',
   component: ThemeProvider,
   parameters: {
     layout: 'centered',

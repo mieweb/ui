@@ -4,7 +4,7 @@ import { Button } from '../Button';
 import { VisuallyHidden } from './VisuallyHidden';
 
 const meta: Meta<typeof VisuallyHidden> = {
-  title: 'Components/VisuallyHidden',
+  title: 'Foundations/VisuallyHidden',
   component: VisuallyHidden,
   parameters: {
     layout: 'centered',

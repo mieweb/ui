@@ -62,7 +62,10 @@ function MessageAvatar({
   };
 
   return (
-    <div className={cn(avatarVariants({ role, size }), className)}>
+    <div
+      data-slot="ai-message-avatar"
+      className={cn(avatarVariants({ role, size }), className)}
+    >
       {role === 'assistant' ? (
         <SparklesIcon size="md" />
       ) : role === 'user' ? (
@@ -115,6 +118,7 @@ function AITypingIndicator({ className }: { className?: string }) {
 
   return (
     <div
+      data-slot="ai-typing-indicator"
       className={cn('inline-flex items-center justify-center gap-2', className)}
     >
       <span
@@ -184,7 +188,10 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
 
   if (content.type === 'thinking' && content.text) {
     return (
-      <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50">
+      <div
+        data-slot="ai-message-thinking"
+        className="rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50"
+      >
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="flex w-full items-center justify-between px-3 py-2 text-left"
@@ -223,7 +230,10 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
 
   if (content.type === 'code' && content.text) {
     return (
-      <pre className="rounded-lg bg-neutral-900 p-3 text-sm dark:bg-neutral-950">
+      <pre
+        data-slot="ai-message-code"
+        className="rounded-lg bg-neutral-900 p-3 text-sm dark:bg-neutral-950"
+      >
         <code
           className={content.language ? `language-${content.language}` : ''}
         >
@@ -310,7 +320,10 @@ export function AIMessageDisplay({
   // For tool messages, render just the tool call without bubble
   if (message.role === 'tool') {
     return (
-      <div className={cn(messageVariants({ role: message.role }), className)}>
+      <div
+        data-slot="ai-message"
+        className={cn(messageVariants({ role: message.role }), className)}
+      >
         {showAvatar && <MessageAvatar role={message.role} />}
         <div className="flex-1 space-y-2">
           {message.content.map((content, index) => (
@@ -326,18 +339,28 @@ export function AIMessageDisplay({
   }
 
   return (
-    <div className={cn(messageVariants({ role: message.role }), className)}>
+    <div
+      data-slot="ai-message"
+      className={cn(messageVariants({ role: message.role }), className)}
+    >
       {showAvatar && message.role !== 'system' && (
         <MessageAvatar role={message.role} userName={userName} />
       )}
 
       <div
         className={cn(
-          'flex flex-col gap-1',
+          'flex min-w-0 flex-1 flex-col gap-1',
           message.role === 'user' && 'items-end'
         )}
       >
-        <div className={bubbleVariants({ role: message.role })}>
+        <div
+          data-slot="ai-message-bubble"
+          className={cn(
+            bubbleVariants({ role: message.role }),
+            message.status === 'error' &&
+              'border border-red-300 dark:border-red-700'
+          )}
+        >
           {hasContent ? (
             <div className="space-y-3">
               {message.content.map((content, index) => (
@@ -356,13 +379,18 @@ export function AIMessageDisplay({
         </div>
 
         {showTimestamp && (
-          <span className="px-2 text-xs text-neutral-500">
+          <span
+            data-slot="ai-message-timestamp"
+            className="px-2 text-xs text-neutral-500"
+          >
             {formatTime(message.timestamp)}
           </span>
         )}
 
         {message.status === 'error' && (
-          <span className="px-2 text-xs text-red-500">Failed to send</span>
+          <span className="px-2 text-xs text-red-500">
+            {message.role === 'user' ? 'Failed to send' : 'An error occurred'}
+          </span>
         )}
       </div>
     </div>

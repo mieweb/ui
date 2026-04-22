@@ -1,16 +1,15 @@
 'use client';
 
 import * as React from 'react';
-
-import { Button } from '../Button/Button';
-import { Input } from '../Input/Input';
 import {
   Modal,
-  ModalBody,
-  ModalFooter,
   ModalHeader,
   ModalTitle,
+  ModalBody,
+  ModalFooter,
 } from '../Modal/Modal';
+import { Button } from '../Button/Button';
+import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
 
 export interface Role {
@@ -102,12 +101,15 @@ export function InviteUserModal({
           <ModalTitle>Invite User</ModalTitle>
         </ModalHeader>
 
-        <ModalBody className="space-y-4">
+        <ModalBody className="space-y-4" data-slot="invite-user-body">
           {entityDisplayName && (
-            <div className="rounded-lg bg-muted p-3">
-              <p className="text-sm text-muted-foreground">
+            <div
+              className="bg-muted rounded-lg p-3"
+              data-slot="invite-user-entity"
+            >
+              <p className="text-muted-foreground text-sm">
                 Inviting user to:{' '}
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   {entityDisplayName}
                 </span>
               </p>
@@ -116,7 +118,10 @@ export function InviteUserModal({
 
           {/* Success Message */}
           {successMessage && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20">
+            <div
+              className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20"
+              data-slot="invite-user-success"
+            >
               <div className="flex items-center gap-2">
                 <svg
                   className="h-5 w-5 text-green-500"
@@ -140,7 +145,10 @@ export function InviteUserModal({
 
           {/* Error Message */}
           {errorMessage && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+            <div
+              className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+              data-slot="invite-user-error"
+            >
               <div className="flex items-center gap-2">
                 <svg
                   className="h-5 w-5 text-red-500"
@@ -170,11 +178,15 @@ export function InviteUserModal({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="user@example.com"
             required
+            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
           />
 
           {/* Name fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div
+            className="grid grid-cols-2 gap-4"
+            data-slot="invite-user-name-grid"
+          >
             <Input
               label="First Name"
               type="text"
@@ -205,16 +217,18 @@ export function InviteUserModal({
           />
 
           {/* Personal Message */}
-          <div>
+          <div data-slot="invite-user-message">
             <label
               htmlFor="invite-message"
-              className="mb-1 block text-sm font-medium text-foreground"
+              className="text-foreground mb-1 block text-sm font-medium"
+              data-slot="invite-user-label"
             >
               Personal Message (optional)
             </label>
             <textarea
               id="invite-message"
-              className="focus:ring-primary w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2"
+              data-slot="invite-user-textarea"
+              className="border-input bg-background text-foreground focus:ring-primary w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -223,7 +237,10 @@ export function InviteUserModal({
           </div>
 
           {/* Info text */}
-          <p className="text-xs text-muted-foreground">
+          <p
+            className="text-muted-foreground text-xs"
+            data-slot="invite-user-info"
+          >
             An email invitation will be sent to this address. If the user
             doesn&apos;t have an account, they&apos;ll be prompted to create
             one.
@@ -243,7 +260,8 @@ export function InviteUserModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  data-slot="invite-user-spinner"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

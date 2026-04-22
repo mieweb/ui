@@ -1,19 +1,18 @@
 'use client';
 
 import * as React from 'react';
-
 import { cn } from '../../utils';
 import { Button } from '../Button';
 import { Input } from '../Input';
+import { Select, type SelectOption } from '../Select';
 import {
   Modal,
-  ModalBody,
-  ModalClose,
-  ModalFooter,
   ModalHeader,
   ModalTitle,
+  ModalClose,
+  ModalBody,
+  ModalFooter,
 } from '../Modal';
-import { Select, type SelectOption } from '../Select';
 
 export interface BackgroundCheckCandidate {
   /** Candidate ID */
@@ -165,7 +164,7 @@ export function CheckrIntegration({
   // Reset selected reports when the available reports change
   // or when the integration is disconnected to avoid stale selections.
   React.useEffect(() => {
-    setSelectedReports(new Set());
+    setSelectedReports((prev) => (prev.size > 0 ? new Set() : prev));
   }, [reports, connected]);
 
   const statusLabels: Record<string, string> = {
@@ -184,18 +183,22 @@ export function CheckrIntegration({
 
   // Status badge styles using design system tokens
   const statusStyles: Record<string, string> = {
-    pending: 'border-warning text-warning bg-warning/10',
-    running: 'border-warning text-warning bg-warning/10',
-    complete: 'border-success text-success bg-success/10',
-    failed: 'border-destructive text-destructive bg-destructive/10',
+    pending:
+      'border-warning text-warning-700 bg-warning/10 dark:text-warning-300',
+    running:
+      'border-warning text-warning-700 bg-warning/10 dark:text-warning-300',
+    complete:
+      'border-success text-success-700 bg-success/10 dark:text-success-300',
+    failed:
+      'border-destructive text-destructive-700 bg-destructive/10 dark:text-destructive-300',
     expired: 'border-muted-foreground text-muted-foreground bg-muted',
   };
 
   // Result text colors using design system tokens
   const resultStyles: Record<string, string> = {
-    clear: 'text-success',
-    consider: 'text-warning',
-    adverse_action: 'text-destructive',
+    clear: 'text-success-700 dark:text-success-300',
+    consider: 'text-warning-700 dark:text-warning-300',
+    adverse_action: 'text-destructive-700 dark:text-destructive-300',
   };
 
   // Status dot colors for summary
@@ -281,13 +284,22 @@ export function CheckrIntegration({
   };
 
   return (
-    <div className={cn('checkr-integration', className)}>
+    <div
+      data-slot="checkr-integration"
+      className={cn('checkr-integration', className)}
+    >
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div
+        data-slot="checkr-header"
+        className="mb-6 flex items-center justify-between"
+      >
         <div className="flex items-center gap-3">
-          <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg">
+          <div
+            data-slot="checkr-header-icon"
+            className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg"
+          >
             <svg
-              className="h-6 w-6 text-success"
+              className="text-success-700 dark:text-success-300 h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -301,9 +313,9 @@ export function CheckrIntegration({
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Checkr</h3>
+            <h3 className="text-foreground text-lg font-semibold">Checkr</h3>
             {connected && account?.name && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {account.name}
                 {account.plan && (
                   <span className="ml-2 text-xs">({account.plan})</span>
@@ -339,7 +351,10 @@ export function CheckrIntegration({
 
       {/* Error State */}
       {error && (
-        <div className="bg-destructive/10 border-destructive/20 mb-4 rounded-lg border p-4 text-destructive">
+        <div
+          data-slot="checkr-error"
+          className="bg-destructive/10 border-destructive/20 text-destructive-700 dark:text-destructive-300 mb-4 rounded-lg border p-4"
+        >
           <svg
             className="mr-2 inline-block h-4 w-4"
             fill="none"
@@ -362,7 +377,10 @@ export function CheckrIntegration({
         <>
           {/* Status Summary */}
           {reports.length > 0 && (
-            <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div
+              data-slot="checkr-status-summary"
+              className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm"
+            >
               {Object.entries(statusCounts)
                 .filter(([, count]) => count > 0)
                 .map(([status, count]) => (
@@ -382,7 +400,7 @@ export function CheckrIntegration({
           )}
 
           {/* Actions */}
-          <div className="mb-6 flex flex-wrap gap-3">
+          <div data-slot="checkr-actions" className="mb-6 flex flex-wrap gap-3">
             <Button variant="primary" onClick={() => setShowInviteModal(true)}>
               <svg
                 className="mr-2 h-4 w-4"
@@ -418,9 +436,15 @@ export function CheckrIntegration({
           </div>
 
           {/* Reports Card */}
-          <div className="overflow-hidden rounded-lg border border-border bg-card">
-            <div className="border-b border-border px-4 py-3">
-              <h4 className="font-medium text-card-foreground">
+          <div
+            data-slot="checkr-reports-card"
+            className="bg-card border-border overflow-hidden rounded-lg border"
+          >
+            <div
+              data-slot="checkr-reports-header"
+              className="border-border border-b px-4 py-3"
+            >
+              <h4 className="text-card-foreground font-medium">
                 {viewReports}
               </h4>
             </div>
@@ -431,10 +455,11 @@ export function CheckrIntegration({
               </div>
             ) : reports.length > 0 ? (
               <>
-                <div className="divide-y divide-border">
+                <div className="divide-border divide-y">
                   {reports.map((report) => (
                     <div
                       key={report.id}
+                      data-slot="checkr-report-row"
                       className="hover:bg-muted/50 flex items-center justify-between px-4 py-4 transition-colors"
                     >
                       <div className="flex items-center gap-4">
@@ -471,14 +496,14 @@ export function CheckrIntegration({
 
                         {/* Candidate Info */}
                         <div>
-                          <p className="font-medium text-card-foreground">
+                          <p className="text-card-foreground font-medium">
                             {report.candidate.name}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {report.candidate.email}
                           </p>
                           {report.packageName && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {report.packageName}
                             </p>
                           )}
@@ -505,7 +530,7 @@ export function CheckrIntegration({
                             {resultLabels[report.result] || report.result}
                           </p>
                         )}
-                        <p className="mt-1 text-xs text-muted-foreground">
+                        <p className="text-muted-foreground mt-1 text-xs">
                           {formatDate(report.completedAt || report.createdAt)}
                         </p>
                       </div>
@@ -514,8 +539,11 @@ export function CheckrIntegration({
                 </div>
 
                 {/* Footer */}
-                <div className="bg-muted/30 flex items-center justify-between border-t border-border px-4 py-3">
-                  <span className="text-sm text-muted-foreground">
+                <div
+                  data-slot="checkr-reports-footer"
+                  className="border-border bg-muted/30 flex items-center justify-between border-t px-4 py-3"
+                >
+                  <span className="text-muted-foreground text-sm">
                     {selectedReports.size > 0
                       ? `${selectedReports.size} report${selectedReports.size > 1 ? 's' : ''} selected`
                       : noReportsSelected}
@@ -541,7 +569,10 @@ export function CheckrIntegration({
                 </div>
               </>
             ) : (
-              <div className="py-8 text-center text-muted-foreground">
+              <div
+                data-slot="checkr-empty-state"
+                className="text-muted-foreground py-8 text-center"
+              >
                 <svg
                   className="text-muted-foreground/30 mx-auto mb-2 h-12 w-12"
                   fill="none"
@@ -564,7 +595,10 @@ export function CheckrIntegration({
 
       {/* Not Connected State */}
       {!connected && !error && (
-        <div className="rounded-lg border border-dashed border-border p-8 text-center">
+        <div
+          data-slot="checkr-not-connected"
+          className="border-border rounded-lg border border-dashed p-8 text-center"
+        >
           <svg
             className="text-muted-foreground/30 mx-auto mb-4 h-12 w-12"
             fill="none"
@@ -578,7 +612,7 @@ export function CheckrIntegration({
               d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
             />
           </svg>
-          <p className="mb-4 text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             Connect your Checkr account to run background checks on candidates
           </p>
           <Button variant="primary" onClick={onConnect}>

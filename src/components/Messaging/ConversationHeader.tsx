@@ -165,6 +165,7 @@ const ConversationHeader = React.forwardRef<
     return (
       <header
         ref={ref}
+        data-slot="conversation-header"
         className={cn(headerVariants({ size }), className)}
         {...props}
       >
@@ -201,7 +202,10 @@ const ConversationHeader = React.forwardRef<
           ))}
 
         {/* Avatar */}
-        <div className="relative shrink-0">
+        <div
+          data-slot="conversation-header-avatar"
+          className="relative shrink-0"
+        >
           <div
             className={cn(
               'flex h-10 w-10 items-center justify-center rounded-full',
@@ -232,7 +236,7 @@ const ConversationHeader = React.forwardRef<
         </div>
 
         {/* Title and subtitle */}
-        <div className="min-w-0 flex-1">
+        <div data-slot="conversation-header-info" className="min-w-0 flex-1">
           <h2 className="truncate font-semibold text-neutral-900 dark:text-neutral-100">
             {displayTitle}
           </h2>
@@ -323,6 +327,7 @@ const ConversationListItem = React.forwardRef<
       ref={ref}
       type="button"
       onClick={() => onSelect?.(conversation)}
+      data-slot="conversation-list-item"
       className={cn(
         'flex w-full items-center gap-3 px-4 py-3',
         'text-left transition-colors',
@@ -336,7 +341,10 @@ const ConversationListItem = React.forwardRef<
       {...props}
     >
       {/* Avatar */}
-      <div className="relative shrink-0">
+      <div
+        data-slot="conversation-list-item-avatar"
+        className="relative shrink-0"
+      >
         <div
           className={cn(
             'flex h-12 w-12 items-center justify-center rounded-full',
@@ -365,7 +373,10 @@ const ConversationListItem = React.forwardRef<
       </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1">
+      <div
+        data-slot="conversation-list-item-content"
+        className="min-w-0 flex-1"
+      >
         <div className="flex items-center justify-between gap-2">
           <h3
             className={cn(
@@ -396,6 +407,7 @@ const ConversationListItem = React.forwardRef<
           </p>
           {isUnread && (
             <span
+              data-slot="conversation-list-item-badge"
               className={cn(
                 'flex shrink-0 items-center justify-center',
                 'h-5 min-w-[20px] rounded-full px-1.5',
@@ -421,7 +433,7 @@ const ConversationListItem = React.forwardRef<
         )}
         {conversation.isMuted && (
           <svg
-            className="h-4 w-4 text-neutral-400"
+            className="h-4 w-4 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

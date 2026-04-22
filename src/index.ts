@@ -4,7 +4,10 @@ export * from './components/ActivityFeed';
 export * from './components/AddContactModal';
 export * from './components/AdditionalFields';
 export * from './components/Address';
-export * from './components/AGGrid';
+// AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
+// This avoids forcing ag-grid-community/ag-grid-react on all consumers.
+// See: src/ag-grid.ts
+// Same with DataVis (src/datavis.ts)
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AppHeader';
@@ -25,9 +28,12 @@ export * from './components/ClaimProviderForm';
 export * from './components/CommandPalette';
 export * from './components/ConfirmDialog';
 export * from './components/ConnectionStatus';
+export * from './components/CountBadge';
+export * from './components/CountryCodeDropdown';
 export * from './components/CookieConsent';
 export * from './components/CreateInvoiceModal';
 export * from './components/CSVColumnMapper';
+export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
@@ -87,6 +93,7 @@ export * from './components/OrderLookupForm';
 export * from './components/OrderSidebar';
 export * from './components/PageHeader';
 export * from './components/Pagination';
+export * from './components/PatientHeader';
 export * from './components/PaymentHistoryTable';
 export * from './components/PaymentMethod';
 export * from './components/PendingClaimsTable';
@@ -140,6 +147,7 @@ export * from './components/Sidebar';
 export * from './components/SiteFooter';
 export * from './components/SiteHeader';
 export * from './components/Skeleton';
+export * from './components/Slider';
 export * from './components/Spinner';
 export * from './components/SSOConfigForm';
 export * from './components/StatCard';
@@ -147,6 +155,7 @@ export * from './components/StepIndicator';
 export * from './components/StripeBadge';
 export * from './components/Switch';
 export * from './components/Table';
+export * from './components/TableOfContents';
 export * from './components/Tabs';
 export * from './components/Text';
 export * from './components/Textarea';
@@ -161,6 +170,8 @@ export {
   ReportDatePicker,
   type ReportDatePickerProps,
   type ReportResult,
+  ReportTimeRange,
+  type ReportTimeRangeProps,
   type SystemReport,
   WebChartReportViewer,
   type WebChartReportViewerProps,

@@ -8,6 +8,29 @@ import {
   ServiceBadgeGroup,
   ServiceCategoryBadge,
 } from './ServiceBadge';
+import {
+  TestTubeIcon,
+  StethoscopeIcon,
+  BriefcaseIcon,
+  HeartIcon,
+  FlaskIcon,
+  TagIcon,
+} from '../Icons';
+import type { LucideIcon } from 'lucide-react';
+
+const iconMap: Record<string, LucideIcon | undefined> = {
+  none: undefined,
+  'test-tube': TestTubeIcon,
+  medical: StethoscopeIcon,
+  briefcase: BriefcaseIcon,
+  heart: HeartIcon,
+  lab: FlaskIcon,
+  tag: TagIcon,
+};
+
+type ServiceBadgeStoryArgs = React.ComponentProps<typeof ServiceBadge> & {
+  iconName?: keyof typeof iconMap;
+};
 
 const mockServices = [
   { id: '1', name: 'Drug Testing', slug: 'drug-testing' },
@@ -16,8 +39,8 @@ const mockServices = [
   { id: '4', name: 'Hair Testing', slug: 'hair-testing' },
 ];
 
-const meta: Meta<typeof ServiceBadge> = {
-  title: 'Provider/ServiceBadge',
+const meta: Meta<ServiceBadgeStoryArgs> = {
+  title: 'Components/Status Indicators/ServiceBadge',
   component: ServiceBadge,
   parameters: {
     layout: 'centered',
@@ -41,6 +64,36 @@ const meta: Meta<typeof ServiceBadge> = {
       control: 'select',
       options: ['xs', 'sm', 'md', 'lg', 'xl'],
     },
+    icon: { table: { disable: true } },
+    iconName: {
+      control: 'select',
+      options: Object.keys(iconMap),
+      description: 'Icon to display before the label',
+    },
+    removable: {
+      control: 'boolean',
+      description: 'Show remove (X) button on the badge',
+    },
+    interactive: {
+      control: 'boolean',
+      description: 'Enable hover/focus interactive styles',
+    },
+    onRemove: { action: 'removed' },
+    onClick: { action: 'clicked' },
+  },
+  args: {
+    children: 'Drug Testing',
+    iconName: 'none',
+    removable: false,
+  },
+  render: ({ iconName, ...args }: ServiceBadgeStoryArgs) => {
+    const Icon = iconName ? iconMap[iconName] : undefined;
+    return (
+      <ServiceBadge
+        {...args}
+        icon={Icon ? <Icon className="h-3.5 w-3.5" /> : undefined}
+      />
+    );
   },
 };
 
@@ -48,11 +101,7 @@ export default meta;
 type Story = StoryObj<typeof ServiceBadge>;
 
 // Default badge
-export const Default: Story = {
-  args: {
-    children: 'Drug Testing',
-  },
-};
+export const Default: Story = {};
 
 // All variants comparison
 export const AllVariants: Story = {

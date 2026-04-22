@@ -106,18 +106,28 @@ export function OrderList<T>({
   }, [orders, tabs, getOrderStatus]);
 
   return (
-    <div className={cn('flex h-full flex-col', className)}>
+    <div
+      className={cn('flex h-full flex-col', className)}
+      data-slot="order-list"
+    >
       {/* Header with tabs and actions */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div
+        className="border-b border-gray-200 dark:border-gray-700"
+        data-slot="order-list-header"
+      >
         <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Tabs */}
-          <div className="flex gap-1 overflow-x-auto">
+          <div
+            className="flex gap-1 overflow-x-auto"
+            data-slot="order-list-tabs"
+          >
             {tabs.map((tab) => {
               const count = tab.count ?? tabCounts[tab.id];
               return (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange?.(tab.id)}
+                  data-slot="order-list-tab"
                   className={cn(
                     'whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                     activeTab === tab.id
@@ -128,6 +138,7 @@ export function OrderList<T>({
                   {tab.label}
                   {count !== undefined && (
                     <span
+                      data-slot="order-list-tab-count"
                       className={cn(
                         'ml-2 rounded-full px-2 py-0.5 text-xs',
                         activeTab === tab.id
@@ -144,9 +155,12 @@ export function OrderList<T>({
           </div>
 
           {/* Actions and search */}
-          <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-2"
+            data-slot="order-list-actions"
+          >
             {showSearch && (
-              <div className="relative">
+              <div className="relative" data-slot="order-list-search">
                 <svg
                   className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                   fill="none"
@@ -175,9 +189,12 @@ export function OrderList<T>({
       </div>
 
       {/* Order list */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" data-slot="order-list-body">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
+          <div
+            className="flex items-center justify-center py-12"
+            data-slot="order-list-loading"
+          >
             <svg
               className="h-8 w-8 animate-spin text-blue-500"
               fill="none"
@@ -199,7 +216,10 @@ export function OrderList<T>({
             </svg>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+          <div
+            className="flex flex-col items-center justify-center px-4 py-12 text-center"
+            data-slot="order-list-empty"
+          >
             {emptyIcon || (
               <svg
                 className="mb-4 h-12 w-12 text-gray-400"
@@ -215,10 +235,18 @@ export function OrderList<T>({
                 />
               </svg>
             )}
-            <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+            <p
+              className="text-gray-500 dark:text-gray-400"
+              data-slot="order-list-empty-message"
+            >
+              {emptyMessage}
+            </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          <div
+            className="divide-y divide-gray-200 dark:divide-gray-700"
+            data-slot="order-list-items"
+          >
             {filteredOrders.map((order, index) => (
               <div key={index}>{renderOrder(order, index)}</div>
             ))}

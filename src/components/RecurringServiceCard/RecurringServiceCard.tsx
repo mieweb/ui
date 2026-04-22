@@ -210,6 +210,7 @@ export function RecurringServiceCard({
 
   return (
     <div
+      data-slot="recurring-service-card"
       className={cn(
         'rounded-xl border-2 bg-card text-card-foreground shadow-sm',
         currentStyle.border,
@@ -230,7 +231,10 @@ export function RecurringServiceCard({
       }}
     >
       {/* Card Header - matches CSVColumnMapper style */}
-      <div className="flex items-center gap-2 px-4 py-3">
+      <div
+        data-slot="recurring-service-header"
+        className="flex items-center gap-2 px-4 py-3"
+      >
         {/* Status Icon */}
         {currentStyle.icon}
         <h6
@@ -242,7 +246,7 @@ export function RecurringServiceCard({
       </div>
 
       {/* Card Body - matches CSVColumnMapper style */}
-      <div className="space-y-4 px-4 pb-4">
+      <div data-slot="recurring-service-body" className="space-y-4 px-4 pb-4">
         {/* Provider */}
         {showProvider && service.providerName && (
           <div>
@@ -343,6 +347,7 @@ export function RecurringServiceAddCard({
     <button
       type="button"
       onClick={onClick}
+      data-slot="recurring-service-add"
       className={cn(
         'hover:border-primary hover:bg-primary/5 hover:text-primary bg-muted/50 flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-4 text-muted-foreground transition-colors',
         className
@@ -454,6 +459,7 @@ export function RecurringServiceSetupModal({
           'w-full max-w-lg rounded-lg bg-card text-card-foreground shadow-xl',
           className
         )}
+        data-slot="recurring-service-modal"
       >
         {/* Header */}
         <div className="bg-primary text-primary-foreground flex items-center justify-between p-4">
@@ -612,7 +618,10 @@ export function RecurringServiceGrid({
   className,
 }: RecurringServiceGridProps) {
   return (
-    <div className={cn('grid grid-cols-1 gap-4 md:grid-cols-2', className)}>
+    <div
+      data-slot="recurring-service-grid"
+      className={cn('grid grid-cols-1 gap-4 md:grid-cols-2', className)}
+    >
       {/* Add Card */}
       <RecurringServiceAddCard onClick={onAdd} />
 

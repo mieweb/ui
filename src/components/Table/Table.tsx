@@ -1,13 +1,11 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 
 // ============================================================================
 // Table Root
 // ============================================================================
 
-export interface TableProps
-  extends React.TableHTMLAttributes<HTMLTableElement> {
+export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
   /** Whether to make the table responsive with horizontal scroll */
   responsive?: boolean;
 }
@@ -38,6 +36,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
     const table = (
       <table
         ref={ref}
+        data-slot="table"
         className={cn('w-full caption-bottom text-sm', className)}
         {...props}
       >
@@ -63,7 +62,12 @@ export type TableHeaderProps = React.HTMLAttributes<HTMLTableSectionElement>;
 
 const TableHeader = React.forwardRef<HTMLTableSectionElement, TableHeaderProps>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn('[&_tr]:border-b', className)} {...props} />
+    <thead
+      ref={ref}
+      data-slot="table-header"
+      className={cn('[&_tr]:border-b', className)}
+      {...props}
+    />
   )
 );
 
@@ -79,6 +83,7 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
   ({ className, ...props }, ref) => (
     <tbody
       ref={ref}
+      data-slot="table-body"
       className={cn('[&_tr:last-child]:border-0', className)}
       {...props}
     />
@@ -97,6 +102,7 @@ const TableFooter = React.forwardRef<HTMLTableSectionElement, TableFooterProps>(
   ({ className, ...props }, ref) => (
     <tfoot
       ref={ref}
+      data-slot="table-footer"
       className={cn(
         'bg-muted/50 border-t font-medium [&>tr]:last:border-b-0',
         className
@@ -112,8 +118,7 @@ TableFooter.displayName = 'TableFooter';
 // Table Row
 // ============================================================================
 
-export interface TableRowProps
-  extends React.HTMLAttributes<HTMLTableRowElement> {
+export interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   /** Whether the row is selected */
   selected?: boolean;
 }
@@ -122,9 +127,10 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
   ({ className, selected, ...props }, ref) => (
     <tr
       ref={ref}
+      data-slot="table-row"
       data-selected={selected}
       className={cn(
-        'border-b border-border transition-colors',
+        'border-border border-b transition-colors',
         'hover:bg-muted/50',
         'data-[selected=true]:bg-muted',
         className
@@ -140,8 +146,7 @@ TableRow.displayName = 'TableRow';
 // Table Head
 // ============================================================================
 
-export interface TableHeadProps
-  extends React.ThHTMLAttributes<HTMLTableCellElement> {
+export interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
   /** Sortable column configuration */
   sortable?: boolean;
   /** Current sort direction */
@@ -157,8 +162,8 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
         type="button"
         onClick={onSort}
         className={cn(
-          'flex items-center gap-1 transition-colors hover:text-foreground',
-          'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+          'hover:text-foreground flex items-center gap-1 transition-colors',
+          'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none'
         )}
         aria-label={`Sort column ${sortDirection === 'asc' ? 'descending' : 'ascending'}`}
       >
@@ -172,6 +177,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
     return (
       <th
         ref={ref}
+        data-slot="table-head"
         aria-sort={
           sortable
             ? sortDirection === 'asc'
@@ -182,7 +188,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
             : undefined
         }
         className={cn(
-          'h-12 px-4 text-left align-middle font-medium text-muted-foreground',
+          'text-muted-foreground h-12 px-4 text-left align-middle font-medium',
           '[&:has([role=checkbox])]:pr-0',
           className
         )}
@@ -206,6 +212,7 @@ const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
   ({ className, ...props }, ref) => (
     <td
       ref={ref}
+      data-slot="table-cell"
       className={cn(
         'p-4 align-middle [&:has([role=checkbox])]:pr-0',
         className
@@ -229,7 +236,8 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn('mt-4 text-sm text-muted-foreground', className)}
+    data-slot="table-caption"
+    className={cn('text-muted-foreground mt-4 text-sm', className)}
     {...props}
   />
 ));
@@ -303,11 +311,11 @@ function SortIcon({ direction }: { direction?: 'asc' | 'desc' | null }) {
 
 export {
   Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
   TableHeader,
+  TableBody,
+  TableFooter,
   TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
 };

@@ -5,10 +5,9 @@
  */
 
 import * as React from 'react';
-
-import { useEscapeKey } from '../../hooks/useEscapeKey';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { cn } from '../../utils/cn';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import type { AIChatProps } from './AIChat';
 import { AIChat } from './AIChat';
 import { SparklesIcon } from './icons';
@@ -50,11 +49,12 @@ export function AIChatTrigger({
   return (
     <button
       onClick={onClick}
+      data-slot="ai-chat-trigger"
       className={cn(
         'fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg',
         'bg-primary-500 text-white',
         'hover:bg-primary-600',
-        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+        'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
         'dark:focus:ring-offset-neutral-900',
         'transition-all duration-200',
         isOpen && 'scale-0 opacity-0',
@@ -65,12 +65,15 @@ export function AIChatTrigger({
     >
       {/* Pulse effect */}
       {pulse && !isOpen && (
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-400 opacity-75" />
+        <span className="bg-primary-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
       )}
 
       {/* Badge */}
       {badge && badge > 0 && (
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold">
+        <span
+          data-slot="ai-chat-trigger-badge"
+          className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold"
+        >
           {badge > 9 ? '9+' : badge}
         </span>
       )}
@@ -85,8 +88,10 @@ export function AIChatTrigger({
 // AI Chat Modal
 // ============================================================================
 
-export interface AIChatModalProps
-  extends Omit<AIChatProps, 'variant' | 'size'> {
+export interface AIChatModalProps extends Omit<
+  AIChatProps,
+  'variant' | 'size'
+> {
   /** Whether the modal is open */
   open: boolean;
   /** Callback when the modal should close */
@@ -146,6 +151,7 @@ export function AIChatModal({
       {/* Modal */}
       <div
         ref={modalRef}
+        data-slot="ai-chat-modal"
         className={cn(
           'fixed z-50',
           'animate-in fade-in-0 zoom-in-95',
@@ -180,8 +186,10 @@ export function AIChatModal({
 // Floating AI Chat (Combined Trigger + Modal)
 // ============================================================================
 
-export interface FloatingAIChatProps
-  extends Omit<AIChatModalProps, 'open' | 'onOpenChange'> {
+export interface FloatingAIChatProps extends Omit<
+  AIChatModalProps,
+  'open' | 'onOpenChange'
+> {
   /** Initial open state */
   defaultOpen?: boolean;
   /** Controlled open state */

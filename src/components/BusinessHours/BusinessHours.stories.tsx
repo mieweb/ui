@@ -70,7 +70,7 @@ Sunday: Closed`,
 };
 
 const meta: Meta<typeof BusinessHours> = {
-  title: 'Provider Directory/BusinessHours',
+  title: 'Product/Provider/BusinessHours',
   component: BusinessHours,
   tags: ['autodocs'],
   parameters: {

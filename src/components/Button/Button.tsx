@@ -17,8 +17,8 @@ const buttonVariants = cva(
       variant: {
         primary: [
           'bg-primary-800 text-white',
-          'hover:bg-primary-700',
-          'active:bg-primary-900',
+          'hover:bg-primary-900',
+          'active:bg-primary-950',
         ],
         secondary: [
           'bg-neutral-200 text-neutral-900',
@@ -115,9 +115,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    const resolvedSize = size ?? 'md';
     return (
       <button
-        className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+        data-slot="button"
+        data-size={resolvedSize}
+        className={cn(
+          buttonVariants({ variant, size: resolvedSize, fullWidth }),
+          className
+        )}
         ref={ref}
         disabled={disabled || isLoading}
         aria-busy={isLoading}

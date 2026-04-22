@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -74,12 +73,15 @@ function Breadcrumb({
   }, [items, maxItems]);
 
   const defaultSeparator = (
-    <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+    <ChevronRightIcon className="text-muted-foreground h-4 w-4 shrink-0" />
   );
 
   return (
-    <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center gap-1.5">
+    <nav data-slot="breadcrumb" aria-label="Breadcrumb" className={className}>
+      <ol
+        data-slot="breadcrumb-list"
+        className="flex flex-wrap items-center gap-1.5"
+      >
         {displayedItems.map((item, index) => {
           const isLast = index === displayedItems.length - 1;
           const isEllipsis = (item as BreadcrumbItem & { isEllipsis?: boolean })
@@ -88,14 +90,23 @@ function Breadcrumb({
           return (
             <li key={index} className="flex items-center gap-1.5">
               {index > 0 && (
-                <span aria-hidden="true">{separator || defaultSeparator}</span>
+                <span data-slot="breadcrumb-separator" aria-hidden="true">
+                  {separator || defaultSeparator}
+                </span>
               )}
               {isEllipsis ? (
-                <span className="text-sm text-muted-foreground">...</span>
+                <span
+                  data-slot="breadcrumb-ellipsis"
+                  className="text-muted-foreground text-sm"
+                >
+                  ...
+                </span>
               ) : isLast || !item.href ? (
                 <BreadcrumbPage item={item} />
               ) : renderLink ? (
-                renderLink(item, index)
+                <span data-slot="breadcrumb-link">
+                  {renderLink(item, index)}
+                </span>
               ) : (
                 <BreadcrumbLink item={item} />
               )}
@@ -121,11 +132,12 @@ function BreadcrumbLink({ item }: BreadcrumbLinkProps) {
   return (
     <a
       href={item.href}
+      data-slot="breadcrumb-link"
       className={cn(
         'inline-flex items-center gap-1.5',
-        'text-sm text-muted-foreground',
-        'transition-colors hover:text-foreground',
-        'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+        'text-muted-foreground text-sm',
+        'hover:text-foreground transition-colors',
+        'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none'
       )}
     >
       {item.icon}
@@ -145,7 +157,8 @@ interface BreadcrumbPageProps {
 function BreadcrumbPage({ item }: BreadcrumbPageProps) {
   return (
     <span
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground"
+      data-slot="breadcrumb-page"
+      className="text-foreground inline-flex items-center gap-1.5 text-sm font-medium"
       aria-current="page"
     >
       {item.icon}
@@ -185,7 +198,7 @@ function ChevronRightIcon({ className }: { className?: string }) {
 function BreadcrumbSlash({ className }: { className?: string }) {
   return (
     <span
-      className={cn('mx-1 text-muted-foreground', className)}
+      className={cn('text-muted-foreground mx-1', className)}
       aria-hidden="true"
     >
       /

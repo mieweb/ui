@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const inputVariants = cva(
@@ -33,7 +32,8 @@ const inputVariants = cva(
 );
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
   /** Error message to display below the input */
   error?: string;
@@ -81,31 +81,36 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const describedByIds = [
       error ? errorId : null,
-      helperText ? helperId : null,
+      helperText && !error ? helperId : null,
       ariaDescribedBy,
     ]
       .filter(Boolean)
       .join(' ');
 
     return (
-      <div className={cn('flex flex-col gap-1.5', disabled && 'opacity-50')}>
+      <div
+        data-slot="input-wrapper"
+        className={cn('flex flex-col gap-1.5', disabled && 'opacity-50')}
+      >
         {label && (
           <label
+            data-slot="input-label"
             htmlFor={inputId}
             className={cn(
-              'text-sm font-medium text-foreground',
+              'text-foreground text-sm font-medium',
               hideLabel && 'sr-only'
             )}
           >
             {label}
             {required && (
-              <span className="ml-1 text-destructive" aria-hidden="true">
+              <span className="text-destructive ml-1" aria-hidden="true">
                 *
               </span>
             )}
           </label>
         )}
         <input
+          data-slot="input"
           id={inputId}
           ref={ref}
           className={cn(
@@ -119,12 +124,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p id={errorId} className="text-sm text-destructive" role="alert">
+          <p
+            id={errorId}
+            data-slot="input-error"
+            className="text-destructive text-sm"
+            role="alert"
+          >
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={helperId} className="text-sm text-muted-foreground">
+          <p
+            id={helperId}
+            data-slot="input-helper"
+            className="text-muted-foreground text-sm"
+          >
             {helperText}
           </p>
         )}

@@ -1,12 +1,12 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { LucideIcon } from 'lucide-react';
-import * as React from 'react';
 
 // Import all icons from our Icons module
 import * as Icons from './index';
 
 const meta: Meta = {
-  title: 'Components/Icons',
+  title: 'Foundations/Icons',
   parameters: {
     layout: 'fullscreen',
   },
@@ -225,11 +225,11 @@ function IconCard({ name, Icon }: IconCardProps) {
   return (
     <button
       onClick={copyImport}
-      className="hover:bg-muted/50 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-border bg-card p-4 transition-all hover:border-primary-300"
+      className="border-border bg-card hover:bg-muted/50 hover:border-primary-300 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border p-4 transition-all"
       title={`Click to copy import for ${name}`}
     >
-      <Icon className="h-6 w-6 text-foreground transition-colors group-hover:text-primary-500" />
-      <span className="break-all text-center text-xs text-muted-foreground transition-colors group-hover:text-foreground">
+      <Icon className="text-foreground group-hover:text-primary-500 h-6 w-6 transition-colors" />
+      <span className="text-muted-foreground group-hover:text-foreground text-center text-xs break-all transition-colors">
         {copied ? '✓ Copied!' : name.replace('Icon', '')}
       </span>
     </button>
@@ -248,10 +248,82 @@ interface IconSectionProps {
 function IconSection({ title, icons }: IconSectionProps) {
   return (
     <div className="mb-8">
-      <h2 className="mb-4 text-lg font-semibold text-foreground">{title}</h2>
+      <h2 className="text-foreground mb-4 text-lg font-semibold">{title}</h2>
       <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
         {icons.map((icon) => (
           <IconCard key={icon.name} name={icon.name} Icon={icon.component} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Brand Icons
+// ============================================================================
+
+interface BrandIconInfo {
+  name: string;
+  brand: string;
+  file: string;
+}
+
+const brandIcons: BrandIconInfo[] = [
+  { name: 'MIE', brand: 'mie', file: 'icon.svg' },
+  { name: 'Enterprise Health', brand: 'enterprise-health', file: 'icon.svg' },
+  { name: 'BlueHive', brand: 'bluehive', file: 'icon-lm.svg' },
+  { name: 'WebChart', brand: 'webchart', file: 'icon.svg' },
+  { name: 'Ozwell', brand: 'ozwell', file: 'icon.svg' },
+  { name: 'Waggleline', brand: 'waggleline', file: 'icon.svg' },
+];
+
+function BrandIconCard({ icon }: { icon: BrandIconInfo }) {
+  const [copied, setCopied] = React.useState(false);
+  const src = `/${icon.brand}/${icon.file}`;
+
+  const copySnippet = () => {
+    navigator.clipboard.writeText(
+      `<img src="${src}" alt="${icon.name}" className="h-5 w-5" />`
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copySnippet}
+      className="border-border bg-card hover:bg-muted/50 hover:border-primary-300 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border p-4 transition-all"
+      title={`Click to copy <img> snippet for ${icon.name}`}
+    >
+      <img
+        src={src}
+        alt={icon.name}
+        className="h-6 w-6 object-contain transition-transform group-hover:scale-110"
+      />
+      <span className="text-muted-foreground group-hover:text-foreground text-center text-xs break-all transition-colors">
+        {copied ? '✓ Copied!' : icon.name}
+      </span>
+    </button>
+  );
+}
+
+function BrandIconSection({
+  icons,
+  visible,
+}: {
+  icons: BrandIconInfo[];
+  visible: boolean;
+}) {
+  if (!visible || icons.length === 0) return null;
+  return (
+    <div className="mb-8">
+      <h2 className="text-foreground mb-4 text-lg font-semibold">
+        Brand Icons
+      </h2>
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
+        {icons.map((icon) => (
+          <BrandIconCard key={icon.brand} icon={icon} />
         ))}
       </div>
     </div>
@@ -265,7 +337,7 @@ function IconSection({ title, icons }: IconSectionProps) {
 function IconsPage() {
   const [search, setSearch] = React.useState('');
 
-  // Filter icons based on search
+  // Filter Lucide icons based on search
   const filteredCategories = React.useMemo(() => {
     if (!search.trim()) return iconCategories;
 
@@ -284,60 +356,74 @@ function IconsPage() {
     return result;
   }, [search]);
 
-  const totalIcons = Object.values(iconCategories).flat().length;
+  // Filter brand icons based on search
+  const filteredBrandIcons = React.useMemo(() => {
+    if (!search.trim()) return brandIcons;
+    const searchLower = search.toLowerCase();
+    return brandIcons.filter(
+      (icon) =>
+        icon.name.toLowerCase().includes(searchLower) ||
+        icon.brand.toLowerCase().includes(searchLower) ||
+        'brand'.startsWith(searchLower)
+    );
+  }, [search]);
+
+  const totalIcons =
+    Object.values(iconCategories).flat().length + brandIcons.length;
+
+  const hasResults =
+    Object.keys(filteredCategories).length > 0 || filteredBrandIcons.length > 0;
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="bg-background min-h-screen p-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-foreground">Icons</h1>
-          <p className="mb-4 text-muted-foreground">
-            {totalIcons} icons powered by{' '}
-            <a
-              href="https://lucide.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-500 hover:underline"
-            >
-              Lucide React
-            </a>
-            . Click any icon to copy its import statement.
+          <h1 className="text-foreground mb-2 text-3xl font-bold">Icons</h1>
+          <p className="text-muted-foreground mb-4">
+            {totalIcons} icons — Lucide React icons plus brand icons. Click any
+            icon to copy its import or snippet.
           </p>
 
           {/* Search */}
           <div className="relative max-w-md">
-            <Icons.SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Icons.SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search icons..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background py-2 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-2 focus:outline-none"
             />
           </div>
         </div>
 
-        {/* Icon Categories */}
+        {/* Lucide Icon Categories */}
         {Object.entries(filteredCategories).map(([category, icons]) => (
           <IconSection key={category} title={category} icons={icons} />
         ))}
 
-        {Object.keys(filteredCategories).length === 0 && (
-          <div className="py-12 text-center text-muted-foreground">
+        {/* Brand Icons */}
+        <BrandIconSection
+          icons={filteredBrandIcons}
+          visible={filteredBrandIcons.length > 0}
+        />
+
+        {!hasResults && (
+          <div className="text-muted-foreground py-12 text-center">
             No icons found matching &ldquo;{search}&rdquo;
           </div>
         )}
 
         {/* Usage Example */}
-        <div className="mt-12 rounded-xl border border-border bg-card p-6">
-          <h2 className="mb-4 text-xl font-bold text-foreground">Usage</h2>
+        <div className="bg-card border-border mt-12 rounded-xl border p-6">
+          <h2 className="text-foreground mb-4 text-xl font-bold">Usage</h2>
           <div className="space-y-4 text-sm">
             <div>
-              <h3 className="mb-2 font-semibold text-foreground">
+              <h3 className="text-foreground mb-2 font-semibold">
                 Import from @mieweb/ui:
               </h3>
-              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
+              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
                 {`import { HomeIcon, UserIcon, SettingsIcon } from '@mieweb/ui';
 
 function MyComponent() {
@@ -351,20 +437,20 @@ function MyComponent() {
               </pre>
             </div>
             <div>
-              <h3 className="mb-2 font-semibold text-foreground">
+              <h3 className="text-foreground mb-2 font-semibold">
                 Or import directly from lucide-react:
               </h3>
-              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
+              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
                 {`import { Accessibility, AlertOctagon } from 'lucide-react';
 
 // Full icon set available at https://lucide.dev/icons`}
               </pre>
             </div>
             <div>
-              <h3 className="mb-2 font-semibold text-foreground">
+              <h3 className="text-foreground mb-2 font-semibold">
                 Styling with Tailwind:
               </h3>
-              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
+              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
                 {`<HomeIcon className="h-4 w-4" />           {/* 16px */}
 <HomeIcon className="h-5 w-5" />           {/* 20px - default */}
 <HomeIcon className="h-6 w-6" />           {/* 24px */}

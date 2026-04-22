@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-
 import { AuthDialog, AuthMode, DEFAULT_SOCIAL_PROVIDERS } from './AuthDialog';
 
 // Demo-only controls interface
@@ -87,7 +86,7 @@ function AuthDialogDemo({
     <div className="min-h-screen bg-gray-100 p-8 dark:bg-gray-900">
       <button
         onClick={() => setIsOpen(true)}
-        className="rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-700"
+        className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white"
       >
         Open Auth Dialog
       </button>
@@ -114,7 +113,7 @@ function AuthDialogDemo({
 type AuthDialogStoryProps = DemoControls;
 
 const meta: Meta<AuthDialogStoryProps> = {
-  title: 'Components/AuthDialog',
+  title: 'Components/Forms & Inputs/AuthDialog',
   component: AuthDialogDemo,
   tags: ['autodocs'],
   parameters: {

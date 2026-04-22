@@ -1,8 +1,7 @@
-import { Building2, ChevronDown, ChevronRight, Shield } from 'lucide-react';
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 import { Checkbox } from '../Checkbox';
+import { ChevronDown, ChevronRight, Shield, Building2 } from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -117,18 +116,19 @@ function PermissionItem({
   };
 
   return (
-    <div className={cn('py-1', level > 0 && 'ml-4')}>
-      <div className="flex items-center gap-2">
+    <div className={cn('py-1', level > 0 && 'ml-4')} data-slot="perm-item">
+      <div className="flex items-center gap-2" data-slot="perm-item-row">
         {hasChildren && (
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="rounded p-0.5 hover:bg-muted"
+            className="hover:bg-muted rounded p-0.5"
+            data-slot="perm-item-toggle"
           >
             {isExpanded ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="text-muted-foreground h-4 w-4" />
             ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <ChevronRight className="text-muted-foreground h-4 w-4" />
             )}
           </button>
         )}
@@ -144,11 +144,12 @@ function PermissionItem({
         <label
           htmlFor={`permission-${permission.id}`}
           className={cn(
-            'cursor-pointer select-none text-sm',
+            'cursor-pointer text-sm select-none',
             level === 0 && 'font-semibold',
             level === 1 && 'font-medium',
             parentChecked === false && 'text-muted-foreground'
           )}
+          data-slot="perm-item-label"
         >
           {permission.name}
         </label>
@@ -284,18 +285,28 @@ export function PermissionsEditor({
   }, [assignedPermissions, permissionMap]);
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn('space-y-6', className)} data-slot="perm-editor">
       {/* User Role Section */}
-      <div>
-        <div className="mb-4 flex items-center gap-2 border-b pb-3">
+      <div data-slot="perm-section">
+        <div
+          className="mb-4 flex items-center gap-2 border-b pb-3"
+          data-slot="perm-section-header"
+        >
           <Shield className="text-primary h-5 w-5" />
-          <h3 className="text-lg font-semibold">{userRole}</h3>
+          <h3 className="text-lg font-semibold" data-slot="perm-section-title">
+            {userRole}
+          </h3>
           {userName && (
-            <span className="text-muted-foreground">— {userName}</span>
+            <span
+              className="text-muted-foreground"
+              data-slot="perm-section-username"
+            >
+              — {userName}
+            </span>
           )}
         </div>
 
-        <div className="space-y-4 pl-2">
+        <div className="space-y-4 pl-2" data-slot="perm-groups">
           {groups.map((group, groupIndex) => (
             <div key={group.id}>
               {/* Group Header */}
@@ -303,18 +314,24 @@ export function PermissionsEditor({
                 type="button"
                 onClick={() => toggleGroup(group.id)}
                 className="hover:bg-muted/50 -ml-2 flex w-full items-center gap-2 rounded py-2 pl-2 text-left"
+                data-slot="perm-group-header"
               >
                 {expandedGroups.has(group.id) ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className="text-muted-foreground h-4 w-4" />
                 ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="text-muted-foreground h-4 w-4" />
                 )}
-                <span className="font-semibold">{group.name}</span>
+                <span className="font-semibold" data-slot="perm-group-name">
+                  {group.name}
+                </span>
               </button>
 
               {/* Group Permissions */}
               {expandedGroups.has(group.id) && (
-                <div className="ml-6 mt-2 border-l pl-4">
+                <div
+                  className="mt-2 ml-6 border-l pl-4"
+                  data-slot="perm-group-list"
+                >
                   {group.permissions.map((permission) => (
                     <PermissionItem
                       key={permission.id}
@@ -342,7 +359,7 @@ export function PermissionsEditor({
 
               {/* Separator between groups */}
               {groupIndex < groups.length - 1 && (
-                <hr className="my-4 border-border" />
+                <hr className="border-border my-4" data-slot="perm-separator" />
               )}
             </div>
           ))}
@@ -351,17 +368,29 @@ export function PermissionsEditor({
 
       {/* Employer Access Section */}
       {showEmployerAccess && employers.length > 0 && (
-        <div>
-          <div className="mb-4 flex items-center gap-2 border-b pb-3">
+        <div data-slot="perm-employer-section">
+          <div
+            className="mb-4 flex items-center gap-2 border-b pb-3"
+            data-slot="perm-section-header"
+          >
             <Building2 className="text-primary h-5 w-5" />
-            <h3 className="text-lg font-semibold">{employerAccess}</h3>
+            <h3
+              className="text-lg font-semibold"
+              data-slot="perm-section-title"
+            >
+              {employerAccess}
+            </h3>
           </div>
 
-          <div className="max-h-60 space-y-2 overflow-y-auto pl-2">
+          <div
+            className="max-h-60 space-y-2 overflow-y-auto pl-2"
+            data-slot="perm-employer-list"
+          >
             {employers.map((employer) => (
               <div
                 key={employer.id}
                 className="hover:bg-muted/50 flex items-center gap-3 rounded px-3 py-2"
+                data-slot="perm-employer-row"
               >
                 <Checkbox
                   id={`employer-${employer.id}`}
@@ -371,10 +400,16 @@ export function PermissionsEditor({
                 <label
                   htmlFor={`employer-${employer.id}`}
                   className="flex-1 cursor-pointer text-sm"
+                  data-slot="perm-employer-label"
                 >
-                  <span className="font-medium">{employer.name}</span>
+                  <span className="font-medium" data-slot="perm-employer-name">
+                    {employer.name}
+                  </span>
                   {employer.address && (
-                    <span className="ml-2 text-muted-foreground">
+                    <span
+                      className="text-muted-foreground ml-2"
+                      data-slot="perm-employer-addr"
+                    >
                       | {employer.address.street1} - {employer.address.city},{' '}
                       {employer.address.state}
                     </span>
@@ -388,11 +423,19 @@ export function PermissionsEditor({
 
       {/* Summary Section */}
       {(assignedPermissionNames.length > 0 || showEmployerAccess) && (
-        <div className="bg-info/10 border-info/30 rounded-lg border p-4">
-          <h4 className="mb-2 font-semibold">{summary}:</h4>
+        <div
+          className="bg-info/10 border-info/30 rounded-lg border p-4"
+          data-slot="perm-summary"
+        >
+          <h4 className="mb-2 font-semibold" data-slot="perm-summary-title">
+            {summary}:
+          </h4>
 
           {assignedPermissionNames.length > 0 && (
-            <ul className="mb-3 space-y-1 text-sm">
+            <ul
+              className="mb-3 space-y-1 text-sm"
+              data-slot="perm-summary-list"
+            >
               {assignedPermissionNames.map((name, i) => (
                 <li key={i}>— {name}</li>
               ))}
@@ -401,8 +444,13 @@ export function PermissionsEditor({
 
           {showEmployerAccess && (
             <>
-              <h5 className="mt-3 text-sm font-medium">{employerAccess}:</h5>
-              <div className="text-sm italic text-muted-foreground">
+              <h5
+                className="mt-3 text-sm font-medium"
+                data-slot="perm-summary-subtitle"
+              >
+                {employerAccess}:
+              </h5>
+              <div className="text-muted-foreground text-sm italic">
                 {selectedEmployers.length === 0 ? (
                   <span>{all}</span>
                 ) : (

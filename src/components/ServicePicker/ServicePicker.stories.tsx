@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { type ServiceGroup, ServicePicker } from './ServicePicker';
 
 const meta: Meta<typeof ServicePicker> = {
-  title: 'Components/ServicePicker',
+  title: 'Components/Forms & Inputs/ServicePicker',
   component: ServicePicker,
   tags: ['autodocs'],
   parameters: {

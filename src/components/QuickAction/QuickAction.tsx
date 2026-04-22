@@ -121,12 +121,23 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
   ) => {
     const content = (
       <>
-        <div className={cn(quickActionIconVariants({ color }))}>{icon}</div>
-        <div>
-          <div className="font-medium text-neutral-900 dark:text-white">
+        <div
+          data-slot="quick-action-icon"
+          className={cn(quickActionIconVariants({ color }))}
+        >
+          {icon}
+        </div>
+        <div data-slot="quick-action-content">
+          <div
+            data-slot="quick-action-title"
+            className="font-medium text-neutral-900 dark:text-white"
+          >
             {title}
           </div>
-          <div className="text-xs text-neutral-500 dark:text-neutral-400">
+          <div
+            data-slot="quick-action-subtitle"
+            className="text-xs text-neutral-500 dark:text-neutral-400"
+          >
             {subtitle}
           </div>
         </div>
@@ -136,6 +147,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
     if (as === 'a' && href) {
       return (
         <a
+          data-slot="quick-action"
           href={href}
           className={cn(quickActionVariants({ disabled }), className)}
           aria-disabled={disabled}
@@ -148,6 +160,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
 
     return (
       <button
+        data-slot="quick-action"
         ref={ref}
         type="button"
         disabled={disabled ?? undefined}
@@ -369,13 +382,23 @@ const QuickActionGroup = React.forwardRef<
     );
 
     return (
-      <div ref={ref} className={className} {...props}>
+      <div
+        data-slot="quick-action-group"
+        ref={ref}
+        className={className}
+        {...props}
+      >
         {title && (
-          <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
+          <h2
+            data-slot="quick-action-group-title"
+            className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white"
+          >
             {title}
           </h2>
         )}
-        <div className={gridCols}>{children}</div>
+        <div data-slot="quick-action-group-grid" className={gridCols}>
+          {children}
+        </div>
       </div>
     );
   }

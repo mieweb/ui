@@ -1,20 +1,19 @@
-import {
-  Calendar,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Edit2,
-  Mail,
-  MapPin,
-  Phone,
-  X,
-} from 'lucide-react';
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
+import {
+  ChevronDown,
+  ChevronUp,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Check,
+  X,
+  Clock,
+  Edit2,
+} from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -175,11 +174,17 @@ export function EmployeeProfileCard({
   };
 
   return (
-    <div className={cn('rounded-lg bg-card', className)}>
+    <div
+      className={cn('bg-card rounded-lg', className)}
+      data-slot="employee-card"
+    >
       {/* Profile Header */}
-      <div className="flex flex-col items-center p-4 text-center">
+      <div
+        className="flex flex-col items-center p-4 text-center"
+        data-slot="employee-card-header"
+      >
         {/* Avatar with optional edit */}
-        <div className="relative mb-3">
+        <div className="relative mb-3" data-slot="employee-card-avatar">
           <Avatar
             src={employee.photoUrl}
             alt={fullName}
@@ -199,8 +204,9 @@ export function EmployeeProfileCard({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 absolute bottom-0 right-0 rounded-full p-1.5 shadow-md transition-colors"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 rounded-full p-1.5 shadow-md transition-colors"
                 aria-label="Edit photo"
+                data-slot="employee-card-photo-edit"
               >
                 <Edit2 className="h-3 w-3" />
               </button>
@@ -212,6 +218,7 @@ export function EmployeeProfileCard({
         <div
           className="mb-1 flex items-center gap-2"
           data-cy="header-employee-name"
+          data-slot="employee-card-name"
         >
           {employee.isActive !== undefined && (
             <span
@@ -232,8 +239,9 @@ export function EmployeeProfileCard({
 
         {/* Title and Company */}
         <p
-          className="text-sm text-muted-foreground"
+          className="text-muted-foreground text-sm"
           data-cy="paragraph-employee-title"
+          data-slot="employee-card-title"
         >
           {employee.title && <span>{employee.title}</span>}
           {employee.title && employee.companyName && <br />}
@@ -244,9 +252,10 @@ export function EmployeeProfileCard({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-primary mt-2 flex items-center gap-1 text-sm hover:underline"
+          className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 mt-2 flex items-center gap-1 text-sm hover:underline"
           aria-expanded={isExpanded}
           aria-controls="employee-details"
+          data-slot="employee-card-toggle"
         >
           {isExpanded ? (
             <>
@@ -270,16 +279,20 @@ export function EmployeeProfileCard({
           isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
         )}
       >
-        <div className="space-y-3 px-4 pb-4 text-sm">
+        <div
+          className="space-y-3 px-4 pb-4 text-sm"
+          data-slot="employee-card-details"
+        >
           {/* Date of Birth */}
           {employee.dateOfBirth && (
             <div
               className="flex items-center gap-2"
               data-cy="header-employee-dob"
+              data-slot="employee-card-detail-row"
             >
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Calendar className="text-muted-foreground h-4 w-4" />
               <span>{formatDate(employee.dateOfBirth)}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 ({calculateAge(employee.dateOfBirth)} {yearsOld})
               </span>
             </div>
@@ -292,8 +305,9 @@ export function EmployeeProfileCard({
                 key={idx}
                 className="flex items-center gap-2"
                 data-cy="header-employee-phone-number"
+                data-slot="employee-card-detail-row"
               >
-                <Phone className="h-4 w-4 text-muted-foreground" />
+                <Phone className="text-muted-foreground h-4 w-4" />
                 <a href={`tel:${p.number}`} className="hover:underline">
                   {formatPhoneNumber(p.number)}
                 </a>
@@ -307,8 +321,9 @@ export function EmployeeProfileCard({
             <div
               className="flex items-center gap-2"
               data-cy="header-employee-email"
+              data-slot="employee-card-detail-row"
             >
-              <Mail className="h-4 w-4 text-muted-foreground" />
+              <Mail className="text-muted-foreground h-4 w-4" />
               <a href={`mailto:${employee.email}`} className="hover:underline">
                 {employee.email}
               </a>
@@ -331,15 +346,16 @@ export function EmployeeProfileCard({
             <div
               className="flex items-center gap-2"
               data-cy="header-payment-status"
+              data-slot="employee-card-detail-row"
             >
               {employee.isPaid ? (
                 <>
-                  <Check className="h-4 w-4 text-success" />
+                  <Check className="text-success h-4 w-4" />
                   <span className="text-success">{paid}</span>
                 </>
               ) : (
                 <>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <Clock className="text-muted-foreground h-4 w-4" />
                   <span>{paymentPending}</span>
                 </>
               )}
@@ -351,8 +367,9 @@ export function EmployeeProfileCard({
             <div
               className="flex items-start gap-2"
               data-cy="div-employee-address"
+              data-slot="employee-card-detail-row"
             >
-              <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+              <MapPin className="text-muted-foreground mt-0.5 h-4 w-4" />
               <span className="whitespace-pre-line">
                 {formatAddress(employee.address)}
               </span>
@@ -439,6 +456,7 @@ export function OrderSidebarTabs({
       )}
       role="tablist"
       aria-orientation={orientation}
+      data-slot="order-sidebar-tabs"
     >
       {tabs.map((tab) => (
         <button
@@ -449,12 +467,13 @@ export function OrderSidebarTabs({
           aria-controls={`panel-${tab.id}`}
           onClick={() => onTabChange(tab.id)}
           data-cy={tab.dataCy}
+          data-slot="order-sidebar-tab"
           className={cn(
             'px-4 py-2 text-sm font-medium transition-colors',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
             activeTab === tab.id
               ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
           )}
         >
           {tab.label}
@@ -540,9 +559,12 @@ export function OrderDetailSidebar({
   const finalTabs = tabs || defaultTabs;
 
   return (
-    <div className={cn('flex h-full flex-col', className)}>
+    <div
+      className={cn('flex h-full flex-col', className)}
+      data-slot="order-detail-sidebar"
+    >
       {/* Employee Profile */}
-      <div className="px-3">
+      <div className="px-3" data-slot="order-sidebar-profile">
         <EmployeeProfileCard
           employee={employee}
           showPhotoEdit={showPhotoEdit}
@@ -564,7 +586,14 @@ export function OrderDetailSidebar({
       )}
 
       {/* Tab Content */}
-      {children && <div className="flex-1 overflow-auto p-3">{children}</div>}
+      {children && (
+        <div
+          className="flex-1 overflow-auto p-3"
+          data-slot="order-sidebar-content"
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 }

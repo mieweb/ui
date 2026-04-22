@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SmallMuted, Text } from './Text';
 
 const meta: Meta<typeof Text> = {
-  title: 'Components/Text',
+  title: 'Foundations/Text',
   component: Text,
   parameters: {
     layout: 'centered',

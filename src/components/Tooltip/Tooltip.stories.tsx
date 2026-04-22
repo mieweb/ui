@@ -4,7 +4,7 @@ import { Button } from '../Button';
 import { Tooltip } from './Tooltip';
 
 const meta: Meta<typeof Tooltip> = {
-  title: 'Components/Tooltip',
+  title: 'Components/Overlays & Layering/Tooltip',
   component: Tooltip,
   parameters: {
     layout: 'centered',

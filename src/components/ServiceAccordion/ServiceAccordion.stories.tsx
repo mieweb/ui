@@ -72,11 +72,36 @@ const mockCategories: ServiceCategory[] = [
 ];
 
 const meta: Meta<typeof ServiceAccordion> = {
-  title: 'Search/ServiceAccordion',
+  title: 'Product/Provider/ServiceAccordion',
   component: ServiceAccordion,
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+  },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'bordered', 'cards'],
+      description: 'Visual style variant',
+    },
+    allowMultiple: {
+      control: 'boolean',
+      description: 'Allow multiple categories to be expanded at once',
+    },
+    basePath: {
+      control: 'text',
+      description: 'Base path for service links',
+    },
+    categories: { table: { disable: true } },
+    expandedCategories: { table: { disable: true } },
+    onExpandedChange: { table: { disable: true } },
+    onServiceClick: { action: 'service-clicked' },
+  },
+  args: {
+    categories: mockCategories,
+    variant: 'default',
+    allowMultiple: true,
+    basePath: '/service',
   },
 };
 
@@ -84,12 +109,7 @@ export default meta;
 type Story = StoryObj<typeof ServiceAccordion>;
 
 // Default accordion
-export const Default: Story = {
-  args: {
-    categories: mockCategories,
-    onServiceClick: (service) => console.log('Clicked:', service.slug),
-  },
-};
+export const Default: Story = {};
 
 // All variants comparison
 export const AllVariants: Story = {

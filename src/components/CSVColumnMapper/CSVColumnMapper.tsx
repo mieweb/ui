@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-
 import { cn } from '../../utils';
 import { Button } from '../Button';
 import { Select, type SelectOption } from '../Select';
@@ -102,22 +101,25 @@ export function CSVColumnMapper({
   };
 
   return (
-    <div className={cn('csv-column-mapper', className)}>
+    <div data-slot="csv-mapper" className={cn('csv-column-mapper', className)}>
       {/* Import Progress Modal */}
       {importing && (
         <div className="bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center">
-          <div className="w-full max-w-lg rounded-lg bg-card text-card-foreground shadow-xl">
+          <div
+            data-slot="csv-mapper-progress"
+            className="bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl"
+          >
             <div className="bg-primary text-primary-foreground p-4">
               <h4 className="text-lg font-semibold">Processing Employees</h4>
             </div>
             <div className="p-6">
-              <div className="h-4 w-full overflow-hidden rounded-full bg-muted">
+              <div className="bg-muted h-4 w-full overflow-hidden rounded-full">
                 <div
-                  className="h-full bg-success transition-all duration-300"
+                  className="bg-success h-full transition-all duration-300"
                   style={{ width: `${importProgress}%` }}
                 />
               </div>
-              <p className="mt-2 text-center text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-center text-sm">
                 {importProgress}% complete
               </p>
             </div>
@@ -126,7 +128,7 @@ export function CSVColumnMapper({
       )}
 
       {/* Bulk Actions */}
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div data-slot="csv-mapper-actions" className="mb-4 flex flex-wrap gap-2">
         <Button
           variant="primary"
           size="sm"
@@ -151,19 +153,36 @@ export function CSVColumnMapper({
       </div>
 
       {/* Info Alert */}
-      <div className="bg-primary/10 border-primary/30 mb-4 rounded-lg border p-4">
-        <h4 className="mb-1 font-semibold text-primary-800 dark:text-primary-200">
+      <div
+        data-slot="csv-mapper-alert"
+        className="bg-primary/10 border-primary/30 mb-4 rounded-lg border p-4"
+      >
+        <h4
+          data-slot="csv-mapper-alert-title"
+          className="text-primary-800 dark:text-primary-200 mb-1 font-semibold"
+        >
           {ensureAccurateData}
         </h4>
-        <p className="text-sm text-primary-700 dark:text-primary-300">
+        <p
+          data-slot="csv-mapper-alert-desc"
+          className="text-primary-800 dark:text-primary-300 text-sm"
+        >
           {ensureAccurateDataDescription}
         </p>
       </div>
 
-      <p className="mb-4 text-muted-foreground">{instructions}</p>
+      <p
+        data-slot="csv-mapper-instructions"
+        className="text-muted-foreground mb-4"
+      >
+        {instructions}
+      </p>
 
       {/* Column Cards Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        data-slot="csv-mapper-grid"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
         {columns.map((column, index) => (
           <CSVColumnCard
             key={column.name}
@@ -183,7 +202,7 @@ export function CSVColumnMapper({
       </div>
 
       {/* Import Button */}
-      <div className="mt-6 flex justify-end">
+      <div data-slot="csv-mapper-footer" className="mt-6 flex justify-end">
         <Button variant="primary" onClick={onImport} disabled={importing}>
           {importLabel}
         </Button>
@@ -234,8 +253,9 @@ function CSVColumnCard({
 
   return (
     <div
+      data-slot="csv-card"
       className={cn(
-        'rounded-xl border-2 bg-card text-card-foreground shadow-sm',
+        'bg-card text-card-foreground rounded-xl border-2 shadow-sm',
         column.ignored
           ? 'border-border opacity-50'
           : isMapped
@@ -244,10 +264,13 @@ function CSVColumnCard({
       )}
     >
       {/* Card Header */}
-      <div className="flex items-center gap-2 px-4 py-3">
+      <div
+        data-slot="csv-card-header"
+        className="flex items-center gap-2 px-4 py-3"
+      >
         {!column.ignored &&
           (isMapped ? (
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground">
+            <span className="bg-success-700 text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
               <svg
                 className="h-3 w-3"
                 fill="none"
@@ -263,44 +286,57 @@ function CSVColumnCard({
               </svg>
             </span>
           ) : (
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warning text-warning-foreground">
+            <span className="bg-warning-700 text-warning-50 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
               <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" fill="currentColor" />
                 <circle cx="12" cy="12" r="4" className="fill-warning" />
               </svg>
             </span>
           ))}
-        <h6 className="truncate text-sm font-semibold" title={column.name}>
+        <h6
+          data-slot="csv-card-title"
+          className="truncate text-sm font-semibold"
+          title={column.name}
+        >
           {column.name}
         </h6>
       </div>
 
       {/* Card Body */}
-      <div className="space-y-4 px-4 pb-4">
+      <div data-slot="csv-card-body" className="space-y-4 px-4 pb-4">
         {/* Sample Value */}
         <div>
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <span
+            data-slot="csv-card-label"
+            className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase"
+          >
             Sample Data
           </span>
           <div
-            className="truncate rounded-md bg-muted px-3 py-2 font-mono text-sm"
+            data-slot="csv-card-sample"
+            className="bg-muted truncate rounded-md px-3 py-2 font-mono text-sm"
             title={column.sampleValue}
           >
             {column.sampleValue || (
-              <em className="text-muted-foreground">Empty</em>
+              <em className="text-neutral-600 dark:text-neutral-300">Empty</em>
             )}
           </div>
         </div>
 
         {/* Field Type Select */}
         <div>
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <span
+            data-slot="csv-card-label"
+            className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase"
+          >
             Map to Field
           </span>
           <div
             className={cn(
               'rounded-md',
-              hasError && !column.ignored && 'ring-warning/50 ring-2'
+              hasError &&
+                !column.ignored &&
+                'ring-warning-700/50 dark:ring-warning-400/50 ring-2'
             )}
           >
             <Select
@@ -315,7 +351,7 @@ function CSVColumnCard({
               className={cn(
                 hasError &&
                   !column.ignored &&
-                  'border-warning text-warning placeholder:text-warning'
+                  'border-warning-700 text-warning-700 placeholder:text-warning-700 dark:border-warning-400 dark:text-warning-400 dark:placeholder:text-warning-400'
               )}
             />
           </div>
@@ -326,7 +362,10 @@ function CSVColumnCard({
           childSelectOptions.length > 0 &&
           column.mappedTo && (
             <div>
-              <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span
+                data-slot="csv-card-label"
+                className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase"
+              >
                 Sub-field
               </span>
               <Select
@@ -346,9 +385,10 @@ function CSVColumnCard({
 
         {/* Ignore/Include Link */}
         <button
+          data-slot="csv-card-ignore"
           type="button"
           onClick={() => onIgnoreToggle(!column.ignored)}
-          className="mx-auto flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground mx-auto flex items-center gap-1 text-xs transition-colors"
         >
           {column.ignored ? (
             <svg
@@ -474,12 +514,16 @@ export function CSVFileUpload({
       {processing ? (
         <div className="flex flex-col items-center">
           <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-          <p className="mt-4 text-muted-foreground">Processing file...</p>
+          <p className="mt-4 text-neutral-600 dark:text-neutral-300">
+            Processing file...
+          </p>
         </div>
       ) : (
         <>
-          <i className="fas fa-file-csv mb-4 text-5xl text-muted-foreground" />
-          <p className="mb-4 text-lg text-muted-foreground">{selectFile}</p>
+          <i className="fas fa-file-csv mb-4 text-5xl text-neutral-600 dark:text-neutral-300" />
+          <p className="mb-4 text-lg text-neutral-600 dark:text-neutral-300">
+            {selectFile}
+          </p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}

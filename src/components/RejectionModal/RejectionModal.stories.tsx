@@ -5,7 +5,7 @@ import { Button } from '../Button/Button';
 import { RejectionModal, RejectionReason } from './RejectionModal';
 
 const meta: Meta<typeof RejectionModal> = {
-  title: 'Components/RejectionModal',
+  title: 'Components/Overlays & Layering/RejectionModal',
   component: RejectionModal,
   tags: ['autodocs'],
   parameters: {

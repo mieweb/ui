@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Textarea } from './Textarea';
 
 const meta: Meta<typeof Textarea> = {
-  title: 'Components/Textarea',
+  title: 'Components/Forms & Inputs/Textarea',
   component: Textarea,
   parameters: {
     layout: 'centered',

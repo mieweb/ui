@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const checkboxVariants = cva(
@@ -30,7 +29,8 @@ const checkboxVariants = cva(
 );
 
 export interface CheckboxProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
     VariantProps<typeof checkboxVariants> {
   /** Label for the checkbox */
   label?: string;
@@ -88,9 +88,13 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     React.useImperativeHandle(ref, () => internalRef.current!);
 
     const checkboxElement = (
-      <span className="relative inline-flex items-center justify-center">
+      <span
+        data-slot="checkbox-indicator"
+        className="relative inline-flex items-center justify-center"
+      >
         <input
           ref={internalRef}
+          data-slot="checkbox"
           id={checkboxId}
           type="checkbox"
           disabled={disabled}
@@ -120,8 +124,9 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       <div className="flex flex-col">
         <label
           htmlFor={checkboxId}
+          data-slot="checkbox-label"
           className={cn(
-            'cursor-pointer select-none text-sm font-medium text-foreground',
+            'text-foreground cursor-pointer text-sm font-medium select-none',
             disabled && 'cursor-not-allowed opacity-50'
           )}
         >
@@ -130,7 +135,8 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         {description && (
           <p
             id={descriptionId}
-            className="mt-0.5 text-xs text-muted-foreground"
+            data-slot="checkbox-description"
+            className="text-muted-foreground mt-0.5 text-xs"
           >
             {description}
           </p>
@@ -139,8 +145,9 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     );
 
     return (
-      <div className="flex flex-col gap-1">
+      <div data-slot="checkbox-wrapper" className="flex flex-col gap-1">
         <div
+          data-slot="checkbox-row"
           className={cn(
             'flex gap-2',
             description ? 'items-start' : 'items-center',
@@ -151,7 +158,12 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           {labelElement}
         </div>
         {error && (
-          <p id={errorId} className="text-sm text-destructive" role="alert">
+          <p
+            id={errorId}
+            data-slot="checkbox-error"
+            className="text-destructive text-sm"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -207,6 +219,7 @@ function CheckboxGroup({
 
   return (
     <fieldset
+      data-slot="checkbox-group"
       className={cn('flex flex-col', className)}
       aria-describedby={
         [description ? descriptionId : null, error ? errorId : null]
@@ -215,17 +228,25 @@ function CheckboxGroup({
       }
     >
       {label && (
-        <legend className="mb-1 text-sm font-medium text-foreground">
+        <legend
+          data-slot="checkbox-group-legend"
+          className="text-foreground mb-1 text-sm font-medium"
+        >
           {label}
         </legend>
       )}
       {description && (
-        <p id={descriptionId} className="mb-3 text-xs text-muted-foreground">
+        <p
+          id={descriptionId}
+          data-slot="checkbox-group-description"
+          className="text-muted-foreground mb-3 text-xs"
+        >
           {description}
         </p>
       )}
       <div
         role="group"
+        data-slot="checkbox-group-items"
         className={cn(
           'flex gap-4',
           orientation === 'vertical' && 'flex-col gap-2'
@@ -234,7 +255,12 @@ function CheckboxGroup({
         {children}
       </div>
       {error && (
-        <p id={errorId} className="mt-2 text-sm text-destructive" role="alert">
+        <p
+          id={errorId}
+          data-slot="checkbox-group-error"
+          className="text-destructive mt-2 text-sm"
+          role="alert"
+        >
           {error}
         </p>
       )}

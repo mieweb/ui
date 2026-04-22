@@ -99,7 +99,10 @@ export function ProductVersion({
   const VersionContent = () => {
     if (variant === 'minimal') {
       return (
-        <span className="text-muted-foreground">
+        <span
+          className="text-muted-foreground"
+          data-slot="product-version-minimal"
+        >
           {name} {versionDisplay}
           {build && <span className="ml-1 opacity-60">({build})</span>}
         </span>
@@ -108,7 +111,10 @@ export function ProductVersion({
 
     if (variant === 'stacked') {
       return (
-        <div className="flex flex-col items-center gap-1">
+        <div
+          className="flex flex-col items-center gap-1"
+          data-slot="product-version-stacked"
+        >
           <div className="flex items-center gap-2">
             <span className="font-semibold">{name}</span>
             <span className="text-muted-foreground">{versionDisplay}</span>
@@ -118,6 +124,7 @@ export function ProductVersion({
                   'rounded px-1.5 py-0.5 text-xs font-medium uppercase',
                   getEnvironmentColor(environment)
                 )}
+                data-slot="product-version-env"
               >
                 {environment}
               </span>
@@ -137,7 +144,10 @@ export function ProductVersion({
 
     // Default: inline
     return (
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div
+        className="flex flex-wrap items-center justify-center gap-2"
+        data-slot="product-version-inline"
+      >
         <span className="font-medium">{name}</span>
         <span className="text-muted-foreground">{versionDisplay}</span>
         {build && (
@@ -149,6 +159,7 @@ export function ProductVersion({
               'rounded px-1.5 py-0.5 text-xs font-medium uppercase',
               getEnvironmentColor(environment)
             )}
+            data-slot="product-version-env"
           >
             {environment}
           </span>
@@ -178,6 +189,7 @@ export function ProductVersion({
         target="_blank"
         rel="noopener noreferrer"
         className={cn(wrapperClasses, 'underline-offset-2 hover:underline')}
+        data-slot="product-version"
         onClick={onClick}
       >
         {content}
@@ -187,13 +199,22 @@ export function ProductVersion({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={wrapperClasses}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={wrapperClasses}
+        data-slot="product-version"
+      >
         {content}
       </button>
     );
   }
 
-  return <div className={wrapperClasses}>{content}</div>;
+  return (
+    <div className={wrapperClasses} data-slot="product-version">
+      {content}
+    </div>
+  );
 }
 
 // ============================================================================
@@ -248,6 +269,7 @@ export function ProductVersionBadge({
         getEnvironmentStyle(environment),
         className
       )}
+      data-slot="product-version-badge"
     >
       <span className="font-mono font-medium">{versionDisplay}</span>
       {build && (

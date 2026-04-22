@@ -1,22 +1,21 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
-
-import { Badge } from '../Badge';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
 import { Card, CardContent } from '../Card';
 import {
-  BellIcon,
-  CalendarIcon,
-  ChartIcon,
-  FileTextIcon,
-  HomeIcon,
-  MailIcon,
-  SettingsIcon,
   UserIcon,
+  SettingsIcon,
+  BellIcon,
+  HomeIcon,
+  ChartIcon,
+  MailIcon,
+  CalendarIcon,
+  FileTextIcon,
 } from '../Icons';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './Tabs';
+import { Badge } from '../Badge';
 
 const meta: Meta<typeof Tabs> = {
-  title: 'Components/Tabs',
+  title: 'Components/Layout & Structure/Tabs',
   component: Tabs,
   parameters: {
     layout: 'centered',
@@ -173,28 +172,28 @@ function PlaygroundTabs({
               {contentStyle === 'card' ? (
                 <Card>
                   <CardContent className="pt-4">
-                    <h3 className="mb-2 font-semibold text-foreground">
+                    <h3 className="text-foreground mb-2 font-semibold">
                       {tab.label}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {tab.content}
                     </p>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="py-4">
-                  <h3 className="mb-2 font-semibold text-foreground">
+                  <h3 className="text-foreground mb-2 font-semibold">
                     {tab.label}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{tab.content}</p>
+                  <p className="text-muted-foreground text-sm">{tab.content}</p>
                 </div>
               )}
             </TabsContent>
           ))}
       </Tabs>
-      <p className="mt-4 text-xs text-muted-foreground">
+      <p className="text-muted-foreground mt-4 text-xs">
         Selected tab:{' '}
-        <code className="rounded bg-muted px-1 py-0.5 font-mono">
+        <code className="bg-muted text-foreground rounded px-1 py-0.5 font-mono">
           {selectedTab}
         </code>
       </p>
@@ -265,7 +264,7 @@ export const Underline: Story = {
         <TabsContent value="account">
           <Card>
             <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Make changes to your account settings here.
               </p>
             </CardContent>
@@ -274,7 +273,7 @@ export const Underline: Story = {
         <TabsContent value="password">
           <Card>
             <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Change your password here.
               </p>
             </CardContent>
@@ -283,7 +282,7 @@ export const Underline: Story = {
         <TabsContent value="notifications">
           <Card>
             <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Manage your notification preferences.
               </p>
             </CardContent>
@@ -304,15 +303,15 @@ export const Pills: Story = {
           <TabsTrigger value="completed">Completed</TabsTrigger>
         </TabsList>
         <TabsContent value="all">
-          <p className="text-sm text-muted-foreground">Showing all items.</p>
+          <p className="text-muted-foreground text-sm">Showing all items.</p>
         </TabsContent>
         <TabsContent value="active">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Showing active items only.
           </p>
         </TabsContent>
         <TabsContent value="completed">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Showing completed items only.
           </p>
         </TabsContent>
@@ -333,7 +332,7 @@ export const Enclosed: Story = {
         <TabsContent value="overview">
           <Card>
             <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Overview dashboard content.
               </p>
             </CardContent>
@@ -342,7 +341,7 @@ export const Enclosed: Story = {
         <TabsContent value="analytics">
           <Card>
             <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Analytics dashboard content.
               </p>
             </CardContent>
@@ -351,7 +350,7 @@ export const Enclosed: Story = {
         <TabsContent value="reports">
           <Card>
             <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Reports dashboard content.
               </p>
             </CardContent>
@@ -384,13 +383,13 @@ export const WithIcons: Story = {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="profile">
-          <p className="text-sm text-muted-foreground">Profile settings.</p>
+          <p className="text-muted-foreground text-sm">Profile settings.</p>
         </TabsContent>
         <TabsContent value="settings">
-          <p className="text-sm text-muted-foreground">General settings.</p>
+          <p className="text-muted-foreground text-sm">General settings.</p>
         </TabsContent>
         <TabsContent value="notifications">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Notification preferences.
           </p>
         </TabsContent>
@@ -411,17 +410,17 @@ export const DisabledTab: Story = {
           <TabsTrigger value="tab3">Also Enabled</TabsTrigger>
         </TabsList>
         <TabsContent value="tab1">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             This tab is enabled and can be selected.
           </p>
         </TabsContent>
         <TabsContent value="tab2">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             This tab is disabled and cannot be selected.
           </p>
         </TabsContent>
         <TabsContent value="tab3">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             This tab is also enabled.
           </p>
         </TabsContent>
@@ -445,7 +444,7 @@ function ControlledTabsDemo() {
         <TabsContent value="tab2">Content for Tab 2</TabsContent>
         <TabsContent value="tab3">Content for Tab 3</TabsContent>
       </Tabs>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         Current tab: <code className="font-mono">{value}</code>
       </p>
     </div>

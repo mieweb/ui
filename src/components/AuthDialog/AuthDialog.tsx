@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -155,6 +154,7 @@ export function AuthDialog({
   };
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       role="dialog"
       aria-modal="true"
@@ -174,18 +174,18 @@ export function AuthDialog({
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="absolute top-4 right-4 rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           aria-label="Close"
         >
           <CloseIcon className="h-5 w-5" />
         </button>
 
         {/* Header */}
-        <div className="px-6 pb-4 pt-6 text-center">
+        <div className="px-6 pt-6 pb-4 text-center">
           {logoUrl ? (
             <img src={logoUrl} alt={appName} className="mx-auto mb-4 h-10" />
           ) : (
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600">
+            <div className="bg-primary-800 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
               <span className="text-xl font-bold text-white">
                 {appName.charAt(0)}
               </span>
@@ -314,7 +314,7 @@ export function AuthDialog({
           {/* Verification Message */}
           {mode === 'verify' && (
             <div className="py-4 text-center">
-              <MailIcon className="mx-auto mb-4 h-12 w-12 text-primary-600" />
+              <MailIcon className="text-primary-800 dark:text-primary-300 mx-auto mb-4 h-12 w-12" />
               <p className="mb-4 text-gray-600 dark:text-gray-400">
                 We&apos;ve sent a verification email to your inbox. Please click
                 the link to verify your account.
@@ -322,7 +322,7 @@ export function AuthDialog({
               <button
                 type="button"
                 onClick={() => setMode('login')}
-                className="text-sm font-medium text-primary-600 hover:text-primary-700"
+                className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 text-sm font-medium"
               >
                 Return to login
               </button>
@@ -366,7 +366,7 @@ export function AuthDialog({
                   <button
                     type="button"
                     onClick={() => setMode('signup')}
-                    className="font-medium text-primary-600 hover:text-primary-700"
+                    className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 font-medium"
                   >
                     Sign up
                   </button>
@@ -377,7 +377,7 @@ export function AuthDialog({
                   <button
                     type="button"
                     onClick={() => setMode('login')}
-                    className="font-medium text-primary-600 hover:text-primary-700"
+                    className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 font-medium"
                   >
                     Sign in
                   </button>
@@ -435,7 +435,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           placeholder="you@example.com"
         />
       </div>
@@ -454,13 +454,13 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -474,7 +474,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
         <label className="flex items-center">
           <input
             type="checkbox"
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            className="text-primary-600 focus:ring-primary-500 rounded border-gray-300"
           />
           <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
             Remember me
@@ -483,7 +483,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
         <button
           type="button"
           onClick={onForgotPassword}
-          className="text-sm text-primary-600 hover:text-primary-700"
+          className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 text-sm"
         >
           Forgot password?
         </button>
@@ -491,7 +491,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? <Spinner className="mx-auto h-5 w-5" /> : 'Sign in'}
       </button>
@@ -542,7 +542,7 @@ function SignupForm({
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           placeholder="you@example.com"
         />
       </div>
@@ -562,13 +562,13 @@ function SignupForm({
             required
             autoComplete="new-password"
             minLength={8}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -593,7 +593,7 @@ function SignupForm({
           required
           autoComplete="new-password"
           className={cn(
-            'w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white',
+            'focus:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:bg-gray-700 dark:text-white',
             confirmPassword && !passwordsMatch
               ? 'border-red-500'
               : 'border-gray-300 dark:border-gray-600'
@@ -610,13 +610,13 @@ function SignupForm({
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
           required
-          className="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          className="text-primary-600 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
         />
         <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
           I agree to the{' '}
           <a
             href={termsUrl}
-            className="text-primary-600 hover:underline"
+            className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -625,7 +625,7 @@ function SignupForm({
           and{' '}
           <a
             href={privacyUrl}
-            className="text-primary-600 hover:underline"
+            className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -636,7 +636,7 @@ function SignupForm({
       <button
         type="submit"
         disabled={isLoading || !passwordsMatch || !acceptedTerms}
-        className="w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? <Spinner className="mx-auto h-5 w-5" /> : 'Create account'}
       </button>
@@ -682,14 +682,14 @@ function ForgotPasswordForm({
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           placeholder="you@example.com"
         />
       </div>
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <Spinner className="mx-auto h-5 w-5" />
@@ -744,13 +744,13 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
             required
             autoComplete="new-password"
             minLength={8}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -775,7 +775,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
           required
           autoComplete="new-password"
           className={cn(
-            'w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white',
+            'focus:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:bg-gray-700 dark:text-white',
             confirmPassword && !passwordsMatch
               ? 'border-red-500'
               : 'border-gray-300 dark:border-gray-600'
@@ -789,7 +789,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
       <button
         type="submit"
         disabled={isLoading || !passwordsMatch}
-        className="w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <Spinner className="mx-auto h-5 w-5" />

@@ -13,7 +13,7 @@ const serviceBadgeVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
+          'bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-300',
         secondary:
           'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
         success:
@@ -125,6 +125,7 @@ export function ServiceBadge({
       {removable && onRemove && (
         <button
           type="button"
+          data-slot="service-badge-remove"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -152,6 +153,7 @@ export function ServiceBadge({
     return (
       <a
         href={href}
+        data-slot="service-badge"
         className={classes}
         {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
@@ -164,6 +166,7 @@ export function ServiceBadge({
     return (
       <button
         type="button"
+        data-slot="service-badge"
         onClick={onClick}
         className={classes}
         {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
@@ -174,7 +177,7 @@ export function ServiceBadge({
   }
 
   return (
-    <span className={classes} {...props}>
+    <span data-slot="service-badge" className={classes} {...props}>
       {content}
     </span>
   );
@@ -204,7 +207,10 @@ export function ServiceBadgeGroup({
   const hiddenCount = maxVisible ? badges.length - maxVisible : 0;
 
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div
+      data-slot="service-badge-group"
+      className={cn('flex flex-wrap gap-2', className)}
+    >
       {visibleBadges}
       {hiddenCount > 0 && (
         <ServiceBadge
@@ -288,7 +294,10 @@ export function ServiceTagCloudBadges({
   const hiddenCount = maxVisible ? services.length - maxVisible : 0;
 
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div
+      data-slot="service-tag-cloud"
+      className={cn('flex flex-wrap gap-2', className)}
+    >
       {visibleServices.map((service) => (
         <ServiceBadge
           key={service.id}
@@ -344,7 +353,10 @@ export function SelectedServicesBadges({
   }
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2', className)}>
+    <div
+      data-slot="selected-services"
+      className={cn('flex flex-wrap items-center gap-2', className)}
+    >
       {services.map((service) => (
         <ServiceBadge
           key={service.id}
@@ -432,6 +444,7 @@ export function DOTBadge({
 
   return (
     <span
+      data-slot="dot-badge"
       className={cn(
         'inline-flex items-center rounded-full font-medium',
         config.className,

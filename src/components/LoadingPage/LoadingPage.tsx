@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { Spinner, type SpinnerProps } from '../Spinner';
 
@@ -65,6 +64,7 @@ export function LoadingDots({
       className={cn('flex items-center gap-1', className)}
       role="status"
       aria-label="Loading"
+      data-slot="loading-dots"
     >
       {[0, 1, 2].map((i) => (
         <div
@@ -118,8 +118,11 @@ export function LoadingBar({
   }[color];
 
   return (
-    <div className={cn('w-full', className)}>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+    <div className={cn('w-full', className)} data-slot="loading-bar">
+      <div
+        className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
+        data-slot="loading-bar-track"
+      >
         {isIndeterminate ? (
           <div
             className={cn(
@@ -142,7 +145,10 @@ export function LoadingBar({
         )}
       </div>
       {showPercentage && !isIndeterminate && (
-        <p className="mt-1 text-right text-sm text-gray-600 dark:text-gray-400">
+        <p
+          className="mt-1 text-right text-sm text-gray-600 dark:text-gray-400"
+          data-slot="loading-bar-percentage"
+        >
           {Math.round(progress)}%
         </p>
       )}
@@ -190,10 +196,13 @@ export function LoadingPage({
   className,
 }: LoadingPageProps) {
   return (
-    <div className={cn(pageVariants({ size }), className)}>
+    <div
+      className={cn(pageVariants({ size }), className)}
+      data-slot="loading-page"
+    >
       {children || (
         <>
-          <div className="mb-6">
+          <div className="mb-6" data-slot="loading-page-indicator">
             {indicator === 'spinner' && <Spinner size={spinnerSize} />}
             {indicator === 'dots' && <LoadingDots size="lg" />}
             {indicator === 'bar' && (
@@ -204,12 +213,18 @@ export function LoadingPage({
             {indicator === 'pulse' && <PulseIndicator />}
           </div>
           {message && (
-            <p className="mb-2 text-lg font-medium text-gray-700 dark:text-gray-300">
+            <p
+              className="mb-2 text-lg font-medium text-gray-700 dark:text-gray-300"
+              data-slot="loading-page-message"
+            >
               {message}
             </p>
           )}
           {subMessage && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p
+              className="text-sm text-gray-500 dark:text-gray-400"
+              data-slot="loading-page-submessage"
+            >
               {subMessage}
             </p>
           )}
@@ -257,7 +272,7 @@ export function LoadingOverlay({
   children,
 }: LoadingOverlayProps) {
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn('relative', className)} data-slot="loading-overlay">
       {children}
       {isLoading && (
         <div
@@ -268,10 +283,14 @@ export function LoadingOverlay({
             backdrop === 'solid' && 'bg-white dark:bg-gray-900',
             backdrop === 'transparent' && 'bg-transparent'
           )}
+          data-slot="loading-overlay-backdrop"
         >
           <Spinner size={spinnerSize} />
           {message && (
-            <p className="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p
+              className="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300"
+              data-slot="loading-overlay-message"
+            >
               {message}
             </p>
           )}
@@ -349,6 +368,7 @@ export function LoadingSkeleton({
           )}
           style={style}
           aria-hidden="true"
+          data-slot="loading-skeleton"
         />
       ))}
     </>
@@ -387,6 +407,7 @@ export function CardSkeleton({
         'rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800',
         className
       )}
+      data-slot="card-skeleton"
     >
       {hasImage && (
         <LoadingSkeleton variant="rounded" height={160} className="mb-4" />
@@ -415,10 +436,10 @@ export function CardSkeleton({
 
 function PulseIndicator() {
   return (
-    <div className="relative h-16 w-16">
-      <div className="absolute inset-0 animate-ping rounded-full bg-primary-200 opacity-75 dark:bg-primary-800" />
-      <div className="absolute inset-2 animate-pulse rounded-full bg-primary-400 dark:bg-primary-600" />
-      <div className="absolute inset-4 rounded-full bg-primary-600 dark:bg-primary-400" />
+    <div className="relative h-16 w-16" data-slot="pulse-indicator">
+      <div className="bg-primary-200 dark:bg-primary-800 absolute inset-0 animate-ping rounded-full opacity-75" />
+      <div className="bg-primary-400 dark:bg-primary-600 absolute inset-2 animate-pulse rounded-full" />
+      <div className="bg-primary-600 dark:bg-primary-400 absolute inset-4 rounded-full" />
     </div>
   );
 }

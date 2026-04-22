@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-
+import { cn } from '../../utils/cn';
 import { Button } from '../Button/Button';
 
 export interface CalendarAppointment {
@@ -75,17 +75,17 @@ export function ScheduleCalendar({
   const getStatusColor = (status?: CalendarAppointment['status']) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-blue-500 border-blue-600';
+        return 'bg-blue-700 border-blue-800';
       case 'pending':
-        return 'bg-yellow-500 border-yellow-600';
+        return 'bg-yellow-700 border-yellow-800';
       case 'completed':
-        return 'bg-green-500 border-green-600';
+        return 'bg-green-700 border-green-800';
       case 'cancelled':
-        return 'bg-gray-400 border-gray-500';
+        return 'bg-gray-600 border-gray-700';
       case 'no-show':
-        return 'bg-red-500 border-red-600';
+        return 'bg-red-700 border-red-800';
       default:
-        return 'bg-blue-500 border-blue-600';
+        return 'bg-blue-700 border-blue-800';
     }
   };
 
@@ -156,7 +156,11 @@ export function ScheduleCalendar({
   if (isLoading) {
     return (
       <div
-        className={`rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${className}`}
+        data-slot="schedule-calendar"
+        className={cn(
+          'rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+          className
+        )}
       >
         <div className="h-12 animate-pulse rounded-t-lg bg-gray-200 dark:bg-gray-700" />
         <div className="space-y-2 p-4">
@@ -175,10 +179,17 @@ export function ScheduleCalendar({
 
   return (
     <div
-      className={`rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${className}`}
+      data-slot="schedule-calendar"
+      className={cn(
+        'rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+        className
+      )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+      <div
+        data-slot="schedule-calendar-header"
+        className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700"
+      >
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -244,11 +255,14 @@ export function ScheduleCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <div className="overflow-auto">
+      <div data-slot="schedule-calendar-grid" className="overflow-auto">
         <div className="min-w-[600px]">
           {/* Day Headers for Week View */}
           {view === 'week' && (
-            <div className="flex border-b border-gray-200 dark:border-gray-700">
+            <div
+              data-slot="schedule-calendar-day-headers"
+              className="flex border-b border-gray-200 dark:border-gray-700"
+            >
               <div className="w-16 flex-shrink-0" />
               {weekDates.map((date, i) => (
                 <div
@@ -279,7 +293,10 @@ export function ScheduleCalendar({
           {/* Time Grid */}
           <div className="flex">
             {/* Time Labels */}
-            <div className="w-16 flex-shrink-0">
+            <div
+              data-slot="schedule-calendar-time-labels"
+              className="w-16 flex-shrink-0"
+            >
               {hours.map((hour) => (
                 <div
                   key={hour}
@@ -336,9 +353,10 @@ export function ScheduleCalendar({
                     return (
                       <div
                         key={appointment.id}
+                        data-slot="schedule-calendar-appointment"
                         role="button"
                         tabIndex={0}
-                        className={`absolute left-1 right-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
+                        className={`absolute right-1 left-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
                         style={{
                           top: position.top,
                           height: position.height,
@@ -352,7 +370,7 @@ export function ScheduleCalendar({
                         <p className="truncate font-medium">
                           {appointment.patientName || appointment.title}
                         </p>
-                        <p className="truncate opacity-80">
+                        <p className="truncate">
                           {formatTime(appointment.startTime)}
                         </p>
                       </div>
@@ -366,21 +384,24 @@ export function ScheduleCalendar({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 border-t border-gray-200 p-4 text-xs dark:border-gray-700">
+      <div
+        data-slot="schedule-calendar-legend"
+        className="flex items-center gap-4 border-t border-gray-200 p-4 text-xs dark:border-gray-700"
+      >
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-blue-500" />
+          <span className="h-3 w-3 rounded bg-blue-700" />
           <span className="text-gray-600 dark:text-gray-400">Confirmed</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-yellow-500" />
+          <span className="h-3 w-3 rounded bg-yellow-700" />
           <span className="text-gray-600 dark:text-gray-400">Pending</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-green-500" />
+          <span className="h-3 w-3 rounded bg-green-700" />
           <span className="text-gray-600 dark:text-gray-400">Completed</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-3 w-3 rounded bg-gray-400" />
+          <span className="h-3 w-3 rounded bg-gray-600" />
           <span className="text-gray-600 dark:text-gray-400">Cancelled</span>
         </div>
       </div>

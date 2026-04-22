@@ -1,16 +1,15 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import type { AttachmentType, NewMessage } from './types';
 import {
   AttachmentPicker,
   AttachmentPreviewItem,
   CameraButton,
   DragDropZone,
-  generateAttachmentId,
   getFileType,
+  generateAttachmentId,
 } from './AttachmentPicker';
-import type { AttachmentType, NewMessage } from './types';
 
 // ============================================================================
 // Types
@@ -58,7 +57,7 @@ function CharacterCounter({
           ? 'font-medium text-red-500'
           : isWarning
             ? 'text-amber-500'
-            : 'text-neutral-400',
+            : 'text-neutral-500',
         className
       )}
       aria-live="polite"
@@ -109,7 +108,8 @@ const sendButtonVariants = cva(
 );
 
 export interface SendButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof sendButtonVariants> {
   isLoading?: boolean;
 }
@@ -124,6 +124,7 @@ const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
         ref={ref}
         type="submit"
         disabled={disabled || !canSend || isLoading}
+        data-slot="composer-send-button"
         className={cn(sendButtonVariants({ variant, canSend }), className)}
         aria-label={isLoading ? 'Sending message' : 'Send message'}
         {...props}
@@ -420,18 +421,23 @@ const MessageComposer = React.forwardRef<
         onError={onError}
         className={cn('w-full', className)}
       >
-        <form onSubmit={handleSubmit} className="w-full">
+        <form
+          onSubmit={handleSubmit}
+          data-slot="message-composer"
+          className="w-full"
+        >
           {/* Reply preview */}
           {replyTo && (
             <div
+              data-slot="composer-reply-preview"
               className={cn(
                 'flex items-center gap-2 px-4 py-2',
                 'bg-neutral-50 dark:bg-neutral-800/50',
-                'border-l-4 border-primary-500'
+                'border-primary-500 border-l-4'
               )}
             >
               <div className="min-w-0 flex-1">
-                <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
+                <span className="text-primary-600 dark:text-primary-400 text-xs font-medium">
                   Replying to {replyTo.senderName}
                 </span>
                 <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">
@@ -443,9 +449,9 @@ const MessageComposer = React.forwardRef<
                 onClick={onCancelReply}
                 className={cn(
                   'shrink-0 rounded p-1',
-                  'text-neutral-400 hover:text-neutral-600',
-                  'dark:text-neutral-500 dark:hover:text-neutral-300',
-                  'focus:outline-none focus:ring-2 focus:ring-primary-500'
+                  'text-neutral-500 hover:text-neutral-700',
+                  'dark:text-neutral-400 dark:hover:text-neutral-200',
+                  'focus:ring-primary-500 focus:ring-2 focus:outline-none'
                 )}
                 aria-label="Cancel reply"
               >
@@ -469,6 +475,7 @@ const MessageComposer = React.forwardRef<
           {/* Attachment previews */}
           {attachments.length > 0 && (
             <div
+              data-slot="composer-attachments"
               className={cn(
                 'flex flex-wrap gap-2 p-3',
                 'border-t border-neutral-200 dark:border-neutral-700'
@@ -486,6 +493,7 @@ const MessageComposer = React.forwardRef<
 
           {/* Input area */}
           <div
+            data-slot="composer-input-area"
             className={cn(
               'flex items-center gap-2 p-3',
               'bg-white dark:bg-neutral-900',
@@ -513,9 +521,10 @@ const MessageComposer = React.forwardRef<
             )}
 
             {/* Text input */}
-            <div className="relative flex-1">
+            <div data-slot="composer-input-wrapper" className="relative flex-1">
               <textarea
                 ref={textareaRef}
+                data-slot="composer-input"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -527,7 +536,7 @@ const MessageComposer = React.forwardRef<
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
-                  'focus:outline-none focus:ring-2 focus:ring-primary-500',
+                  'focus:ring-primary-500 focus:ring-2 focus:outline-none',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                   'transition-colors',
                   'max-h-[150px]'
@@ -538,7 +547,11 @@ const MessageComposer = React.forwardRef<
 
               {/* Character count */}
               {showCharacterCount && (
-                <div id="char-count" className="absolute bottom-1.5 right-3">
+                <div
+                  data-slot="composer-char-count"
+                  id="char-count"
+                  className="absolute right-3 bottom-1.5"
+                >
                   <CharacterCounter current={content.length} max={maxLength} />
                 </div>
               )}
@@ -559,4 +572,4 @@ const MessageComposer = React.forwardRef<
 
 MessageComposer.displayName = 'MessageComposer';
 
-export { CharacterCounter, MessageComposer, SendButton, sendButtonVariants };
+export { MessageComposer, CharacterCounter, SendButton, sendButtonVariants };

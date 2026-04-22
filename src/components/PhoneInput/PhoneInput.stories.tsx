@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { PhoneInput } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInput> = {
-  title: 'Components/PhoneInput',
+  title: 'Components/Forms & Inputs/PhoneInput',
   component: PhoneInput,
   parameters: {
     layout: 'centered',

@@ -1,12 +1,18 @@
 'use client';
 
 import * as React from 'react';
-
-import { Badge } from '../Badge/Badge';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
-import { Modal, ModalFooter, ModalHeader, ModalTitle } from '../Modal/Modal';
 import { Select } from '../Select/Select';
+import { Badge } from '../Badge/Badge';
+import { Textarea } from '../Textarea/Textarea';
 
 export interface EmployerOption {
   id: string;
@@ -53,6 +59,10 @@ export interface CreateInvoiceModalProps {
   currency?: string;
   /** Default due date offset in days */
   defaultDueDays?: number;
+  /** Initial step for the wizard (for Storybook/testing) */
+  initialStep?: number;
+  /** Initial employer ID (for Storybook/testing) */
+  initialEmployerId?: string;
 }
 
 /**
@@ -70,9 +80,11 @@ export function CreateInvoiceModal({
   errorMessage,
   currency = '$',
   defaultDueDays = 30,
+  initialStep = 1,
+  initialEmployerId = '',
 }: CreateInvoiceModalProps) {
-  const [step, setStep] = React.useState(1);
-  const [employerId, setEmployerId] = React.useState('');
+  const [step, setStep] = React.useState(initialStep);
+  const [employerId, setEmployerId] = React.useState(initialEmployerId);
   const [selectedOrders, setSelectedOrders] = React.useState<Set<string>>(
     new Set()
   );
@@ -82,13 +94,13 @@ export function CreateInvoiceModal({
   // Reset form when modal closes
   React.useEffect(() => {
     if (!open) {
-      setStep(1);
-      setEmployerId('');
+      setStep(initialStep);
+      setEmployerId(initialEmployerId);
       setSelectedOrders(new Set());
       setDueDate('');
       setNotes('');
     }
-  }, [open]);
+  }, [open, initialStep, initialEmployerId]);
 
   // Set default due date
   React.useEffect(() => {
@@ -159,28 +171,35 @@ export function CreateInvoiceModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} size="lg">
-      <form onSubmit={handleSubmit}>
+      <form data-slot="invoice-modal" onSubmit={handleSubmit}>
         <ModalHeader>
-          <div className="flex items-center gap-3">
+          <div
+            data-slot="invoice-modal-header"
+            className="flex items-center gap-3"
+          >
             <ModalTitle>Create Invoice</ModalTitle>
             <Badge variant="secondary">Step {step} of 3</Badge>
           </div>
         </ModalHeader>
 
-        <div className="space-y-4">
+        <ModalBody className="space-y-4">
           {/* Error message */}
           {errorMessage && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {errorMessage}
-              </p>
+            <div
+              data-slot="invoice-modal-error"
+              className="border-destructive/30 bg-destructive/10 rounded-lg border p-3"
+            >
+              <p className="text-destructive text-sm">{errorMessage}</p>
             </div>
           )}
 
           {/* Step 1: Select Employer */}
           {step === 1 && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p
+                data-slot="invoice-modal-step-desc"
+                className="text-muted-foreground text-sm"
+              >
                 Select the employer you want to create an invoice for.
               </p>
               <Select
@@ -197,14 +216,18 @@ export function CreateInvoiceModal({
           {step === 2 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p
+                  data-slot="invoice-modal-step-desc"
+                  className="text-muted-foreground text-sm"
+                >
                   Select the completed orders to include in this invoice.
                 </p>
                 {orders.length > 0 && (
                   <button
                     type="button"
+                    data-slot="invoice-modal-toggle-all"
                     onClick={toggleAllOrders}
-                    className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                    className="text-primary text-sm hover:underline"
                   >
                     {selectedOrders.size === orders.length
                       ? 'Deselect All'
@@ -218,14 +241,18 @@ export function CreateInvoiceModal({
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="h-16 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"
+                      className="bg-muted h-16 animate-pulse rounded-lg"
                     />
                   ))}
                 </div>
               ) : orders.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-gray-300 py-8 text-center dark:border-gray-700">
+                <div
+                  data-slot="invoice-modal-empty"
+                  className="border-border rounded-lg border border-dashed py-8 text-center"
+                >
                   <svg
-                    className="mx-auto mb-2 h-10 w-10 text-gray-400 dark:text-gray-600"
+                    data-slot="invoice-modal-empty-icon"
+                    className="text-muted-foreground/60 mx-auto mb-2 h-10 w-10"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -237,36 +264,41 @@ export function CreateInvoiceModal({
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                     />
                   </svg>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground text-sm">
                     No unbilled orders found for this employer
                   </p>
                 </div>
               ) : (
-                <div className="max-h-60 space-y-2 overflow-y-auto">
+                <div
+                  data-slot="invoice-modal-order-list"
+                  className="max-h-60 space-y-2 overflow-y-auto"
+                >
                   {orders.map((order) => {
                     const isSelected = selectedOrders.has(order.id);
                     return (
                       <button
                         key={order.id}
                         type="button"
+                        data-slot="invoice-modal-order"
                         onClick={() => toggleOrder(order.id)}
                         className={`w-full rounded-lg border p-3 text-left transition-colors ${
                           isSelected
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-border/80'
                         } `}
                       >
                         <div className="flex items-center gap-3">
                           <div
+                            data-slot="invoice-modal-order-check"
                             className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
                               isSelected
-                                ? 'border-blue-500 bg-blue-500'
-                                : 'border-gray-300 dark:border-gray-600'
+                                ? 'border-primary bg-primary'
+                                : 'border-input'
                             } `}
                           >
                             {isSelected && (
                               <svg
-                                className="h-3 w-3 text-white"
+                                className="text-primary-foreground h-3 w-3"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -282,14 +314,23 @@ export function CreateInvoiceModal({
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
-                              <p className="font-medium text-gray-900 dark:text-white">
+                              <p
+                                data-slot="invoice-modal-order-number"
+                                className="text-foreground font-medium"
+                              >
                                 {order.orderNumber}
                               </p>
-                              <span className="font-medium text-gray-900 dark:text-white">
+                              <span
+                                data-slot="invoice-modal-order-amount"
+                                className="text-foreground font-medium"
+                              >
                                 {formatCurrency(order.amount)}
                               </span>
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p
+                              data-slot="invoice-modal-order-detail"
+                              className="text-muted-foreground text-xs"
+                            >
                               {order.employeeName} • {order.serviceName} •{' '}
                               {formatDate(order.date)}
                             </p>
@@ -303,12 +344,18 @@ export function CreateInvoiceModal({
 
               {/* Selected summary */}
               {selectedOrders.size > 0 && (
-                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                <div
+                  data-slot="invoice-modal-summary"
+                  className="bg-muted flex items-center justify-between rounded-lg p-3"
+                >
+                  <span className="text-muted-foreground text-sm">
                     {selectedOrders.size} order
                     {selectedOrders.size > 1 ? 's' : ''} selected
                   </span>
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  <span
+                    data-slot="invoice-modal-summary-total"
+                    className="text-foreground text-lg font-bold"
+                  >
                     {formatCurrency(totalAmount)}
                   </span>
                 </div>
@@ -319,33 +366,38 @@ export function CreateInvoiceModal({
           {/* Step 3: Review & Configure */}
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p
+                data-slot="invoice-modal-step-desc"
+                className="text-muted-foreground text-sm"
+              >
                 Review and configure the invoice details.
               </p>
 
               {/* Summary */}
-              <div className="space-y-2 rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+              <div
+                data-slot="invoice-modal-summary"
+                className="bg-muted space-y-2 rounded-lg p-4"
+              >
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="text-muted-foreground text-sm">
                     Employer
                   </span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-foreground text-sm font-medium">
                     {employers.find((e) => e.id === employerId)?.name}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Orders
-                  </span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-muted-foreground text-sm">Orders</span>
+                  <span className="text-foreground text-sm font-medium">
                     {selectedOrders.size} items
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    Total
-                  </span>
-                  <span className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="border-border flex justify-between border-t pt-2">
+                  <span className="text-foreground font-medium">Total</span>
+                  <span
+                    data-slot="invoice-modal-summary-total"
+                    className="text-foreground text-xl font-bold"
+                  >
                     {formatCurrency(totalAmount)}
                   </span>
                 </div>
@@ -359,28 +411,22 @@ export function CreateInvoiceModal({
                 required
               />
 
-              <div>
-                <label
-                  htmlFor="invoice-notes"
-                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Notes (Optional)
-                </label>
-                <textarea
-                  id="invoice-notes"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  rows={3}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any notes for this invoice..."
-                />
-              </div>
+              <Textarea
+                label="Notes (Optional)"
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add any notes for this invoice..."
+              />
             </div>
           )}
-        </div>
+        </ModalBody>
 
         <ModalFooter>
-          <div className="flex w-full justify-between">
+          <div
+            data-slot="invoice-modal-footer"
+            className="flex w-full justify-between"
+          >
             <div>
               {step > 1 && (
                 <Button
@@ -393,7 +439,10 @@ export function CreateInvoiceModal({
                 </Button>
               )}
             </div>
-            <div className="flex gap-2">
+            <div
+              data-slot="invoice-modal-footer-buttons"
+              className="flex gap-2"
+            >
               <Button
                 type="button"
                 variant="outline"
@@ -415,7 +464,7 @@ export function CreateInvoiceModal({
                   {isSubmitting ? (
                     <>
                       <svg
-                        className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                        className="mr-2 -ml-1 h-4 w-4 animate-spin"
                         fill="none"
                         viewBox="0 0 24 24"
                       >

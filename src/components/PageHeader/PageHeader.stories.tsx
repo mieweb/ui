@@ -40,7 +40,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 const meta: Meta<typeof PageHeader> = {
-  title: 'Components/PageHeader',
+  title: 'Components/Layout & Structure/PageHeader',
   component: PageHeader,
   tags: ['autodocs'],
   argTypes: {

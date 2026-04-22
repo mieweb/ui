@@ -1,29 +1,28 @@
 import * as React from 'react';
-
-import { useIsMobile } from '../../hooks';
 import { cn } from '../../utils/cn';
-import { Alert, AlertDescription, AlertTitle } from '../Alert';
 import { Button } from '../Button';
-import {
-  AlertCircleIcon,
-  CameraIcon,
-  CheckCircleIcon,
-  ScanIcon,
-  TrashIcon,
-  UploadIcon,
-} from '../Icons';
 import { SpinnerWithLabel } from '../Spinner';
+import { Alert, AlertTitle, AlertDescription } from '../Alert';
 import { Text } from '../Text';
+import {
+  UploadIcon,
+  CameraIcon,
+  ScanIcon,
+  CheckCircleIcon,
+  AlertCircleIcon,
+  TrashIcon,
+} from '../Icons';
 import { DropZone } from './DropZone';
 import { FilePreview } from './FilePreview';
+import { WebcamModal } from './WebcamModal';
+import { useFileUpload } from './useFileUpload';
+import { useIsMobile } from '../../hooks';
 import type {
   DocumentScannerProps,
   ScannerState,
   ValidationError,
 } from './types';
 import { DEFAULT_ACCEPTED_FILE_TYPES, DEFAULT_MAX_FILE_SIZE_MB } from './types';
-import { useFileUpload } from './useFileUpload';
-import { WebcamModal } from './WebcamModal';
 
 /**
  * DocumentScanner - A comprehensive component for scanning documents, IDs, and cards
@@ -284,7 +283,10 @@ export function DocumentScanner({
           )}
 
           {/* Actions */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div
+            className="flex flex-wrap items-center justify-center gap-3"
+            data-slot="doc-scanner-actions"
+          >
             {multiple && (
               <>
                 {/* Add more files button */}
@@ -341,9 +343,15 @@ export function DocumentScanner({
           disabled={disabled}
           className="min-h-[240px]"
         >
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100">
-              <UploadIcon className="h-7 w-7 text-primary-600 dark:text-primary-400" />
+          <div
+            className="flex flex-col items-center gap-4 text-center"
+            data-slot="doc-scanner-dropzone-content"
+          >
+            <div
+              className="bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full"
+              data-slot="doc-scanner-upload-icon"
+            >
+              <UploadIcon className="text-primary-600 dark:text-primary-400 h-7 w-7" />
             </div>
 
             <div className="space-y-1">
@@ -365,11 +373,11 @@ export function DocumentScanner({
         {(enableCamera || enableWebcam) && (
           <div className="flex flex-col items-center gap-3">
             <div className="flex w-full max-w-xs items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
+              <div className="bg-border h-px flex-1" />
               <Text variant="muted" size="sm">
                 or
               </Text>
-              <div className="h-px flex-1 bg-border" />
+              <div className="bg-border h-px flex-1" />
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
@@ -427,13 +435,14 @@ export function DocumentScanner({
   return (
     <div
       className={cn(
-        'w-full rounded-xl border border-border bg-card p-6',
+        'border-border bg-card w-full rounded-xl border p-6',
         'shadow-sm',
         className
       )}
+      data-slot="doc-scanner"
     >
       {/* Header */}
-      <div className="mb-6 text-center">
+      <div className="mb-6 text-center" data-slot="doc-scanner-header">
         <Text as="h2" size="xl" weight="semibold" className="mb-1">
           {title}
         </Text>
@@ -472,7 +481,7 @@ DocumentScanner.displayName = 'DocumentScanner';
 // Re-export sub-components for advanced usage
 export { DropZone } from './DropZone';
 export { FilePreview } from './FilePreview';
-export type * from './types';
-export { useCamera } from './useCamera';
-export { useFileUpload } from './useFileUpload';
 export { WebcamModal } from './WebcamModal';
+export { useFileUpload } from './useFileUpload';
+export { useCamera } from './useCamera';
+export type * from './types';

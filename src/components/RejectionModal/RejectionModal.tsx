@@ -1,16 +1,15 @@
 'use client';
 
 import * as React from 'react';
-
-import { cn } from '../../utils';
-import { Button } from '../Button/Button';
 import {
   Modal,
-  ModalBody,
-  ModalFooter,
   ModalHeader,
   ModalTitle,
+  ModalBody,
+  ModalFooter,
 } from '../Modal/Modal';
+import { Button } from '../Button/Button';
+import { cn } from '../../utils';
 
 export interface RejectionReason {
   id: string;
@@ -115,12 +114,15 @@ export function RejectionModal({
         <ModalBody className="space-y-4">
           {/* Description or item info */}
           {(description || itemDescription) && (
-            <div className="rounded-lg bg-muted p-3">
+            <div
+              className="bg-muted rounded-lg p-3"
+              data-slot="rejection-modal-info"
+            >
               {description && (
-                <p className="text-sm text-muted-foreground">{description}</p>
+                <p className="text-muted-foreground text-sm">{description}</p>
               )}
               {itemDescription && (
-                <p className="mt-1 text-sm font-medium text-foreground">
+                <p className="text-foreground mt-1 text-sm font-medium">
                   {itemDescription}
                 </p>
               )}
@@ -129,9 +131,12 @@ export function RejectionModal({
 
           {/* Warning message */}
           {variant === 'danger' && (
-            <div className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-lg border p-3">
+            <div
+              className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-lg border p-3"
+              data-slot="rejection-modal-warning"
+            >
               <svg
-                className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive"
+                className="text-destructive-700 dark:text-destructive-300 mt-0.5 h-5 w-5 flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -143,7 +148,7 @@ export function RejectionModal({
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              <p className="text-sm text-destructive">
+              <p className="text-destructive-700 dark:text-destructive-300 text-sm">
                 This action cannot be undone. The affected party will be
                 notified of this rejection.
               </p>
@@ -151,19 +156,20 @@ export function RejectionModal({
           )}
 
           {/* Reason selection */}
-          <div>
-            <span className="mb-2 block text-sm font-medium text-foreground">
+          <div data-slot="rejection-modal-reasons">
+            <span className="text-foreground mb-2 block text-sm font-medium">
               Reason for rejection
             </span>
             <div className="space-y-2">
               {reasons.map((reason) => (
                 <label
                   key={reason.id}
+                  data-slot="rejection-modal-reason"
                   className={cn(
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     selectedReasonId === reason.id
                       ? 'border-primary bg-primary/10'
-                      : 'hover:border-muted-foreground/50 border-border'
+                      : 'border-border hover:border-muted-foreground/50'
                   )}
                 >
                   <input
@@ -172,13 +178,13 @@ export function RejectionModal({
                     value={reason.id}
                     checked={selectedReasonId === reason.id}
                     onChange={(e) => setSelectedReasonId(e.target.value)}
-                    className="text-primary focus:ring-primary h-4 w-4 border-border"
+                    className="text-primary focus:ring-primary border-border h-4 w-4"
                   />
-                  <span className="text-sm text-foreground">
+                  <span className="text-foreground text-sm">
                     {reason.label}
                   </span>
                   {reason.requiresDetails && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       (requires details)
                     </span>
                   )}
@@ -189,15 +195,15 @@ export function RejectionModal({
 
           {/* Details textarea */}
           {showDetails && (
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">
+            <div data-slot="rejection-modal-details">
+              <label className="text-foreground mb-1 block text-sm font-medium">
                 {detailsLabel}
                 {needsDetails && (
-                  <span className="ml-1 text-destructive">*</span>
+                  <span className="text-destructive ml-1">*</span>
                 )}
               </label>
               <textarea
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
                 rows={3}
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
@@ -205,7 +211,7 @@ export function RejectionModal({
                 required={needsDetails}
               />
               {needsDetails && !details.trim() && selectedReasonId && (
-                <p className="mt-1 text-xs text-destructive">
+                <p className="text-destructive mt-1 text-xs">
                   Please provide additional details for this rejection reason.
                 </p>
               )}
@@ -230,7 +236,7 @@ export function RejectionModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

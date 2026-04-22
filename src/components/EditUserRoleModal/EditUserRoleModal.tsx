@@ -1,15 +1,14 @@
 'use client';
 
 import * as React from 'react';
-
-import { Button } from '../Button/Button';
 import {
   Modal,
-  ModalBody,
-  ModalFooter,
   ModalHeader,
   ModalTitle,
+  ModalBody,
+  ModalFooter,
 } from '../Modal/Modal';
+import { Button } from '../Button/Button';
 import { Select } from '../Select/Select';
 
 export interface UserRole {
@@ -88,9 +87,9 @@ export function EditUserRoleModal({
       <ModalBody className="space-y-4">
         {/* User info */}
         {user && (
-          <div className="rounded-lg bg-muted p-3">
-            <p className="font-medium text-foreground">{user.name}</p>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
+          <div className="bg-muted rounded-lg p-3">
+            <p className="text-foreground font-medium">{user.name}</p>
+            <p className="text-foreground/70 text-sm">{user.email}</p>
           </div>
         )}
 
@@ -99,7 +98,7 @@ export function EditUserRoleModal({
           <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
             <div className="flex items-center gap-2">
               <svg
-                className="h-5 w-5 text-destructive"
+                className="text-destructive h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -111,7 +110,7 @@ export function EditUserRoleModal({
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="text-sm text-destructive">{errorMessage}</p>
+              <p className="text-destructive text-sm">{errorMessage}</p>
             </div>
           </div>
         )}
@@ -131,21 +130,23 @@ export function EditUserRoleModal({
         {/* Role description */}
         {selectedRole?.description && (
           <div className="bg-primary/10 rounded-lg p-3">
-            <p className="text-primary text-sm">{selectedRole.description}</p>
+            <p className="text-primary-800 dark:text-primary-300 text-sm">
+              {selectedRole.description}
+            </p>
           </div>
         )}
 
         {/* Role permissions preview */}
         {selectedRole?.permissions && selectedRole.permissions.length > 0 && (
           <div>
-            <span className="mb-2 block text-sm font-medium text-foreground">
+            <span className="text-foreground mb-2 block text-sm font-medium">
               Permissions
             </span>
             <div className="flex flex-wrap gap-2">
               {selectedRole.permissions.map((permission) => (
                 <span
                   key={permission}
-                  className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground"
+                  className="bg-muted text-foreground/70 rounded-full px-2 py-1 text-xs font-medium"
                 >
                   {permission}
                 </span>
@@ -172,7 +173,7 @@ export function EditUserRoleModal({
           {isSubmitting ? (
             <>
               <svg
-                className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                className="mr-2 -ml-1 h-4 w-4 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"
               >

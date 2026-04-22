@@ -3,6 +3,8 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    'ag-grid': 'src/ag-grid.ts',
+    'datavis': 'src/datavis.ts',
     'hooks/index': 'src/hooks/index.ts',
     'utils/index': 'src/utils/index.ts',
     'tailwind-preset': 'src/tailwind-preset.ts',
@@ -16,6 +18,7 @@ export default defineConfig({
     'components/Button/index': 'src/components/Button/index.ts',
     'components/Card/index': 'src/components/Card/index.ts',
     'components/Checkbox/index': 'src/components/Checkbox/index.ts',
+    'components/CountryCodeDropdown/index': 'src/components/CountryCodeDropdown/index.ts',
     'components/DateInput/index': 'src/components/DateInput/index.ts',
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
     'components/Input/index': 'src/components/Input/index.ts',
@@ -29,6 +32,7 @@ export default defineConfig({
     'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
     'components/Select/index': 'src/components/Select/index.ts',
     'components/Skeleton/index': 'src/components/Skeleton/index.ts',
+    'components/Slider/index': 'src/components/Slider/index.ts',
     'components/Spinner/index': 'src/components/Spinner/index.ts',
     'components/Switch/index': 'src/components/Switch/index.ts',
     'components/Table/index': 'src/components/Table/index.ts',
@@ -42,27 +46,29 @@ export default defineConfig({
     'brands/index': 'src/brands/index.ts',
     'brands/types': 'src/brands/types.ts',
     'brands/bluehive': 'src/brands/bluehive.ts',
+    'brands/ozwell': 'src/brands/ozwell.ts',
   },
   format: ['esm', 'cjs'],
   target: 'es2022',
   dts: true,
+  tsconfig: 'tsconfig.build.json',
   sourcemap: true,
-  // `clean: true` previously wiped `dist/` at the start of every (re)build,
-  // which briefly removed `dist/brands/*.css` — consumers like Meteor's CSS
-  // minifier (apps/web imports `@mieweb/ui/brands/bluehive.css`) can read
-  // during that window and hard-fail the build. Leaving `dist/` intact
-  // between rebuilds keeps watch mode stable; `npm run build` still does a
-  // full fresh output. Set to `false` here and rely on `rm -rf dist` in
-  // `npm run build` if a clean is required.
-  clean: false,
-  external: ['react', 'react-dom'],
+  clean: true,
+  external: [
+    'react',
+    'react-dom',
+    'ag-grid-community',
+    'ag-grid-react',
+    '@mieweb/ui',
+    '@mieweb/datavis',
+    'datavis-ace',
+    /^@mieweb\/ui\//,
+    /^datavis\//,
+  ],
   treeshake: true,
   splitting: true,
   minify: false,
   esbuildOptions(options) {
     options.jsx = 'automatic';
   },
-  // Re-copy brand CSS after every (re)build so edits to `src/brands/*.css`
-  // propagate into `dist/brands/` without a manual restart.
-  onSuccess: 'cp src/brands/*.css dist/brands/ 2>/dev/null || true',
 });

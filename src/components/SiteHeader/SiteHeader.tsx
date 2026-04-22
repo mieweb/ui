@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -45,18 +44,20 @@ export function SiteLogo({
   className,
 }: SiteLogoProps) {
   const content = (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div
+      data-slot="site-header-logo-content"
+      className={cn('flex items-center gap-2', className)}
+    >
       {logoSrc ? (
         <img
+          data-slot="site-header-logo-icon"
           src={logoSrc}
           alt={logoAlt}
-          className={cn(
-            'object-contain',
-            textSrc ? 'h-8 w-8' : 'h-[30px] w-auto'
-          )}
+          className="h-8 w-8 object-contain"
         />
       ) : (
         <div
+          data-slot="site-header-logo-icon"
           className={cn(
             'flex h-8 w-8 items-center justify-center rounded-lg text-lg font-bold',
             variant === 'light'
@@ -78,6 +79,7 @@ export function SiteLogo({
         />
       ) : name ? (
         <span
+          data-slot="site-header-logo-name"
           className={cn(
             'hidden text-xl font-semibold sm:block',
             variant === 'light' ? 'text-white' : 'text-gray-900 dark:text-white'
@@ -90,7 +92,7 @@ export function SiteLogo({
   );
 
   return (
-    <a href={href} className="flex-shrink-0">
+    <a data-slot="site-header-logo" href={href} className="flex-shrink-0">
       {content}
     </a>
   );
@@ -112,11 +114,15 @@ export function NavLinks({
   className,
 }: NavLinksProps) {
   return (
-    <nav className={cn('hidden items-center gap-1 md:flex', className)}>
+    <nav
+      data-slot="site-header-nav"
+      className={cn('hidden items-center gap-1 md:flex', className)}
+    >
       {links.map((link) => (
         <a
           key={link.href}
           href={link.href}
+          data-slot="site-header-nav-link"
           target={link.external ? '_blank' : undefined}
           rel={link.external ? 'noopener noreferrer' : undefined}
           className={cn(
@@ -181,8 +187,8 @@ export function AuthButtons({
       className={cn(
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
-          ? 'bg-white text-primary-600 hover:bg-white/90'
-          : 'bg-primary-600 text-white hover:bg-primary-700'
+          ? 'text-primary-600 bg-white hover:bg-white/90'
+          : 'bg-primary-700 hover:bg-primary-800 text-white'
       )}
     >
       Sign Up
@@ -191,7 +197,10 @@ export function AuthButtons({
 
   if (loginHref || signUpHref) {
     return (
-      <div className={cn('flex items-center gap-2', className)}>
+      <div
+        data-slot="site-header-auth"
+        className={cn('flex items-center gap-2', className)}
+      >
         {loginHref ? (
           <a
             href={loginHref}
@@ -213,8 +222,8 @@ export function AuthButtons({
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
-                ? 'bg-white text-primary-600 hover:bg-white/90'
-                : 'bg-primary-600 text-white hover:bg-primary-700'
+                ? 'text-primary-600 bg-white hover:bg-white/90'
+                : 'bg-primary-700 hover:bg-primary-800 text-white'
             )}
           >
             Sign Up
@@ -227,7 +236,10 @@ export function AuthButtons({
   }
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div
+      data-slot="site-header-auth"
+      className={cn('flex items-center gap-2', className)}
+    >
       {loginButton}
       {signUpButton}
     </div>
@@ -321,7 +333,11 @@ export function UserMenu({
   ];
 
   return (
-    <div ref={menuRef} className={cn('relative', className)}>
+    <div
+      data-slot="site-header-user-menu"
+      ref={menuRef}
+      className={cn('relative', className)}
+    >
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -336,17 +352,19 @@ export function UserMenu({
       >
         {user.avatarUrl ? (
           <img
+            data-slot="site-header-user-avatar"
             src={user.avatarUrl}
             alt={user.name}
             className="h-8 w-8 rounded-full object-cover"
           />
         ) : (
           <div
+            data-slot="site-header-user-avatar"
             className={cn(
               'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
               variant === 'light'
                 ? 'bg-white/20 text-white'
-                : 'dark:bg-primary-900/30 bg-primary-100 text-primary-700 dark:text-primary-400'
+                : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
             )}
           >
             {initials}
@@ -364,7 +382,10 @@ export function UserMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-56 rounded-lg bg-white shadow-lg ring-1 ring-black/5 dark:bg-gray-800 dark:ring-white/10">
+        <div
+          data-slot="site-header-user-dropdown"
+          className="absolute right-0 z-50 mt-2 w-56 rounded-lg bg-white shadow-lg ring-1 ring-black/5 dark:bg-gray-800 dark:ring-white/10"
+        >
           {/* User Info */}
           <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-700">
             <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
@@ -436,6 +457,7 @@ export function MobileMenuButton({
 }: MobileMenuButtonProps) {
   return (
     <button
+      data-slot="site-header-mobile-btn"
       type="button"
       onClick={onClick}
       className={cn(
@@ -496,7 +518,7 @@ export function MobileMenuPanel({
       {/* Panel */}
       <div
         className={cn(
-          'fixed bottom-0 right-0 top-0 z-50 w-80 max-w-full bg-white shadow-xl dark:bg-gray-900 md:hidden',
+          'fixed top-0 right-0 bottom-0 z-50 w-80 max-w-full bg-white shadow-xl md:hidden dark:bg-gray-900',
           className
         )}
       >
@@ -532,11 +554,11 @@ export function MobileMenuPanel({
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 p-4 dark:border-gray-700">
+        <div className="absolute right-0 bottom-0 left-0 border-t border-gray-200 p-4 dark:border-gray-700">
           {user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3 px-2">
-                <div className="dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 font-medium text-primary-700 dark:text-primary-400">
+                <div className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium">
                   {user.name
                     .split(' ')
                     .map((w) => w[0])
@@ -583,7 +605,7 @@ export function MobileMenuPanel({
                   onSignUp?.();
                   onClose();
                 }}
-                className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-sm font-medium text-white"
               >
                 Sign Up
               </button>
@@ -606,7 +628,7 @@ const headerVariants = cva(
       variant: {
         primary: 'bg-primary-600',
         white:
-          'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.24)] dark:bg-gray-900 dark:border-b dark:border-gray-800 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[3px] after:bg-gradient-to-r after:from-[#27AAE1] after:via-[#5DBFE8] after:to-[#27AAE1]',
+          'bg-white shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800',
         transparent: 'bg-transparent',
         glass: 'bg-white/80 backdrop-blur-md shadow-sm dark:bg-gray-900/80',
       },
@@ -660,16 +682,20 @@ export function SiteHeader({
   return (
     <>
       {/* Spacer for fixed header */}
-      <div className="h-16" aria-hidden="true" />
+      <div data-slot="site-header-spacer" className="h-16" aria-hidden="true" />
 
       <header
+        data-slot="site-header"
         className={cn(
           headerVariants({ variant: variant ?? 'primary' }),
           className
         )}
       >
         <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
+          <div
+            data-slot="site-header-row"
+            className="flex h-16 items-center justify-between"
+          >
             {/* Logo */}
             <SiteLogo
               href={logo.href}
@@ -770,18 +796,29 @@ export function CompactHeader({
 
   return (
     <>
-      <div className="h-14" aria-hidden="true" />
+      <div
+        data-slot="site-header-compact-spacer"
+        className="h-14"
+        aria-hidden="true"
+      />
       <header
+        data-slot="site-header-compact"
         className={cn(
-          'fixed left-0 right-0 top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
+          'fixed top-0 right-0 left-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
           className
         )}
       >
-        <div className="flex h-14 items-center justify-between px-4">
+        <div
+          data-slot="site-header-compact-row"
+          className="flex h-14 items-center justify-between px-4"
+        >
           <div className="flex items-center gap-2">
             {backButton}
             {title && (
-              <h1 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
+              <h1
+                data-slot="site-header-compact-title"
+                className="truncate text-lg font-semibold text-gray-900 dark:text-white"
+              >
                 {title}
               </h1>
             )}

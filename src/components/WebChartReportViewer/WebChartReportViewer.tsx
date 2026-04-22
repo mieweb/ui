@@ -1,30 +1,34 @@
 'use client';
 
-import { AlertTriangle, Check, Link, RefreshCw } from 'lucide-react';
 import * as React from 'react';
-
-import { cn } from '../../utils';
-import { Alert, AlertDescription, AlertTitle } from '../Alert';
+import { AlertTriangle, Check, Link, RefreshCw } from 'lucide-react';
+import {
+  cn,
+  dateToDisplayFormat,
+  displayFormatToDateString,
+  isValidDate,
+} from '../../utils';
 import { Button } from '../Button';
 import { Card, CardContent } from '../Card';
-import { Input } from '../Input';
-import {
-  Modal,
-  ModalBody,
-  ModalClose,
-  ModalHeader,
-  ModalTitle,
-} from '../Modal';
-import { Select } from '../Select';
+import { Alert, AlertDescription, AlertTitle } from '../Alert';
 import { Skeleton } from '../Skeleton';
 import { Spinner } from '../Spinner';
+import { DateInput } from '../DateInput';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalClose,
+} from '../Modal';
+import { Select } from '../Select';
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
+  TableBody,
   TableRow,
+  TableHead,
+  TableCell,
 } from '../Table';
 
 export interface SystemReport {
@@ -150,13 +154,30 @@ export function WebChartReportViewer({
     onClose?.();
   };
 
-  const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toISOString().split('T')[0];
+  // Handle date input change - only propagate when valid
+  const handleStartDateChange = (value: string) => {
+    if (isValidDate(value)) {
+      onDateRangeChange?.(
+        displayFormatToDateString(value),
+        dateRange?.end || new Date()
+      );
+    }
+  };
+
+  const handleEndDateChange = (value: string) => {
+    if (isValidDate(value)) {
+      onDateRangeChange?.(
+        dateRange?.start || new Date(),
+        displayFormatToDateString(value)
+      );
+    }
   };
 
   return (
-    <div className={cn('webchart-report-viewer', className)}>
+    <div
+      data-slot="webchart-report-viewer"
+      className={cn('webchart-report-viewer', className)}
+    >
       {/* Error State */}
       {error && (
         <Alert variant="warning" icon={<AlertTriangle />} className="mb-4">
@@ -188,7 +209,10 @@ export function WebChartReportViewer({
       )}
 
       {/* Reports Grid */}
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        data-slot="report-grid"
+        className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+      >
         {loading ? (
           // Loading placeholders
           <>
@@ -234,7 +258,10 @@ export function WebChartReportViewer({
             </Card>
           ))
         ) : (
-          <div className="col-span-full py-8 text-center text-muted-foreground">
+          <div
+            data-slot="report-empty"
+            className="text-muted-foreground col-span-full py-8 text-center"
+          >
             {noReports}
           </div>
         )}
@@ -251,7 +278,10 @@ export function WebChartReportViewer({
         size="4xl"
       >
         <ModalHeader>
-          <div className="flex items-center gap-3">
+          <div
+            data-slot="report-modal-header"
+            className="flex items-center gap-3"
+          >
             <ModalTitle>{currentReport?.name || 'Report Results'}</ModalTitle>
             {reportResult?.error ? (
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
@@ -263,31 +293,30 @@ export function WebChartReportViewer({
         </ModalHeader>
 
         {/* Toolbar */}
-        <div className="bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4">
+        <div
+          data-slot="report-toolbar"
+          className="bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4"
+        >
           {/* Date Range */}
           {onDateRangeChange && dateRange && (
             <div className="flex items-center gap-2">
-              <label className="text-sm text-muted-foreground">
+              <label className="text-muted-foreground text-sm">
                 {dateFrom}:
               </label>
-              <Input
-                type="date"
+              <DateInput
                 size="sm"
-                value={formatDate(dateRange.start)}
-                onChange={(e) =>
-                  onDateRangeChange(e.target.value, dateRange.end)
-                }
-                className="w-auto"
+                showCalendar
+                width="fixed"
+                value={dateToDisplayFormat(dateRange.start)}
+                onChange={handleStartDateChange}
               />
-              <label className="text-sm text-muted-foreground">{dateTo}:</label>
-              <Input
-                type="date"
+              <label className="text-muted-foreground text-sm">{dateTo}:</label>
+              <DateInput
                 size="sm"
-                value={formatDate(dateRange.end)}
-                onChange={(e) =>
-                  onDateRangeChange(dateRange.start, e.target.value)
-                }
-                className="w-auto"
+                showCalendar
+                width="fixed"
+                value={dateToDisplayFormat(dateRange.end)}
+                onChange={handleEndDateChange}
               />
             </div>
           )}
@@ -305,9 +334,12 @@ export function WebChartReportViewer({
 
         <ModalBody className="max-h-[60vh] overflow-auto">
           {loadingReport ? (
-            <div className="flex h-64 flex-col items-center justify-center">
+            <div
+              data-slot="report-loading"
+              className="flex h-64 flex-col items-center justify-center"
+            >
               <Spinner size="xl" />
-              <span className="mt-4 text-muted-foreground">{loadingData}</span>
+              <span className="text-muted-foreground mt-4">{loadingData}</span>
             </div>
           ) : reportResult?.error ? (
             <Alert variant="danger" icon={<AlertTriangle />}>
@@ -363,7 +395,7 @@ export function WebChartReportViewer({
                     reportResult.data as Record<string, unknown>
                   ).map(([key, val]) => (
                     <TableRow key={key}>
-                      <TableCell className="font-medium text-muted-foreground">
+                      <TableCell className="text-muted-foreground font-medium">
                         {key}
                       </TableCell>
                       <TableCell>{val == null ? '' : String(val)}</TableCell>
@@ -373,7 +405,10 @@ export function WebChartReportViewer({
               </Table>
             )
           ) : (
-            <div className="py-8 text-center text-muted-foreground">
+            <div
+              data-slot="report-empty"
+              className="text-muted-foreground py-8 text-center"
+            >
               No data available
             </div>
           )}
@@ -383,9 +418,9 @@ export function WebChartReportViewer({
   );
 }
 
-/* Date Picker for Reports */
+/* Time Range Selector for Reports */
 
-export interface ReportDatePickerProps {
+export interface ReportTimeRangeProps {
   /** Start date */
   startDate?: Date | string;
   /** End date */
@@ -398,7 +433,7 @@ export interface ReportDatePickerProps {
   className?: string;
 }
 
-export function ReportDatePicker({
+export function ReportTimeRange({
   startDate,
   endDate,
   onChange,
@@ -411,14 +446,8 @@ export function ReportDatePicker({
     { label: 'Custom', value: 'custom' },
   ],
   className,
-}: ReportDatePickerProps) {
+}: ReportTimeRangeProps) {
   const [preset, setPreset] = React.useState('this-month');
-
-  const formatDate = (date?: Date | string) => {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toISOString().split('T')[0];
-  };
 
   const handlePresetChange = (value: string) => {
     setPreset(value);
@@ -457,8 +486,24 @@ export function ReportDatePicker({
     label: p.label,
   }));
 
+  // Only propagate changes when we have a valid complete date
+  const handleStartChange = (value: string) => {
+    if (isValidDate(value)) {
+      onChange?.(displayFormatToDateString(value), endDate || new Date());
+    }
+  };
+
+  const handleEndChange = (value: string) => {
+    if (isValidDate(value)) {
+      onChange?.(startDate || new Date(), displayFormatToDateString(value));
+    }
+  };
+
   return (
-    <div className={cn('flex flex-wrap items-center gap-3', className)}>
+    <div
+      data-slot="report-time-range"
+      className={cn('flex flex-wrap items-center gap-3', className)}
+    >
       <Select
         value={preset}
         onValueChange={(value) => handlePresetChange(value)}
@@ -468,27 +513,31 @@ export function ReportDatePicker({
 
       {preset === 'custom' && (
         <>
-          <Input
-            type="date"
+          <DateInput
             size="sm"
-            value={formatDate(startDate)}
-            onChange={(e) => onChange?.(e.target.value, endDate || new Date())}
-            className="w-auto"
+            showCalendar
+            width="fixed"
+            value={dateToDisplayFormat(startDate || '')}
+            onChange={handleStartChange}
           />
           <span className="text-muted-foreground">to</span>
-          <Input
-            type="date"
+          <DateInput
             size="sm"
-            value={formatDate(endDate)}
-            onChange={(e) =>
-              onChange?.(startDate || new Date(), e.target.value)
-            }
-            className="w-auto"
+            showCalendar
+            width="fixed"
+            value={dateToDisplayFormat(endDate || '')}
+            onChange={handleEndChange}
           />
         </>
       )}
     </div>
   );
 }
+
+/** @deprecated Use ReportTimeRange instead */
+export const ReportDatePicker = ReportTimeRange;
+
+/** @deprecated Use ReportTimeRangeProps instead */
+export type ReportDatePickerProps = ReportTimeRangeProps;
 
 export default WebChartReportViewer;

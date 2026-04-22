@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-
-import { ProviderOption, ProviderSelector } from './ProviderSelector';
+import { ProviderSelector, ProviderOption } from './ProviderSelector';
 
 const sampleProviders: ProviderOption[] = [
   {
@@ -43,7 +42,7 @@ const sampleProviders: ProviderOption[] = [
 ];
 
 const meta: Meta<typeof ProviderSelector> = {
-  title: 'Components/ProviderSelector',
+  title: 'Components/Forms & Inputs/ProviderSelector',
   component: ProviderSelector,
   tags: ['autodocs'],
   parameters: {
@@ -119,8 +118,11 @@ export const Default: Story = {
           onSelect={setSelected}
         />
         {selected && (
-          <div className="mt-4 rounded-lg bg-muted p-3">
-            <p className="text-sm text-muted-foreground">
+          <div
+            data-slot="provider-selector-result"
+            className="bg-muted mt-4 rounded-lg p-3"
+          >
+            <p className="text-muted-foreground text-sm">
               Selected:{' '}
               <strong className="text-foreground">{selected.name}</strong>
             </p>
@@ -148,8 +150,11 @@ function InteractiveDemo(
         {...props}
       />
       {selected && (
-        <div className="mt-4 rounded-lg bg-muted p-3">
-          <p className="text-sm text-muted-foreground">
+        <div
+          data-slot="provider-selector-result"
+          className="bg-muted mt-4 rounded-lg p-3"
+        >
+          <p className="text-muted-foreground text-sm">
             Selected:{' '}
             <strong className="text-foreground">{selected.name}</strong>
           </p>

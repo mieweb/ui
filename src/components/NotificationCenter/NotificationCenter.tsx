@@ -211,7 +211,7 @@ export function NotificationCenter({
 
   if (isLoading) {
     return (
-      <div className={`space-y-2 ${className}`}>
+      <div data-slot="notification-center" className={`space-y-2 ${className}`}>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
@@ -224,10 +224,14 @@ export function NotificationCenter({
 
   return (
     <div
+      data-slot="notification-center"
       className={`rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900 ${className}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+      <div
+        data-slot="notification-center-header"
+        className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700"
+      >
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-gray-900 dark:text-white">
             Notifications
@@ -250,7 +254,10 @@ export function NotificationCenter({
 
       {/* Notifications List */}
       {notifications.length === 0 ? (
-        <div className="py-12 text-center">
+        <div
+          data-slot="notification-center-empty"
+          className="py-12 text-center"
+        >
           <svg
             className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
             fill="none"
@@ -267,12 +274,16 @@ export function NotificationCenter({
           <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="max-h-[400px] divide-y divide-gray-100 overflow-y-auto dark:divide-gray-800">
+        <div
+          data-slot="notification-center-list"
+          className="max-h-[400px] divide-y divide-gray-100 overflow-y-auto dark:divide-gray-800"
+        >
           {visibleNotifications.map((notification) => (
             <div
               key={notification.id}
               role="button"
               tabIndex={0}
+              data-slot="notification-center-item"
               className={`cursor-pointer px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
                 !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
               }`}
@@ -295,7 +306,10 @@ export function NotificationCenter({
                 }
               }}
             >
-              <div className="flex gap-3">
+              <div
+                data-slot="notification-center-item-row"
+                className="flex gap-3"
+              >
                 {/* Icon or Avatar */}
                 {notification.senderAvatar || notification.senderName ? (
                   <Avatar
@@ -305,6 +319,7 @@ export function NotificationCenter({
                   />
                 ) : (
                   <div
+                    data-slot="notification-center-icon"
                     className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${getTypeColor(notification.type, notification.priority)}`}
                   >
                     {getTypeIcon(notification.type)}
@@ -312,7 +327,10 @@ export function NotificationCenter({
                 )}
 
                 {/* Content */}
-                <div className="min-w-0 flex-1">
+                <div
+                  data-slot="notification-center-content"
+                  className="min-w-0 flex-1"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <p
                       className={`text-sm ${
@@ -323,7 +341,10 @@ export function NotificationCenter({
                     >
                       {notification.title}
                     </p>
-                    <div className="flex flex-shrink-0 items-center gap-2">
+                    <div
+                      data-slot="notification-center-badges"
+                      className="flex flex-shrink-0 items-center gap-2"
+                    >
                       {notification.priority === 'urgent' && (
                         <Badge variant="danger">Urgent</Badge>
                       )}
@@ -338,8 +359,11 @@ export function NotificationCenter({
                   <p className="mt-0.5 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
                     {notification.message}
                   </p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                  <div
+                    data-slot="notification-center-meta"
+                    className="mt-2 flex items-center justify-between"
+                  >
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {formatTimestamp(notification.timestamp)}
                     </span>
                     <div className="flex items-center gap-2">
@@ -382,7 +406,10 @@ export function NotificationCenter({
 
       {/* Footer */}
       {hasMore && onSeeAll && (
-        <div className="border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+        <div
+          data-slot="notification-center-footer"
+          className="border-t border-gray-200 px-4 py-3 dark:border-gray-700"
+        >
           <Button variant="ghost" className="w-full" onClick={onSeeAll}>
             See all notifications
           </Button>

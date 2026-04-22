@@ -55,6 +55,7 @@ function Skeleton({
 }: SkeletonProps) {
   return (
     <div
+      data-slot="skeleton"
       className={cn(
         skeletonVariants({ variant }),
         circle && 'rounded-full',
@@ -109,7 +110,11 @@ function SkeletonText({
   };
 
   return (
-    <div className={cn(gapClasses[gap], className)} aria-hidden="true">
+    <div
+      data-slot="skeleton-text"
+      className={cn(gapClasses[gap], className)}
+      aria-hidden="true"
+    >
       {Array.from({ length: lines }).map((_, index) => (
         <Skeleton
           key={index}
@@ -156,6 +161,7 @@ function SkeletonCard({
 }: SkeletonCardProps) {
   return (
     <div
+      data-slot="skeleton-card"
       className={cn(
         'space-y-4 rounded-xl border border-border bg-card p-4',
         className
@@ -209,7 +215,11 @@ function SkeletonTable({
   className,
 }: SkeletonTableProps) {
   return (
-    <div className={cn('space-y-3', className)} aria-hidden="true">
+    <div
+      data-slot="skeleton-table"
+      className={cn('space-y-3', className)}
+      aria-hidden="true"
+    >
       {/* Header */}
       <div className="flex gap-4">
         {Array.from({ length: columns }).map((_, i) => (

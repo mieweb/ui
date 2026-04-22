@@ -112,7 +112,7 @@ const renderIcon = (iconName: string | undefined) => {
 };
 
 const meta: Meta<typeof Button> = {
-  title: 'Components/Button',
+  title: 'Components/Forms & Inputs/Button',
   component: Button,
   parameters: {
     layout: 'centered',

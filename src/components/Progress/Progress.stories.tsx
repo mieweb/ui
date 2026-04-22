@@ -4,7 +4,7 @@ import * as React from 'react';
 import { CircularProgress, Progress } from './Progress';
 
 const meta: Meta<typeof Progress> = {
-  title: 'Components/Progress',
+  title: 'Components/Loaders/Progress',
   component: Progress,
   parameters: {
     layout: 'centered',

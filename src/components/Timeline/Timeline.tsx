@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -171,6 +170,7 @@ export function TimelineProgress({
 
   return (
     <div
+      data-slot="timeline-progress"
       className={cn(sizes.padding, 'overflow-x-auto', className)}
       role="progressbar"
       aria-valuenow={currentIndex + 1}
@@ -230,23 +230,23 @@ export function TimelineProgress({
                       'relative z-10 flex items-center justify-center rounded-full transition-all duration-200',
                       state === 'completed' &&
                         cn(
-                          'dark:bg-primary-900/40 bg-primary-100 text-primary-600 ring-2 ring-primary-200 dark:text-primary-400 dark:ring-primary-800',
+                          'bg-primary-100 text-primary-800 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2',
                           sizes.completed
                         ),
                       state === 'current' &&
                         cn(
-                          'shadow-primary-500/30 dark:ring-primary-900/50 bg-primary-500 text-white shadow-md ring-4 ring-primary-100 dark:bg-primary-500',
+                          'bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4',
                           sizes.current,
                           pulse && 'animate-pulse'
                         ),
                       state === 'pending' &&
                         cn(
-                          'bg-neutral-100 text-neutral-400 ring-2 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-500 dark:ring-neutral-700',
+                          'bg-neutral-100 text-neutral-500 ring-2 ring-neutral-400 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-600',
                           sizes.pending
                         ),
                       state === 'error' &&
                         cn(
-                          'bg-red-500 text-white shadow-md shadow-red-500/30 ring-4 ring-red-100 dark:bg-red-500 dark:ring-red-900/50',
+                          'bg-red-500 text-white shadow-md ring-4 shadow-red-500/30 ring-red-100 dark:bg-red-500 dark:ring-red-900/50',
                           sizes.error
                         )
                     )}
@@ -265,7 +265,7 @@ export function TimelineProgress({
                     {state === 'pending' && (
                       <div
                         className={cn(
-                          'rounded-full bg-neutral-300 dark:bg-neutral-600',
+                          'rounded-full bg-neutral-500 dark:bg-neutral-400',
                           sizes.pendingDot
                         )}
                       />
@@ -296,11 +296,11 @@ export function TimelineProgress({
                   sizes.label,
                   sizes.labelMargin,
                   state === 'completed' &&
-                    'text-primary-700 dark:text-primary-300',
+                    'text-primary-800 dark:text-primary-300',
                   state === 'current' &&
                     'font-semibold text-neutral-900 dark:text-white',
                   state === 'pending' &&
-                    'text-neutral-400 dark:text-neutral-500',
+                    'text-neutral-500 dark:text-neutral-400',
                   state === 'error' &&
                     'font-semibold text-red-600 dark:text-red-400'
                 )}
@@ -392,13 +392,13 @@ export function TimelineEventList({
   const getEventColor = (type: TimelineEvent['type']): string => {
     switch (type) {
       case 'message':
-        return 'bg-blue-50 text-blue-500 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-800/40';
+        return 'bg-blue-50 text-blue-700 ring-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-800/40';
       case 'status':
-        return 'bg-green-50 text-green-500 ring-green-100 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-800/40';
+        return 'bg-green-50 text-green-700 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-800/40';
       case 'attachment':
-        return 'bg-purple-50 text-purple-500 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-800/40';
+        return 'bg-purple-50 text-purple-700 ring-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:ring-purple-800/40';
       case 'assignment':
-        return 'bg-orange-50 text-orange-500 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/40';
+        return 'bg-orange-50 text-orange-700 ring-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:ring-orange-800/40';
       case 'note':
         return 'bg-neutral-50 text-neutral-500 ring-neutral-100 dark:bg-neutral-800/50 dark:text-neutral-400 dark:ring-neutral-700/40';
       default:
@@ -415,11 +415,11 @@ export function TimelineEventList({
   }
 
   return (
-    <div className={cn('relative', className)}>
+    <div data-slot="timeline-event-list" className={cn('relative', className)}>
       {/* Continuous vertical connector line */}
       {events.length > 1 && (
         <div
-          className="absolute bottom-0 left-5 top-0 w-px bg-neutral-200 dark:bg-neutral-700"
+          className="absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700"
           aria-hidden="true"
         />
       )}
@@ -450,7 +450,7 @@ export function TimelineEventList({
                     </p>
                   )}
                 </div>
-                <time className="shrink-0 pt-0.5 text-xs text-neutral-400 dark:text-neutral-500">
+                <time className="shrink-0 pt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
                   {formatTime(event.timestamp)}
                 </time>
               </div>
@@ -510,6 +510,7 @@ export function OrderConfirmation({
 
   return (
     <div
+      data-slot="order-confirmation"
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4',
         className
@@ -553,8 +554,8 @@ export function OrderConfirmation({
           onClick={onClose}
           className={cn(
             'w-full rounded-lg px-4 py-3 font-medium',
-            'bg-primary-600 text-white hover:bg-primary-700',
-            'dark:bg-primary-500 dark:hover:bg-primary-600',
+            'bg-primary-700 hover:bg-primary-800 text-white',
+            'dark:bg-primary-600 dark:hover:bg-primary-700',
             'transition-colors'
           )}
         >

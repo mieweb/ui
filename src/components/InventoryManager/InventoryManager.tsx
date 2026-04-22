@@ -120,7 +120,7 @@ export function InventoryManager({
     : null;
 
   return (
-    <div className={className}>
+    <div data-slot="inventory-manager" className={className}>
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>

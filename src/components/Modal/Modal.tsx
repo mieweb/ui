@@ -1,10 +1,9 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
-import { useEscapeKey } from '../../hooks/useEscapeKey';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { isStorybookDocsMode } from '../../utils/environment';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 /**
  * Modal scroll lock state manager.
@@ -26,7 +25,7 @@ export const __resetScrollLockState = () => scrollLockState.reset();
 
 const modalOverlayVariants = cva(
   [
-    'fixed inset-0 z-50',
+    'fixed inset-0',
     'bg-black/50 backdrop-blur-sm',
     'data-[state=open]:animate-in data-[state=open]:fade-in-0',
     'data-[state=closed]:animate-out data-[state=closed]:fade-out-0',
@@ -39,10 +38,17 @@ const modalOverlayVariants = cva(
 
 const modalContentVariants = cva(
   [
-    'fixed left-1/2 top-1/2 z-50',
-    '-translate-x-1/2 -translate-y-1/2',
-    'w-full bg-card text-card-foreground',
-    'border border-border rounded-xl shadow-lg',
+    'relative w-full bg-card text-card-foreground',
+    'border border-border shadow-lg',
+    // Full-screen on mobile, rounded on larger screens
+    'rounded-none sm:rounded-xl',
+    'flex flex-col',
+    // Full viewport height on mobile, constrained on larger screens
+    'max-h-dvh sm:max-h-[calc(100dvh-2rem)]',
+    'min-h-dvh sm:min-h-0',
+    // If a <form> is used as a direct child (wrapping ModalBody + ModalFooter),
+    // make it participate in the flex column layout so overflow constraints work.
+    '[&>form]:flex [&>form]:flex-col [&>form]:flex-1 [&>form]:min-h-0',
     'focus:outline-none',
     'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
     'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
@@ -51,13 +57,13 @@ const modalContentVariants = cva(
   {
     variants: {
       size: {
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl',
-        '2xl': 'max-w-2xl',
-        '3xl': 'max-w-3xl',
-        '4xl': 'max-w-4xl',
+        sm: 'sm:max-w-sm',
+        md: 'sm:max-w-md',
+        lg: 'sm:max-w-lg',
+        xl: 'sm:max-w-xl',
+        '2xl': 'sm:max-w-2xl',
+        '3xl': 'sm:max-w-3xl',
+        '4xl': 'sm:max-w-4xl',
         full: 'max-w-[calc(100vw-2rem)]',
       },
     },
@@ -182,27 +188,38 @@ function Modal({
     >
       {/* Portal to body */}
       <div className="fixed inset-0 z-50">
-        {/* Overlay */}
+        {/* Overlay backdrop */}
         <div
           className={cn(modalOverlayVariants())}
           data-state={open ? 'open' : 'closed'}
-          onClick={handleOverlayClick}
           aria-hidden="true"
         />
-        {/* Content */}
-        <div
-          ref={focusTrapRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label={ariaLabel}
-          aria-labelledby={ariaLabelledBy || `${modalId}-title`}
-          aria-describedby={ariaDescribedBy}
-          id={modalId}
-          tabIndex={-1}
-          data-state={open ? 'open' : 'closed'}
-          className={cn(modalContentVariants({ size }), className)}
-        >
-          {children}
+        {/* Scrollable centering container — click outside to close */}
+        <div className="fixed inset-0 overflow-y-auto">
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+          <div
+            className="flex min-h-full items-center justify-center p-0 sm:p-4"
+            onClick={handleOverlayClick}
+          >
+            {/* Content */}
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
+            <div
+              ref={focusTrapRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label={ariaLabel}
+              aria-labelledby={ariaLabelledBy || `${modalId}-title`}
+              aria-describedby={ariaDescribedBy}
+              id={modalId}
+              tabIndex={-1}
+              data-state={open ? 'open' : 'closed'}
+              data-slot="modal"
+              className={cn(modalContentVariants({ size }), className)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {children}
+            </div>
+          </div>
         </div>
       </div>
     </ModalContext.Provider>
@@ -245,9 +262,10 @@ const ModalHeader = React.forwardRef<HTMLDivElement, ModalHeaderProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
+      data-slot="modal-header"
       className={cn(
-        'flex items-center justify-between',
-        'border-b border-border px-6 py-4',
+        'flex shrink-0 items-center justify-between',
+        'border-border border-b px-6 py-4',
         className
       )}
       {...props}
@@ -273,8 +291,9 @@ const ModalTitle = React.forwardRef<HTMLHeadingElement, ModalTitleProps>(
       <h2
         ref={ref}
         id={`${modalId}-title`}
+        data-slot="modal-title"
         className={cn(
-          'text-lg font-semibold leading-none tracking-tight',
+          'text-lg leading-none font-semibold tracking-tight',
           className
         )}
         {...props}
@@ -315,11 +334,12 @@ const ModalClose = React.forwardRef<HTMLButtonElement, ModalCloseProps>(
         ref={ref}
         type="button"
         onClick={handleClick}
+        data-slot="modal-close"
         className={cn(
           'inline-flex h-8 w-8 items-center justify-center rounded-lg',
           'text-muted-foreground hover:text-foreground',
-          'transition-colors hover:bg-muted',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'hover:bg-muted transition-colors',
+          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
           className
         )}
         aria-label="Close"
@@ -344,7 +364,12 @@ export type ModalBodyProps = React.HTMLAttributes<HTMLDivElement>;
  */
 const ModalBody = React.forwardRef<HTMLDivElement, ModalBodyProps>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('px-6 py-4', className)} {...props} />
+    <div
+      ref={ref}
+      data-slot="modal-body"
+      className={cn('min-h-0 flex-1 overflow-y-auto px-6 py-4', className)}
+      {...props}
+    />
   )
 );
 
@@ -363,9 +388,10 @@ const ModalFooter = React.forwardRef<HTMLDivElement, ModalFooterProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
+      data-slot="modal-footer"
       className={cn(
-        'flex items-center justify-end gap-3',
-        'border-t border-border px-6 py-4',
+        'flex shrink-0 items-center justify-end gap-3',
+        'border-border border-t px-6 py-4',
         className
       )}
       {...props}
@@ -401,11 +427,11 @@ function CloseIcon() {
 
 export {
   Modal,
-  ModalBody,
-  ModalClose,
-  modalContentVariants,
-  ModalFooter,
   ModalHeader,
-  modalOverlayVariants,
   ModalTitle,
+  ModalClose,
+  ModalBody,
+  ModalFooter,
+  modalContentVariants,
+  modalOverlayVariants,
 };

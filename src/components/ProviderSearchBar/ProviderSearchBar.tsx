@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Input } from '../Input';
@@ -157,10 +156,10 @@ const GeolocationButton: React.FC<GeolocationButtonProps> = ({
         return <SpinnerIcon className="h-4 w-4" />;
       case 'success':
         return (
-          <CheckIcon className="animate-in zoom-in h-4 w-4 text-success" />
+          <CheckIcon className="text-success animate-in zoom-in h-4 w-4" />
         );
       case 'error':
-        return <WarningIcon className="h-4 w-4 text-destructive" />;
+        return <WarningIcon className="text-destructive h-4 w-4" />;
       default:
         return <CrosshairsIcon className="h-4 w-4" />;
     }
@@ -220,7 +219,7 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
   if (loading) {
     return (
       <div
-        className={cn('animate-pulse text-sm text-muted-foreground', className)}
+        className={cn('text-muted-foreground animate-pulse text-sm', className)}
       >
         Searching for providers near you...
       </div>
@@ -229,9 +228,22 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
 
   if (!results) return null;
 
+  // Guard against malformed results objects
+  if (
+    typeof results.count !== 'number' ||
+    !results.postalCode ||
+    typeof results.postalCode !== 'object' ||
+    typeof results.postalCode.zipcode !== 'string' ||
+    typeof results.postalCode.city !== 'string' ||
+    typeof results.postalCode.state !== 'string' ||
+    typeof results.distance !== 'number'
+  ) {
+    return null;
+  }
+
   if (results.count === 0) {
     return (
-      <div className={cn('text-sm text-muted-foreground', className)}>
+      <div className={cn('text-muted-foreground text-sm', className)}>
         <strong>No providers found</strong> for ZIP code{' '}
         {results.postalCode.zipcode}
       </div>
@@ -277,7 +289,8 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
 // ============================================================================
 
 export interface ProviderSearchBarProps
-  extends VariantProps<typeof searchBarVariants>,
+  extends
+    VariantProps<typeof searchBarVariants>,
     Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit' | 'results'> {
   /** Callback when search is submitted */
   onSearch: (zipCode: string) => void;
@@ -402,6 +415,7 @@ export const ProviderSearchBar = React.forwardRef<
 
     return (
       <div
+        data-slot="provider-search"
         className={cn(
           'w-full',
           searchBarVariants({ size, variant }),
@@ -417,9 +431,10 @@ export const ProviderSearchBar = React.forwardRef<
           {...props}
         >
           <div
+            data-slot="provider-search-input"
             className={cn(
-              'flex items-center gap-1 rounded-lg border bg-background',
-              'focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2',
+              'bg-background flex items-center gap-1 rounded-lg border',
+              'focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2',
               displayError && 'border-destructive',
               !displayError && 'border-input'
             )}
@@ -476,7 +491,7 @@ export const ProviderSearchBar = React.forwardRef<
           {displayError && (
             <p
               id="search-error"
-              className="mt-2 text-sm text-destructive"
+              className="text-destructive mt-2 text-sm"
               role="alert"
             >
               {displayError}
@@ -486,7 +501,7 @@ export const ProviderSearchBar = React.forwardRef<
 
         {/* Results Message */}
         {showResults && (results || resultsLoading) && (
-          <div className="mt-3">
+          <div data-slot="provider-search-results" className="mt-3">
             <SearchResultsMessage
               results={results}
               loading={resultsLoading}
@@ -522,14 +537,20 @@ export const HeroSearchBar: React.FC<HeroSearchBarProps> = ({
   ...props
 }) => {
   return (
-    <div className={cn('text-center', className)}>
+    <div
+      data-slot="provider-search-hero"
+      className={cn('text-center', className)}
+    >
       {title && (
-        <h1 className="mb-2 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
+        <h1
+          data-slot="provider-search-hero-title"
+          className="text-foreground mb-2 text-3xl font-bold md:text-4xl lg:text-5xl"
+        >
           {title}
         </h1>
       )}
       {subtitle && (
-        <p className="mb-6 text-lg text-muted-foreground md:text-xl">
+        <p className="text-muted-foreground mb-6 text-lg md:text-xl">
           {subtitle}
         </p>
       )}

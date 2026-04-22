@@ -1,16 +1,16 @@
+/// <reference types="vite/client" />
+import type { Preview, Decorator } from '@storybook/react-vite';
+import { useEffect, useMemo } from 'react';
+import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import './preview.css';
-
-import type { Decorator, Preview } from '@storybook/react-vite';
-import { useEffect, useMemo } from 'react';
-
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { defaultBrand } from '../src/brands/default';
 import { enterpriseHealthBrand } from '../src/brands/enterprise-health';
 import { miewebBrand } from '../src/brands/mieweb';
-import type { BrandConfig } from '../src/brands/types';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
+import type { BrandConfig } from '../src/brands/types';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -21,6 +21,68 @@ const brands: Record<string, BrandConfig> = {
   waggleline: wagglelineBrand,
   webchart: webchartBrand,
 };
+
+/*
+ * Global theme listener — ensures data-theme and brand styles are applied
+ * even on docs-only MDX pages (like Introduction) where no story decorator runs.
+ */
+function applyGlobalTheme(globals: Record<string, unknown>) {
+  const brandName = (globals?.brand || 'bluehive') as string;
+  const isDark = globals?.theme === 'dark';
+  const isCondensed = globals?.density === 'condensed';
+  const brand = brands[brandName] || brands.bluehive;
+  const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
+
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+
+  // Toggle condensed density class on body
+  if (isCondensed) {
+    document.body.classList.add('condensed');
+  } else {
+    document.body.classList.remove('condensed');
+  }
+
+  document.body.style.backgroundColor = semanticColors.background;
+  document.body.style.color = semanticColors.foreground;
+  applyBrandStyles(brand, isDark);
+}
+
+// Listen for globals changes at the channel level (fires for all pages, including docs-only MDX)
+const handleGlobalsUpdated = ({ globals }: { globals: Record<string, unknown> }) => {
+  applyGlobalTheme(globals);
+};
+
+const channel = addons.getChannel();
+// Ensure we don't register duplicate listeners across HMR updates
+channel.off('globalsUpdated', handleGlobalsUpdated);
+channel.on('globalsUpdated', handleGlobalsUpdated);
+
+// Clean up listener on HMR dispose
+import.meta.hot?.dispose(() => {
+  channel.off('globalsUpdated', handleGlobalsUpdated);
+});
+
+// Apply initial theme from URL params
+try {
+  const params = new URLSearchParams(window.location.search);
+  const globalsParam = params.get('globals') || '';
+  const globals: Record<string, string> = {};
+  for (const pair of globalsParam.split(';')) {
+    const [key, value] = pair.split(':');
+    if (key && value) globals[key] = value;
+  }
+  if (globals.theme || globals.brand || globals.density) {
+    applyGlobalTheme(globals);
+  }
+} catch {
+  // Ignore URL parsing errors
+}
 
 // Function to apply brand CSS variables to document
 function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
@@ -87,26 +149,16 @@ const withBrand: Decorator = (Story, context) => {
   const brandName = context.globals.brand || 'bluehive';
   const isDark = context.globals.theme === 'dark';
   const brand = brands[brandName] || brands.bluehive;
-
+  
   // Get the actual color values for this brand/mode
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
+  const isCondensed = context.globals.density === 'condensed';
+
   useEffect(() => {
-    applyBrandStyles(brand, isDark);
-
-    // Update dark mode class
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-
-    // Apply to body with actual values (not CSS vars) to ensure immediate update
-    document.body.style.backgroundColor = semanticColors.background;
-    document.body.style.color = semanticColors.foreground;
-  }, [brand, isDark, semanticColors]);
+    // Delegate to shared applyGlobalTheme to keep a single source of truth
+    applyGlobalTheme(context.globals);
+  }, [brand, isDark, isCondensed, semanticColors]);
 
   // Load Google Fonts for the brand
   const fontLink = useMemo(() => {
@@ -123,7 +175,7 @@ const withBrand: Decorator = (Story, context) => {
 
   // Check if the story has fullscreen layout
   const isFullscreen = context.parameters?.layout === 'fullscreen';
-
+  
   // Build font family string
   const fontFamily = brand.typography.fontFamily.sans
     .map((f) => (f.includes(' ') ? `"${f}"` : f))
@@ -147,11 +199,15 @@ const withBrand: Decorator = (Story, context) => {
 };
 
 const preview: Preview = {
+  initialGlobals: {
+    brand: 'bluehive',
+    theme: 'light',
+    density: 'standard',
+  },
   globalTypes: {
     brand: {
       name: 'Brand',
       description: 'Switch between brand themes',
-      defaultValue: 'bluehive',
       toolbar: {
         icon: 'paintbrush',
         items: [
@@ -162,21 +218,30 @@ const preview: Preview = {
           { value: 'waggleline', title: '🍯 Waggleline' },
           { value: 'webchart', title: '🟠 WebChart' },
         ],
-        showName: true,
         dynamicTitle: true,
       },
     },
     theme: {
       name: 'Theme',
       description: 'Color mode',
-      defaultValue: 'light',
       toolbar: {
         icon: 'circlehollow',
         items: [
           { value: 'light', icon: 'sun', title: 'Light' },
           { value: 'dark', icon: 'moon', title: 'Dark' },
         ],
-        showName: true,
+        dynamicTitle: true,
+      },
+    },
+    density: {
+      name: 'Density',
+      description: 'UI density mode',
+      toolbar: {
+        icon: 'collapse',
+        items: [
+          { value: 'standard', title: 'Standard' },
+          { value: 'condensed', title: 'Condensed' },
+        ],
         dynamicTitle: true,
       },
     },
@@ -193,39 +258,24 @@ const preview: Preview = {
       storySort: {
         order: [
           'Introduction',
-          'Components',
-          [
-            'Alert',
-            'Avatar',
-            'Badge',
-            'Breadcrumb',
-            'Button',
-            'Card',
-            'Checkbox',
-            'DateInput',
-            'Dropdown',
-            'Input',
-            'Modal',
-            'Pagination',
-            'PhoneInput',
-            'Progress',
-            'QuickAction',
-            'Radio',
-            'SchedulePicker',
-            'Select',
-            'Skeleton',
-            'Spinner',
-            'Switch',
-            'Table',
-            'Tabs',
-            'Text',
-            'Textarea',
-            'ThemeProvider',
-            'Tooltip',
-            'VisuallyHidden',
-          ],
-          'Hooks',
+          'Foundations',
+          'Inputs & Controls',
+          'Data Display',
+          'Navigation',
+          'Feedback & Overlays',
+          'Layout & Structure',
+          'Authentication & Permissions',
+          'Commerce & Payments',
+          'Media & Device',
+          'Feature Modules',
           'Examples',
+          'Forms',
+          'Provider',
+          'Provider Directory',
+          'Messaging',
+          'Directory',
+          'Search',
+          'Layout',
         ],
       },
     },

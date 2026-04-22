@@ -44,6 +44,16 @@
   --mieweb-success-foreground: #ffffff;
   --mieweb-warning: #f59e0b;
   --mieweb-warning-foreground: #ffffff;
+  --mieweb-info: #0ea5e9;
+  --mieweb-info-foreground: #ffffff;
+  --mieweb-secondary-foreground: #ffffff;
+
+  /* Chart / Data Visualization */
+  --mieweb-chart-1: #27ae60;
+  --mieweb-chart-2: #0ea5e9;
+  --mieweb-chart-3: #f59e0b;
+  --mieweb-chart-4: #ef4444;
+  --mieweb-chart-5: #6366f1;
 
   /* Typography */
   --mieweb-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -85,6 +95,16 @@
   --mieweb-success-foreground: #fafafa;
   --mieweb-warning: #d97706;
   --mieweb-warning-foreground: #fafafa;
+  --mieweb-info: #0284c7;
+  --mieweb-info-foreground: #fafafa;
+  --mieweb-secondary-foreground: #fafafa;
+
+  /* Chart */
+  --mieweb-chart-1: #4ade80;
+  --mieweb-chart-2: #38bdf8;
+  --mieweb-chart-3: #fbbf24;
+  --mieweb-chart-4: #f87171;
+  --mieweb-chart-5: #818cf8;
 }
 
 /* ============================================

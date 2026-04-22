@@ -1,10 +1,9 @@
 'use client';
 
 import * as React from 'react';
-
+import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 
 export interface PricingTier {
   id: string;
@@ -69,9 +68,15 @@ export function EmployerPricingCard({
   };
 
   return (
-    <Card className={`${className} ${!isActive ? 'opacity-60' : ''}`}>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <div className="flex-1">
+    <Card
+      data-slot="employer-pricing-card"
+      className={`${className} ${!isActive ? 'opacity-60' : ''}`}
+    >
+      <CardHeader
+        data-slot="employer-pricing-header"
+        className="flex flex-row items-start justify-between space-y-0 pb-2"
+      >
+        <div data-slot="employer-pricing-title" className="flex-1">
           <CardTitle className="text-base font-semibold">
             {serviceName}
           </CardTitle>
@@ -81,7 +86,7 @@ export function EmployerPricingCard({
             </Badge>
           )}
         </div>
-        <div className="text-right">
+        <div data-slot="employer-pricing-base-price" className="text-right">
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatPrice(basePrice)}
           </p>
@@ -92,14 +97,15 @@ export function EmployerPricingCard({
       <CardContent className="pt-0">
         {/* Pricing tiers */}
         {tiers.length > 0 && (
-          <div className="mt-3 space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          <div data-slot="employer-pricing-tiers" className="mt-3 space-y-2">
+            <p className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
               Volume Pricing
             </p>
             <div className="space-y-1">
               {tiers.map((tier) => (
                 <div
                   key={tier.id}
+                  data-slot="employer-pricing-tier-row"
                   className="flex items-center justify-between rounded bg-gray-50 px-2 py-1.5 dark:bg-gray-800/50"
                 >
                   <div className="flex items-center gap-2">
@@ -126,7 +132,10 @@ export function EmployerPricingCard({
 
         {/* Notes */}
         {notes && (
-          <div className="mt-3 rounded border border-yellow-200 bg-yellow-50 p-2 dark:border-yellow-800 dark:bg-yellow-900/20">
+          <div
+            data-slot="employer-pricing-notes"
+            className="mt-3 rounded border border-yellow-200 bg-yellow-50 p-2 dark:border-yellow-800 dark:bg-yellow-900/20"
+          >
             <p className="text-xs text-yellow-800 dark:text-yellow-200">
               <span className="font-medium">Note:</span> {notes}
             </p>
@@ -135,7 +144,7 @@ export function EmployerPricingCard({
 
         {/* Actions */}
         {editable && (
-          <div className="mt-4 flex gap-2">
+          <div data-slot="employer-pricing-actions" className="mt-4 flex gap-2">
             {onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <svg

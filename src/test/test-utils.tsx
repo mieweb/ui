@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { ReactElement } from 'react';
 
 import { ThemeProvider } from '../components/ThemeProvider';
@@ -6,7 +6,10 @@ import { ThemeProvider } from '../components/ThemeProvider';
 /**
  * Custom render function that includes theme provider
  */
-export const renderWithTheme = (ui: ReactElement, options = {}) => {
+export const renderWithTheme = (
+  ui: ReactElement,
+  options = {}
+): RenderResult => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <ThemeProvider defaultTheme="light">{children}</ThemeProvider>
   );
@@ -17,7 +20,10 @@ export const renderWithTheme = (ui: ReactElement, options = {}) => {
 /**
  * Custom render function with dark mode
  */
-export const renderWithDarkTheme = (ui: ReactElement, options = {}) => {
+export const renderWithDarkTheme = (
+  ui: ReactElement,
+  options = {}
+): RenderResult => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <ThemeProvider defaultTheme="dark">{children}</ThemeProvider>
   );

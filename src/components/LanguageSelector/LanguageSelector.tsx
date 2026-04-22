@@ -173,6 +173,7 @@ export function LanguageSelector({
   return (
     <div
       ref={containerRef}
+      data-slot="language-selector"
       className={cn(selectorVariants({ size }), className)}
     >
       {/* Trigger Button */}
@@ -183,6 +184,7 @@ export function LanguageSelector({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label={label}
+        data-slot="language-selector-trigger"
         className={cn(
           buttonVariants({ size, variant }),
           'w-full',
@@ -210,6 +212,7 @@ export function LanguageSelector({
       {/* Dropdown */}
       {isOpen && (
         <div
+          data-slot="language-selector-dropdown"
           className={cn(
             'absolute z-50 mt-1 w-full min-w-[180px] rounded-lg border border-gray-200 bg-white shadow-lg',
             'dark:border-gray-700 dark:bg-gray-800',
@@ -228,6 +231,7 @@ export function LanguageSelector({
                 aria-selected={language.code === value}
                 onClick={() => handleSelect(language)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSelect(language)}
+                data-slot="language-selector-option"
                 className={cn(
                   'flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors',
                   language.code === value
@@ -305,7 +309,7 @@ export function LanguageSelectorNative({
   };
 
   return (
-    <div className="relative">
+    <div data-slot="language-selector-native" className="relative">
       <select
         value={value || ''}
         onChange={handleChange}
@@ -380,6 +384,7 @@ export function LanguageSelectorInline({
     <div
       role="radiogroup"
       aria-label="Language"
+      data-slot="language-selector-inline"
       className={cn(
         'inline-flex rounded-lg border border-gray-200 dark:border-gray-700',
         className
@@ -392,6 +397,7 @@ export function LanguageSelectorInline({
           role="radio"
           aria-checked={language.code === value}
           onClick={() => onChange?.(language)}
+          data-slot="language-selector-inline-option"
           className={cn(
             'px-3 py-1.5 text-sm transition-colors',
             index === 0 && 'rounded-l-lg',

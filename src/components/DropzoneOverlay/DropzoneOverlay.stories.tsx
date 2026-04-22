@@ -6,7 +6,7 @@ import { Card } from '../Card';
 import { DropzoneOverlay, useDropzone } from './DropzoneOverlay';
 
 const meta: Meta<typeof DropzoneOverlay> = {
-  title: 'Components/DropzoneOverlay',
+  title: 'Components/Forms & Inputs/DropzoneOverlay',
   component: DropzoneOverlay,
   tags: ['autodocs'],
   parameters: {

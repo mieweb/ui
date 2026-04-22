@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { Button, buttonVariants } from '../Button/Button';
 
@@ -162,31 +161,46 @@ export function ErrorPage({
   };
 
   return (
-    <div className={cn(errorPageVariants({ size }), className)}>
+    <div
+      className={cn(errorPageVariants({ size }), className)}
+      data-slot="error-page"
+    >
       {/* Illustration */}
-      <div className="mb-8">
+      <div className="mb-8" data-slot="error-page-illustration">
         {illustration || <DefaultIllustration type={type} />}
       </div>
 
       {/* Error Code */}
       {displayCode && (
-        <div className="mb-4 text-6xl font-bold text-gray-200 dark:text-gray-700 sm:text-8xl">
+        <div
+          className="mb-4 text-6xl font-bold text-gray-300 sm:text-8xl dark:text-gray-600"
+          data-slot="error-page-code"
+        >
           {displayCode}
         </div>
       )}
 
       {/* Title */}
-      <h1 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+      <h1
+        className="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
+        data-slot="error-page-title"
+      >
         {displayTitle}
       </h1>
 
       {/* Description */}
-      <p className="mb-8 max-w-md text-gray-600 dark:text-gray-400">
+      <p
+        className="mb-8 max-w-md text-gray-600 dark:text-gray-400"
+        data-slot="error-page-description"
+      >
         {displayDescription}
       </p>
 
       {/* Actions */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div
+        className="flex flex-col gap-3 sm:flex-row"
+        data-slot="error-page-actions"
+      >
         {primaryAction && (
           <ActionButton
             label={primaryAction.label}
@@ -220,7 +234,11 @@ export function ErrorPage({
       </div>
 
       {/* Additional Content */}
-      {children && <div className="mt-8">{children}</div>}
+      {children && (
+        <div className="mt-8" data-slot="error-page-children">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -274,7 +292,10 @@ export function ServerErrorPage({
   return (
     <ErrorPage type="500" {...props}>
       {showErrorDetails && errorMessage && (
-        <div className="mt-4 max-w-2xl text-left">
+        <div
+          className="mt-4 max-w-2xl text-left"
+          data-slot="error-page-details"
+        >
           <details className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
             <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
               Error Details
@@ -378,7 +399,7 @@ export function MaintenancePage({
           href={statusUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-medium text-primary-600 hover:text-primary-700"
+          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
         >
           Check Status Page →
         </a>

@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
-
 import {
   AppHeader,
+  AppHeaderBrand,
+  AppHeaderSection,
+  AppHeaderTitle,
   AppHeaderActions,
   AppHeaderDivider,
   AppHeaderIconButton,
   AppHeaderSearch,
-  AppHeaderSection,
-  AppHeaderTitle,
   AppHeaderUserMenu,
 } from './index';
 
@@ -157,7 +157,7 @@ function HeaderWithTitleDemo() {
 
       <AppHeaderSection align="right">
         <AppHeaderActions>
-          <button className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600">
+          <button className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors">
             Add User
           </button>
         </AppHeaderActions>
@@ -189,7 +189,7 @@ type AppHeaderStoryProps = React.ComponentProps<typeof AppHeader> &
 // =============================================================================
 
 const meta: Meta<AppHeaderStoryProps> = {
-  title: 'Components/AppHeader',
+  title: 'Components/Layout & Structure/AppHeader',
   component: AppHeader,
   parameters: {
     layout: 'fullscreen',
@@ -306,18 +306,19 @@ export const Default: Story = {
         <AppHeader {...args}>
           <AppHeaderSection align="left">
             {showBranding && (
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-sm font-bold text-white">
-                  A
-                </div>
-                <span className="hidden font-semibold text-gray-900 dark:text-white sm:block">
-                  Acme Inc
-                </span>
-              </div>
+              <AppHeaderBrand
+                logo={
+                  <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white">
+                    A
+                  </div>
+                }
+              >
+                Acme Inc
+              </AppHeaderBrand>
             )}
             {!showMobileMenu && (
               <button
-                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:hover:bg-gray-800"
                 aria-label="Open menu"
               >
                 <MenuIcon />
@@ -391,7 +392,7 @@ export const Default: Story = {
                         />
                         {/* User dropdown menu */}
                         {userMenuOpen && (
-                          <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                          <div className="absolute top-full right-0 mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
                             <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
                               <p className="text-sm font-medium text-gray-900 dark:text-white">
                                 John Doe
@@ -473,7 +474,7 @@ export const Default: Story = {
                   {/* Sign In button when signed out */}
                   {!isSignedIn && (
                     <button
-                      className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+                      className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
                       onClick={() => console.log('Sign in')}
                     >
                       Sign in
@@ -487,12 +488,12 @@ export const Default: Story = {
 
         {/* Mobile slide-out menu */}
         {showMobileMenu && mobileMenuOpen && (
-          <div className="absolute left-0 right-0 top-16 z-40 border-b border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+          <div className="absolute top-16 right-0 left-0 z-40 border-b border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
             <div className="flex flex-col gap-2 p-4">
               {/* User info at top (when signed in) */}
               {isSignedIn && showUserMenu && (
                 <div className="flex items-center gap-3 border-b border-gray-200 px-2 py-3 dark:border-gray-700">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 font-medium text-primary-900 dark:bg-primary-900 dark:text-primary-100">
+                  <div className="bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 flex h-10 w-10 items-center justify-center rounded-full font-medium">
                     JD
                   </div>
                   <div>
@@ -509,7 +510,7 @@ export const Default: Story = {
               {/* Signed out state - Sign In button */}
               {!isSignedIn && (
                 <button
-                  className="w-full rounded-lg bg-primary-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+                  className="bg-primary-500 hover:bg-primary-600 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors"
                   onClick={() => console.log('Sign in')}
                 >
                   Sign in

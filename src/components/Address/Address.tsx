@@ -265,6 +265,7 @@ export function Address({
   if (mapsUrl) {
     return (
       <a
+        data-slot="address"
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
@@ -283,14 +284,18 @@ export function Address({
   // Non-linked address (semantic <address> tag for block format)
   if (format === 'block') {
     return (
-      <address className={cn(baseStyles, 'not-italic')} {...props}>
+      <address
+        data-slot="address"
+        className={cn(baseStyles, 'not-italic')}
+        {...props}
+      >
         {wrapWithIcon(content)}
       </address>
     );
   }
 
   return (
-    <span className={baseStyles} {...props}>
+    <span data-slot="address" className={baseStyles} {...props}>
       {wrapWithIcon(content)}
     </span>
   );
@@ -339,19 +344,24 @@ export function AddressCard({
 
   return (
     <div
+      data-slot="address-card"
       className={cn(
         'rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800',
         className
       )}
     >
       {title && (
-        <h4 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+        <h4
+          data-slot="address-card-title"
+          className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
           {title}
         </h4>
       )}
       <Address address={address} showIcon {...addressProps} />
       {phoneNumber && (
         <a
+          data-slot="address-card-phone"
           href={`tel:${phoneNumber.replace(/\D/g, '')}`}
           onClick={handlePhoneClick}
           className="mt-2 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"

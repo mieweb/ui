@@ -1,11 +1,10 @@
 'use client';
 
 import * as React from 'react';
-
-import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Card, CardContent } from '../Card/Card';
+import { Badge } from '../Badge/Badge';
 import { Input } from '../Input/Input';
+import { Card, CardContent } from '../Card/Card';
 
 export interface OrderDetails {
   id: string;
@@ -93,10 +92,10 @@ export function OrderConfirmationWizard({
   const canComplete = canProceedStep1 && canProceedStep2;
 
   return (
-    <div className={`mx-auto max-w-2xl ${className}`}>
+    <div className={`mx-auto max-w-2xl ${className}`} data-slot="ocw-root">
       {/* Progress indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
+      <div className="mb-8" data-slot="ocw-progress">
+        <div className="flex items-start justify-between">
           {stepTitles.map((title, index) => {
             const stepNum = index + 1;
             const isActive = step === stepNum;
@@ -106,6 +105,7 @@ export function OrderConfirmationWizard({
               <React.Fragment key={stepNum}>
                 <div className="flex flex-col items-center">
                   <div
+                    data-slot="ocw-step-circle"
                     className={`flex h-10 w-10 items-center justify-center rounded-full font-medium ${
                       isComplete
                         ? 'bg-green-500 text-white'
@@ -133,6 +133,7 @@ export function OrderConfirmationWizard({
                     )}
                   </div>
                   <span
+                    data-slot="ocw-step-label"
                     className={`mt-2 text-center text-xs font-medium ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} `}
                   >
                     {title}
@@ -140,7 +141,8 @@ export function OrderConfirmationWizard({
                 </div>
                 {index < stepTitles.length - 1 && (
                   <div
-                    className={`mx-4 h-0.5 flex-1 ${step > stepNum ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'} `}
+                    data-slot="ocw-step-connector"
+                    className={`mt-5 h-0.5 flex-1 -translate-y-1/2 ${step > stepNum ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'} `}
                   />
                 )}
               </React.Fragment>
@@ -150,262 +152,349 @@ export function OrderConfirmationWizard({
       </div>
 
       {/* Order summary */}
-      <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">
-                {order.orderNumber}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {order.serviceName}
-              </p>
+      <div data-slot="ocw-summary-card">
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div
+              className="flex items-center justify-between"
+              data-slot="ocw-summary-row"
+            >
+              <div>
+                <p
+                  className="font-medium text-gray-900 dark:text-white"
+                  data-slot="ocw-summary-title"
+                >
+                  {order.orderNumber}
+                </p>
+                <p
+                  className="text-sm text-gray-500 dark:text-gray-400"
+                  data-slot="ocw-summary-subtitle"
+                >
+                  {order.serviceName}
+                </p>
+              </div>
+              <Badge variant="warning">In Progress</Badge>
             </div>
-            <Badge variant="warning">In Progress</Badge>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Step content */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          {/* Step 1: Verify Employee */}
-          {step === 1 && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Verify Employee Identity
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Please verify the following information matches the employee
-                present.
-              </p>
-
-              <div className="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Employee Name
-                  </p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {order.employeeName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Date of Birth
-                  </p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {order.dateOfBirth || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Employer
-                  </p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {order.employerName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Scheduled
-                  </p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {formatDate(order.scheduledDate)}
-                  </p>
-                </div>
-              </div>
-
-              <label className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  checked={employeeVerified}
-                  onChange={(e) => setEmployeeVerified(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  I confirm the employee&apos;s identity matches the information
-                  above
-                </span>
-              </label>
-
-              <div>
-                <label
-                  htmlFor="verification-notes"
-                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+      <div data-slot="ocw-step-card">
+        <Card className="mb-6">
+          <CardContent className="p-6" data-slot="ocw-step-content">
+            {/* Step 1: Verify Employee */}
+            {step === 1 && (
+              <div className="space-y-6" data-slot="ocw-step-body">
+                <h3
+                  className="text-lg font-semibold text-gray-900 dark:text-white"
+                  data-slot="ocw-step-title"
                 >
-                  Notes (Optional)
-                </label>
-                <textarea
-                  id="verification-notes"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  rows={2}
-                  value={verificationNotes}
-                  onChange={(e) => setVerificationNotes(e.target.value)}
-                  placeholder="Any verification notes..."
-                />
-              </div>
-            </div>
-          )}
+                  Verify Employee Identity
+                </h3>
+                <p
+                  className="text-sm text-gray-600 dark:text-gray-400"
+                  data-slot="ocw-step-desc"
+                >
+                  Please verify the following information matches the employee
+                  present.
+                </p>
 
-          {/* Step 2: Consent & ID */}
-          {step === 2 && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Consent & ID Verification
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Obtain consent and verify government-issued identification.
-              </p>
-
-              <label
-                aria-label="Consent Obtained"
-                className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
-              >
-                <input
-                  type="checkbox"
-                  checked={consentObtained}
-                  onChange={(e) => setConsentObtained(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    Consent Obtained
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Employee has provided written or verbal consent for the
-                    requested services
-                  </p>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                <input
-                  type="checkbox"
-                  checked={idVerified}
-                  onChange={(e) => setIdVerified(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    Photo ID Verified
-                  </p>
-                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                    Government-issued photo ID matches employee information
-                  </p>
-                  {idVerified && (
-                    <Input
-                      placeholder="ID Type (e.g., Driver's License)"
-                      value={idType}
-                      onChange={(e) => setIdType(e.target.value)}
-                      className="mt-2"
-                    />
-                  )}
-                </div>
-              </label>
-            </div>
-          )}
-
-          {/* Step 3: Confirmation */}
-          {step === 3 && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Review & Confirm
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Review the verification steps before proceeding.
-              </p>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="h-5 w-5 text-green-600 dark:text-green-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="font-medium text-green-700 dark:text-green-300">
-                      Employee Identity Verified
-                    </span>
+                <div
+                  className="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-800"
+                  data-slot="ocw-detail-grid"
+                >
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Employee Name
+                    </p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {order.employeeName}
+                    </p>
                   </div>
-                  <span className="text-green-600 dark:text-green-400">✓</span>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Date of Birth
+                    </p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {order.dateOfBirth || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Employer
+                    </p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {order.employerName}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Scheduled
+                    </p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {formatDate(order.scheduledDate)}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="h-5 w-5 text-green-600 dark:text-green-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                <label
+                  className="flex items-start gap-3"
+                  data-slot="ocw-checkbox-row"
+                >
+                  <input
+                    type="checkbox"
+                    checked={employeeVerified}
+                    onChange={(e) => setEmployeeVerified(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    data-slot="ocw-checkbox"
+                  />
+                  <span
+                    className="text-sm text-gray-700 dark:text-gray-300"
+                    data-slot="ocw-checkbox-label"
+                  >
+                    I confirm the employee&apos;s identity matches the
+                    information above
+                  </span>
+                </label>
+
+                <div>
+                  <label
+                    htmlFor="verification-notes"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    data-slot="ocw-label"
+                  >
+                    Notes (Optional)
+                  </label>
+                  <textarea
+                    id="verification-notes"
+                    data-slot="ocw-textarea"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    rows={2}
+                    value={verificationNotes}
+                    onChange={(e) => setVerificationNotes(e.target.value)}
+                    placeholder="Any verification notes..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Consent & ID */}
+            {step === 2 && (
+              <div className="space-y-6" data-slot="ocw-step-body">
+                <h3
+                  className="text-lg font-semibold text-gray-900 dark:text-white"
+                  data-slot="ocw-step-title"
+                >
+                  Consent & ID Verification
+                </h3>
+                <p
+                  className="text-sm text-gray-600 dark:text-gray-400"
+                  data-slot="ocw-step-desc"
+                >
+                  Obtain consent and verify government-issued identification.
+                </p>
+
+                <label
+                  aria-label="Consent Obtained"
+                  className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                  data-slot="ocw-checkbox-card"
+                >
+                  <input
+                    type="checkbox"
+                    checked={consentObtained}
+                    onChange={(e) => setConsentObtained(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    data-slot="ocw-checkbox"
+                  />
+                  <div>
+                    <p
+                      className="font-medium text-gray-900 dark:text-white"
+                      data-slot="ocw-checkbox-card-title"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="font-medium text-green-700 dark:text-green-300">
                       Consent Obtained
-                    </span>
-                  </div>
-                  <span className="text-green-600 dark:text-green-400">✓</span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="h-5 w-5 text-green-600 dark:text-green-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    </p>
+                    <p
+                      className="text-sm text-gray-500 dark:text-gray-400"
+                      data-slot="ocw-checkbox-card-desc"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      Employee has provided written or verbal consent for the
+                      requested services
+                    </p>
+                  </div>
+                </label>
+
+                <label
+                  className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                  data-slot="ocw-checkbox-card"
+                >
+                  <input
+                    type="checkbox"
+                    checked={idVerified}
+                    onChange={(e) => setIdVerified(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    data-slot="ocw-checkbox"
+                  />
+                  <div className="flex-1">
+                    <p
+                      className="font-medium text-gray-900 dark:text-white"
+                      data-slot="ocw-checkbox-card-title"
+                    >
+                      Photo ID Verified
+                    </p>
+                    <p
+                      className="mb-2 text-sm text-gray-500 dark:text-gray-400"
+                      data-slot="ocw-checkbox-card-desc"
+                    >
+                      Government-issued photo ID matches employee information
+                    </p>
+                    {idVerified && (
+                      <Input
+                        placeholder="ID Type (e.g., Driver's License)"
+                        value={idType}
+                        onChange={(e) => setIdType(e.target.value)}
+                        className="mt-2"
                       />
-                    </svg>
-                    <span className="font-medium text-green-700 dark:text-green-300">
-                      Photo ID Verified {idType && `(${idType})`}
+                    )}
+                  </div>
+                </label>
+              </div>
+            )}
+
+            {/* Step 3: Confirmation */}
+            {step === 3 && (
+              <div className="space-y-6" data-slot="ocw-step-body">
+                <h3
+                  className="text-lg font-semibold text-gray-900 dark:text-white"
+                  data-slot="ocw-step-title"
+                >
+                  Review & Confirm
+                </h3>
+                <p
+                  className="text-sm text-gray-600 dark:text-gray-400"
+                  data-slot="ocw-step-desc"
+                >
+                  Review the verification steps before proceeding.
+                </p>
+
+                <div className="space-y-3" data-slot="ocw-confirm-list">
+                  <div
+                    className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20"
+                    data-slot="ocw-confirm-row"
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg
+                        className="h-5 w-5 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span
+                        className="font-medium text-green-700 dark:text-green-300"
+                        data-slot="ocw-confirm-label"
+                      >
+                        Employee Identity Verified
+                      </span>
+                    </div>
+                    <span className="text-green-600 dark:text-green-400">
+                      ✓
                     </span>
                   </div>
-                  <span className="text-green-600 dark:text-green-400">✓</span>
+
+                  <div
+                    className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20"
+                    data-slot="ocw-confirm-row"
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg
+                        className="h-5 w-5 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span
+                        className="font-medium text-green-700 dark:text-green-300"
+                        data-slot="ocw-confirm-label"
+                      >
+                        Consent Obtained
+                      </span>
+                    </div>
+                    <span className="text-green-600 dark:text-green-400">
+                      ✓
+                    </span>
+                  </div>
+
+                  <div
+                    className="flex items-center justify-between rounded-lg bg-green-50 p-3 dark:bg-green-900/20"
+                    data-slot="ocw-confirm-row"
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg
+                        className="h-5 w-5 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span
+                        className="font-medium text-green-700 dark:text-green-300"
+                        data-slot="ocw-confirm-label"
+                      >
+                        Photo ID Verified {idType && `(${idType})`}
+                      </span>
+                    </div>
+                    <span className="text-green-600 dark:text-green-400">
+                      ✓
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="confirmation-notes"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    data-slot="ocw-label"
+                  >
+                    Additional Notes (Optional)
+                  </label>
+                  <textarea
+                    id="confirmation-notes"
+                    data-slot="ocw-textarea"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    rows={3}
+                    value={confirmationNotes}
+                    onChange={(e) => setConfirmationNotes(e.target.value)}
+                    placeholder="Any additional notes for this order..."
+                  />
                 </div>
               </div>
-
-              <div>
-                <label
-                  htmlFor="confirmation-notes"
-                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Additional Notes (Optional)
-                </label>
-                <textarea
-                  id="confirmation-notes"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  rows={3}
-                  value={confirmationNotes}
-                  onChange={(e) => setConfirmationNotes(e.target.value)}
-                  placeholder="Any additional notes for this order..."
-                />
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <div className="flex justify-between" data-slot="ocw-nav">
         <div>
           {step > 1 && (
             <Button
@@ -468,7 +557,7 @@ export function OrderConfirmationWizard({
               {isSubmitting ? (
                 <>
                   <svg
-                    className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >

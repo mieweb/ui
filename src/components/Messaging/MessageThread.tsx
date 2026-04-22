@@ -56,6 +56,7 @@ function LightboxModal({ attachment, onClose }: LightboxModalProps) {
 
   return (
     <div
+      data-slot="message-lightbox"
       className={cn('fixed inset-0 z-50', 'flex items-center justify-center')}
       role="dialog"
       aria-modal="true"
@@ -287,6 +288,7 @@ const MessageThread = React.forwardRef<HTMLDivElement, MessageThreadProps>(
     return (
       <div
         ref={ref}
+        data-slot="message-thread"
         className={cn(
           'flex h-full flex-col',
           'bg-white dark:bg-neutral-900',
@@ -422,6 +424,7 @@ function MessagingSplitView({
 
   return (
     <div
+      data-slot="messaging-split-view"
       className={cn(
         'h-full w-full',
         breakpointClasses[mobileBreakpoint],
@@ -430,6 +433,7 @@ function MessagingSplitView({
     >
       {/* Conversation list */}
       <div
+        data-slot="messaging-list-pane"
         className={cn(
           'h-full w-full flex-shrink-0',
           'border-r border-neutral-200 dark:border-neutral-700',
@@ -444,6 +448,7 @@ function MessagingSplitView({
 
       {/* Message thread */}
       <div
+        data-slot="messaging-thread-pane"
         className={cn(
           'h-full min-w-0 flex-1',
           showMobileClasses[mobileBreakpoint]

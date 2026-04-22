@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Checkbox, CheckboxGroup } from './Checkbox';
 
 const meta: Meta<typeof Checkbox> = {
-  title: 'Components/Checkbox',
+  title: 'Components/Forms & Inputs/Checkbox',
   component: Checkbox,
   parameters: {
     layout: 'centered',

@@ -29,6 +29,7 @@ function FilePreviewItem({ file, onRemove, disabled }: FilePreviewItemProps) {
     <div
       role="group"
       aria-label={`File: ${file.file.name}`}
+      data-slot="doc-scanner-preview-item"
       className={cn(
         'group relative overflow-hidden rounded-lg',
         'border border-border bg-card',
@@ -95,7 +96,7 @@ function FilePreviewItem({ file, onRemove, disabled }: FilePreviewItemProps) {
       </div>
 
       {/* File info */}
-      <div className="p-2">
+      <div className="p-2" data-slot="doc-scanner-preview-info">
         <p
           className="truncate text-sm font-medium text-foreground"
           title={file.file.name}
@@ -149,6 +150,7 @@ export function FilePreview({ files, onRemove, disabled }: FilePreviewProps) {
       )}
       role="list"
       aria-label="Selected files"
+      data-slot="doc-scanner-preview"
     >
       {files.map((file) => (
         <FilePreviewItem

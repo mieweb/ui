@@ -1,14 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
-
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   BookingDialog,
-  type BookingProvider,
-  type BookingService,
   FloatingInput,
+  ServiceSelect,
   InlineBookingForm,
   QuickBookCard,
-  ServiceSelect,
+  type BookingProvider,
+  type BookingService,
 } from './BookingDialog';
 
 const mockProvider: BookingProvider = {
@@ -30,62 +29,62 @@ const mockServices: BookingService[] = [
 ];
 
 const meta: Meta<typeof BookingDialog> = {
-  title: 'Provider/BookingDialog',
+  title: 'Components/Overlays & Layering/BookingDialog',
   component: BookingDialog,
-  parameters: {
-    layout: 'centered',
-  },
   tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+  },
+  decorators: [
+    (Story) => (
+      // Container with transform creates a new containing block for position:fixed
+      // This keeps the dialog within this container in docs view
+      <div
+        className="bg-background flex min-h-[900px] items-center justify-center p-4"
+        style={{ transform: 'translateZ(0)' }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    isOpen: true,
+    provider: mockProvider,
+    services: mockServices,
+  },
+  argTypes: {
+    isOpen: {
+      control: 'boolean',
+      description: 'Whether the dialog is open',
+    },
+    onClose: { action: 'onClose' },
+    onSubmit: { action: 'onSubmit' },
+    onCall: { action: 'onCall' },
+    provider: {
+      control: 'object',
+      description: 'Provider information',
+    },
+    services: {
+      control: 'object',
+      description: 'Available services for booking',
+    },
+    isLoading: {
+      control: 'boolean',
+      description: 'Whether the form is in a loading/submitting state',
+    },
+    className: { table: { disable: true } },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof BookingDialog>;
 
-// Dialog wrapper for interactive demos
-function BookingDialogWrapper(args: Story['args']) {
-  const [isOpen, setIsOpen] = React.useState(true);
-
-  return (
-    <div>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-700"
-      >
-        Open Booking Dialog
-      </button>
-      <BookingDialog
-        {...args}
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        provider={args?.provider || mockProvider}
-        services={args?.services || mockServices}
-        onSubmit={(data) => {
-          window.alert(
-            `Booking requested for ${data.firstName} ${data.lastName}`
-          );
-          setIsOpen(false);
-        }}
-        onCall={(phone) => window.alert(`Calling ${phone}...`)}
-      />
-    </div>
-  );
-}
-
 // Default booking dialog
-export const Default: Story = {
-  render: (args) => <BookingDialogWrapper {...args} />,
-  args: {
-    provider: mockProvider,
-    services: mockServices,
-  },
-};
+export const Default: Story = {};
 
 // Loading state
 export const Loading: Story = {
-  render: (args) => <BookingDialogWrapper {...args} />,
   args: {
-    provider: mockProvider,
-    services: mockServices,
     isLoading: true,
   },
 };
@@ -133,7 +132,7 @@ export const ServiceSelectDemo: StoryObj<typeof ServiceSelect> = {
 
 export const InlineForm: StoryObj<typeof InlineBookingForm> = {
   render: () => (
-    <div className="w-96 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+    <div className="bg-card w-96 rounded-lg p-6 shadow-lg">
       <InlineBookingForm
         provider={mockProvider}
         services={mockServices}

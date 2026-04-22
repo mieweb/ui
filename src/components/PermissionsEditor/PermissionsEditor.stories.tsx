@@ -10,7 +10,7 @@ import {
 } from './PermissionsEditor';
 
 const meta: Meta<typeof PermissionsEditor> = {
-  title: 'Components/PermissionsEditor',
+  title: 'Components/Forms & Inputs/PermissionsEditor',
   component: PermissionsEditor,
   tags: ['autodocs'],
   argTypes: {

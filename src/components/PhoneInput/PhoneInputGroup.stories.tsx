@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { type PhoneEntry, PhoneInputGroup } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInputGroup> = {
-  title: 'Components/PhoneInputGroup',
+  title: 'Components/Forms & Inputs/PhoneInputGroup',
   component: PhoneInputGroup,
   tags: ['autodocs'],
   parameters: {
@@ -18,7 +18,7 @@ const meta: Meta<typeof PhoneInputGroup> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[500px]">
+      <div className="w-full max-w-[500px]">
         <Story />
       </div>
     ),

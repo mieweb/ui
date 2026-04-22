@@ -1,6 +1,5 @@
-import { cva } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -36,8 +35,10 @@ export interface TranscriptionResult {
   confidence?: number;
 }
 
-export interface RecordButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+export interface RecordButtonProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  'children'
+> {
   /** Current state of the button */
   state?: RecordButtonState;
   /** Size of the button */
@@ -179,10 +180,12 @@ function PulseRings({ variant }: { variant: RecordButtonVariant }) {
   return (
     <>
       <span
+        data-slot="record-button-pulse"
         className={cn('absolute inset-0 animate-ping rounded-full', ringColor)}
         style={{ animationDuration: '1.5s' }}
       />
       <span
+        data-slot="record-button-pulse"
         className={cn('absolute inset-0 animate-ping rounded-full', ringColor)}
         style={{ animationDuration: '1.5s', animationDelay: '0.5s' }}
       />
@@ -198,7 +201,10 @@ function WaveformBars({ size }: { size: RecordButtonSize }) {
   const barHeight = size === 'sm' ? 'h-2' : size === 'md' ? 'h-3' : 'h-4';
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div
+      data-slot="record-button-waveform"
+      className="flex items-center gap-0.5"
+    >
       {[0, 1, 2, 3, 4].map((i) => (
         <span
           key={i}
@@ -656,13 +662,17 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
     };
 
     return (
-      <div className="relative inline-flex items-center gap-2">
+      <div
+        data-slot="record-button"
+        className="relative inline-flex items-center gap-2"
+      >
         <button
           ref={ref}
           type="button"
           disabled={isDisabled}
           onClick={handleClick}
           {...props}
+          data-slot="record-button-trigger"
           className={cn(
             recordButtonVariants({ variant, size }),
             getStateStyles(effectiveState, variant),
@@ -678,19 +688,27 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
           )}
 
           {/* Icon */}
-          <span className="relative z-10">{renderIcon()}</span>
+          <span data-slot="record-button-icon" className="relative z-10">
+            {renderIcon()}
+          </span>
         </button>
 
         {/* Duration display */}
         {showDuration && isRecording && (
-          <span className="font-mono text-xs tabular-nums text-destructive">
+          <span
+            data-slot="record-button-duration"
+            className="text-destructive font-mono text-xs tabular-nums"
+          >
             {formatDuration(duration)}
           </span>
         )}
 
         {/* Transcription state label */}
         {showTranscriptionState && getTranscriptionLabel() && (
-          <span className="text-primary text-xs font-medium">
+          <span
+            data-slot="record-button-transcription"
+            className="text-primary text-xs font-medium"
+          >
             {getTranscriptionLabel()}
           </span>
         )}
@@ -705,4 +723,4 @@ RecordButton.displayName = 'RecordButton';
 // Exports
 // ============================================================================
 
-export { formatDuration, RecordButton, recordButtonVariants };
+export { RecordButton, recordButtonVariants, formatDuration };

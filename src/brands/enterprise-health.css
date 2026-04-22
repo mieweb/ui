@@ -41,10 +41,19 @@
   --mieweb-primary-900: #42193d;
   --mieweb-primary-950: #280e25;
 
-  /* Secondary Color - Deep Teal Blue (for gradients) */
-  --mieweb-secondary: #00497a;
-  --mieweb-secondary-light: #006ba8;
-  --mieweb-secondary-dark: #003658;
+  /* Secondary Color Scale - Deep Teal Blue */
+  --mieweb-secondary-50: #e6f3fa;
+  --mieweb-secondary-100: #b3dcf0;
+  --mieweb-secondary-200: #80c5e6;
+  --mieweb-secondary-300: #4daedc;
+  --mieweb-secondary-400: #2697d2;
+  --mieweb-secondary-500: #00497a;
+  --mieweb-secondary-600: #003d68;
+  --mieweb-secondary-700: #003658;
+  --mieweb-secondary-800: #002a45;
+  --mieweb-secondary-900: #001e33;
+  --mieweb-secondary-950: #001120;
+  --mieweb-secondary-foreground: #ffffff;
 
   /* Accent Color - Gold/Yellow (logo) */
   --mieweb-accent: #f8b700;
@@ -71,6 +80,15 @@
   --mieweb-success-foreground: #ffffff;
   --mieweb-warning: #f8b700;
   --mieweb-warning-foreground: #222326;
+  --mieweb-info: #0ea5e9;
+  --mieweb-info-foreground: #ffffff;
+
+  /* Chart / Data Visualization */
+  --mieweb-chart-1: #6e2b68;
+  --mieweb-chart-2: #00497a;
+  --mieweb-chart-3: #f8b700;
+  --mieweb-chart-4: #dc2626;
+  --mieweb-chart-5: #22c55e;
 
   /* Typography - Jost is the Enterprise Health font */
   --mieweb-font-sans: 'Jost', ui-sans-serif, system-ui, sans-serif;
@@ -115,6 +133,16 @@
   --mieweb-success-foreground: #fafafa;
   --mieweb-warning: #f8b700;
   --mieweb-warning-foreground: #222326;
+  --mieweb-info: #0284c7;
+  --mieweb-info-foreground: #fafafa;
+  --mieweb-secondary-foreground: #fafafa;
+
+  /* Chart */
+  --mieweb-chart-1: #c95ab8;
+  --mieweb-chart-2: #006ba8;
+  --mieweb-chart-3: #ffc933;
+  --mieweb-chart-4: #f87171;
+  --mieweb-chart-5: #4ade80;
 
   --mieweb-glass-background: rgba(255, 255, 255, 0.1);
 }

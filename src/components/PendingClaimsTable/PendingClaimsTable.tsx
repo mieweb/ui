@@ -1,10 +1,9 @@
 'use client';
 
 import * as React from 'react';
-
-import { Avatar } from '../Avatar/Avatar';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
+import { Avatar } from '../Avatar/Avatar';
 
 export interface PendingClaim {
   id: string;
@@ -66,7 +65,7 @@ export function PendingClaimsTable({
 
   if (isLoading) {
     return (
-      <div className={`space-y-2 ${className}`}>
+      <div data-slot="pending-claims" className={`space-y-2 ${className}`}>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
@@ -80,6 +79,7 @@ export function PendingClaimsTable({
   if (claims.length === 0) {
     return (
       <div
+        data-slot="pending-claims"
         className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
@@ -95,40 +95,50 @@ export function PendingClaimsTable({
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+        <p
+          data-slot="pending-claims-empty"
+          className="text-gray-500 dark:text-gray-400"
+        >
+          {emptyMessage}
+        </p>
       </div>
     );
   }
 
   return (
     <div
+      data-slot="pending-claims"
       className={`overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}
     >
       {/* Desktop table */}
       <div className="hidden md:block">
-        <table className="w-full">
+        <table data-slot="pending-claims-table" className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Claimant
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Role
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Submitted
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {claims.map((claim) => (
-              <tr key={claim.id} className="bg-white dark:bg-gray-900">
+              <tr
+                key={claim.id}
+                data-slot="pending-claims-row"
+                className="bg-white dark:bg-gray-900"
+              >
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-3">
                     <Avatar name={claim.claimantName} size="sm" />
@@ -200,9 +210,16 @@ export function PendingClaimsTable({
       </div>
 
       {/* Mobile cards */}
-      <div className="divide-y divide-gray-200 dark:divide-gray-700 md:hidden">
+      <div
+        data-slot="pending-claims-cards"
+        className="divide-y divide-gray-200 md:hidden dark:divide-gray-700"
+      >
         {claims.map((claim) => (
-          <div key={claim.id} className="bg-white p-4 dark:bg-gray-900">
+          <div
+            key={claim.id}
+            data-slot="pending-claims-card"
+            className="bg-white p-4 dark:bg-gray-900"
+          >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Avatar name={claim.claimantName} size="sm" />

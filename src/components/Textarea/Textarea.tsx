@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const textareaVariants = cva(
@@ -41,7 +40,8 @@ const textareaVariants = cva(
 );
 
 export interface TextareaProps
-  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
+  extends
+    Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
     VariantProps<typeof textareaVariants> {
   /** Label for the textarea */
   label?: string;
@@ -142,7 +142,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     // Build aria-describedby
     const describedByIds = [
       error ? errorId : null,
-      helperText ? helperId : null,
+      helperText && !error ? helperId : null,
       showCount ? countId : null,
       ariaDescribedBy,
     ]
@@ -150,12 +150,13 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       .join(' ');
 
     return (
-      <div className="flex flex-col gap-1.5">
+      <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
         {label && (
           <label
+            data-slot="textarea-label"
             htmlFor={textareaId}
             className={cn(
-              'text-sm font-medium text-foreground',
+              'text-foreground text-sm font-medium',
               hideLabel && 'sr-only'
             )}
           >
@@ -163,6 +164,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           </label>
         )}
         <textarea
+          data-slot="textarea"
           ref={internalRef}
           id={textareaId}
           value={value}
@@ -181,15 +183,27 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           )}
           {...props}
         />
-        <div className="flex items-center justify-between gap-2">
+        <div
+          data-slot="textarea-footer"
+          className="flex items-center justify-between gap-2"
+        >
           <div className="flex-1">
             {error && (
-              <p id={errorId} className="text-sm text-destructive" role="alert">
+              <p
+                id={errorId}
+                data-slot="textarea-error"
+                className="text-destructive text-sm"
+                role="alert"
+              >
                 {error}
               </p>
             )}
             {helperText && !error && (
-              <p id={helperId} className="text-sm text-muted-foreground">
+              <p
+                id={helperId}
+                data-slot="textarea-helper"
+                className="text-muted-foreground text-sm"
+              >
                 {helperText}
               </p>
             )}
@@ -197,8 +211,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           {showCount && (
             <p
               id={countId}
+              data-slot="textarea-count"
               className={cn(
-                'shrink-0 text-xs text-muted-foreground',
+                'text-muted-foreground shrink-0 text-xs',
                 maxLength && characterCount >= maxLength && 'text-destructive'
               )}
             >

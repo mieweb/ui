@@ -4,7 +4,7 @@ import { OrderLookupForm } from './OrderLookupForm';
 
 const meta: Meta<typeof OrderLookupForm> = {
   component: OrderLookupForm,
-  title: 'Components/OrderLookupForm',
+  title: 'Product/Feature Modules/OrderLookupForm',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',

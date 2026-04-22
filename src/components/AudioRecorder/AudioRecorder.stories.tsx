@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-
 import { AudioRecorder } from './AudioRecorder';
 
 const meta: Meta<typeof AudioRecorder> = {
-  title: 'Components/AudioRecorder',
+  title: 'Components/Images & Media/AudioRecorder',
   component: AudioRecorder,
   parameters: {
     layout: 'centered',
@@ -434,7 +433,7 @@ export const CustomControls: Story = {
           {state === 'stopped' && (
             <button
               onClick={onPlay}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700"
+              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ▶️ Play Recording
             </button>
@@ -442,7 +441,7 @@ export const CustomControls: Story = {
           {isPlaying && (
             <button
               onClick={onPause}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700"
+              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ⏸️ Pause Playback
             </button>
@@ -535,7 +534,7 @@ export const InlineRecorder: Story = {
             showTime={false}
           />
         </div>
-        <button className="rounded-lg bg-primary-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-primary-700">
+        <button className="bg-primary-700 hover:bg-primary-800 rounded-lg px-3 py-1.5 text-sm text-white transition-colors">
           Send
         </button>
       </div>

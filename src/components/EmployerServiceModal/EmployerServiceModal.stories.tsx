@@ -4,7 +4,7 @@ import { EmployerServiceModal } from './EmployerServiceModal';
 
 const meta: Meta<typeof EmployerServiceModal> = {
   component: EmployerServiceModal,
-  title: 'Components/EmployerServiceModal',
+  title: 'Components/Forms & Inputs/EmployerServiceModal',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',

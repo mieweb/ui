@@ -158,7 +158,7 @@ export function PaymentHistoryTable({
 
   if (isLoading) {
     return (
-      <div className={`space-y-2 ${className}`}>
+      <div data-slot="payment-history" className={`space-y-2 ${className}`}>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
@@ -172,6 +172,7 @@ export function PaymentHistoryTable({
   if (payments.length === 0) {
     return (
       <div
+        data-slot="payment-history"
         className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
@@ -187,16 +188,22 @@ export function PaymentHistoryTable({
             d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
           />
         </svg>
-        <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+        <p
+          data-slot="payment-history-empty"
+          className="text-gray-500 dark:text-gray-400"
+        >
+          {emptyMessage}
+        </p>
       </div>
     );
   }
 
   return (
     <div
+      data-slot="payment-history"
       className={`overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}
     >
-      <table className="w-full">
+      <table data-slot="payment-history-table" className="w-full">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -228,6 +235,7 @@ export function PaymentHistoryTable({
           {payments.map((payment) => (
             <tr
               key={payment.id}
+              data-slot="payment-history-row"
               onClick={() => onPaymentClick?.(payment)}
               className={`bg-white dark:bg-gray-900 ${onPaymentClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
             >

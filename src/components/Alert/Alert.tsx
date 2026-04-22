@@ -1,7 +1,6 @@
+import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
-import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 
 const alertVariants = cva(
@@ -30,7 +29,8 @@ const alertVariants = cva(
 );
 
 export interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof alertVariants> {
   /** Icon to display in the alert */
   icon?: React.ReactElement | null;
@@ -71,6 +71,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       <div
         ref={ref}
         role="alert"
+        data-slot="alert"
         className={cn(
           alertVariants({ variant }),
           React.isValidElement(icon) && 'pl-11',
@@ -84,11 +85,12 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         {dismissible && (
           <button
             type="button"
+            data-slot="alert-dismiss"
             onClick={onDismiss}
             className={cn(
-              'absolute right-2 top-2 rounded-md p-1',
+              'absolute top-2 right-2 rounded-md p-1',
               'opacity-70 hover:opacity-100',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
               'transition-opacity'
             )}
             aria-label={dismissLabel}
@@ -112,7 +114,8 @@ const AlertTitle = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn('mb-1 font-semibold leading-none tracking-tight', className)}
+    data-slot="alert-title"
+    className={cn('mb-1 leading-none font-semibold tracking-tight', className)}
     {...props}
   >
     {children}
@@ -130,6 +133,7 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
+    data-slot="alert-description"
     className={cn('text-sm [&_p]:leading-relaxed', className)}
     {...props}
   />
@@ -137,4 +141,4 @@ const AlertDescription = React.forwardRef<
 
 AlertDescription.displayName = 'AlertDescription';
 
-export { Alert, AlertDescription, AlertTitle, alertVariants };
+export { Alert, AlertTitle, AlertDescription, alertVariants };

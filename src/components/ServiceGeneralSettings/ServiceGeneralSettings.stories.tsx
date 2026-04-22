@@ -4,7 +4,7 @@ import { ServiceGeneralSettings } from './ServiceGeneralSettings';
 
 const meta: Meta<typeof ServiceGeneralSettings> = {
   component: ServiceGeneralSettings,
-  title: 'Components/ServiceGeneralSettings',
+  title: 'Product/Feature Modules/ServiceGeneralSettings',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

@@ -1,16 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
-
-import { Badge } from '../Badge';
 import {
-  ReportDatePicker,
-  type ReportResult,
-  type SystemReport,
   WebChartReportViewer,
+  ReportTimeRange,
+  type SystemReport,
+  type ReportResult,
 } from './WebChartReportViewer';
+import { Badge } from '../Badge';
 
 const meta: Meta<typeof WebChartReportViewer> = {
-  title: 'Components/WebChartReportViewer',
+  title: 'Components/Text & Data Display/WebChartReportViewer',
   component: WebChartReportViewer,
   tags: ['autodocs'],
   parameters: {
@@ -188,14 +187,14 @@ export const ReportWithError: Story = {
   },
 };
 
-function DatePickerWrapper() {
+function TimeRangeWrapper() {
   const [range, setRange] = useState({
     start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     end: new Date(),
   });
 
   return (
-    <ReportDatePicker
+    <ReportTimeRange
       startDate={range.start}
       endDate={range.end}
       onChange={(start, end) => {
@@ -208,8 +207,8 @@ function DatePickerWrapper() {
   );
 }
 
-export const DatePicker: StoryObj<typeof ReportDatePicker> = {
-  render: () => <DatePickerWrapper />,
+export const TimeRange: StoryObj<typeof ReportTimeRange> = {
+  render: () => <TimeRangeWrapper />,
 };
 
 const structuredResult: ReportResult = {

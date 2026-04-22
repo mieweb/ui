@@ -90,6 +90,7 @@ export {
   FolderOpen as FolderOpenIcon,
   Image as ImageIcon,
   Paperclip as PaperclipIcon,
+  Printer as PrinterIcon,
 } from 'lucide-react';
 
 // Data & Charts

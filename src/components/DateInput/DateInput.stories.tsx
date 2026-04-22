@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DateInput } from './DateInput';
 
 const meta: Meta<typeof DateInput> = {
-  title: 'Components/DateInput',
+  title: 'Components/Forms & Inputs/DateInput',
   component: DateInput,
   parameters: {
     layout: 'centered',

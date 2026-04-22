@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const cardVariants = cva(
@@ -67,7 +66,8 @@ const cardAccentVariants = cva('absolute left-0 top-0 bottom-0 w-1', {
 });
 
 export interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {
   /** Semantic HTML element to render as */
   as?: 'div' | 'article' | 'section' | 'aside';
@@ -121,6 +121,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           accent && 'pl-4',
           className
         )}
+        data-slot="card"
         data-loading={loading || undefined}
         aria-busy={loading || undefined}
         {...props}
@@ -134,9 +135,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {loading && (
           <div className="bg-card/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
             <div className="flex gap-1">
-              <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500 [animation-delay:-0.3s]" />
-              <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500 [animation-delay:-0.15s]" />
-              <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500" />
+              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
+              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
+              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full" />
             </div>
           </div>
         )}
@@ -157,6 +158,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    data-slot="card-header"
     className={cn('flex flex-col gap-1.5 pb-4', className)}
     {...props}
   />
@@ -173,8 +175,9 @@ const CardTitle = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <h3
     ref={ref}
+    data-slot="card-title"
     className={cn(
-      'text-lg font-semibold leading-none tracking-tight',
+      'text-lg leading-none font-semibold tracking-tight',
       className
     )}
     {...props}
@@ -194,7 +197,8 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
+    data-slot="card-description"
+    className={cn('text-muted-foreground text-sm', className)}
     {...props}
   />
 ));
@@ -208,7 +212,12 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('', className)} {...props} />
+  <div
+    ref={ref}
+    data-slot="card-content"
+    className={cn('', className)}
+    {...props}
+  />
 ));
 
 CardContent.displayName = 'CardContent';
@@ -222,6 +231,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    data-slot="card-footer"
     className={cn('flex items-center pt-4', className)}
     {...props}
   />
@@ -232,8 +242,7 @@ CardFooter.displayName = 'CardFooter';
 /**
  * Image/Media section for a Card - typically used at the top
  */
-export interface CardMediaProps
-  extends React.ImgHTMLAttributes<HTMLImageElement> {
+export interface CardMediaProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   /** Aspect ratio of the media */
   aspectRatio?: 'video' | 'square' | 'wide' | 'auto';
   /** Optional overlay content */
@@ -252,6 +261,7 @@ const CardMedia = React.forwardRef<HTMLDivElement, CardMediaProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-media"
         className={cn(
           'relative -mx-4 -mt-4 overflow-hidden first:rounded-t-xl',
           className
@@ -314,6 +324,7 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
     return (
       <span
         ref={ref}
+        data-slot="card-badge"
         className={cn(
           'absolute z-10 rounded-md px-2 py-1 text-xs font-medium',
           variantClasses[variant],
@@ -351,6 +362,7 @@ const CardActions = React.forwardRef<HTMLDivElement, CardActionsProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-actions"
         className={cn(
           'flex items-center gap-2 pt-4',
           alignClasses[align],
@@ -375,7 +387,8 @@ const CardDivider = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <hr
     ref={ref}
-    className={cn('-mx-4 my-4 border-border', className)}
+    data-slot="card-divider"
+    className={cn('border-border -mx-4 my-4', className)}
     {...props}
   />
 ));
@@ -385,8 +398,7 @@ CardDivider.displayName = 'CardDivider';
 /**
  * Collapsible content section for Cards
  */
-export interface CardCollapsibleProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardCollapsibleProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Whether the content is expanded */
   expanded?: boolean;
   /** Callback when expand state changes */
@@ -420,11 +432,16 @@ const CardCollapsible = React.forwardRef<HTMLDivElement, CardCollapsibleProps>(
     };
 
     return (
-      <div ref={ref} className={cn('', className)} {...props}>
+      <div
+        ref={ref}
+        data-slot="card-collapsible"
+        className={cn('', className)}
+        {...props}
+      >
         <button
           type="button"
           onClick={handleToggle}
-          className="flex items-center gap-1 rounded text-sm text-primary-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+          className="text-primary-600 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           aria-expanded={expanded}
         >
           {typeof trigger === 'string' ? (
@@ -487,17 +504,18 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-stat"
         className={cn('flex items-start gap-3', className)}
         {...props}
       >
         {icon && (
-          <div className="bg-primary-500/10 rounded-lg p-2 text-primary-600">
+          <div className="bg-primary-500/10 text-primary-600 rounded-lg p-2">
             {icon}
           </div>
         )}
         <div className="min-w-0 flex-1">
           <div className="text-2xl font-bold tracking-tight">{value}</div>
-          <div className="text-sm text-muted-foreground">{label}</div>
+          <div className="text-muted-foreground text-sm">{label}</div>
           {trend && (
             <div
               className={cn(
@@ -534,17 +552,17 @@ CardStat.displayName = 'CardStat';
 
 export {
   Card,
-  cardAccentVariants,
-  CardActions,
-  CardBadge,
-  CardCollapsible,
-  CardContent,
-  CardDescription,
-  CardDivider,
-  CardFooter,
   CardHeader,
-  CardMedia,
-  CardStat,
   CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  CardMedia,
+  CardBadge,
+  CardActions,
+  CardDivider,
+  CardCollapsible,
+  CardStat,
   cardVariants,
+  cardAccentVariants,
 };

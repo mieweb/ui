@@ -31,6 +31,7 @@ export function AppHeader({
 }: AppHeaderProps): React.JSX.Element {
   return (
     <header
+      data-slot="app-header"
       data-testid={testId}
       className={cn(
         'flex items-center justify-between px-4 lg:px-6',
@@ -65,6 +66,7 @@ export function AppHeaderSection({
 }: AppHeaderSectionProps): React.JSX.Element {
   return (
     <div
+      data-slot="app-header-section"
       className={cn(
         'flex items-center gap-3',
         align === 'left' && 'mr-auto',
@@ -74,6 +76,40 @@ export function AppHeaderSection({
       )}
     >
       {children}
+    </div>
+  );
+}
+
+// =============================================================================
+// AppHeaderBrand Component
+// =============================================================================
+
+export interface AppHeaderBrandProps {
+  /** Brand/app name */
+  children: ReactNode;
+  /** Logo element (icon, image, or text) */
+  logo?: ReactNode;
+  /** Additional CSS classes */
+  className?: string;
+}
+
+export function AppHeaderBrand({
+  children,
+  logo,
+  className,
+}: AppHeaderBrandProps): React.JSX.Element {
+  return (
+    <div
+      data-slot="app-header-brand"
+      className={cn('flex items-center gap-2', className)}
+    >
+      {logo && <div data-slot="app-header-brand-logo">{logo}</div>}
+      <span
+        data-slot="app-header-brand-name"
+        className="hidden font-semibold text-gray-900 sm:block dark:text-white"
+      >
+        {children}
+      </span>
     </div>
   );
 }
@@ -96,7 +132,7 @@ export function AppHeaderTitle({
   className,
 }: AppHeaderTitleProps): React.JSX.Element {
   return (
-    <div className={cn('min-w-0', className)}>
+    <div data-slot="app-header-title" className={cn('min-w-0', className)}>
       <h1 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
         {children}
       </h1>
@@ -124,7 +160,12 @@ export function AppHeaderActions({
   className,
 }: AppHeaderActionsProps): React.JSX.Element {
   return (
-    <div className={cn('flex items-center gap-2', className)}>{children}</div>
+    <div
+      data-slot="app-header-actions"
+      className={cn('flex items-center gap-2', className)}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -142,6 +183,7 @@ export function AppHeaderDivider({
 }: AppHeaderDividerProps): React.JSX.Element {
   return (
     <div
+      data-slot="app-header-divider"
       className={cn('mx-2 h-6 w-px bg-gray-200 dark:bg-gray-700', className)}
       aria-hidden="true"
     />
@@ -180,7 +222,9 @@ export function AppHeaderIconButton({
 }: AppHeaderIconButtonProps): React.JSX.Element {
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-slot="app-header-icon-btn"
       data-testid={testId}
       className={cn(
         'relative rounded-lg p-2 transition-colors',
@@ -244,7 +288,9 @@ export function AppHeaderSearch({
 }: AppHeaderSearchProps): React.JSX.Element {
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-slot="app-header-search"
       data-testid={testId}
       className={cn(
         'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-600',
@@ -315,7 +361,9 @@ export function AppHeaderUserMenu({
 
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-slot="app-header-user-menu"
       data-testid={testId}
       className={cn(
         'flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors',
@@ -327,6 +375,7 @@ export function AppHeaderUserMenu({
     >
       {/* Avatar */}
       <div
+        data-slot="app-header-user-avatar"
         className={cn(
           'flex h-8 w-8 items-center justify-center overflow-hidden rounded-full',
           'bg-primary-100 text-sm font-medium text-primary-900 dark:bg-primary-900 dark:text-primary-100'
@@ -345,11 +394,17 @@ export function AppHeaderUserMenu({
 
       {/* Name (hidden on small screens) */}
       <div className="hidden min-w-0 text-left lg:block">
-        <div className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white">
+        <div
+          data-slot="app-header-user-name"
+          className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white"
+        >
           {name}
         </div>
         {email && (
-          <div className="max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400">
+          <div
+            data-slot="app-header-user-email"
+            className="max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400"
+          >
             {email}
           </div>
         )}

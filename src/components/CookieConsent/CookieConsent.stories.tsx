@@ -8,7 +8,7 @@ import {
 } from './CookieConsent';
 
 const meta: Meta<typeof CookieConsentBanner> = {
-  title: 'Components/CookieConsent',
+  title: 'Components/Overlays & Layering/CookieConsent',
   component: CookieConsentBanner,
   tags: ['autodocs'],
   parameters: {

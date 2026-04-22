@@ -1,9 +1,8 @@
 'use client';
 
 import * as React from 'react';
-
+import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
 import { Button } from '../Button/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 
 export interface QuickLink {
   id: string;
@@ -61,6 +60,7 @@ export function QuickLinksCard({
       </CardHeader>
       <CardContent className="pt-0">
         <div
+          data-slot="quick-links-list"
           className={
             layout === 'grid'
               ? `grid ${gridColsClass} gap-2`
@@ -77,29 +77,37 @@ export function QuickLinksCard({
             >
               {link.icon && (
                 <span
+                  data-slot="quick-links-icon"
                   className={`text-muted-foreground ${layout === 'grid' ? 'mb-1' : 'mr-3'} `}
                 >
                   {link.icon}
                 </span>
               )}
-              <span className="flex-1 text-left">
-                <span className="block text-sm font-medium text-foreground">
+              <span data-slot="quick-links-label" className="flex-1 text-left">
+                <span className="text-foreground block text-sm font-medium">
                   {link.label}
                 </span>
                 {link.description && layout !== 'grid' && (
-                  <span className="block text-xs text-muted-foreground">
+                  <span
+                    data-slot="quick-links-description"
+                    className="text-muted-foreground block text-xs"
+                  >
                     {link.description}
                   </span>
                 )}
               </span>
-              {link.badge !== undefined && (
-                <span className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-[var(--mieweb-primary-700)] dark:text-[var(--mieweb-primary-400)]">
+              {link.badge != null && (
+                <span
+                  data-slot="quick-links-badge"
+                  className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-[var(--mieweb-primary-700)] dark:text-[var(--mieweb-primary-400)]"
+                >
                   {link.badge}
                 </span>
               )}
-              {!link.badge && layout !== 'grid' && (
+              {link.badge == null && layout !== 'grid' && (
                 <svg
-                  className="h-4 w-4 text-muted-foreground"
+                  data-slot="quick-links-chevron"
+                  className="text-muted-foreground h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

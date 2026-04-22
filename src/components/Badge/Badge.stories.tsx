@@ -45,7 +45,7 @@ type BadgeStoryArgs = React.ComponentProps<typeof Badge> & {
 };
 
 const meta: Meta<typeof Badge> = {
-  title: 'Components/Badge',
+  title: 'Components/Text & Data Display/Badge',
   component: Badge,
   parameters: {
     layout: 'centered',

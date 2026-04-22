@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge';
 import { Tooltip } from '../Tooltip';
@@ -44,10 +43,10 @@ const providerCardVariants = cva(
   [
     'group relative flex w-full overflow-hidden rounded-xl',
     'bg-card text-card-foreground',
-    'border-0',
-    'shadow-[0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.24)]',
+    'border border-border',
+    'shadow-card',
     'transition-all duration-200',
-    'hover:shadow-md',
+    'hover:shadow-md hover:border-primary-200 dark:hover:border-primary-800',
   ],
   {
     variants: {
@@ -74,7 +73,7 @@ const logoContainerVariants = cva(
     variants: {
       variant: {
         compact: 'h-20 w-full',
-        list: 'w-24 h-full',
+        list: 'w-28 h-full',
         featured: 'h-32 w-full rounded-lg mb-4',
       },
     },
@@ -97,9 +96,12 @@ const ProviderLogo: React.FC<{
 
   if (!logoURL || hasError) {
     return (
-      <div className={cn(logoContainerVariants({ variant }))}>
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-          <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
+      <div
+        data-slot="provider-card-logo"
+        className={cn(logoContainerVariants({ variant }))}
+      >
+        <div className="bg-primary-100 dark:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-full">
+          <span className="text-primary-800 dark:text-primary-300 text-lg font-bold">
             {name.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -108,7 +110,10 @@ const ProviderLogo: React.FC<{
   }
 
   return (
-    <div className={cn(logoContainerVariants({ variant }))}>
+    <div
+      data-slot="provider-card-logo"
+      className={cn(logoContainerVariants({ variant }))}
+    >
       <img
         src={logoURL}
         alt={`${name}'s logo`}
@@ -123,26 +128,37 @@ const ProviderLogo: React.FC<{
 const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
   if (distance === undefined) return null;
 
-  // Format: show up to 2 decimal places, but trim trailing zeros
-  const formatted =
-    distance < 10
-      ? parseFloat(distance.toFixed(2)).toString()
-      : distance.toFixed(0);
-
   return (
-    <span className="bg-primary-600/10 dark:bg-primary-500/20 inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold text-primary-600 dark:text-primary-400">
-      <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 512 512">
-        <path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19L508.48 67.48c16.49-38.4-14.96-80.35-63.96-63.96z" />
+    <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+      <svg
+        className="h-3 w-3"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+        />
       </svg>
-      <span>{formatted}</span>
-      <span className="uppercase">MI</span>
+      {distance.toFixed(1)}mi
     </span>
   );
 };
 
 const SafeFromWildfiresNotice: React.FC = () => (
   <Tooltip content="BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.">
-    <div className="bg-success/10 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-success">
+    <div
+      data-slot="provider-card-safe-notice"
+      className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300"
+    >
       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -157,7 +173,10 @@ const SafeFromWildfiresNotice: React.FC = () => (
 
 const VerifiedBadge: React.FC = () => (
   <Tooltip content="This provider's information has been verified">
-    <span className="inline-flex items-center gap-1 text-xs text-success">
+    <span
+      data-slot="provider-card-verified"
+      className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300"
+    >
       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -188,12 +207,23 @@ function formatPhoneNumber(phone: string): string {
   return phone;
 }
 
+/**
+ * Format address for single line display
+ */
+function formatAddressSingleLine(address: ProviderAddress): string {
+  const parts = [address.street1];
+  if (address.street2) parts.push(address.street2);
+  parts.push(`${address.city}, ${address.state} ${address.postalCode}`);
+  return parts.join(', ');
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
 
 export interface ProviderCardProps
-  extends VariantProps<typeof providerCardVariants>,
+  extends
+    VariantProps<typeof providerCardVariants>,
     Omit<React.HTMLAttributes<HTMLDivElement>, 'onClick'> {
   /** Provider data to display */
   provider: Provider;
@@ -280,8 +310,10 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
         tabIndex={interactive ? 0 : undefined}
         role={interactive ? 'button' : undefined}
         aria-label={`View ${provider.name}`}
-        data-testid="provider-card"
         {...props}
+        data-slot="provider-card"
+        data-variant={variant}
+        data-testid="provider-card"
       >
         {/* Logo Section */}
         {(variant === 'compact' || variant === 'featured') && (
@@ -301,6 +333,7 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
 
         {/* Content Section */}
         <div
+          data-slot="provider-card-content"
           className={cn(
             'flex flex-1 flex-col',
             variant === 'compact' && 'p-4',
@@ -308,74 +341,74 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
             variant === 'featured' && ''
           )}
         >
-          {/* Header: Name + Distance */}
-          <div className="mb-1 flex items-start justify-between gap-2">
-            <div className="flex items-start gap-1">
-              <h3
-                className={cn(
-                  'line-clamp-2 font-semibold text-primary-600 dark:text-primary-400',
-                  'group-hover:text-primary-700 dark:group-hover:text-primary-300',
-                  'transition-colors',
-                  variant === 'featured'
-                    ? 'text-lg'
-                    : 'text-[15px] leading-tight'
-                )}
-              >
-                {provider.name}
-              </h3>
-              {provider.verified && <VerifiedBadge />}
-            </div>
-            <DistanceBadge distance={provider.distance} />
+          {/* Header: Name + Verified */}
+          <div
+            data-slot="provider-card-header"
+            className="mb-1 flex items-start justify-between gap-2"
+          >
+            <h3
+              className={cn(
+                'text-primary-800 dark:text-primary-300 line-clamp-2 font-semibold',
+                'group-hover:text-primary-900 dark:group-hover:text-primary-200',
+                'transition-colors',
+                variant === 'featured' ? 'text-lg' : 'text-sm'
+              )}
+            >
+              {provider.name}
+            </h3>
+            {provider.verified && <VerifiedBadge />}
           </div>
 
           {/* Address */}
           <p
+            data-slot="provider-card-address"
             className={cn(
               'text-muted-foreground',
-              variant === 'featured' ? 'text-sm' : 'text-[13px]'
+              variant === 'featured' ? 'text-sm' : 'text-xs'
             )}
           >
-            {provider.address.street1}
-            {provider.address.street2 && (
+            {variant === 'list' ? (
+              formatAddressSingleLine(provider.address)
+            ) : (
               <>
+                {provider.address.street1}
+                {provider.address.street2 && (
+                  <>
+                    <br />
+                    {provider.address.street2}
+                  </>
+                )}
                 <br />
-                {provider.address.street2}
+                {provider.address.city}, {provider.address.state}{' '}
+                {provider.address.postalCode}
               </>
             )}
-            <br />
-            {provider.address.city}, {provider.address.state}{' '}
-            {provider.address.postalCode}
           </p>
 
           {/* Phone */}
           {provider.workNumber && (
             <a
               href={`tel:${provider.workNumber}`}
+              data-slot="provider-card-phone"
               data-phone-link
               onClick={handlePhoneClick}
               className={cn(
-                'mt-1 inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800',
-                'dark:text-emerald-400 dark:hover:text-emerald-300',
+                'text-primary-800 hover:text-primary-900 mt-1',
+                'dark:text-primary-300 dark:hover:text-primary-200',
                 'hover:underline',
-                variant === 'featured' ? 'text-sm' : 'text-[13px]'
+                variant === 'featured' ? 'text-sm' : 'text-xs'
               )}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 512 512"
-                fill="currentColor"
-                className="h-3.5 w-3.5 shrink-0"
-                aria-hidden="true"
-              >
-                <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" />
-              </svg>
               {formatPhoneNumber(provider.workNumber)}
             </a>
           )}
 
           {/* Services Badges */}
           {displayServices && displayServices.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div
+              data-slot="provider-card-services"
+              className="mt-3 flex flex-wrap gap-1.5"
+            >
               {displayServices.map((service) => (
                 <Badge
                   key={service._id}
@@ -397,10 +430,16 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
           {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Footer: Safe from wildfires + Actions */}
-          <div className="mt-2 flex items-center justify-between">
+          {/* Footer: Distance + Actions */}
+          <div
+            data-slot="provider-card-footer"
+            className="mt-3 flex items-center justify-between"
+          >
             <div className="flex items-center gap-2">
               {provider.safeFromWildfires && <SafeFromWildfiresNotice />}
+              {!provider.safeFromWildfires && (
+                <DistanceBadge distance={provider.distance} />
+              )}
             </div>
 
             {renderActions?.(provider)}
@@ -455,6 +494,7 @@ export const ProviderCardGrid: React.FC<ProviderCardGridProps> = ({
   if (loading) {
     return (
       <div
+        data-slot="provider-card-grid"
         className={cn(
           'grid gap-4',
           variant === 'compact' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
@@ -471,7 +511,10 @@ export const ProviderCardGrid: React.FC<ProviderCardGridProps> = ({
 
   if (providers.length === 0) {
     return (
-      <div className={cn('py-12 text-center', className)}>
+      <div
+        data-slot="provider-card-grid"
+        className={cn('py-12 text-center', className)}
+      >
         {emptyState || (
           <div className="text-muted-foreground">
             <svg
@@ -499,6 +542,7 @@ export const ProviderCardGrid: React.FC<ProviderCardGridProps> = ({
 
   return (
     <div
+      data-slot="provider-card-grid"
       className={cn(
         'grid gap-4',
         variant === 'compact' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
@@ -534,7 +578,7 @@ export const ProviderCardSkeleton: React.FC<ProviderCardSkeletonProps> = ({
   return (
     <div
       className={cn(
-        'animate-pulse rounded-xl border border-border bg-card',
+        'border-border bg-card animate-pulse rounded-xl border',
         variant === 'compact' && 'flex flex-col',
         variant === 'list' && 'flex min-h-[120px] flex-row',
         variant === 'featured' && 'flex flex-col p-6'
@@ -558,21 +602,21 @@ export const ProviderCardSkeleton: React.FC<ProviderCardSkeletonProps> = ({
         )}
       >
         {/* Title */}
-        <div className="h-4 w-3/4 rounded bg-muted" />
+        <div className="bg-muted h-4 w-3/4 rounded" />
 
         {/* Address lines */}
-        <div className="h-3 w-full rounded bg-muted" />
-        <div className="h-3 w-2/3 rounded bg-muted" />
+        <div className="bg-muted h-3 w-full rounded" />
+        <div className="bg-muted h-3 w-2/3 rounded" />
 
         {/* Phone */}
-        <div className="h-3 w-1/3 rounded bg-muted" />
+        <div className="bg-muted h-3 w-1/3 rounded" />
 
         {/* Spacer */}
         <div className="flex-1" />
 
         {/* Footer */}
         <div className="flex justify-between">
-          <div className="h-4 w-16 rounded bg-muted" />
+          <div className="bg-muted h-4 w-16 rounded" />
         </div>
       </div>
     </div>

@@ -30,7 +30,7 @@ import {
 } from './Table';
 
 const meta: Meta<typeof Table> = {
-  title: 'Components/Table',
+  title: 'Components/Layout & Structure/Table',
   component: Table,
   parameters: {
     layout: 'centered',

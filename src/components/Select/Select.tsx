@@ -1,9 +1,8 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-
-import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 // ============================================================================
 // Types
@@ -63,8 +62,9 @@ const selectTriggerVariants = cva(
 // Select Component
 // ============================================================================
 
-export interface SelectProps
-  extends VariantProps<typeof selectTriggerVariants> {
+export interface SelectProps extends VariantProps<
+  typeof selectTriggerVariants
+> {
   /** Array of options or groups */
   options: (SelectOption | SelectGroup)[];
   /** Controlled value */
@@ -242,14 +242,34 @@ function Select({
   const updateDropdownPosition = React.useCallback(() => {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const isCondensed = document.body.classList.contains('condensed');
+    const optionHeight = isCondensed ? 28 : 40;
+    const estimatedDropdownHeight = Math.min(
+      flatOptions.length * optionHeight + 16,
+      300
+    );
+    const openAbove =
+      spaceBelow < estimatedDropdownHeight && spaceAbove > spaceBelow;
+
     setDropdownStyle({
       position: 'fixed',
-      top: rect.bottom + 4,
+      ...(openAbove
+        ? { bottom: window.innerHeight - rect.top + 4 }
+        : { top: rect.bottom + 4 }),
       left: rect.left,
       width: rect.width,
+      maxHeight: Math.max(
+        Math.min(openAbove ? spaceAbove - 8 : spaceBelow - 8, 300),
+        0
+      ),
+      display: 'flex',
+      flexDirection: 'column' as const,
+      overflow: 'hidden',
       zIndex: 9999,
     });
-  }, []);
+  }, [flatOptions.length]);
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -336,17 +356,24 @@ function Select({
   }, [searchQuery, filteredFlatOptions.length]);
 
   // Build aria-describedby
-  const describedByIds = [error ? errorId : null, helperText ? helperId : null]
+  const describedByIds = [
+    error ? errorId : null,
+    helperText && !error ? helperId : null,
+  ]
     .filter(Boolean)
     .join(' ');
 
   return (
-    <div className={cn('flex flex-col gap-1.5', className)}>
+    <div
+      data-slot="select-wrapper"
+      className={cn('flex flex-col gap-1.5', className)}
+    >
       {label && (
         <label
+          data-slot="select-label"
           htmlFor={selectId}
           className={cn(
-            'text-sm font-medium text-foreground',
+            'text-foreground text-sm font-medium',
             hideLabel && 'sr-only'
           )}
         >
@@ -357,6 +384,7 @@ function Select({
       <div ref={containerRef} className="relative">
         {/* Trigger Button */}
         <button
+          data-slot="select-trigger"
           ref={triggerRef}
           id={selectId}
           type="button"
@@ -383,7 +411,7 @@ function Select({
           </span>
           <ChevronDownIcon
             className={cn(
-              'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
+              'text-muted-foreground h-4 w-4 shrink-0 transition-transform',
               isOpen && 'rotate-180'
             )}
           />
@@ -393,16 +421,20 @@ function Select({
         {isOpen &&
           createPortal(
             <div
+              data-slot="select-dropdown"
               ref={dropdownRef}
               style={dropdownStyle}
               className={cn(
-                'rounded-lg border border-border bg-card shadow-lg',
+                'border-border bg-card rounded-lg border shadow-lg',
                 'animate-in fade-in zoom-in-95 duration-100'
               )}
             >
               {/* Search Input */}
               {searchable && (
-                <div className="border-b border-border p-2">
+                <div
+                  data-slot="select-search"
+                  className="border-border border-b p-2"
+                >
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -411,9 +443,9 @@ function Select({
                     onKeyDown={handleKeyDown}
                     placeholder={searchPlaceholder}
                     className={cn(
-                      'w-full rounded-md border border-input bg-background px-3 py-2 text-sm',
+                      'border-input bg-background w-full rounded-md border px-3 py-2 text-sm',
                       'placeholder:text-muted-foreground',
-                      'focus:outline-none focus:ring-2 focus:ring-ring'
+                      'focus:ring-ring focus:ring-2 focus:outline-none'
                     )}
                     aria-label="Search options"
                   />
@@ -426,10 +458,11 @@ function Select({
                 id={listboxId}
                 role="listbox"
                 aria-label={label || 'Options'}
-                className="max-h-60 overflow-auto p-1"
+                data-slot="select-listbox"
+                className="flex-1 overflow-auto p-1"
               >
                 {filteredFlatOptions.length === 0 ? (
-                  <li className="px-3 py-2 text-center text-sm text-muted-foreground">
+                  <li className="text-muted-foreground px-3 py-2 text-center text-sm">
                     {noResultsText}
                   </li>
                 ) : (
@@ -438,7 +471,10 @@ function Select({
                       // Render group
                       return (
                         <li key={`group-${item.label}`} role="presentation">
-                          <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <div
+                            data-slot="select-group-label"
+                            className="text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase"
+                          >
                             {item.label}
                           </div>
                           <ul role="group" aria-label={item.label}>
@@ -494,14 +530,23 @@ function Select({
 
       {/* Error Message */}
       {error && (
-        <p id={errorId} className="text-sm text-destructive" role="alert">
+        <p
+          id={errorId}
+          data-slot="select-error"
+          className="text-destructive text-sm"
+          role="alert"
+        >
           {error}
         </p>
       )}
 
       {/* Helper Text */}
       {helperText && !error && (
-        <p id={helperId} className="text-sm text-muted-foreground">
+        <p
+          id={helperId}
+          data-slot="select-helper"
+          className="text-muted-foreground text-sm"
+        >
           {helperText}
         </p>
       )}
@@ -541,6 +586,7 @@ function SelectOptionItem({
 
   return (
     <li
+      data-slot="select-option"
       role="option"
       aria-selected={isSelected}
       aria-disabled={option.disabled}
@@ -552,7 +598,7 @@ function SelectOptionItem({
       onMouseEnter={option.disabled ? undefined : onMouseEnter}
       className={cn(
         'flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm',
-        'outline-none transition-colors',
+        'transition-colors outline-none',
         isHighlighted && 'bg-muted',
         isSelected &&
           'bg-primary-50 text-primary-900 dark:bg-primary-950 dark:text-primary-100',
@@ -561,7 +607,7 @@ function SelectOptionItem({
     >
       <span className="flex-1 truncate">{option.label}</span>
       {isSelected && (
-        <CheckIcon className="h-4 w-4 shrink-0 text-primary-500" />
+        <CheckIcon className="text-primary-500 h-4 w-4 shrink-0" />
       )}
     </li>
   );

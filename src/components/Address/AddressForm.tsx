@@ -4,50 +4,46 @@ import { cn } from '../../utils/cn';
 import { Input } from '../Input';
 import type { AddressData } from './Address';
 
-// =============================================================================
-// Google Maps Types (minimal for autocomplete)
-// Full types available via @types/google.maps if needed
-// =============================================================================
+interface GoogleMapsAddressComponent {
+  long_name: string;
+  short_name: string;
+  types: string[];
+}
 
-declare global {
-  interface Window {
-    google?: typeof google;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace google.maps {
-    // eslint-disable-next-line @typescript-eslint/no-namespace
-    namespace places {
-      class Autocomplete {
-        constructor(input: HTMLInputElement, options?: AutocompleteOptions);
-        getPlace(): PlaceResult;
-        addListener(event: string, handler: () => void): void;
-      }
-      interface AutocompleteOptions {
-        types?: string[];
-        fields?: string[];
-        componentRestrictions?: { country: string | string[] };
-      }
-      interface PlaceResult {
-        address_components?: AddressComponent[];
-        geometry?: {
-          location: {
-            lat(): number;
-            lng(): number;
-          };
-        };
-        formatted_address?: string;
-      }
-      interface AddressComponent {
-        long_name: string;
-        short_name: string;
-        types: string[];
-      }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-namespace
-    namespace event {
-      function clearInstanceListeners(instance: object): void;
-    }
-  }
+interface GoogleMapsPlaceResult {
+  address_components?: GoogleMapsAddressComponent[];
+  geometry?: {
+    location: {
+      lat(): number;
+      lng(): number;
+    };
+  };
+  formatted_address?: string;
+}
+
+interface GoogleMapsAutocompleteOptions {
+  types?: string[];
+  fields?: string[];
+  componentRestrictions?: { country: string | string[] };
+}
+
+interface GoogleMapsAutocomplete {
+  getPlace(): GoogleMapsPlaceResult;
+  addListener(event: string, handler: () => void): void;
+}
+
+interface GoogleMapsNamespace {
+  maps?: {
+    places?: {
+      Autocomplete: new (
+        input: HTMLInputElement,
+        options?: GoogleMapsAutocompleteOptions
+      ) => GoogleMapsAutocomplete;
+    };
+    event?: {
+      clearInstanceListeners(instance: object): void;
+    };
+  };
 }
 
 // =============================================================================
@@ -116,7 +112,7 @@ export interface AddressFormProps {
     /** Whether to enable autocomplete on street1 field */
     enabled: boolean;
     /** Callback when place is selected */
-    onPlaceSelect?: (place: google.maps.places.PlaceResult) => void;
+    onPlaceSelect?: (place: GoogleMapsPlaceResult) => void;
     /** Country restrictions for autocomplete */
     componentRestrictions?: { country: string | string[] };
     /** Types of places to return */
@@ -207,9 +203,7 @@ export function AddressForm({
 }: AddressFormProps) {
   const generatedId = React.useId();
   const idPrefix = id || generatedId;
-  const autocompleteRef = React.useRef<google.maps.places.Autocomplete | null>(
-    null
-  );
+  const autocompleteRef = React.useRef<GoogleMapsAutocomplete | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Merge labels and placeholders with defaults
@@ -228,15 +222,19 @@ export function AddressForm({
   React.useEffect(() => {
     if (!googlePlaces?.enabled || !inputRef.current) return;
 
+    const googleMaps = (
+      globalThis.window as { google?: GoogleMapsNamespace } | undefined
+    )?.google;
+
     // Check if Google Maps is loaded
-    if (typeof google === 'undefined' || !google.maps?.places) {
+    if (!googleMaps?.maps?.places?.Autocomplete) {
       console.warn(
         'Google Maps Places API is not loaded. Autocomplete will not work.'
       );
       return;
     }
 
-    const options: google.maps.places.AutocompleteOptions = {
+    const options: GoogleMapsAutocompleteOptions = {
       types: googlePlaces.types || ['address'],
       fields: ['address_components', 'geometry', 'formatted_address'],
     };
@@ -245,7 +243,7 @@ export function AddressForm({
       options.componentRestrictions = googlePlaces.componentRestrictions;
     }
 
-    autocompleteRef.current = new google.maps.places.Autocomplete(
+    autocompleteRef.current = new googleMaps.maps.places.Autocomplete(
       inputRef.current,
       options
     );
@@ -306,8 +304,8 @@ export function AddressForm({
     });
 
     return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      if (autocompleteRef.current && googleMaps.maps?.event) {
+        googleMaps.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
   }, [googlePlaces?.enabled]);

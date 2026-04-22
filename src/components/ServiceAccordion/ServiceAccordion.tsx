@@ -199,6 +199,7 @@ export function ServiceLink({
       href={`${basePath}/${service.slug}`}
       onClick={handleClick}
       className={serviceLinkVariants({ size })}
+      data-slot="service-accordion-link"
       data-cy={`service-link-${service.slug}`}
     >
       <LinkIcon className="flex-shrink-0 text-neutral-400" />
@@ -231,7 +232,7 @@ function SubCategoryAccordion({
   const contentId = `sub-content-${index}`;
 
   return (
-    <div className="sub-category">
+    <div data-slot="service-accordion-subcategory" className="sub-category">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -324,6 +325,7 @@ function CategoryAccordionItem({
 
   return (
     <div
+      data-slot="service-accordion-category"
       className={cn(
         variant === 'cards' && 'overflow-hidden rounded-lg',
         variant === 'cards' && isExpanded && 'shadow-md'
@@ -335,6 +337,7 @@ function CategoryAccordionItem({
         className={categoryHeaderVariants({ variant, isExpanded })}
         aria-expanded={isExpanded}
         aria-controls={contentId}
+        data-slot="service-accordion-category-header"
         data-cy={`btn-category-${index}`}
       >
         <div className="flex items-center gap-3">
@@ -364,6 +367,7 @@ function CategoryAccordionItem({
       {hasContent && (
         <div
           id={contentId}
+          data-slot="service-accordion-category-content"
           className={cn(
             'overflow-hidden transition-all duration-200 ease-in-out',
             isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0',
@@ -467,6 +471,7 @@ export function ServiceAccordion({
 
   return (
     <div
+      data-slot="service-accordion"
       className={cn(accordionVariants({ variant }), className)}
       role="region"
       aria-label="Service categories"
@@ -519,7 +524,10 @@ export function ServiceTagCloud({
   const hasMore = maxItems && services.length > maxItems;
 
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div
+      data-slot="service-tag-cloud"
+      className={cn('flex flex-wrap gap-2', className)}
+    >
       {displayedServices.map((service, index) => (
         <a
           key={index}
@@ -592,7 +600,10 @@ export function ServiceList({
   };
 
   return (
-    <ul className={cn('grid gap-1', gridClasses[columns], className)}>
+    <ul
+      data-slot="service-list"
+      className={cn('grid gap-1', gridClasses[columns], className)}
+    >
       {services.map((service, index) => (
         <li key={index}>
           <a
