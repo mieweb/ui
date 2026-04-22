@@ -291,6 +291,7 @@ function BrandIconCard({ icon }: { icon: BrandIconInfo }) {
 
   return (
     <button
+      type="button"
       onClick={copySnippet}
       className="border-border bg-card hover:bg-muted/50 hover:border-primary-300 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border p-4 transition-all"
       title={`Click to copy <img> snippet for ${icon.name}`}
@@ -363,7 +364,7 @@ function IconsPage() {
       (icon) =>
         icon.name.toLowerCase().includes(searchLower) ||
         icon.brand.toLowerCase().includes(searchLower) ||
-        'brand'.includes(searchLower)
+        'brand'.startsWith(searchLower)
     );
   }, [search]);
 
