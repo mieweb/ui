@@ -349,7 +349,6 @@ export function LogoCard({ name, brand, lm, dm, color }) {
       style={{
         borderRadius: '12px',
         border: '1px solid var(--mieweb-border, #e5e7eb)',
-        overflow: 'hidden',
       }}
     >
       <div
@@ -360,6 +359,7 @@ export function LogoCard({ name, brand, lm, dm, color }) {
           padding: '24px',
           backgroundColor: '#ffffff',
           minHeight: '120px',
+          borderRadius: '12px 12px 0 0',
         }}
       >
         {lightSrc ? (
@@ -442,7 +442,6 @@ export function IconCard({ name, brand, icon, iconDm, color }) {
       style={{
         borderRadius: '12px',
         border: '1px solid var(--mieweb-border, #e5e7eb)',
-        overflow: 'hidden',
       }}
     >
       <div
@@ -453,6 +452,7 @@ export function IconCard({ name, brand, icon, iconDm, color }) {
           padding: '20px',
           backgroundColor: '#ffffff',
           minHeight: '100px',
+          borderRadius: '12px 12px 0 0',
         }}
       >
         {lightSrc ? (
@@ -568,7 +568,7 @@ export function IconCard({ name, brand, icon, iconDm, color }) {
 <div
   style={{
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: '20px',
     marginTop: '16px',
     marginBottom: '32px',
