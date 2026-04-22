@@ -1,17 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '../Table/Table';
+
+import { Avatar } from '../Avatar/Avatar';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Avatar } from '../Avatar/Avatar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../Table/Table';
 
 export interface ProviderUser {
   id: string;

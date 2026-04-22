@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import {
-  ReportDashboard,
-  type MetricData,
   type ChartDataPoint,
+  type MetricData,
+  ReportDashboard,
   type TopItem,
 } from './ReportDashboard';
 

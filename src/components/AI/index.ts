@@ -10,54 +10,54 @@ export * from './types';
 
 // Icons
 export {
-  SparklesIcon,
   AILogoIcon,
-  CloseIcon,
-  RefreshIcon,
-  ChevronIcon,
-  SendIcon,
-  SpinnerIcon,
-  type SparklesIconProps,
   type AILogoIconProps,
-  type CloseIconProps,
-  type RefreshIconProps,
+  ChevronIcon,
   type ChevronIconProps,
+  CloseIcon,
+  type CloseIconProps,
+  RefreshIcon,
+  type RefreshIconProps,
+  SendIcon,
   type SendIconProps,
+  SparklesIcon,
+  type SparklesIconProps,
+  SpinnerIcon,
   type SpinnerIconProps,
 } from './icons';
 
 // MCP Tool Call Display
 export {
-  MCPToolCallDisplay,
-  ResourceLink,
-  ToolStatusIcon,
   getToolIcon,
+  MCPToolCallDisplay,
   type MCPToolCallDisplayProps,
+  ResourceLink,
   type ResourceLinkProps,
+  ToolStatusIcon,
 } from './MCPToolCall';
 
 // AI Message Display
 export {
   AIMessageDisplay,
-  MessageAvatar,
-  AITypingIndicator,
   type AIMessageDisplayProps,
+  AITypingIndicator,
+  MessageAvatar,
 } from './AIMessage';
 
 // AI Chat
 export {
   AIChat,
-  SuggestedActions,
   type AIChatProps,
+  SuggestedActions,
   type SuggestedActionsProps,
 } from './AIChat';
 
 // AI Chat Modal
 export {
   AIChatModal,
-  AIChatTrigger,
-  FloatingAIChat,
   type AIChatModalProps,
+  AIChatTrigger,
   type AIChatTriggerProps,
+  FloatingAIChat,
   type FloatingAIChatProps,
 } from './AIChatModal';

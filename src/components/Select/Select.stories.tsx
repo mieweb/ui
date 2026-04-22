@@ -1,6 +1,7 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Select, type SelectOption, type SelectGroup } from './Select';
+import * as React from 'react';
+
+import { Select, type SelectGroup, type SelectOption } from './Select';
 
 // =============================================================================
 // Sample Data
@@ -404,9 +405,9 @@ function ControlledDemo() {
         value={value}
         onValueChange={setValue}
       />
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         Selected:{' '}
-        <code className="bg-muted rounded px-1 font-mono">
+        <code className="rounded bg-muted px-1 font-mono">
           {value || 'none'}
         </code>
       </p>

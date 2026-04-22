@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { DateRangePicker, DateRangeFilter, DateRange } from './DateRangePicker';
+
+import { DateRange, DateRangeFilter, DateRangePicker } from './DateRangePicker';
 
 // ============================================================================
 // DateRangePicker Stories
@@ -267,7 +268,7 @@ export const FilterDropdown: StoryObj<typeof DateRangeFilter> = {
           activePreset={preset}
         />
         {preset && (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Selected: {preset}
             {range.start &&
               ` (${range.start.toLocaleDateString()} - ${range.end?.toLocaleDateString()})`}

@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
+
 import { PhoneInput } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInput> = {
@@ -46,7 +47,7 @@ export const Controlled: Story = {
           onChange={setPhone}
           validateOnBlur
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Raw value: {phone || '(empty)'}
         </p>
       </div>

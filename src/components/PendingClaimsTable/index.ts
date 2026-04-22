@@ -1,5 +1,5 @@
 export {
+  type PendingClaim,
   PendingClaimsTable,
   type PendingClaimsTableProps,
-  type PendingClaim,
 } from './PendingClaimsTable';

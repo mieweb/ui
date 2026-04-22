@@ -1,9 +1,10 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
+import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { cn } from '../../utils/cn';
 import { isStorybookDocsMode } from '../../utils/environment';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useEscapeKey } from '../../hooks/useEscapeKey';
 
 /**
  * Modal scroll lock state manager.
@@ -246,7 +247,7 @@ const ModalHeader = React.forwardRef<HTMLDivElement, ModalHeaderProps>(
       ref={ref}
       className={cn(
         'flex items-center justify-between',
-        'border-border border-b px-6 py-4',
+        'border-b border-border px-6 py-4',
         className
       )}
       {...props}
@@ -273,7 +274,7 @@ const ModalTitle = React.forwardRef<HTMLHeadingElement, ModalTitleProps>(
         ref={ref}
         id={`${modalId}-title`}
         className={cn(
-          'text-lg leading-none font-semibold tracking-tight',
+          'text-lg font-semibold leading-none tracking-tight',
           className
         )}
         {...props}
@@ -317,8 +318,8 @@ const ModalClose = React.forwardRef<HTMLButtonElement, ModalCloseProps>(
         className={cn(
           'inline-flex h-8 w-8 items-center justify-center rounded-lg',
           'text-muted-foreground hover:text-foreground',
-          'hover:bg-muted transition-colors',
-          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+          'transition-colors hover:bg-muted',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           className
         )}
         aria-label="Close"
@@ -364,7 +365,7 @@ const ModalFooter = React.forwardRef<HTMLDivElement, ModalFooterProps>(
       ref={ref}
       className={cn(
         'flex items-center justify-end gap-3',
-        'border-border border-t px-6 py-4',
+        'border-t border-border px-6 py-4',
         className
       )}
       {...props}
@@ -400,11 +401,11 @@ function CloseIcon() {
 
 export {
   Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalClose,
   ModalBody,
-  ModalFooter,
+  ModalClose,
   modalContentVariants,
+  ModalFooter,
+  ModalHeader,
   modalOverlayVariants,
+  ModalTitle,
 };

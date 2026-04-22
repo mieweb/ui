@@ -1,27 +1,28 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
+import { Alert, AlertDescription, AlertTitle } from '../Alert';
 import { Button } from '../Button';
 import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalClose,
-  ModalBody,
-  ModalFooter,
-} from '../Modal';
-import { Spinner } from '../Spinner';
-import { Alert, AlertTitle, AlertDescription } from '../Alert';
-import {
-  CameraIcon,
-  RefreshIcon,
-  CheckIcon,
   AlertCircleIcon,
+  CameraIcon,
+  CheckIcon,
+  RefreshIcon,
   ScanLineIcon,
 } from '../Icons';
-import { useCamera } from './useCamera';
-import { useDocumentDetection } from './useDocumentDetection';
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal';
+import { Spinner } from '../Spinner';
 import { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
 import type { WebcamModalProps } from './types';
+import { useCamera } from './useCamera';
+import { useDocumentDetection } from './useDocumentDetection';
 
 /**
  * Camera viewfinder component
@@ -66,17 +67,17 @@ function CameraViewfinder({
           {/* Corner guides */}
           <div className="absolute inset-8 rounded-lg border-2 border-white/30">
             {/* Top-left corner */}
-            <div className="absolute -top-0.5 -left-0.5 h-6 w-6 rounded-tl-lg border-t-4 border-l-4 border-white" />
+            <div className="absolute -left-0.5 -top-0.5 h-6 w-6 rounded-tl-lg border-l-4 border-t-4 border-white" />
             {/* Top-right corner */}
-            <div className="absolute -top-0.5 -right-0.5 h-6 w-6 rounded-tr-lg border-t-4 border-r-4 border-white" />
+            <div className="absolute -right-0.5 -top-0.5 h-6 w-6 rounded-tr-lg border-r-4 border-t-4 border-white" />
             {/* Bottom-left corner */}
             <div className="absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-lg border-b-4 border-l-4 border-white" />
             {/* Bottom-right corner */}
-            <div className="absolute -right-0.5 -bottom-0.5 h-6 w-6 rounded-br-lg border-r-4 border-b-4 border-white" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-br-lg border-b-4 border-r-4 border-white" />
           </div>
 
           {/* Center hint text */}
-          <div className="absolute right-0 bottom-4 left-0 text-center">
+          <div className="absolute bottom-4 left-0 right-0 text-center">
             <span className="rounded-full bg-black/50 px-3 py-1 text-sm text-white">
               Position document within the frame
             </span>
@@ -103,10 +104,10 @@ function PermissionDeniedMessage({ onRetry }: { onRetry: () => void }) {
       </Alert>
 
       <div className="flex flex-col gap-2 text-center">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           To enable camera access:
         </p>
-        <ol className="text-muted-foreground list-inside list-decimal space-y-1 text-left text-sm">
+        <ol className="list-inside list-decimal space-y-1 text-left text-sm text-muted-foreground">
           <li>Click the camera/lock icon in your browser&apos;s address bar</li>
           <li>Allow camera access for this site</li>
           <li>Click the button below to try again</li>
@@ -288,7 +289,6 @@ export function WebcamModal({
         return null;
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, permission]);
 
   // Start detection when camera is ready
@@ -299,7 +299,6 @@ export function WebcamModal({
     return () => {
       detection.stopDetection();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, autoDetectEnabled, capturedFile]);
 
   const handleCapture = React.useCallback(() => {

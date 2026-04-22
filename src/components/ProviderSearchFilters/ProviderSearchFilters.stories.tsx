@@ -1,12 +1,13 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import {
-  ProviderSearchFilters,
-  ServiceMultiSelect,
   ActiveFilters,
   CompactFilterBar,
-  type ServiceOption,
   type ProviderFilters,
+  ProviderSearchFilters,
+  ServiceMultiSelect,
+  type ServiceOption,
 } from './ProviderSearchFilters';
 
 const mockServices: ServiceOption[] = [
@@ -87,6 +88,36 @@ export const Vertical: Story = {
 // Compact layout
 export const Compact: Story = {
   render: () => <FiltersDemo layout="compact" />,
+};
+
+// With location autocomplete (requires Mapbox token)
+export const WithLocationAutocomplete: Story = {
+  render: () => (
+    <FiltersDemo
+      mapboxToken="YOUR_MAPBOX_TOKEN"
+      onGeolocate={() => alert('Geolocation requested')}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Pass a `mapboxToken` prop to enable city/place name autocomplete alongside ZIP code input. Pass `onGeolocate` to show a "Use my location" button.',
+      },
+    },
+  },
+};
+
+// Compact with location autocomplete
+export const CompactWithLocation: Story = {
+  render: () => (
+    <FiltersDemo
+      layout="compact"
+      showLabels={false}
+      mapboxToken="YOUR_MAPBOX_TOKEN"
+      onGeolocate={() => alert('Geolocation requested')}
+    />
+  ),
 };
 
 // Sub-component: Service Multi-Select

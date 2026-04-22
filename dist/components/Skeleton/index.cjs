@@ -1,29 +1,29 @@
 'use strict';
 
-var chunkN3QTYHRZ_cjs = require('../../chunk-N3QTYHRZ.cjs');
+var chunkY5C2WNWC_cjs = require('../../chunk-Y5C2WNWC.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
 
 
 Object.defineProperty(exports, "Skeleton", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.Skeleton; }
+  get: function () { return chunkY5C2WNWC_cjs.Skeleton; }
 });
 Object.defineProperty(exports, "SkeletonCard", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonCard; }
+  get: function () { return chunkY5C2WNWC_cjs.SkeletonCard; }
 });
 Object.defineProperty(exports, "SkeletonTable", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonTable; }
+  get: function () { return chunkY5C2WNWC_cjs.SkeletonTable; }
 });
 Object.defineProperty(exports, "SkeletonText", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonText; }
+  get: function () { return chunkY5C2WNWC_cjs.SkeletonText; }
 });
 Object.defineProperty(exports, "skeletonVariants", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.skeletonVariants; }
+  get: function () { return chunkY5C2WNWC_cjs.skeletonVariants; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

@@ -1,16 +1,15 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import {
   formatPhoneNumber,
-  unformatPhoneNumber,
   isValidPhoneNumber,
+  unformatPhoneNumber,
 } from '../../utils/phone';
 import { Input, type InputProps } from '../Input';
 
-export interface PhoneInputProps extends Omit<
-  InputProps,
-  'type' | 'onChange' | 'value'
-> {
+export interface PhoneInputProps
+  extends Omit<InputProps, 'type' | 'onChange' | 'value'> {
   /** The phone number value (can be formatted or unformatted) */
   value?: string;
   /** Callback fired when the value changes, receives the unformatted value */
@@ -254,7 +253,7 @@ function PhoneInputGroup({
               className={cn(
                 'w-full rounded-md border px-3 py-2 text-sm',
                 'border-gray-300 bg-white text-gray-900',
-                'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none',
+                'focus:border-brand-500 focus:ring-brand-500/20 focus:outline-none focus:ring-2',
                 'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500',
                 'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100',
                 'dark:focus:border-brand-400 dark:focus:ring-brand-400/20',

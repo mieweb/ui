@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -48,9 +49,8 @@ const paginationButtonVariants = cva(
 // Pagination Component
 // ============================================================================
 
-export interface PaginationProps extends VariantProps<
-  typeof paginationButtonVariants
-> {
+export interface PaginationProps
+  extends VariantProps<typeof paginationButtonVariants> {
   /** Current page (1-indexed) */
   page: number;
   /** Total number of pages */
@@ -249,9 +249,8 @@ Pagination.displayName = 'Pagination';
 // Simple Pagination Component
 // ============================================================================
 
-export interface SimplePaginationProps extends VariantProps<
-  typeof paginationButtonVariants
-> {
+export interface SimplePaginationProps
+  extends VariantProps<typeof paginationButtonVariants> {
   /** Current page */
   page: number;
   /** Total number of pages */
@@ -307,7 +306,7 @@ function SimplePagination({
       </button>
 
       {showPageInfo && (
-        <span className="text-muted-foreground px-2 text-sm">
+        <span className="px-2 text-sm text-muted-foreground">
           Page {page} of {totalPages}
         </span>
       )}
@@ -414,4 +413,4 @@ function ChevronsRightIcon({ className }: { className?: string }) {
   );
 }
 
-export { Pagination, SimplePagination, paginationButtonVariants };
+export { Pagination, paginationButtonVariants, SimplePagination };

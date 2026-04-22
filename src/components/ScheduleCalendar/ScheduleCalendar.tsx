@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { Button } from '../Button/Button';
 
 export interface CalendarAppointment {
@@ -337,7 +338,7 @@ export function ScheduleCalendar({
                         key={appointment.id}
                         role="button"
                         tabIndex={0}
-                        className={`absolute right-1 left-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
+                        className={`absolute left-1 right-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
                         style={{
                           top: position.top,
                           height: position.height,

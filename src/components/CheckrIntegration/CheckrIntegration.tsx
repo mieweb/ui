@@ -1,18 +1,19 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils';
 import { Button } from '../Button';
 import { Input } from '../Input';
-import { Select, type SelectOption } from '../Select';
 import {
   Modal,
+  ModalBody,
+  ModalClose,
+  ModalFooter,
   ModalHeader,
   ModalTitle,
-  ModalClose,
-  ModalBody,
-  ModalFooter,
 } from '../Modal';
+import { Select, type SelectOption } from '../Select';
 
 export interface BackgroundCheckCandidate {
   /** Candidate ID */
@@ -286,7 +287,7 @@ export function CheckrIntegration({
         <div className="flex items-center gap-3">
           <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg">
             <svg
-              className="text-success h-6 w-6"
+              className="h-6 w-6 text-success"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -300,9 +301,9 @@ export function CheckrIntegration({
             </svg>
           </div>
           <div>
-            <h3 className="text-foreground text-lg font-semibold">Checkr</h3>
+            <h3 className="text-lg font-semibold text-foreground">Checkr</h3>
             {connected && account?.name && (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {account.name}
                 {account.plan && (
                   <span className="ml-2 text-xs">({account.plan})</span>
@@ -338,7 +339,7 @@ export function CheckrIntegration({
 
       {/* Error State */}
       {error && (
-        <div className="bg-destructive/10 border-destructive/20 text-destructive mb-4 rounded-lg border p-4">
+        <div className="bg-destructive/10 border-destructive/20 mb-4 rounded-lg border p-4 text-destructive">
           <svg
             className="mr-2 inline-block h-4 w-4"
             fill="none"
@@ -361,7 +362,7 @@ export function CheckrIntegration({
         <>
           {/* Status Summary */}
           {reports.length > 0 && (
-            <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm">
+            <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               {Object.entries(statusCounts)
                 .filter(([, count]) => count > 0)
                 .map(([status, count]) => (
@@ -417,9 +418,9 @@ export function CheckrIntegration({
           </div>
 
           {/* Reports Card */}
-          <div className="bg-card border-border overflow-hidden rounded-lg border">
-            <div className="border-border border-b px-4 py-3">
-              <h4 className="text-card-foreground font-medium">
+          <div className="overflow-hidden rounded-lg border border-border bg-card">
+            <div className="border-b border-border px-4 py-3">
+              <h4 className="font-medium text-card-foreground">
                 {viewReports}
               </h4>
             </div>
@@ -430,7 +431,7 @@ export function CheckrIntegration({
               </div>
             ) : reports.length > 0 ? (
               <>
-                <div className="divide-border divide-y">
+                <div className="divide-y divide-border">
                   {reports.map((report) => (
                     <div
                       key={report.id}
@@ -470,14 +471,14 @@ export function CheckrIntegration({
 
                         {/* Candidate Info */}
                         <div>
-                          <p className="text-card-foreground font-medium">
+                          <p className="font-medium text-card-foreground">
                             {report.candidate.name}
                           </p>
-                          <p className="text-muted-foreground text-sm">
+                          <p className="text-sm text-muted-foreground">
                             {report.candidate.email}
                           </p>
                           {report.packageName && (
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-xs text-muted-foreground">
                               {report.packageName}
                             </p>
                           )}
@@ -504,7 +505,7 @@ export function CheckrIntegration({
                             {resultLabels[report.result] || report.result}
                           </p>
                         )}
-                        <p className="text-muted-foreground mt-1 text-xs">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {formatDate(report.completedAt || report.createdAt)}
                         </p>
                       </div>
@@ -513,8 +514,8 @@ export function CheckrIntegration({
                 </div>
 
                 {/* Footer */}
-                <div className="border-border bg-muted/30 flex items-center justify-between border-t px-4 py-3">
-                  <span className="text-muted-foreground text-sm">
+                <div className="bg-muted/30 flex items-center justify-between border-t border-border px-4 py-3">
+                  <span className="text-sm text-muted-foreground">
                     {selectedReports.size > 0
                       ? `${selectedReports.size} report${selectedReports.size > 1 ? 's' : ''} selected`
                       : noReportsSelected}
@@ -540,7 +541,7 @@ export function CheckrIntegration({
                 </div>
               </>
             ) : (
-              <div className="text-muted-foreground py-8 text-center">
+              <div className="py-8 text-center text-muted-foreground">
                 <svg
                   className="text-muted-foreground/30 mx-auto mb-2 h-12 w-12"
                   fill="none"
@@ -563,7 +564,7 @@ export function CheckrIntegration({
 
       {/* Not Connected State */}
       {!connected && !error && (
-        <div className="border-border rounded-lg border border-dashed p-8 text-center">
+        <div className="rounded-lg border border-dashed border-border p-8 text-center">
           <svg
             className="text-muted-foreground/30 mx-auto mb-4 h-12 w-12"
             fill="none"
@@ -577,7 +578,7 @@ export function CheckrIntegration({
               d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
             />
           </svg>
-          <p className="text-muted-foreground mb-4">
+          <p className="mb-4 text-muted-foreground">
             Connect your Checkr account to run background checks on candidates
           </p>
           <Button variant="primary" onClick={onConnect}>

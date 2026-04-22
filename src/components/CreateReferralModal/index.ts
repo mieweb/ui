@@ -1,7 +1,7 @@
-export { CreateReferralModal } from './CreateReferralModal';
 export type {
   CreateReferralModalProps,
   Employee,
-  ServiceOption,
   ReferralData,
+  ServiceOption,
 } from './CreateReferralModal';
+export { CreateReferralModal } from './CreateReferralModal';

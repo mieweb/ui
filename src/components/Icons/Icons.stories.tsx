@@ -1,6 +1,6 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { LucideIcon } from 'lucide-react';
+import * as React from 'react';
 
 // Import all icons from our Icons module
 import * as Icons from './index';
@@ -225,11 +225,11 @@ function IconCard({ name, Icon }: IconCardProps) {
   return (
     <button
       onClick={copyImport}
-      className="border-border bg-card hover:bg-muted/50 hover:border-primary-300 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border p-4 transition-all"
+      className="hover:bg-muted/50 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-border bg-card p-4 transition-all hover:border-primary-300"
       title={`Click to copy import for ${name}`}
     >
-      <Icon className="text-foreground group-hover:text-primary-500 h-6 w-6 transition-colors" />
-      <span className="text-muted-foreground group-hover:text-foreground text-center text-xs break-all transition-colors">
+      <Icon className="h-6 w-6 text-foreground transition-colors group-hover:text-primary-500" />
+      <span className="break-all text-center text-xs text-muted-foreground transition-colors group-hover:text-foreground">
         {copied ? '✓ Copied!' : name.replace('Icon', '')}
       </span>
     </button>
@@ -248,7 +248,7 @@ interface IconSectionProps {
 function IconSection({ title, icons }: IconSectionProps) {
   return (
     <div className="mb-8">
-      <h2 className="text-foreground mb-4 text-lg font-semibold">{title}</h2>
+      <h2 className="mb-4 text-lg font-semibold text-foreground">{title}</h2>
       <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
         {icons.map((icon) => (
           <IconCard key={icon.name} name={icon.name} Icon={icon.component} />
@@ -287,12 +287,12 @@ function IconsPage() {
   const totalIcons = Object.values(iconCategories).flat().length;
 
   return (
-    <div className="bg-background min-h-screen p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-foreground mb-2 text-3xl font-bold">Icons</h1>
-          <p className="text-muted-foreground mb-4">
+          <h1 className="mb-2 text-3xl font-bold text-foreground">Icons</h1>
+          <p className="mb-4 text-muted-foreground">
             {totalIcons} icons powered by{' '}
             <a
               href="https://lucide.dev"
@@ -307,13 +307,13 @@ function IconsPage() {
 
           {/* Search */}
           <div className="relative max-w-md">
-            <Icons.SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Icons.SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search icons..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-2 focus:outline-none"
+              className="w-full rounded-lg border border-input bg-background py-2 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </div>
@@ -324,20 +324,20 @@ function IconsPage() {
         ))}
 
         {Object.keys(filteredCategories).length === 0 && (
-          <div className="text-muted-foreground py-12 text-center">
+          <div className="py-12 text-center text-muted-foreground">
             No icons found matching &ldquo;{search}&rdquo;
           </div>
         )}
 
         {/* Usage Example */}
-        <div className="bg-card border-border mt-12 rounded-xl border p-6">
-          <h2 className="text-foreground mb-4 text-xl font-bold">Usage</h2>
+        <div className="mt-12 rounded-xl border border-border bg-card p-6">
+          <h2 className="mb-4 text-xl font-bold text-foreground">Usage</h2>
           <div className="space-y-4 text-sm">
             <div>
-              <h3 className="text-foreground mb-2 font-semibold">
+              <h3 className="mb-2 font-semibold text-foreground">
                 Import from @mieweb/ui:
               </h3>
-              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
                 {`import { HomeIcon, UserIcon, SettingsIcon } from '@mieweb/ui';
 
 function MyComponent() {
@@ -351,20 +351,20 @@ function MyComponent() {
               </pre>
             </div>
             <div>
-              <h3 className="text-foreground mb-2 font-semibold">
+              <h3 className="mb-2 font-semibold text-foreground">
                 Or import directly from lucide-react:
               </h3>
-              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
                 {`import { Accessibility, AlertOctagon } from 'lucide-react';
 
 // Full icon set available at https://lucide.dev/icons`}
               </pre>
             </div>
             <div>
-              <h3 className="text-foreground mb-2 font-semibold">
+              <h3 className="mb-2 font-semibold text-foreground">
                 Styling with Tailwind:
               </h3>
-              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
                 {`<HomeIcon className="h-4 w-4" />           {/* 16px */}
 <HomeIcon className="h-5 w-5" />           {/* 20px - default */}
 <HomeIcon className="h-6 w-6" />           {/* 24px */}

@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -12,7 +13,9 @@ interface AccordionContextValue {
   allowMultiple: boolean;
 }
 
-const AccordionContext = React.createContext<AccordionContextValue | null>(null);
+const AccordionContext = React.createContext<AccordionContextValue | null>(
+  null
+);
 
 function useAccordionContext() {
   const context = React.useContext(AccordionContext);
@@ -87,10 +90,7 @@ export function Accordion({
 
   return (
     <AccordionContext.Provider value={contextValue}>
-      <div
-        className={cn(accordionVariants({ variant }), className)}
-        {...props}
-      >
+      <div className={cn(accordionVariants({ variant }), className)} {...props}>
         {children}
       </div>
     </AccordionContext.Provider>
@@ -106,12 +106,15 @@ interface AccordionItemContextValue {
   isExpanded: boolean;
 }
 
-const AccordionItemContext = React.createContext<AccordionItemContextValue | null>(null);
+const AccordionItemContext =
+  React.createContext<AccordionItemContextValue | null>(null);
 
 function useAccordionItemContext() {
   const context = React.useContext(AccordionItemContext);
   if (!context) {
-    throw new Error('AccordionItem components must be used within an AccordionItem');
+    throw new Error(
+      'AccordionItem components must be used within an AccordionItem'
+    );
   }
   return context;
 }
@@ -360,7 +363,8 @@ export interface ProviderFAQData {
 
 export function generateProviderFAQs(provider: ProviderFAQData): FAQItem[] {
   const faqs: FAQItem[] = [];
-  const { name, address, phoneNumber, services, website, locationType } = provider;
+  const { name, address, phoneNumber, services, website, locationType } =
+    provider;
 
   // Location FAQ
   faqs.push({
@@ -377,7 +381,8 @@ export function generateProviderFAQs(provider: ProviderFAQData): FAQItem[] {
           rel="noopener noreferrer"
           className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
         >
-          {address.street1}, {address.city}, {address.state} {address.postalCode}
+          {address.street1}, {address.city}, {address.state}{' '}
+          {address.postalCode}
         </a>
         .
       </span>

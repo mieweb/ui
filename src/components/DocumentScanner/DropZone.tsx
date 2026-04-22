@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import type { DropZoneProps } from './types';
 
@@ -131,14 +132,14 @@ export function DropZone({
         'border-neutral-300 bg-neutral-50',
         'dark:border-neutral-600 dark:bg-neutral-800/50',
         // Hover state
-        'hover:border-primary-400 hover:bg-primary-50/50',
-        'dark:hover:border-primary-500 dark:hover:bg-primary-900/20',
+        'hover:bg-primary-50/50 hover:border-primary-400',
+        'dark:hover:bg-primary-900/20 dark:hover:border-primary-500',
         // Focus state
-        'focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
         // Dragging state
         isDragging && [
           'border-primary-500 bg-primary-50',
-          'dark:border-primary-400 dark:bg-primary-900/30',
+          'dark:bg-primary-900/30 dark:border-primary-400',
           'scale-[1.01]',
         ],
         // Disabled state
@@ -173,7 +174,7 @@ export function DropZone({
             'pointer-events-none'
           )}
         >
-          <span className="text-primary-600 dark:text-primary-400 text-lg font-medium">
+          <span className="text-lg font-medium text-primary-600 dark:text-primary-400">
             Drop files here
           </span>
         </div>

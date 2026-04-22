@@ -4,15 +4,16 @@
  * Renders an MCP tool invocation with status, parameters, and results.
  */
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import type {
-  MCPToolCall,
-  MCPToolStatus,
-  MCPToolResult,
   MCPResourceLink,
+  MCPToolCall,
   MCPToolParameter,
+  MCPToolResult,
+  MCPToolStatus,
 } from './types';
 
 // ============================================================================
@@ -56,7 +57,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'running' && (
         <svg
-          className="text-primary-600 dark:text-primary-400 h-3 w-3 animate-spin"
+          className="h-3 w-3 animate-spin text-primary-600 dark:text-primary-400"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -345,9 +346,9 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
         'bg-primary-50 text-primary-700 hover:bg-primary-100',
-        'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
+        'dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-300',
         'text-sm font-medium transition-colors',
-        'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
         'dark:focus:ring-offset-neutral-900',
         className
       )}
@@ -587,9 +588,8 @@ function getParameterSummary(
   return null;
 }
 
-export interface MCPToolCallDisplayProps extends VariantProps<
-  typeof toolCallVariants
-> {
+export interface MCPToolCallDisplayProps
+  extends VariantProps<typeof toolCallVariants> {
   /** The tool call to display */
   toolCall: MCPToolCall;
   /** Whether to show parameters (in detailed view) */
@@ -716,7 +716,7 @@ export function MCPToolCallDisplay({
           {/* Technical Details (collapsed by default) */}
           {showDetails && showParameters && toolCall.parameters.length > 0 && (
             <div className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800">
-              <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400">
+              <h4 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                 Parameters
               </h4>
               <div className="space-y-0.5">
@@ -744,4 +744,4 @@ export function MCPToolCallDisplay({
   );
 }
 
-export { ToolStatusIcon, getToolIcon };
+export { getToolIcon, ToolStatusIcon };

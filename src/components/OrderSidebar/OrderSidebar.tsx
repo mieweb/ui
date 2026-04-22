@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '../Button/Button';
+
 import { Badge } from '../Badge/Badge';
+import { Button } from '../Button/Button';
 
 export interface OrderSidebarProps {
   /** Order ID */
@@ -111,7 +112,7 @@ export function OrderSidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 right-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className} `}
+        className={`fixed right-0 top-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className} `}
         role="dialog"
         aria-modal="true"
         aria-label="Order details"
@@ -169,7 +170,7 @@ export function OrderSidebar({
           <dl className="space-y-4">
             {patientName && (
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Patient
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -180,7 +181,7 @@ export function OrderSidebar({
 
             {employerName && (
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Employer
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -191,7 +192,7 @@ export function OrderSidebar({
 
             {serviceName && (
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Service
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -202,7 +203,7 @@ export function OrderSidebar({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Created
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -210,7 +211,7 @@ export function OrderSidebar({
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Scheduled
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -221,7 +222,7 @@ export function OrderSidebar({
 
             {notes && (
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Notes
                 </dt>
                 <dd className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
@@ -237,7 +238,7 @@ export function OrderSidebar({
 
         {/* Actions */}
         {actions.length > 0 && (
-          <div className="absolute right-0 bottom-0 left-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+          <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
             <div className="flex flex-wrap gap-2">
               {actions.map((action) => (
                 <Button

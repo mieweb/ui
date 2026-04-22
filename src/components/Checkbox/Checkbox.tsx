@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const checkboxVariants = cva(
@@ -29,8 +30,7 @@ const checkboxVariants = cva(
 );
 
 export interface CheckboxProps
-  extends
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
     VariantProps<typeof checkboxVariants> {
   /** Label for the checkbox */
   label?: string;
@@ -121,7 +121,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         <label
           htmlFor={checkboxId}
           className={cn(
-            'text-foreground cursor-pointer text-sm font-medium select-none',
+            'cursor-pointer select-none text-sm font-medium text-foreground',
             disabled && 'cursor-not-allowed opacity-50'
           )}
         >
@@ -130,7 +130,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         {description && (
           <p
             id={descriptionId}
-            className="text-muted-foreground mt-0.5 text-xs"
+            className="mt-0.5 text-xs text-muted-foreground"
           >
             {description}
           </p>
@@ -151,7 +151,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           {labelElement}
         </div>
         {error && (
-          <p id={errorId} className="text-destructive text-sm" role="alert">
+          <p id={errorId} className="text-sm text-destructive" role="alert">
             {error}
           </p>
         )}
@@ -215,12 +215,12 @@ function CheckboxGroup({
       }
     >
       {label && (
-        <legend className="text-foreground mb-1 text-sm font-medium">
+        <legend className="mb-1 text-sm font-medium text-foreground">
           {label}
         </legend>
       )}
       {description && (
-        <p id={descriptionId} className="text-muted-foreground mb-3 text-xs">
+        <p id={descriptionId} className="mb-3 text-xs text-muted-foreground">
           {description}
         </p>
       )}
@@ -234,7 +234,7 @@ function CheckboxGroup({
         {children}
       </div>
       {error && (
-        <p id={errorId} className="text-destructive mt-2 text-sm" role="alert">
+        <p id={errorId} className="mt-2 text-sm text-destructive" role="alert">
           {error}
         </p>
       )}

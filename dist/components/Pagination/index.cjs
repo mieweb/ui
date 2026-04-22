@@ -1,21 +1,21 @@
 'use strict';
 
-var chunkPF3XWKE5_cjs = require('../../chunk-PF3XWKE5.cjs');
+var chunkSND2HWEP_cjs = require('../../chunk-SND2HWEP.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
 
 
 Object.defineProperty(exports, "Pagination", {
   enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.Pagination; }
+  get: function () { return chunkSND2HWEP_cjs.Pagination; }
 });
 Object.defineProperty(exports, "SimplePagination", {
   enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.SimplePagination; }
+  get: function () { return chunkSND2HWEP_cjs.SimplePagination; }
 });
 Object.defineProperty(exports, "paginationButtonVariants", {
   enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.paginationButtonVariants; }
+  get: function () { return chunkSND2HWEP_cjs.paginationButtonVariants; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

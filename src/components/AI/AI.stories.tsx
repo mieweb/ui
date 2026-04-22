@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+
 import {
   AIChat,
-  AIMessageDisplay,
-  MCPToolCallDisplay,
-  FloatingAIChat,
   AIChatTrigger,
   type AIMessage,
-  type MCPToolCall,
+  AIMessageDisplay,
   type AISuggestedAction,
+  FloatingAIChat,
+  type MCPToolCall,
+  MCPToolCallDisplay,
 } from './index';
 
 // ============================================================================

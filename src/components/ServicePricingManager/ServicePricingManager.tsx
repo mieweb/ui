@@ -1,16 +1,17 @@
 'use client';
 
 import * as React from 'react';
+
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 import { Input } from '../Input/Input';
 import {
   Modal,
-  ModalHeader,
-  ModalTitle,
   ModalBody,
   ModalFooter,
+  ModalHeader,
+  ModalTitle,
 } from '../Modal/Modal';
 
 export interface ServicePrice {
@@ -243,7 +244,7 @@ export function ServicePricingManager({
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {/* Desktop header */}
-              <div className="hidden gap-4 py-3 text-xs font-medium text-gray-500 uppercase md:grid md:grid-cols-6 dark:text-gray-400">
+              <div className="hidden gap-4 py-3 text-xs font-medium uppercase text-gray-500 dark:text-gray-400 md:grid md:grid-cols-6">
                 <div className="col-span-2">Service</div>
                 <div className="text-right">Base Price</div>
                 <div className="text-right">Employer Price</div>

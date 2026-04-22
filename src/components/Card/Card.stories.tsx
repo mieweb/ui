@@ -1,20 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+
+import { Button } from '../Button';
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  CardMedia,
-  CardBadge,
   CardActions,
-  CardDivider,
+  CardBadge,
   CardCollapsible,
+  CardContent,
+  CardDescription,
+  CardDivider,
+  CardFooter,
+  CardHeader,
+  CardMedia,
   CardStat,
+  CardTitle,
 } from './Card';
-import { Button } from '../Button';
 
 const meta: Meta<typeof Card> = {
   title: 'Components/Card',
@@ -149,7 +150,7 @@ export const NoPadding: Story = {
       />
       <div className="p-4">
         <h3 className="font-semibold">Image Card</h3>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Card with no padding and an image.
         </p>
       </div>
@@ -180,31 +181,31 @@ export const Variants: Story = {
       <Card variant="default" style={{ width: '180px' }}>
         <CardContent>
           <p className="font-medium">Default</p>
-          <p className="text-muted-foreground text-sm">With shadow</p>
+          <p className="text-sm text-muted-foreground">With shadow</p>
         </CardContent>
       </Card>
       <Card variant="elevated" style={{ width: '180px' }}>
         <CardContent>
           <p className="font-medium">Elevated</p>
-          <p className="text-muted-foreground text-sm">Larger shadow</p>
+          <p className="text-sm text-muted-foreground">Larger shadow</p>
         </CardContent>
       </Card>
       <Card variant="outlined" style={{ width: '180px' }}>
         <CardContent>
           <p className="font-medium">Outlined</p>
-          <p className="text-muted-foreground text-sm">Thicker border</p>
+          <p className="text-sm text-muted-foreground">Thicker border</p>
         </CardContent>
       </Card>
       <Card variant="ghost" style={{ width: '180px' }}>
         <CardContent>
           <p className="font-medium">Ghost</p>
-          <p className="text-muted-foreground text-sm">No background</p>
+          <p className="text-sm text-muted-foreground">No background</p>
         </CardContent>
       </Card>
       <Card variant="filled" style={{ width: '180px' }}>
         <CardContent>
           <p className="font-medium">Filled</p>
-          <p className="text-muted-foreground text-sm">Muted background</p>
+          <p className="text-sm text-muted-foreground">Muted background</p>
         </CardContent>
       </Card>
     </div>
@@ -218,31 +219,31 @@ export const WithAccent: Story = {
       <Card accent="primary" style={{ width: '170px' }}>
         <CardContent>
           <p className="font-medium">Primary</p>
-          <p className="text-muted-foreground text-sm">Brand color accent</p>
+          <p className="text-sm text-muted-foreground">Brand color accent</p>
         </CardContent>
       </Card>
       <Card accent="success" style={{ width: '170px' }}>
         <CardContent>
           <p className="font-medium">Success</p>
-          <p className="text-muted-foreground text-sm">Positive status</p>
+          <p className="text-sm text-muted-foreground">Positive status</p>
         </CardContent>
       </Card>
       <Card accent="warning" style={{ width: '170px' }}>
         <CardContent>
           <p className="font-medium">Warning</p>
-          <p className="text-muted-foreground text-sm">Caution needed</p>
+          <p className="text-sm text-muted-foreground">Caution needed</p>
         </CardContent>
       </Card>
       <Card accent="destructive" style={{ width: '170px' }}>
         <CardContent>
           <p className="font-medium">Destructive</p>
-          <p className="text-muted-foreground text-sm">Critical alert</p>
+          <p className="text-sm text-muted-foreground">Critical alert</p>
         </CardContent>
       </Card>
       <Card accent="info" style={{ width: '170px' }}>
         <CardContent>
           <p className="font-medium">Info</p>
-          <p className="text-muted-foreground text-sm">Informational</p>
+          <p className="text-sm text-muted-foreground">Informational</p>
         </CardContent>
       </Card>
     </div>
@@ -295,7 +296,7 @@ export const WithMediaOverlay: Story = {
         }
       />
       <div className="p-4">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Join our guided night tour and witness the beauty of the stars.
         </p>
         <CardActions align="between" className="mt-2">
@@ -317,7 +318,7 @@ export const WithBadges: Story = {
         </CardBadge>
         <CardContent className="pt-8">
           <p className="font-medium">Product Card</p>
-          <p className="text-muted-foreground text-sm">With success badge</p>
+          <p className="text-sm text-muted-foreground">With success badge</p>
         </CardContent>
       </Card>
       <Card style={{ width: '200px' }}>
@@ -326,7 +327,7 @@ export const WithBadges: Story = {
         </CardBadge>
         <CardContent className="pt-8">
           <p className="font-medium">Product Card</p>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             With destructive badge
           </p>
         </CardContent>
@@ -337,7 +338,7 @@ export const WithBadges: Story = {
         </CardBadge>
         <CardContent className="pt-8">
           <p className="font-medium">Product Card</p>
-          <p className="text-muted-foreground text-sm">With warning badge</p>
+          <p className="text-sm text-muted-foreground">With warning badge</p>
         </CardContent>
       </Card>
     </div>
@@ -363,7 +364,7 @@ export const Selectable: Story = {
           >
             <CardContent>
               <p className="font-medium">Option {id}</p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {selected === id ? 'Selected' : 'Click to select'}
               </p>
             </CardContent>
@@ -580,7 +581,7 @@ export const ComplexCard: Story = {
         <CardDescription>Master modern React development</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="text-muted-foreground flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <svg
               className="h-4 w-4"
@@ -622,7 +623,7 @@ export const ComplexCard: Story = {
         </div>
         <CardDivider />
         <CardCollapsible trigger="View curriculum">
-          <ul className="text-muted-foreground space-y-2 text-sm">
+          <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• Introduction to Advanced Patterns</li>
             <li>• Compound Components</li>
             <li>• Render Props & HOCs</li>
@@ -634,7 +635,7 @@ export const ComplexCard: Story = {
       <CardFooter className="justify-between">
         <div>
           <span className="text-2xl font-bold">$79</span>
-          <span className="text-muted-foreground ml-2 text-sm line-through">
+          <span className="ml-2 text-sm text-muted-foreground line-through">
             $129
           </span>
         </div>

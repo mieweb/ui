@@ -1,6 +1,7 @@
 import React from 'react';
+
 import { cn } from '../../utils/cn';
-import type { ToastData, ToastVariant, ToastPosition } from './ToastProvider';
+import type { ToastData, ToastPosition, ToastVariant } from './ToastProvider';
 
 // =============================================================================
 // Icons
@@ -143,7 +144,7 @@ export function Toast({
       role="alert"
       className={cn(
         'flex items-start gap-3 rounded-lg border p-4 shadow-lg',
-        'max-w-[420px] min-w-[300px]',
+        'min-w-[300px] max-w-[420px]',
         'animate-slide-in-right',
         styles.container
       )}
@@ -158,7 +159,7 @@ export function Toast({
         {action && (
           <button
             onClick={action.onClick}
-            className="mt-2 rounded text-sm font-medium underline hover:no-underline focus:ring-2 focus:ring-current focus:ring-offset-2 focus:outline-none"
+            className="mt-2 rounded text-sm font-medium underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-2"
           >
             {action.label}
           </button>
@@ -169,7 +170,7 @@ export function Toast({
       {dismissible && (
         <button
           onClick={onClose}
-          className="flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10"
+          className="flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-current dark:hover:bg-white/10"
           aria-label="Dismiss notification"
         >
           <XIcon />

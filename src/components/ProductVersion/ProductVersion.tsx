@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -250,12 +251,12 @@ export function ProductVersionBadge({
     >
       <span className="font-mono font-medium">{versionDisplay}</span>
       {build && (
-        <span className="text-muted-foreground font-mono opacity-70">
+        <span className="font-mono text-muted-foreground opacity-70">
           {build.substring(0, 7)}
         </span>
       )}
       {environment && (
-        <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
           {environment.substring(0, 3)}
         </span>
       )}

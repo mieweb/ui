@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 
@@ -198,26 +199,26 @@ export function PaymentHistoryTable({
       <table className="w-full">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Date
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+            <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:table-cell">
               Invoice
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
+            <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 md:table-cell">
               Employer
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase lg:table-cell dark:text-gray-400">
+            <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 lg:table-cell">
               Method
             </th>
-            <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Amount
             </th>
-            <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Status
             </th>
             {onRefund && (
-              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Action
               </th>
             )}
@@ -234,7 +235,7 @@ export function PaymentHistoryTable({
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatDate(payment.date)}
                 </p>
-                <p className="text-xs text-gray-500 sm:hidden dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
                   {payment.invoiceNumber}
                 </p>
               </td>

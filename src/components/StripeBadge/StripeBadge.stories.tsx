@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { StripeBadge, StripeSecureBadge } from './StripeBadge';
+
+import { Button } from '../Button';
 import { Card } from '../Card';
 import { Input } from '../Input';
-import { Button } from '../Button';
+import { StripeBadge, StripeSecureBadge } from './StripeBadge';
 
 const meta: Meta<typeof StripeBadge> = {
   title: 'Components/StripeBadge',
@@ -183,9 +184,9 @@ export const InPaymentForm: Story = {
 // In checkout footer
 export const InCheckoutFooter: Story = {
   render: () => (
-    <div className="border-border flex items-center justify-between border-t pt-4">
+    <div className="flex items-center justify-between border-t border-border pt-4">
       <StripeSecureBadge size="sm" />
-      <div className="text-muted-foreground flex items-center gap-4 text-xs">
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span>256-bit SSL encryption</span>
         <span>•</span>
         <button type="button" className="hover:underline">
@@ -205,7 +206,7 @@ export const InSubscriptionCard: Story = {
           <h3 className="font-semibold">Pro Plan</h3>
           <p className="text-2xl font-bold">
             $29
-            <span className="text-muted-foreground text-sm font-normal">
+            <span className="text-sm font-normal text-muted-foreground">
               /month
             </span>
           </p>
@@ -228,7 +229,7 @@ export const InSubscriptionCard: Story = {
 
         <Button className="w-full">Subscribe</Button>
 
-        <div className="text-muted-foreground flex items-center justify-center gap-2 text-xs">
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <span>Cancel anytime</span>
           <span>•</span>
           <StripeBadge variant="minimal" size="sm" showPoweredBy={false} />

@@ -5,17 +5,20 @@ This document outlines the comprehensive testing strategy for the MIE UI compone
 ## Testing Stack
 
 ### Unit & Integration Testing
+
 - **Vitest** - Fast unit test runner with Jest compatibility
 - **React Testing Library** - Component testing utilities
 - **Jest DOM** - Additional DOM testing matchers
 - **User Events** - Realistic user interaction simulation
 
 ### Visual Regression Testing
+
 - **Playwright** - Browser automation for visual testing
 - **Chromatic** - Visual regression testing service integrated with Storybook
 - **Storybook** - Component documentation and testing environment
 
 ### Code Quality
+
 - **ESLint** - Code linting and best practices
 - **TypeScript** - Type checking
 - **Prettier** - Code formatting
@@ -43,6 +46,7 @@ tests/
 ## Running Tests
 
 ### Unit Tests
+
 ```bash
 # Run all unit tests
 npm run test
@@ -55,6 +59,7 @@ npm run test:coverage
 ```
 
 ### Visual Regression Tests
+
 ```bash
 # Install Playwright browsers (one-time setup)
 npm run playwright:install
@@ -73,6 +78,7 @@ npx playwright test --update-snapshots
 ```
 
 ### Storybook
+
 ```bash
 # Start Storybook development server
 npm run storybook
@@ -86,6 +92,7 @@ npm run build-storybook
 ### Unit Tests
 
 #### Basic Component Test
+
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
@@ -101,7 +108,7 @@ describe('Button', () => {
   it('handles click events', () => {
     const handleClick = vi.fn();
     renderWithTheme(<Button onClick={handleClick}>Click me</Button>);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
@@ -109,18 +116,19 @@ describe('Button', () => {
 ```
 
 #### Testing with User Events
+
 ```typescript
 import userEvent from '@testing-library/user-event';
 
 it('handles user input', async () => {
   const user = userEvent.setup();
   const handleChange = vi.fn();
-  
+
   renderWithTheme(<Input onChange={handleChange} />);
-  
+
   const input = screen.getByRole('textbox');
   await user.type(input, 'Hello World');
-  
+
   expect(input).toHaveValue('Hello World');
   expect(handleChange).toHaveBeenCalled();
 });
@@ -129,35 +137,40 @@ it('handles user input', async () => {
 ### Visual Regression Tests
 
 #### Basic Visual Test
+
 ```typescript
 import { test, expect } from '@playwright/test';
 
 test('Button - Default state', async ({ page }) => {
   await page.goto('/iframe.html?id=button--default&viewMode=story');
   await page.waitForLoadState('networkidle');
-  
+
   await expect(page).toHaveScreenshot('button-default.png');
 });
 ```
 
 #### Interactive State Testing
+
 ```typescript
 test('Button - Hover state', async ({ page }) => {
   await page.goto('/iframe.html?id=button--default&viewMode=story');
-  
+
   const button = page.getByRole('button').first();
   await button.hover();
-  
+
   await expect(page).toHaveScreenshot('button-hover.png');
 });
 ```
 
 #### Theme Testing
+
 ```typescript
 test('Button - Dark theme', async ({ page }) => {
-  await page.goto('/iframe.html?id=button--default&viewMode=story&globals=theme:dark');
+  await page.goto(
+    '/iframe.html?id=button--default&viewMode=story&globals=theme:dark'
+  );
   await page.waitForLoadState('networkidle');
-  
+
   await expect(page).toHaveScreenshot('button-dark.png');
 });
 ```
@@ -165,6 +178,7 @@ test('Button - Dark theme', async ({ page }) => {
 ## Testing Best Practices
 
 ### Unit Tests
+
 1. **Test behavior, not implementation** - Focus on what the component does, not how it does it
 2. **Use descriptive test names** - Make it clear what is being tested
 3. **Test accessibility** - Ensure components work with screen readers and keyboard navigation
@@ -172,6 +186,7 @@ test('Button - Dark theme', async ({ page }) => {
 5. **Test error states** - Verify components handle errors gracefully
 
 ### Visual Tests
+
 1. **Wait for animations** - Use `waitForLoadState('networkidle')` or specific waits
 2. **Test multiple states** - Default, hover, focus, disabled, etc.
 3. **Test responsive design** - Different viewport sizes
@@ -179,6 +194,7 @@ test('Button - Dark theme', async ({ page }) => {
 5. **Use meaningful names** - Screenshot names should be descriptive
 
 ### Storybook Stories
+
 1. **Cover all variants** - Every prop combination should have a story
 2. **Include interactive examples** - Show real usage patterns
 3. **Document accessibility** - Use the a11y addon
@@ -187,20 +203,25 @@ test('Button - Dark theme', async ({ page }) => {
 ## Test Configuration
 
 ### Vitest Configuration
+
 The project uses a custom Vitest configuration with:
+
 - JSdom environment for DOM testing
 - Jest DOM matchers for enhanced assertions
 - Coverage reporting with thresholds
 - Path aliases for clean imports
 
-### Playwright Configuration  
+### Playwright Configuration
+
 The visual tests are configured to:
+
 - Run against multiple browsers (Chrome, Firefox, Safari)
 - Test desktop and mobile viewports
 - Start Storybook automatically
 - Generate HTML reports with screenshots
 
 ### Coverage Requirements
+
 - **Branches**: 80%
 - **Functions**: 80%
 - **Lines**: 80%
@@ -209,6 +230,7 @@ The visual tests are configured to:
 ## Continuous Integration
 
 The CI pipeline runs:
+
 1. **Linting and type checking**
 2. **Unit tests with coverage**
 3. **Visual regression tests**
@@ -218,6 +240,7 @@ The CI pipeline runs:
 7. **Security auditing**
 
 ### Visual Review Process
+
 1. **Automated tests** catch obvious regressions
 2. **Chromatic reviews** for detailed visual changes
 3. **Manual review** for complex interactions
@@ -228,19 +251,23 @@ The CI pipeline runs:
 ### Common Issues
 
 #### Visual Tests Failing
+
 - **Fonts not loading**: Add font loading waits
 - **Animations**: Add specific wait times
 - **Browser differences**: Check if it's browser-specific
 - **Timing issues**: Use `waitForLoadState('networkidle')`
 
 #### Unit Tests Failing
+
 - **Missing mocks**: Ensure external dependencies are mocked
 - **Async operations**: Use proper async/await patterns
 - **DOM cleanup**: Tests should clean up after themselves
 - **Theme context**: Use `renderWithTheme` for themed components
 
 ### Updating Visual Baselines
+
 When components intentionally change:
+
 ```bash
 # Update all snapshots
 npx playwright test --update-snapshots

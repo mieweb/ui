@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
+
 import {
   Toast,
   ToastContainer,
+  type ToastPosition,
   ToastProvider,
   useToast,
-  type ToastPosition,
 } from './index';
 
 // =============================================================================
@@ -38,7 +39,7 @@ function ToastDemo() {
         </button>
         <button
           onClick={() => info('New features are available!')}
-          className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white transition-colors"
+          className="rounded-lg bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700"
         >
           Info
         </button>
@@ -70,7 +71,7 @@ function ToastWithTitleDemo() {
             },
           })
         }
-        className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-white transition-colors"
+        className="rounded-lg bg-primary-500 px-4 py-2 text-white transition-colors hover:bg-primary-600"
       >
         Show Toast with Title & Action
       </button>

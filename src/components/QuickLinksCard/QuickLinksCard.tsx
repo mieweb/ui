@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
+
 import { Button } from '../Button/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 
 export interface QuickLink {
   id: string;
@@ -82,11 +83,11 @@ export function QuickLinksCard({
                 </span>
               )}
               <span className="flex-1 text-left">
-                <span className="text-foreground block text-sm font-medium">
+                <span className="block text-sm font-medium text-foreground">
                   {link.label}
                 </span>
                 {link.description && layout !== 'grid' && (
-                  <span className="text-muted-foreground block text-xs">
+                  <span className="block text-xs text-muted-foreground">
                     {link.description}
                   </span>
                 )}
@@ -98,7 +99,7 @@ export function QuickLinksCard({
               )}
               {!link.badge && layout !== 'grid' && (
                 <svg
-                  className="text-muted-foreground h-4 w-4"
+                  className="h-4 w-4 text-muted-foreground"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

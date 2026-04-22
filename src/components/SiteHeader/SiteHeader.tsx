@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -180,8 +181,8 @@ export function AuthButtons({
       className={cn(
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
-          ? 'text-primary-600 bg-white hover:bg-white/90'
-          : 'bg-primary-600 hover:bg-primary-700 text-white'
+          ? 'bg-white text-primary-600 hover:bg-white/90'
+          : 'bg-primary-600 text-white hover:bg-primary-700'
       )}
     >
       Sign Up
@@ -212,8 +213,8 @@ export function AuthButtons({
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
-                ? 'text-primary-600 bg-white hover:bg-white/90'
-                : 'bg-primary-600 hover:bg-primary-700 text-white'
+                ? 'bg-white text-primary-600 hover:bg-white/90'
+                : 'bg-primary-600 text-white hover:bg-primary-700'
             )}
           >
             Sign Up
@@ -345,7 +346,7 @@ export function UserMenu({
               'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
               variant === 'light'
                 ? 'bg-white/20 text-white'
-                : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                : 'dark:bg-primary-900/30 bg-primary-100 text-primary-700 dark:text-primary-400'
             )}
           >
             {initials}
@@ -495,7 +496,7 @@ export function MobileMenuPanel({
       {/* Panel */}
       <div
         className={cn(
-          'fixed top-0 right-0 bottom-0 z-50 w-80 max-w-full bg-white shadow-xl md:hidden dark:bg-gray-900',
+          'fixed bottom-0 right-0 top-0 z-50 w-80 max-w-full bg-white shadow-xl dark:bg-gray-900 md:hidden',
           className
         )}
       >
@@ -531,11 +532,11 @@ export function MobileMenuPanel({
           ))}
         </nav>
 
-        <div className="absolute right-0 bottom-0 left-0 border-t border-gray-200 p-4 dark:border-gray-700">
+        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 p-4 dark:border-gray-700">
           {user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3 px-2">
-                <div className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium">
+                <div className="dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 font-medium text-primary-700 dark:text-primary-400">
                   {user.name
                     .split(' ')
                     .map((w) => w[0])
@@ -582,7 +583,7 @@ export function MobileMenuPanel({
                   onSignUp?.();
                   onClose();
                 }}
-                className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-sm font-medium text-white"
+                className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
               >
                 Sign Up
               </button>
@@ -772,7 +773,7 @@ export function CompactHeader({
       <div className="h-14" aria-hidden="true" />
       <header
         className={cn(
-          'fixed top-0 right-0 left-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
+          'fixed left-0 right-0 top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
           className
         )}
       >

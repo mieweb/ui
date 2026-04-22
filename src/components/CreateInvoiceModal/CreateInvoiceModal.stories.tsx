@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { CreateInvoiceModal } from './CreateInvoiceModal';
 
 const meta: Meta<typeof CreateInvoiceModal> = {

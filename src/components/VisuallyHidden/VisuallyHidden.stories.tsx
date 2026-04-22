@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { VisuallyHidden } from './VisuallyHidden';
+
 import { Button } from '../Button';
+import { VisuallyHidden } from './VisuallyHidden';
 
 const meta: Meta<typeof VisuallyHidden> = {
   title: 'Components/VisuallyHidden',
@@ -92,7 +93,7 @@ export const SkipLink: Story = {
       </p>
       <a
         href="#main-content"
-        className="absolute top-0 left-0 -translate-y-full rounded-b-lg bg-[var(--mieweb-primary-500)] px-4 py-2 text-white transition-transform focus:translate-y-0 focus:ring-2 focus:ring-[var(--mieweb-ring)] focus:outline-none"
+        className="absolute left-0 top-0 -translate-y-full rounded-b-lg bg-[var(--mieweb-primary-500)] px-4 py-2 text-white transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[var(--mieweb-ring)]"
         onClick={(e) => e.preventDefault()}
       >
         Skip to main content
@@ -120,7 +121,7 @@ export const FormLabel: Story = {
         </label>
         <div className="relative">
           <svg
-            className="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--mieweb-muted-foreground)]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mieweb-muted-foreground)]"
             xmlns="http://www.w3.org/2000/svg"
             width="16"
             height="16"
@@ -138,7 +139,7 @@ export const FormLabel: Story = {
             id="search-input"
             type="search"
             placeholder="Search..."
-            className="w-64 rounded-lg border border-[var(--mieweb-border)] bg-[var(--mieweb-background)] py-2 pr-4 pl-10 focus:ring-2 focus:ring-[var(--mieweb-ring)] focus:outline-none"
+            className="w-64 rounded-lg border border-[var(--mieweb-border)] bg-[var(--mieweb-background)] py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[var(--mieweb-ring)]"
           />
         </div>
       </div>

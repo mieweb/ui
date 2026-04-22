@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { DropzoneOverlay, useDropzone } from './DropzoneOverlay';
+
 import { Button } from '../Button';
 import { Card } from '../Card';
+import { DropzoneOverlay, useDropzone } from './DropzoneOverlay';
 
 const meta: Meta<typeof DropzoneOverlay> = {
   title: 'Components/DropzoneOverlay',
@@ -59,7 +60,7 @@ export const Default: Story = {
     (Story) => (
       <div className="border-muted-foreground/25 bg-muted/10 relative h-96 rounded-lg border-2 border-dashed">
         <Story />
-        <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
           <p>Drag files here or click to upload</p>
         </div>
       </div>
@@ -77,7 +78,7 @@ export const Hidden: Story = {
     (Story) => (
       <div className="border-muted-foreground/25 bg-muted/10 relative h-96 rounded-lg border-2 border-dashed">
         <Story />
-        <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
           <p>Overlay is hidden - set isVisible to true to see it</p>
         </div>
       </div>
@@ -145,7 +146,7 @@ function InteractiveDemo() {
           isVisible={isDragging}
           message="Drop files to upload"
         />
-        <div className="text-muted-foreground absolute inset-0 flex flex-col items-center justify-center gap-2">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
           <p className="text-sm">Drag files here or click to upload</p>
           <p className="text-xs">Accepts: Images, PDF, Word documents</p>
         </div>
@@ -168,7 +169,7 @@ function InteractiveDemo() {
               <li key={i} className="flex items-center gap-2">
                 <span className="text-muted-foreground">📄</span>
                 <span>{file.name}</span>
-                <span className="text-muted-foreground text-xs">
+                <span className="text-xs text-muted-foreground">
                   ({(file.size / 1024).toFixed(1)} KB)
                 </span>
               </li>
@@ -225,7 +226,7 @@ function DocumentUploadDemo() {
             <div className="space-y-2">
               <div className="text-4xl">📄</div>
               <p className="font-medium">{file.name}</p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {(file.size / 1024).toFixed(1)} KB
               </p>
               <Button
@@ -241,7 +242,7 @@ function DocumentUploadDemo() {
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="text-muted-foreground text-4xl">📁</div>
+              <div className="text-4xl text-muted-foreground">📁</div>
               <p className="text-muted-foreground">
                 Drop a PDF or Word document here
               </p>
@@ -303,7 +304,7 @@ function ImageGalleryDemo() {
             {images.map((src, i) => (
               <div
                 key={i}
-                className="bg-muted aspect-square overflow-hidden rounded-lg"
+                className="aspect-square overflow-hidden rounded-lg bg-muted"
               >
                 <img
                   src={src}
@@ -312,12 +313,12 @@ function ImageGalleryDemo() {
                 />
               </div>
             ))}
-            <div className="border-muted-foreground/25 text-muted-foreground flex aspect-square items-center justify-center rounded-lg border-2 border-dashed">
+            <div className="border-muted-foreground/25 flex aspect-square items-center justify-center rounded-lg border-2 border-dashed text-muted-foreground">
               <span className="text-2xl">+</span>
             </div>
           </div>
         ) : (
-          <div className="text-muted-foreground flex h-40 flex-col items-center justify-center">
+          <div className="flex h-40 flex-col items-center justify-center text-muted-foreground">
             <div className="mb-2 text-4xl">🖼️</div>
             <p>Drop images here or click to browse</p>
           </div>
@@ -327,7 +328,7 @@ function ImageGalleryDemo() {
       {images.length > 0 && (
         <div className="mt-4 flex gap-2">
           <Button onClick={() => setImages([])}>Clear All</Button>
-          <span className="text-muted-foreground self-center text-sm">
+          <span className="self-center text-sm text-muted-foreground">
             {images.length} image(s) selected
           </span>
         </div>
@@ -382,7 +383,7 @@ function DisabledDemo() {
       >
         <input {...getInputProps()} />
         <DropzoneOverlay isVisible={isDragging} message="Disabled" />
-        <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
           <p>Upload disabled</p>
         </div>
       </div>

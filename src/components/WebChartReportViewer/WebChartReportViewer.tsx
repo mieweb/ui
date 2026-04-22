@@ -1,29 +1,30 @@
 'use client';
 
-import * as React from 'react';
 import { AlertTriangle, Check, Link, RefreshCw } from 'lucide-react';
+import * as React from 'react';
+
 import { cn } from '../../utils';
+import { Alert, AlertDescription, AlertTitle } from '../Alert';
 import { Button } from '../Button';
 import { Card, CardContent } from '../Card';
-import { Alert, AlertDescription, AlertTitle } from '../Alert';
-import { Skeleton } from '../Skeleton';
-import { Spinner } from '../Spinner';
 import { Input } from '../Input';
 import {
   Modal,
-  ModalHeader,
-  ModalTitle,
   ModalBody,
   ModalClose,
+  ModalHeader,
+  ModalTitle,
 } from '../Modal';
 import { Select } from '../Select';
+import { Skeleton } from '../Skeleton';
+import { Spinner } from '../Spinner';
 import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
-  TableHead,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '../Table';
 
 export interface SystemReport {
@@ -233,7 +234,7 @@ export function WebChartReportViewer({
             </Card>
           ))
         ) : (
-          <div className="text-muted-foreground col-span-full py-8 text-center">
+          <div className="col-span-full py-8 text-center text-muted-foreground">
             {noReports}
           </div>
         )}
@@ -266,7 +267,7 @@ export function WebChartReportViewer({
           {/* Date Range */}
           {onDateRangeChange && dateRange && (
             <div className="flex items-center gap-2">
-              <label className="text-muted-foreground text-sm">
+              <label className="text-sm text-muted-foreground">
                 {dateFrom}:
               </label>
               <Input
@@ -278,7 +279,7 @@ export function WebChartReportViewer({
                 }
                 className="w-auto"
               />
-              <label className="text-muted-foreground text-sm">{dateTo}:</label>
+              <label className="text-sm text-muted-foreground">{dateTo}:</label>
               <Input
                 type="date"
                 size="sm"
@@ -306,7 +307,7 @@ export function WebChartReportViewer({
           {loadingReport ? (
             <div className="flex h-64 flex-col items-center justify-center">
               <Spinner size="xl" />
-              <span className="text-muted-foreground mt-4">{loadingData}</span>
+              <span className="mt-4 text-muted-foreground">{loadingData}</span>
             </div>
           ) : reportResult?.error ? (
             <Alert variant="danger" icon={<AlertTriangle />}>
@@ -362,7 +363,7 @@ export function WebChartReportViewer({
                     reportResult.data as Record<string, unknown>
                   ).map(([key, val]) => (
                     <TableRow key={key}>
-                      <TableCell className="text-muted-foreground font-medium">
+                      <TableCell className="font-medium text-muted-foreground">
                         {key}
                       </TableCell>
                       <TableCell>{val == null ? '' : String(val)}</TableCell>
@@ -372,7 +373,7 @@ export function WebChartReportViewer({
               </Table>
             )
           ) : (
-            <div className="text-muted-foreground py-8 text-center">
+            <div className="py-8 text-center text-muted-foreground">
               No data available
             </div>
           )}

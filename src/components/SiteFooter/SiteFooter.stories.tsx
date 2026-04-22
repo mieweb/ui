@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
 import {
-  SiteFooter,
-  SocialMediaLinks,
+  type FooterLinkGroup,
   NewsletterForm,
   SimpleFooter,
-  type FooterLinkGroup,
+  SiteFooter,
   type SocialLink,
+  SocialMediaLinks,
 } from './SiteFooter';
 
 const defaultSocialLinks: SocialLink[] = [
@@ -130,7 +131,7 @@ export const SocialLinksDemo: StoryObj<typeof SocialMediaLinks> = {
 export const NewsletterDemo: StoryObj<typeof NewsletterForm> = {
   render: () => (
     <div className="max-w-md space-y-4 p-4">
-      <div className="bg-primary-600 rounded-lg p-6">
+      <div className="rounded-lg bg-primary-600 p-6">
         <NewsletterForm
           variant="light"
           onSubmit={(email) => window.alert(`Subscribed: ${email}`)}

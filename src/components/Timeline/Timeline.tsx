@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -229,12 +230,12 @@ export function TimelineProgress({
                       'relative z-10 flex items-center justify-center rounded-full transition-all duration-200',
                       state === 'completed' &&
                         cn(
-                          'bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2',
+                          'dark:bg-primary-900/40 bg-primary-100 text-primary-600 ring-2 ring-primary-200 dark:text-primary-400 dark:ring-primary-800',
                           sizes.completed
                         ),
                       state === 'current' &&
                         cn(
-                          'bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4',
+                          'shadow-primary-500/30 dark:ring-primary-900/50 bg-primary-500 text-white shadow-md ring-4 ring-primary-100 dark:bg-primary-500',
                           sizes.current,
                           pulse && 'animate-pulse'
                         ),
@@ -245,7 +246,7 @@ export function TimelineProgress({
                         ),
                       state === 'error' &&
                         cn(
-                          'bg-red-500 text-white shadow-md ring-4 shadow-red-500/30 ring-red-100 dark:bg-red-500 dark:ring-red-900/50',
+                          'bg-red-500 text-white shadow-md shadow-red-500/30 ring-4 ring-red-100 dark:bg-red-500 dark:ring-red-900/50',
                           sizes.error
                         )
                     )}
@@ -418,7 +419,7 @@ export function TimelineEventList({
       {/* Continuous vertical connector line */}
       {events.length > 1 && (
         <div
-          className="absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700"
+          className="absolute bottom-0 left-5 top-0 w-px bg-neutral-200 dark:bg-neutral-700"
           aria-hidden="true"
         />
       )}
@@ -552,7 +553,7 @@ export function OrderConfirmation({
           onClick={onClose}
           className={cn(
             'w-full rounded-lg px-4 py-3 font-medium',
-            'bg-primary-600 hover:bg-primary-700 text-white',
+            'bg-primary-600 text-white hover:bg-primary-700',
             'dark:bg-primary-500 dark:hover:bg-primary-600',
             'transition-colors'
           )}

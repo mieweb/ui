@@ -1,13 +1,14 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import {
   BookingDialog,
-  FloatingInput,
-  ServiceSelect,
-  InlineBookingForm,
-  QuickBookCard,
   type BookingProvider,
   type BookingService,
+  FloatingInput,
+  InlineBookingForm,
+  QuickBookCard,
+  ServiceSelect,
 } from './BookingDialog';
 
 const mockProvider: BookingProvider = {
@@ -48,7 +49,7 @@ function BookingDialogWrapper(args: Story['args']) {
     <div>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white"
+        className="rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-700"
       >
         Open Booking Dialog
       </button>

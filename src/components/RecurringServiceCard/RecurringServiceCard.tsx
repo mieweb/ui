@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils';
 
 export interface RecurringService {
@@ -125,7 +126,7 @@ export function RecurringServiceCard({
     success: {
       border: 'border-success/30',
       icon: (
-        <span className="bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground">
           <svg
             className="h-3 w-3"
             fill="none"
@@ -167,7 +168,7 @@ export function RecurringServiceCard({
     warning: {
       border: 'border-warning/30',
       icon: (
-        <span className="bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warning text-warning-foreground">
           <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" fill="currentColor" />
             <circle cx="12" cy="12" r="4" className="fill-warning" />
@@ -179,7 +180,7 @@ export function RecurringServiceCard({
     error: {
       border: 'border-destructive/30',
       icon: (
-        <span className="bg-destructive text-destructive-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground">
           <svg
             className="h-3 w-3"
             fill="none"
@@ -210,7 +211,7 @@ export function RecurringServiceCard({
   return (
     <div
       className={cn(
-        'bg-card text-card-foreground rounded-xl border-2 shadow-sm',
+        'rounded-xl border-2 bg-card text-card-foreground shadow-sm',
         currentStyle.border,
         isDisabled && 'opacity-50',
         onEdit &&
@@ -245,10 +246,10 @@ export function RecurringServiceCard({
         {/* Provider */}
         {showProvider && service.providerName && (
           <div>
-            <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {provider}
             </span>
-            <div className="bg-muted truncate rounded-md px-3 py-2 text-sm">
+            <div className="truncate rounded-md bg-muted px-3 py-2 text-sm">
               {service.providerName}
             </div>
           </div>
@@ -256,21 +257,21 @@ export function RecurringServiceCard({
 
         {/* Occurrence */}
         <div>
-          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {occurrence}
           </span>
-          <div className="bg-muted rounded-md px-3 py-2 text-sm">
+          <div className="rounded-md bg-muted px-3 py-2 text-sm">
             {getOccurrenceLabel(service.occurrence)}
           </div>
         </div>
 
         {/* Next Order */}
         <div>
-          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {nextOrder}
           </span>
           <div
-            className="bg-muted rounded-md px-3 py-2 text-sm"
+            className="rounded-md bg-muted px-3 py-2 text-sm"
             title={service.nextOrder?.toString()}
           >
             {formatDate(service.nextOrder)}
@@ -285,7 +286,7 @@ export function RecurringServiceCard({
           </div>
         )}
         {effectiveState === 'error' && (
-          <div className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs">
+          <div className="bg-destructive/10 rounded-md px-3 py-2 text-xs text-destructive">
             <i className="fas fa-times-circle mr-1" />
             {consentNote}
           </div>
@@ -299,7 +300,7 @@ export function RecurringServiceCard({
               e.stopPropagation();
               onDelete?.(service);
             }}
-            className="text-muted-foreground hover:text-destructive mx-auto flex items-center gap-1 text-xs transition-colors"
+            className="mx-auto flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
           >
             <svg
               className="h-3 w-3"
@@ -343,7 +344,7 @@ export function RecurringServiceAddCard({
       type="button"
       onClick={onClick}
       className={cn(
-        'text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary border-border bg-muted/50 flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 transition-colors',
+        'hover:border-primary hover:bg-primary/5 hover:text-primary bg-muted/50 flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-4 text-muted-foreground transition-colors',
         className
       )}
     >
@@ -450,7 +451,7 @@ export function RecurringServiceSetupModal({
     <div className="bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center">
       <div
         className={cn(
-          'bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl',
+          'w-full max-w-lg rounded-lg bg-card text-card-foreground shadow-xl',
           className
         )}
       >
@@ -471,7 +472,7 @@ export function RecurringServiceSetupModal({
           {/* Provider Select */}
           {showProviderSelector && (
             <div className="mb-4">
-              <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {provider}
               </label>
               <select
@@ -479,7 +480,7 @@ export function RecurringServiceSetupModal({
                 onChange={(e) =>
                   setFormData({ ...formData, providerId: e.target.value })
                 }
-                className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
+                className="focus:ring-primary w-full rounded-lg border border-input bg-card p-2 focus:outline-none focus:ring-2"
                 required={showProviderSelector}
               >
                 <option value="">Select provider...</option>
@@ -494,7 +495,7 @@ export function RecurringServiceSetupModal({
 
           {/* Service Select */}
           <div className="mb-4">
-            <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {service}
             </label>
             <select
@@ -502,7 +503,7 @@ export function RecurringServiceSetupModal({
               onChange={(e) =>
                 setFormData({ ...formData, serviceId: e.target.value })
               }
-              className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
+              className="focus:ring-primary w-full rounded-lg border border-input bg-card p-2 focus:outline-none focus:ring-2"
               required
             >
               <option value="">Select service...</option>
@@ -516,7 +517,7 @@ export function RecurringServiceSetupModal({
 
           {/* Occurrence Select */}
           <div className="mb-4">
-            <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {occurrence}
             </label>
             <select
@@ -524,7 +525,7 @@ export function RecurringServiceSetupModal({
               onChange={(e) =>
                 setFormData({ ...formData, occurrence: e.target.value })
               }
-              className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
+              className="focus:ring-primary w-full rounded-lg border border-input bg-card p-2 focus:outline-none focus:ring-2"
               required
             >
               <option value="monthly">Monthly</option>
@@ -546,11 +547,11 @@ export function RecurringServiceSetupModal({
                     overrideConsent: e.target.checked,
                   })
                 }
-                className="border-input accent-primary h-4 w-4 rounded"
+                className="accent-primary h-4 w-4 rounded border-input"
               />
               <span className="text-sm">{overrideConsent}</span>
             </label>
-            <p className="text-muted-foreground ml-6 text-xs">
+            <p className="ml-6 text-xs text-muted-foreground">
               {overrideConsentNote}
             </p>
           </div>
@@ -560,14 +561,14 @@ export function RecurringServiceSetupModal({
             <button
               type="button"
               onClick={onClose}
-              className="border-border text-muted-foreground hover:bg-muted rounded-lg border px-4 py-2 transition-colors"
+              className="rounded-lg border border-border px-4 py-2 text-muted-foreground transition-colors hover:bg-muted"
             >
               {cancel}
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-lg px-4 py-2 transition-colors"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 transition-colors disabled:bg-muted disabled:text-muted-foreground"
             >
               {saving ? (
                 <span className="flex items-center gap-2">

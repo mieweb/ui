@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { InvoiceView } from './InvoiceView';
 
 const meta: Meta<typeof InvoiceView> = {

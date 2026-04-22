@@ -1,15 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalBody,
-  ModalFooter,
-} from '../Modal/Modal';
+
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal/Modal';
 import { Select } from '../Select/Select';
 import { Switch } from '../Switch/Switch';
 
@@ -163,13 +164,13 @@ export function SetupServiceModal({
           <div>
             <label
               htmlFor="setup-service-description"
-              className="text-foreground mb-1 block text-sm font-medium"
+              className="mb-1 block text-sm font-medium text-foreground"
             >
               Description
             </label>
             <textarea
               id="setup-service-description"
-              className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
               rows={3}
               value={formData.description}
               onChange={(e) =>
@@ -202,12 +203,12 @@ export function SetupServiceModal({
           <div>
             <label
               htmlFor="setup-service-price"
-              className="text-foreground mb-1 block text-sm font-medium"
+              className="mb-1 block text-sm font-medium text-foreground"
             >
               Base Price
             </label>
             <div className="relative">
-              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                 $
               </span>
               <input
@@ -215,7 +216,7 @@ export function SetupServiceModal({
                 type="number"
                 min="0"
                 step="0.01"
-                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
+                className="w-full rounded-md border border-input bg-background py-2 pl-7 pr-4 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 value={formData.price}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -233,10 +234,10 @@ export function SetupServiceModal({
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-foreground text-sm font-medium">
+                <p className="text-sm font-medium text-foreground">
                   Currently Offered
                 </p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                   Service is available for orders
                 </p>
               </div>
@@ -254,10 +255,10 @@ export function SetupServiceModal({
 
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-foreground text-sm font-medium">
+                <p className="text-sm font-medium text-foreground">
                   Limited Inventory
                 </p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                   Track inventory for this service
                 </p>
               </div>
@@ -274,7 +275,7 @@ export function SetupServiceModal({
             </div>
 
             {formData.limitedInventory && (
-              <div className="border-border ml-4 border-l-2 pl-4">
+              <div className="ml-4 border-l-2 border-border pl-4">
                 <Input
                   label="Initial Inventory"
                   type="number"
@@ -293,10 +294,10 @@ export function SetupServiceModal({
 
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-foreground text-sm font-medium">
+                <p className="text-sm font-medium text-foreground">
                   Auto-Accept Referrals
                 </p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                   Automatically accept incoming referrals
                 </p>
               </div>
@@ -327,7 +328,7 @@ export function SetupServiceModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ml-1 mr-2 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

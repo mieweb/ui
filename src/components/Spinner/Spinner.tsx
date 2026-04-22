@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const spinnerVariants = cva(
@@ -27,8 +28,7 @@ const spinnerVariants = cva(
 );
 
 export interface SpinnerProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof spinnerVariants> {
   /** Accessible label for the spinner */
   label?: string;
@@ -115,7 +115,7 @@ function SpinnerWithLabel({
         className={cn(spinnerVariants({ size, variant }))}
         aria-hidden="true"
       />
-      <span className="text-muted-foreground text-sm">{label}</span>
+      <span className="text-sm text-muted-foreground">{label}</span>
     </div>
   );
 }
@@ -156,11 +156,11 @@ function FullPageSpinner({
       )}
     >
       <Spinner size={size} {...props} />
-      {text && <p className="text-muted-foreground text-sm">{text}</p>}
+      {text && <p className="text-sm text-muted-foreground">{text}</p>}
     </div>
   );
 }
 
 FullPageSpinner.displayName = 'FullPageSpinner';
 
-export { Spinner, SpinnerWithLabel, FullPageSpinner, spinnerVariants };
+export { FullPageSpinner, Spinner, spinnerVariants, SpinnerWithLabel };

@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -167,7 +168,7 @@ export function PaymentMethodCard({
             )}
             aria-hidden="true"
           />
-          <span className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+          <span className="text-xs font-medium uppercase text-gray-600 dark:text-gray-400">
             Credit Card
           </span>
         </div>
@@ -333,7 +334,7 @@ export function PaymentMethodBank({
       <div className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
         <div className="flex items-center gap-2">
           <BankIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <span className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+          <span className="text-xs font-medium uppercase text-gray-600 dark:text-gray-400">
             ACH
           </span>
         </div>
@@ -368,7 +369,7 @@ export function PaymentMethodBank({
           {account.last4}
         </div>
         {account.accountType && (
-          <div className="text-xs text-gray-500 capitalize dark:text-gray-500">
+          <div className="text-xs capitalize text-gray-500 dark:text-gray-500">
             {account.accountType}
           </div>
         )}

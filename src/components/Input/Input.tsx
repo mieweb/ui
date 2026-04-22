@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const inputVariants = cva(
@@ -32,8 +33,7 @@ const inputVariants = cva(
 );
 
 export interface InputProps
-  extends
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
   /** Error message to display below the input */
   error?: string;
@@ -93,13 +93,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={inputId}
             className={cn(
-              'text-foreground text-sm font-medium',
+              'text-sm font-medium text-foreground',
               hideLabel && 'sr-only'
             )}
           >
             {label}
             {required && (
-              <span className="text-destructive ml-1" aria-hidden="true">
+              <span className="ml-1 text-destructive" aria-hidden="true">
                 *
               </span>
             )}
@@ -119,12 +119,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p id={errorId} className="text-destructive text-sm" role="alert">
+          <p id={errorId} className="text-sm text-destructive" role="alert">
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={helperId} className="text-muted-foreground text-sm">
+          <p id={helperId} className="text-sm text-muted-foreground">
             {helperText}
           </p>
         )}

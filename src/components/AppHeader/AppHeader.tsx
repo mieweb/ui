@@ -1,4 +1,6 @@
+import { Search } from 'lucide-react';
 import React, { type ReactNode } from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -184,9 +186,9 @@ export function AppHeaderIconButton({
         'relative rounded-lg p-2 transition-colors',
         'text-gray-500 dark:text-gray-400',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         isActive &&
-          'text-primary-600 dark:text-primary-400 bg-gray-100 dark:bg-gray-800',
+          'bg-gray-100 text-primary-600 dark:bg-gray-800 dark:text-primary-400',
         className
       )}
       aria-label={label}
@@ -196,7 +198,7 @@ export function AppHeaderIconButton({
       {typeof badge === 'number' && badge > 0 && (
         <span
           className={cn(
-            'absolute -top-1 -right-1 flex items-center justify-center',
+            'absolute -right-1 -top-1 flex items-center justify-center',
             'h-[18px] min-w-[18px] px-1 text-[10px] font-bold',
             'rounded-full bg-red-500 text-white'
           )}
@@ -225,21 +227,7 @@ export interface AppHeaderSearchProps {
   'data-testid'?: string;
 }
 
-const SearchIcon = () => (
-  <svg
-    className="h-5 w-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-    />
-  </svg>
-);
+const SearchIcon = () => <Search className="h-5 w-5" aria-hidden="true" />;
 
 /** Check if running on Mac */
 const isMac =
@@ -269,7 +257,7 @@ export function AppHeaderSearch({
       )}
     >
       <SearchIcon />
-      <span className="flex-1 text-left whitespace-nowrap">{placeholder}</span>
+      <span className="flex-1 whitespace-nowrap text-left">{placeholder}</span>
       <kbd
         className={cn(
           'hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex',
@@ -332,7 +320,7 @@ export function AppHeaderUserMenu({
       className={cn(
         'flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         isOpen && 'bg-gray-100 dark:bg-gray-800',
         className
       )}
@@ -341,7 +329,7 @@ export function AppHeaderUserMenu({
       <div
         className={cn(
           'flex h-8 w-8 items-center justify-center overflow-hidden rounded-full',
-          'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 text-sm font-medium'
+          'bg-primary-100 text-sm font-medium text-primary-900 dark:bg-primary-900 dark:text-primary-100'
         )}
       >
         {avatarUrl ? (

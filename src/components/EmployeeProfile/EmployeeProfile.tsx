@@ -1,19 +1,20 @@
+import {
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Edit2,
+  Mail,
+  MapPin,
+  Phone,
+  X,
+} from 'lucide-react';
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
-import {
-  ChevronDown,
-  ChevronUp,
-  Phone,
-  Mail,
-  MapPin,
-  Calendar,
-  Check,
-  X,
-  Clock,
-  Edit2,
-} from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -174,7 +175,7 @@ export function EmployeeProfileCard({
   };
 
   return (
-    <div className={cn('bg-card rounded-lg', className)}>
+    <div className={cn('rounded-lg bg-card', className)}>
       {/* Profile Header */}
       <div className="flex flex-col items-center p-4 text-center">
         {/* Avatar with optional edit */}
@@ -198,7 +199,7 @@ export function EmployeeProfileCard({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 rounded-full p-1.5 shadow-md transition-colors"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 absolute bottom-0 right-0 rounded-full p-1.5 shadow-md transition-colors"
                 aria-label="Edit photo"
               >
                 <Edit2 className="h-3 w-3" />
@@ -231,7 +232,7 @@ export function EmployeeProfileCard({
 
         {/* Title and Company */}
         <p
-          className="text-muted-foreground text-sm"
+          className="text-sm text-muted-foreground"
           data-cy="paragraph-employee-title"
         >
           {employee.title && <span>{employee.title}</span>}
@@ -276,9 +277,9 @@ export function EmployeeProfileCard({
               className="flex items-center gap-2"
               data-cy="header-employee-dob"
             >
-              <Calendar className="text-muted-foreground h-4 w-4" />
+              <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>{formatDate(employee.dateOfBirth)}</span>
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 ({calculateAge(employee.dateOfBirth)} {yearsOld})
               </span>
             </div>
@@ -292,7 +293,7 @@ export function EmployeeProfileCard({
                 className="flex items-center gap-2"
                 data-cy="header-employee-phone-number"
               >
-                <Phone className="text-muted-foreground h-4 w-4" />
+                <Phone className="h-4 w-4 text-muted-foreground" />
                 <a href={`tel:${p.number}`} className="hover:underline">
                   {formatPhoneNumber(p.number)}
                 </a>
@@ -307,7 +308,7 @@ export function EmployeeProfileCard({
               className="flex items-center gap-2"
               data-cy="header-employee-email"
             >
-              <Mail className="text-muted-foreground h-4 w-4" />
+              <Mail className="h-4 w-4 text-muted-foreground" />
               <a href={`mailto:${employee.email}`} className="hover:underline">
                 {employee.email}
               </a>
@@ -333,12 +334,12 @@ export function EmployeeProfileCard({
             >
               {employee.isPaid ? (
                 <>
-                  <Check className="text-success h-4 w-4" />
+                  <Check className="h-4 w-4 text-success" />
                   <span className="text-success">{paid}</span>
                 </>
               ) : (
                 <>
-                  <Clock className="text-muted-foreground h-4 w-4" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                   <span>{paymentPending}</span>
                 </>
               )}
@@ -351,7 +352,7 @@ export function EmployeeProfileCard({
               className="flex items-start gap-2"
               data-cy="div-employee-address"
             >
-              <MapPin className="text-muted-foreground mt-0.5 h-4 w-4" />
+              <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <span className="whitespace-pre-line">
                 {formatAddress(employee.address)}
               </span>
@@ -450,10 +451,10 @@ export function OrderSidebarTabs({
           data-cy={tab.dataCy}
           className={cn(
             'px-4 py-2 text-sm font-medium transition-colors',
-            'focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             activeTab === tab.id
               ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           )}
         >
           {tab.label}

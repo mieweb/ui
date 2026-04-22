@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent } from '../Card/Card';
@@ -273,7 +274,7 @@ export function InvoiceView({
                 </h2>
               )}
               {invoice.providerAddress && (
-                <p className="text-sm whitespace-pre-line text-gray-600 dark:text-gray-400">
+                <p className="whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">
                   {invoice.providerAddress}
                 </p>
               )}
@@ -316,14 +317,14 @@ export function InvoiceView({
 
           {/* Bill To */}
           <div className="mb-8">
-            <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
+            <p className="mb-1 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
               Bill To
             </p>
             <p className="font-medium text-gray-900 dark:text-white">
               {invoice.employerName}
             </p>
             {invoice.employerAddress && (
-              <p className="text-sm whitespace-pre-line text-gray-600 dark:text-gray-400">
+              <p className="whitespace-pre-line text-sm text-gray-600 dark:text-gray-400">
                 {invoice.employerAddress}
               </p>
             )}
@@ -339,16 +340,16 @@ export function InvoiceView({
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                     Description
                   </th>
-                  <th className="hidden px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+                  <th className="hidden px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400 sm:table-cell">
                     Qty
                   </th>
-                  <th className="hidden px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+                  <th className="hidden px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400 sm:table-cell">
                     Unit Price
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                     Total
                   </th>
                 </tr>
@@ -367,10 +368,10 @@ export function InvoiceView({
                         </p>
                       )}
                     </td>
-                    <td className="hidden px-4 py-3 text-center text-gray-700 sm:table-cell dark:text-gray-300">
+                    <td className="hidden px-4 py-3 text-center text-gray-700 dark:text-gray-300 sm:table-cell">
                       {item.quantity}
                     </td>
-                    <td className="hidden px-4 py-3 text-right text-gray-700 sm:table-cell dark:text-gray-300">
+                    <td className="hidden px-4 py-3 text-right text-gray-700 dark:text-gray-300 sm:table-cell">
                       {formatCurrency(item.unitPrice)}
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
@@ -419,7 +420,7 @@ export function InvoiceView({
             <div className="mt-8 space-y-4 border-t border-gray-200 pt-6 dark:border-gray-700">
               {invoice.paymentTerms && (
                 <div>
-                  <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
+                  <p className="mb-1 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
                     Payment Terms
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -429,10 +430,10 @@ export function InvoiceView({
               )}
               {invoice.notes && (
                 <div>
-                  <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
+                  <p className="mb-1 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
                     Notes
                   </p>
-                  <p className="text-sm whitespace-pre-line text-gray-700 dark:text-gray-300">
+                  <p className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">
                     {invoice.notes}
                   </p>
                 </div>

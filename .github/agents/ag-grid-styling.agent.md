@@ -40,8 +40,8 @@ AG Grid provides a comprehensive theming system built around **themes**, **param
 import { themeQuartz, themeBalham, themeMaterial } from 'ag-grid-community';
 
 const gridOptions = {
-    theme: themeQuartz,
-    // ... other options
+  theme: themeQuartz,
+  // ... other options
 };
 ```
 
@@ -49,8 +49,8 @@ const gridOptions = {
 
 ```typescript
 const gridOptions = {
-    theme: themeQuartz,
-    loadThemeGoogleFonts: true, // Automatically loads theme fonts from Google CDN
+  theme: themeQuartz,
+  loadThemeGoogleFonts: true, // Automatically loads theme fonts from Google CDN
 };
 ```
 
@@ -61,6 +61,7 @@ const gridOptions = {
 Parameters follow a suffix-based type system for validation and IDE support:
 
 #### Length Values
+
 - **Suffixes**: Width, Height, Padding, Spacing (or no suffix)
 - **Supported values**:
   ```typescript
@@ -73,6 +74,7 @@ Parameters follow a suffix-based type system for validation and IDE support:
   ```
 
 #### Color Values
+
 - **Suffix**: Color
 - **Supported values**:
   ```typescript
@@ -85,6 +87,7 @@ Parameters follow a suffix-based type system for validation and IDE support:
   ```
 
 #### Border Values
+
 - **Suffix**: Border
 - **Supported values**:
   ```typescript
@@ -103,26 +106,29 @@ Parameters follow a suffix-based type system for validation and IDE support:
 ### Key Parameters for Design Systems
 
 #### Core Colors
+
 ```typescript
 const myTheme = themeQuartz.withParams({
-  backgroundColor: 'rgb(249, 245, 227)',    // Page background
-  foregroundColor: 'rgb(126, 46, 132)',     // Text color
-  accentColor: '#2196F3',                   // Brand/highlight color
-  borderColor: 'rgba(0, 0, 0, 0.12)',      // Default border color
+  backgroundColor: 'rgb(249, 245, 227)', // Page background
+  foregroundColor: 'rgb(126, 46, 132)', // Text color
+  accentColor: '#2196F3', // Brand/highlight color
+  borderColor: 'rgba(0, 0, 0, 0.12)', // Default border color
 });
 ```
 
 #### Layout & Spacing
+
 ```typescript
 const myTheme = themeQuartz.withParams({
-  spacing: 8,                               // Base spacing unit
-  rowHeight: '48px',                        // Fixed row height
-  headerHeight: '56px',                     // Header height
-  rowVerticalPaddingScale: 1.2,             // Scale padding
+  spacing: 8, // Base spacing unit
+  rowHeight: '48px', // Fixed row height
+  headerHeight: '56px', // Header height
+  rowVerticalPaddingScale: 1.2, // Scale padding
 });
 ```
 
 #### Typography
+
 ```typescript
 const myTheme = themeQuartz.withParams({
   fontFamily: ['Inter', 'system-ui', 'sans-serif'],
@@ -145,22 +151,23 @@ const myTheme = themeQuartz.withParams({
 Parts are modular components that handle specific features:
 
 ```typescript
-import { 
-  themeQuartz, 
-  colorSchemeDark, 
+import {
+  themeQuartz,
+  colorSchemeDark,
   iconSetMaterial,
-  inputStyleUnderlined 
+  inputStyleUnderlined,
 } from 'ag-grid-community';
 
 const myTheme = themeQuartz
-  .withPart(colorSchemeDark)        // Dark color scheme
-  .withPart(iconSetMaterial)        // Material icons
-  .withPart(inputStyleUnderlined);  // Material-style inputs
+  .withPart(colorSchemeDark) // Dark color scheme
+  .withPart(iconSetMaterial) // Material icons
+  .withPart(inputStyleUnderlined); // Material-style inputs
 ```
 
 ### Available Parts by Feature
 
 #### Color Schemes
+
 - `colorSchemeVariable` - Default, mode-responsive
 - `colorSchemeLight` - Neutral light
 - `colorSchemeLightWarm`/`colorSchemeLightCold` - Tinted light schemes
@@ -168,17 +175,20 @@ const myTheme = themeQuartz
 - `colorSchemeDarkBlue` - Blue-tinted dark (used on AG Grid website)
 
 #### Icon Sets
+
 - `iconSetQuartz` - Default icons (customizable stroke width)
 - `iconSetMaterial` - Material Design icons
 - `iconSetAlpine` - Alpine theme icons
 - `iconSetBalham` - Balham theme icons
 
 #### Input Styles
+
 - `inputStyleBase` - Unstyled base
 - `inputStyleBordered` - Bordered inputs
 - `inputStyleUnderlined` - Material Design style
 
 #### Button & UI Styles
+
 - `buttonStyleQuartz`, `buttonStyleAlpine`, `buttonStyleBalham`
 - `tabStyleQuartz`, `tabStyleMaterial`, `tabStyleRolodex`
 - `checkboxStyleDefault`
@@ -202,7 +212,7 @@ const customCheckboxPart = createPart({
     .ag-checkbox-input-wrapper.ag-checked {
       background-color: var(--ag-checkbox-selected-color);
     }
-  `
+  `,
 });
 ```
 
@@ -238,7 +248,7 @@ All theme parameters are implemented as CSS custom properties with `--ag-` prefi
   --primary-color: #2196f3;
   --text-color: #333;
   --spacing-unit: 8px;
-  
+
   /* Map to AG Grid variables */
   --ag-accent-color: var(--primary-color);
   --ag-foreground-color: var(--text-color);
@@ -305,12 +315,12 @@ Target grid elements using CSS class selectors:
     --ag-spacing: 12px;
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
+
   /* Tablet adjustments */
   @media (min-width: 769px) and (max-width: 1024px) {
     --ag-spacing: 10px;
   }
-  
+
   /* Desktop optimizations */
   @media (min-width: 1025px) {
     --ag-spacing: 8px;
@@ -319,8 +329,8 @@ Target grid elements using CSS class selectors:
 
 /* Hide/show columns based on screen size */
 @media (max-width: 768px) {
-  .ag-theme-quartz .ag-header-cell[col-id="description"],
-  .ag-theme-quartz .ag-cell[col-id="description"] {
+  .ag-theme-quartz .ag-header-cell[col-id='description'],
+  .ag-theme-quartz .ag-cell[col-id='description'] {
     display: none;
   }
 }
@@ -341,16 +351,22 @@ Use `data-ag-theme-mode` attribute for dynamic theme switching:
 ```typescript
 // Custom theme modes
 const myTheme = themeQuartz
-  .withParams({
-    backgroundColor: '#ffffff',
-    foregroundColor: '#333333',
-    accentColor: '#2196f3',
-  }, 'light')
-  .withParams({
-    backgroundColor: '#1a1a1a',
-    foregroundColor: '#ffffff',
-    accentColor: '#64b5f6',
-  }, 'dark');
+  .withParams(
+    {
+      backgroundColor: '#ffffff',
+      foregroundColor: '#333333',
+      accentColor: '#2196f3',
+    },
+    'light'
+  )
+  .withParams(
+    {
+      backgroundColor: '#1a1a1a',
+      foregroundColor: '#ffffff',
+      accentColor: '#64b5f6',
+    },
+    'dark'
+  );
 ```
 
 ```javascript
@@ -368,20 +384,20 @@ const designSystemTheme = themeQuartz.withParams({
   backgroundColor: 'var(--ds-surface-primary)',
   foregroundColor: 'var(--ds-text-primary)',
   accentColor: 'var(--ds-color-primary)',
-  
+
   // Semantic colors
   dataBackgroundColor: 'var(--ds-surface-secondary)',
   headerBackgroundColor: 'var(--ds-surface-elevated)',
-  
+
   // Interactive states
   cellHoverBackgroundColor: 'var(--ds-surface-hover)',
   rowHoverBackgroundColor: 'var(--ds-surface-hover)',
   selectedBackgroundColor: 'var(--ds-surface-selected)',
-  
+
   // Borders and dividers
   borderColor: 'var(--ds-border-default)',
   headerColumnBorder: 'var(--ds-border-subtle)',
-  
+
   // Status colors
   invalidColor: 'var(--ds-color-error)',
   successColor: 'var(--ds-color-success)',
@@ -398,18 +414,18 @@ const headerTheme = themeQuartz.withParams({
   // Header dimensions
   headerHeight: '56px',
   headerVerticalPaddingScale: 1.5,
-  
+
   // Header colors
   headerBackgroundColor: '#f5f5f5',
   headerTextColor: '#333',
   headerCellHoverBackgroundColor: 'rgba(0, 0, 0, 0.05)',
-  
+
   // Header borders and separators
   headerColumnBorder: { width: 1, style: 'solid', color: '#e0e0e0' },
   headerColumnBorderHeight: '60%',
   headerColumnResizeHandleColor: '#2196f3',
   headerColumnResizeHandleWidth: '3px',
-  
+
   // Header typography
   headerFontWeight: '600',
   headerFontSize: '14px',
@@ -521,23 +537,23 @@ const headerTheme = themeQuartz.withParams({
 import { iconSetMaterial, iconOverrides } from 'ag-grid-community';
 
 // Use Material Design icons
-const materialTheme = themeQuartz
-  .withPart(iconSetMaterial)
-  .withParams({
-    iconSize: 18, // Material icons work best at 18, 24, 36, 48px
-  });
+const materialTheme = themeQuartz.withPart(iconSetMaterial).withParams({
+  iconSize: 18, // Material icons work best at 18, 24, 36, 48px
+});
 
 // Custom icon font integration
 const fontAwesomeIcons = iconOverrides({
   type: 'font',
   family: 'Font Awesome 6 Pro',
-  cssImports: ['https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'],
+  cssImports: [
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+  ],
   weight: '900',
   icons: {
-    asc: '\uf0de',      // fa-sort-up
-    desc: '\uf0dd',     // fa-sort-down
-    filter: '\uf0b0',   // fa-filter
-    menu: '\uf0c9',     // fa-bars
+    asc: '\uf0de', // fa-sort-up
+    desc: '\uf0dd', // fa-sort-down
+    filter: '\uf0b0', // fa-filter
+    menu: '\uf0c9', // fa-bars
   },
 });
 ```
@@ -552,7 +568,7 @@ const svgIconOverrides = iconOverrides({
     filter: {
       svg: `<svg viewBox="0 0 24 24">
         <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
-      </svg>`
+      </svg>`,
     },
     // Add more icons as needed
   },
@@ -599,10 +615,10 @@ AG Grid uses DOM virtualisation to render only visible elements:
 ```typescript
 const gridOptions = {
   // Virtualization settings
-  rowBuffer: 10,                          // Render extra rows for smooth scrolling
+  rowBuffer: 10, // Render extra rows for smooth scrolling
   suppressMaxRenderedRowRestriction: true, // Remove 500 row limit if needed
-  suppressColumnVirtualisation: false,     // Keep column virtualization
-  suppressRowVirtualisation: false,       // Keep row virtualization
+  suppressColumnVirtualisation: false, // Keep column virtualization
+  suppressRowVirtualisation: false, // Keep row virtualization
 };
 ```
 
@@ -643,7 +659,11 @@ const gridOptions = {
 
 ```typescript
 // Create minimal theme for smaller bundle size
-import { createTheme, colorSchemeLight, iconSetQuartz } from 'ag-grid-community';
+import {
+  createTheme,
+  colorSchemeLight,
+  iconSetQuartz,
+} from 'ag-grid-community';
 
 const minimalTheme = createTheme()
   .withPart(colorSchemeLight)
@@ -664,14 +684,19 @@ const minimalTheme = createTheme()
 }
 
 @keyframes flash {
-  0% { background-color: rgba(76, 175, 80, 0.3); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: rgba(76, 175, 80, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 ```
 
 ## Enterprise vs Community Styling
 
 ### Community Features (Free)
+
 - All core theming capabilities
 - Theme parameters and parts
 - CSS customization
@@ -680,6 +705,7 @@ const minimalTheme = createTheme()
 - Basic cell and header styling
 
 ### Enterprise Features (Licensed)
+
 - **Advanced Tool Panels**: Column and filter tool panel styling
 - **Context Menus**: Enterprise context menu theming
 - **Master/Detail**: Nested grid styling
@@ -732,6 +758,7 @@ const minimalTheme = createTheme()
 ### Browser Support
 
 AG Grid themes support all modern browsers:
+
 - Chrome 70+
 - Firefox 63+
 - Safari 12+
@@ -744,11 +771,11 @@ AG Grid themes support all modern browsers:
 .ag-theme-quartz {
   /* CSS Grid for layout */
   display: grid;
-  grid-template-areas: "header header" "sidebar content";
-  
+  grid-template-areas: 'header header' 'sidebar content';
+
   /* CSS Custom Properties */
   --ag-spacing: 8px;
-  
+
   /* Flexbox for component alignment */
 }
 
@@ -767,24 +794,24 @@ AG Grid themes support all modern browsers:
     --ag-row-height: 56px;
     --ag-header-height: 64px;
   }
-  
+
   /* Fallback media queries */
   @media (max-width: 600px) {
     --ag-row-height: 56px;
     --ag-header-height: 64px;
-    
+
     /* Hide less important columns */
-    .ag-header-cell[col-id="description"],
-    .ag-cell[col-id="description"] {
+    .ag-header-cell[col-id='description'],
+    .ag-cell[col-id='description'] {
       display: none;
     }
-    
+
     /* Stack filter controls */
     .ag-filter-panel {
       flex-direction: column;
     }
   }
-  
+
   /* High DPI displays */
   @media (-webkit-min-device-pixel-ratio: 2) {
     /* Adjust for retina displays */
@@ -802,13 +829,13 @@ AG Grid themes support all modern browsers:
     --ag-row-height: 48px;
     --ag-header-height: 56px;
     --ag-spacing: 12px;
-    
+
     /* Larger touch targets */
     .ag-checkbox-input-wrapper {
       width: 20px;
       height: 20px;
     }
-    
+
     /* Easier scrolling */
     .ag-body-viewport {
       -webkit-overflow-scrolling: touch;
@@ -870,10 +897,10 @@ import { AgGridReact } from 'ag-grid-react';
 
 const StyledGridWrapper = styled.div`
   .ag-theme-quartz {
-    --ag-accent-color: ${props => props.theme.colors.primary};
-    --ag-background-color: ${props => props.theme.colors.surface};
-    --ag-foreground-color: ${props => props.theme.colors.onSurface};
-    --ag-spacing: ${props => props.theme.spacing.sm};
+    --ag-accent-color: ${(props) => props.theme.colors.primary};
+    --ag-background-color: ${(props) => props.theme.colors.surface};
+    --ag-foreground-color: ${(props) => props.theme.colors.onSurface};
+    --ag-spacing: ${(props) => props.theme.spacing.sm};
   }
 `;
 
@@ -904,26 +931,26 @@ interface DataGridProps {
   // ... other props
 }
 
-export const DataGrid: React.FC<DataGridProps> = ({ 
+export const DataGrid: React.FC<DataGridProps> = ({
   variant = 'default',
   colorScheme = 'light',
-  ...props 
+  ...props
 }) => {
   const theme = useMemo(() => {
     let baseTheme = appGridTheme;
-    
+
     // Apply variant
     if (variant === 'compact') {
       baseTheme = baseTheme.withParams({ spacing: 4, rowHeight: '32px' });
     } else if (variant === 'comfortable') {
       baseTheme = baseTheme.withParams({ spacing: 12, rowHeight: '56px' });
     }
-    
+
     // Apply color scheme
     if (colorScheme === 'dark') {
       baseTheme = baseTheme.withPart(colorSchemeDark);
     }
-    
+
     return baseTheme;
   }, [variant, colorScheme]);
 
@@ -979,8 +1006,12 @@ themes/
 }
 
 /* 4. Utility classes */
-.grid-compact { --ag-spacing: 4px; }
-.grid-comfortable { --ag-spacing: 12px; }
+.grid-compact {
+  --ag-spacing: 4px;
+}
+.grid-comfortable {
+  --ag-spacing: 12px;
+}
 ```
 
 ### Development Workflow
@@ -1001,12 +1032,12 @@ export const themeTestUtils = {
   checkContrast: (backgroundColor: string, textColor: string) => {
     // Implementation for WCAG compliance testing
   },
-  
+
   // Validate responsive breakpoints
   testResponsiveness: (theme: Theme) => {
     // Test theme at different viewport sizes
   },
-  
+
   // Performance benchmarking
   measureRenderTime: (gridOptions: GridOptions) => {
     // Measure initial render and scroll performance
@@ -1056,56 +1087,62 @@ export const themeTestUtils = {
 AG Grid's theming system provides comprehensive tools for design system integration through its three-pillar approach: **themes**, **parameters**, and **parts**. By leveraging CSS custom properties, modular parts system, and extensive customization options, you can create consistent, maintainable, and performant data grid experiences that align perfectly with your design system.
 
 The key to successful implementation is starting with the appropriate built-in theme, mapping your design tokens to AG Grid parameters, and progressively enhancing with custom CSS while respecting the grid's architecture and performance characteristics.
+
 - `--mieweb-shadow-card` - Card shadow
 
 ### Tailwind Preset Mappings
 
 The `tailwind-preset.ts` maps CSS variables to Tailwind classes:
 
-| Tailwind Class | CSS Variable |
-|---------------|--------------|
-| `primary-500` | `var(--mieweb-primary-500)` |
+| Tailwind Class  | CSS Variable                  |
+| --------------- | ----------------------------- |
+| `primary-500`   | `var(--mieweb-primary-500)`   |
 | `secondary-500` | `var(--mieweb-secondary-500)` |
-| `neutral-500` | `var(--mieweb-neutral-500)` |
-| `rounded-lg` | `var(--mieweb-radius-lg)` |
-| `rounded-2xl` | `var(--mieweb-radius-2xl)` |
-| `font-sans` | `var(--mieweb-font-sans)` |
+| `neutral-500`   | `var(--mieweb-neutral-500)`   |
+| `rounded-lg`    | `var(--mieweb-radius-lg)`     |
+| `rounded-2xl`   | `var(--mieweb-radius-2xl)`    |
+| `font-sans`     | `var(--mieweb-font-sans)`     |
 
 ## What to Flag as Issues
 
 ### ❌ Hardcoded Colors (BAD)
+
 ```tsx
 // These bypass the branding system:
-className="bg-violet-500"           // Hardcoded violet
-className="bg-purple-600"           // Hardcoded purple  
-className="bg-blue-500"             // Hardcoded blue
-className="text-indigo-600"         // Hardcoded indigo
-className="from-violet-500 to-purple-600"  // Hardcoded gradients
+className = 'bg-violet-500'; // Hardcoded violet
+className = 'bg-purple-600'; // Hardcoded purple
+className = 'bg-blue-500'; // Hardcoded blue
+className = 'text-indigo-600'; // Hardcoded indigo
+className = 'from-violet-500 to-purple-600'; // Hardcoded gradients
 ```
 
 ### ✅ Brand-Aware Colors (GOOD)
+
 ```tsx
 // These respect the active brand:
-className="bg-primary-500"          // Uses brand primary
-className="text-primary-600"        // Uses brand primary
-className="bg-secondary-500"        // Uses brand secondary
-className="text-neutral-700"        // Uses brand neutral
+className = 'bg-primary-500'; // Uses brand primary
+className = 'text-primary-600'; // Uses brand primary
+className = 'bg-secondary-500'; // Uses brand secondary
+className = 'text-neutral-700'; // Uses brand neutral
 ```
 
 ### Exceptions - Semantic Colors (OKAY)
+
 These are intentionally hardcoded for consistent meaning across brands:
+
 - `bg-red-*`, `text-red-*` - Error/danger states
-- `bg-green-*`, `text-green-*` - Success states  
+- `bg-green-*`, `text-green-*` - Success states
 - `bg-amber-*`, `bg-yellow-*` - Warning states
 - `bg-neutral-*` - Only if specifically for UI chrome, not brand expression
 
 ### Border Radius Issues
+
 ```tsx
 // Check if these use brand radius variables:
-className="rounded-lg"   // ✅ Mapped to --mieweb-radius-lg
-className="rounded-2xl"  // ✅ Mapped to --mieweb-radius-2xl
-className="rounded-full" // ✅ OK for circular elements (avatars, pills)
-className="rounded-[20px]" // ❌ Hardcoded - should use brand token
+className = 'rounded-lg'; // ✅ Mapped to --mieweb-radius-lg
+className = 'rounded-2xl'; // ✅ Mapped to --mieweb-radius-2xl
+className = 'rounded-full'; // ✅ OK for circular elements (avatars, pills)
+className = 'rounded-[20px]'; // ❌ Hardcoded - should use brand token
 ```
 
 ## Audit Process
@@ -1139,25 +1176,26 @@ When reporting issues, use this format:
 
 **File:** `src/components/ComponentName/ComponentName.tsx`
 
-| Line | Issue | Current | Recommended |
-|------|-------|---------|-------------|
-| 45 | Hardcoded color | `bg-violet-500` | `bg-primary-500` |
-| 67 | Hardcoded gradient | `from-violet-500 to-purple-600` | `bg-primary-500` |
+| Line | Issue              | Current                         | Recommended      |
+| ---- | ------------------ | ------------------------------- | ---------------- |
+| 45   | Hardcoded color    | `bg-violet-500`                 | `bg-primary-500` |
+| 67   | Hardcoded gradient | `from-violet-500 to-purple-600` | `bg-primary-500` |
 
 **Summary:**
+
 - ✅ Border radius: Using brand tokens correctly
 - ❌ Colors: 2 hardcoded colors found
 - ✅ Typography: Using font-sans correctly
 
 ## Brand Reference
 
-| Brand | Primary Color | Example |
-|-------|---------------|---------|
-| BlueHive | Blue `#27aae1` | Healthcare/Medical |
-| MIEWeb | Purple | Enterprise |
-| WebChart | Blue | Clinical |
-| Enterprise Health | Teal | Corporate |
-| Waggleline | Orange | Consumer |
+| Brand             | Primary Color  | Example            |
+| ----------------- | -------------- | ------------------ |
+| BlueHive          | Blue `#27aae1` | Healthcare/Medical |
+| MIEWeb            | Purple         | Enterprise         |
+| WebChart          | Blue           | Clinical           |
+| Enterprise Health | Teal           | Corporate          |
+| Waggleline        | Orange         | Consumer           |
 
 ## Key Files to Reference
 

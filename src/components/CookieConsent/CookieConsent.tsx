@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -45,9 +46,8 @@ const bannerVariants = cva(
 // CookieConsentBanner Component
 // =============================================================================
 
-export interface CookieConsentBannerProps extends VariantProps<
-  typeof bannerVariants
-> {
+export interface CookieConsentBannerProps
+  extends VariantProps<typeof bannerVariants> {
   /** Whether the banner is visible */
   isVisible?: boolean;
   /** Callback when user accepts cookies */
@@ -243,7 +243,7 @@ export function CookieConsentBanner({
               className={cn(
                 'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                 variant === 'default'
-                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
+                  ? 'bg-primary-600 text-white hover:bg-primary-700'
                   : 'bg-white text-gray-900 hover:bg-gray-100'
               )}
             >
@@ -284,7 +284,7 @@ export function CompactCookieBanner({
       role="dialog"
       aria-label="Cookie consent"
       className={cn(
-        'fixed right-4 bottom-4 left-4 md:right-4 md:left-auto md:max-w-sm',
+        'fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm',
         'z-50 rounded-lg bg-gray-900 p-4 text-white shadow-xl',
         className
       )}

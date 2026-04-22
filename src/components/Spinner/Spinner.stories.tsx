@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Spinner, SpinnerWithLabel } from './Spinner';
+
 import { Button } from '../Button';
+import { Spinner, SpinnerWithLabel } from './Spinner';
 
 const meta: Meta<typeof Spinner> = {
   title: 'Components/Spinner',
@@ -80,12 +81,12 @@ export const InsideButton: Story = {
 
 export const FullPage: Story = {
   render: () => (
-    <div className="border-border relative h-[300px] w-[400px] overflow-hidden rounded-lg border">
-      <p className="text-muted-foreground p-4">Content behind the spinner...</p>
+    <div className="relative h-[300px] w-[400px] overflow-hidden rounded-lg border border-border">
+      <p className="p-4 text-muted-foreground">Content behind the spinner...</p>
       <div className="bg-background/80 absolute inset-0 flex items-center justify-center backdrop-blur-sm">
         <div className="flex flex-col items-center gap-4">
           <Spinner size="xl" />
-          <p className="text-muted-foreground text-sm">Loading your data...</p>
+          <p className="text-sm text-muted-foreground">Loading your data...</p>
         </div>
       </div>
     </div>
@@ -94,7 +95,7 @@ export const FullPage: Story = {
 
 export const InlineLoading: Story = {
   render: () => (
-    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
       <Spinner size="sm" variant="muted" />
       <span>Saving your changes...</span>
     </div>
@@ -103,11 +104,11 @@ export const InlineLoading: Story = {
 
 export const LoadingCard: Story = {
   render: () => (
-    <div className="border-border bg-card flex w-80 flex-col items-center gap-4 rounded-xl border p-8">
+    <div className="flex w-80 flex-col items-center gap-4 rounded-xl border border-border bg-card p-8">
       <Spinner size="lg" />
       <div className="text-center">
         <h3 className="font-semibold">Loading Data</h3>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Please wait while we fetch your information
         </p>
       </div>

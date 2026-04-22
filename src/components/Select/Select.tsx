@@ -1,8 +1,9 @@
+import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../../utils/cn';
+
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { cn } from '../../utils/cn';
 
 // ============================================================================
 // Types
@@ -62,9 +63,8 @@ const selectTriggerVariants = cva(
 // Select Component
 // ============================================================================
 
-export interface SelectProps extends VariantProps<
-  typeof selectTriggerVariants
-> {
+export interface SelectProps
+  extends VariantProps<typeof selectTriggerVariants> {
   /** Array of options or groups */
   options: (SelectOption | SelectGroup)[];
   /** Controlled value */
@@ -346,7 +346,7 @@ function Select({
         <label
           htmlFor={selectId}
           className={cn(
-            'text-foreground text-sm font-medium',
+            'text-sm font-medium text-foreground',
             hideLabel && 'sr-only'
           )}
         >
@@ -383,7 +383,7 @@ function Select({
           </span>
           <ChevronDownIcon
             className={cn(
-              'text-muted-foreground h-4 w-4 shrink-0 transition-transform',
+              'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
               isOpen && 'rotate-180'
             )}
           />
@@ -396,13 +396,13 @@ function Select({
               ref={dropdownRef}
               style={dropdownStyle}
               className={cn(
-                'border-border bg-card rounded-lg border shadow-lg',
+                'rounded-lg border border-border bg-card shadow-lg',
                 'animate-in fade-in zoom-in-95 duration-100'
               )}
             >
               {/* Search Input */}
               {searchable && (
-                <div className="border-border border-b p-2">
+                <div className="border-b border-border p-2">
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -411,9 +411,9 @@ function Select({
                     onKeyDown={handleKeyDown}
                     placeholder={searchPlaceholder}
                     className={cn(
-                      'border-input bg-background w-full rounded-md border px-3 py-2 text-sm',
+                      'w-full rounded-md border border-input bg-background px-3 py-2 text-sm',
                       'placeholder:text-muted-foreground',
-                      'focus:ring-ring focus:ring-2 focus:outline-none'
+                      'focus:outline-none focus:ring-2 focus:ring-ring'
                     )}
                     aria-label="Search options"
                   />
@@ -429,7 +429,7 @@ function Select({
                 className="max-h-60 overflow-auto p-1"
               >
                 {filteredFlatOptions.length === 0 ? (
-                  <li className="text-muted-foreground px-3 py-2 text-center text-sm">
+                  <li className="px-3 py-2 text-center text-sm text-muted-foreground">
                     {noResultsText}
                   </li>
                 ) : (
@@ -438,7 +438,7 @@ function Select({
                       // Render group
                       return (
                         <li key={`group-${item.label}`} role="presentation">
-                          <div className="text-muted-foreground px-3 py-1.5 text-xs font-semibold tracking-wider uppercase">
+                          <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             {item.label}
                           </div>
                           <ul role="group" aria-label={item.label}>
@@ -494,14 +494,14 @@ function Select({
 
       {/* Error Message */}
       {error && (
-        <p id={errorId} className="text-destructive text-sm" role="alert">
+        <p id={errorId} className="text-sm text-destructive" role="alert">
           {error}
         </p>
       )}
 
       {/* Helper Text */}
       {helperText && !error && (
-        <p id={helperId} className="text-muted-foreground text-sm">
+        <p id={helperId} className="text-sm text-muted-foreground">
           {helperText}
         </p>
       )}
@@ -552,7 +552,7 @@ function SelectOptionItem({
       onMouseEnter={option.disabled ? undefined : onMouseEnter}
       className={cn(
         'flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm',
-        'transition-colors outline-none',
+        'outline-none transition-colors',
         isHighlighted && 'bg-muted',
         isSelected &&
           'bg-primary-50 text-primary-900 dark:bg-primary-950 dark:text-primary-100',
@@ -561,7 +561,7 @@ function SelectOptionItem({
     >
       <span className="flex-1 truncate">{option.label}</span>
       {isSelected && (
-        <CheckIcon className="text-primary-500 h-4 w-4 shrink-0" />
+        <CheckIcon className="h-4 w-4 shrink-0 text-primary-500" />
       )}
     </li>
   );

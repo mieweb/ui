@@ -1,12 +1,13 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import {
-  ProviderSearchBar,
-  HeroSearchBar,
-  SearchResultsMessage,
-  type SearchResults,
   type GeolocationStatus,
+  HeroSearchBar,
   type PostalCodeInfo,
+  ProviderSearchBar,
+  type SearchResults,
+  SearchResultsMessage,
 } from './ProviderSearchBar';
 
 const meta: Meta<typeof ProviderSearchBar> = {

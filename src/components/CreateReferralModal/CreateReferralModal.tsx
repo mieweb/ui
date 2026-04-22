@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+
 import { Button } from '../Button/Button';
+import { Modal, ModalFooter, ModalHeader, ModalTitle } from '../Modal/Modal';
 
 export interface Employee {
   id: string;
@@ -129,7 +130,7 @@ export function CreateReferralModal({
           {/* Employee info */}
           {employee && (
             <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-              <p className="mb-1 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
+              <p className="mb-1 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Employee
               </p>
               <p className="font-medium text-gray-900 dark:text-white">
@@ -257,7 +258,7 @@ export function CreateReferralModal({
             </label>
             <textarea
               id="referral-notes"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -302,7 +303,7 @@ export function CreateReferralModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ml-1 mr-2 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

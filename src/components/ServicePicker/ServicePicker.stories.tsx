@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
-import { ServicePicker, type ServiceGroup } from './ServicePicker';
+import { type ServiceGroup, ServicePicker } from './ServicePicker';
 
 const meta: Meta<typeof ServicePicker> = {
   title: 'Components/ServicePicker',
@@ -18,7 +18,7 @@ const meta: Meta<typeof ServicePicker> = {
   },
   decorators: [
     (Story) => (
-      <div className="border-border h-[500px] w-[400px] overflow-hidden rounded-lg border">
+      <div className="h-[500px] w-[400px] overflow-hidden rounded-lg border border-border">
         <Story />
       </div>
     ),
@@ -125,8 +125,8 @@ function ServicePickerExample(
         onSelectionChange={setSelectedIds}
         fullWidth
       />
-      <div className="border-border bg-muted/50 border-t p-3">
-        <p className="text-muted-foreground text-xs">
+      <div className="bg-muted/50 border-t border-border p-3">
+        <p className="text-xs text-muted-foreground">
           Selected: {selectedIds.length > 0 ? selectedIds.join(', ') : 'None'}
         </p>
       </div>

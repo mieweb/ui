@@ -1,13 +1,14 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
+import { MessageBubble } from './MessageBubble';
 import type {
   Message,
+  MessageAttachment,
   MessageGroup,
   MessageParticipant,
-  MessageAttachment,
   TypingState,
 } from './types';
-import { MessageBubble } from './MessageBubble';
 
 // ============================================================================
 // Utility Functions
@@ -318,7 +319,7 @@ function LoadMoreButton({
           'rounded-full px-4 py-2 text-sm font-medium',
           'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
           'hover:bg-neutral-200 dark:hover:bg-neutral-700',
-          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+          'focus:outline-none focus:ring-2 focus:ring-primary-500',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'transition-colors'
         )}
@@ -598,12 +599,12 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
               bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
             }}
             className={cn(
-              'fixed right-4 bottom-24 z-10',
+              'fixed bottom-24 right-4 z-10',
               'rounded-full p-3 shadow-lg',
               'bg-white dark:bg-neutral-800',
               'border border-neutral-200 dark:border-neutral-700',
               'hover:bg-neutral-50 dark:hover:bg-neutral-700',
-              'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+              'focus:outline-none focus:ring-2 focus:ring-primary-500',
               'transition-all'
             )}
             aria-label="Scroll to bottom"
@@ -631,13 +632,13 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
 MessageList.displayName = 'MessageList';
 
 export {
+  DateSeparator,
+  EmptyState,
+  formatDateLabel,
+  groupMessagesByDate,
+  isSameSenderGroup,
+  LoadMoreButton,
   MessageList,
   SkeletonMessage,
   TypingIndicator,
-  DateSeparator,
-  EmptyState,
-  LoadMoreButton,
-  groupMessagesByDate,
-  formatDateLabel,
-  isSameSenderGroup,
 };

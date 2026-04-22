@@ -1,5 +1,5 @@
 export {
+  type SSOConfigData,
   SSOConfigForm,
   type SSOConfigFormProps,
-  type SSOConfigData,
 } from './SSOConfigForm';

@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { cn } from '../../utils/cn';
-import { useEscapeKey } from '../../hooks/useEscapeKey';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { cn } from '../../utils/cn';
 import {
-  useCommandPalette,
-  type CommandPaletteItem,
   type CommandPaletteCategory,
+  type CommandPaletteItem,
+  useCommandPalette,
 } from './CommandPaletteProvider';
 
 // =============================================================================
@@ -286,7 +287,7 @@ export function CommandPalette({
         >
           {/* Search Input */}
           <div className="relative border-b border-gray-200 dark:border-gray-700">
-            <div className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
               <SearchIcon />
             </div>
             <input
@@ -296,11 +297,10 @@ export function CommandPalette({
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               data-testid={`${testId}-input`}
               className={cn(
-                'w-full bg-transparent py-4 pr-12 pl-12 text-base',
+                'w-full bg-transparent py-4 pl-12 pr-12 text-base',
                 'focus:outline-none dark:text-white dark:placeholder-gray-400'
               )}
             />
@@ -308,13 +308,13 @@ export function CommandPalette({
               <button
                 onClick={() => setQuery('')}
                 data-testid={`${testId}-clear`}
-                className="absolute top-1/2 right-12 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <XIcon />
               </button>
             )}
             {isLoading && (
-              <div className="text-primary-500 absolute top-1/2 right-4 -translate-y-1/2">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary-500">
                 <SpinnerIcon />
               </div>
             )}
@@ -442,7 +442,7 @@ export function CommandPalette({
                             className={cn(
                               'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
                               isSelected
-                                ? 'bg-primary-50 dark:bg-primary-500/20'
+                                ? 'dark:bg-primary-500/20 bg-primary-50'
                                 : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
                               item.disabled && 'cursor-not-allowed opacity-50'
                             )}
@@ -567,7 +567,7 @@ export function CommandPaletteTrigger({
       {children ?? (
         <>
           <SearchIcon />
-          <span className="flex-1 text-left whitespace-nowrap">
+          <span className="flex-1 whitespace-nowrap text-left">
             {placeholder}
           </span>
           <kbd

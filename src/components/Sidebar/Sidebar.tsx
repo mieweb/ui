@@ -1,100 +1,39 @@
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  Search,
+  X,
+} from 'lucide-react';
 import React, {
   type ReactNode,
-  useRef,
   useCallback,
-  useState,
   useEffect,
+  useId,
+  useRef,
+  useState,
 } from 'react';
+
 import { cn } from '../../utils/cn';
 import { useSidebar } from './SidebarProvider';
 
 // =============================================================================
-// Icons
+// Icons (Lucide — single source of truth for @mieweb/ui chrome)
 // =============================================================================
 
 const ChevronLeftIcon = () => (
-  <svg
-    className="h-4 w-4"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-  </svg>
+  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
 );
-
 const ChevronRightIcon = () => (
-  <svg
-    className="h-4 w-4"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-  </svg>
+  <ChevronRight className="h-4 w-4" aria-hidden="true" />
 );
-
 const ChevronDownIcon = () => (
-  <svg
-    className="h-3 w-3"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-  </svg>
+  <ChevronDown className="h-4 w-4" aria-hidden="true" />
 );
-
-const XIcon = () => (
-  <svg
-    className="h-5 w-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 18L18 6M6 6l12 12"
-    />
-  </svg>
-);
-
-const MenuIcon = () => (
-  <svg
-    className="h-5 w-5"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 6h16M4 12h16M4 18h16"
-    />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg
-    className="h-4 w-4"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-    />
-  </svg>
-);
+const XIcon = () => <X className="h-5 w-5" aria-hidden="true" />;
+const MenuIcon = () => <Menu className="h-5 w-5" aria-hidden="true" />;
+const SearchIcon = () => <Search className="h-4 w-4" aria-hidden="true" />;
 
 // =============================================================================
 // Sidebar Component
@@ -151,7 +90,7 @@ export function Sidebar({
           'border-r border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
           'transition-all duration-300 ease-in-out',
           // Mobile positioning
-          isMobileViewport && 'fixed top-0 left-0 z-50',
+          isMobileViewport && 'fixed left-0 top-0 z-50',
           isMobileViewport &&
             (isMobileOpen ? 'translate-x-0' : '-translate-x-full'),
           // Desktop positioning
@@ -210,7 +149,7 @@ export function SidebarHeader({
       {showMobileClose && isMobileViewport && (
         <button
           onClick={closeMobile}
-          className="-mr-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800"
+          className="-mr-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 lg:hidden"
           aria-label="Close navigation"
         >
           <XIcon />
@@ -318,6 +257,8 @@ export function SidebarNavGroup({
   const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } =
     useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
+  const reactId = useId();
+  const panelId = `sidebar-group-${reactId}`;
 
   // Determine if this group is expanded
   const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
@@ -334,57 +275,66 @@ export function SidebarNavGroup({
     }
   }, [groupId, toggleGroup]);
 
+  // In the collapsed rail we cannot show a disclosure — flatten children so
+  // they remain reachable as icon-only links (with their own tooltips).
+  if (showCollapsed) {
+    return (
+      <div className={cn('mb-2', className)} role="group" aria-label={label}>
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className={cn('mb-2', className)}>
       {/* Group Header */}
       <button
+        type="button"
         onClick={handleToggle}
+        aria-expanded={effectiveExpanded}
+        aria-controls={panelId}
         className={cn(
           'flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold',
           'text-neutral-700 dark:text-neutral-300',
           'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-          showCollapsed && 'justify-center'
+          'focus:outline-none focus:ring-2 focus:ring-primary-500'
         )}
-        title={showCollapsed ? label : undefined}
       >
         {icon && (
           <span
-            className={cn(
-              'h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400',
-              !showCollapsed && 'mr-3'
-            )}
+            className="mr-3 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center text-neutral-500 dark:text-neutral-400"
+            aria-hidden="true"
           >
             {icon}
           </span>
         )}
-        {!showCollapsed && (
-          <>
-            <span className="flex-1 truncate text-left">{label}</span>
-            <span
-              className={cn(
-                'ml-2 flex-shrink-0 transition-transform duration-200',
-                effectiveExpanded && 'rotate-180'
-              )}
-            >
-              <ChevronDownIcon />
-            </span>
-          </>
-        )}
+        <span className="flex-1 truncate text-left">{label}</span>
+        <span
+          className={cn(
+            'ml-2 flex-shrink-0 transition-transform duration-200',
+            effectiveExpanded && 'rotate-180'
+          )}
+          aria-hidden="true"
+        >
+          <ChevronDownIcon />
+        </span>
       </button>
 
       {/* Group Items */}
-      {!showCollapsed && (
-        <div
-          className={cn(
-            'overflow-hidden transition-all duration-300',
-            effectiveExpanded
-              ? 'mt-1 max-h-[1000px] opacity-100'
-              : 'max-h-0 opacity-0'
-          )}
-        >
-          <div className="pl-2">{children}</div>
-        </div>
-      )}
+      <div
+        id={panelId}
+        role="region"
+        aria-label={label}
+        hidden={!effectiveExpanded}
+        className={cn(
+          'overflow-hidden transition-all duration-300',
+          effectiveExpanded
+            ? 'mt-1 max-h-[1000px] opacity-100'
+            : 'max-h-0 opacity-0'
+        )}
+      >
+        <div className="pl-2">{children}</div>
+      </div>
     </div>
   );
 }
@@ -428,14 +378,20 @@ export function SidebarNavItem({
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
 
-  const handleClick = useCallback(() => {
-    if (disabled) return;
-    onClick?.();
-    // Close mobile sidebar on navigation
-    if (isMobileViewport) {
-      closeMobile();
-    }
-  }, [disabled, onClick, isMobileViewport, closeMobile]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (disabled) return;
+      if (onClick) {
+        e.preventDefault();
+        onClick();
+      }
+      // Close mobile sidebar on navigation
+      if (isMobileViewport) {
+        closeMobile();
+      }
+    },
+    [disabled, onClick, isMobileViewport, closeMobile]
+  );
 
   const content = (
     <>
@@ -460,7 +416,7 @@ export function SidebarNavItem({
               className={cn(
                 'ml-2 rounded-full px-2 py-0.5 text-xs font-medium',
                 isActive
-                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                  ? 'dark:bg-primary-900/30 bg-primary-100 text-primary-700 dark:text-primary-300'
                   : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400'
               )}
             >
@@ -535,7 +491,7 @@ export function SidebarToggle({
       className={cn(
         'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         className
       )}
       aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -546,7 +502,7 @@ export function SidebarToggle({
 
   if (position === 'floating') {
     return (
-      <div className="absolute top-6 -right-3 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="absolute -right-3 top-6 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900">
         {button}
       </div>
     );
@@ -581,7 +537,7 @@ export function SidebarMobileToggle({
       className={cn(
         'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         className
       )}
       aria-label="Open navigation"
@@ -656,7 +612,7 @@ export function SidebarSearch({
   return (
     <div className={cn('px-3 py-2', className)}>
       <div className="relative">
-        <div className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
           <SearchIcon />
         </div>
         <input
@@ -667,10 +623,10 @@ export function SidebarSearch({
           placeholder={`${placeholder} (${shortcutHint})`}
           data-testid={testId}
           className={cn(
-            'w-full rounded-lg py-2 pr-4 pl-10 text-sm',
+            'w-full rounded-lg py-2 pl-10 pr-4 text-sm',
             'border-transparent bg-neutral-100 dark:bg-neutral-800',
             'text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500',
-            'focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-neutral-700',
+            'focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:bg-neutral-700',
             'transition-colors'
           )}
         />

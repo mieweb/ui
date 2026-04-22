@@ -1,13 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import {
-  OrderList,
-  OrderStatus,
-  OrderListTab,
-  defaultOrderTabs,
-} from './OrderList';
-import { Button } from '../Button/Button';
+
 import { Badge } from '../Badge/Badge';
+import { Button } from '../Button/Button';
+import {
+  defaultOrderTabs,
+  OrderList,
+  OrderListTab,
+  OrderStatus,
+} from './OrderList';
 
 const meta: Meta<typeof OrderList> = {
   title: 'Components/OrderList',
@@ -120,19 +121,19 @@ function renderOrderItem(order: SampleOrder) {
       <div className="flex items-start justify-between">
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="text-foreground font-medium">
+            <span className="font-medium text-foreground">
               {order.orderNumber}
             </span>
             <Badge variant={statusVariants[order.status]} size="sm">
               {order.status.replace('-', ' ')}
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">{order.employeeName}</p>
+          <p className="text-sm text-muted-foreground">{order.employeeName}</p>
           <p className="text-muted-foreground/70 mt-1 text-xs">
             {order.services.join(' • ')}
           </p>
         </div>
-        <span className="text-muted-foreground text-xs">
+        <span className="text-xs text-muted-foreground">
           {order.createdAt.toLocaleDateString()}
         </span>
       </div>
@@ -231,19 +232,19 @@ function OrderItem({ order }: { order: SampleOrder }) {
       <div className="flex items-start justify-between">
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="text-foreground font-medium">
+            <span className="font-medium text-foreground">
               {order.orderNumber}
             </span>
             <Badge variant={statusVariants[order.status]} size="sm">
               {order.status.replace('-', ' ')}
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">{order.employeeName}</p>
+          <p className="text-sm text-muted-foreground">{order.employeeName}</p>
           <p className="text-muted-foreground/70 mt-1 text-xs">
             {order.services.join(' • ')}
           </p>
         </div>
-        <span className="text-muted-foreground text-xs">
+        <span className="text-xs text-muted-foreground">
           {order.createdAt.toLocaleDateString()}
         </span>
       </div>
@@ -279,7 +280,7 @@ function InteractiveDemo({
     : orders;
 
   return (
-    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
+    <div className="h-[500px] overflow-hidden rounded-lg border border-border bg-background">
       <OrderList
         orders={filteredBySearch}
         activeTab={activeTab}
@@ -330,7 +331,7 @@ function PlaygroundDemo({
     : sampleOrders;
 
   return (
-    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
+    <div className="h-[500px] overflow-hidden rounded-lg border border-border bg-background">
       <OrderList
         orders={isLoading ? [] : filteredOrders}
         activeTab={activeTab}
@@ -439,7 +440,7 @@ function LoadingWrapper() {
   const [activeTab, setActiveTab] = useState('all');
 
   return (
-    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
+    <div className="h-[500px] overflow-hidden rounded-lg border border-border bg-background">
       <OrderList<SampleOrder>
         orders={[]}
         activeTab={activeTab}
@@ -467,7 +468,7 @@ function EmptyWrapper() {
   const [activeTab, setActiveTab] = useState('all');
 
   return (
-    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
+    <div className="h-[500px] overflow-hidden rounded-lg border border-border bg-background">
       <OrderList<SampleOrder>
         orders={[]}
         activeTab={activeTab}
@@ -495,7 +496,7 @@ function CustomEmptyIconWrapper() {
   const [activeTab, setActiveTab] = useState('all');
 
   return (
-    <div className="border-border bg-background h-[500px] overflow-hidden rounded-lg border">
+    <div className="h-[500px] overflow-hidden rounded-lg border border-border bg-background">
       <OrderList<SampleOrder>
         orders={[]}
         activeTab={activeTab}

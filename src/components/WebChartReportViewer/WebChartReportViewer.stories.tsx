@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
-import {
-  WebChartReportViewer,
-  ReportDatePicker,
-  type SystemReport,
-  type ReportResult,
-} from './WebChartReportViewer';
+
 import { Badge } from '../Badge';
+import {
+  ReportDatePicker,
+  type ReportResult,
+  type SystemReport,
+  WebChartReportViewer,
+} from './WebChartReportViewer';
 
 const meta: Meta<typeof WebChartReportViewer> = {
   title: 'Components/WebChartReportViewer',

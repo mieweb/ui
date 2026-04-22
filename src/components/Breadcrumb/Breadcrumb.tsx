@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -73,7 +74,7 @@ function Breadcrumb({
   }, [items, maxItems]);
 
   const defaultSeparator = (
-    <ChevronRightIcon className="text-muted-foreground h-4 w-4 shrink-0" />
+    <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
   );
 
   return (
@@ -90,7 +91,7 @@ function Breadcrumb({
                 <span aria-hidden="true">{separator || defaultSeparator}</span>
               )}
               {isEllipsis ? (
-                <span className="text-muted-foreground text-sm">...</span>
+                <span className="text-sm text-muted-foreground">...</span>
               ) : isLast || !item.href ? (
                 <BreadcrumbPage item={item} />
               ) : renderLink ? (
@@ -122,9 +123,9 @@ function BreadcrumbLink({ item }: BreadcrumbLinkProps) {
       href={item.href}
       className={cn(
         'inline-flex items-center gap-1.5',
-        'text-muted-foreground text-sm',
-        'hover:text-foreground transition-colors',
-        'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none'
+        'text-sm text-muted-foreground',
+        'transition-colors hover:text-foreground',
+        'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
       )}
     >
       {item.icon}
@@ -144,7 +145,7 @@ interface BreadcrumbPageProps {
 function BreadcrumbPage({ item }: BreadcrumbPageProps) {
   return (
     <span
-      className="text-foreground inline-flex items-center gap-1.5 text-sm font-medium"
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground"
       aria-current="page"
     >
       {item.icon}
@@ -184,7 +185,7 @@ function ChevronRightIcon({ className }: { className?: string }) {
 function BreadcrumbSlash({ className }: { className?: string }) {
   return (
     <span
-      className={cn('text-muted-foreground mx-1', className)}
+      className={cn('mx-1 text-muted-foreground', className)}
       aria-hidden="true"
     >
       /

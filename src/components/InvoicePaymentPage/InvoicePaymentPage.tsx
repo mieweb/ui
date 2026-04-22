@@ -1,10 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '../Button/Button';
-import { Input } from '../Input/Input';
+
 import { Badge } from '../Badge/Badge';
+import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
+import { Input } from '../Input/Input';
 
 export interface InvoiceLineItem {
   id: string;
@@ -134,7 +135,7 @@ export function InvoicePaymentPage({
   if (isLoading) {
     return (
       <div
-        className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
+        className={`min-h-screen bg-gray-50 p-4 dark:bg-gray-900 sm:p-8 ${className}`}
       >
         <div className="mx-auto max-w-4xl">
           <div className="animate-pulse space-y-6">
@@ -222,7 +223,7 @@ export function InvoicePaymentPage({
 
   return (
     <div
-      className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
+      className={`min-h-screen bg-gray-50 p-4 dark:bg-gray-900 sm:p-8 ${className}`}
     >
       <div className="mx-auto max-w-4xl">
         {/* Header */}
@@ -430,7 +431,7 @@ export function InvoicePaymentPage({
                     {isProcessing ? (
                       <>
                         <svg
-                          className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                          className="-ml-1 mr-2 h-4 w-4 animate-spin"
                           fill="none"
                           viewBox="0 0 24 24"
                         >

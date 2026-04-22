@@ -1,6 +1,7 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Progress, CircularProgress } from './Progress';
+import * as React from 'react';
+
+import { CircularProgress, Progress } from './Progress';
 
 const meta: Meta<typeof Progress> = {
   title: 'Components/Progress',
@@ -368,10 +369,10 @@ export const FileUploadExample: Story = {
     <div className="w-80 space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-sm">document.pdf</span>
-        <span className="text-muted-foreground text-xs">2.5 MB</span>
+        <span className="text-xs text-muted-foreground">2.5 MB</span>
       </div>
       <Progress value={65} size="sm" variant="default" />
-      <p className="text-muted-foreground text-xs">Uploading... 65%</p>
+      <p className="text-xs text-muted-foreground">Uploading... 65%</p>
     </div>
   ),
 };

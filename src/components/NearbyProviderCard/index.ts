@@ -1,8 +1,8 @@
 export {
+  type NearbyProviderAddress,
   NearbyProviderCard,
-  NearbyProvidersList,
   type NearbyProviderCardProps,
   type NearbyProviderData,
-  type NearbyProviderAddress,
+  NearbyProvidersList,
   type NearbyProvidersListProps,
 } from './NearbyProviderCard';

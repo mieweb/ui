@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
@@ -48,7 +48,11 @@ function applyTheme(theme: ResolvedTheme): void {
 export function useTheme(defaultTheme: Theme = 'system') {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(
-    defaultTheme === 'system' ? 'light' : defaultTheme === 'dark' ? 'dark' : 'light'
+    defaultTheme === 'system'
+      ? 'light'
+      : defaultTheme === 'dark'
+        ? 'dark'
+        : 'light'
   );
 
   // Initialize theme from storage, falling back to defaultTheme

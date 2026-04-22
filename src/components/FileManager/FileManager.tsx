@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { Card } from '../Card/Card';
 import { Progress } from '../Progress/Progress';
 
@@ -290,16 +291,16 @@ export function FileManager({
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Filename
               </th>
-              <th className="py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Extension
               </th>
-              <th className="py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Size
               </th>
-              <th className="py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Actions
               </th>
             </tr>
@@ -320,7 +321,7 @@ export function FileManager({
                     </div>
                   </td>
                   <td className="py-3 text-center">
-                    <span className="text-xs text-gray-500 uppercase dark:text-gray-400">
+                    <span className="text-xs uppercase text-gray-500 dark:text-gray-400">
                       {file.fileExtension.replace('.', '')}
                     </span>
                   </td>

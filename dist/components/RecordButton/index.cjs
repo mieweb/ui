@@ -1,21 +1,21 @@
 'use strict';
 
-var chunk5T3AWNHG_cjs = require('../../chunk-5T3AWNHG.cjs');
+var chunkE6PQXOSJ_cjs = require('../../chunk-E6PQXOSJ.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
 
 
 Object.defineProperty(exports, "RecordButton", {
   enumerable: true,
-  get: function () { return chunk5T3AWNHG_cjs.RecordButton; }
+  get: function () { return chunkE6PQXOSJ_cjs.RecordButton; }
 });
 Object.defineProperty(exports, "formatDuration", {
   enumerable: true,
-  get: function () { return chunk5T3AWNHG_cjs.formatDuration; }
+  get: function () { return chunkE6PQXOSJ_cjs.formatDuration; }
 });
 Object.defineProperty(exports, "recordButtonVariants", {
   enumerable: true,
-  get: function () { return chunk5T3AWNHG_cjs.recordButtonVariants; }
+  get: function () { return chunkE6PQXOSJ_cjs.recordButtonVariants; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

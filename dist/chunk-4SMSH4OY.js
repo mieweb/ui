@@ -1,5 +1,6 @@
+import { useEffect, useRef } from 'react';
+
 import { isStorybookDocsMode } from './chunk-VSQF22GL.js';
-import { useRef, useEffect } from 'react';
 
 function useFocusTrap(enabled = true) {
   const containerRef = useRef(null);
@@ -14,7 +15,7 @@ function useFocusTrap(enabled = true) {
     const lastElement = focusableElements[focusableElements.length - 1];
     firstElement.focus();
     const handleKeyDown = (event) => {
-      if (event.key !== "Tab") return;
+      if (event.key !== 'Tab') return;
       if (event.shiftKey) {
         if (document.activeElement === firstElement) {
           event.preventDefault();
@@ -27,8 +28,8 @@ function useFocusTrap(enabled = true) {
         }
       }
     };
-    container.addEventListener("keydown", handleKeyDown);
-    return () => container.removeEventListener("keydown", handleKeyDown);
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
   }, [enabled]);
   return containerRef;
 }

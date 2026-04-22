@@ -1,5 +1,5 @@
-export { ClaimProviderForm } from './ClaimProviderForm';
 export type {
-  ClaimProviderFormProps,
   ClaimFormData,
+  ClaimProviderFormProps,
 } from './ClaimProviderForm';
+export { ClaimProviderForm } from './ClaimProviderForm';

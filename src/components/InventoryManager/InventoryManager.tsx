@@ -1,15 +1,16 @@
 'use client';
 
 import * as React from 'react';
+
 import { Button } from '../Button/Button';
+import { Input } from '../Input/Input';
 import {
   Modal,
-  ModalHeader,
-  ModalTitle,
   ModalBody,
   ModalFooter,
+  ModalHeader,
+  ModalTitle,
 } from '../Modal/Modal';
-import { Input } from '../Input/Input';
 import { Textarea } from '../Textarea/Textarea';
 
 export interface InventoryLogEntry {
@@ -123,23 +124,23 @@ export function InventoryManager({
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-foreground text-lg font-semibold">
+          <h3 className="text-lg font-semibold text-foreground">
             Remaining Inventory
           </h3>
         </div>
-        <div className="text-foreground text-2xl font-bold">
+        <div className="text-2xl font-bold text-foreground">
           {currentInventory}{' '}
-          <span className="text-muted-foreground text-sm font-normal">
+          <span className="text-sm font-normal text-muted-foreground">
             units
           </span>
         </div>
       </div>
 
-      <hr className="border-border mb-4" />
+      <hr className="mb-4 border-border" />
 
       {/* Log Section Header */}
       <div className="mb-4 flex items-center justify-between">
-        <h4 className="text-foreground text-base font-semibold">
+        <h4 className="text-base font-semibold text-foreground">
           Inventory Log
         </h4>
         {onUpdateClick && (
@@ -166,24 +167,24 @@ export function InventoryManager({
         )}
       </div>
 
-      <hr className="border-border mb-4" />
+      <hr className="mb-4 border-border" />
 
       {/* Log Table */}
       {logEntries.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-border border-b">
-                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
+              <tr className="border-b border-border">
+                <th className="py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Date
                 </th>
-                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
+                <th className="py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   User
                 </th>
-                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
+                <th className="py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Change
                 </th>
-                <th className="text-muted-foreground py-2 text-right text-xs font-medium tracking-wider uppercase">
+                <th className="py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Quantity
                 </th>
               </tr>
@@ -193,15 +194,15 @@ export function InventoryManager({
                 <React.Fragment key={entry.id}>
                   <tr>
                     <td
-                      className="text-muted-foreground py-2 text-sm"
+                      className="py-2 text-sm text-muted-foreground"
                       title={formatDate(entry.createdAt)}
                     >
                       {formatRelativeTime(entry.createdAt)}
                     </td>
-                    <td className="text-muted-foreground py-2 text-sm">
+                    <td className="py-2 text-sm text-muted-foreground">
                       {entry.createdBy.name}
                     </td>
-                    <td className="text-muted-foreground py-2 text-sm">
+                    <td className="py-2 text-sm text-muted-foreground">
                       {entry.type === 'credit' ? 'Added' : 'Removed'}
                     </td>
                     <td className="py-2 text-right text-sm">
@@ -248,7 +249,7 @@ export function InventoryManager({
                   {entry.memo && (
                     <tr className="bg-muted/50">
                       <td colSpan={4} className="px-2 py-1 text-right">
-                        <span className="text-muted-foreground text-xs italic">
+                        <span className="text-xs italic text-muted-foreground">
                           Memo: {entry.memo}
                         </span>
                       </td>
@@ -260,7 +261,7 @@ export function InventoryManager({
           </table>
         </div>
       ) : (
-        <div className="text-muted-foreground py-8 text-center">
+        <div className="py-8 text-center text-muted-foreground">
           <svg
             className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12"
             fill="none"
@@ -293,13 +294,13 @@ export function InventoryManager({
         </ModalHeader>
         <ModalBody className="space-y-4">
           <div>
-            <h4 className="text-foreground text-lg font-semibold">
+            <h4 className="text-lg font-semibold text-foreground">
               {serviceName}
             </h4>
           </div>
 
           <div>
-            <h5 className="text-muted-foreground mb-2 text-sm font-medium">
+            <h5 className="mb-2 text-sm font-medium text-muted-foreground">
               Update Inventory
             </h5>
           </div>
@@ -333,7 +334,7 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('credit')}
-              className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-r-md border-b border-r border-t px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'credit'
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-input bg-card text-foreground hover:bg-muted'

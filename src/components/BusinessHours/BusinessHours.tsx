@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -409,7 +410,7 @@ function DayScheduleRow({
       >
         {dayName}
         {isToday && highlightToday && (
-          <span className="text-primary-500 ml-1 text-xs">(Today)</span>
+          <span className="ml-1 text-xs text-primary-500">(Today)</span>
         )}
       </span>
 
@@ -433,9 +434,8 @@ function DayScheduleRow({
 // Main BusinessHours Component
 // ============================================================================
 
-export interface BusinessHoursProps extends VariantProps<
-  typeof containerVariants
-> {
+export interface BusinessHoursProps
+  extends VariantProps<typeof containerVariants> {
   /** Business hours schedule data */
   schedule: BusinessHoursSchedule;
   /** Show open/closed status badge */
@@ -482,7 +482,7 @@ export function BusinessHours({
             {showStatus && <OpenStatusBadge isOpen={false} />}
           </div>
         )}
-        <pre className="m-0 font-sans whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
+        <pre className="m-0 whitespace-pre-wrap font-sans text-neutral-700 dark:text-neutral-300">
           {schedule.officeHoursText}
         </pre>
       </div>
@@ -499,7 +499,7 @@ export function BusinessHours({
             {headerText}
           </div>
         )}
-        <p className="text-neutral-500 italic dark:text-neutral-400">
+        <p className="italic text-neutral-500 dark:text-neutral-400">
           Hours not available
         </p>
       </div>

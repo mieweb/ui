@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import {
-  OnboardingWizard,
-  OnboardingStepQuestion,
-  OnboardingCompletion,
-} from './OnboardingWizard';
+
 import { Button } from '../Button';
 import { Input } from '../Input';
+import {
+  OnboardingCompletion,
+  OnboardingStepQuestion,
+  OnboardingWizard,
+} from './OnboardingWizard';
 
 // =============================================================================
 // Sample Steps Data
@@ -104,7 +105,7 @@ const sampleSteps = [
         title="Set up payment"
         description="Add your payment method to start ordering services."
       >
-        <div className="border-border bg-muted/30 mx-auto mt-6 max-w-md rounded-lg border p-6">
+        <div className="bg-muted/30 mx-auto mt-6 max-w-md rounded-lg border border-border p-6">
           <div className="space-y-4">
             <Input
               id="card-number"
@@ -256,7 +257,7 @@ function OnboardingWizardDemo({
   };
 
   return (
-    <div className="border-border relative h-[700px] overflow-hidden rounded-lg border shadow-lg">
+    <div className="relative h-[700px] overflow-hidden rounded-lg border border-border shadow-lg">
       <OnboardingWizard
         {...getProps()}
         className="!absolute !inset-0 !h-full"

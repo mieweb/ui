@@ -8,11 +8,11 @@ function useClickOutside(ref, callback) {
         callback();
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("touchstart", handleClick);
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('touchstart', handleClick);
     return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("touchstart", handleClick);
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('touchstart', handleClick);
     };
   }, [ref, callback]);
 }

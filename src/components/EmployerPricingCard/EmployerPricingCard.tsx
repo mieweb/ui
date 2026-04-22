@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
+
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 
 export interface PricingTier {
   id: string;
@@ -92,7 +93,7 @@ export function EmployerPricingCard({
         {/* Pricing tiers */}
         {tiers.length > 0 && (
           <div className="mt-3 space-y-2">
-            <p className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Volume Pricing
             </p>
             <div className="space-y-1">

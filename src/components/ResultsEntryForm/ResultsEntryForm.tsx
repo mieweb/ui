@@ -1,18 +1,19 @@
+import { AlertCircle, FileUp, X } from 'lucide-react';
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
+import { Button } from '../Button';
+import { Checkbox } from '../Checkbox';
+import { Input } from '../Input';
 import {
   Modal,
-  ModalHeader,
-  ModalTitle,
   ModalBody,
   ModalFooter,
+  ModalHeader,
+  ModalTitle,
 } from '../Modal/Modal';
-import { Input } from '../Input';
+import { Radio, RadioGroup } from '../Radio';
 import { Textarea } from '../Textarea';
-import { RadioGroup, Radio } from '../Radio';
-import { Checkbox } from '../Checkbox';
-import { Button } from '../Button';
-import { FileUp, X, AlertCircle } from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -342,13 +343,13 @@ export const ResultsEntryForm = React.forwardRef<
       {showFileUpload && (
         <div>
           <div className="flex items-center gap-2">
-            <span className="bg-muted border-input rounded-l-md border border-r-0 px-3 py-2 text-sm font-medium">
+            <span className="rounded-l-md border border-r-0 border-input bg-muted px-3 py-2 text-sm font-medium">
               {results}
             </span>
             <Input
               value={files.map((f) => f.name).join(', ')}
               readOnly
-              className="rounded-none border-r-0 border-l-0"
+              className="rounded-none border-l-0 border-r-0"
               placeholder="No files selected"
             />
             <input
@@ -381,7 +382,7 @@ export const ResultsEntryForm = React.forwardRef<
                   <button
                     type="button"
                     onClick={() => removeFile(index)}
-                    className="text-muted-foreground hover:text-destructive ml-2"
+                    className="ml-2 text-muted-foreground hover:text-destructive"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -434,10 +435,10 @@ export const ResultsEntryForm = React.forwardRef<
         showFileUpload && (
           <div className="bg-warning/10 border-warning/30 rounded-lg border p-4">
             <h4 className="flex items-center gap-2 font-semibold">
-              <AlertCircle className="text-warning h-5 w-5" />
+              <AlertCircle className="h-5 w-5 text-warning" />
               {noProviderContacts}
             </h4>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="mt-1 text-sm text-muted-foreground">
               {noProviderContactsMessage}
             </p>
             <button
@@ -452,7 +453,7 @@ export const ResultsEntryForm = React.forwardRef<
 
       {/* Error Message */}
       {showError && (
-        <p className="text-destructive text-sm font-medium">
+        <p className="text-sm font-medium text-destructive">
           {pleaseSelectResult}
         </p>
       )}
@@ -464,10 +465,8 @@ export const ResultsEntryForm = React.forwardRef<
 // ResultsEntryModal - Pre-built modal wrapper
 // ============================================================================
 
-export interface ResultsEntryModalProps extends Omit<
-  ResultsEntryFormProps,
-  'onCancel'
-> {
+export interface ResultsEntryModalProps
+  extends Omit<ResultsEntryFormProps, 'onCancel'> {
   /** Whether modal is open */
   open: boolean;
   /** Handler for closing the modal */
@@ -512,10 +511,10 @@ export function ResultsEntryModal({
 
       <ModalBody>
         {employeeName && (
-          <div className="bg-muted mb-4 rounded-lg p-3">
-            <p className="text-muted-foreground text-sm">
+          <div className="mb-4 rounded-lg bg-muted p-3">
+            <p className="text-sm text-muted-foreground">
               Employee:{' '}
-              <span className="text-foreground font-medium">
+              <span className="font-medium text-foreground">
                 {employeeName}
               </span>
             </p>
@@ -548,7 +547,7 @@ export function ResultsEntryModal({
           {isSubmitting ? (
             <>
               <svg
-                className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                className="-ml-1 mr-2 h-4 w-4 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -585,10 +584,8 @@ export function ResultsEntryModal({
  * @deprecated Use ResultsEntryModal instead. This wrapper provides backward
  * compatibility with the old isOpen/onClose API.
  */
-export interface ResultsEntryCardProps extends Omit<
-  ResultsEntryModalProps,
-  'open' | 'onOpenChange'
-> {
+export interface ResultsEntryCardProps
+  extends Omit<ResultsEntryModalProps, 'open' | 'onOpenChange'> {
   /** Legacy prop: whether the card/modal is open */
   isOpen: boolean;
   /** Legacy prop: called when the card/modal requests to close */

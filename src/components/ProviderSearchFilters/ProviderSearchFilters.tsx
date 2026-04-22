@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -33,13 +34,26 @@ export interface RadiusOption {
 }
 
 /**
+ * Location suggestion from geocoding
+ */
+export interface LocationSuggestion {
+  id: string;
+  place_name: string;
+  text: string;
+  place_type: string[];
+  center: [number, number];
+}
+
+/**
  * Filter state object
  */
 export interface ProviderFilters {
   /** Provider name/search phrase */
   searchPhrase?: string;
-  /** ZIP code */
+  /** ZIP code (resolved postal code for API calls) */
   zipCode?: string;
+  /** Display name shown in the location input (e.g. "Indianapolis, IN" or "46220") */
+  locationDisplayName?: string;
   /** Search radius in miles */
   radius: number;
   /** Selected service slugs */
@@ -180,6 +194,52 @@ function XMarkIcon({ className }: { className?: string }) {
   );
 }
 
+function CrosshairsIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      className={cn('h-4 w-4', className)}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="3" />
+      <line x1="12" y1="2" x2="12" y2="6" />
+      <line x1="12" y1="18" x2="12" y2="22" />
+      <line x1="2" y1="12" x2="6" y2="12" />
+      <line x1="18" y1="12" x2="22" y2="12" />
+    </svg>
+  );
+}
+
+function SpinnerSmallIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn('h-4 w-4 animate-spin', className)}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
+  );
+}
+
 // ============================================================================
 // Sub-components
 // ============================================================================
@@ -216,7 +276,8 @@ function InputField({ label, icon, className, id, ...props }: InputFieldProps) {
   );
 }
 
-interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface SelectFieldProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   options: { value: string | number; label: string }[];
 }
@@ -254,6 +315,272 @@ function SelectField({
 }
 
 // ============================================================================
+// Location Input with Autocomplete + Geolocation
+// ============================================================================
+
+interface LocationInputProps {
+  label?: string;
+  /** Current display value (city name, ZIP, etc.) */
+  value: string;
+  /** Called when the display value changes (user typing) */
+  onValueChange: (value: string) => void;
+  /** Called when a location is resolved to a ZIP code */
+  onZipCodeResolved: (zipCode: string, displayName: string) => void;
+  /** Mapbox access token for geocoding */
+  mapboxToken?: string;
+  /** Called when geolocation button is clicked */
+  onGeolocate?: () => void;
+  /** Whether geolocation is in progress */
+  geolocating?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+}
+
+function LocationInput({
+  label,
+  value,
+  onValueChange,
+  onZipCodeResolved,
+  mapboxToken,
+  onGeolocate,
+  geolocating = false,
+  disabled = false,
+  placeholder = 'ZIP code or city',
+}: LocationInputProps) {
+  const [suggestions, setSuggestions] = React.useState<LocationSuggestion[]>(
+    []
+  );
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [highlightedIndex, setHighlightedIndex] = React.useState(-1);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const generatedId = React.useId();
+  const listboxId = `${generatedId}-listbox`;
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch suggestions from Mapbox Geocoding API
+  const fetchSuggestions = React.useCallback(
+    async (query: string) => {
+      if (!mapboxToken || query.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?types=postcode,place&country=us&access_token=${mapboxToken}&limit=5`
+        );
+        const data = await res.json();
+        setSuggestions(data.features || []);
+        setIsOpen(true);
+        setHighlightedIndex(-1);
+      } catch {
+        setSuggestions([]);
+      }
+    },
+    [mapboxToken]
+  );
+
+  // Resolve a suggestion to a ZIP code
+  const resolveSuggestion = React.useCallback(
+    async (suggestion: LocationSuggestion) => {
+      setIsOpen(false);
+      setSuggestions([]);
+
+      if (suggestion.place_type.includes('postcode')) {
+        onZipCodeResolved(suggestion.text, suggestion.text);
+        onValueChange(suggestion.text);
+        return;
+      }
+
+      // For cities, reverse-geocode to get postal code
+      if (mapboxToken) {
+        const [lng, lat] = suggestion.center;
+        try {
+          const res = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=postcode&access_token=${mapboxToken}&limit=1`
+          );
+          const data = await res.json();
+          const zip = data.features?.[0]?.text;
+          if (zip) {
+            const displayName = suggestion.place_name
+              .split(',')
+              .slice(0, 2)
+              .join(',')
+              .trim();
+            onZipCodeResolved(zip, displayName);
+            onValueChange(displayName);
+            return;
+          }
+        } catch {
+          // Fall through
+        }
+      }
+
+      // Fallback: use text as-is
+      onValueChange(suggestion.place_name);
+    },
+    [mapboxToken, onValueChange, onZipCodeResolved]
+  );
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const newValue = e.target.value;
+    onValueChange(newValue);
+
+    // If it's a 5-digit ZIP, resolve immediately
+    if (/^\d{5}$/.test(newValue)) {
+      onZipCodeResolved(newValue, newValue);
+      setIsOpen(false);
+      setSuggestions([]);
+      return;
+    }
+
+    // Debounce geocoding calls
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (mapboxToken && newValue.length >= 2) {
+      debounceRef.current = setTimeout(() => fetchSuggestions(newValue), 300);
+    } else {
+      setSuggestions([]);
+      setIsOpen(false);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!isOpen || suggestions.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+      e.preventDefault();
+      resolveSuggestion(suggestions[highlightedIndex]);
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  }
+
+  const showGeolocate = Boolean(onGeolocate);
+
+  return (
+    <div ref={containerRef} className="relative">
+      {label && (
+        <label htmlFor={generatedId} className={labelVariants()}>
+          {label}
+        </label>
+      )}
+      <div className="relative">
+        {/* Map pin icon */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+          <MapPinIcon />
+        </div>
+
+        <input
+          ref={inputRef}
+          id={generatedId}
+          type="text"
+          value={value}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onFocus={() => {
+            if (suggestions.length > 0) setIsOpen(true);
+          }}
+          placeholder={placeholder}
+          disabled={disabled}
+          autoComplete="off"
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-controls={listboxId}
+          aria-activedescendant={
+            highlightedIndex >= 0
+              ? `${listboxId}-${highlightedIndex}`
+              : undefined
+          }
+          className={cn(
+            inputVariants({ hasIcon: true }),
+            showGeolocate && 'pr-10'
+          )}
+          data-cy="input-search-providers-by-location"
+        />
+
+        {/* Geolocation button */}
+        {showGeolocate && (
+          <button
+            type="button"
+            onClick={onGeolocate}
+            disabled={disabled || geolocating}
+            className={cn(
+              'absolute inset-y-0 right-0 flex items-center pr-3',
+              'text-neutral-400 transition-colors hover:text-primary-500',
+              'disabled:cursor-not-allowed disabled:opacity-50'
+            )}
+            aria-label="Use my location"
+            title="Use my location"
+          >
+            {geolocating ? <SpinnerSmallIcon /> : <CrosshairsIcon />}
+          </button>
+        )}
+      </div>
+
+      {/* Suggestions dropdown */}
+      {isOpen && suggestions.length > 0 && (
+        <ul
+          id={listboxId}
+          role="listbox"
+          className={cn(
+            'absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg',
+            'dark:border-neutral-700 dark:bg-neutral-800',
+            'max-h-48 overflow-auto py-1'
+          )}
+        >
+          {suggestions.map((suggestion, index) => {
+            const isZip = suggestion.place_type.includes('postcode');
+            return (
+              <li
+                key={suggestion.id}
+                id={`${listboxId}-${index}`}
+                role="option"
+                aria-selected={index === highlightedIndex}
+                onClick={() => resolveSuggestion(suggestion)}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 px-3 py-2 text-sm',
+                  index === highlightedIndex
+                    ? 'dark:bg-primary-900/20 bg-primary-50'
+                    : 'hover:bg-neutral-50 dark:hover:bg-neutral-700'
+                )}
+              >
+                <MapPinIcon className="h-4 w-4 shrink-0 text-neutral-400" />
+                <span className="truncate">{suggestion.place_name}</span>
+                {isZip && (
+                  <span className="ml-auto shrink-0 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400">
+                    ZIP
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
 // Multi-Select Tag Component
 // ============================================================================
 
@@ -266,22 +593,25 @@ function ServiceTag({ service, onRemove }: ServiceTagProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm',
+        'inline-flex items-center gap-0.5 whitespace-nowrap rounded px-1.5 py-0.5 text-xs leading-tight',
         'bg-primary-100 text-primary-800',
         'dark:bg-primary-900/30 dark:text-primary-300'
       )}
     >
-      {service.label}
+      <span className="max-w-[120px] truncate">{service.label}</span>
       <button
         type="button"
-        onClick={onRemove}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
         className={cn(
-          'hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5',
-          'focus:ring-primary-500 focus:ring-2 focus:outline-none'
+          'shrink-0 rounded-full p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800',
+          'focus:outline-none focus:ring-2 focus:ring-primary-500'
         )}
         aria-label={`Remove ${service.label}`}
       >
-        <XMarkIcon className="h-3 w-3" />
+        <XMarkIcon className="h-2.5 w-2.5" />
       </button>
     </span>
   );
@@ -312,7 +642,7 @@ export function ServiceMultiSelect({
   services,
   selectedServices,
   onSelectionChange,
-  label = 'Services',
+  label,
   placeholder = 'All services',
   disabled = false,
   showCounts = false,
@@ -389,20 +719,7 @@ export function ServiceMultiSelect({
     <div ref={containerRef} className="relative">
       {label && <label className={labelVariants()}>{label}</label>}
 
-      {/* Selected tags display */}
-      {selectedServiceObjects.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-1">
-          {selectedServiceObjects.map((service) => (
-            <ServiceTag
-              key={service.value}
-              service={service}
-              onRemove={() => handleRemoveService(service.value)}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Dropdown trigger */}
+      {/* Dropdown trigger - tag input style */}
       <div className="relative">
         <button
           type="button"
@@ -413,16 +730,33 @@ export function ServiceMultiSelect({
           aria-expanded={isOpen}
           aria-labelledby={label ? undefined : 'services-label'}
           className={cn(
-            selectVariants(),
-            'w-full text-left',
-            !selectedServices.length &&
-              'text-neutral-500 dark:text-neutral-400',
+            'flex h-10 w-full items-center rounded-md border border-neutral-200 bg-white text-sm',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            'dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100',
+            'appearance-none bg-no-repeat',
+            'bg-[url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27M6 8l4 4 4-4%27/%3e%3c/svg%3e")]',
+            'bg-[length:1.5em_1.5em]',
+            'bg-[right_0.5rem_center]',
+            'pr-8 text-left',
             disabled && 'cursor-not-allowed opacity-50'
           )}
         >
-          {selectedServices.length > 0
-            ? `${selectedServices.length} service${selectedServices.length > 1 ? 's' : ''} selected`
-            : placeholder}
+          {selectedServiceObjects.length > 0 ? (
+            <div className="scrollbar-none flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-2 py-1">
+              {selectedServiceObjects.map((service) => (
+                <ServiceTag
+                  key={service.value}
+                  service={service}
+                  onRemove={() => handleRemoveService(service.value)}
+                />
+              ))}
+            </div>
+          ) : (
+            <span className="px-3 text-neutral-500 dark:text-neutral-400">
+              {placeholder}
+            </span>
+          )}
         </button>
       </div>
 
@@ -447,10 +781,9 @@ export function ServiceMultiSelect({
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search services..."
               className={cn(inputVariants({ hasIcon: true }), 'pl-8')}
-              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
-            <SearchIcon className="absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400" />
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
           </div>
 
           {/* Service options */}
@@ -459,7 +792,7 @@ export function ServiceMultiSelect({
               ([category, categoryServices]) => (
                 <div key={category}>
                   {services.some((s) => s.category) && (
-                    <div className="bg-neutral-50 px-3 py-2 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:bg-neutral-900 dark:text-neutral-400">
+                    <div className="bg-neutral-50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
                       {category}
                     </div>
                   )}
@@ -475,7 +808,7 @@ export function ServiceMultiSelect({
                         className={cn(
                           'flex w-full items-center justify-between px-3 py-2 text-left text-sm',
                           'hover:bg-neutral-100 dark:hover:bg-neutral-700',
-                          isSelected && 'bg-primary-50 dark:bg-primary-900/20'
+                          isSelected && 'dark:bg-primary-900/20 bg-primary-50'
                         )}
                       >
                         <span className="flex items-center gap-2">
@@ -483,7 +816,7 @@ export function ServiceMultiSelect({
                             className={cn(
                               'flex h-4 w-4 items-center justify-center rounded border',
                               isSelected
-                                ? 'bg-primary-500 border-primary-500 text-white'
+                                ? 'border-primary-500 bg-primary-500 text-white'
                                 : 'border-neutral-300 dark:border-neutral-600'
                             )}
                           >
@@ -541,9 +874,8 @@ export function ServiceMultiSelect({
 // Main ProviderSearchFilters Component
 // ============================================================================
 
-export interface ProviderSearchFiltersProps extends VariantProps<
-  typeof containerVariants
-> {
+export interface ProviderSearchFiltersProps
+  extends VariantProps<typeof containerVariants> {
   /** Current filter values */
   filters: ProviderFilters;
   /** Called when any filter changes */
@@ -554,7 +886,7 @@ export interface ProviderSearchFiltersProps extends VariantProps<
   radiusOptions?: RadiusOption[];
   /** Show provider name search input */
   showNameSearch?: boolean;
-  /** Show ZIP code input */
+  /** Show ZIP code / location input */
   showZipCode?: boolean;
   /** Show radius selector */
   showRadius?: boolean;
@@ -570,6 +902,12 @@ export interface ProviderSearchFiltersProps extends VariantProps<
   onSubmit?: (filters: ProviderFilters) => void;
   /** Loading state */
   loading?: boolean;
+  /** Mapbox access token for location autocomplete (enables city name search) */
+  mapboxToken?: string;
+  /** Called when geolocation button is clicked. If provided, shows geolocation button. */
+  onGeolocate?: () => void;
+  /** Whether geolocation is in progress */
+  geolocating?: boolean;
   /** Additional CSS classes */
   className?: string;
 }
@@ -589,6 +927,9 @@ export function ProviderSearchFilters({
   formId,
   onSubmit,
   loading = false,
+  mapboxToken,
+  onGeolocate,
+  geolocating = false,
   className,
 }: ProviderSearchFiltersProps) {
   function handleFieldChange<K extends keyof ProviderFilters>(
@@ -630,25 +971,29 @@ export function ProviderSearchFilters({
         </div>
       )}
 
-      {/* ZIP Code */}
+      {/* Location (ZIP code or city name) */}
       {showZipCode && (
-        <div className={fieldGroupVariants({ size: 'sm' })}>
-          <InputField
-            label={showLabels ? 'ZIP Code' : undefined}
-            icon={<MapPinIcon />}
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]{5}"
-            maxLength={5}
-            placeholder="ZIP code"
-            value={filters.zipCode || ''}
-            onChange={(e) => {
-              // Only allow digits
-              const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-              handleFieldChange('zipCode', value);
+        <div
+          className={fieldGroupVariants({ size: mapboxToken ? 'lg' : 'sm' })}
+        >
+          <LocationInput
+            label={showLabels ? 'Location' : undefined}
+            value={filters.locationDisplayName ?? filters.zipCode ?? ''}
+            onValueChange={(val) =>
+              handleFieldChange('locationDisplayName', val)
+            }
+            onZipCodeResolved={(zip, displayName) => {
+              onFiltersChange({
+                ...filters,
+                zipCode: zip,
+                locationDisplayName: displayName,
+              });
             }}
+            mapboxToken={mapboxToken}
+            onGeolocate={onGeolocate}
+            geolocating={geolocating}
             disabled={loading}
-            data-cy="input-search-providers-by-zip"
+            placeholder={mapboxToken ? 'ZIP code or city' : 'ZIP code'}
           />
         </div>
       )}
@@ -741,7 +1086,7 @@ export function CompactFilterBar({
       {/* Search Input */}
       <div className="min-w-[150px] flex-1">
         <div className="relative">
-          <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             placeholder="Search providers..."
@@ -749,8 +1094,8 @@ export function CompactFilterBar({
             onChange={(e) => handleFieldChange('searchPhrase', e.target.value)}
             disabled={loading}
             className={cn(
-              'h-9 w-full rounded-md border border-neutral-200 pr-3 pl-9 text-sm',
-              'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+              'h-9 w-full rounded-md border border-neutral-200 pl-9 pr-3 text-sm',
+              'focus:outline-none focus:ring-2 focus:ring-primary-500',
               'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
             )}
           />
@@ -773,7 +1118,7 @@ export function CompactFilterBar({
           disabled={loading}
           className={cn(
             'h-9 w-20 rounded-l-md border border-neutral-200 px-3 text-sm',
-            'focus:ring-primary-500 focus:z-10 focus:ring-2 focus:outline-none',
+            'focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary-500',
             'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
           )}
         />
@@ -783,7 +1128,7 @@ export function CompactFilterBar({
           disabled={loading}
           className={cn(
             'h-9 rounded-r-md border border-l-0 border-neutral-200 px-2 text-sm',
-            'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+            'focus:outline-none focus:ring-2 focus:ring-primary-500',
             'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
           )}
         >
@@ -807,7 +1152,7 @@ export function CompactFilterBar({
             disabled={loading}
             className={cn(
               'h-9 w-full rounded-md border border-neutral-200 px-3 text-sm',
-              'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+              'focus:outline-none focus:ring-2 focus:ring-primary-500',
               'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white',
               !filters.services.length && 'text-neutral-500'
             )}
@@ -830,8 +1175,8 @@ export function CompactFilterBar({
           disabled={loading}
           className={cn(
             'h-9 rounded-md px-4 text-sm font-medium',
-            'bg-primary-500 hover:bg-primary-600 text-white',
-            'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
+            'bg-primary-500 text-white hover:bg-primary-600',
+            'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50'
           )}
         >
@@ -902,7 +1247,7 @@ export function ActiveFilters({
   if (filters.zipCode) {
     activeFilters.push({
       key: 'zipCode',
-      label: `Near ${filters.zipCode}`,
+      label: `Near ${filters.locationDisplayName || filters.zipCode}`,
       onClear: () => onClearFilter('zipCode'),
     });
   }
@@ -956,7 +1301,7 @@ export function ActiveFilters({
       <button
         type="button"
         onClick={onClearAll}
-        className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm"
+        className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
       >
         Clear all
       </button>

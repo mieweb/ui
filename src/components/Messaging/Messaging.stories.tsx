@@ -1,22 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+
 import {
-  MessageBubble,
-  MessageList,
-  MessageComposer,
-  MessageThread,
   ConversationHeader,
   ConversationListItem,
-  TypingIndicator,
-  EmptyState,
-  SkeletonMessage,
-  MessagingSplitView,
   ConversationListSkeleton,
+  EmptyState,
+  MessageBubble,
+  MessageComposer,
+  MessageList,
+  MessageThread,
+  MessagingSplitView,
+  SkeletonMessage,
+  TypingIndicator,
 } from './index';
 import type {
+  Conversation,
   Message,
   MessageParticipant,
-  Conversation,
   TypingState,
 } from './types';
 
@@ -722,7 +723,7 @@ export const EmptyStateCustom: StoryObj<typeof EmptyState> = {
         title="No messages"
         description="Send a message to start the conversation."
         action={
-          <button className="bg-primary-800 rounded-lg px-4 py-2 text-white">
+          <button className="rounded-lg bg-primary-800 px-4 py-2 text-white">
             Start Chat
           </button>
         }

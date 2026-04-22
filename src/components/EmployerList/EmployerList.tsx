@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
@@ -109,7 +110,7 @@ export function EmployerList({
         {showSearch && (
           <div className="relative flex-1">
             <svg
-              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

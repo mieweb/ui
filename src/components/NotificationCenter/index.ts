@@ -1,5 +1,5 @@
 export {
+  type Notification,
   NotificationCenter,
   type NotificationCenterProps,
-  type Notification,
 } from './NotificationCenter';

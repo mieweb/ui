@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const quickActionIconVariants = cva(
@@ -67,10 +68,11 @@ export type QuickActionColor =
   | 'amber'
   | 'neutral';
 
-export interface QuickActionProps extends Omit<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  'color' | 'disabled'
-> {
+export interface QuickActionProps
+  extends Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    'color' | 'disabled'
+  > {
   /** The main title text */
   title: string;
   /** The subtitle/description text */
@@ -317,7 +319,8 @@ export const QuickActionIcons = {
  * </QuickActionGroup>
  * ```
  */
-export interface QuickActionGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface QuickActionGroupProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /** Optional title to display above the quick actions */
   title?: string;
   /** Number of columns on different screen sizes */
@@ -383,6 +386,6 @@ QuickActionGroup.displayName = 'QuickActionGroup';
 export {
   QuickAction,
   QuickActionGroup,
-  quickActionVariants,
   quickActionIconVariants,
+  quickActionVariants,
 };

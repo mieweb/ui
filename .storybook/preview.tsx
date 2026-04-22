@@ -1,14 +1,16 @@
-import type { Preview, Decorator } from '@storybook/react-vite';
-import { useEffect, useMemo } from 'react';
 import '../src/styles/base.css';
 import './preview.css';
+
+import type { Decorator, Preview } from '@storybook/react-vite';
+import { useEffect, useMemo } from 'react';
+
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { defaultBrand } from '../src/brands/default';
 import { enterpriseHealthBrand } from '../src/brands/enterprise-health';
 import { miewebBrand } from '../src/brands/mieweb';
+import type { BrandConfig } from '../src/brands/types';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
-import type { BrandConfig } from '../src/brands/types';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -85,7 +87,7 @@ const withBrand: Decorator = (Story, context) => {
   const brandName = context.globals.brand || 'bluehive';
   const isDark = context.globals.theme === 'dark';
   const brand = brands[brandName] || brands.bluehive;
-  
+
   // Get the actual color values for this brand/mode
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
@@ -100,7 +102,7 @@ const withBrand: Decorator = (Story, context) => {
       document.documentElement.classList.remove('dark');
       document.documentElement.setAttribute('data-theme', 'light');
     }
-    
+
     // Apply to body with actual values (not CSS vars) to ensure immediate update
     document.body.style.backgroundColor = semanticColors.background;
     document.body.style.color = semanticColors.foreground;
@@ -121,7 +123,7 @@ const withBrand: Decorator = (Story, context) => {
 
   // Check if the story has fullscreen layout
   const isFullscreen = context.parameters?.layout === 'fullscreen';
-  
+
   // Build font family string
   const fontFamily = brand.typography.fontFamily.sans
     .map((f) => (f.includes(' ') ? `"${f}"` : f))

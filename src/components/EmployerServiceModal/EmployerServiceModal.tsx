@@ -1,15 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalBody,
-  ModalFooter,
-} from '../Modal/Modal';
+
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal/Modal';
 import { Switch } from '../Switch/Switch';
 
 export interface EmployerServiceModalProps {
@@ -112,7 +113,7 @@ export function EmployerServiceModal({
           {/* Error message */}
           {errorMessage && (
             <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
-              <p className="text-destructive text-sm">{errorMessage}</p>
+              <p className="text-sm text-destructive">{errorMessage}</p>
             </div>
           )}
 
@@ -128,12 +129,12 @@ export function EmployerServiceModal({
 
           {/* Pricing section */}
           <div className="space-y-3">
-            <p className="text-foreground text-sm font-medium">Pricing</p>
+            <p className="text-sm font-medium text-foreground">Pricing</p>
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-foreground text-sm">Use Base Price</p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-sm text-foreground">Use Base Price</p>
+                <p className="text-xs text-muted-foreground">
                   Use the service&apos;s default pricing
                 </p>
               </div>
@@ -150,15 +151,15 @@ export function EmployerServiceModal({
             </div>
 
             {!config.useBasePrice && (
-              <div className="border-border ml-4 border-l-2 pl-4">
+              <div className="ml-4 border-l-2 border-border pl-4">
                 <label
                   htmlFor="custom-price"
-                  className="text-foreground mb-1 block text-sm font-medium"
+                  className="mb-1 block text-sm font-medium text-foreground"
                 >
                   Custom Price
                 </label>
                 <div className="relative w-40">
-                  <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     $
                   </span>
                   <input
@@ -166,7 +167,7 @@ export function EmployerServiceModal({
                     type="number"
                     min="0"
                     step="0.01"
-                    className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
+                    className="w-full rounded-md border border-input bg-background py-2 pl-7 pr-4 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     value={config.customPrice ?? ''}
                     onChange={(e) =>
                       setConfig((prev) => ({
@@ -193,14 +194,14 @@ export function EmployerServiceModal({
 
           {/* Order handling */}
           <div className="space-y-3">
-            <p className="text-foreground text-sm font-medium">
+            <p className="text-sm font-medium text-foreground">
               Order Handling
             </p>
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-foreground text-sm">Auto-Accept Orders</p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-sm text-foreground">Auto-Accept Orders</p>
+                <p className="text-xs text-muted-foreground">
                   Automatically accept orders from this employer
                 </p>
               </div>
@@ -214,8 +215,8 @@ export function EmployerServiceModal({
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-foreground text-sm">Requires Approval</p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-sm text-foreground">Requires Approval</p>
+                <p className="text-xs text-muted-foreground">
                   Orders need manual approval before processing
                 </p>
               </div>
@@ -230,12 +231,12 @@ export function EmployerServiceModal({
 
           {/* Notifications */}
           <div className="space-y-3">
-            <p className="text-foreground text-sm font-medium">Notifications</p>
+            <p className="text-sm font-medium text-foreground">Notifications</p>
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-foreground text-sm">Notify on New Orders</p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-sm text-foreground">Notify on New Orders</p>
+                <p className="text-xs text-muted-foreground">
                   Send email when orders are placed
                 </p>
               </div>
@@ -248,7 +249,7 @@ export function EmployerServiceModal({
             </div>
 
             {config.notifyOnOrder && (
-              <div className="border-border ml-4 border-l-2 pl-4">
+              <div className="ml-4 border-l-2 border-border pl-4">
                 <Input
                   label="Notification Email"
                   type="email"
@@ -269,13 +270,13 @@ export function EmployerServiceModal({
           <div>
             <label
               htmlFor="employer-service-notes"
-              className="text-foreground mb-1 block text-sm font-medium"
+              className="mb-1 block text-sm font-medium text-foreground"
             >
               Internal Notes
             </label>
             <textarea
               id="employer-service-notes"
-              className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
               rows={3}
               value={config.notes || ''}
               onChange={(e) =>
@@ -299,7 +300,7 @@ export function EmployerServiceModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ml-1 mr-2 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

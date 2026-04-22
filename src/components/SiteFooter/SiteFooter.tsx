@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -235,7 +236,7 @@ export function NewsletterForm({
           'min-w-0 flex-1 rounded-lg px-4 py-2 text-sm transition-colors',
           variant === 'light'
             ? 'border border-white/20 bg-white/10 text-white placeholder-white/60 focus:border-white/50 focus:outline-none'
-            : 'focus:border-primary-500 border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400'
+            : 'border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400'
         )}
         disabled={isLoading}
       />
@@ -243,10 +244,10 @@ export function NewsletterForm({
         type="submit"
         disabled={isLoading}
         className={cn(
-          'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
+          'whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors',
           variant === 'light'
-            ? 'text-primary-600 bg-white hover:bg-white/90'
-            : 'bg-primary-600 hover:bg-primary-700 text-white',
+            ? 'bg-white text-primary-600 hover:bg-white/90'
+            : 'bg-primary-600 text-white hover:bg-primary-700',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -275,7 +276,7 @@ export function FooterLinkSection({
     <div className={className}>
       <h3
         className={cn(
-          'mb-4 text-sm font-semibold tracking-wider uppercase',
+          'mb-4 text-sm font-semibold uppercase tracking-wider',
           variant === 'light'
             ? 'text-white/70'
             : 'text-gray-500 dark:text-gray-400'
@@ -686,7 +687,7 @@ export function SimpleFooter({
       className={cn(
         'border-t py-4',
         variant === 'light'
-          ? 'bg-primary-700 border-white/10'
+          ? 'border-white/10 bg-primary-700'
           : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
         className
       )}

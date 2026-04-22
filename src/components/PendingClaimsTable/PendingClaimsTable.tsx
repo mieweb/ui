@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
+
+import { Avatar } from '../Avatar/Avatar';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Avatar } from '../Avatar/Avatar';
 
 export interface PendingClaim {
   id: string;
@@ -108,19 +109,19 @@ export function PendingClaimsTable({
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Claimant
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Role
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Submitted
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Actions
               </th>
             </tr>
@@ -199,7 +200,7 @@ export function PendingClaimsTable({
       </div>
 
       {/* Mobile cards */}
-      <div className="divide-y divide-gray-200 md:hidden dark:divide-gray-700">
+      <div className="divide-y divide-gray-200 dark:divide-gray-700 md:hidden">
         {claims.map((claim) => (
           <div key={claim.id} className="bg-white p-4 dark:bg-gray-900">
             <div className="flex items-start justify-between gap-4">

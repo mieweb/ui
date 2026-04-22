@@ -1,10 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '../Button/Button';
+
 import { Badge } from '../Badge/Badge';
-import { Input } from '../Input/Input';
+import { Button } from '../Button/Button';
 import { Card, CardContent } from '../Card/Card';
+import { Input } from '../Input/Input';
 
 export interface OrderDetails {
   id: string;
@@ -236,7 +237,7 @@ export function OrderConfirmationWizard({
                 </label>
                 <textarea
                   id="verification-notes"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   rows={2}
                   value={verificationNotes}
                   onChange={(e) => setVerificationNotes(e.target.value)}
@@ -391,7 +392,7 @@ export function OrderConfirmationWizard({
                 </label>
                 <textarea
                   id="confirmation-notes"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   rows={3}
                   value={confirmationNotes}
                   onChange={(e) => setConfirmationNotes(e.target.value)}
@@ -467,7 +468,7 @@ export function OrderConfirmationWizard({
               {isSubmitting ? (
                 <>
                   <svg
-                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                    className="-ml-1 mr-2 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >

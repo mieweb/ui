@@ -6,14 +6,15 @@
  */
 
 import * as React from 'react';
-import type { BrandConfig } from '../../brands/types';
+
 import {
-  miewebBrand,
   bluehiveBrand,
+  enterpriseHealthBrand,
+  miewebBrand,
   wagglelineBrand,
   webchartBrand,
-  enterpriseHealthBrand,
 } from '../../brands';
+import type { BrandConfig } from '../../brands/types';
 
 // =============================================================================
 // Brand Theme Types

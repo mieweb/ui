@@ -1,10 +1,11 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import type {
   Message,
-  MessageStatus,
   MessageAttachment,
+  MessageStatus,
   ReadReceipt,
 } from './types';
 
@@ -225,7 +226,7 @@ function AttachmentPreview({
         onClick={onClick}
         className={cn(
           'relative block overflow-hidden rounded-lg',
-          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+          'focus:outline-none focus:ring-2 focus:ring-primary-500',
           'transition-transform hover:scale-[1.02]',
           className
         )}
@@ -310,7 +311,7 @@ function AttachmentPreview({
         'flex items-center gap-3 rounded-lg p-3',
         'bg-white/10 hover:bg-white/20',
         'transition-colors',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500',
         className
       )}
     >
@@ -389,8 +390,7 @@ const bubbleVariants = cva(
 );
 
 export interface MessageBubbleProps
-  extends
-    Omit<React.HTMLAttributes<HTMLDivElement>, 'id'>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'id'>,
     VariantProps<typeof bubbleVariants> {
   /** The message to display */
   message: Message;
@@ -561,7 +561,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 
             {/* Text content */}
             {hasText && (
-              <p className="break-words whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap break-words">
                 {message.isDeleted ? (
                   <span className="italic opacity-60">
                     This message was deleted
@@ -611,7 +611,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
                   'flex items-center gap-1 rounded px-2 py-0.5',
                   'text-xs font-medium text-red-500',
                   'hover:bg-red-50 dark:hover:bg-red-900/20',
-                  'focus:ring-2 focus:ring-red-500 focus:outline-none'
+                  'focus:outline-none focus:ring-2 focus:ring-red-500'
                 )}
                 aria-label="Retry sending message"
               >
@@ -671,10 +671,10 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 MessageBubble.displayName = 'MessageBubble';
 
 export {
-  MessageBubble,
-  MessageStatusIcon,
-  ReadReceiptIndicator,
   AttachmentPreview,
   bubbleVariants,
   formatFileSize,
+  MessageBubble,
+  MessageStatusIcon,
+  ReadReceiptIndicator,
 };

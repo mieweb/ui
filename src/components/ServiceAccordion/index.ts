@@ -1,12 +1,12 @@
 export {
   ServiceAccordion,
-  ServiceTagCloud,
-  ServiceList,
-  ServiceLink,
   type ServiceAccordionProps,
-  type ServiceTagCloudProps,
-  type ServiceListProps,
   type ServiceCategory,
-  type ServiceSubCategory,
   type ServiceItem,
+  ServiceLink,
+  ServiceList,
+  type ServiceListProps,
+  type ServiceSubCategory,
+  ServiceTagCloud,
+  type ServiceTagCloudProps,
 } from './ServiceAccordion';

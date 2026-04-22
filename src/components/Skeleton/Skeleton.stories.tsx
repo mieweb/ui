@@ -1,10 +1,11 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import {
   Skeleton,
-  SkeletonText,
   SkeletonCard,
   SkeletonTable,
+  SkeletonText,
 } from './Skeleton';
 
 // =============================================================================
@@ -203,7 +204,7 @@ function SkeletonExample({
 
     case 'profileCard':
       return (
-        <div className="border-border bg-card w-80 rounded-xl border p-4">
+        <div className="w-80 rounded-xl border border-border bg-card p-4">
           <div className="mb-4 flex items-center gap-4">
             <Skeleton circle width={64} height={64} />
             <div className="flex-1 space-y-2">
@@ -518,31 +519,31 @@ export const AllVariants: Story = {
   render: () => (
     <div className="w-80 space-y-6">
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Default</p>
+        <p className="mb-2 text-sm text-muted-foreground">Default</p>
         <Skeleton width="100%" height={40} />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Text</p>
+        <p className="mb-2 text-sm text-muted-foreground">Text</p>
         <Skeleton variant="text" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Title</p>
+        <p className="mb-2 text-sm text-muted-foreground">Title</p>
         <Skeleton variant="title" width="60%" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Avatar</p>
+        <p className="mb-2 text-sm text-muted-foreground">Avatar</p>
         <Skeleton variant="avatar" circle width={48} height={48} />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Button</p>
+        <p className="mb-2 text-sm text-muted-foreground">Button</p>
         <Skeleton variant="button" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Card</p>
+        <p className="mb-2 text-sm text-muted-foreground">Card</p>
         <Skeleton variant="card" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Image</p>
+        <p className="mb-2 text-sm text-muted-foreground">Image</p>
         <Skeleton variant="image" className="rounded-lg" />
       </div>
     </div>

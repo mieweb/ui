@@ -1,33 +1,42 @@
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 // Helper to navigate to a story and wait for it to render
 async function gotoStory(page: Page, storyId: string) {
   // Navigate to the story iframe
   await page.goto(`/iframe.html?id=${storyId}&viewMode=story`);
-  
+
   // Wait for either success or error state
   const result = await page.waitForFunction(
     () => {
       const body = document.body;
       const root = document.querySelector('#storybook-root');
       // Success: main is showing and root has content
-      if (body?.classList.contains('sb-show-main') && root && root.children.length > 0) {
+      if (
+        body?.classList.contains('sb-show-main') &&
+        root &&
+        root.children.length > 0
+      ) {
         return 'success';
       }
       // Error: no preview is showing
-      if (body?.classList.contains('sb-show-nopreview') || body?.classList.contains('sb-show-errordisplay')) {
+      if (
+        body?.classList.contains('sb-show-nopreview') ||
+        body?.classList.contains('sb-show-errordisplay')
+      ) {
         return 'error';
       }
       return false;
     },
     { timeout: 20000 }
   );
-  
+
   const status = await result.jsonValue();
   if (status === 'error') {
-    throw new Error(`Story '${storyId}' failed to render - check if the story exists`);
+    throw new Error(
+      `Story '${storyId}' failed to render - check if the story exists`
+    );
   }
-  
+
   // Additional delay for any animations/renders
   await page.waitForTimeout(500);
 }
@@ -95,14 +104,14 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('Spinner - Default', async ({ page }) => {
     await gotoStory(page, 'components-spinner--default');
     await expect(page).toHaveScreenshot('spinner-default.png', {
-      animations: 'disabled'
+      animations: 'disabled',
     });
   });
 
   test('Progress - Default', async ({ page }) => {
     await gotoStory(page, 'components-progress--default');
     await expect(page).toHaveScreenshot('progress-default.png', {
-      animations: 'disabled'
+      animations: 'disabled',
     });
   });
 

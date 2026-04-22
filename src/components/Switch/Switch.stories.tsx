@@ -1,5 +1,6 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import { Switch } from './Switch';
 
 const meta: Meta<typeof Switch> = {
@@ -97,7 +98,7 @@ function ControlledSwitchDemo() {
         checked={checked}
         onCheckedChange={setChecked}
       />
-      <p className="text-muted-foreground text-xs">
+      <p className="text-xs text-muted-foreground">
         State: <code className="font-mono">{checked ? 'on' : 'off'}</code>
       </p>
     </div>

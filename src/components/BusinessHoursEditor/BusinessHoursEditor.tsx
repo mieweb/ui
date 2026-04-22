@@ -2,9 +2,10 @@
 
 import * as React from 'react';
 import { useCallback } from 'react';
+
+import { cn } from '../../utils/cn';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
-import { cn } from '../../utils/cn';
 
 // ============================================================================
 // Types
@@ -227,10 +228,10 @@ export function BusinessHoursEditor({
                       <CopyIcon className="mr-1 h-3 w-3" />
                       Copy
                     </Button>
-                    <div className="invisible absolute top-full right-0 z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="invisible absolute right-0 top-full z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800">
                       <button
                         type="button"
-                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="block w-full whitespace-nowrap px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => handleCopyToAll(dayIndex)}
                         disabled={disabled}
                       >
@@ -238,7 +239,7 @@ export function BusinessHoursEditor({
                       </button>
                       <button
                         type="button"
-                        className="block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="block w-full whitespace-nowrap px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => handleCopyToWeekdays(dayIndex)}
                         disabled={disabled}
                       >
@@ -263,7 +264,7 @@ export function BusinessHoursEditor({
 
             {/* Time Slots */}
             {hours.length === 0 ? (
-              <p className="text-sm text-gray-500 italic dark:text-gray-400">
+              <p className="text-sm italic text-gray-500 dark:text-gray-400">
                 Closed
               </p>
             ) : (

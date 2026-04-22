@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useEffect, useState } from 'react';
-import { AddContactModal, ContactFormData } from './AddContactModal';
+
 import { Button } from '../Button/Button';
+import { AddContactModal, ContactFormData } from './AddContactModal';
 
 const meta: Meta<typeof AddContactModal> = {
   title: 'Components/AddContactModal',

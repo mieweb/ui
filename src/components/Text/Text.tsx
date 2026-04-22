@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const textVariants = cva('', {
@@ -54,7 +55,8 @@ type TextElement =
   | 'h6';
 
 export interface TextProps
-  extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof textVariants> {
+  extends React.HTMLAttributes<HTMLElement>,
+    VariantProps<typeof textVariants> {
   /** HTML element to render as */
   as?: TextElement;
   /** Truncate text with ellipsis */
@@ -115,4 +117,4 @@ const SmallMuted = React.forwardRef<
 
 SmallMuted.displayName = 'SmallMuted';
 
-export { Text, SmallMuted, textVariants };
+export { SmallMuted, Text, textVariants };

@@ -1,14 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as React from 'react';
-import { DocumentScanner } from './DocumentScanner';
-import { useFileUpload } from './useFileUpload';
-import { useCamera } from './useCamera';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { useIsMobile } from '../../hooks';
+import { DocumentScanner } from './DocumentScanner';
 import { DropZone } from './DropZone';
 import { FilePreview } from './FilePreview';
 import type { PreviewFile } from './types';
+import { useCamera } from './useCamera';
+import { useFileUpload } from './useFileUpload';
 
 // Mark unused imports as used for type checking
 void useCamera;

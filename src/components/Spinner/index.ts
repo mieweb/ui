@@ -1,9 +1,9 @@
 export {
-  Spinner,
-  SpinnerWithLabel,
   FullPageSpinner,
-  spinnerVariants,
-  type SpinnerProps,
-  type SpinnerWithLabelProps,
   type FullPageSpinnerProps,
+  Spinner,
+  type SpinnerProps,
+  spinnerVariants,
+  SpinnerWithLabel,
+  type SpinnerWithLabelProps,
 } from './Spinner';

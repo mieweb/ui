@@ -1,7 +1,7 @@
 export {
   Checkbox,
   CheckboxGroup,
-  checkboxVariants,
-  type CheckboxProps,
   type CheckboxGroupProps,
+  type CheckboxProps,
+  checkboxVariants,
 } from './Checkbox';

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Tooltip } from './Tooltip';
+
 import { Button } from '../Button';
+import { Tooltip } from './Tooltip';
 
 const meta: Meta<typeof Tooltip> = {
   title: 'Components/Tooltip',
@@ -79,7 +80,7 @@ export const SmartPositioning: Story = {
       </p>
 
       {/* Top-left corner */}
-      <div className="absolute top-12 left-2">
+      <div className="absolute left-2 top-12">
         <Tooltip
           content="I flip to bottom-right when near the corner!"
           placement="top"
@@ -91,7 +92,7 @@ export const SmartPositioning: Story = {
       </div>
 
       {/* Top-right corner */}
-      <div className="absolute top-12 right-2">
+      <div className="absolute right-2 top-12">
         <Tooltip
           content="I flip to bottom-left when near the corner!"
           placement="top"
@@ -115,7 +116,7 @@ export const SmartPositioning: Story = {
       </div>
 
       {/* Bottom-right corner */}
-      <div className="absolute right-2 bottom-4">
+      <div className="absolute bottom-4 right-2">
         <Tooltip
           content="I flip to top-left when near the corner!"
           placement="bottom"
@@ -127,7 +128,7 @@ export const SmartPositioning: Story = {
       </div>
 
       {/* Center */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <Tooltip
           content="I have plenty of space, so I stay on top!"
           placement="top"

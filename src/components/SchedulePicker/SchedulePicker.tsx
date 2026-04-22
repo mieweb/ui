@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -27,8 +28,7 @@ const dateButtonVariants = cva(
 );
 
 export interface DateButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof dateButtonVariants> {
   /** The date to display */
   date: Date;
@@ -87,8 +87,7 @@ const timeButtonVariants = cva(
 );
 
 export interface TimeButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof timeButtonVariants> {
   /** The time string to display (e.g., "8:00 AM") */
   time: string;
@@ -137,8 +136,7 @@ const radioOptionVariants = cva(
 );
 
 export interface RadioOptionProps
-  extends
-    Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
     VariantProps<typeof radioOptionVariants> {
   /** Title text for the option */
   title: React.ReactNode;
@@ -325,7 +323,8 @@ TimePicker.displayName = 'TimePicker';
 // Schedule Picker Component (Composite)
 // ============================================================================
 
-export interface SchedulePickerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SchedulePickerProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /** Array of available dates to display */
   dates: Date[];
   /** Array of available time strings */
@@ -411,12 +410,12 @@ SchedulePicker.displayName = 'SchedulePicker';
 
 export {
   DateButton,
-  TimeButton,
-  RadioOption,
-  DatePicker,
-  TimePicker,
-  SchedulePicker,
   dateButtonVariants,
-  timeButtonVariants,
+  DatePicker,
+  RadioOption,
   radioOptionVariants,
+  SchedulePicker,
+  TimeButton,
+  timeButtonVariants,
+  TimePicker,
 };

@@ -1,11 +1,12 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils';
-import { Button } from '../Button';
 import { Alert } from '../Alert';
-import { Spinner } from '../Spinner';
+import { Button } from '../Button';
 import { Progress } from '../Progress';
+import { Spinner } from '../Spinner';
 
 export interface OnboardingStep {
   /** Unique step identifier */
@@ -122,7 +123,7 @@ export function OnboardingWizard({
   return (
     <div
       className={cn(
-        'onboarding-wizard bg-background text-foreground fixed inset-0 z-50 flex flex-col',
+        'onboarding-wizard fixed inset-0 z-50 flex flex-col bg-background text-foreground',
         className
       )}
     >
@@ -150,7 +151,7 @@ export function OnboardingWizard({
       {loading ? (
         <div className="flex flex-1 flex-col items-center justify-center">
           <Spinner size="xl" />
-          <p className="text-muted-foreground mt-4 text-center text-lg">
+          <p className="mt-4 text-center text-lg text-muted-foreground">
             {loadingMessage}
           </p>
         </div>
@@ -169,7 +170,7 @@ export function OnboardingWizard({
           </div>
 
           {/* Footer Buttons */}
-          <div className="border-border mt-auto border-t pt-4">
+          <div className="mt-auto border-t border-border pt-4">
             {/* Skip Button (top right of footer) */}
             {!isLastStep && currentStepData?.skippable !== false && (
               <div className="mb-3 flex justify-end">
@@ -185,7 +186,7 @@ export function OnboardingWizard({
             )}
 
             {/* Navigation Row */}
-            <div className="bg-background flex w-full items-center gap-4">
+            <div className="flex w-full items-center gap-4 bg-background">
               {/* Back Button - always visible, disabled on first step */}
               <Button
                 variant="outline"
@@ -266,12 +267,12 @@ export function OnboardingStepQuestion({
     <div className="py-4">
       <div className="mb-4 flex items-start gap-3">
         {icon && (
-          <div className="bg-muted text-muted-foreground hidden rounded-full p-3">
+          <div className="hidden rounded-full bg-muted p-3 text-muted-foreground">
             <i className={cn(icon, 'text-lg')} />
           </div>
         )}
         <div>
-          <h3 className="text-foreground mb-2 text-2xl font-bold">{title}</h3>
+          <h3 className="mb-2 text-2xl font-bold text-foreground">{title}</h3>
           {description && (
             <p className="text-muted-foreground">{description}</p>
           )}
@@ -326,7 +327,7 @@ export function OnboardingCompletion({
     return (
       <div className="py-4">
         <div className="mb-4">
-          <p className="text-foreground mb-0 text-2xl">
+          <p className="mb-0 text-2xl text-foreground">
             <i className="fas fa-check-circle mr-2 text-green-500" />
             Setup complete!
           </p>
@@ -357,7 +358,7 @@ export function OnboardingCompletion({
   return (
     <div className="py-4">
       <div className="mb-4">
-        <h3 className="text-foreground mb-2 text-2xl font-bold">
+        <h3 className="mb-2 text-2xl font-bold text-foreground">
           Some steps not completed
         </h3>
         <p className="text-muted-foreground">

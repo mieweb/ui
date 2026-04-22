@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -60,8 +61,7 @@ const progressBarFillVariants = cva(
 // ============================================================================
 
 export interface ProgressProps
-  extends
-    VariantProps<typeof progressBarTrackVariants>,
+  extends VariantProps<typeof progressBarTrackVariants>,
     VariantProps<typeof progressBarFillVariants> {
   /** Current progress value (0-100) */
   value: number;
@@ -116,13 +116,13 @@ function Progress({
           {label && (
             <label
               id={`${progressId}-label`}
-              className="text-foreground text-sm font-medium"
+              className="text-sm font-medium text-foreground"
             >
               {label}
             </label>
           )}
           {showValue && !indeterminate && (
-            <span className="text-muted-foreground text-sm">
+            <span className="text-sm text-muted-foreground">
               {displayValue}
             </span>
           )}
@@ -178,9 +178,8 @@ const circularProgressVariants = cva(['relative inline-flex'], {
 // Circular Progress Component
 // ============================================================================
 
-export interface CircularProgressProps extends VariantProps<
-  typeof circularProgressVariants
-> {
+export interface CircularProgressProps
+  extends VariantProps<typeof circularProgressVariants> {
   /** Current progress value (0-100) */
   value: number;
   /** Maximum value (default: 100) */
@@ -272,7 +271,7 @@ function CircularProgress({
         />
       </svg>
       {showValue && !indeterminate && (
-        <span className="text-foreground absolute inset-0 flex items-center justify-center text-xs font-medium">
+        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-foreground">
           {Math.round(percentage)}%
         </span>
       )}
@@ -283,9 +282,9 @@ function CircularProgress({
 CircularProgress.displayName = 'CircularProgress';
 
 export {
-  Progress,
   CircularProgress,
-  progressBarTrackVariants,
-  progressBarFillVariants,
   circularProgressVariants,
+  Progress,
+  progressBarFillVariants,
+  progressBarTrackVariants,
 };

@@ -1,10 +1,11 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { AudioPlayer } from './AudioPlayer';
-import { Card, CardContent, CardHeader, CardTitle } from '../Card';
-import { Text } from '../Text';
+import * as React from 'react';
+
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../Card';
+import { Text } from '../Text';
+import { AudioPlayer } from './AudioPlayer';
 
 // ============================================================================
 // Audio Sample Generation
@@ -16,11 +17,9 @@ import { Badge } from '../Badge';
  */
 function createSampleAudioUrl(durationSec = 5, frequency = 440): string {
   // Create audio context
-  const audioContext = new (
-    window.AudioContext ||
+  const audioContext = new (window.AudioContext ||
     (window as typeof window & { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext
-  )();
+      .webkitAudioContext)();
   const sampleRate = audioContext.sampleRate;
   const numSamples = Math.floor(sampleRate * durationSec);
 
@@ -481,13 +480,13 @@ export const ChatMessage: Story = {
       <div className="flex flex-row-reverse gap-2">
         <Avatar name="You" size="sm" />
         <div className="space-y-1">
-          <div className="bg-primary-600 rounded-2xl rounded-tr-sm px-3 py-2">
+          <div className="rounded-2xl rounded-tr-sm bg-primary-600 px-3 py-2">
             <AudioPlayer
               src={getShortAudio()}
               variant="compact"
               size="sm"
               showTime
-              className="[&_button]:bg-white/20 [&_button]:text-white [&_div]:bg-white/30 [&_div>div]:bg-white [&_span]:text-white/80"
+              className="[&_button]:bg-white/20 [&_button]:text-white [&_div>div]:bg-white [&_div]:bg-white/30 [&_span]:text-white/80"
             />
           </div>
           <Text size="xs" variant="muted" className="text-right">
@@ -504,7 +503,7 @@ export const PodcastPlayer: Story = {
     <Card className="w-[500px]">
       <CardContent className="pt-6">
         <div className="flex gap-4">
-          <div className="bg-primary-500 h-24 w-24 shrink-0 overflow-hidden rounded-lg">
+          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-primary-500">
             <div className="flex h-full items-center justify-center text-2xl text-white">
               🎙️
             </div>
@@ -540,9 +539,9 @@ export const AudioAttachment: Story = {
     <div className="w-72">
       <div className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
         <div className="mb-2 flex items-center gap-2">
-          <div className="bg-primary-100 dark:bg-primary-900/30 flex h-8 w-8 items-center justify-center rounded">
+          <div className="dark:bg-primary-900/30 flex h-8 w-8 items-center justify-center rounded bg-primary-100">
             <svg
-              className="text-primary-600 dark:text-primary-400 h-4 w-4"
+              className="h-4 w-4 text-primary-600 dark:text-primary-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

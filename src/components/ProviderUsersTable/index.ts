@@ -1,5 +1,5 @@
-export { ProviderUsersTable } from './ProviderUsersTable';
 export type {
-  ProviderUsersTableProps,
   ProviderUser,
+  ProviderUsersTableProps,
 } from './ProviderUsersTable';
+export { ProviderUsersTable } from './ProviderUsersTable';

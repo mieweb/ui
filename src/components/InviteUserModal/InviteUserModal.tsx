@@ -1,15 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalBody,
-  ModalFooter,
-} from '../Modal/Modal';
+
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal/Modal';
 import { Select } from '../Select/Select';
 
 export interface Role {
@@ -103,10 +104,10 @@ export function InviteUserModal({
 
         <ModalBody className="space-y-4">
           {entityDisplayName && (
-            <div className="bg-muted rounded-lg p-3">
-              <p className="text-muted-foreground text-sm">
+            <div className="rounded-lg bg-muted p-3">
+              <p className="text-sm text-muted-foreground">
                 Inviting user to:{' '}
-                <span className="text-foreground font-medium">
+                <span className="font-medium text-foreground">
                   {entityDisplayName}
                 </span>
               </p>
@@ -169,7 +170,6 @@ export function InviteUserModal({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="user@example.com"
             required
-            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
           />
 
@@ -208,13 +208,13 @@ export function InviteUserModal({
           <div>
             <label
               htmlFor="invite-message"
-              className="text-foreground mb-1 block text-sm font-medium"
+              className="mb-1 block text-sm font-medium text-foreground"
             >
               Personal Message (optional)
             </label>
             <textarea
               id="invite-message"
-              className="border-input bg-background text-foreground focus:ring-primary w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+              className="focus:ring-primary w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2"
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -223,7 +223,7 @@ export function InviteUserModal({
           </div>
 
           {/* Info text */}
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             An email invitation will be sent to this address. If the user
             doesn&apos;t have an account, they&apos;ll be prompted to create
             one.
@@ -243,7 +243,7 @@ export function InviteUserModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ml-1 mr-2 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

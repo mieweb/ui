@@ -11,11 +11,13 @@ Auto-fix all formatting and linting issues.
 Execute these steps:
 
 1. **Auto-format code**
+
    ```bash
    npm run format:fix
    ```
 
 2. **Auto-fix lint issues**
+
    ```bash
    npm run lint:fix
    ```

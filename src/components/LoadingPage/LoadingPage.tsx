@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Spinner, type SpinnerProps } from '../Spinner';
 
@@ -415,9 +416,9 @@ export function CardSkeleton({
 function PulseIndicator() {
   return (
     <div className="relative h-16 w-16">
-      <div className="bg-primary-200 dark:bg-primary-800 absolute inset-0 animate-ping rounded-full opacity-75" />
-      <div className="bg-primary-400 dark:bg-primary-600 absolute inset-2 animate-pulse rounded-full" />
-      <div className="bg-primary-600 dark:bg-primary-400 absolute inset-4 rounded-full" />
+      <div className="absolute inset-0 animate-ping rounded-full bg-primary-200 opacity-75 dark:bg-primary-800" />
+      <div className="absolute inset-2 animate-pulse rounded-full bg-primary-400 dark:bg-primary-600" />
+      <div className="absolute inset-4 rounded-full bg-primary-600 dark:bg-primary-400" />
     </div>
   );
 }

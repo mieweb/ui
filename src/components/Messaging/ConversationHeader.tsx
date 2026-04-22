@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import type { Conversation, MessageParticipant } from './types';
 
@@ -28,8 +29,7 @@ const headerVariants = cva(
 );
 
 export interface ConversationHeaderProps
-  extends
-    React.HTMLAttributes<HTMLElement>,
+  extends React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof headerVariants> {
   /** The conversation to display */
   conversation?: Conversation;
@@ -179,7 +179,7 @@ const ConversationHeader = React.forwardRef<
                 'text-neutral-500 hover:text-neutral-700',
                 'dark:text-neutral-400 dark:hover:text-neutral-200',
                 'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-                'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+                'focus:outline-none focus:ring-2 focus:ring-primary-500',
                 'transition-colors'
               )}
               aria-label="Go back"
@@ -222,7 +222,7 @@ const ConversationHeader = React.forwardRef<
           {showOnlineStatus && isOnline && (
             <span
               className={cn(
-                'absolute right-0 bottom-0',
+                'absolute bottom-0 right-0',
                 'h-3 w-3 rounded-full',
                 'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
               )}
@@ -266,10 +266,8 @@ ConversationHeader.displayName = 'ConversationHeader';
 // Conversation List Item Component
 // ============================================================================
 
-export interface ConversationListItemProps extends Omit<
-  React.HTMLAttributes<HTMLButtonElement>,
-  'onSelect'
-> {
+export interface ConversationListItemProps
+  extends Omit<React.HTMLAttributes<HTMLButtonElement>, 'onSelect'> {
   /** The conversation to display */
   conversation: Conversation;
   /** Whether this item is selected */
@@ -329,7 +327,7 @@ const ConversationListItem = React.forwardRef<
         'flex w-full items-center gap-3 px-4 py-3',
         'text-left transition-colors',
         isSelected
-          ? 'bg-primary-50 dark:bg-primary-900/20'
+          ? 'dark:bg-primary-900/20 bg-primary-50'
           : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50',
         'focus:bg-neutral-50 focus:outline-none dark:focus:bg-neutral-800/50',
         className
@@ -358,7 +356,7 @@ const ConversationListItem = React.forwardRef<
         {participant?.isOnline && (
           <span
             className={cn(
-              'absolute right-0 bottom-0',
+              'absolute bottom-0 right-0',
               'h-3 w-3 rounded-full',
               'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
             )}
@@ -414,7 +412,7 @@ const ConversationListItem = React.forwardRef<
       <div className="flex shrink-0 flex-col items-center gap-1">
         {conversation.isPinned && (
           <svg
-            className="text-primary-500 h-4 w-4"
+            className="h-4 w-4 text-primary-500"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -495,8 +493,8 @@ export {
   ConversationHeader,
   ConversationListItem,
   ConversationListSkeleton,
-  headerVariants,
-  getConversationTitle,
-  getConversationSubtitle,
   formatLastSeen,
+  getConversationSubtitle,
+  getConversationTitle,
+  headerVariants,
 };

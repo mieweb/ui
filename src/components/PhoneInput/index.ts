@@ -1,8 +1,8 @@
 export {
+  type PhoneEntry,
   PhoneInput,
   PhoneInputGroup,
-  type PhoneInputProps,
   type PhoneInputGroupProps,
-  type PhoneEntry,
+  type PhoneInputProps,
   type PhoneType,
 } from './PhoneInput';

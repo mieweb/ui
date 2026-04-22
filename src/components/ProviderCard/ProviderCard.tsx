@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge';
 import { Tooltip } from '../Tooltip';
@@ -97,8 +98,8 @@ const ProviderLogo: React.FC<{
   if (!logoURL || hasError) {
     return (
       <div className={cn(logoContainerVariants({ variant }))}>
-        <div className="bg-primary-100 dark:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-full">
-          <span className="text-primary-600 dark:text-primary-400 text-lg font-bold">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+          <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
             {name.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -129,7 +130,7 @@ const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
       : distance.toFixed(0);
 
   return (
-    <span className="bg-primary-600/10 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400 inline-flex shrink-0 items-center gap-1 rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
+    <span className="bg-primary-600/10 dark:bg-primary-500/20 inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold text-primary-600 dark:text-primary-400">
       <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 512 512">
         <path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19L508.48 67.48c16.49-38.4-14.96-80.35-63.96-63.96z" />
       </svg>
@@ -141,7 +142,7 @@ const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
 
 const SafeFromWildfiresNotice: React.FC = () => (
   <Tooltip content="BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.">
-    <div className="bg-success/10 text-success inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs">
+    <div className="bg-success/10 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-success">
       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -156,7 +157,7 @@ const SafeFromWildfiresNotice: React.FC = () => (
 
 const VerifiedBadge: React.FC = () => (
   <Tooltip content="This provider's information has been verified">
-    <span className="text-success inline-flex items-center gap-1 text-xs">
+    <span className="inline-flex items-center gap-1 text-xs text-success">
       <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
         <path
           fillRule="evenodd"
@@ -192,8 +193,7 @@ function formatPhoneNumber(phone: string): string {
 // ============================================================================
 
 export interface ProviderCardProps
-  extends
-    VariantProps<typeof providerCardVariants>,
+  extends VariantProps<typeof providerCardVariants>,
     Omit<React.HTMLAttributes<HTMLDivElement>, 'onClick'> {
   /** Provider data to display */
   provider: Provider;
@@ -313,7 +313,7 @@ export const ProviderCard = React.forwardRef<HTMLDivElement, ProviderCardProps>(
             <div className="flex items-start gap-1">
               <h3
                 className={cn(
-                  'text-primary-600 dark:text-primary-400 line-clamp-2 font-semibold',
+                  'line-clamp-2 font-semibold text-primary-600 dark:text-primary-400',
                   'group-hover:text-primary-700 dark:group-hover:text-primary-300',
                   'transition-colors',
                   variant === 'featured'
@@ -534,7 +534,7 @@ export const ProviderCardSkeleton: React.FC<ProviderCardSkeletonProps> = ({
   return (
     <div
       className={cn(
-        'border-border bg-card animate-pulse rounded-xl border',
+        'animate-pulse rounded-xl border border-border bg-card',
         variant === 'compact' && 'flex flex-col',
         variant === 'list' && 'flex min-h-[120px] flex-row',
         variant === 'featured' && 'flex flex-col p-6'
@@ -558,21 +558,21 @@ export const ProviderCardSkeleton: React.FC<ProviderCardSkeletonProps> = ({
         )}
       >
         {/* Title */}
-        <div className="bg-muted h-4 w-3/4 rounded" />
+        <div className="h-4 w-3/4 rounded bg-muted" />
 
         {/* Address lines */}
-        <div className="bg-muted h-3 w-full rounded" />
-        <div className="bg-muted h-3 w-2/3 rounded" />
+        <div className="h-3 w-full rounded bg-muted" />
+        <div className="h-3 w-2/3 rounded bg-muted" />
 
         {/* Phone */}
-        <div className="bg-muted h-3 w-1/3 rounded" />
+        <div className="h-3 w-1/3 rounded bg-muted" />
 
         {/* Spacer */}
         <div className="flex-1" />
 
         {/* Footer */}
         <div className="flex justify-between">
-          <div className="bg-muted h-4 w-16 rounded" />
+          <div className="h-4 w-16 rounded bg-muted" />
         </div>
       </div>
     </div>

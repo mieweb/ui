@@ -1,23 +1,24 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { LucideIcon } from 'lucide-react';
 import React from 'react';
-import { Badge } from './Badge';
+
 import {
-  CheckIcon,
   AlertCircleIcon,
-  InfoIcon,
-  StarIcon,
-  HeartIcon,
   BellIcon,
-  TagIcon,
-  ZapIcon,
-  ShieldIcon,
+  CheckIcon,
   ClockIcon,
-  UserIcon,
+  HeartIcon,
+  InfoIcon,
   MailIcon,
   PlusIcon,
+  ShieldIcon,
   SparklesIcon,
+  StarIcon,
+  TagIcon,
+  UserIcon,
+  ZapIcon,
 } from '../Icons';
-import type { LucideIcon } from 'lucide-react';
+import { Badge } from './Badge';
 
 // Map of available icons for the dropdown
 const iconMap: Record<string, LucideIcon | undefined> = {

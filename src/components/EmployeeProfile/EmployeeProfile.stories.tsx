@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+
 import {
-  EmployeeProfileCard,
-  OrderSidebarTabs,
-  OrderDetailSidebar,
   EmployeeData,
+  EmployeeProfileCard,
+  OrderDetailSidebar,
+  OrderSidebarTabs,
 } from './EmployeeProfile';
 
 // ============================================================================
@@ -241,7 +242,7 @@ export const OrderSidebar: StoryObj<typeof OrderDetailSidebar> = {
           onTabChange={setActiveTab}
           showPaymentStatus
         >
-          <div className="text-muted-foreground p-4 text-center">
+          <div className="p-4 text-center text-muted-foreground">
             {activeTab === 'timeline' && 'Timeline content goes here...'}
             {activeTab === 'services' && 'Services list goes here...'}
             {activeTab === 'attachments' && 'Attachments list goes here...'}
@@ -272,7 +273,7 @@ export const Mobile: StoryObj<typeof OrderDetailSidebar> = {
           showPaymentStatus
           showPhotoEdit
         >
-          <div className="text-muted-foreground p-4 text-center">
+          <div className="p-4 text-center text-muted-foreground">
             {activeTab === 'timeline' && 'Timeline content goes here...'}
             {activeTab === 'services' && 'Services list goes here...'}
             {activeTab === 'attachments' && 'Attachments list goes here...'}

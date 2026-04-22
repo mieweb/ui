@@ -1,18 +1,19 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
-import type {
-  Message,
-  MessageParticipant,
-  MessageAttachment,
-  TypingState,
-  Conversation,
-  NewMessage,
-  MessagingEventHandlers,
-} from './types';
-import { MessageList } from './MessageList';
-import { MessageComposer } from './MessageComposer';
-import { ConversationHeader } from './ConversationHeader';
 import { DragDropZone } from './AttachmentPicker';
+import { ConversationHeader } from './ConversationHeader';
+import { MessageComposer } from './MessageComposer';
+import { MessageList } from './MessageList';
+import type {
+  Conversation,
+  Message,
+  MessageAttachment,
+  MessageParticipant,
+  MessagingEventHandlers,
+  NewMessage,
+  TypingState,
+} from './types';
 
 // ============================================================================
 // Lightbox Modal Component
@@ -73,11 +74,11 @@ function LightboxModal({ attachment, onClose }: LightboxModalProps) {
         type="button"
         onClick={onClose}
         className={cn(
-          'absolute top-4 right-4 z-10',
+          'absolute right-4 top-4 z-10',
           'rounded-full p-2',
           'bg-white/10 text-white',
           'hover:bg-white/20',
-          'focus:ring-2 focus:ring-white focus:outline-none',
+          'focus:outline-none focus:ring-2 focus:ring-white',
           'transition-colors'
         )}
         aria-label="Close"
@@ -456,4 +457,4 @@ function MessagingSplitView({
 
 MessagingSplitView.displayName = 'MessagingSplitView';
 
-export { MessageThread, LightboxModal, MessagingSplitView };
+export { LightboxModal, MessageThread, MessagingSplitView };

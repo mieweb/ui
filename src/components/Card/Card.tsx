@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const cardVariants = cva(
@@ -66,8 +67,7 @@ const cardAccentVariants = cva('absolute left-0 top-0 bottom-0 w-1', {
 });
 
 export interface CardProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {
   /** Semantic HTML element to render as */
   as?: 'div' | 'article' | 'section' | 'aside';
@@ -134,9 +134,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {loading && (
           <div className="bg-card/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
             <div className="flex gap-1">
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full" />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500 [animation-delay:-0.3s]" />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500 [animation-delay:-0.15s]" />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500" />
             </div>
           </div>
         )}
@@ -174,7 +174,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      'text-lg leading-none font-semibold tracking-tight',
+      'text-lg font-semibold leading-none tracking-tight',
       className
     )}
     {...props}
@@ -194,7 +194,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-muted-foreground text-sm', className)}
+    className={cn('text-sm text-muted-foreground', className)}
     {...props}
   />
 ));
@@ -232,7 +232,8 @@ CardFooter.displayName = 'CardFooter';
 /**
  * Image/Media section for a Card - typically used at the top
  */
-export interface CardMediaProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+export interface CardMediaProps
+  extends React.ImgHTMLAttributes<HTMLImageElement> {
   /** Aspect ratio of the media */
   aspectRatio?: 'video' | 'square' | 'wide' | 'auto';
   /** Optional overlay content */
@@ -374,7 +375,7 @@ const CardDivider = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <hr
     ref={ref}
-    className={cn('border-border -mx-4 my-4', className)}
+    className={cn('-mx-4 my-4 border-border', className)}
     {...props}
   />
 ));
@@ -384,7 +385,8 @@ CardDivider.displayName = 'CardDivider';
 /**
  * Collapsible content section for Cards
  */
-export interface CardCollapsibleProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardCollapsibleProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /** Whether the content is expanded */
   expanded?: boolean;
   /** Callback when expand state changes */
@@ -422,7 +424,7 @@ const CardCollapsible = React.forwardRef<HTMLDivElement, CardCollapsibleProps>(
         <button
           type="button"
           onClick={handleToggle}
-          className="text-primary-600 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="flex items-center gap-1 rounded text-sm text-primary-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
           aria-expanded={expanded}
         >
           {typeof trigger === 'string' ? (
@@ -489,13 +491,13 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
         {...props}
       >
         {icon && (
-          <div className="bg-primary-500/10 text-primary-600 rounded-lg p-2">
+          <div className="bg-primary-500/10 rounded-lg p-2 text-primary-600">
             {icon}
           </div>
         )}
         <div className="min-w-0 flex-1">
           <div className="text-2xl font-bold tracking-tight">{value}</div>
-          <div className="text-muted-foreground text-sm">{label}</div>
+          <div className="text-sm text-muted-foreground">{label}</div>
           {trend && (
             <div
               className={cn(
@@ -532,17 +534,17 @@ CardStat.displayName = 'CardStat';
 
 export {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  CardMedia,
-  CardBadge,
-  CardActions,
-  CardDivider,
-  CardCollapsible,
-  CardStat,
-  cardVariants,
   cardAccentVariants,
+  CardActions,
+  CardBadge,
+  CardCollapsible,
+  CardContent,
+  CardDescription,
+  CardDivider,
+  CardFooter,
+  CardHeader,
+  CardMedia,
+  CardStat,
+  CardTitle,
+  cardVariants,
 };

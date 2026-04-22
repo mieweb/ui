@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -230,7 +231,8 @@ const tabsTriggerVariants = cva(
   }
 );
 
-export interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface TabsTriggerProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** The value that identifies this tab */
   value: string;
   /** Icon to show before the label */
@@ -302,7 +304,7 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
         hidden={!isSelected}
         data-state={isSelected ? 'active' : 'inactive'}
         className={cn(
-          'focus-visible:ring-ring mt-4 rounded-lg focus-visible:ring-2 focus-visible:outline-none',
+          'mt-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           !isSelected && 'hidden',
           className
         )}
@@ -318,9 +320,9 @@ TabsContent.displayName = 'TabsContent';
 
 export {
   Tabs,
-  TabsList,
-  TabsTrigger,
   TabsContent,
+  TabsList,
   tabsListVariants,
+  TabsTrigger,
   tabsTriggerVariants,
 };

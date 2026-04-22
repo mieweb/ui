@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
-import { PhoneInputGroup, type PhoneEntry } from './PhoneInput';
+import { type PhoneEntry, PhoneInputGroup } from './PhoneInput';
 
 const meta: Meta<typeof PhoneInputGroup> = {
   title: 'Components/PhoneInputGroup',

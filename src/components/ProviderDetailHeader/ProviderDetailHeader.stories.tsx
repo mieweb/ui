@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
 import {
+  BookAppointmentButton,
+  type BreadcrumbItem,
+  CompactProviderHeader,
+  type ProviderDetailData,
   ProviderDetailHeader,
+  ProviderDetailHeaderSkeleton,
   ProviderLogo,
   SocialMediaLinks,
   VerifiedBadge,
-  BookAppointmentButton,
-  CompactProviderHeader,
-  ProviderDetailHeaderSkeleton,
-  type ProviderDetailData,
-  type BreadcrumbItem,
 } from './ProviderDetailHeader';
 
 // Sample Data
@@ -209,7 +210,7 @@ export const FullPageDemo: Story = {
             {['Drug Testing', 'DOT Physical', 'Breath Alcohol'].map((s) => (
               <span
                 key={s}
-                className="bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 rounded-full px-3 py-1.5 text-sm"
+                className="rounded-full bg-primary-100 px-3 py-1.5 text-sm text-primary-700 dark:bg-primary-900 dark:text-primary-300"
               >
                 {s}
               </span>

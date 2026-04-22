@@ -1,24 +1,23 @@
-export {
-  SiteFooter,
-  SocialMediaLinks as FooterSocialLinks,
-  NewsletterForm,
-  FooterLinkSection,
-  CopyrightText,
-  LegalLinks,
-  DisclaimerText,
-  SimpleFooter,
-} from './SiteFooter';
-
 export type {
-  SiteFooterProps,
-  SocialMediaLinksProps as FooterSocialLinksProps,
-  NewsletterFormProps,
-  FooterLinkSectionProps,
   CopyrightTextProps,
-  LegalLinksProps,
   DisclaimerTextProps,
-  SimpleFooterProps,
   FooterLink,
   FooterLinkGroup,
+  FooterLinkSectionProps,
+  SocialMediaLinksProps as FooterSocialLinksProps,
+  LegalLinksProps,
+  NewsletterFormProps,
+  SimpleFooterProps,
+  SiteFooterProps,
   SocialLink,
+} from './SiteFooter';
+export {
+  CopyrightText,
+  DisclaimerText,
+  FooterLinkSection,
+  SocialMediaLinks as FooterSocialLinks,
+  LegalLinks,
+  NewsletterForm,
+  SimpleFooter,
+  SiteFooter,
 } from './SiteFooter';

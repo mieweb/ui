@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const textareaVariants = cva(
@@ -40,8 +41,7 @@ const textareaVariants = cva(
 );
 
 export interface TextareaProps
-  extends
-    Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
+  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
     VariantProps<typeof textareaVariants> {
   /** Label for the textarea */
   label?: string;
@@ -155,7 +155,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <label
             htmlFor={textareaId}
             className={cn(
-              'text-foreground text-sm font-medium',
+              'text-sm font-medium text-foreground',
               hideLabel && 'sr-only'
             )}
           >
@@ -184,12 +184,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1">
             {error && (
-              <p id={errorId} className="text-destructive text-sm" role="alert">
+              <p id={errorId} className="text-sm text-destructive" role="alert">
                 {error}
               </p>
             )}
             {helperText && !error && (
-              <p id={helperId} className="text-muted-foreground text-sm">
+              <p id={helperId} className="text-sm text-muted-foreground">
                 {helperText}
               </p>
             )}
@@ -198,7 +198,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             <p
               id={countId}
               className={cn(
-                'text-muted-foreground shrink-0 text-xs',
+                'shrink-0 text-xs text-muted-foreground',
                 maxLength && characterCount >= maxLength && 'text-destructive'
               )}
             >

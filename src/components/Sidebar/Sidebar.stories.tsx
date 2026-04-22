@@ -1,17 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
+
 import {
   Sidebar,
-  SidebarHeader,
-  SidebarFooter,
   SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMobileToggle,
   SidebarNav,
   SidebarNavGroup,
   SidebarNavItem,
-  SidebarToggle,
-  SidebarMobileToggle,
-  SidebarSearch,
   SidebarProvider,
+  SidebarSearch,
+  SidebarToggle,
   useSidebar,
 } from './index';
 
@@ -115,7 +116,7 @@ function AppLogo() {
 
   if (showCollapsed) {
     return (
-      <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 font-bold text-white">
         M
       </div>
     );
@@ -123,7 +124,7 @@ function AppLogo() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 font-bold text-white">
         M
       </div>
       <div className="font-semibold text-neutral-900 dark:text-white">
@@ -142,7 +143,7 @@ function UserFooter() {
     return (
       <button
         onClick={toggleCollapsed}
-        className="hover:ring-primary-500 rounded-full p-0.5 transition-colors hover:ring-2"
+        className="rounded-full p-0.5 transition-colors hover:ring-2 hover:ring-primary-500"
         title="Expand sidebar"
       >
         <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
@@ -224,7 +225,7 @@ function CollapsibleDemo() {
       </Sidebar>
 
       <div className="flex-1 p-6">
-        <h1 className="mb-4 text-xl font-semibold text-neutral-900 capitalize dark:text-white">
+        <h1 className="mb-4 text-xl font-semibold capitalize text-neutral-900 dark:text-white">
           {activePage}
         </h1>
         <p className="text-neutral-600 dark:text-neutral-400">
@@ -357,7 +358,7 @@ function ConfigurableSidebarDemo({
       <div className="flex-1 p-6">
         <div className="mb-6 flex items-center gap-4">
           <SidebarMobileToggle />
-          <h1 className="text-xl font-semibold text-neutral-900 capitalize dark:text-white">
+          <h1 className="text-xl font-semibold capitalize text-neutral-900 dark:text-white">
             {activePage}
           </h1>
         </div>

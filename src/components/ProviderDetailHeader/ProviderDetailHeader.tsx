@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -328,7 +329,7 @@ export function AddressDisplay({
   }
 
   return (
-    <address className={cn('text-sm text-white/90 not-italic', className)}>
+    <address className={cn('text-sm not-italic text-white/90', className)}>
       {addressText}
     </address>
   );
@@ -362,7 +363,7 @@ export function QuickAction({
   const content = (
     <>
       <span className="text-lg">{icon}</span>
-      <span className="text-[11px] font-medium tracking-[0.22px] uppercase">
+      <span className="text-[11px] font-medium uppercase tracking-[0.22px]">
         {label}
       </span>
     </>
@@ -407,7 +408,7 @@ export function ClaimListingButton({
     <a
       href={href || `/provider/${slug}/claim`}
       className={cn(
-        'hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5 text-xs text-gray-500 transition-colors dark:text-gray-400',
+        'inline-flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400',
         className
       )}
     >
@@ -470,8 +471,7 @@ const bookButtonVariants = cva(
 );
 
 export interface BookAppointmentButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof bookButtonVariants> {
   showIcon?: boolean;
 }
@@ -588,7 +588,7 @@ export function ProviderDetailHeader({
                   className="shrink-0"
                 />
                 <div className="min-w-0">
-                  <h1 className="mb-2 text-3xl leading-tight font-bold text-white lg:text-4xl">
+                  <h1 className="mb-2 text-3xl font-bold leading-tight text-white lg:text-4xl">
                     {provider.name}
                   </h1>
                   <div className="flex flex-wrap items-center gap-2">
@@ -826,7 +826,8 @@ export function ProviderDetailHeaderSkeleton({
 // Backward-compatible exports
 // =============================================================================
 
-export interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ActionButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: React.ReactNode;
   label: string;
   href?: string;

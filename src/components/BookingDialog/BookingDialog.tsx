@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -70,8 +71,7 @@ const inputVariants = cva(
 );
 
 export interface FloatingInputProps
-  extends
-    React.InputHTMLAttributes<HTMLInputElement>,
+  extends React.InputHTMLAttributes<HTMLInputElement>,
     VariantProps<typeof inputVariants> {
   label: string;
   error?: string;
@@ -94,7 +94,7 @@ export function FloatingInput({
         placeholder=" "
         className={cn(
           inputVariants({ state: error ? 'error' : (state ?? 'default') }),
-          'peer pt-6 pb-2',
+          'peer pb-2 pt-6',
           className
         )}
         {...props}
@@ -102,7 +102,7 @@ export function FloatingInput({
       <label
         htmlFor={inputId}
         className={cn(
-          'absolute top-4 left-4 origin-left transform text-gray-500 transition-all duration-200',
+          'absolute left-4 top-4 origin-left transform text-gray-500 transition-all duration-200',
           'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
           'peer-focus:-translate-y-2 peer-focus:scale-75',
           'peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-75',
@@ -174,10 +174,10 @@ export function ServiceSelect({
         className={cn(
           'w-full rounded-lg border px-4 py-3 text-left transition-colors',
           'bg-white dark:bg-gray-800',
-          'focus:ring-2 focus:outline-none',
+          'focus:outline-none focus:ring-2',
           error
             ? 'border-red-500 focus:ring-red-500/20'
-            : 'focus:border-primary-500 focus:ring-primary-500/20 dark:focus:border-primary-400 border-gray-300 dark:border-gray-600'
+            : 'focus:ring-primary-500/20 border-gray-300 focus:border-primary-500 dark:border-gray-600 dark:focus:border-primary-400'
         )}
       >
         {selectedServiceNames.length > 0 ? (
@@ -185,7 +185,7 @@ export function ServiceSelect({
             {selectedServiceNames.map((name) => (
               <span
                 key={name}
-                className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm"
+                className="dark:bg-primary-900/30 inline-flex items-center gap-1 rounded-full bg-primary-100 px-2 py-0.5 text-sm text-primary-700 dark:text-primary-400"
               >
                 {name}
               </span>
@@ -198,7 +198,7 @@ export function ServiceSelect({
         )}
         <ChevronDownIcon
           className={cn(
-            'absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-gray-400 transition-transform',
+            'absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 transition-transform',
             isOpen && 'rotate-180'
           )}
         />
@@ -215,7 +215,7 @@ export function ServiceSelect({
                 type="checkbox"
                 checked={selectedServices.includes(service.slug)}
                 onChange={() => toggleService(service.slug)}
-                className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300 dark:border-gray-600"
+                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600"
               />
               <span className="text-gray-900 dark:text-white">
                 {service.name}
@@ -265,7 +265,7 @@ export function ConsentSwitch({
         id={id}
         onClick={() => onChange(!checked)}
         className={cn(
-          'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
+          'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
           checked ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
         )}
       >
@@ -410,7 +410,7 @@ export function BookingDialog({
   return (
     <DialogOverlay isOpen={isOpen} onClose={onClose} className={className}>
       {/* Header */}
-      <div className="bg-primary-600 flex items-center justify-between rounded-t-2xl border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+      <div className="flex items-center justify-between rounded-t-2xl border-b border-gray-200 bg-primary-600 px-6 py-4 dark:border-gray-700">
         <h2 className="text-xl font-semibold text-white">Book Appointment</h2>
         <button
           type="button"
@@ -433,7 +433,7 @@ export function BookingDialog({
               href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-primary-600 dark:hover:text-primary-400 text-sm text-gray-600 dark:text-gray-400"
+              className="text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
             >
               {provider.address.street1}
               {provider.address.street2 && ` ${provider.address.street2}`}{' '}
@@ -554,7 +554,7 @@ export function BookingDialog({
               type="submit"
               disabled={isLoading}
               className={cn(
-                'bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
+                'inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700',
                 isLoading && 'cursor-not-allowed opacity-50'
               )}
             >
@@ -681,7 +681,7 @@ export function InlineBookingForm({
         type="submit"
         disabled={isLoading}
         className={cn(
-          'bg-primary-600 hover:bg-primary-700 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
+          'w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -735,7 +735,7 @@ export function QuickBookCard({
         <button
           type="button"
           onClick={onBook}
-          className="bg-primary-600 hover:bg-primary-700 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
         >
           <CalendarIcon className="h-4 w-4" />
           Book Online

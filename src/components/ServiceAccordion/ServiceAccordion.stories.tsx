@@ -1,12 +1,13 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import {
   ServiceAccordion,
-  ServiceTagCloud,
-  ServiceList,
-  ServiceLink,
   type ServiceCategory,
   type ServiceItem,
+  ServiceLink,
+  ServiceList,
+  ServiceTagCloud,
 } from './ServiceAccordion';
 
 const mockServices: ServiceItem[] = [
@@ -96,7 +97,7 @@ export const AllVariants: Story = {
     <div className="space-y-8">
       {(['default', 'bordered', 'cards'] as const).map((variant) => (
         <div key={variant} className="space-y-2">
-          <div className="text-sm font-medium text-gray-500 capitalize">
+          <div className="text-sm font-medium capitalize text-gray-500">
             {variant}
           </div>
           <ServiceAccordion

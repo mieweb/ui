@@ -1,15 +1,16 @@
 'use client';
 
 import * as React from 'react';
+
+import { cn } from '../../utils';
+import { Button } from '../Button/Button';
 import {
   Modal,
-  ModalHeader,
-  ModalTitle,
   ModalBody,
   ModalFooter,
+  ModalHeader,
+  ModalTitle,
 } from '../Modal/Modal';
-import { Button } from '../Button/Button';
-import { cn } from '../../utils';
 
 export interface RejectionReason {
   id: string;
@@ -114,12 +115,12 @@ export function RejectionModal({
         <ModalBody className="space-y-4">
           {/* Description or item info */}
           {(description || itemDescription) && (
-            <div className="bg-muted rounded-lg p-3">
+            <div className="rounded-lg bg-muted p-3">
               {description && (
-                <p className="text-muted-foreground text-sm">{description}</p>
+                <p className="text-sm text-muted-foreground">{description}</p>
               )}
               {itemDescription && (
-                <p className="text-foreground mt-1 text-sm font-medium">
+                <p className="mt-1 text-sm font-medium text-foreground">
                   {itemDescription}
                 </p>
               )}
@@ -130,7 +131,7 @@ export function RejectionModal({
           {variant === 'danger' && (
             <div className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-lg border p-3">
               <svg
-                className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0"
+                className="mt-0.5 h-5 w-5 flex-shrink-0 text-destructive"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -142,7 +143,7 @@ export function RejectionModal({
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              <p className="text-destructive text-sm">
+              <p className="text-sm text-destructive">
                 This action cannot be undone. The affected party will be
                 notified of this rejection.
               </p>
@@ -151,7 +152,7 @@ export function RejectionModal({
 
           {/* Reason selection */}
           <div>
-            <span className="text-foreground mb-2 block text-sm font-medium">
+            <span className="mb-2 block text-sm font-medium text-foreground">
               Reason for rejection
             </span>
             <div className="space-y-2">
@@ -162,7 +163,7 @@ export function RejectionModal({
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
                     selectedReasonId === reason.id
                       ? 'border-primary bg-primary/10'
-                      : 'border-border hover:border-muted-foreground/50'
+                      : 'hover:border-muted-foreground/50 border-border'
                   )}
                 >
                   <input
@@ -171,13 +172,13 @@ export function RejectionModal({
                     value={reason.id}
                     checked={selectedReasonId === reason.id}
                     onChange={(e) => setSelectedReasonId(e.target.value)}
-                    className="text-primary focus:ring-primary border-border h-4 w-4"
+                    className="text-primary focus:ring-primary h-4 w-4 border-border"
                   />
-                  <span className="text-foreground text-sm">
+                  <span className="text-sm text-foreground">
                     {reason.label}
                   </span>
                   {reason.requiresDetails && (
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                       (requires details)
                     </span>
                   )}
@@ -189,14 +190,14 @@ export function RejectionModal({
           {/* Details textarea */}
           {showDetails && (
             <div>
-              <label className="text-foreground mb-1 block text-sm font-medium">
+              <label className="mb-1 block text-sm font-medium text-foreground">
                 {detailsLabel}
                 {needsDetails && (
-                  <span className="text-destructive ml-1">*</span>
+                  <span className="ml-1 text-destructive">*</span>
                 )}
               </label>
               <textarea
-                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 rows={3}
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
@@ -204,7 +205,7 @@ export function RejectionModal({
                 required={needsDetails}
               />
               {needsDetails && !details.trim() && selectedReasonId && (
-                <p className="text-destructive mt-1 text-xs">
+                <p className="mt-1 text-xs text-destructive">
                   Please provide additional details for this rejection reason.
                 </p>
               )}
@@ -229,7 +230,7 @@ export function RejectionModal({
             {isSubmitting ? (
               <>
                 <svg
-                  className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  className="-ml-1 mr-2 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

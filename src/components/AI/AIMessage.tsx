@@ -4,12 +4,13 @@
  * Renders AI chat messages with support for text, tool calls, and streaming.
  */
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
-import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
+import { ChevronIcon, SparklesIcon } from './icons';
 import { MCPToolCallDisplay } from './MCPToolCall';
-import { SparklesIcon, ChevronIcon } from './icons';
+import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
 
 // ============================================================================
 // Avatar Component
@@ -211,7 +212,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
         </button>
         {!isCollapsed && (
           <div className="border-t border-neutral-200 px-3 py-2 dark:border-neutral-700">
-            <p className="text-sm text-neutral-600 italic dark:text-neutral-400">
+            <p className="text-sm italic text-neutral-600 dark:text-neutral-400">
               {content.text}
             </p>
           </div>
@@ -368,4 +369,4 @@ export function AIMessageDisplay({
   );
 }
 
-export { MessageAvatar, AITypingIndicator };
+export { AITypingIndicator, MessageAvatar };

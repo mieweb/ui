@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils';
 import { Button } from '../Button';
 import { Select, type SelectOption } from '../Select';
@@ -105,18 +106,18 @@ export function CSVColumnMapper({
       {/* Import Progress Modal */}
       {importing && (
         <div className="bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl">
+          <div className="w-full max-w-lg rounded-lg bg-card text-card-foreground shadow-xl">
             <div className="bg-primary text-primary-foreground p-4">
               <h4 className="text-lg font-semibold">Processing Employees</h4>
             </div>
             <div className="p-6">
-              <div className="bg-muted h-4 w-full overflow-hidden rounded-full">
+              <div className="h-4 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="bg-success h-full transition-all duration-300"
+                  className="h-full bg-success transition-all duration-300"
                   style={{ width: `${importProgress}%` }}
                 />
               </div>
-              <p className="text-muted-foreground mt-2 text-center text-sm">
+              <p className="mt-2 text-center text-sm text-muted-foreground">
                 {importProgress}% complete
               </p>
             </div>
@@ -151,15 +152,15 @@ export function CSVColumnMapper({
 
       {/* Info Alert */}
       <div className="bg-primary/10 border-primary/30 mb-4 rounded-lg border p-4">
-        <h4 className="text-primary-800 dark:text-primary-200 mb-1 font-semibold">
+        <h4 className="mb-1 font-semibold text-primary-800 dark:text-primary-200">
           {ensureAccurateData}
         </h4>
-        <p className="text-primary-700 dark:text-primary-300 text-sm">
+        <p className="text-sm text-primary-700 dark:text-primary-300">
           {ensureAccurateDataDescription}
         </p>
       </div>
 
-      <p className="text-muted-foreground mb-4">{instructions}</p>
+      <p className="mb-4 text-muted-foreground">{instructions}</p>
 
       {/* Column Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -234,7 +235,7 @@ function CSVColumnCard({
   return (
     <div
       className={cn(
-        'bg-card text-card-foreground rounded-xl border-2 shadow-sm',
+        'rounded-xl border-2 bg-card text-card-foreground shadow-sm',
         column.ignored
           ? 'border-border opacity-50'
           : isMapped
@@ -246,7 +247,7 @@ function CSVColumnCard({
       <div className="flex items-center gap-2 px-4 py-3">
         {!column.ignored &&
           (isMapped ? (
-            <span className="bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground">
               <svg
                 className="h-3 w-3"
                 fill="none"
@@ -262,7 +263,7 @@ function CSVColumnCard({
               </svg>
             </span>
           ) : (
-            <span className="bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warning text-warning-foreground">
               <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" fill="currentColor" />
                 <circle cx="12" cy="12" r="4" className="fill-warning" />
@@ -278,11 +279,11 @@ function CSVColumnCard({
       <div className="space-y-4 px-4 pb-4">
         {/* Sample Value */}
         <div>
-          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Sample Data
           </span>
           <div
-            className="bg-muted truncate rounded-md px-3 py-2 font-mono text-sm"
+            className="truncate rounded-md bg-muted px-3 py-2 font-mono text-sm"
             title={column.sampleValue}
           >
             {column.sampleValue || (
@@ -293,7 +294,7 @@ function CSVColumnCard({
 
         {/* Field Type Select */}
         <div>
-          <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Map to Field
           </span>
           <div
@@ -325,7 +326,7 @@ function CSVColumnCard({
           childSelectOptions.length > 0 &&
           column.mappedTo && (
             <div>
-              <span className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Sub-field
               </span>
               <Select
@@ -347,7 +348,7 @@ function CSVColumnCard({
         <button
           type="button"
           onClick={() => onIgnoreToggle(!column.ignored)}
-          className="text-muted-foreground hover:text-foreground mx-auto flex items-center gap-1 text-xs transition-colors"
+          className="mx-auto flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           {column.ignored ? (
             <svg
@@ -473,12 +474,12 @@ export function CSVFileUpload({
       {processing ? (
         <div className="flex flex-col items-center">
           <div className="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
-          <p className="text-muted-foreground mt-4">Processing file...</p>
+          <p className="mt-4 text-muted-foreground">Processing file...</p>
         </div>
       ) : (
         <>
-          <i className="fas fa-file-csv text-muted-foreground mb-4 text-5xl" />
-          <p className="text-muted-foreground mb-4 text-lg">{selectFile}</p>
+          <i className="fas fa-file-csv mb-4 text-5xl text-muted-foreground" />
+          <p className="mb-4 text-lg text-muted-foreground">{selectFile}</p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}

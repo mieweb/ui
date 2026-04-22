@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { ProviderSelector, ProviderOption } from './ProviderSelector';
+
+import { ProviderOption, ProviderSelector } from './ProviderSelector';
 
 const sampleProviders: ProviderOption[] = [
   {
@@ -118,8 +119,8 @@ export const Default: Story = {
           onSelect={setSelected}
         />
         {selected && (
-          <div className="bg-muted mt-4 rounded-lg p-3">
-            <p className="text-muted-foreground text-sm">
+          <div className="mt-4 rounded-lg bg-muted p-3">
+            <p className="text-sm text-muted-foreground">
               Selected:{' '}
               <strong className="text-foreground">{selected.name}</strong>
             </p>
@@ -147,8 +148,8 @@ function InteractiveDemo(
         {...props}
       />
       {selected && (
-        <div className="bg-muted mt-4 rounded-lg p-3">
-          <p className="text-muted-foreground text-sm">
+        <div className="mt-4 rounded-lg bg-muted p-3">
+          <p className="text-sm text-muted-foreground">
             Selected:{' '}
             <strong className="text-foreground">{selected.name}</strong>
           </p>

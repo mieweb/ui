@@ -1,6 +1,7 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { RadioGroup, Radio } from './Radio';
+import * as React from 'react';
+
+import { Radio, RadioGroup } from './Radio';
 
 // Wrapper component to handle controlled state for stories
 function RadioGroupWithState(
@@ -312,7 +313,7 @@ function ControlledRadioDemo() {
         <Radio value="b" label="Option B" />
         <Radio value="c" label="Option C" />
       </RadioGroup>
-      <p className="text-muted-foreground text-xs">
+      <p className="text-xs text-muted-foreground">
         Selected: <code className="font-mono">{value || 'none'}</code>
       </p>
     </div>

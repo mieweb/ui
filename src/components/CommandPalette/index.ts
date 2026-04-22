@@ -1,14 +1,14 @@
 export {
   CommandPalette,
-  CommandPaletteTrigger,
   type CommandPaletteProps,
+  CommandPaletteTrigger,
   type CommandPaletteTriggerProps,
 } from './CommandPalette';
 export {
-  CommandPaletteProvider,
-  useCommandPalette,
-  type CommandPaletteItem,
   type CommandPaletteCategory,
   type CommandPaletteContextValue,
+  type CommandPaletteItem,
+  CommandPaletteProvider,
   type CommandPaletteProviderProps,
+  useCommandPalette,
 } from './CommandPaletteProvider';

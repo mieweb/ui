@@ -1,17 +1,18 @@
-import * as React from 'react';
-import { AgGridReact, AgGridReactProps } from 'ag-grid-react';
 import {
-  ModuleRegistry,
   AllCommunityModule,
+  type ColDef as AGColDef,
   type GridApi,
   type GridReadyEvent,
-  type ColDef as AGColDef,
+  ModuleRegistry,
   type RowClickedEvent,
   type RowSelectionOptions,
 } from 'ag-grid-community';
-import { cn } from '../../utils/cn';
+import { AgGridReact, AgGridReactProps } from 'ag-grid-react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import type { BrandConfig } from '../../brands/types';
+import { cn } from '../../utils/cn';
 
 // Register AG Grid Community modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -66,8 +67,7 @@ const agGridVariants = cva('ag-theme-custom w-full', {
 // ============================================================================
 
 export interface AGGridProps<TData = unknown>
-  extends
-    Omit<AgGridReactProps<TData>, 'className' | 'rowSelection'>,
+  extends Omit<AgGridReactProps<TData>, 'className' | 'rowSelection'>,
     VariantProps<typeof agGridVariants> {
   /** Additional CSS classes for the grid container */
   className?: string;
@@ -302,12 +302,12 @@ function AGGridInner<TData = unknown>(
         rowHeight={sizeConfig.rowHeight}
         headerHeight={sizeConfig.headerHeight}
         noRowsOverlayComponent={() => (
-          <div className="text-muted-foreground py-8 text-center">
+          <div className="py-8 text-center text-muted-foreground">
             {noDataMessage}
           </div>
         )}
         loadingOverlayComponent={() => (
-          <div className="text-muted-foreground py-8 text-center">
+          <div className="py-8 text-center text-muted-foreground">
             {loadingMessage}
           </div>
         )}
@@ -337,16 +337,15 @@ export type { ColDef as AGColDef } from 'ag-grid-community';
 export type ColDef<TData = unknown, TValue = unknown> = AGColDef<TData, TValue>;
 
 export type {
+  CellClickedEvent,
+  CellValueChangedEvent,
+  FilterChangedEvent,
+  FirstDataRenderedEvent,
   GridApi,
   GridReadyEvent,
   RowClickedEvent,
-  CellClickedEvent,
-  CellValueChangedEvent,
-  SelectionChangedEvent,
-  FilterChangedEvent,
-  SortChangedEvent,
   RowSelectedEvent,
-  FirstDataRenderedEvent,
+  SelectionChangedEvent,
+  SortChangedEvent,
 } from 'ag-grid-community';
-
 export { AgGridReact } from 'ag-grid-react';

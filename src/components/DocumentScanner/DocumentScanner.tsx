@@ -1,28 +1,29 @@
 import * as React from 'react';
+
+import { useIsMobile } from '../../hooks';
 import { cn } from '../../utils/cn';
+import { Alert, AlertDescription, AlertTitle } from '../Alert';
 import { Button } from '../Button';
-import { SpinnerWithLabel } from '../Spinner';
-import { Alert, AlertTitle, AlertDescription } from '../Alert';
-import { Text } from '../Text';
 import {
-  UploadIcon,
-  CameraIcon,
-  ScanIcon,
-  CheckCircleIcon,
   AlertCircleIcon,
+  CameraIcon,
+  CheckCircleIcon,
+  ScanIcon,
   TrashIcon,
+  UploadIcon,
 } from '../Icons';
+import { SpinnerWithLabel } from '../Spinner';
+import { Text } from '../Text';
 import { DropZone } from './DropZone';
 import { FilePreview } from './FilePreview';
-import { WebcamModal } from './WebcamModal';
-import { useFileUpload } from './useFileUpload';
-import { useIsMobile } from '../../hooks';
 import type {
   DocumentScannerProps,
   ScannerState,
   ValidationError,
 } from './types';
 import { DEFAULT_ACCEPTED_FILE_TYPES, DEFAULT_MAX_FILE_SIZE_MB } from './types';
+import { useFileUpload } from './useFileUpload';
+import { WebcamModal } from './WebcamModal';
 
 /**
  * DocumentScanner - A comprehensive component for scanning documents, IDs, and cards
@@ -341,8 +342,8 @@ export function DocumentScanner({
           className="min-h-[240px]"
         >
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full">
-              <UploadIcon className="text-primary-600 dark:text-primary-400 h-7 w-7" />
+            <div className="dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100">
+              <UploadIcon className="h-7 w-7 text-primary-600 dark:text-primary-400" />
             </div>
 
             <div className="space-y-1">
@@ -364,11 +365,11 @@ export function DocumentScanner({
         {(enableCamera || enableWebcam) && (
           <div className="flex flex-col items-center gap-3">
             <div className="flex w-full max-w-xs items-center gap-3">
-              <div className="bg-border h-px flex-1" />
+              <div className="h-px flex-1 bg-border" />
               <Text variant="muted" size="sm">
                 or
               </Text>
-              <div className="bg-border h-px flex-1" />
+              <div className="h-px flex-1 bg-border" />
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
@@ -426,7 +427,7 @@ export function DocumentScanner({
   return (
     <div
       className={cn(
-        'border-border bg-card w-full rounded-xl border p-6',
+        'w-full rounded-xl border border-border bg-card p-6',
         'shadow-sm',
         className
       )}
@@ -471,7 +472,7 @@ DocumentScanner.displayName = 'DocumentScanner';
 // Re-export sub-components for advanced usage
 export { DropZone } from './DropZone';
 export { FilePreview } from './FilePreview';
-export { WebcamModal } from './WebcamModal';
-export { useFileUpload } from './useFileUpload';
-export { useCamera } from './useCamera';
 export type * from './types';
+export { useCamera } from './useCamera';
+export { useFileUpload } from './useFileUpload';
+export { WebcamModal } from './WebcamModal';

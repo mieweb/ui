@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -13,9 +14,8 @@ export type AudioPlayerState =
   | 'paused'
   | 'error';
 
-export interface AudioPlayerProps extends VariantProps<
-  typeof audioPlayerVariants
-> {
+export interface AudioPlayerProps
+  extends VariantProps<typeof audioPlayerVariants> {
   /** Audio source URL */
   src: string;
   /** Title/label for the audio (used for accessibility and display) */
@@ -250,11 +250,11 @@ function ProgressBar({
       }}
     >
       <div
-        className="bg-primary-600 absolute inset-y-0 left-0 rounded-full transition-all"
+        className="absolute inset-y-0 left-0 rounded-full bg-primary-600 transition-all"
         style={{ width: `${progress}%` }}
       />
       <div
-        className="bg-primary-600 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all"
+        className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-primary-600 shadow-sm transition-all"
         style={{ left: `calc(${progress}% - 6px)` }}
       />
     </div>
@@ -365,7 +365,6 @@ function Waveform({
         wavesurferRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, showHoverCursor]);
 
   // Handle play/pause
@@ -477,7 +476,7 @@ function Waveform({
       {/* Hover cursor line */}
       {showHoverCursor && isHovering && isLoaded && (
         <div
-          className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5"
+          className="pointer-events-none absolute bottom-0 top-0 z-10 w-0.5"
           style={{ left: `${hoverPosition}%`, backgroundColor: cursorColor }}
         />
       )}
@@ -785,7 +784,7 @@ function AudioPlayer({
           </span>
         )}
         {showDuration && displayDuration > 0 && (
-          <span className="font-mono text-xs text-neutral-500 tabular-nums dark:text-neutral-400">
+          <span className="font-mono text-xs tabular-nums text-neutral-500 dark:text-neutral-400">
             {isPlaying ? formatTime(currentTime) : formatTime(displayDuration)}
           </span>
         )}

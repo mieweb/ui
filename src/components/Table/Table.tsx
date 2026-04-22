@@ -1,11 +1,13 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
 // Table Root
 // ============================================================================
 
-export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
+export interface TableProps
+  extends React.TableHTMLAttributes<HTMLTableElement> {
   /** Whether to make the table responsive with horizontal scroll */
   responsive?: boolean;
 }
@@ -110,7 +112,8 @@ TableFooter.displayName = 'TableFooter';
 // Table Row
 // ============================================================================
 
-export interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+export interface TableRowProps
+  extends React.HTMLAttributes<HTMLTableRowElement> {
   /** Whether the row is selected */
   selected?: boolean;
 }
@@ -121,7 +124,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
       ref={ref}
       data-selected={selected}
       className={cn(
-        'border-border border-b transition-colors',
+        'border-b border-border transition-colors',
         'hover:bg-muted/50',
         'data-[selected=true]:bg-muted',
         className
@@ -137,7 +140,8 @@ TableRow.displayName = 'TableRow';
 // Table Head
 // ============================================================================
 
-export interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
+export interface TableHeadProps
+  extends React.ThHTMLAttributes<HTMLTableCellElement> {
   /** Sortable column configuration */
   sortable?: boolean;
   /** Current sort direction */
@@ -153,8 +157,8 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
         type="button"
         onClick={onSort}
         className={cn(
-          'hover:text-foreground flex items-center gap-1 transition-colors',
-          'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none'
+          'flex items-center gap-1 transition-colors hover:text-foreground',
+          'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
         )}
         aria-label={`Sort column ${sortDirection === 'asc' ? 'descending' : 'ascending'}`}
       >
@@ -178,7 +182,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
             : undefined
         }
         className={cn(
-          'text-muted-foreground h-12 px-4 text-left align-middle font-medium',
+          'h-12 px-4 text-left align-middle font-medium text-muted-foreground',
           '[&:has([role=checkbox])]:pr-0',
           className
         )}
@@ -225,7 +229,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn('text-muted-foreground mt-4 text-sm', className)}
+    className={cn('mt-4 text-sm text-muted-foreground', className)}
     {...props}
   />
 ));
@@ -299,11 +303,11 @@ function SortIcon({ direction }: { direction?: 'asc' | 'desc' | null }) {
 
 export {
   Table,
-  TableHeader,
   TableBody,
-  TableFooter,
-  TableRow,
-  TableHead,
-  TableCell,
   TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
 };

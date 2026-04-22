@@ -8,18 +8,19 @@
  * All renderers are memoized with React.memo for performance optimization.
  */
 
+import type { ICellRendererParams } from 'ag-grid-community';
+import { Linkedin } from 'lucide-react';
 import * as React from 'react';
 import { memo } from 'react';
-import type { ICellRendererParams } from 'ag-grid-community';
+
 import { cn } from '../../utils/cn';
 import {
-  MailIcon,
-  PhoneIcon,
-  GlobeIcon,
   CheckCircleIcon,
   ClockIcon,
+  GlobeIcon,
+  MailIcon,
+  PhoneIcon,
 } from '../Icons';
-import { Linkedin } from 'lucide-react';
 
 // =============================================================================
 // Utility Functions
@@ -212,7 +213,7 @@ export function AvatarNameRenderer(
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-500">
           {displayName === 'Unassigned' ? '—' : '??'}
         </div>
-        <span className="truncate text-gray-400 italic dark:text-gray-500">
+        <span className="truncate italic text-gray-400 dark:text-gray-500">
           {displayName}
         </span>
       </div>
@@ -243,7 +244,7 @@ export function AvatarNameRenderer(
       >
         {initials}
       </div>
-      <span className="text-foreground truncate font-medium">
+      <span className="truncate font-medium text-foreground">
         {displayName}
       </span>
     </div>
@@ -360,7 +361,7 @@ export function EmailRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`mailto:${value}`}
-      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
+      className="inline-flex items-center gap-1.5 text-primary-600 hover:underline dark:text-primary-400"
       onClick={(e) => e.stopPropagation()}
     >
       <MailIcon className="h-3 w-3 opacity-60" />
@@ -385,7 +386,7 @@ export function PhoneRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`tel:${value}`}
-      className="text-foreground hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5"
+      className="inline-flex items-center gap-1.5 text-foreground hover:text-primary-600 dark:hover:text-primary-400"
       onClick={(e) => e.stopPropagation()}
     >
       <PhoneIcon className="h-3 w-3 text-green-500 opacity-70" />
@@ -413,7 +414,7 @@ export function DomainRenderer(props: ICellRendererParams): React.ReactElement {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
+      className="inline-flex items-center gap-1.5 text-primary-600 hover:underline dark:text-primary-400"
       onClick={(e) => e.stopPropagation()}
     >
       <GlobeIcon className="h-3 w-3 opacity-60" />
@@ -466,7 +467,7 @@ export function CurrencyRenderer(
   }).format(value);
 
   return (
-    <span className="text-foreground font-medium tabular-nums">
+    <span className="font-medium tabular-nums text-foreground">
       {formatted}
     </span>
   );
@@ -485,7 +486,7 @@ export function NumberRenderer(props: ICellRendererParams): React.ReactElement {
 
   const formatted = Number(value).toLocaleString();
 
-  return <span className="text-foreground tabular-nums">{formatted}</span>;
+  return <span className="tabular-nums text-foreground">{formatted}</span>;
 }
 
 // =============================================================================
@@ -633,7 +634,7 @@ export function CompanyRenderer(
         />
       ) : null}
       <div
-        className="bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 flex h-5 w-5 items-center justify-center rounded text-[9px] font-semibold"
+        className="dark:bg-primary-900/30 flex h-5 w-5 items-center justify-center rounded bg-primary-100 text-[9px] font-semibold text-primary-600 dark:text-primary-400"
         style={{ display: faviconUrl ? 'none' : 'flex' }}
       >
         {getInitials(value)}
@@ -673,7 +674,7 @@ export function ProgressRenderer(
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <span className="text-muted-foreground text-xs font-medium">
+      <span className="text-xs font-medium text-muted-foreground">
         {Math.round(percentage)}%
       </span>
     </div>
@@ -704,7 +705,7 @@ export function TagsRenderer(props: ICellRendererParams): React.ReactElement {
         </span>
       ))}
       {value.length > 3 && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-xs text-muted-foreground">
           +{value.length - 3}
         </span>
       )}

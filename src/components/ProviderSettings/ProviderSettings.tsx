@@ -1,13 +1,14 @@
 'use client';
 
 import * as React from 'react';
+
+import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
 import { Input } from '../Input/Input';
-import { Textarea } from '../Textarea/Textarea';
 import { Switch } from '../Switch/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../Tabs/Tabs';
-import { Badge } from '../Badge/Badge';
+import { Textarea } from '../Textarea/Textarea';
 
 export interface ProviderSettingsData {
   /** General settings */
@@ -549,7 +550,7 @@ export function ProviderSettings({
                 </div>
               </div>
 
-              <div className="grid gap-4 border-t border-gray-200 pt-6 md:grid-cols-2 dark:border-gray-700">
+              <div className="grid gap-4 border-t border-gray-200 pt-6 dark:border-gray-700 md:grid-cols-2">
                 <div>
                   <label
                     htmlFor="appointment-buffer"

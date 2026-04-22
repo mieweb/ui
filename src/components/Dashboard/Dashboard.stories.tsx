@@ -1,5 +1,5 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
 
 // Import components
 import { Alert } from '../Alert';
@@ -7,48 +7,48 @@ import { AudioPlayer } from '../AudioPlayer';
 import { AudioRecorder } from '../AudioRecorder';
 import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
+import { Breadcrumb } from '../Breadcrumb';
 import { Button } from '../Button';
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '../Card';
+import { Checkbox, CheckboxGroup } from '../Checkbox';
 import { DateInput } from '../DateInput';
 import {
   Dropdown,
-  DropdownHeader,
   DropdownContent,
+  DropdownHeader,
   DropdownItem,
   DropdownSeparator,
 } from '../Dropdown';
 import { Input } from '../Input';
-import { Select } from '../Select';
-import { Checkbox, CheckboxGroup } from '../Checkbox';
-import { RadioGroup, Radio } from '../Radio';
-import { Switch } from '../Switch';
-import { Textarea } from '../Textarea';
-import { Progress, CircularProgress } from '../Progress';
-import { RecordButton, type TranscriptionState } from '../RecordButton';
-import { Skeleton, SkeletonText, SkeletonCard } from '../Skeleton';
-import { Spinner, SpinnerWithLabel } from '../Spinner';
-import { Breadcrumb } from '../Breadcrumb';
 import { Pagination, SimplePagination } from '../Pagination';
+import { PhoneInput } from '../PhoneInput';
+import { CircularProgress, Progress } from '../Progress';
+import { QuickAction, QuickActionGroup } from '../QuickAction';
+import { Radio, RadioGroup } from '../Radio';
+import { RecordButton, type TranscriptionState } from '../RecordButton';
+import { Select } from '../Select';
+import { Skeleton, SkeletonCard, SkeletonText } from '../Skeleton';
+import { Spinner, SpinnerWithLabel } from '../Spinner';
+import { Switch } from '../Switch';
 import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
-  TableHead,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '../Table';
 import { Text } from '../Text';
-import { Tooltip } from '../Tooltip';
-import { QuickAction, QuickActionGroup } from '../QuickAction';
-import { PhoneInput } from '../PhoneInput';
+import { Textarea } from '../Textarea';
 import { ThemeProvider, useThemeContext } from '../ThemeProvider';
+import { Tooltip } from '../Tooltip';
 
 // ============================================================================
 // Meta
@@ -510,11 +510,11 @@ function UserMenu({ user, onProfile, onSettings, onLogout }: UserMenuProps) {
       width={256}
       trigger={
         <button
-          className="focus:ring-primary-500/40 flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+          className="focus:ring-primary-500/40 flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-neutral-100 focus:outline-none focus:ring-2 dark:hover:bg-neutral-700"
           aria-label="User menu"
         >
           <Avatar src={user.avatarUrl} name={user.name} size="sm" ring />
-          <span className="hidden text-sm font-medium text-neutral-700 md:block dark:text-neutral-300">
+          <span className="hidden text-sm font-medium text-neutral-700 dark:text-neutral-300 md:block">
             {user.name}
           </span>
           <Icons.ChevronDown />
@@ -582,12 +582,12 @@ function NotificationsDropdown() {
       width={320}
       trigger={
         <button
-          className="focus:ring-primary-500/40 relative rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+          className="focus:ring-primary-500/40 relative rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:outline-none focus:ring-2 dark:hover:bg-neutral-700"
           aria-label="Notifications"
         >
           <Icons.Bell />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+            <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
               {unreadCount}
             </span>
           )}
@@ -642,7 +642,7 @@ function ThemeToggle() {
     >
       <button
         onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-        className="focus:ring-primary-500/40 rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:ring-2 focus:outline-none dark:hover:bg-neutral-700"
+        className="focus:ring-primary-500/40 rounded-lg p-2 transition-colors hover:bg-neutral-100 focus:outline-none focus:ring-2 dark:hover:bg-neutral-700"
         aria-label="Toggle theme"
       >
         {resolvedTheme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
@@ -692,12 +692,12 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:border-r lg:border-neutral-200 lg:shadow-none dark:bg-neutral-800 dark:lg:border-neutral-700 ${isOpen ? 'translate-x-0' : '-translate-x-full'} `}
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out dark:bg-neutral-800 lg:static lg:translate-x-0 lg:border-r lg:border-neutral-200 lg:shadow-none dark:lg:border-neutral-700 ${isOpen ? 'translate-x-0' : '-translate-x-full'} `}
       >
         {/* Logo */}
         <div className="flex h-16 items-center justify-between border-b border-neutral-200 px-4 dark:border-neutral-700">
           <div className="flex items-center gap-2">
-            <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 font-bold text-white">
               M
             </div>
             <Text weight="bold" size="lg">
@@ -706,7 +706,7 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-700"
+            className="rounded-lg p-1 hover:bg-neutral-100 dark:hover:bg-neutral-700 lg:hidden"
             aria-label="Close sidebar"
           >
             <Icons.Close />
@@ -721,7 +721,7 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
               onClick={() => handleNavigate(item.id)}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
                 currentPage === item.id
-                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                  ? 'dark:bg-primary-900/30 bg-primary-50 text-primary-700 dark:text-primary-400'
                   : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
               } `}
             >
@@ -742,7 +742,7 @@ function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
             onClick={() => handleNavigate('settings')}
             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
               currentPage === 'settings'
-                ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                ? 'dark:bg-primary-900/30 bg-primary-50 text-primary-700 dark:text-primary-400'
                 : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
             } `}
           >
@@ -798,7 +798,7 @@ function VoiceSearch() {
         onChange={(e) => setSearchValue(e.target.value)}
         className="w-64 pr-10"
       />
-      <div className="absolute top-1/2 right-2 -translate-y-1/2">
+      <div className="absolute right-2 top-1/2 -translate-y-1/2">
         <RecordButton
           size="sm"
           variant="default"
@@ -832,11 +832,11 @@ function Header({
   onLogout,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:px-6 dark:border-neutral-700 dark:bg-neutral-800">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 dark:border-neutral-700 dark:bg-neutral-800 lg:px-6">
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuToggle}
-          className="rounded-lg p-2 hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-700"
+          className="rounded-lg p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 lg:hidden"
           aria-label="Toggle menu"
         >
           <Icons.Menu />
@@ -1202,7 +1202,7 @@ function AnalyticsPage() {
               {[65, 45, 80, 55, 70, 90, 75].map((height, i) => (
                 <div
                   key={i}
-                  className="bg-primary-500 hover:bg-primary-600 w-8 rounded-t transition-all"
+                  className="w-8 rounded-t bg-primary-500 transition-all hover:bg-primary-600"
                   style={{ height: `${height}%` }}
                 />
               ))}
@@ -1638,7 +1638,7 @@ function VoiceNotesPage() {
                 rows={3}
                 className="pr-12"
               />
-              <div className="absolute right-3 bottom-3">
+              <div className="absolute bottom-3 right-3">
                 <RecordButton
                   size="md"
                   variant="default"
@@ -1687,7 +1687,7 @@ function VoiceNotesPage() {
             </div>
             <div className="relative">
               <Input placeholder="Search notes..." className="w-48 pr-10" />
-              <div className="absolute top-1/2 right-2 -translate-y-1/2">
+              <div className="absolute right-2 top-1/2 -translate-y-1/2">
                 <RecordButton size="sm" variant="default" maxDuration={10} />
               </div>
             </div>
@@ -1712,7 +1712,7 @@ function VoiceNotesPage() {
                 <div
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
                     note.status === 'transcribing'
-                      ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                      ? 'dark:bg-primary-900/30 bg-primary-100 text-primary-600 dark:text-primary-400'
                       : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
                   }`}
                 >
@@ -1832,7 +1832,7 @@ function SettingsPage() {
                   onClick={() => setActiveTab(item.id)}
                   className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
                     activeTab === item.id
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                      ? 'dark:bg-primary-900/30 bg-primary-50 text-primary-700 dark:text-primary-400'
                       : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700'
                   } `}
                 >
@@ -2027,7 +2027,7 @@ function AppShell() {
       <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-4 dark:bg-neutral-900">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="bg-primary-500 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold text-white">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary-500 text-xl font-bold text-white">
               M
             </div>
             <CardTitle>You&apos;ve been logged out</CardTitle>
@@ -2143,7 +2143,7 @@ export const Dashboard: StoryObj = {
 
 export const AllComponents: StoryObj = {
   render: () => (
-    <div className="bg-background min-h-screen p-8">
+    <div className="min-h-screen bg-background p-8">
       <Text as="h1" size="3xl" weight="bold" className="mb-8">
         Component Showcase
       </Text>

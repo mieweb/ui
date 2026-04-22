@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -238,7 +239,7 @@ function SubCategoryAccordion({
           'flex w-full items-center justify-between px-3 py-2',
           'text-left font-medium text-neutral-700 dark:text-neutral-200',
           'hover:text-primary-600 dark:hover:text-primary-400',
-          'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500'
         )}
         aria-expanded={isExpanded}
         aria-controls={contentId}
@@ -411,9 +412,8 @@ function CategoryAccordionItem({
 // Main ServiceAccordion Component
 // ============================================================================
 
-export interface ServiceAccordionProps extends VariantProps<
-  typeof accordionVariants
-> {
+export interface ServiceAccordionProps
+  extends VariantProps<typeof accordionVariants> {
   /** Array of service categories */
   categories: ServiceCategory[];
   /** Base path for service links */
@@ -534,9 +534,9 @@ export function ServiceTagCloud({
             'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5',
             'text-sm font-medium',
             'bg-primary-100 text-primary-800 hover:bg-primary-200',
-            'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
+            'dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-300',
             'transition-colors',
-            'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500'
           )}
           data-cy={`service-tag-${service.slug}`}
         >

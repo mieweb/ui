@@ -1,5 +1,5 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
 
 const meta: Meta = {
   title: 'Examples/Colors',
@@ -237,19 +237,19 @@ function ColorSwatch({ color }: ColorSwatchProps) {
   };
 
   return (
-    <div className="border-border hover:bg-muted/50 flex items-center gap-4 border-b px-4 py-3 transition-colors">
+    <div className="hover:bg-muted/50 flex items-center gap-4 border-b border-border px-4 py-3 transition-colors">
       {/* Color Block */}
       <div
-        className="border-border h-16 w-16 flex-shrink-0 rounded-lg border shadow-sm"
+        className="h-16 w-16 flex-shrink-0 rounded-lg border border-border shadow-sm"
         style={{ backgroundColor: `var(${color.variable})` }}
       />
 
       {/* Info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-foreground font-semibold">{color.name}</span>
+          <span className="font-semibold text-foreground">{color.name}</span>
           {color.description && (
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               — {color.description}
             </span>
           )}
@@ -259,7 +259,7 @@ function ColorSwatch({ color }: ColorSwatchProps) {
           {/* CSS Variable */}
           <button
             onClick={() => copyToClipboard(`var(${color.variable})`, 'var')}
-            className="text-muted-foreground hover:text-foreground cursor-pointer font-mono transition-colors"
+            className="cursor-pointer font-mono text-muted-foreground transition-colors hover:text-foreground"
             title="Click to copy"
           >
             {copied === 'var' ? '✓ Copied!' : color.variable}
@@ -268,7 +268,7 @@ function ColorSwatch({ color }: ColorSwatchProps) {
           {/* Hex Value */}
           <button
             onClick={() => copyToClipboard(color.lightValue, 'hex')}
-            className="text-muted-foreground hover:text-foreground cursor-pointer font-mono transition-colors"
+            className="cursor-pointer font-mono text-muted-foreground transition-colors hover:text-foreground"
             title="Click to copy"
           >
             {copied === 'hex' ? '✓ Copied!' : color.lightValue}
@@ -278,7 +278,7 @@ function ColorSwatch({ color }: ColorSwatchProps) {
           {color.tailwindClass && (
             <button
               onClick={() => copyToClipboard(color.tailwindClass!, 'tw')}
-              className="text-primary-600 hover:text-primary-700 cursor-pointer font-mono transition-colors"
+              className="cursor-pointer font-mono text-primary-600 transition-colors hover:text-primary-700"
               title="Click to copy"
             >
               {copied === 'tw' ? '✓ Copied!' : color.tailwindClass}
@@ -290,10 +290,10 @@ function ColorSwatch({ color }: ColorSwatchProps) {
       {/* Dark mode value (if different) */}
       {color.darkValue && color.darkValue !== color.lightValue && (
         <div className="hidden text-right text-sm sm:block">
-          <div className="text-muted-foreground text-xs">Dark mode</div>
+          <div className="text-xs text-muted-foreground">Dark mode</div>
           <button
             onClick={() => copyToClipboard(color.darkValue!, 'dark')}
-            className="text-muted-foreground hover:text-foreground cursor-pointer font-mono transition-colors"
+            className="cursor-pointer font-mono text-muted-foreground transition-colors hover:text-foreground"
             title="Click to copy"
           >
             {copied === 'dark' ? '✓ Copied!' : color.darkValue}
@@ -318,12 +318,12 @@ function ColorSection({ title, description, colors }: ColorSectionProps) {
   return (
     <div className="mb-8">
       <div className="mb-4">
-        <h2 className="text-foreground text-xl font-bold">{title}</h2>
+        <h2 className="text-xl font-bold text-foreground">{title}</h2>
         {description && (
-          <p className="text-muted-foreground mt-1 text-sm">{description}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         )}
       </div>
-      <div className="bg-card border-border overflow-hidden rounded-xl border">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         {colors.map((color) => (
           <ColorSwatch key={color.variable} color={color} />
         ))}
@@ -338,11 +338,11 @@ function ColorSection({ title, description, colors }: ColorSectionProps) {
 
 function ColorsPage() {
   return (
-    <div className="bg-background min-h-screen p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-foreground mb-2 text-3xl font-bold">
+          <h1 className="mb-2 text-3xl font-bold text-foreground">
             Color System
           </h1>
           <p className="text-muted-foreground">
@@ -374,12 +374,12 @@ function ColorsPage() {
         />
 
         {/* Usage Example */}
-        <div className="bg-card border-border mt-12 rounded-xl border p-6">
-          <h2 className="text-foreground mb-4 text-xl font-bold">Usage</h2>
+        <div className="mt-12 rounded-xl border border-border bg-card p-6">
+          <h2 className="mb-4 text-xl font-bold text-foreground">Usage</h2>
           <div className="space-y-4 text-sm">
             <div>
-              <h3 className="text-foreground mb-2 font-semibold">In CSS:</h3>
-              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+              <h3 className="mb-2 font-semibold text-foreground">In CSS:</h3>
+              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
                 {`.my-component {
   background-color: var(--mieweb-primary-500);
   color: var(--mieweb-foreground);
@@ -388,10 +388,10 @@ function ColorsPage() {
               </pre>
             </div>
             <div>
-              <h3 className="text-foreground mb-2 font-semibold">
+              <h3 className="mb-2 font-semibold text-foreground">
                 With Tailwind:
               </h3>
-              <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
+              <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-foreground">
                 {`<div className="bg-primary-500 text-foreground border border-border">
   ...
 </div>`}

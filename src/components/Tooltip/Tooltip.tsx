@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { cn } from '../../utils/cn';
+
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { cn } from '../../utils/cn';
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -406,7 +407,7 @@ function Tooltip({
             className={cn(
               'pointer-events-none z-[9999] px-3 py-1.5 text-xs',
               'rounded-md shadow-md',
-              'leading-normal font-semibold',
+              'font-semibold leading-normal',
               !prefersReducedMotion && position && 'animate-fade-in',
               className
             )}

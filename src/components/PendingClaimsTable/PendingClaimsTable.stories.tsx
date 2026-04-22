@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { PendingClaimsTable, type PendingClaim } from './PendingClaimsTable';
+
+import { type PendingClaim, PendingClaimsTable } from './PendingClaimsTable';
 
 const meta: Meta<typeof PendingClaimsTable> = {
   title: 'Provider/PendingClaimsTable',

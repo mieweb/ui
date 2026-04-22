@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import { Button } from '../Button';
 import {
   Dropdown,
   DropdownItem,
-  DropdownSeparator,
   DropdownLabel,
+  DropdownSeparator,
 } from './Dropdown';
-import { Button } from '../Button';
 
 const meta: Meta<typeof Dropdown> = {
   title: 'Components/Dropdown',

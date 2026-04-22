@@ -1,9 +1,10 @@
 'use client';
 
+import { Pencil, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
 import * as React from 'react';
-import { Card } from '../Card/Card';
+
 import { Badge } from '../Badge/Badge';
-import { SlidersHorizontal, Trash2, Pencil, Plus } from 'lucide-react';
+import { Card } from '../Card/Card';
 
 export interface ServiceCardProps {
   /** Service ID */
@@ -117,9 +118,9 @@ export function ServiceCard({
         {/* Header */}
         <div className="mb-2 flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h3 className="text-foreground truncate font-semibold">{name}</h3>
+            <h3 className="truncate font-semibold text-foreground">{name}</h3>
             {category && (
-              <p className="text-muted-foreground mt-0.5 text-xs">{category}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{category}</p>
             )}
           </div>
           {!currentlyOffered && (
@@ -131,7 +132,7 @@ export function ServiceCard({
 
         {/* Description */}
         {description && (
-          <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
+          <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
             {description}
           </p>
         )}
@@ -142,13 +143,13 @@ export function ServiceCard({
             {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="bg-muted text-muted-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium"
+                className="inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
               >
                 {tag}
               </span>
             ))}
             {tags.length > 3 && (
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 +{tags.length - 3}
               </span>
             )}
@@ -160,10 +161,10 @@ export function ServiceCard({
           {/* Price */}
           {price !== undefined && (
             <div className="mb-2 flex items-baseline justify-between">
-              <span className="text-muted-foreground text-xs font-medium uppercase">
+              <span className="text-xs font-medium uppercase text-muted-foreground">
                 Base Price
               </span>
-              <span className="text-foreground text-lg font-bold">
+              <span className="text-lg font-bold text-foreground">
                 {formatCurrency(price, currency)}
               </span>
             </div>
@@ -184,7 +185,7 @@ export function ServiceCard({
 
           {/* Custom Pricing Indicator */}
           {(hasCustomAvailability || customPricingCount > 0) && (
-            <div className="text-muted-foreground mb-3 flex items-center gap-2 text-xs">
+            <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
               <SlidersHorizontal className="h-3.5 w-3.5" />
               <span>
                 {customPricingCount > 0
@@ -196,12 +197,12 @@ export function ServiceCard({
 
           {/* Actions */}
           {(onEdit || onManage || onDelete) && (
-            <div className="border-border flex items-center gap-2 border-t pt-2">
+            <div className="flex items-center gap-2 border-t border-border pt-2">
               {onDelete && (
                 <button
                   type="button"
                   onClick={handleDeleteClick}
-                  className="text-muted-foreground hover:text-destructive p-1.5 transition-colors"
+                  className="p-1.5 text-muted-foreground transition-colors hover:text-destructive"
                   title="Delete service"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -211,7 +212,7 @@ export function ServiceCard({
                 <button
                   type="button"
                   onClick={handleEditClick}
-                  className="text-muted-foreground hover:text-primary p-1.5 transition-colors"
+                  className="hover:text-primary p-1.5 text-muted-foreground transition-colors"
                   title="Edit service"
                 >
                   <Pencil className="h-4 w-4" />
@@ -250,14 +251,14 @@ export function AddServiceCard({
 }: AddServiceCardProps) {
   return (
     <Card
-      className={`border-border bg-muted/50 hover:border-primary hover:bg-muted h-full cursor-pointer border-2 border-dashed transition-all duration-200 ${className} `.trim()}
+      className={`bg-muted/50 hover:border-primary h-full cursor-pointer border-2 border-dashed border-border transition-all duration-200 hover:bg-muted ${className} `.trim()}
       onClick={onClick}
     >
       <div className="flex h-full min-h-[160px] flex-col items-center justify-center p-4">
-        <div className="bg-muted mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-          <Plus className="text-muted-foreground h-6 w-6" />
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+          <Plus className="h-6 w-6 text-muted-foreground" />
         </div>
-        <p className="text-muted-foreground text-sm font-medium">
+        <p className="text-sm font-medium text-muted-foreground">
           Add New Service
         </p>
       </div>

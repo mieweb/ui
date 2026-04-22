@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Input } from '../Input';
@@ -156,10 +157,10 @@ const GeolocationButton: React.FC<GeolocationButtonProps> = ({
         return <SpinnerIcon className="h-4 w-4" />;
       case 'success':
         return (
-          <CheckIcon className="text-success animate-in zoom-in h-4 w-4" />
+          <CheckIcon className="animate-in zoom-in h-4 w-4 text-success" />
         );
       case 'error':
-        return <WarningIcon className="text-destructive h-4 w-4" />;
+        return <WarningIcon className="h-4 w-4 text-destructive" />;
       default:
         return <CrosshairsIcon className="h-4 w-4" />;
     }
@@ -219,7 +220,7 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
   if (loading) {
     return (
       <div
-        className={cn('text-muted-foreground animate-pulse text-sm', className)}
+        className={cn('animate-pulse text-sm text-muted-foreground', className)}
       >
         Searching for providers near you...
       </div>
@@ -230,7 +231,7 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
 
   if (results.count === 0) {
     return (
-      <div className={cn('text-muted-foreground text-sm', className)}>
+      <div className={cn('text-sm text-muted-foreground', className)}>
         <strong>No providers found</strong> for ZIP code{' '}
         {results.postalCode.zipcode}
       </div>
@@ -276,8 +277,7 @@ export const SearchResultsMessage: React.FC<SearchResultsMessageProps> = ({
 // ============================================================================
 
 export interface ProviderSearchBarProps
-  extends
-    VariantProps<typeof searchBarVariants>,
+  extends VariantProps<typeof searchBarVariants>,
     Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit' | 'results'> {
   /** Callback when search is submitted */
   onSearch: (zipCode: string) => void;
@@ -418,8 +418,8 @@ export const ProviderSearchBar = React.forwardRef<
         >
           <div
             className={cn(
-              'bg-background flex items-center gap-1 rounded-lg border',
-              'focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2',
+              'flex items-center gap-1 rounded-lg border bg-background',
+              'focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2',
               displayError && 'border-destructive',
               !displayError && 'border-input'
             )}
@@ -476,7 +476,7 @@ export const ProviderSearchBar = React.forwardRef<
           {displayError && (
             <p
               id="search-error"
-              className="text-destructive mt-2 text-sm"
+              className="mt-2 text-sm text-destructive"
               role="alert"
             >
               {displayError}
@@ -524,12 +524,12 @@ export const HeroSearchBar: React.FC<HeroSearchBarProps> = ({
   return (
     <div className={cn('text-center', className)}>
       {title && (
-        <h1 className="text-foreground mb-2 text-3xl font-bold md:text-4xl lg:text-5xl">
+        <h1 className="mb-2 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl">
           {title}
         </h1>
       )}
       {subtitle && (
-        <p className="text-muted-foreground mb-6 text-lg md:text-xl">
+        <p className="mb-6 text-lg text-muted-foreground md:text-xl">
           {subtitle}
         </p>
       )}

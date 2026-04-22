@@ -47,7 +47,14 @@ export default defineConfig({
   target: 'es2022',
   dts: true,
   sourcemap: true,
-  clean: true,
+  // `clean: true` previously wiped `dist/` at the start of every (re)build,
+  // which briefly removed `dist/brands/*.css` — consumers like Meteor's CSS
+  // minifier (apps/web imports `@mieweb/ui/brands/bluehive.css`) can read
+  // during that window and hard-fail the build. Leaving `dist/` intact
+  // between rebuilds keeps watch mode stable; `npm run build` still does a
+  // full fresh output. Set to `false` here and rely on `rm -rf dist` in
+  // `npm run build` if a clean is required.
+  clean: false,
   external: ['react', 'react-dom'],
   treeshake: true,
   splitting: true,
@@ -55,4 +62,7 @@ export default defineConfig({
   esbuildOptions(options) {
     options.jsx = 'automatic';
   },
+  // Re-copy brand CSS after every (re)build so edits to `src/brands/*.css`
+  // propagate into `dist/brands/` without a manual restart.
+  onSuccess: 'cp src/brands/*.css dist/brands/ 2>/dev/null || true',
 });

@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -149,7 +150,7 @@ function RadioGroup({
         {label && (
           <legend
             className={cn(
-              'text-foreground font-medium',
+              'font-medium text-foreground',
               size === 'sm' && 'text-xs',
               size === 'md' && 'text-sm',
               size === 'lg' && 'text-base'
@@ -205,8 +206,7 @@ RadioGroup.displayName = 'RadioGroup';
 // ============================================================================
 
 export interface RadioProps
-  extends
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
     VariantProps<typeof radioVariants> {
   /** Value for this radio option */
   value: string;
@@ -275,7 +275,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         {/* Custom dot indicator */}
         <span
           className={cn(
-            'bg-primary-500 pointer-events-none absolute rounded-full transition-transform',
+            'pointer-events-none absolute rounded-full bg-primary-500 transition-transform',
             size === 'sm' && 'h-2 w-2',
             size === 'md' && 'h-2.5 w-2.5',
             size === 'lg' && 'h-3 w-3',
@@ -290,7 +290,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         <label
           htmlFor={radioId}
           className={cn(
-            'text-foreground cursor-pointer font-medium select-none',
+            'cursor-pointer select-none font-medium text-foreground',
             size === 'sm' && 'text-xs',
             size === 'md' && 'text-sm',
             size === 'lg' && 'text-base',
@@ -331,4 +331,4 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
 
 Radio.displayName = 'Radio';
 
-export { RadioGroup, Radio, radioVariants };
+export { Radio, RadioGroup, radioVariants };

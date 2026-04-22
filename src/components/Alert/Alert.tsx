@@ -1,6 +1,7 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const alertVariants = cva(
@@ -29,8 +30,7 @@ const alertVariants = cva(
 );
 
 export interface AlertProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof alertVariants> {
   /** Icon to display in the alert */
   icon?: React.ReactElement | null;
@@ -86,9 +86,9 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             type="button"
             onClick={onDismiss}
             className={cn(
-              'absolute top-2 right-2 rounded-md p-1',
+              'absolute right-2 top-2 rounded-md p-1',
               'opacity-70 hover:opacity-100',
-              'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               'transition-opacity'
             )}
             aria-label={dismissLabel}
@@ -112,7 +112,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn('mb-1 leading-none font-semibold tracking-tight', className)}
+    className={cn('mb-1 font-semibold leading-none tracking-tight', className)}
     {...props}
   >
     {children}
@@ -137,4 +137,4 @@ const AlertDescription = React.forwardRef<
 
 AlertDescription.displayName = 'AlertDescription';
 
-export { Alert, AlertTitle, AlertDescription, alertVariants };
+export { Alert, AlertDescription, AlertTitle, alertVariants };

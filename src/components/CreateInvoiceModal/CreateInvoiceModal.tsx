@@ -1,11 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalFooter } from '../Modal/Modal';
+
+import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import { Modal, ModalFooter, ModalHeader, ModalTitle } from '../Modal/Modal';
 import { Select } from '../Select/Select';
-import { Badge } from '../Badge/Badge';
 
 export interface EmployerOption {
   id: string;
@@ -367,7 +368,7 @@ export function CreateInvoiceModal({
                 </label>
                 <textarea
                   id="invoice-notes"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -414,7 +415,7 @@ export function CreateInvoiceModal({
                   {isSubmitting ? (
                     <>
                       <svg
-                        className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                        className="-ml-1 mr-2 h-4 w-4 animate-spin"
                         fill="none"
                         viewBox="0 0 24 24"
                       >

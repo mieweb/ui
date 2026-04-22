@@ -1,10 +1,11 @@
 'use client';
 
 import * as React from 'react';
+
+import { Avatar } from '../Avatar/Avatar';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
-import { Avatar } from '../Avatar/Avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../Tabs/Tabs';
 
 export interface EmployerContact {
@@ -189,7 +190,7 @@ export function EmployerView({
 
           {/* Stats */}
           {employer.stats && (
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-200 pt-6 md:grid-cols-5 dark:border-gray-700">
+            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-200 pt-6 dark:border-gray-700 md:grid-cols-5">
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {employer.stats.totalOrders}
@@ -254,7 +255,7 @@ export function EmployerView({
                   <CardTitle className="text-lg">Address</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <address className="text-gray-700 not-italic dark:text-gray-300">
+                  <address className="not-italic text-gray-700 dark:text-gray-300">
                     {employer.address.street}
                     {employer.address.street2 && (
                       <>

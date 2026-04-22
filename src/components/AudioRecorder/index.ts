@@ -1,10 +1,10 @@
 export {
   AudioRecorder,
-  audioRecorderVariants,
-  waveformContainerVariants,
-  controlButtonVariants,
-  formatTime,
+  type AudioRecorderControlsRenderProps,
   type AudioRecorderProps,
   type AudioRecorderState,
-  type AudioRecorderControlsRenderProps,
+  audioRecorderVariants,
+  controlButtonVariants,
+  formatTime,
+  waveformContainerVariants,
 } from './AudioRecorder';

@@ -1,21 +1,21 @@
 'use strict';
 
-var chunkRRQGH7C5_cjs = require('../../chunk-RRQGH7C5.cjs');
+var chunkRRARXXV2_cjs = require('../../chunk-RRARXXV2.cjs');
 require('../../chunk-OR5DRJCW.cjs');
 
 
 
 Object.defineProperty(exports, "Switch", {
   enumerable: true,
-  get: function () { return chunkRRQGH7C5_cjs.Switch; }
+  get: function () { return chunkRRARXXV2_cjs.Switch; }
 });
 Object.defineProperty(exports, "switchThumbVariants", {
   enumerable: true,
-  get: function () { return chunkRRQGH7C5_cjs.switchThumbVariants; }
+  get: function () { return chunkRRARXXV2_cjs.switchThumbVariants; }
 });
 Object.defineProperty(exports, "switchTrackVariants", {
   enumerable: true,
-  get: function () { return chunkRRQGH7C5_cjs.switchTrackVariants; }
+  get: function () { return chunkRRARXXV2_cjs.switchTrackVariants; }
 });
 //# sourceMappingURL=index.cjs.map
 //# sourceMappingURL=index.cjs.map

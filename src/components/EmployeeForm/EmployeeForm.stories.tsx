@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { EmployeeForm } from './EmployeeForm';
 
 const meta: Meta<typeof EmployeeForm> = {
@@ -140,9 +141,9 @@ export const WithCustomFields: Story = {
     isNew: true,
     mode: 'create',
     customFields: (
-      <div className="bg-muted border-border rounded-lg border p-4">
+      <div className="rounded-lg border border-border bg-muted p-4">
         <h4 className="mb-2 font-medium">Custom Fields Section</h4>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Additional custom fields can be injected here.
         </p>
       </div>
@@ -224,11 +225,11 @@ export const FullFeatured: Story = {
     mode: 'create',
     customFields: (
       <div className="grid grid-cols-2 gap-4">
-        <div className="border-border rounded border border-dashed p-3">
-          <span className="text-muted-foreground text-xs">Badge ID</span>
+        <div className="rounded border border-dashed border-border p-3">
+          <span className="text-xs text-muted-foreground">Badge ID</span>
         </div>
-        <div className="border-border rounded border border-dashed p-3">
-          <span className="text-muted-foreground text-xs">Start Date</span>
+        <div className="rounded border border-dashed border-border p-3">
+          <span className="text-xs text-muted-foreground">Start Date</span>
         </div>
       </div>
     ),

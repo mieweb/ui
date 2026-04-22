@@ -1,15 +1,16 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalClose,
-  ModalBody,
-  ModalFooter,
-} from './Modal';
+import * as React from 'react';
+
 import { Button } from '../Button';
 import { Input } from '../Input';
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from './Modal';
 
 const meta: Meta<typeof Modal> = {
   title: 'Components/Modal',
@@ -169,7 +170,7 @@ function ScrollableModalDemo() {
           <ModalClose />
         </ModalHeader>
         <ModalBody className="max-h-[60vh] overflow-y-auto">
-          <div className="text-muted-foreground space-y-4 text-sm">
+          <div className="space-y-4 text-sm text-muted-foreground">
             {Array.from({ length: 20 }, (_, i) => (
               <p key={i}>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do

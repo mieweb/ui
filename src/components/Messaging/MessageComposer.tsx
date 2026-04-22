@@ -1,15 +1,16 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
-import type { AttachmentType, NewMessage } from './types';
 import {
   AttachmentPicker,
   AttachmentPreviewItem,
   CameraButton,
   DragDropZone,
-  getFileType,
   generateAttachmentId,
+  getFileType,
 } from './AttachmentPicker';
+import type { AttachmentType, NewMessage } from './types';
 
 // ============================================================================
 // Types
@@ -108,8 +109,7 @@ const sendButtonVariants = cva(
 );
 
 export interface SendButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof sendButtonVariants> {
   isLoading?: boolean;
 }
@@ -427,11 +427,11 @@ const MessageComposer = React.forwardRef<
               className={cn(
                 'flex items-center gap-2 px-4 py-2',
                 'bg-neutral-50 dark:bg-neutral-800/50',
-                'border-primary-500 border-l-4'
+                'border-l-4 border-primary-500'
               )}
             >
               <div className="min-w-0 flex-1">
-                <span className="text-primary-600 dark:text-primary-400 text-xs font-medium">
+                <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
                   Replying to {replyTo.senderName}
                 </span>
                 <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">
@@ -445,7 +445,7 @@ const MessageComposer = React.forwardRef<
                   'shrink-0 rounded p-1',
                   'text-neutral-400 hover:text-neutral-600',
                   'dark:text-neutral-500 dark:hover:text-neutral-300',
-                  'focus:ring-primary-500 focus:ring-2 focus:outline-none'
+                  'focus:outline-none focus:ring-2 focus:ring-primary-500'
                 )}
                 aria-label="Cancel reply"
               >
@@ -527,7 +527,7 @@ const MessageComposer = React.forwardRef<
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
-                  'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+                  'focus:outline-none focus:ring-2 focus:ring-primary-500',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                   'transition-colors',
                   'max-h-[150px]'
@@ -538,7 +538,7 @@ const MessageComposer = React.forwardRef<
 
               {/* Character count */}
               {showCharacterCount && (
-                <div id="char-count" className="absolute right-3 bottom-1.5">
+                <div id="char-count" className="absolute bottom-1.5 right-3">
                   <CharacterCounter current={content.length} max={maxLength} />
                 </div>
               )}
@@ -559,4 +559,4 @@ const MessageComposer = React.forwardRef<
 
 MessageComposer.displayName = 'MessageComposer';
 
-export { MessageComposer, CharacterCounter, SendButton, sendButtonVariants };
+export { CharacterCounter, MessageComposer, SendButton, sendButtonVariants };

@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -112,7 +113,7 @@ export function NearbyProviderCard({
           ) : null}
           <div
             className={cn(
-              'from-primary-500 to-primary-700 shadow-primary-500/20 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br text-lg font-bold text-white shadow-sm',
+              'shadow-primary-500/20 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 text-lg font-bold text-white shadow-sm',
               logoUrl && 'hidden'
             )}
           >
@@ -126,11 +127,11 @@ export function NearbyProviderCard({
           <div className="mb-1 flex items-start justify-between gap-2">
             <LinkWrapper
               to={`/provider/${slug}`}
-              className="hover:text-primary-600 dark:hover:text-primary-400 text-sm font-semibold text-gray-900 transition-colors dark:text-white"
+              className="text-sm font-semibold text-gray-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
             >
               {name}
             </LinkWrapper>
-            <span className="bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
+            <span className="dark:bg-primary-900/30 inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary-600 dark:text-primary-400">
               {distance.toFixed(1)} mi
             </span>
           </div>
@@ -150,7 +151,7 @@ export function NearbyProviderCard({
           {phoneNumber && (
             <a
               href={`tel:${phoneNumber}`}
-              className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm"
+              className="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               <PhoneIcon className="h-4 w-4" />
               {formatPhone(phoneNumber)}
@@ -203,7 +204,7 @@ export function NearbyProvidersList({
     <div className={cn('space-y-4', className)}>
       {/* Title */}
       <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-        <LocationIcon className="text-primary-600 dark:text-primary-400 h-5 w-5" />
+        <LocationIcon className="h-5 w-5 text-primary-600 dark:text-primary-400" />
         {title}
       </h2>
 
@@ -226,7 +227,7 @@ export function NearbyProvidersList({
       {zipcode && (
         <a
           href={`/providers/search/${zipcode}/25`}
-          className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-2 text-sm font-medium"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
         >
           <LocationIcon className="h-4 w-4" />
           SHOW PROVIDERS IN {zipcode}
@@ -242,7 +243,7 @@ export function NearbyProvidersList({
 
 function ConciergeBanner() {
   return (
-    <div className="border-primary-200 bg-primary-50 dark:border-primary-800 dark:bg-primary-900/20 rounded-lg border p-4">
+    <div className="dark:bg-primary-900/20 rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800">
       <div className="flex items-center gap-4">
         <img
           src="/images/logos/bluehive-concierge.png"
@@ -260,7 +261,7 @@ function ConciergeBanner() {
             href="https://bluehive.com/concierge/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 mt-1 inline-flex items-center gap-1 text-sm font-medium"
+            className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
           >
             LEARN MORE
             <ArrowRightIcon className="h-4 w-4" />

@@ -116,9 +116,9 @@
   ],
   "scripts": {
     "dev": "tsup --watch",
-    "build": "tsup && npm run build:css && npm run copy:brand-css",
+    "build": "rm -rf dist && tsup && npm run build:css && npm run copy:brand-css",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
-    "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
+    "copy:brand-css": "mkdir -p dist/brands && cp src/brands/*.css dist/brands/ 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",

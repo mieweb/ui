@@ -1,7 +1,8 @@
+import { Building2, ChevronDown, ChevronRight, Shield } from 'lucide-react';
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Checkbox } from '../Checkbox';
-import { ChevronDown, ChevronRight, Shield, Building2 } from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -122,12 +123,12 @@ function PermissionItem({
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="hover:bg-muted rounded p-0.5"
+            className="rounded p-0.5 hover:bg-muted"
           >
             {isExpanded ? (
-              <ChevronDown className="text-muted-foreground h-4 w-4" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
             ) : (
-              <ChevronRight className="text-muted-foreground h-4 w-4" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             )}
           </button>
         )}
@@ -143,7 +144,7 @@ function PermissionItem({
         <label
           htmlFor={`permission-${permission.id}`}
           className={cn(
-            'cursor-pointer text-sm select-none',
+            'cursor-pointer select-none text-sm',
             level === 0 && 'font-semibold',
             level === 1 && 'font-medium',
             parentChecked === false && 'text-muted-foreground'
@@ -304,16 +305,16 @@ export function PermissionsEditor({
                 className="hover:bg-muted/50 -ml-2 flex w-full items-center gap-2 rounded py-2 pl-2 text-left"
               >
                 {expandedGroups.has(group.id) ? (
-                  <ChevronDown className="text-muted-foreground h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 ) : (
-                  <ChevronRight className="text-muted-foreground h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 )}
                 <span className="font-semibold">{group.name}</span>
               </button>
 
               {/* Group Permissions */}
               {expandedGroups.has(group.id) && (
-                <div className="mt-2 ml-6 border-l pl-4">
+                <div className="ml-6 mt-2 border-l pl-4">
                   {group.permissions.map((permission) => (
                     <PermissionItem
                       key={permission.id}
@@ -341,7 +342,7 @@ export function PermissionsEditor({
 
               {/* Separator between groups */}
               {groupIndex < groups.length - 1 && (
-                <hr className="border-border my-4" />
+                <hr className="my-4 border-border" />
               )}
             </div>
           ))}
@@ -373,7 +374,7 @@ export function PermissionsEditor({
                 >
                   <span className="font-medium">{employer.name}</span>
                   {employer.address && (
-                    <span className="text-muted-foreground ml-2">
+                    <span className="ml-2 text-muted-foreground">
                       | {employer.address.street1} - {employer.address.city},{' '}
                       {employer.address.state}
                     </span>
@@ -401,7 +402,7 @@ export function PermissionsEditor({
           {showEmployerAccess && (
             <>
               <h5 className="mt-3 text-sm font-medium">{employerAccess}:</h5>
-              <div className="text-muted-foreground text-sm italic">
+              <div className="text-sm italic text-muted-foreground">
                 {selectedEmployers.length === 0 ? (
                   <span>{all}</span>
                 ) : (

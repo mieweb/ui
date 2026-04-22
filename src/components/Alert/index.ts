@@ -1,7 +1,7 @@
 export {
   Alert,
-  AlertTitle,
   AlertDescription,
-  alertVariants,
   type AlertProps,
+  AlertTitle,
+  alertVariants,
 } from './Alert';

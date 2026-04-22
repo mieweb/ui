@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 export interface ProviderOption {
@@ -133,7 +134,7 @@ export function ProviderSelector({
   return (
     <div className={cn('relative', className)} ref={containerRef}>
       {label && (
-        <label className="text-foreground mb-1 block text-sm font-medium">
+        <label className="mb-1 block text-sm font-medium text-foreground">
           {label}
         </label>
       )}
@@ -148,7 +149,7 @@ export function ProviderSelector({
           'bg-background text-foreground',
           'border-input',
           'hover:border-muted-foreground/50',
-          'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
+          'focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring',
           'disabled:cursor-not-allowed disabled:opacity-50',
           sizeStyles[size]
         )}
@@ -156,7 +157,7 @@ export function ProviderSelector({
         {isLoading ? (
           <div className="flex flex-1 items-center gap-2">
             <svg
-              className="text-muted-foreground h-5 w-5 animate-spin"
+              className="h-5 w-5 animate-spin text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -191,24 +192,24 @@ export function ProviderSelector({
               </div>
             )}
             <div className="min-w-0 flex-1 leading-tight">
-              <div className="text-foreground truncate text-sm">
+              <div className="truncate text-sm text-foreground">
                 {selectedProvider.name}
               </div>
               {selectedProvider.location && (
-                <div className="text-muted-foreground truncate text-[11px]">
+                <div className="truncate text-[11px] text-muted-foreground">
                   {selectedProvider.location}
                 </div>
               )}
             </div>
           </>
         ) : (
-          <span className="text-muted-foreground flex-1">{placeholder}</span>
+          <span className="flex-1 text-muted-foreground">{placeholder}</span>
         )}
 
         {/* Dropdown arrow */}
         <svg
           className={cn(
-            'text-muted-foreground h-4 w-4 flex-shrink-0 transition-transform',
+            'h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform',
             isOpen && 'rotate-180'
           )}
           fill="none"
@@ -226,13 +227,13 @@ export function ProviderSelector({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="border-border bg-card absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
+        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-border bg-card shadow-lg">
           {/* Search */}
           {searchable && (
-            <div className="border-border border-b p-2">
+            <div className="border-b border-border p-2">
               <div className="relative">
                 <svg
-                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -249,8 +250,7 @@ export function ProviderSelector({
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-1 focus:outline-none"
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
+                  className="w-full rounded-md border border-input bg-background py-2 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   autoFocus
                 />
               </div>
@@ -260,7 +260,7 @@ export function ProviderSelector({
           {/* Options list */}
           <div className="max-h-64 overflow-y-auto">
             {filteredProviders.length === 0 ? (
-              <div className="text-muted-foreground px-4 py-6 text-center">
+              <div className="px-4 py-6 text-center text-muted-foreground">
                 No providers found
               </div>
             ) : (
@@ -283,29 +283,29 @@ export function ProviderSelector({
                       className="h-8 w-8 rounded object-cover"
                     />
                   ) : (
-                    <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded text-sm font-medium">
+                    <div className="flex h-8 w-8 items-center justify-center rounded bg-muted text-sm font-medium text-muted-foreground">
                       {getInitials(provider.name)}
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-foreground font-medium">
+                      <span className="font-medium text-foreground">
                         {provider.name}
                       </span>
                       {provider.code && (
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-xs text-muted-foreground">
                           ({provider.code})
                         </span>
                       )}
                       {provider.isActive === false && (
-                        <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium">
+                        <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
                           Inactive
                         </span>
                       )}
                     </div>
                     {(provider.location || provider.type) && (
-                      <div className="text-muted-foreground truncate text-sm">
+                      <div className="truncate text-sm text-muted-foreground">
                         {[provider.type, provider.location]
                           .filter(Boolean)
                           .join(' • ')}

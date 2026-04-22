@@ -1,18 +1,19 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalBody,
-  ModalFooter,
-} from '../Modal/Modal';
+import { useEffect, useState } from 'react';
+
+import { cn } from '../../utils/cn';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal/Modal';
 import { Select } from '../Select/Select';
-import { cn } from '../../utils/cn';
 
 // ============================================================================
 // Constants

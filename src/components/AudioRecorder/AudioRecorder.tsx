@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -14,9 +15,8 @@ export type AudioRecorderState =
   | 'stopped'
   | 'playback';
 
-export interface AudioRecorderProps extends VariantProps<
-  typeof audioRecorderVariants
-> {
+export interface AudioRecorderProps
+  extends VariantProps<typeof audioRecorderVariants> {
   /** Current state of the recorder */
   state?: AudioRecorderState;
   /** Callback when state changes */
@@ -1029,7 +1029,7 @@ function DefaultControls({
 export {
   AudioRecorder,
   audioRecorderVariants,
-  waveformContainerVariants,
   controlButtonVariants,
   formatTime,
+  waveformContainerVariants,
 };

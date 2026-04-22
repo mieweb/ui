@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -35,10 +36,8 @@ export interface TranscriptionResult {
   confidence?: number;
 }
 
-export interface RecordButtonProps extends Omit<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  'children'
-> {
+export interface RecordButtonProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   /** Current state of the button */
   state?: RecordButtonState;
   /** Size of the button */
@@ -684,7 +683,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
 
         {/* Duration display */}
         {showDuration && isRecording && (
-          <span className="text-destructive font-mono text-xs tabular-nums">
+          <span className="font-mono text-xs tabular-nums text-destructive">
             {formatDuration(duration)}
           </span>
         )}
@@ -706,4 +705,4 @@ RecordButton.displayName = 'RecordButton';
 // Exports
 // ============================================================================
 
-export { RecordButton, recordButtonVariants, formatDuration };
+export { formatDuration, RecordButton, recordButtonVariants };

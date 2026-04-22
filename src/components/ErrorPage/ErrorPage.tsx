@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Button, buttonVariants } from '../Button/Button';
 
@@ -169,13 +170,13 @@ export function ErrorPage({
 
       {/* Error Code */}
       {displayCode && (
-        <div className="mb-4 text-6xl font-bold text-gray-200 sm:text-8xl dark:text-gray-700">
+        <div className="mb-4 text-6xl font-bold text-gray-200 dark:text-gray-700 sm:text-8xl">
           {displayCode}
         </div>
       )}
 
       {/* Title */}
-      <h1 className="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+      <h1 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
         {displayTitle}
       </h1>
 
@@ -377,7 +378,7 @@ export function MaintenancePage({
           href={statusUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+          className="text-sm font-medium text-primary-600 hover:text-primary-700"
         >
           Check Status Page →
         </a>

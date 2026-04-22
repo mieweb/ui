@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { ProviderUsersTable } from './ProviderUsersTable';
 
 const meta: Meta<typeof ProviderUsersTable> = {

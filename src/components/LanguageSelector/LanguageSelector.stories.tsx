@@ -1,10 +1,11 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import * as React from 'react';
+
 import {
-  LanguageSelector,
-  LanguageSelectorNative,
-  LanguageSelectorInline,
   type Language,
+  LanguageSelector,
+  LanguageSelectorInline,
+  LanguageSelectorNative,
 } from './LanguageSelector';
 
 const limitedLanguages: Language[] = [
@@ -183,7 +184,7 @@ export const AllVariantsComparison: Story = {
     return (
       <div className="space-y-6">
         <div>
-          <p className="text-muted-foreground mb-2 text-sm">Custom Dropdown</p>
+          <p className="mb-2 text-sm text-muted-foreground">Custom Dropdown</p>
           <LanguageSelector
             {...args}
             value={dropdownValue}
@@ -191,7 +192,7 @@ export const AllVariantsComparison: Story = {
           />
         </div>
         <div>
-          <p className="text-muted-foreground mb-2 text-sm">Native Select</p>
+          <p className="mb-2 text-sm text-muted-foreground">Native Select</p>
           <LanguageSelectorNative
             {...args}
             value={nativeValue}
@@ -199,7 +200,7 @@ export const AllVariantsComparison: Story = {
           />
         </div>
         <div>
-          <p className="text-muted-foreground mb-2 text-sm">Inline Buttons</p>
+          <p className="mb-2 text-sm text-muted-foreground">Inline Buttons</p>
           <LanguageSelectorInline
             {...args}
             value={inlineValue}
@@ -226,8 +227,8 @@ export const InHeader: Story = {
     }, [args.value]);
 
     return (
-      <header className="border-border bg-card flex items-center justify-between rounded-lg border px-4 py-3">
-        <div className="text-foreground font-semibold">BlueHive</div>
+      <header className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+        <div className="font-semibold text-foreground">BlueHive</div>
         <div className="flex items-center gap-4">
           <LanguageSelector
             {...args}

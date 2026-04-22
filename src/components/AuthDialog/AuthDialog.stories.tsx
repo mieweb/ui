@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+
 import { AuthDialog, AuthMode, DEFAULT_SOCIAL_PROVIDERS } from './AuthDialog';
 
 // Demo-only controls interface
@@ -86,7 +87,7 @@ function AuthDialogDemo({
     <div className="min-h-screen bg-gray-100 p-8 dark:bg-gray-900">
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-white"
+        className="rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-700"
       >
         Open Auth Dialog
       </button>

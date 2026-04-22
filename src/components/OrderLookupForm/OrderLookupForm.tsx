@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 
@@ -93,7 +94,7 @@ export function OrderLookupForm({
       </div>
 
       {/* Right side - Lookup form */}
-      <div className="flex items-center justify-center bg-white p-8 md:w-1/2 dark:bg-gray-900">
+      <div className="flex items-center justify-center bg-white p-8 dark:bg-gray-900 md:w-1/2">
         <div className="w-full max-w-md">
           <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
             Order Lookup
@@ -159,7 +160,7 @@ export function OrderLookupForm({
               {isSubmitting ? (
                 <>
                   <svg
-                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                    className="-ml-1 mr-2 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >

@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -120,8 +121,7 @@ const addressVariants = cva('', {
 // =============================================================================
 
 export interface AddressProps
-  extends
-    VariantProps<typeof addressVariants>,
+  extends VariantProps<typeof addressVariants>,
     Omit<React.HTMLAttributes<HTMLElement>, 'children'> {
   /** The address data to display */
   address: AddressData;
@@ -270,8 +270,8 @@ export function Address({
         rel="noopener noreferrer"
         className={cn(
           baseStyles,
-          'hover:text-primary-600 dark:hover:text-primary-400 hover:underline',
-          'focus:ring-primary-500 rounded focus:ring-2 focus:ring-offset-2 focus:outline-none'
+          'hover:text-primary-600 hover:underline dark:hover:text-primary-400',
+          'rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
         )}
         {...props}
       >
@@ -354,7 +354,7 @@ export function AddressCard({
         <a
           href={`tel:${phoneNumber.replace(/\D/g, '')}`}
           onClick={handlePhoneClick}
-          className="hover:text-primary-600 dark:hover:text-primary-400 mt-2 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+          className="mt-2 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
         >
           <PhoneIcon className="h-4 w-4" />
           {phoneNumber}

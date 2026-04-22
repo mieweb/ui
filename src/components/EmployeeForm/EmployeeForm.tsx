@@ -1,9 +1,10 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Input } from '../Input';
-import { Textarea } from '../Textarea';
-import { Switch } from '../Switch';
 import { Select } from '../Select';
+import { Switch } from '../Switch';
+import { Textarea } from '../Textarea';
 
 // ============================================================================
 // Types
@@ -405,7 +406,7 @@ export function EmployeeForm({
                 <button
                   type="button"
                   onClick={() => removePhone(index)}
-                  className="text-destructive hover:text-destructive/80 p-2"
+                  className="hover:text-destructive/80 p-2 text-destructive"
                 >
                   ✕
                 </button>
@@ -469,7 +470,7 @@ export function EmployeeForm({
             <button
               type="button"
               onClick={onCancel}
-              className="border-input hover:bg-muted rounded-md border px-4 py-2 text-sm"
+              className="rounded-md border border-input px-4 py-2 text-sm hover:bg-muted"
             >
               {cancel}
             </button>

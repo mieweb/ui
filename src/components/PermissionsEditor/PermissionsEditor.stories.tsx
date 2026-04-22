@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import {
-  PermissionsEditor,
-  PermissionGroup,
-  EmployerAccess,
-} from './PermissionsEditor';
-import { Card } from '../Card';
+
 import { Button } from '../Button';
+import { Card } from '../Card';
+import {
+  EmployerAccess,
+  PermissionGroup,
+  PermissionsEditor,
+} from './PermissionsEditor';
 
 const meta: Meta<typeof PermissionsEditor> = {
   title: 'Components/PermissionsEditor',
@@ -284,7 +285,7 @@ function InModalContextDemo() {
   const [permissions, setPermissions] = React.useState<string[]>([]);
 
   return (
-    <div className="bg-background mx-auto max-w-2xl rounded-lg border shadow-lg">
+    <div className="mx-auto max-w-2xl rounded-lg border bg-background shadow-lg">
       <div className="bg-primary text-primary-foreground rounded-t-lg p-4">
         <h4 className="text-lg font-semibold">User Permissions</h4>
       </div>

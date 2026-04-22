@@ -40,19 +40,19 @@
  * ```
  */
 
+export { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
 export { DocumentScanner } from './DocumentScanner';
 export { DropZone } from './DropZone';
 export { FilePreview } from './FilePreview';
-export { WebcamModal } from './WebcamModal';
-export { DocumentDetectionOverlay } from './DocumentDetectionOverlay';
-export { useFileUpload } from './useFileUpload';
-export { useCamera } from './useCamera';
-export { useDocumentDetection } from './useDocumentDetection';
 export type * from './types';
+export { useCamera } from './useCamera';
 export type {
-  Point,
-  DocumentBoundary,
+  DetectionConfig,
   DetectionMetrics,
   DetectionState,
-  DetectionConfig,
+  DocumentBoundary,
+  Point,
 } from './useDocumentDetection';
+export { useDocumentDetection } from './useDocumentDetection';
+export { useFileUpload } from './useFileUpload';
+export { WebcamModal } from './WebcamModal';

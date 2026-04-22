@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -55,7 +56,9 @@ export function ProviderMap({
   const mapContainerRef = React.useRef<HTMLDivElement>(null);
   const mapRef = React.useRef<unknown>(null);
   const [mapLoaded, setMapLoaded] = React.useState(false);
-  const [mapStyle, setMapStyle] = React.useState<'streets' | 'satellite'>('streets');
+  const [mapStyle, setMapStyle] = React.useState<'streets' | 'satellite'>(
+    'streets'
+  );
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -68,9 +71,13 @@ export function ProviderMap({
     const loadMapbox = async () => {
       try {
         // Load CSS (always needed regardless of JS loading method)
-        if (typeof window !== 'undefined' && !document.querySelector('link[href*="mapbox-gl"]')) {
+        if (
+          typeof window !== 'undefined' &&
+          !document.querySelector('link[href*="mapbox-gl"]')
+        ) {
           const link = document.createElement('link');
-          link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+          link.href =
+            'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
           link.rel = 'stylesheet';
           document.head.appendChild(link);
         }
@@ -79,7 +86,8 @@ export function ProviderMap({
         let mapboxgl: MapboxGLTypes | undefined;
         try {
           const mod = await import('mapbox-gl');
-          const defaultExport = (mod.default || mod) as unknown as MapboxGLTypes;
+          const defaultExport = (mod.default ||
+            mod) as unknown as MapboxGLTypes;
           if (defaultExport && typeof defaultExport.Map === 'function') {
             mapboxgl = defaultExport;
           }
@@ -99,13 +107,15 @@ export function ProviderMap({
         if (!mapboxgl) {
           await new Promise<void>((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
+            script.src =
+              'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
             script.onload = () => resolve();
             script.onerror = reject;
             document.head.appendChild(script);
           });
           await new Promise((resolve) => setTimeout(resolve, 100));
-          mapboxgl = (window as unknown as { mapboxgl: MapboxGLTypes }).mapboxgl;
+          mapboxgl = (window as unknown as { mapboxgl: MapboxGLTypes })
+            .mapboxgl;
         }
 
         if (!mapboxgl) {
@@ -117,9 +127,10 @@ export function ProviderMap({
         if (mapContainerRef.current && !mapRef.current) {
           const map = new mapboxgl.Map({
             container: mapContainerRef.current,
-            style: mapStyle === 'streets'
-              ? 'mapbox://styles/mapbox/streets-v12'
-              : 'mapbox://styles/mapbox/satellite-streets-v12',
+            style:
+              mapStyle === 'streets'
+                ? 'mapbox://styles/mapbox/streets-v12'
+                : 'mapbox://styles/mapbox/satellite-streets-v12',
             center: [coordinates.longitude, coordinates.latitude],
             zoom,
           });
@@ -174,7 +185,15 @@ export function ProviderMap({
         mapRef.current = null;
       }
     };
-  }, [mapboxToken, coordinates, zoom, providerName, address, showZoomControls, showFullscreen]);
+  }, [
+    mapboxToken,
+    coordinates,
+    zoom,
+    providerName,
+    address,
+    showZoomControls,
+    showFullscreen,
+  ]);
 
   // Update map style when toggled
   React.useEffect(() => {
@@ -194,7 +213,8 @@ export function ProviderMap({
       setIsFullscreen(!!document.fullscreenElement);
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    return () =>
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   // Fallback to static map if no token
@@ -258,8 +278,10 @@ export function ProviderMap({
       {showSatelliteToggle && mapLoaded && (
         <button
           type="button"
-          onClick={() => setMapStyle((s) => (s === 'streets' ? 'satellite' : 'streets'))}
-          className="absolute top-2 right-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          onClick={() =>
+            setMapStyle((s) => (s === 'streets' ? 'satellite' : 'streets'))
+          }
+          className="absolute right-2 top-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           {mapStyle === 'streets' ? 'Satellite view' : 'Map view'}
         </button>
@@ -271,7 +293,7 @@ export function ProviderMap({
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
+          className="absolute left-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
         >
           GET DIRECTIONS
         </a>
@@ -321,7 +343,7 @@ function StaticMapFallback({
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
+          className="absolute left-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700"
         >
           GET DIRECTIONS
         </a>

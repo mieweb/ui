@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Input } from '../Input';
 
@@ -224,20 +225,20 @@ export function ServicePicker({
   return (
     <div
       className={cn(
-        'bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border',
+        'flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-card',
         !fullWidth && 'lg:max-w-md',
         className
       )}
     >
       <div className="p-3">
         {!hideHeading && (
-          <h2 className="text-foreground mb-3 text-xl font-bold">{heading}</h2>
+          <h2 className="mb-3 text-xl font-bold text-foreground">{heading}</h2>
         )}
 
         {showSearch && (
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <SearchIcon className="text-muted-foreground h-5 w-5" />
+              <SearchIcon className="h-5 w-5 text-muted-foreground" />
             </div>
             <Input
               type="search"
@@ -253,13 +254,13 @@ export function ServicePicker({
 
       <div className="flex-1 overflow-y-auto p-3">
         {error && (
-          <div className="bg-destructive/10 text-destructive mb-4 rounded-lg p-4">
+          <div className="bg-destructive/10 mb-4 rounded-lg p-4 text-destructive">
             <strong>{error}</strong>
           </div>
         )}
 
         {loading ? (
-          <div className="text-muted-foreground flex items-center gap-2">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <SpinnerIcon className="h-5 w-5 animate-spin" />
             <span>Loading available services...</span>
           </div>
@@ -278,7 +279,7 @@ export function ServicePicker({
               ))
             ) : (
               <li>
-                <div className="bg-muted text-muted-foreground rounded-lg p-4">
+                <div className="rounded-lg bg-muted p-4 text-muted-foreground">
                   <strong>{emptyMessage}</strong>
                 </div>
               </li>
@@ -302,7 +303,7 @@ export function ServicePicker({
               ))
             ) : (
               <li>
-                <div className="bg-muted text-muted-foreground rounded-lg p-4">
+                <div className="rounded-lg bg-muted p-4 text-muted-foreground">
                   <strong>{emptyMessage}</strong>
                 </div>
               </li>
@@ -351,7 +352,7 @@ function ServiceGroupItem({
         onClick={() => onToggleGroup(group.id)}
         className={cn(
           'flex w-full items-center justify-between rounded-lg px-3 py-2',
-          'text-muted-foreground text-left text-sm font-medium',
+          'text-left text-sm font-medium text-muted-foreground',
           'hover:bg-muted',
           'transition-colors',
           depth > 0 && 'ml-4'
@@ -369,7 +370,7 @@ function ServiceGroupItem({
         </span>
         <ChevronIcon
           className={cn(
-            'text-muted-foreground h-5 w-5 transition-transform',
+            'h-5 w-5 text-muted-foreground transition-transform',
             isExpanded && 'rotate-180'
           )}
         />
@@ -444,11 +445,11 @@ function ServiceItem({
               disabled={service.disabled}
               className={cn(
                 'peer h-4 w-4 shrink-0 appearance-none rounded',
-                'border-input bg-background border-2',
+                'border-2 border-input bg-background',
                 'cursor-pointer transition-all duration-150',
-                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'disabled:cursor-not-allowed disabled:opacity-50',
-                'checked:bg-primary-500 checked:border-primary-500'
+                'checked:border-primary-500 checked:bg-primary-500'
               )}
             />
             <CheckIcon className="pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
@@ -462,35 +463,35 @@ function ServiceItem({
               disabled={service.disabled}
               className={cn(
                 'peer h-4 w-4 shrink-0 appearance-none rounded-full',
-                'border-input bg-background border-2',
+                'border-2 border-input bg-background',
                 'cursor-pointer transition-all duration-150',
-                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'disabled:cursor-not-allowed disabled:opacity-50',
                 'checked:border-primary-500'
               )}
             />
-            <span className="bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" />
+            <span className="pointer-events-none absolute h-2 w-2 scale-0 rounded-full bg-primary-500 transition-transform peer-checked:scale-100" />
           </span>
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-foreground text-sm font-medium">
+            <span className="text-sm font-medium text-foreground">
               {service.name}
             </span>
             {service.code && (
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 ({service.code})
               </span>
             )}
           </div>
           {service.description && (
-            <p className="text-muted-foreground truncate text-xs">
+            <p className="truncate text-xs text-muted-foreground">
               {service.description}
             </p>
           )}
         </div>
         {service.price !== undefined && (
-          <span className="text-foreground text-sm font-medium">
+          <span className="text-sm font-medium text-foreground">
             ${service.price.toFixed(2)}
           </span>
         )}

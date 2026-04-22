@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { cn } from '../../utils/cn';
+
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { cn } from '../../utils/cn';
 
 export type DropdownPlacement = 'bottom-start' | 'bottom-end' | 'bottom';
 
@@ -135,10 +136,8 @@ Dropdown.displayName = 'Dropdown';
 // Dropdown Header Component
 // ============================================================================
 
-export interface DropdownHeaderProps extends Omit<
-  React.HTMLAttributes<HTMLDivElement>,
-  'title'
-> {
+export interface DropdownHeaderProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   /** Avatar element or image */
   avatar?: React.ReactNode;
   /** Primary text (e.g., user name) */
@@ -212,7 +211,8 @@ DropdownContent.displayName = 'DropdownContent';
 // Dropdown Item Component
 // ============================================================================
 
-export interface DropdownItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface DropdownItemProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Icon to display before the label */
   icon?: React.ReactNode;
   /** Danger variant for destructive actions */
@@ -292,7 +292,7 @@ function DropdownLabel({
   return (
     <div
       className={cn(
-        'px-3 py-1.5 text-xs font-semibold tracking-wider uppercase',
+        'px-3 py-1.5 text-xs font-semibold uppercase tracking-wider',
         'text-neutral-500 dark:text-neutral-400',
         className
       )}
@@ -306,9 +306,9 @@ DropdownLabel.displayName = 'DropdownLabel';
 
 export {
   Dropdown,
-  DropdownHeader,
   DropdownContent,
+  DropdownHeader,
   DropdownItem,
-  DropdownSeparator,
   DropdownLabel,
+  DropdownSeparator,
 };

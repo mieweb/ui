@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { PaymentHistoryTable } from './PaymentHistoryTable';
 
 const meta: Meta<typeof PaymentHistoryTable> = {

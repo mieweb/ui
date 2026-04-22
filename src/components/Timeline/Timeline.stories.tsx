@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
 import {
-  TimelineProgress,
-  TimelineEventList,
   OrderConfirmation,
-  type TimelineStep,
   type TimelineEvent,
+  TimelineEventList,
+  TimelineProgress,
   type TimelineSize,
+  type TimelineStep,
 } from './Timeline';
 
 // =============================================================================
@@ -326,7 +326,7 @@ export const Confirmation: StoryObj<typeof OrderConfirmation> = {
       <div>
         <button
           onClick={() => setOpen(true)}
-          className="bg-primary-600 rounded px-4 py-2 text-white"
+          className="rounded bg-primary-600 px-4 py-2 text-white"
         >
           Show Confirmation
         </button>

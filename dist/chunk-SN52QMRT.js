@@ -1,13 +1,13 @@
 // src/utils/date.ts
 function formatDateValue(value) {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
-  if (digits.length === 0) return "";
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length === 0) return '';
   if (digits.length <= 2) return digits;
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
 function parseDateValue(value) {
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replace(/\D/g, '');
   if (digits.length !== 8) return null;
   const month = parseInt(digits.slice(0, 2), 10);
   const day = parseInt(digits.slice(2, 4), 10);
@@ -16,7 +16,11 @@ function parseDateValue(value) {
   if (day < 1 || day > 31) return null;
   if (year < 1900 || year > 2100) return null;
   const date = new Date(year, month - 1, day);
-  if (date.getMonth() !== month - 1 || date.getDate() !== day || date.getFullYear() !== year) {
+  if (
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day ||
+    date.getFullYear() !== year
+  ) {
     return null;
   }
   return date;
@@ -25,7 +29,7 @@ function isValidDate(value) {
   return parseDateValue(value) !== null;
 }
 function isDateEmpty(value) {
-  return value.replace(/\D/g, "").length === 0;
+  return value.replace(/\D/g, '').length === 0;
 }
 function calculateAge(dob) {
   const birthDate = parseDateValue(dob);
@@ -33,7 +37,10 @@ function calculateAge(dob) {
   const today = /* @__PURE__ */ new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0 || monthDiff === 0 && today.getDate() < birthDate.getDate()) {
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
     age--;
   }
   return age;
@@ -53,6 +60,15 @@ function isDateInFuture(value) {
   return date > /* @__PURE__ */ new Date();
 }
 
-export { calculateAge, formatDateValue, isDateEmpty, isDateInFuture, isDateInPast, isValidDate, isValidDrivingAge, parseDateValue };
+export {
+  calculateAge,
+  formatDateValue,
+  isDateEmpty,
+  isDateInFuture,
+  isDateInPast,
+  isValidDate,
+  isValidDrivingAge,
+  parseDateValue,
+};
 //# sourceMappingURL=chunk-SN52QMRT.js.map
 //# sourceMappingURL=chunk-SN52QMRT.js.map

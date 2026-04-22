@@ -1,9 +1,10 @@
+import { Calendar, ChevronDown, Download, Filter, Printer } from 'lucide-react';
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
-import { Input } from '../Input';
 import { Dropdown, DropdownItem } from '../Dropdown';
-import { Filter, Printer, Download, Calendar, ChevronDown } from 'lucide-react';
+import { Input } from '../Input';
 
 // ============================================================================
 // Types
@@ -320,7 +321,7 @@ export function DateRangePicker({
 
       {/* Date Input */}
       <div className="relative min-w-[200px] flex-1">
-        <Calendar className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+        <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
           value={displayValue}

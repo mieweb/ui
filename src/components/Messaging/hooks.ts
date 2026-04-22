@@ -1,11 +1,12 @@
 /* eslint-disable no-undef */
 import * as React from 'react';
+
 import type {
   Message,
   MessageParticipant,
   MessageStatus,
-  TypingState,
   NewMessage,
+  TypingState,
 } from './types';
 
 // ============================================================================

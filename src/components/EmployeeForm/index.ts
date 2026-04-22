@@ -1,8 +1,8 @@
 export {
-  EmployeeForm,
-  type EmployeeFormProps,
-  type EmployeeFormData,
   type Department,
+  EmployeeForm,
+  type EmployeeFormData,
+  type EmployeeFormProps,
 } from './EmployeeForm';
 
 // Note: EmployeePhone and EmployeeAddress types are exported from EmployeeProfile

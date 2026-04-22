@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -91,8 +92,7 @@ const serviceBadgeVariants = cva(
 );
 
 export interface ServiceBadgeProps
-  extends
-    Omit<React.HTMLAttributes<HTMLSpanElement>, 'onClick'>,
+  extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'onClick'>,
     VariantProps<typeof serviceBadgeVariants> {
   children: React.ReactNode;
   href?: string;
@@ -224,10 +224,8 @@ export function ServiceBadgeGroup({
 // ServiceCategoryBadge (with category icon)
 // =============================================================================
 
-export interface ServiceCategoryBadgeProps extends Omit<
-  ServiceBadgeProps,
-  'icon'
-> {
+export interface ServiceCategoryBadgeProps
+  extends Omit<ServiceBadgeProps, 'icon'> {
   category?:
     | 'drug-testing'
     | 'medical'
@@ -375,10 +373,8 @@ export function SelectedServicesBadges({
 // DOT-specific Badge Variants
 // =============================================================================
 
-export interface DOTBadgeProps extends Omit<
-  ServiceBadgeProps,
-  'variant' | 'children'
-> {
+export interface DOTBadgeProps
+  extends Omit<ServiceBadgeProps, 'variant' | 'children'> {
   type:
     | 'dot-certified'
     | 'non-dot'

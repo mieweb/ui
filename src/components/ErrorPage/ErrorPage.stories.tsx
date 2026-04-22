@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import {
   ErrorPage,
-  ServerErrorPage,
-  OfflinePage,
   MaintenancePage,
+  OfflinePage,
+  ServerErrorPage,
 } from './ErrorPage';
 
 const meta: Meta<typeof ErrorPage> = {

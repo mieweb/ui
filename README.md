@@ -597,10 +597,10 @@ This package uses automated releases via GitHub Actions. There are two release c
 
 ### Release Channels
 
-| Channel | npm Tag | Install Command | Description |
-| ------- | ------- | --------------- | ----------- |
-| **Stable** | `latest` | `npm install @mieweb/ui` | Production-ready releases |
-| **Prerelease** | `next` | `npm install @mieweb/ui@next` | Latest from `main` branch |
+| Channel        | npm Tag  | Install Command               | Description               |
+| -------------- | -------- | ----------------------------- | ------------------------- |
+| **Stable**     | `latest` | `npm install @mieweb/ui`      | Production-ready releases |
+| **Prerelease** | `next`   | `npm install @mieweb/ui@next` | Latest from `main` branch |
 
 ### Prerelease (Automatic)
 
@@ -626,6 +626,7 @@ To create a stable release:
 5. Click **Run workflow**
 
 The workflow will:
+
 1. Bump the version in `package.json`
 2. Commit and push the change
 3. Create a git tag (e.g., `v0.2.0`)
@@ -642,6 +643,7 @@ git push origin v1.0.0
 ```
 
 The release workflow will automatically:
+
 - Run tests and build
 - Publish to npm with the appropriate tag (`latest` for stable, `next` for prereleases like `v1.0.0-beta.1`)
 - Create a GitHub Release with auto-generated release notes

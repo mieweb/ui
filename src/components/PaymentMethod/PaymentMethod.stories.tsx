@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
 import {
-  PaymentMethodCard,
-  PaymentMethodBank,
-  PaymentMethodList,
-  type CreditCardData,
   type BankAccountData,
+  type CreditCardData,
   type PaymentMethod,
+  PaymentMethodBank,
+  PaymentMethodCard,
+  PaymentMethodList,
 } from './PaymentMethod';
 
 // =============================================================================

@@ -1,8 +1,8 @@
 'use strict';
 
-var chunkPDHFC5S5_cjs = require('./chunk-PDHFC5S5.cjs');
-var chunkBXK5TNJE_cjs = require('./chunk-BXK5TNJE.cjs');
-var chunkZJCPW6MS_cjs = require('./chunk-ZJCPW6MS.cjs');
+var chunkZ5MOXAAV_cjs = require('./chunk-Z5MOXAAV.cjs');
+var chunkQE6UIZ6W_cjs = require('./chunk-QE6UIZ6W.cjs');
+var chunkXQWKU2SZ_cjs = require('./chunk-XQWKU2SZ.cjs');
 var chunk6DP6RKUA_cjs = require('./chunk-6DP6RKUA.cjs');
 var chunkS6UNPMAS_cjs = require('./chunk-S6UNPMAS.cjs');
 var chunkSWV5E75F_cjs = require('./chunk-SWV5E75F.cjs');
@@ -11,32 +11,32 @@ var chunkFFJVCQ5R_cjs = require('./chunk-FFJVCQ5R.cjs');
 var chunk4LNS5QDP_cjs = require('./chunk-4LNS5QDP.cjs');
 var chunkO5HS7ZND_cjs = require('./chunk-O5HS7ZND.cjs');
 var chunkP52GA3GJ_cjs = require('./chunk-P52GA3GJ.cjs');
-var chunkNL3CZNBH_cjs = require('./chunk-NL3CZNBH.cjs');
-var chunkN3QTYHRZ_cjs = require('./chunk-N3QTYHRZ.cjs');
-var chunkJYMQJ32S_cjs = require('./chunk-JYMQJ32S.cjs');
-var chunkRRQGH7C5_cjs = require('./chunk-RRQGH7C5.cjs');
-var chunkLZEY55QZ_cjs = require('./chunk-LZEY55QZ.cjs');
-var chunkORUPC5TV_cjs = require('./chunk-ORUPC5TV.cjs');
-var chunkQDGZBDBI_cjs = require('./chunk-QDGZBDBI.cjs');
-var chunkB7YGVKTE_cjs = require('./chunk-B7YGVKTE.cjs');
-var chunkI7L6CQXR_cjs = require('./chunk-I7L6CQXR.cjs');
-var chunkPF3XWKE5_cjs = require('./chunk-PF3XWKE5.cjs');
-var chunkCQCYXHCU_cjs = require('./chunk-CQCYXHCU.cjs');
-var chunkNAATBUHR_cjs = require('./chunk-NAATBUHR.cjs');
-var chunkAU5ADTYD_cjs = require('./chunk-AU5ADTYD.cjs');
-var chunkXHJGYBYG_cjs = require('./chunk-XHJGYBYG.cjs');
-var chunk5T3AWNHG_cjs = require('./chunk-5T3AWNHG.cjs');
-var chunkEF46XW4Z_cjs = require('./chunk-EF46XW4Z.cjs');
-var chunkEKIQE524_cjs = require('./chunk-EKIQE524.cjs');
-var chunkPEFJAWNR_cjs = require('./chunk-PEFJAWNR.cjs');
-var chunkMKJDBXX4_cjs = require('./chunk-MKJDBXX4.cjs');
-var chunkHRA4FUO6_cjs = require('./chunk-HRA4FUO6.cjs');
-var chunkQYJ7RQJ2_cjs = require('./chunk-QYJ7RQJ2.cjs');
-var chunkB7DA35BY_cjs = require('./chunk-B7DA35BY.cjs');
-var chunkFIXAVBUA_cjs = require('./chunk-FIXAVBUA.cjs');
-var chunkVV4N4WY6_cjs = require('./chunk-VV4N4WY6.cjs');
+var chunkGEKTNWTP_cjs = require('./chunk-GEKTNWTP.cjs');
+var chunkY5C2WNWC_cjs = require('./chunk-Y5C2WNWC.cjs');
+var chunkPN4ZPTTG_cjs = require('./chunk-PN4ZPTTG.cjs');
+var chunkRRARXXV2_cjs = require('./chunk-RRARXXV2.cjs');
+var chunkS7TMEGSN_cjs = require('./chunk-S7TMEGSN.cjs');
+var chunkHFUAI5CX_cjs = require('./chunk-HFUAI5CX.cjs');
+var chunkAHNIW7MQ_cjs = require('./chunk-AHNIW7MQ.cjs');
+var chunkJHVDSH6J_cjs = require('./chunk-JHVDSH6J.cjs');
+var chunkAOHWULSD_cjs = require('./chunk-AOHWULSD.cjs');
+var chunkSND2HWEP_cjs = require('./chunk-SND2HWEP.cjs');
+var chunkARJXBNYA_cjs = require('./chunk-ARJXBNYA.cjs');
+var chunk23KJAH6Y_cjs = require('./chunk-23KJAH6Y.cjs');
+var chunkXZIAHCNM_cjs = require('./chunk-XZIAHCNM.cjs');
+var chunkJGQIBHAG_cjs = require('./chunk-JGQIBHAG.cjs');
+var chunkE6PQXOSJ_cjs = require('./chunk-E6PQXOSJ.cjs');
+var chunkRXWCUFNF_cjs = require('./chunk-RXWCUFNF.cjs');
+var chunkFOFDJDAY_cjs = require('./chunk-FOFDJDAY.cjs');
+var chunkCYUZ6REQ_cjs = require('./chunk-CYUZ6REQ.cjs');
+var chunkIO2XB35K_cjs = require('./chunk-IO2XB35K.cjs');
+var chunkOGGM27JO_cjs = require('./chunk-OGGM27JO.cjs');
+var chunkMFDLN4RH_cjs = require('./chunk-MFDLN4RH.cjs');
+var chunkNVWPAMCO_cjs = require('./chunk-NVWPAMCO.cjs');
+var chunkTDFPD3YV_cjs = require('./chunk-TDFPD3YV.cjs');
+var chunkSZRD5UTO_cjs = require('./chunk-SZRD5UTO.cjs');
 var chunkR4DM4635_cjs = require('./chunk-R4DM4635.cjs');
-var chunkJZIH3A2A_cjs = require('./chunk-JZIH3A2A.cjs');
+var chunkELQZWMU3_cjs = require('./chunk-ELQZWMU3.cjs');
 var chunk6HFFWEM3_cjs = require('./chunk-6HFFWEM3.cjs');
 var chunkNNEFAUHV_cjs = require('./chunk-NNEFAUHV.cjs');
 var chunkSWMRCGL4_cjs = require('./chunk-SWMRCGL4.cjs');
@@ -46,12 +46,12 @@ var chunkBTJHYGPI_cjs = require('./chunk-BTJHYGPI.cjs');
 var chunkKMN7JX2X_cjs = require('./chunk-KMN7JX2X.cjs');
 var chunkSCV7C55E_cjs = require('./chunk-SCV7C55E.cjs');
 var chunkSJ3BF4BO_cjs = require('./chunk-SJ3BF4BO.cjs');
-var chunkIY7UQPDO_cjs = require('./chunk-IY7UQPDO.cjs');
-var chunkAKTUXJPI_cjs = require('./chunk-AKTUXJPI.cjs');
-var chunk53K3KWXQ_cjs = require('./chunk-53K3KWXQ.cjs');
-var chunk2J2V4TMJ_cjs = require('./chunk-2J2V4TMJ.cjs');
+var chunk5N3GFFVP_cjs = require('./chunk-5N3GFFVP.cjs');
+var chunkY7HUZPNG_cjs = require('./chunk-Y7HUZPNG.cjs');
+var chunk4E6KW5HC_cjs = require('./chunk-4E6KW5HC.cjs');
+var chunkW4MDIFH6_cjs = require('./chunk-W4MDIFH6.cjs');
 var chunkOR5DRJCW_cjs = require('./chunk-OR5DRJCW.cjs');
-var React47 = require('react');
+var React49 = require('react');
 var classVarianceAuthority = require('class-variance-authority');
 var jsxRuntime = require('react/jsx-runtime');
 var agGridReact = require('ag-grid-react');
@@ -76,11 +76,13 @@ function _interopNamespace(e) {
   return Object.freeze(n);
 }
 
-var React47__namespace = /*#__PURE__*/_interopNamespace(React47);
+var React49__namespace = /*#__PURE__*/_interopNamespace(React49);
 
-var AccordionContext = React47__namespace.createContext(null);
+var AccordionContext = React49__namespace.createContext(
+  null
+);
 function useAccordionContext() {
-  const context = React47__namespace.useContext(AccordionContext);
+  const context = React49__namespace.useContext(AccordionContext);
   if (!context) {
     throw new Error("Accordion components must be used within an Accordion");
   }
@@ -106,10 +108,10 @@ function Accordion({
   className,
   ...props
 }) {
-  const [expandedItems, setExpandedItems] = React47__namespace.useState(
+  const [expandedItems, setExpandedItems] = React49__namespace.useState(
     new Set(defaultExpanded)
   );
-  const toggleItem = React47__namespace.useCallback(
+  const toggleItem = React49__namespace.useCallback(
     (id) => {
       setExpandedItems((prev) => {
         const next = new Set(prev);
@@ -126,24 +128,19 @@ function Accordion({
     },
     [allowMultiple]
   );
-  const contextValue = React47__namespace.useMemo(
+  const contextValue = React49__namespace.useMemo(
     () => ({ expandedItems, toggleItem, allowMultiple }),
     [expandedItems, toggleItem, allowMultiple]
   );
-  return /* @__PURE__ */ jsxRuntime.jsx(AccordionContext.Provider, { value: contextValue, children: /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      className: chunkOR5DRJCW_cjs.cn(accordionVariants({ variant }), className),
-      ...props,
-      children
-    }
-  ) });
+  return /* @__PURE__ */ jsxRuntime.jsx(AccordionContext.Provider, { value: contextValue, children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(accordionVariants({ variant }), className), ...props, children }) });
 }
-var AccordionItemContext = React47__namespace.createContext(null);
+var AccordionItemContext = React49__namespace.createContext(null);
 function useAccordionItemContext() {
-  const context = React47__namespace.useContext(AccordionItemContext);
+  const context = React49__namespace.useContext(AccordionItemContext);
   if (!context) {
-    throw new Error("AccordionItem components must be used within an AccordionItem");
+    throw new Error(
+      "AccordionItem components must be used within an AccordionItem"
+    );
   }
   return context;
 }
@@ -168,7 +165,7 @@ function AccordionItem({
 }) {
   const { expandedItems } = useAccordionContext();
   const isExpanded = expandedItems.has(id);
-  const contextValue = React47__namespace.useMemo(
+  const contextValue = React49__namespace.useMemo(
     () => ({ itemId: id, isExpanded }),
     [id, isExpanded]
   );
@@ -258,11 +255,11 @@ function AccordionContent({
   ...props
 }) {
   const { itemId, isExpanded } = useAccordionItemContext();
-  const contentRef = React47__namespace.useRef(null);
-  const [height, setHeight] = React47__namespace.useState(
+  const contentRef = React49__namespace.useRef(null);
+  const [height, setHeight] = React49__namespace.useState(
     isExpanded ? void 0 : 0
   );
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (!contentRef.current) return;
     const resizeObserver = new ResizeObserver(() => {
       if (isExpanded) {
@@ -272,7 +269,7 @@ function AccordionContent({
     resizeObserver.observe(contentRef.current);
     return () => resizeObserver.disconnect();
   }, [isExpanded]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (isExpanded) {
       setHeight(contentRef.current?.scrollHeight);
     } else {
@@ -450,9 +447,9 @@ function AddContactModal({
   showCustomFields = true,
   showPhone = true
 }) {
-  const [formData, setFormData] = React47.useState(defaultContact);
-  const [errors, setErrors] = React47.useState({});
-  React47.useEffect(() => {
+  const [formData, setFormData] = React49.useState(defaultContact);
+  const [errors, setErrors] = React49.useState({});
+  React49.useEffect(() => {
     if (open) {
       setFormData(contact ? { ...defaultContact, ...contact } : defaultContact);
       setErrors({});
@@ -516,10 +513,10 @@ function AddContactModal({
     }
   };
   const isEditing = !!contact?.id;
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: isEditing ? "Edit Contact" : title }) }),
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: isEditing ? "Edit Contact" : title }) }),
     /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: chunkOR5DRJCW_cjs.cn("space-y-4", className), children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: chunkOR5DRJCW_cjs.cn("space-y-4", className), children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-1 gap-4 sm:grid-cols-3", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsxs(
@@ -534,7 +531,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-firstName",
                 value: formData.firstName,
@@ -558,7 +555,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-lastName",
                 value: formData.lastName,
@@ -579,7 +576,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkNL3CZNBH_cjs.Select,
+              chunkGEKTNWTP_cjs.Select,
               {
                 id: "contact-sex",
                 options: SEX_OPTIONS,
@@ -603,7 +600,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-positionTitle",
                 value: formData.positionTitle || "",
@@ -622,7 +619,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-degree",
                 value: formData.degree || "",
@@ -646,7 +643,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-email",
                 type: "email",
@@ -668,7 +665,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-phone",
                 type: "tel",
@@ -682,7 +679,7 @@ function AddContactModal({
         showAddress && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
           /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: "Address" }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               id: "contact-street1",
               value: formData.address?.street1 || "",
@@ -691,7 +688,7 @@ function AddContactModal({
             }
           ) }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               id: "contact-street2",
               value: formData.address?.street2 || "",
@@ -701,7 +698,7 @@ function AddContactModal({
           ) }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-2 gap-4 sm:grid-cols-4", children: [
             /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-2 sm:col-span-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-city",
                 value: formData.address?.city || "",
@@ -710,7 +707,7 @@ function AddContactModal({
               }
             ) }),
             /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-state",
                 value: formData.address?.state || "",
@@ -719,7 +716,7 @@ function AddContactModal({
               }
             ) }),
             /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "contact-postalCode",
                 value: formData.address?.postalCode || "",
@@ -733,7 +730,7 @@ function AddContactModal({
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
             /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: "Custom Fields" }),
             /* @__PURE__ */ jsxRuntime.jsxs(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 type: "button",
                 variant: "ghost",
@@ -748,7 +745,7 @@ function AddContactModal({
           ] }),
           (formData.customFields || []).map((field, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 value: field.name,
                 onChange: (e) => handleCustomFieldChange(index, "name", e.target.value),
@@ -757,7 +754,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 value: field.value,
                 onChange: (e) => handleCustomFieldChange(index, "value", e.target.value),
@@ -766,7 +763,7 @@ function AddContactModal({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 type: "button",
                 variant: "ghost",
@@ -780,9 +777,9 @@ function AddContactModal({
           (!formData.customFields || formData.customFields.length === 0) && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: 'No custom fields added. Click "Add Field" to add custom information.' })
         ] })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             type: "button",
             variant: "secondary",
@@ -791,7 +788,7 @@ function AddContactModal({
             children: "Cancel"
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", disabled: isSaving, children: isSaving ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", disabled: isSaving, children: isSaving ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
           /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon, { className: "mr-2 h-4 w-4 animate-spin" }),
           "Saving..."
         ] }) : "Save Contact" })
@@ -881,8 +878,8 @@ function AdditionalFields({
   className,
   collapsible = true
 }) {
-  const [isExpanded, setIsExpanded] = React47__namespace.useState(defaultExpanded);
-  const contentId = React47__namespace.useId();
+  const [isExpanded, setIsExpanded] = React49__namespace.useState(defaultExpanded);
+  const contentId = React49__namespace.useId();
   const handleNameChange = (id, name) => {
     const updated = value.map(
       (entry) => entry.id === id ? { ...entry, name } : entry
@@ -917,7 +914,7 @@ function AdditionalFields({
   const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
     value.map((entry) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-start gap-2", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           value: entry.name,
           onChange: (e) => handleNameChange(entry.id, e.target.value),
@@ -927,7 +924,7 @@ function AdditionalFields({
         }
       ) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           value: entry.value,
           onChange: (e) => handleValueChange(entry.id, e.target.value),
@@ -1196,8 +1193,8 @@ function Address({
         rel: "noopener noreferrer",
         className: chunkOR5DRJCW_cjs.cn(
           baseStyles,
-          "hover:text-primary-600 dark:hover:text-primary-400 hover:underline",
-          "focus:ring-primary-500 rounded focus:ring-2 focus:ring-offset-2 focus:outline-none"
+          "hover:text-primary-600 hover:underline dark:hover:text-primary-400",
+          "rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         ),
         ...props,
         children: wrapWithIcon(content)
@@ -1238,7 +1235,7 @@ function AddressCard({
           {
             href: `tel:${phoneNumber.replace(/\D/g, "")}`,
             onClick: handlePhoneClick,
-            className: "hover:text-primary-600 dark:hover:text-primary-400 mt-2 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400",
+            className: "mt-2 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400",
             children: [
               /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon, { className: "h-4 w-4" }),
               phoneNumber
@@ -1340,12 +1337,12 @@ function AddressForm({
   className,
   googlePlaces
 }) {
-  const generatedId = React47__namespace.useId();
+  const generatedId = React49__namespace.useId();
   const idPrefix = id || generatedId;
-  const autocompleteRef = React47__namespace.useRef(
+  const autocompleteRef = React49__namespace.useRef(
     null
   );
-  const inputRef = React47__namespace.useRef(null);
+  const inputRef = React49__namespace.useRef(null);
   const mergedLabels = { ...DEFAULT_LABELS, ...labels };
   const mergedPlaceholders = { ...DEFAULT_PLACEHOLDERS, ...placeholders };
   const handleChange = (field, fieldValue) => {
@@ -1354,7 +1351,7 @@ function AddressForm({
       [field]: fieldValue
     });
   };
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (!googlePlaces?.enabled || !inputRef.current) return;
     if (typeof google === "undefined" || !google.maps?.places) {
       console.warn(
@@ -1424,7 +1421,7 @@ function AddressForm({
   }, [googlePlaces?.enabled]);
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-4", className), children: [
     /* @__PURE__ */ jsxRuntime.jsx(
-      chunkVV4N4WY6_cjs.Input,
+      chunkSZRD5UTO_cjs.Input,
       {
         ref: inputRef,
         id: `${idPrefix}-street1`,
@@ -1441,7 +1438,7 @@ function AddressForm({
       }
     ),
     /* @__PURE__ */ jsxRuntime.jsx(
-      chunkVV4N4WY6_cjs.Input,
+      chunkSZRD5UTO_cjs.Input,
       {
         id: `${idPrefix}-street2`,
         label: mergedLabels.street2,
@@ -1457,7 +1454,7 @@ function AddressForm({
     ),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-12 gap-4", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-12 md:col-span-6", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           id: `${idPrefix}-city`,
           label: mergedLabels.city,
@@ -1473,7 +1470,7 @@ function AddressForm({
         }
       ) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-4 md:col-span-3", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           id: `${idPrefix}-state`,
           label: mergedLabels.state,
@@ -1490,7 +1487,7 @@ function AddressForm({
         }
       ) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-8 md:col-span-3", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           id: `${idPrefix}-postalCode`,
           label: mergedLabels.postalCode,
@@ -1508,7 +1505,7 @@ function AddressForm({
     ] }),
     (showCounty || showCountry) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-12 gap-4", children: [
       showCounty && /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(showCountry ? "col-span-6" : "col-span-12"), children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           id: `${idPrefix}-county`,
           label: mergedLabels.county,
@@ -1523,7 +1520,7 @@ function AddressForm({
         }
       ) }),
       showCountry && /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(showCounty ? "col-span-6" : "col-span-12"), children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           id: `${idPrefix}-country`,
           label: mergedLabels.country,
@@ -1624,30 +1621,30 @@ function AGGridInner({
   loadingMessage = "Loading...",
   ...props
 }, ref) {
-  const internalRef = React47__namespace.useRef(null);
-  const gridApiRef = React47__namespace.useRef(null);
+  const internalRef = React49__namespace.useRef(null);
+  const gridApiRef = React49__namespace.useRef(null);
   const resolvedRef = gridRef || ref || internalRef;
-  const handleGridReady = React47__namespace.useCallback(
+  const handleGridReady = React49__namespace.useCallback(
     (event) => {
       gridApiRef.current = event.api;
       onGridReady?.(event);
     },
     [onGridReady]
   );
-  const handleRowClicked = React47__namespace.useCallback(
+  const handleRowClicked = React49__namespace.useCallback(
     (event) => {
       onRowClick?.(event);
     },
     [onRowClick]
   );
-  const mergedDefaultColDef = React47__namespace.useMemo(
+  const mergedDefaultColDef = React49__namespace.useMemo(
     () => ({
       ...getDefaultColDef(sortable, filterable, resizable),
       ...userDefaultColDef
     }),
     [userDefaultColDef, sortable, filterable, resizable]
   );
-  const resolvedRowSelection = React47__namespace.useMemo(() => {
+  const resolvedRowSelection = React49__namespace.useMemo(() => {
     if (!rowSelection) return void 0;
     if (typeof rowSelection === "object") {
       return rowSelection;
@@ -1666,7 +1663,7 @@ function AGGridInner({
     }
     return void 0;
   }, [rowSelection]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (gridApiRef.current) {
       if (loading) {
         gridApiRef.current.showLoadingOverlay();
@@ -1706,8 +1703,8 @@ function AGGridInner({
           paginationPageSizeSelector: pagination ? [25, 50, 100, 200] : void 0,
           rowHeight: sizeConfig.rowHeight,
           headerHeight: sizeConfig.headerHeight,
-          noRowsOverlayComponent: () => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground py-8 text-center", children: noDataMessage }),
-          loadingOverlayComponent: () => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground py-8 text-center", children: loadingMessage }),
+          noRowsOverlayComponent: () => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "py-8 text-center text-muted-foreground", children: noDataMessage }),
+          loadingOverlayComponent: () => /* @__PURE__ */ jsxRuntime.jsx("div", { className: "py-8 text-center text-muted-foreground", children: loadingMessage }),
           theme: "legacy",
           ...props
         }
@@ -1715,7 +1712,7 @@ function AGGridInner({
     }
   );
 }
-var AGGrid = React47__namespace.forwardRef(AGGridInner);
+var AGGrid = React49__namespace.forwardRef(AGGridInner);
 AGGrid.displayName = "AGGrid";
 function getNestedValue(obj, path) {
   if (!obj || !path) return void 0;
@@ -1827,7 +1824,7 @@ function AvatarNameRenderer(props) {
   if (isSystemValue) {
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 py-1", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-500", children: displayName === "Unassigned" ? "\u2014" : "??" }),
-      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate text-gray-400 italic dark:text-gray-500", children: displayName })
+      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate italic text-gray-400 dark:text-gray-500", children: displayName })
     ] });
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 py-1", children: [
@@ -1856,7 +1853,7 @@ function AvatarNameRenderer(props) {
         children: initials
       }
     ),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground truncate font-medium", children: displayName })
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate font-medium text-foreground", children: displayName })
   ] });
 }
 function StatusBadgeRenderer(props) {
@@ -1925,7 +1922,7 @@ function EmailRenderer(props) {
     "a",
     {
       href: `mailto:${value}`,
-      className: "text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline",
+      className: "inline-flex items-center gap-1.5 text-primary-600 hover:underline dark:text-primary-400",
       onClick: (e) => e.stopPropagation(),
       children: [
         /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Mail, { className: "h-3 w-3 opacity-60" }),
@@ -1942,7 +1939,7 @@ function PhoneRenderer(props) {
     "a",
     {
       href: `tel:${value}`,
-      className: "text-foreground hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5",
+      className: "inline-flex items-center gap-1.5 text-foreground hover:text-primary-600 dark:hover:text-primary-400",
       onClick: (e) => e.stopPropagation(),
       children: [
         /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Phone, { className: "h-3 w-3 text-green-500 opacity-70" }),
@@ -1962,7 +1959,7 @@ function DomainRenderer(props) {
       href: url,
       target: "_blank",
       rel: "noopener noreferrer",
-      className: "text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline",
+      className: "inline-flex items-center gap-1.5 text-primary-600 hover:underline dark:text-primary-400",
       onClick: (e) => e.stopPropagation(),
       children: [
         /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Globe, { className: "h-3 w-3 opacity-60" }),
@@ -1998,13 +1995,13 @@ function CurrencyRenderer(props) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(value);
-  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground font-medium tabular-nums", children: formatted });
+  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium tabular-nums text-foreground", children: formatted });
 }
 function NumberRenderer(props) {
   const { value } = props;
   if (value == null) return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "--" });
   const formatted = Number(value).toLocaleString();
-  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground tabular-nums", children: formatted });
+  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: "tabular-nums text-foreground", children: formatted });
 }
 function DateRenderer(props) {
   const { value, format = "medium" } = props;
@@ -2091,7 +2088,7 @@ function CompanyRenderer(props) {
     /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        className: "bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 flex h-5 w-5 items-center justify-center rounded text-[9px] font-semibold",
+        className: "dark:bg-primary-900/30 flex h-5 w-5 items-center justify-center rounded bg-primary-100 text-[9px] font-semibold text-primary-600 dark:text-primary-400",
         style: { display: faviconUrl ? "none" : "flex" },
         children: getInitials2(value)
       }
@@ -2111,7 +2108,7 @@ function ProgressRenderer(props) {
         style: { width: `${percentage}%` }
       }
     ) }),
-    /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs font-medium", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs font-medium text-muted-foreground", children: [
       Math.round(percentage),
       "%"
     ] })
@@ -2131,65 +2128,65 @@ function TagsRenderer(props) {
       },
       index
     )),
-    value.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
+    value.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs text-muted-foreground", children: [
       "+",
       value.length - 3
     ] })
   ] });
 }
-var MemoizedAvatarNameRenderer = React47.memo(
+var MemoizedAvatarNameRenderer = React49.memo(
   AvatarNameRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedStatusBadgeRenderer = React47.memo(
+var MemoizedStatusBadgeRenderer = React49.memo(
   StatusBadgeRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedEngagementScoreRenderer = React47.memo(
+var MemoizedEngagementScoreRenderer = React49.memo(
   EngagementScoreRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedEmailRenderer = React47.memo(
+var MemoizedEmailRenderer = React49.memo(
   EmailRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedPhoneRenderer = React47.memo(
+var MemoizedPhoneRenderer = React49.memo(
   PhoneRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedLinkedInRenderer = React47.memo(
+var MemoizedLinkedInRenderer = React49.memo(
   LinkedInRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedDomainRenderer = React47.memo(
+var MemoizedDomainRenderer = React49.memo(
   DomainRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedCurrencyRenderer = React47.memo(
+var MemoizedCurrencyRenderer = React49.memo(
   CurrencyRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedNumberRenderer = React47.memo(
+var MemoizedNumberRenderer = React49.memo(
   NumberRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedDateRenderer = React47.memo(
+var MemoizedDateRenderer = React49.memo(
   DateRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedBooleanRenderer = React47.memo(
+var MemoizedBooleanRenderer = React49.memo(
   BooleanRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedCompanyRenderer = React47.memo(
+var MemoizedCompanyRenderer = React49.memo(
   CompanyRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedProgressRenderer = React47.memo(
+var MemoizedProgressRenderer = React49.memo(
   ProgressRenderer,
   cellRendererPropsAreEqual
 );
-var MemoizedTagsRenderer = React47.memo(
+var MemoizedTagsRenderer = React49.memo(
   TagsRenderer,
   cellRendererPropsAreEqual
 );
@@ -2451,7 +2448,7 @@ function ToolStatusIcon({ status, className }) {
     status === "running" && /* @__PURE__ */ jsxRuntime.jsxs(
       "svg",
       {
-        className: "text-primary-600 dark:text-primary-400 h-3 w-3 animate-spin",
+        className: "h-3 w-3 animate-spin text-primary-600 dark:text-primary-400",
         fill: "none",
         viewBox: "0 0 24 24",
         children: [
@@ -2769,9 +2766,9 @@ function ResourceLink({ link, onClick, className }) {
       className: chunkOR5DRJCW_cjs.cn(
         "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5",
         "bg-primary-50 text-primary-700 hover:bg-primary-100",
-        "dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50",
+        "dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-300",
         "text-sm font-medium transition-colors",
-        "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
         "dark:focus:ring-offset-neutral-900",
         className
       ),
@@ -2806,7 +2803,7 @@ function ToolResultDisplay({
   showRawData = false,
   className
 }) {
-  const [showJson, setShowJson] = React47__namespace.useState(false);
+  const [showJson, setShowJson] = React49__namespace.useState(false);
   if (result.type === "error") {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "div",
@@ -2960,7 +2957,7 @@ function MCPToolCallDisplay({
   onLinkClick,
   className
 }) {
-  const [showDetails, setShowDetails] = React47__namespace.useState(!defaultCollapsed);
+  const [showDetails, setShowDetails] = React49__namespace.useState(!defaultCollapsed);
   const formatDuration2 = (ms) => {
     if (!ms) return null;
     if (ms < 1e3) return `${ms}ms`;
@@ -3029,7 +3026,7 @@ function MCPToolCallDisplay({
             }
           ),
           showDetails && showParameters && toolCall.parameters.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "mb-1.5 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400", children: "Parameters" }),
+            /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400", children: "Parameters" }),
             /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-0.5", children: toolCall.parameters.map((param) => /* @__PURE__ */ jsxRuntime.jsxs(
               "div",
               {
@@ -3174,7 +3171,7 @@ function AITypingIndicator({ className }) {
   );
 }
 function ContentBlock({ content, onLinkClick }) {
-  const [isCollapsed, setIsCollapsed] = React47__namespace.useState(
+  const [isCollapsed, setIsCollapsed] = React49__namespace.useState(
     content.collapsed ?? false
   );
   if (content.type === "text" && content.text) {
@@ -3229,7 +3226,7 @@ function ContentBlock({ content, onLinkClick }) {
           ]
         }
       ),
-      !isCollapsed && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-t border-neutral-200 px-3 py-2 dark:border-neutral-700", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-neutral-600 italic dark:text-neutral-400", children: content.text }) })
+      !isCollapsed && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-t border-neutral-200 px-3 py-2 dark:border-neutral-700", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm italic text-neutral-600 dark:text-neutral-400", children: content.text }) })
     ] });
   }
   if (content.type === "code" && content.text) {
@@ -3501,11 +3498,11 @@ function AttachmentPreviewItem({
             type: "button",
             onClick: onRemove,
             className: chunkOR5DRJCW_cjs.cn(
-              "absolute -top-1 -right-1 z-10",
+              "absolute -right-1 -top-1 z-10",
               "rounded-full p-1",
               "bg-neutral-900 text-white",
               "opacity-0 group-hover:opacity-100",
-              "focus:ring-primary-500 focus:opacity-100 focus:ring-2 focus:outline-none",
+              "focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500",
               "transition-opacity"
             ),
             "aria-label": `Remove ${file.name}`,
@@ -3533,7 +3530,7 @@ function AttachmentPreviewItem({
           "div",
           {
             className: chunkOR5DRJCW_cjs.cn(
-              "absolute right-0 bottom-0 left-0",
+              "absolute bottom-0 left-0 right-0",
               "bg-black/70 px-1 py-0.5",
               "opacity-0 group-hover:opacity-100",
               "transition-opacity"
@@ -3546,7 +3543,7 @@ function AttachmentPreviewItem({
   );
 }
 AttachmentPreviewItem.displayName = "AttachmentPreviewItem";
-var AttachmentPicker = React47__namespace.forwardRef(
+var AttachmentPicker = React49__namespace.forwardRef(
   ({
     onFilesSelected,
     acceptedTypes = ["image/*", "video/*", ".pdf", ".doc", ".docx"],
@@ -3559,8 +3556,8 @@ var AttachmentPicker = React47__namespace.forwardRef(
     className,
     children
   }, ref) => {
-    const inputRef = React47__namespace.useRef(null);
-    React47__namespace.useImperativeHandle(ref, () => inputRef.current);
+    const inputRef = React49__namespace.useRef(null);
+    React49__namespace.useImperativeHandle(ref, () => inputRef.current);
     const handleClick = () => {
       inputRef.current?.click();
     };
@@ -3610,7 +3607,7 @@ var AttachmentPicker = React47__namespace.forwardRef(
             "text-neutral-500 hover:text-neutral-700",
             "dark:text-neutral-400 dark:hover:text-neutral-200",
             "hover:bg-neutral-100 dark:hover:bg-neutral-800",
-            "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+            "focus:outline-none focus:ring-2 focus:ring-primary-500",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "transition-colors",
             className
@@ -3650,8 +3647,8 @@ function DragDropZone({
   children,
   className
 }) {
-  const [isDragging, setIsDragging] = React47__namespace.useState(false);
-  const dragCounterRef = React47__namespace.useRef(0);
+  const [isDragging, setIsDragging] = React49__namespace.useState(false);
+  const dragCounterRef = React49__namespace.useRef(0);
   const handleDragEnter = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -3715,14 +3712,14 @@ function DragDropZone({
               "absolute inset-0 z-50",
               "flex items-center justify-center",
               "bg-primary-50/90 dark:bg-primary-900/90",
-              "border-primary-500 border-2 border-dashed",
+              "border-2 border-dashed border-primary-500",
               "rounded-lg"
             ),
             children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center", children: [
               /* @__PURE__ */ jsxRuntime.jsx(
                 "svg",
                 {
-                  className: "text-primary-500 mx-auto h-12 w-12",
+                  className: "mx-auto h-12 w-12 text-primary-500",
                   fill: "none",
                   viewBox: "0 0 24 24",
                   stroke: "currentColor",
@@ -3737,7 +3734,7 @@ function DragDropZone({
                   )
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-primary-700 dark:text-primary-300 mt-2 text-sm font-medium", children: "Drop files here" })
+              /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-2 text-sm font-medium text-primary-700 dark:text-primary-300", children: "Drop files here" })
             ] })
           }
         )
@@ -3752,7 +3749,7 @@ function CameraButton({
   disabled = false,
   className
 }) {
-  const inputRef = React47__namespace.useRef(null);
+  const inputRef = React49__namespace.useRef(null);
   const handleClick = () => {
     inputRef.current?.click();
   };
@@ -3789,7 +3786,7 @@ function CameraButton({
           "text-neutral-500 hover:text-neutral-700",
           "dark:text-neutral-400 dark:hover:text-neutral-200",
           "hover:bg-neutral-100 dark:hover:bg-neutral-800",
-          "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+          "focus:outline-none focus:ring-2 focus:ring-primary-500",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "transition-colors",
           className
@@ -3889,7 +3886,7 @@ var sendButtonVariants = classVarianceAuthority.cva(
     }
   }
 );
-var SendButton = React47__namespace.forwardRef(
+var SendButton = React49__namespace.forwardRef(
   ({ className, variant, canSend, isLoading, disabled, ...props }, ref) => {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "button",
@@ -3943,7 +3940,7 @@ var SendButton = React47__namespace.forwardRef(
   }
 );
 SendButton.displayName = "SendButton";
-var MessageComposer = React47__namespace.forwardRef(
+var MessageComposer = React49__namespace.forwardRef(
   ({
     onSend,
     onTypingStart,
@@ -3965,22 +3962,22 @@ var MessageComposer = React47__namespace.forwardRef(
     variant = "default",
     className
   }, ref) => {
-    const textareaRef = React47__namespace.useRef(null);
-    const [content, setContent] = React47__namespace.useState("");
-    const [attachments, setAttachments] = React47__namespace.useState(
+    const textareaRef = React49__namespace.useRef(null);
+    const [content, setContent] = React49__namespace.useState("");
+    const [attachments, setAttachments] = React49__namespace.useState(
       []
     );
-    const [isTyping, setIsTyping] = React47__namespace.useState(false);
-    const typingTimeoutRef = React47__namespace.useRef(null);
-    React47__namespace.useImperativeHandle(ref, () => textareaRef.current);
-    React47__namespace.useEffect(() => {
+    const [isTyping, setIsTyping] = React49__namespace.useState(false);
+    const typingTimeoutRef = React49__namespace.useRef(null);
+    React49__namespace.useImperativeHandle(ref, () => textareaRef.current);
+    React49__namespace.useEffect(() => {
       const textarea = textareaRef.current;
       if (textarea) {
         textarea.style.height = "auto";
         textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
       }
     }, [content]);
-    React47__namespace.useEffect(() => {
+    React49__namespace.useEffect(() => {
       if (content.length > 0 && !isTyping) {
         setIsTyping(true);
         onTypingStart?.();
@@ -4000,12 +3997,12 @@ var MessageComposer = React47__namespace.forwardRef(
         }
       };
     }, [content, isTyping, onTypingStart, onTypingStop]);
-    React47__namespace.useEffect(() => {
+    React49__namespace.useEffect(() => {
       if (autoFocus) {
         textareaRef.current?.focus();
       }
     }, [autoFocus]);
-    React47__namespace.useEffect(() => {
+    React49__namespace.useEffect(() => {
       if (replyTo) {
         textareaRef.current?.focus();
       }
@@ -4069,7 +4066,7 @@ var MessageComposer = React47__namespace.forwardRef(
         return prev.filter((a) => a.id !== attachmentId);
       });
     };
-    React47__namespace.useEffect(() => {
+    React49__namespace.useEffect(() => {
       const currentAttachments = attachments;
       return () => {
         currentAttachments.forEach((a) => {
@@ -4096,11 +4093,11 @@ var MessageComposer = React47__namespace.forwardRef(
               className: chunkOR5DRJCW_cjs.cn(
                 "flex items-center gap-2 px-4 py-2",
                 "bg-neutral-50 dark:bg-neutral-800/50",
-                "border-primary-500 border-l-4"
+                "border-l-4 border-primary-500"
               ),
               children: [
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
-                  /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-primary-600 dark:text-primary-400 text-xs font-medium", children: [
+                  /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs font-medium text-primary-600 dark:text-primary-400", children: [
                     "Replying to ",
                     replyTo.senderName
                   ] }),
@@ -4115,7 +4112,7 @@ var MessageComposer = React47__namespace.forwardRef(
                       "shrink-0 rounded p-1",
                       "text-neutral-400 hover:text-neutral-600",
                       "dark:text-neutral-500 dark:hover:text-neutral-300",
-                      "focus:ring-primary-500 focus:ring-2 focus:outline-none"
+                      "focus:outline-none focus:ring-2 focus:ring-primary-500"
                     ),
                     "aria-label": "Cancel reply",
                     children: /* @__PURE__ */ jsxRuntime.jsx(
@@ -4201,7 +4198,7 @@ var MessageComposer = React47__namespace.forwardRef(
                         "bg-neutral-100 dark:bg-neutral-800",
                         "text-neutral-900 dark:text-neutral-100",
                         "placeholder:text-neutral-400 dark:placeholder:text-neutral-500",
-                        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                        "focus:outline-none focus:ring-2 focus:ring-primary-500",
                         "disabled:cursor-not-allowed disabled:opacity-50",
                         "transition-colors",
                         "max-h-[150px]"
@@ -4210,7 +4207,7 @@ var MessageComposer = React47__namespace.forwardRef(
                       "aria-describedby": showCharacterCount ? "char-count" : void 0
                     }
                   ),
-                  showCharacterCount && /* @__PURE__ */ jsxRuntime.jsx("div", { id: "char-count", className: "absolute right-3 bottom-1.5", children: /* @__PURE__ */ jsxRuntime.jsx(CharacterCounter, { current: content.length, max: maxLength }) })
+                  showCharacterCount && /* @__PURE__ */ jsxRuntime.jsx("div", { id: "char-count", className: "absolute bottom-1.5 right-3", children: /* @__PURE__ */ jsxRuntime.jsx(CharacterCounter, { current: content.length, max: maxLength }) })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
                   SendButton,
@@ -4426,7 +4423,7 @@ function AttachmentPreview({
         onClick,
         className: chunkOR5DRJCW_cjs.cn(
           "relative block overflow-hidden rounded-lg",
-          "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+          "focus:outline-none focus:ring-2 focus:ring-primary-500",
           "transition-transform hover:scale-[1.02]",
           className
         ),
@@ -4519,7 +4516,7 @@ function AttachmentPreview({
         "flex items-center gap-3 rounded-lg p-3",
         "bg-white/10 hover:bg-white/20",
         "transition-colors",
-        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500",
         className
       ),
       children: [
@@ -4598,7 +4595,7 @@ function defaultFormatTimestamp(timestamp) {
     minute: "2-digit"
   });
 }
-var MessageBubble = React47__namespace.forwardRef(
+var MessageBubble = React49__namespace.forwardRef(
   ({
     className,
     message,
@@ -4696,7 +4693,7 @@ var MessageBubble = React47__namespace.forwardRef(
                         },
                         attachment.id
                       )) }),
-                      hasText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "break-words whitespace-pre-wrap", children: message.isDeleted ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "italic opacity-60", children: "This message was deleted" }) : message.content }),
+                      hasText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "whitespace-pre-wrap break-words", children: message.isDeleted ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "italic opacity-60", children: "This message was deleted" }) : message.content }),
                       message.isEdited && !message.isDeleted && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-xs opacity-60", children: "(edited)" })
                     ]
                   }
@@ -4721,7 +4718,7 @@ var MessageBubble = React47__namespace.forwardRef(
                             "flex items-center gap-1 rounded px-2 py-0.5",
                             "text-xs font-medium text-red-500",
                             "hover:bg-red-50 dark:hover:bg-red-900/20",
-                            "focus:ring-2 focus:ring-red-500 focus:outline-none"
+                            "focus:outline-none focus:ring-2 focus:ring-red-500"
                           ),
                           "aria-label": "Retry sending message",
                           children: [
@@ -4991,7 +4988,7 @@ function LoadMoreButton({
         "rounded-full px-4 py-2 text-sm font-medium",
         "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300",
         "hover:bg-neutral-200 dark:hover:bg-neutral-700",
-        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "transition-colors"
       ),
@@ -5032,7 +5029,7 @@ function LoadMoreButton({
   ) });
 }
 LoadMoreButton.displayName = "LoadMoreButton";
-var MessageList = React47__namespace.forwardRef(
+var MessageList = React49__namespace.forwardRef(
   ({
     messages,
     currentUser,
@@ -5051,19 +5048,19 @@ var MessageList = React47__namespace.forwardRef(
     className,
     autoScroll = "onNewMessage"
   }, ref) => {
-    const scrollContainerRef = React47__namespace.useRef(null);
-    const bottomRef = React47__namespace.useRef(null);
-    const [isUserScrolled, setIsUserScrolled] = React47__namespace.useState(false);
-    const prevMessageCountRef = React47__namespace.useRef(messages.length);
-    React47__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
-    const handleScroll = React47__namespace.useCallback(() => {
+    const scrollContainerRef = React49__namespace.useRef(null);
+    const bottomRef = React49__namespace.useRef(null);
+    const [isUserScrolled, setIsUserScrolled] = React49__namespace.useState(false);
+    const prevMessageCountRef = React49__namespace.useRef(messages.length);
+    React49__namespace.useImperativeHandle(ref, () => scrollContainerRef.current);
+    const handleScroll = React49__namespace.useCallback(() => {
       const container = scrollContainerRef.current;
       if (!container) return;
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       setIsUserScrolled(!isAtBottom);
     }, []);
-    React47__namespace.useEffect(() => {
+    React49__namespace.useEffect(() => {
       const container = scrollContainerRef.current;
       const bottom = bottomRef.current;
       if (!container || !bottom) return;
@@ -5079,7 +5076,7 @@ var MessageList = React47__namespace.forwardRef(
         }
       }
     }, [messages, currentUser.id, autoScroll, isUserScrolled]);
-    React47__namespace.useEffect(() => {
+    React49__namespace.useEffect(() => {
       const bottom = bottomRef.current;
       if (bottom && !isLoading) {
         bottom.scrollIntoView();
@@ -5125,7 +5122,7 @@ var MessageList = React47__namespace.forwardRef(
         "aria-live": "polite",
         children: [
           hasMore && onLoadMore && /* @__PURE__ */ jsxRuntime.jsx(LoadMoreButton, { isLoading: isLoadingMore, onClick: onLoadMore }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1 p-4", children: messageGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsxs(React49__namespace.Fragment, { children: [
             groupByDate && group.label && /* @__PURE__ */ jsxRuntime.jsx(DateSeparator, { label: group.label }),
             group.messages.map((message, index) => {
               const prevMessage = group.messages[index - 1];
@@ -5167,12 +5164,12 @@ var MessageList = React47__namespace.forwardRef(
                 bottomRef.current?.scrollIntoView({ behavior: "smooth" });
               },
               className: chunkOR5DRJCW_cjs.cn(
-                "fixed right-4 bottom-24 z-10",
+                "fixed bottom-24 right-4 z-10",
                 "rounded-full p-3 shadow-lg",
                 "bg-white dark:bg-neutral-800",
                 "border border-neutral-200 dark:border-neutral-700",
                 "hover:bg-neutral-50 dark:hover:bg-neutral-700",
-                "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                "focus:outline-none focus:ring-2 focus:ring-primary-500",
                 "transition-all"
               ),
               "aria-label": "Scroll to bottom",
@@ -5323,9 +5320,9 @@ function SuggestedActions({
       onClick: () => onSelect(action),
       className: chunkOR5DRJCW_cjs.cn(
         "flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5",
-        "hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 text-sm text-neutral-700",
+        "text-sm text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700",
         "dark:border-neutral-700 dark:text-neutral-300",
-        "dark:hover:border-primary-700 dark:hover:bg-primary-900/20 dark:hover:text-primary-300",
+        "dark:hover:bg-primary-900/20 dark:hover:border-primary-700 dark:hover:text-primary-300",
         "transition-colors"
       ),
       children: [
@@ -5344,7 +5341,7 @@ function AIEmptyState({
   className,
   ...props
 }) {
-  const aiIcon = /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white", children: /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "lg", className: "h-8 w-8" }) });
+  const aiIcon = /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded-full bg-primary-500 text-white dark:bg-primary-600", children: /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "lg", className: "h-8 w-8" }) });
   const suggestionsAction = suggestions && suggestions.length > 0 && onSuggestionSelect ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-6", children: [
     /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 text-sm text-neutral-500 dark:text-neutral-400", children: "Try asking:" }),
     /* @__PURE__ */ jsxRuntime.jsx(SuggestedActions, { actions: suggestions, onSelect: onSuggestionSelect })
@@ -5404,13 +5401,13 @@ function AIChat({
   onClear,
   onClose
 }) {
-  const messagesEndRef = React47__namespace.useRef(null);
-  const messages = React47__namespace.useMemo(
+  const messagesEndRef = React49__namespace.useRef(null);
+  const messages = React49__namespace.useMemo(
     () => session?.messages || messagesProp || [],
     [session?.messages, messagesProp]
   );
   const isGenerating = session?.isGenerating || isGeneratingProp || false;
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   const handleSend = async (message) => {
@@ -5438,7 +5435,7 @@ function AIChat({
       children: [
         showHeader && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white", children: /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "sm" }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white dark:bg-primary-600", children: /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "sm" }) }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
               /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "font-semibold text-neutral-900 dark:text-white", children: title }),
               isGenerating && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-neutral-500", children: "Generating..." })
@@ -5547,7 +5544,7 @@ function AIChatTrigger({
         "fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg",
         "bg-primary-500 text-white",
         "hover:bg-primary-600",
-        "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
         "dark:focus:ring-offset-neutral-900",
         "transition-all duration-200",
         isOpen && "scale-0 opacity-0",
@@ -5556,8 +5553,8 @@ function AIChatTrigger({
       ),
       "aria-label": "Open AI Assistant",
       children: [
-        pulse && !isOpen && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-primary-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" }),
-        badge && badge > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold", children: badge > 9 ? "9+" : badge }),
+        pulse && !isOpen && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-400 opacity-75" }),
+        badge && badge > 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold", children: badge > 9 ? "9+" : badge }),
         /* @__PURE__ */ jsxRuntime.jsx(SparklesIcon, { size: "lg" })
       ]
     }
@@ -5636,7 +5633,7 @@ function FloatingAIChat({
   pulse = false,
   ...chatProps
 }) {
-  const [internalOpen, setInternalOpen] = React47__namespace.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React49__namespace.useState(defaultOpen);
   const isControlled = controlledOpen !== void 0;
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const handleOpenChange = (open) => {
@@ -5665,6 +5662,170 @@ function FloatingAIChat({
       }
     )
   ] });
+}
+function relativeTime(input) {
+  if (!input) return "";
+  const d = input instanceof Date ? input : new Date(input);
+  const diff = Date.now() - d.getTime();
+  if (Number.isNaN(diff)) return "";
+  const s = Math.max(0, Math.floor(diff / 1e3));
+  if (s < 60) return "just now";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d2 = Math.floor(h / 24);
+  if (d2 < 30) return `${d2}d ago`;
+  return d.toLocaleDateString();
+}
+var KIND_STYLE = {
+  order_created: {
+    color: "text-sky-700 dark:text-sky-300",
+    bg: "bg-sky-100 dark:bg-sky-900/30",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" }) })
+  },
+  order_accepted: {
+    color: "text-violet-700 dark:text-violet-300",
+    bg: "bg-violet-100 dark:bg-violet-900/30",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        fillRule: "evenodd",
+        d: "M16.7 5.3a1 1 0 010 1.4l-7 7a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L9 11.6l6.3-6.3a1 1 0 011.4 0z",
+        clipRule: "evenodd"
+      }
+    ) })
+  },
+  order_completed: {
+    color: "text-neutral-700 dark:text-neutral-300",
+    bg: "bg-neutral-100 dark:bg-neutral-800",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        fillRule: "evenodd",
+        d: "M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 10-1.4 1.4l2 2a1 1 0 001.4 0l4-4z",
+        clipRule: "evenodd"
+      }
+    ) })
+  },
+  order_refused: {
+    color: "text-red-700 dark:text-red-300",
+    bg: "bg-red-100 dark:bg-red-900/30",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M4.7 4.7a1 1 0 011.4 0L10 8.6l3.9-3.9a1 1 0 111.4 1.4L11.4 10l3.9 3.9a1 1 0 01-1.4 1.4L10 11.4l-3.9 3.9a1 1 0 01-1.4-1.4L8.6 10 4.7 6.1a1 1 0 010-1.4z" }) })
+  },
+  results_ready: {
+    color: "text-green-700 dark:text-green-300",
+    bg: "bg-green-100 dark:bg-green-900/30",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M9 2a1 1 0 012 0v2h4a1 1 0 110 2h-1v9a2 2 0 01-2 2H8a2 2 0 01-2-2V6H5a1 1 0 110-2h4V2z" }) })
+  },
+  employee_added: {
+    color: "text-primary-700 dark:text-primary-300",
+    bg: "bg-primary-100 dark:bg-primary-900/30",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M10 9a4 4 0 100-8 4 4 0 000 8zm-7 9a7 7 0 1114 0H3z" }) })
+  },
+  invoice_paid: {
+    color: "text-amber-700 dark:text-amber-300",
+    bg: "bg-amber-100 dark:bg-amber-900/30",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1.5.87L13 15.5l-1.5 1.4a1 1 0 01-1.4 0L8.5 15.5 7 16.87A1 1 0 015.5 16H4V4z" }) })
+  },
+  message: {
+    color: "text-sky-700 dark:text-sky-300",
+    bg: "bg-sky-100 dark:bg-sky-900/30",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        fillRule: "evenodd",
+        d: "M18 5.25A3.25 3.25 0 0014.75 2h-9.5A3.25 3.25 0 002 5.25v7.5A3.25 3.25 0 005.25 16H6v2.25a.75.75 0 001.22.58L11.7 16h3.05A3.25 3.25 0 0018 12.75v-7.5z",
+        clipRule: "evenodd"
+      }
+    ) })
+  },
+  system: {
+    color: "text-neutral-700 dark:text-neutral-300",
+    bg: "bg-neutral-100 dark:bg-neutral-800",
+    icon: /* @__PURE__ */ jsxRuntime.jsx("svg", { viewBox: "0 0 20 20", fill: "currentColor", className: "h-3.5 w-3.5", children: /* @__PURE__ */ jsxRuntime.jsx(
+      "path",
+      {
+        fillRule: "evenodd",
+        d: "M10 2a1 1 0 01.9.55l1.6 3.24 3.58.52a1 1 0 01.55 1.7l-2.59 2.52.61 3.56a1 1 0 01-1.45 1.06L10 13.77l-3.2 1.68a1 1 0 01-1.45-1.06l.61-3.56L3.37 8.3a1 1 0 01.55-1.7l3.58-.52L9.1 2.55A1 1 0 0110 2z",
+        clipRule: "evenodd"
+      }
+    ) })
+  }
+};
+function ActivityFeed({
+  items,
+  loading = false,
+  emptyState,
+  maxItems,
+  className
+}) {
+  const visible = maxItems ? items.slice(0, maxItems) : items;
+  if (loading) {
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("space-y-3", className), children: [0, 1, 2, 3].map((i) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-3", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-8 w-8 animate-pulse rounded-full bg-muted" }),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 space-y-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-3/4 animate-pulse rounded bg-muted" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-1/2 animate-pulse rounded bg-muted" })
+      ] })
+    ] }, i)) });
+  }
+  if (!items.length) {
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className, children: emptyState ?? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-6 text-center text-sm text-muted-foreground", children: "No recent activity" }) });
+  }
+  return /* @__PURE__ */ jsxRuntime.jsx("ol", { className: chunkOR5DRJCW_cjs.cn("relative space-y-3", className), children: visible.map((item, idx) => {
+    const style = KIND_STYLE[item.kind] ?? KIND_STYLE.system;
+    const isLast = idx === visible.length - 1;
+    const interactive = Boolean(item.onClick);
+    return /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "relative flex gap-3", children: [
+      !isLast && /* @__PURE__ */ jsxRuntime.jsx(
+        "span",
+        {
+          "aria-hidden": "true",
+          className: "absolute left-[15px] top-8 h-[calc(100%-1rem)] w-px bg-border"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "span",
+        {
+          className: chunkOR5DRJCW_cjs.cn(
+            "relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full",
+            style.bg,
+            style.color
+          ),
+          "aria-hidden": "true",
+          children: style.icon
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsxs(
+        "div",
+        {
+          className: chunkOR5DRJCW_cjs.cn(
+            "min-w-0 flex-1 rounded-lg px-2 py-1",
+            interactive && "cursor-pointer transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          ),
+          role: interactive ? "button" : void 0,
+          tabIndex: interactive ? 0 : void 0,
+          onClick: item.onClick,
+          onKeyDown: (e) => {
+            if (!interactive) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              item.onClick?.();
+            }
+          },
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-sm font-medium text-foreground", children: item.title }),
+            item.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-xs text-muted-foreground", children: item.description }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground", children: [
+              item.actor && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate", children: item.actor }),
+              item.timestamp && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-auto whitespace-nowrap", children: relativeTime(item.timestamp) })
+            ] })
+          ]
+        }
+      )
+    ] }, item.id);
+  }) });
 }
 function AppHeader({
   children,
@@ -5754,8 +5915,8 @@ function AppHeaderIconButton({
         "relative rounded-lg p-2 transition-colors",
         "text-gray-500 dark:text-gray-400",
         "hover:bg-gray-100 dark:hover:bg-gray-800",
-        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
-        isActive && "text-primary-600 dark:text-primary-400 bg-gray-100 dark:bg-gray-800",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500",
+        isActive && "bg-gray-100 text-primary-600 dark:bg-gray-800 dark:text-primary-400",
         className
       ),
       "aria-label": label,
@@ -5766,7 +5927,7 @@ function AppHeaderIconButton({
           "span",
           {
             className: chunkOR5DRJCW_cjs.cn(
-              "absolute -top-1 -right-1 flex items-center justify-center",
+              "absolute -right-1 -top-1 flex items-center justify-center",
               "h-[18px] min-w-[18px] px-1 text-[10px] font-bold",
               "rounded-full bg-red-500 text-white"
             ),
@@ -5777,24 +5938,7 @@ function AppHeaderIconButton({
     }
   );
 }
-var SearchIcon = () => /* @__PURE__ */ jsxRuntime.jsx(
-  "svg",
-  {
-    className: "h-5 w-5",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    children: /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-      }
-    )
-  }
-);
+var SearchIcon = () => /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Search, { className: "h-5 w-5", "aria-hidden": "true" });
 var isMac = typeof window !== "undefined" && typeof window.navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(window.navigator.platform);
 function AppHeaderSearch({
   onClick,
@@ -5819,7 +5963,7 @@ function AppHeaderSearch({
       ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsx(SearchIcon, {}),
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 text-left whitespace-nowrap", children: placeholder }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 whitespace-nowrap text-left", children: placeholder }),
         /* @__PURE__ */ jsxRuntime.jsxs(
           "kbd",
           {
@@ -5857,7 +6001,7 @@ function AppHeaderUserMenu({
       className: chunkOR5DRJCW_cjs.cn(
         "flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors",
         "hover:bg-gray-100 dark:hover:bg-gray-800",
-        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500",
         isOpen && "bg-gray-100 dark:bg-gray-800",
         className
       ),
@@ -5867,7 +6011,7 @@ function AppHeaderUserMenu({
           {
             className: chunkOR5DRJCW_cjs.cn(
               "flex h-8 w-8 items-center justify-center overflow-hidden rounded-full",
-              "bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 text-sm font-medium"
+              "bg-primary-100 text-sm font-medium text-primary-900 dark:bg-primary-900 dark:text-primary-100"
             ),
             children: avatarUrl ? /* @__PURE__ */ jsxRuntime.jsx(
               "img",
@@ -5925,10 +6069,10 @@ function AuthDialog({
   requireEmailVerification = false,
   className
 }) {
-  const [internalMode, setInternalMode] = React47__namespace.useState("login");
-  const [isLoading, setIsLoading] = React47__namespace.useState(false);
-  const [error, setError] = React47__namespace.useState(null);
-  const [success, setSuccess] = React47__namespace.useState(null);
+  const [internalMode, setInternalMode] = React49__namespace.useState("login");
+  const [isLoading, setIsLoading] = React49__namespace.useState(false);
+  const [error, setError] = React49__namespace.useState(null);
+  const [success, setSuccess] = React49__namespace.useState(null);
   const mode = controlledMode ?? internalMode;
   const setMode = (newMode) => {
     setError(null);
@@ -5939,14 +6083,14 @@ function AuthDialog({
       setInternalMode(newMode);
     }
   };
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isOpen) onClose();
     };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -5995,13 +6139,13 @@ function AuthDialog({
                 {
                   type: "button",
                   onClick: onClose,
-                  className: "absolute top-4 right-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300",
+                  className: "absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300",
                   "aria-label": "Close",
                   children: /* @__PURE__ */ jsxRuntime.jsx(CloseIcon2, { className: "h-5 w-5" })
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "px-6 pt-6 pb-4 text-center", children: [
-                logoUrl ? /* @__PURE__ */ jsxRuntime.jsx("img", { src: logoUrl, alt: appName, className: "mx-auto mb-4 h-10" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-600 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xl font-bold text-white", children: appName.charAt(0) }) }),
+              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "px-6 pb-4 pt-6 text-center", children: [
+                logoUrl ? /* @__PURE__ */ jsxRuntime.jsx("img", { src: logoUrl, alt: appName, className: "mx-auto mb-4 h-10" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xl font-bold text-white", children: appName.charAt(0) }) }),
                 /* @__PURE__ */ jsxRuntime.jsxs(
                   "h2",
                   {
@@ -6111,14 +6255,14 @@ function AuthDialog({
                   }
                 ),
                 mode === "verify" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-4 text-center", children: [
-                  /* @__PURE__ */ jsxRuntime.jsx(MailIcon, { className: "text-primary-600 mx-auto mb-4 h-12 w-12" }),
+                  /* @__PURE__ */ jsxRuntime.jsx(MailIcon, { className: "mx-auto mb-4 h-12 w-12 text-primary-600" }),
                   /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-4 text-gray-600 dark:text-gray-400", children: "We've sent a verification email to your inbox. Please click the link to verify your account." }),
                   /* @__PURE__ */ jsxRuntime.jsx(
                     "button",
                     {
                       type: "button",
                       onClick: () => setMode("login"),
-                      className: "text-primary-600 hover:text-primary-700 text-sm font-medium",
+                      className: "text-sm font-medium text-primary-600 hover:text-primary-700",
                       children: "Return to login"
                     }
                   )
@@ -6146,7 +6290,7 @@ function AuthDialog({
                     {
                       type: "button",
                       onClick: () => setMode("signup"),
-                      className: "text-primary-600 hover:text-primary-700 font-medium",
+                      className: "font-medium text-primary-600 hover:text-primary-700",
                       children: "Sign up"
                     }
                   )
@@ -6158,7 +6302,7 @@ function AuthDialog({
                     {
                       type: "button",
                       onClick: () => setMode("login"),
-                      className: "text-primary-600 hover:text-primary-700 font-medium",
+                      className: "font-medium text-primary-600 hover:text-primary-700",
                       children: "Sign in"
                     }
                   )
@@ -6172,9 +6316,9 @@ function AuthDialog({
   );
 }
 function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
-  const [email, setEmail] = React47__namespace.useState("");
-  const [password, setPassword] = React47__namespace.useState("");
-  const [showPassword, setShowPassword] = React47__namespace.useState(false);
+  const [email, setEmail] = React49__namespace.useState("");
+  const [password, setPassword] = React49__namespace.useState("");
+  const [showPassword, setShowPassword] = React49__namespace.useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(email, password);
@@ -6198,7 +6342,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
           onChange: (e) => setEmail(e.target.value),
           required: true,
           autoComplete: "email",
-          className: "focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
+          className: "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
           placeholder: "you@example.com"
         }
       )
@@ -6222,7 +6366,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
             onChange: (e) => setPassword(e.target.value),
             required: true,
             autoComplete: "current-password",
-            className: "focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
+            className: "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
             placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
           }
         ),
@@ -6231,7 +6375,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
           {
             type: "button",
             onClick: () => setShowPassword(!showPassword),
-            className: "absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600",
+            className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
             children: showPassword ? /* @__PURE__ */ jsxRuntime.jsx(EyeOffIcon, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(EyeIcon, { className: "h-4 w-4" })
           }
         )
@@ -6243,7 +6387,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
           "input",
           {
             type: "checkbox",
-            className: "text-primary-600 focus:ring-primary-500 rounded border-gray-300"
+            className: "rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-2 text-sm text-gray-600 dark:text-gray-400", children: "Remember me" })
@@ -6253,7 +6397,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
         {
           type: "button",
           onClick: onForgotPassword,
-          className: "text-primary-600 hover:text-primary-700 text-sm",
+          className: "text-sm text-primary-600 hover:text-primary-700",
           children: "Forgot password?"
         }
       )
@@ -6263,7 +6407,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }) {
       {
         type: "submit",
         disabled: isLoading,
-        className: "bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+        className: "w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50",
         children: isLoading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner2, { className: "mx-auto h-5 w-5" }) : "Sign in"
       }
     )
@@ -6275,11 +6419,11 @@ function SignupForm({
   termsUrl,
   privacyUrl
 }) {
-  const [email, setEmail] = React47__namespace.useState("");
-  const [password, setPassword] = React47__namespace.useState("");
-  const [confirmPassword, setConfirmPassword] = React47__namespace.useState("");
-  const [acceptedTerms, setAcceptedTerms] = React47__namespace.useState(false);
-  const [showPassword, setShowPassword] = React47__namespace.useState(false);
+  const [email, setEmail] = React49__namespace.useState("");
+  const [password, setPassword] = React49__namespace.useState("");
+  const [confirmPassword, setConfirmPassword] = React49__namespace.useState("");
+  const [acceptedTerms, setAcceptedTerms] = React49__namespace.useState(false);
+  const [showPassword, setShowPassword] = React49__namespace.useState(false);
   const passwordsMatch = password === confirmPassword;
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -6305,7 +6449,7 @@ function SignupForm({
           onChange: (e) => setEmail(e.target.value),
           required: true,
           autoComplete: "email",
-          className: "focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
+          className: "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
           placeholder: "you@example.com"
         }
       )
@@ -6330,7 +6474,7 @@ function SignupForm({
             required: true,
             autoComplete: "new-password",
             minLength: 8,
-            className: "focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
+            className: "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
             placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
           }
         ),
@@ -6339,7 +6483,7 @@ function SignupForm({
           {
             type: "button",
             onClick: () => setShowPassword(!showPassword),
-            className: "absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600",
+            className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
             children: showPassword ? /* @__PURE__ */ jsxRuntime.jsx(EyeOffIcon, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(EyeIcon, { className: "h-4 w-4" })
           }
         )
@@ -6364,7 +6508,7 @@ function SignupForm({
           required: true,
           autoComplete: "new-password",
           className: chunkOR5DRJCW_cjs.cn(
-            "focus:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:bg-gray-700 dark:text-white",
+            "w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white",
             confirmPassword && !passwordsMatch ? "border-red-500" : "border-gray-300 dark:border-gray-600"
           ),
           placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
@@ -6380,7 +6524,7 @@ function SignupForm({
           checked: acceptedTerms,
           onChange: (e) => setAcceptedTerms(e.target.checked),
           required: true,
-          className: "text-primary-600 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
+          className: "mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "ml-2 text-sm text-gray-600 dark:text-gray-400", children: [
@@ -6416,7 +6560,7 @@ function SignupForm({
       {
         type: "submit",
         disabled: isLoading || !passwordsMatch || !acceptedTerms,
-        className: "bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+        className: "w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50",
         children: isLoading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner2, { className: "mx-auto h-5 w-5" }) : "Create account"
       }
     )
@@ -6427,7 +6571,7 @@ function ForgotPasswordForm({
   isLoading,
   onBack
 }) {
-  const [email, setEmail] = React47__namespace.useState("");
+  const [email, setEmail] = React49__namespace.useState("");
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(email);
@@ -6452,7 +6596,7 @@ function ForgotPasswordForm({
           onChange: (e) => setEmail(e.target.value),
           required: true,
           autoComplete: "email",
-          className: "focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
+          className: "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
           placeholder: "you@example.com"
         }
       )
@@ -6462,7 +6606,7 @@ function ForgotPasswordForm({
       {
         type: "submit",
         disabled: isLoading,
-        className: "bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+        className: "w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50",
         children: isLoading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner2, { className: "mx-auto h-5 w-5" }) : "Send reset link"
       }
     ),
@@ -6478,9 +6622,9 @@ function ForgotPasswordForm({
   ] });
 }
 function ResetPasswordForm({ onSubmit, isLoading }) {
-  const [password, setPassword] = React47__namespace.useState("");
-  const [confirmPassword, setConfirmPassword] = React47__namespace.useState("");
-  const [showPassword, setShowPassword] = React47__namespace.useState(false);
+  const [password, setPassword] = React49__namespace.useState("");
+  const [confirmPassword, setConfirmPassword] = React49__namespace.useState("");
+  const [showPassword, setShowPassword] = React49__namespace.useState(false);
   const passwordsMatch = password === confirmPassword;
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -6508,7 +6652,7 @@ function ResetPasswordForm({ onSubmit, isLoading }) {
             required: true,
             autoComplete: "new-password",
             minLength: 8,
-            className: "focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
+            className: "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white",
             placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
           }
         ),
@@ -6517,7 +6661,7 @@ function ResetPasswordForm({ onSubmit, isLoading }) {
           {
             type: "button",
             onClick: () => setShowPassword(!showPassword),
-            className: "absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600",
+            className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
             children: showPassword ? /* @__PURE__ */ jsxRuntime.jsx(EyeOffIcon, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(EyeIcon, { className: "h-4 w-4" })
           }
         )
@@ -6542,7 +6686,7 @@ function ResetPasswordForm({ onSubmit, isLoading }) {
           required: true,
           autoComplete: "new-password",
           className: chunkOR5DRJCW_cjs.cn(
-            "focus:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:bg-gray-700 dark:text-white",
+            "w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white",
             confirmPassword && !passwordsMatch ? "border-red-500" : "border-gray-300 dark:border-gray-600"
           ),
           placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
@@ -6555,7 +6699,7 @@ function ResetPasswordForm({ onSubmit, isLoading }) {
       {
         type: "submit",
         disabled: isLoading || !passwordsMatch,
-        className: "bg-primary-600 hover:bg-primary-700 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+        className: "w-full rounded-lg bg-primary-600 py-2.5 font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50",
         children: isLoading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner2, { className: "mx-auto h-5 w-5" }) : "Set new password"
       }
     )
@@ -6781,7 +6925,7 @@ function FloatingInput({
         placeholder: " ",
         className: chunkOR5DRJCW_cjs.cn(
           inputVariants2({ state: error ? "error" : state ?? "default" }),
-          "peer pt-6 pb-2",
+          "peer pb-2 pt-6",
           className
         ),
         ...props
@@ -6792,7 +6936,7 @@ function FloatingInput({
       {
         htmlFor: inputId,
         className: chunkOR5DRJCW_cjs.cn(
-          "absolute top-4 left-4 origin-left transform text-gray-500 transition-all duration-200",
+          "absolute left-4 top-4 origin-left transform text-gray-500 transition-all duration-200",
           "peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100",
           "peer-focus:-translate-y-2 peer-focus:scale-75",
           "peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-75",
@@ -6813,9 +6957,9 @@ function ServiceSelect({
   error,
   className
 }) {
-  const [isOpen, setIsOpen] = React47__namespace.useState(false);
-  const dropdownRef = React47__namespace.useRef(null);
-  React47__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React49__namespace.useState(false);
+  const dropdownRef = React49__namespace.useRef(null);
+  React49__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -6841,14 +6985,14 @@ function ServiceSelect({
         className: chunkOR5DRJCW_cjs.cn(
           "w-full rounded-lg border px-4 py-3 text-left transition-colors",
           "bg-white dark:bg-gray-800",
-          "focus:ring-2 focus:outline-none",
-          error ? "border-red-500 focus:ring-red-500/20" : "focus:border-primary-500 focus:ring-primary-500/20 dark:focus:border-primary-400 border-gray-300 dark:border-gray-600"
+          "focus:outline-none focus:ring-2",
+          error ? "border-red-500 focus:ring-red-500/20" : "focus:ring-primary-500/20 border-gray-300 focus:border-primary-500 dark:border-gray-600 dark:focus:border-primary-400"
         ),
         children: [
           selectedServiceNames.length > 0 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-1", children: selectedServiceNames.map((name) => /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
-              className: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm",
+              className: "dark:bg-primary-900/30 inline-flex items-center gap-1 rounded-full bg-primary-100 px-2 py-0.5 text-sm text-primary-700 dark:text-primary-400",
               children: name
             },
             name
@@ -6857,7 +7001,7 @@ function ServiceSelect({
             ChevronDownIcon,
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-gray-400 transition-transform",
+                "absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 transition-transform",
                 isOpen && "rotate-180"
               )
             }
@@ -6877,7 +7021,7 @@ function ServiceSelect({
                 type: "checkbox",
                 checked: selectedServices.includes(service.slug),
                 onChange: () => toggleService(service.slug),
-                className: "text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300 dark:border-gray-600"
+                className: "h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600"
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-gray-900 dark:text-white", children: service.name })
@@ -6908,7 +7052,7 @@ function ConsentSwitch({
         id,
         onClick: () => onChange(!checked),
         className: chunkOR5DRJCW_cjs.cn(
-          "focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none",
+          "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
           checked ? "bg-primary-600" : "bg-gray-200 dark:bg-gray-700"
         ),
         children: /* @__PURE__ */ jsxRuntime.jsx(
@@ -6941,7 +7085,7 @@ function DialogOverlay({
   children,
   className
 }) {
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -6986,7 +7130,7 @@ function BookingDialog({
   isLoading = false,
   className
 }) {
-  const [formData, setFormData] = React47__namespace.useState({
+  const [formData, setFormData] = React49__namespace.useState({
     firstName: defaultValues?.firstName || "",
     lastName: defaultValues?.lastName || "",
     phoneNumber: defaultValues?.phoneNumber || "",
@@ -6995,7 +7139,7 @@ function BookingDialog({
     consentEmail: defaultValues?.consentEmail ?? false,
     consentSms: defaultValues?.consentSms ?? false
   });
-  const [errors, setErrors] = React47__namespace.useState({});
+  const [errors, setErrors] = React49__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) {
@@ -7023,7 +7167,7 @@ function BookingDialog({
     `${provider.address.street1}, ${provider.address.city}, ${provider.address.state} ${provider.address.postalCode}`
   )}`;
   return /* @__PURE__ */ jsxRuntime.jsxs(DialogOverlay, { isOpen, onClose, className, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-primary-600 flex items-center justify-between rounded-t-2xl border-b border-gray-200 px-6 py-4 dark:border-gray-700", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between rounded-t-2xl border-b border-gray-200 bg-primary-600 px-6 py-4 dark:border-gray-700", children: [
       /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "text-xl font-semibold text-white", children: "Book Appointment" }),
       /* @__PURE__ */ jsxRuntime.jsx(
         "button",
@@ -7046,7 +7190,7 @@ function BookingDialog({
               href: mapsUrl,
               target: "_blank",
               rel: "noopener noreferrer",
-              className: "hover:text-primary-600 dark:hover:text-primary-400 text-sm text-gray-600 dark:text-gray-400",
+              className: "text-sm text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400",
               children: [
                 provider.address.street1,
                 provider.address.street2 && ` ${provider.address.street2}`,
@@ -7170,7 +7314,7 @@ function BookingDialog({
               type: "submit",
               disabled: isLoading,
               className: chunkOR5DRJCW_cjs.cn(
-                "bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+                "inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700",
                 isLoading && "cursor-not-allowed opacity-50"
               ),
               children: isLoading ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
@@ -7192,7 +7336,7 @@ function InlineBookingForm({
   isLoading = false,
   className
 }) {
-  const [formData, setFormData] = React47__namespace.useState({
+  const [formData, setFormData] = React49__namespace.useState({
     firstName: defaultValues?.firstName || "",
     lastName: defaultValues?.lastName || "",
     phoneNumber: defaultValues?.phoneNumber || "",
@@ -7201,7 +7345,7 @@ function InlineBookingForm({
     consentEmail: defaultValues?.consentEmail ?? false,
     consentSms: defaultValues?.consentSms ?? false
   });
-  const [errors, setErrors] = React47__namespace.useState({});
+  const [errors, setErrors] = React49__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) {
@@ -7271,7 +7415,7 @@ function InlineBookingForm({
         type: "submit",
         disabled: isLoading,
         className: chunkOR5DRJCW_cjs.cn(
-          "bg-primary-600 hover:bg-primary-700 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors",
+          "w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700",
           isLoading && "cursor-not-allowed opacity-50"
         ),
         children: isLoading ? "Submitting..." : "Request Booking"
@@ -7316,7 +7460,7 @@ function QuickBookCard({
             {
               type: "button",
               onClick: onBook,
-              className: "bg-primary-600 hover:bg-primary-700 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+              className: "inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700",
               children: [
                 /* @__PURE__ */ jsxRuntime.jsx(CalendarIcon, { className: "h-4 w-4" }),
                 "Book Online"
@@ -7678,7 +7822,7 @@ function DayScheduleRow({
             ),
             children: [
               dayName,
-              isToday && highlightToday && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-primary-500 ml-1 text-xs", children: "(Today)" })
+              isToday && highlightToday && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-xs text-primary-500", children: "(Today)" })
             ]
           }
         ),
@@ -7717,7 +7861,7 @@ function BusinessHours({
         ] }),
         showStatus && /* @__PURE__ */ jsxRuntime.jsx(OpenStatusBadge, { isOpen: false })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "m-0 font-sans whitespace-pre-wrap text-neutral-700 dark:text-neutral-300", children: schedule.officeHoursText })
+      /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "m-0 whitespace-pre-wrap font-sans text-neutral-700 dark:text-neutral-300", children: schedule.officeHoursText })
     ] });
   }
   if (!schedule.officeHours || schedule.officeHours.length === 0) {
@@ -7726,7 +7870,7 @@ function BusinessHours({
         /* @__PURE__ */ jsxRuntime.jsx(ClockIcon, { className: "text-neutral-500" }),
         headerText
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-neutral-500 italic dark:text-neutral-400", children: "Hours not available" })
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "italic text-neutral-500 dark:text-neutral-400", children: "Hours not available" })
     ] });
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(containerVariants({ variant, size }), className), children: [
@@ -7783,7 +7927,7 @@ function HoursSummary({
   defaultExpanded = false,
   className
 }) {
-  const [isExpanded, setIsExpanded] = React47__namespace.useState(defaultExpanded);
+  const [isExpanded, setIsExpanded] = React49__namespace.useState(defaultExpanded);
   const isOpen = isCurrentlyOpen(schedule.officeHours);
   const todayHours = getTodayHours(schedule.officeHours, use24Hour);
   const hasStructuredHours = schedule.officeHours && schedule.officeHours.length > 0;
@@ -7876,7 +8020,7 @@ function BusinessHoursEditor({
 }) {
   const schedule = ensureAllDays(value);
   const orderedDays = getOrderedDays(weekStartsOn);
-  const handleAddTimeSlot = React47.useCallback(
+  const handleAddTimeSlot = React49.useCallback(
     (dayIndex) => {
       const newSchedule = [...schedule];
       const daySchedule = newSchedule.find((d) => d.day === dayIndex);
@@ -7890,7 +8034,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleRemoveTimeSlot = React47.useCallback(
+  const handleRemoveTimeSlot = React49.useCallback(
     (dayIndex, slotIndex) => {
       const newSchedule = [...schedule];
       const daySchedule = newSchedule.find((d) => d.day === dayIndex);
@@ -7901,7 +8045,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleTimeChange = React47.useCallback(
+  const handleTimeChange = React49.useCallback(
     (dayIndex, slotIndex, field, value2) => {
       const newSchedule = [...schedule];
       const daySchedule = newSchedule.find((d) => d.day === dayIndex);
@@ -7915,7 +8059,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleCopyToAll = React47.useCallback(
+  const handleCopyToAll = React49.useCallback(
     (sourceDayIndex) => {
       const sourceDay = schedule.find((d) => d.day === sourceDayIndex);
       if (!sourceDay || sourceDay.hours.length === 0) return;
@@ -7933,7 +8077,7 @@ function BusinessHoursEditor({
     },
     [schedule, onChange]
   );
-  const handleCopyToWeekdays = React47.useCallback(
+  const handleCopyToWeekdays = React49.useCallback(
     (sourceDayIndex) => {
       const sourceDay = schedule.find((d) => d.day === sourceDayIndex);
       if (!sourceDay || sourceDay.hours.length === 0) return;
@@ -7966,7 +8110,7 @@ function BusinessHoursEditor({
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
               hours.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "group relative", children: [
                 /* @__PURE__ */ jsxRuntime.jsxs(
-                  chunkMKJDBXX4_cjs.Button,
+                  chunkIO2XB35K_cjs.Button,
                   {
                     type: "button",
                     variant: "ghost",
@@ -7979,12 +8123,12 @@ function BusinessHoursEditor({
                     ]
                   }
                 ),
-                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "invisible absolute top-full right-0 z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800", children: [
+                /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "invisible absolute right-0 top-full z-10 mt-1 rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800", children: [
                   /* @__PURE__ */ jsxRuntime.jsx(
                     "button",
                     {
                       type: "button",
-                      className: "block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700",
+                      className: "block w-full whitespace-nowrap px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700",
                       onClick: () => handleCopyToAll(dayIndex),
                       disabled,
                       children: "Copy to all days"
@@ -7994,7 +8138,7 @@ function BusinessHoursEditor({
                     "button",
                     {
                       type: "button",
-                      className: "block w-full px-3 py-2 text-left text-xs whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700",
+                      className: "block w-full whitespace-nowrap px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700",
                       onClick: () => handleCopyToWeekdays(dayIndex),
                       disabled,
                       children: "Copy to weekdays"
@@ -8003,7 +8147,7 @@ function BusinessHoursEditor({
                 ] })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsxs(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   type: "button",
                   variant: "ghost",
@@ -8019,13 +8163,13 @@ function BusinessHoursEditor({
               )
             ] })
           ] }),
-          hours.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 italic dark:text-gray-400", children: "Closed" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-2", children: hours.map((slot, slotIndex) => /* @__PURE__ */ jsxRuntime.jsxs(
+          hours.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm italic text-gray-500 dark:text-gray-400", children: "Closed" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-2", children: hours.map((slot, slotIndex) => /* @__PURE__ */ jsxRuntime.jsxs(
             "div",
             {
               className: "flex flex-wrap items-center gap-2 sm:flex-nowrap",
               children: [
                 /* @__PURE__ */ jsxRuntime.jsx("div", { className: "w-24 sm:w-28", children: /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     type: "time",
                     value: slot.start,
@@ -8042,7 +8186,7 @@ function BusinessHoursEditor({
                 ) }),
                 /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-gray-400", children: "\u2013" }),
                 /* @__PURE__ */ jsxRuntime.jsx("div", { className: "w-24 sm:w-28", children: /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     type: "time",
                     value: slot.end,
@@ -8058,7 +8202,7 @@ function BusinessHoursEditor({
                   }
                 ) }),
                 showDescription && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-[120px] flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     type: "text",
                     value: slot.description || "",
@@ -8075,7 +8219,7 @@ function BusinessHoursEditor({
                   }
                 ) }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkMKJDBXX4_cjs.Button,
+                  chunkIO2XB35K_cjs.Button,
                   {
                     type: "button",
                     variant: "ghost",
@@ -8206,17 +8350,17 @@ function CheckrIntegration({
     viewDetails = "View Details",
     noReportsSelected = "No reports selected"
   } = labels;
-  const [showInviteModal, setShowInviteModal] = React47__namespace.useState(false);
-  const [candidateName, setCandidateName] = React47__namespace.useState("");
-  const [candidateEmail, setCandidateEmail] = React47__namespace.useState("");
-  const [candidatePhone, setCandidatePhone] = React47__namespace.useState("");
-  const [selectedPackage, setSelectedPackage] = React47__namespace.useState(
+  const [showInviteModal, setShowInviteModal] = React49__namespace.useState(false);
+  const [candidateName, setCandidateName] = React49__namespace.useState("");
+  const [candidateEmail, setCandidateEmail] = React49__namespace.useState("");
+  const [candidatePhone, setCandidatePhone] = React49__namespace.useState("");
+  const [selectedPackage, setSelectedPackage] = React49__namespace.useState(
     packages[0]?.id || ""
   );
-  const [selectedReports, setSelectedReports] = React47__namespace.useState(
+  const [selectedReports, setSelectedReports] = React49__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     setSelectedReports(/* @__PURE__ */ new Set());
   }, [reports, connected]);
   const statusLabels = {
@@ -8250,7 +8394,7 @@ function CheckrIntegration({
     failed: "bg-destructive",
     expired: "bg-muted-foreground"
   };
-  const statusCounts = React47__namespace.useMemo(() => {
+  const statusCounts = React49__namespace.useMemo(() => {
     const counts = {
       pending: 0,
       running: 0,
@@ -8320,7 +8464,7 @@ function CheckrIntegration({
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg", children: /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
-            className: "text-success h-6 w-6",
+            className: "h-6 w-6 text-success",
             fill: "none",
             viewBox: "0 0 24 24",
             stroke: "currentColor",
@@ -8336,8 +8480,8 @@ function CheckrIntegration({
           }
         ) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-foreground text-lg font-semibold", children: "Checkr" }),
-          connected && account?.name && /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-muted-foreground text-sm", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-lg font-semibold text-foreground", children: "Checkr" }),
+          connected && account?.name && /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-muted-foreground", children: [
             account.name,
             account.plan && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "ml-2 text-xs", children: [
               "(",
@@ -8347,7 +8491,7 @@ function CheckrIntegration({
           ] })
         ] })
       ] }),
-      connected ? /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onDisconnect, children: disconnect }) : /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "primary", onClick: onConnect, children: [
+      connected ? /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onDisconnect, children: disconnect }) : /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "primary", onClick: onConnect, children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
@@ -8369,7 +8513,7 @@ function CheckrIntegration({
         connect
       ] })
     ] }),
-    error && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-destructive/10 border-destructive/20 text-destructive mb-4 rounded-lg border p-4", children: [
+    error && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-destructive/10 border-destructive/20 mb-4 rounded-lg border p-4 text-destructive", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
@@ -8391,7 +8535,7 @@ function CheckrIntegration({
       error
     ] }),
     connected && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-      reports.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm", children: Object.entries(statusCounts).filter(([, count]) => count > 0).map(([status, count]) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+      reports.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground", children: Object.entries(statusCounts).filter(([, count]) => count > 0).map(([status, count]) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "span",
           {
@@ -8408,7 +8552,7 @@ function CheckrIntegration({
         ] })
       ] }, status)) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-6 flex flex-wrap gap-3", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "primary", onClick: () => setShowInviteModal(true), children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "primary", onClick: () => setShowInviteModal(true), children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -8429,7 +8573,7 @@ function CheckrIntegration({
           ),
           inviteCandidate
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onRefresh, children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onRefresh, children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -8451,10 +8595,10 @@ function CheckrIntegration({
           refresh
         ] })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-card border-border overflow-hidden rounded-lg border", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-border border-b px-4 py-3", children: /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-card-foreground font-medium", children: viewReports }) }),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "overflow-hidden rounded-lg border border-border bg-card", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-b border-border px-4 py-3", children: /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "font-medium text-card-foreground", children: viewReports }) }),
         loading ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center p-8", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" }) }) : reports.length > 0 ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "divide-border divide-y", children: reports.map((report) => /* @__PURE__ */ jsxRuntime.jsxs(
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "divide-y divide-border", children: reports.map((report) => /* @__PURE__ */ jsxRuntime.jsxs(
             "div",
             {
               className: "hover:bg-muted/50 flex items-center justify-between px-4 py-4 transition-colors",
@@ -8493,9 +8637,9 @@ function CheckrIntegration({
                     }
                   ),
                   /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-                    /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-card-foreground font-medium", children: report.candidate.name }),
-                    /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm", children: report.candidate.email }),
-                    report.packageName && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: report.packageName })
+                    /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-card-foreground", children: report.candidate.name }),
+                    /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: report.candidate.email }),
+                    report.packageName && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: report.packageName })
                   ] })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-right", children: [
@@ -8519,17 +8663,17 @@ function CheckrIntegration({
                       children: resultLabels[report.result] || report.result
                     }
                   ),
-                  /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mt-1 text-xs", children: formatDate4(report.completedAt || report.createdAt) })
+                  /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-xs text-muted-foreground", children: formatDate4(report.completedAt || report.createdAt) })
                 ] })
               ]
             },
             report.id
           )) }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border bg-muted/30 flex items-center justify-between border-t px-4 py-3", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-sm", children: selectedReports.size > 0 ? `${selectedReports.size} report${selectedReports.size > 1 ? "s" : ""} selected` : noReportsSelected }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-muted/30 flex items-center justify-between border-t border-border px-4 py-3", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-muted-foreground", children: selectedReports.size > 0 ? `${selectedReports.size} report${selectedReports.size > 1 ? "s" : ""} selected` : noReportsSelected }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-2", children: [
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "outline",
                   size: "sm",
@@ -8539,7 +8683,7 @@ function CheckrIntegration({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "primary",
                   size: "sm",
@@ -8550,7 +8694,7 @@ function CheckrIntegration({
               )
             ] })
           ] })
-        ] }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-muted-foreground py-8 text-center", children: [
+        ] }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-8 text-center text-muted-foreground", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -8573,7 +8717,7 @@ function CheckrIntegration({
         ] })
       ] })
     ] }),
-    !connected && !error && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border rounded-lg border border-dashed p-8 text-center", children: [
+    !connected && !error && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-lg border border-dashed border-border p-8 text-center", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
@@ -8592,8 +8736,8 @@ function CheckrIntegration({
           )
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mb-4", children: "Connect your Checkr account to run background checks on candidates" }),
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "primary", onClick: onConnect, children: [
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-4 text-muted-foreground", children: "Connect your Checkr account to run background checks on candidates" }),
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "primary", onClick: onConnect, children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
@@ -8615,15 +8759,15 @@ function CheckrIntegration({
         connect
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.Modal, { open: showInviteModal, onOpenChange: setShowInviteModal, size: "md", children: [
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalHeader, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: inviteCandidate }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalClose, {})
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.Modal, { open: showInviteModal, onOpenChange: setShowInviteModal, size: "md", children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalHeader, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: inviteCandidate }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalClose, {})
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleInviteSubmit, children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalBody, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalBody, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: name,
               value: candidateName,
@@ -8632,7 +8776,7 @@ function CheckrIntegration({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: email,
               type: "email",
@@ -8642,7 +8786,7 @@ function CheckrIntegration({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: phone,
               type: "tel",
@@ -8651,7 +8795,7 @@ function CheckrIntegration({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkNL3CZNBH_cjs.Select,
+            chunkGEKTNWTP_cjs.Select,
             {
               label: packageLabel,
               options: packageOptions,
@@ -8660,9 +8804,9 @@ function CheckrIntegration({
             }
           )
         ] }) }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               type: "button",
               variant: "outline",
@@ -8670,13 +8814,13 @@ function CheckrIntegration({
               children: cancel
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", variant: "primary", children: submit })
+          /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", variant: "primary", children: submit })
         ] })
       ] })
     ] })
   ] });
 }
-var CommandPaletteContext = React47.createContext(
+var CommandPaletteContext = React49.createContext(
   null
 );
 function CommandPaletteProvider({
@@ -8684,24 +8828,24 @@ function CommandPaletteProvider({
   enableShortcut = true,
   customEventName
 }) {
-  const [isOpen, setIsOpen] = React47.useState(false);
-  const [query, setQuery] = React47.useState("");
-  const [selectedIndex, setSelectedIndex] = React47.useState(-1);
-  const [activeCategory, setActiveCategory] = React47.useState(null);
-  const [items, setItems] = React47.useState([]);
-  const [categories, setCategories] = React47.useState([]);
-  const open = React47.useCallback(() => {
+  const [isOpen, setIsOpen] = React49.useState(false);
+  const [query, setQuery] = React49.useState("");
+  const [selectedIndex, setSelectedIndex] = React49.useState(-1);
+  const [activeCategory, setActiveCategory] = React49.useState(null);
+  const [items, setItems] = React49.useState([]);
+  const [categories, setCategories] = React49.useState([]);
+  const open = React49.useCallback(() => {
     setIsOpen(true);
     setQuery("");
     setSelectedIndex(-1);
     setActiveCategory(null);
   }, []);
-  const close = React47.useCallback(() => {
+  const close = React49.useCallback(() => {
     setIsOpen(false);
     setQuery("");
     setSelectedIndex(-1);
   }, []);
-  const toggle = React47.useCallback(() => {
+  const toggle = React49.useCallback(() => {
     if (isOpen) {
       close();
     } else {
@@ -8709,13 +8853,13 @@ function CommandPaletteProvider({
     }
   }, [isOpen, open, close]);
   chunkR4DM4635_cjs.useCommandK(toggle, enableShortcut);
-  React47__namespace.default.useEffect(() => {
+  React49__namespace.default.useEffect(() => {
     if (!customEventName) return;
     const handler = () => open();
     document.addEventListener(customEventName, handler);
     return () => document.removeEventListener(customEventName, handler);
   }, [customEventName, open]);
-  const contextValue = React47.useMemo(
+  const contextValue = React49.useMemo(
     () => ({
       isOpen,
       open,
@@ -8747,7 +8891,7 @@ function CommandPaletteProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(CommandPaletteContext.Provider, { value: contextValue, children });
 }
 function useCommandPalette() {
-  const context = React47.useContext(CommandPaletteContext);
+  const context = React49.useContext(CommandPaletteContext);
   if (!context) {
     throw new Error(
       "useCommandPalette must be used within a CommandPaletteProvider"
@@ -8835,10 +8979,10 @@ function CommandPalette({
     items,
     categories
   } = useCommandPalette();
-  const inputRef = React47.useRef(null);
-  const containerRef = React47.useRef(null);
-  const listRef = React47.useRef(null);
-  const filteredItems = React47.useMemo(() => {
+  const inputRef = React49.useRef(null);
+  const containerRef = React49.useRef(null);
+  const listRef = React49.useRef(null);
+  const filteredItems = React49.useMemo(() => {
     let result = items;
     if (activeCategory) {
       result = result.filter((item) => item.category === activeCategory);
@@ -8851,7 +8995,7 @@ function CommandPalette({
     }
     return result;
   }, [items, query, activeCategory]);
-  const groupedItems = React47.useMemo(() => {
+  const groupedItems = React49.useMemo(() => {
     const groups = /* @__PURE__ */ new Map();
     filteredItems.forEach((item) => {
       const category = item.category ?? "Other";
@@ -8863,15 +9007,15 @@ function CommandPalette({
   }, [filteredItems]);
   chunkFHY3K6PL_cjs.useEscapeKey(close, isOpen);
   chunkSWMRCGL4_cjs.useClickOutside(containerRef, close);
-  React47.useEffect(() => {
+  React49.useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
-  React47.useEffect(() => {
+  React49.useEffect(() => {
     setSelectedIndex(filteredItems.length > 0 ? 0 : -1);
   }, [filteredItems.length, setSelectedIndex]);
-  React47.useEffect(() => {
+  React49.useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
       const selectedElement = listRef.current.querySelector(
         `[data-index="${selectedIndex}"]`
@@ -8879,7 +9023,7 @@ function CommandPalette({
       selectedElement?.scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
-  const handleKeyDown = React47.useCallback(
+  const handleKeyDown = React49.useCallback(
     (e) => {
       switch (e.key) {
         case "ArrowDown":
@@ -8923,7 +9067,7 @@ function CommandPalette({
       setActiveCategory
     ]
   );
-  const handleItemClick = React47.useCallback(
+  const handleItemClick = React49.useCallback(
     (item) => {
       if (!item.disabled) {
         onSelect?.(item);
@@ -8932,7 +9076,7 @@ function CommandPalette({
     },
     [onSelect, close]
   );
-  const getCategoryInfo = React47.useCallback(
+  const getCategoryInfo = React49.useCallback(
     (categoryId) => {
       return categories.find((c) => c.id === categoryId);
     },
@@ -8960,7 +9104,7 @@ function CommandPalette({
         ),
         children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative border-b border-gray-200 dark:border-gray-700", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute top-1/2 left-4 -translate-y-1/2 text-gray-400", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon2, {}) }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon2, {}) }),
             /* @__PURE__ */ jsxRuntime.jsx(
               "input",
               {
@@ -8973,7 +9117,7 @@ function CommandPalette({
                 autoFocus: true,
                 "data-testid": `${testId}-input`,
                 className: chunkOR5DRJCW_cjs.cn(
-                  "w-full bg-transparent py-4 pr-12 pl-12 text-base",
+                  "w-full bg-transparent py-4 pl-12 pr-12 text-base",
                   "focus:outline-none dark:text-white dark:placeholder-gray-400"
                 )
               }
@@ -8983,11 +9127,11 @@ function CommandPalette({
               {
                 onClick: () => setQuery(""),
                 "data-testid": `${testId}-clear`,
-                className: "absolute top-1/2 right-12 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+                className: "absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
                 children: /* @__PURE__ */ jsxRuntime.jsx(XIcon2, {})
               }
             ),
-            isLoading && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-primary-500 absolute top-1/2 right-4 -translate-y-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon3, {}) })
+            isLoading && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute right-4 top-1/2 -translate-y-1/2 text-primary-500", children: /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon3, {}) })
           ] }),
           categories.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1 overflow-x-auto border-b border-gray-100 p-2 dark:border-gray-700", children: [
             /* @__PURE__ */ jsxRuntime.jsx(
@@ -9089,7 +9233,7 @@ function CommandPalette({
                       disabled: item.disabled,
                       className: chunkOR5DRJCW_cjs.cn(
                         "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
-                        isSelected ? "bg-primary-50 dark:bg-primary-500/20" : "hover:bg-gray-50 dark:hover:bg-gray-700/50",
+                        isSelected ? "dark:bg-primary-500/20 bg-primary-50" : "hover:bg-gray-50 dark:hover:bg-gray-700/50",
                         item.disabled && "cursor-not-allowed opacity-50"
                       ),
                       children: [
@@ -9179,7 +9323,7 @@ function CommandPaletteTrigger({
       ),
       children: children ?? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsx(SearchIcon2, {}),
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 text-left whitespace-nowrap", children: placeholder }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 whitespace-nowrap text-left", children: placeholder }),
         /* @__PURE__ */ jsxRuntime.jsxs(
           "kbd",
           {
@@ -9195,6 +9339,134 @@ function CommandPaletteTrigger({
           }
         )
       ] })
+    }
+  );
+}
+function resolveMessageFieldOptions(field) {
+  if (!field) return null;
+  if (field === true) return {};
+  return field;
+}
+function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  variant = "default",
+  messageField,
+  isSubmitting = false,
+  errorMessage,
+  onConfirm,
+  onCancel,
+  size,
+  children
+}) {
+  const fieldOpts = resolveMessageFieldOptions(messageField);
+  const [message, setMessage] = React49__namespace.useState(fieldOpts?.defaultValue ?? "");
+  const [validationError, setValidationError] = React49__namespace.useState(
+    null
+  );
+  React49__namespace.useEffect(() => {
+    if (open) {
+      setMessage(fieldOpts?.defaultValue ?? "");
+      setValidationError(null);
+    }
+  }, [open]);
+  const handleCancel = React49__namespace.useCallback(() => {
+    if (isSubmitting) return;
+    if (onCancel) onCancel();
+    else onOpenChange(false);
+  }, [isSubmitting, onCancel, onOpenChange]);
+  const handleConfirm = React49__namespace.useCallback(async () => {
+    if (isSubmitting) return;
+    let messageToSend;
+    if (fieldOpts) {
+      const trimmed = message.trim();
+      if (fieldOpts.required && trimmed.length === 0) {
+        setValidationError("A message is required.");
+        return;
+      }
+      if (fieldOpts.minLength && trimmed.length > 0 && trimmed.length < fieldOpts.minLength) {
+        setValidationError(
+          `Message must be at least ${fieldOpts.minLength} characters.`
+        );
+        return;
+      }
+      setValidationError(null);
+      messageToSend = trimmed.length > 0 ? trimmed : void 0;
+    }
+    await onConfirm(messageToSend);
+  }, [fieldOpts, isSubmitting, message, onConfirm]);
+  const confirmVariant = variant === "danger" ? "danger" : "primary";
+  const resolvedSize = size ?? (fieldOpts ? "md" : "sm");
+  const maxLength = fieldOpts?.maxLength ?? 1500;
+  const rows = fieldOpts?.rows ?? 4;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    chunkAOHWULSD_cjs.Modal,
+    {
+      open,
+      onOpenChange: (next) => {
+        if (!next && isSubmitting) return;
+        onOpenChange(next);
+      },
+      size: resolvedSize,
+      closeOnEscape: !isSubmitting,
+      closeOnOverlayClick: !isSubmitting,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: title }) }),
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
+          description && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: description }),
+          children,
+          fieldOpts && /* @__PURE__ */ jsxRuntime.jsx(
+            chunkJHVDSH6J_cjs.Textarea,
+            {
+              id: "confirm-dialog-message",
+              label: fieldOpts.label ?? "Personal Message (optional)",
+              rows,
+              value: message,
+              onChange: (e) => setMessage(e.target.value),
+              placeholder: fieldOpts.placeholder,
+              maxLength,
+              showCount: true,
+              helperText: fieldOpts.helperText,
+              disabled: isSubmitting,
+              required: fieldOpts.required
+            }
+          ),
+          (errorMessage || validationError) && /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              role: "alert",
+              className: "rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
+              children: validationError ?? errorMessage
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            chunkIO2XB35K_cjs.Button,
+            {
+              type: "button",
+              variant: "outline",
+              onClick: handleCancel,
+              disabled: isSubmitting,
+              children: cancelLabel
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            chunkIO2XB35K_cjs.Button,
+            {
+              type: "button",
+              variant: confirmVariant,
+              onClick: handleConfirm,
+              disabled: isSubmitting,
+              children: isSubmitting ? "Sending\u2026" : confirmLabel
+            }
+          )
+        ] })
+      ]
     }
   );
 }
@@ -9262,7 +9534,7 @@ function ConnectionStatusOverlay({
           {
             type: "button",
             onClick: onReload || (() => window.location.reload()),
-            className: "bg-primary-600 hover:bg-primary-700 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+            className: "inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700",
             children: [
               /* @__PURE__ */ jsxRuntime.jsx(ReloadIcon, { className: "h-4 w-4" }),
               "Reload"
@@ -9298,7 +9570,7 @@ function UpdateAvailableOverlay({
             alt: appName,
             className: "h-12 w-12 animate-pulse"
           }
-        ) : /* @__PURE__ */ jsxRuntime.jsx(UpdateIcon, { className: "text-primary-600 h-12 w-12 animate-pulse" }) }),
+        ) : /* @__PURE__ */ jsxRuntime.jsx(UpdateIcon, { className: "h-12 w-12 animate-pulse text-primary-600" }) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
           /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-semibold text-gray-900 dark:text-white", children: "Update Available" }),
           /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "mt-1 text-sm text-gray-600 dark:text-gray-400", children: [
@@ -9379,7 +9651,7 @@ function ConnectionStatusBar({
       role: "status",
       "aria-live": "polite",
       className: chunkOR5DRJCW_cjs.cn(
-        "fixed right-0 left-0 z-40 px-4 py-2",
+        "fixed left-0 right-0 z-40 px-4 py-2",
         position === "top" ? "top-0" : "bottom-0",
         isConnecting ? "bg-yellow-500 text-yellow-900" : "bg-red-500 text-white",
         className
@@ -9507,11 +9779,11 @@ function formatRetryTime(time) {
 }
 function useConnectionStatus(options = {}) {
   const { onDisconnect, onReconnect } = options;
-  const [isOnline, setIsOnline] = React47__namespace.useState(() => {
+  const [isOnline, setIsOnline] = React49__namespace.useState(() => {
     if (typeof window === "undefined") return true;
     return navigator.onLine;
   });
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
       onReconnect?.();
@@ -9574,7 +9846,7 @@ function CookieConsentBanner({
   isMobileApp = false,
   className
 }) {
-  const [isAnimating, setIsAnimating] = React47__namespace.useState(false);
+  const [isAnimating, setIsAnimating] = React49__namespace.useState(false);
   const handleAccept = () => {
     setIsAnimating(true);
     setTimeout(() => {
@@ -9626,7 +9898,7 @@ function CookieConsentBanner({
                         appName,
                         " you are agreeing to our",
                         " ",
-                        legalLinks.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+                        legalLinks.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React49__namespace.Fragment, { children: [
                           index > 0 && (index === legalLinks.length - 1 ? " and " : ", "),
                           /* @__PURE__ */ jsxRuntime.jsx(
                             "a",
@@ -9686,7 +9958,7 @@ function CookieConsentBanner({
                       onClick: handleAccept,
                       className: chunkOR5DRJCW_cjs.cn(
                         "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                        variant === "default" ? "bg-primary-600 hover:bg-primary-700 text-white" : "bg-white text-gray-900 hover:bg-gray-100"
+                        variant === "default" ? "bg-primary-600 text-white hover:bg-primary-700" : "bg-white text-gray-900 hover:bg-gray-100"
                       ),
                       children: [
                         acceptText,
@@ -9716,7 +9988,7 @@ function CompactCookieBanner({
       role: "dialog",
       "aria-label": "Cookie consent",
       className: chunkOR5DRJCW_cjs.cn(
-        "fixed right-4 bottom-4 left-4 md:right-4 md:left-auto md:max-w-sm",
+        "fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm",
         "z-50 rounded-lg bg-gray-900 p-4 text-white shadow-xl",
         className
       ),
@@ -9742,20 +10014,20 @@ function CompactCookieBanner({
 var COOKIE_CONSENT_KEY = "cookie-consent-accepted";
 function useCookieConsent(options = {}) {
   const { storageKey = COOKIE_CONSENT_KEY, onConsent } = options;
-  const [hasConsented, setHasConsented] = React47__namespace.useState(() => {
+  const [hasConsented, setHasConsented] = React49__namespace.useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(storageKey) === "true";
   });
-  const acceptCookies = React47__namespace.useCallback(() => {
+  const acceptCookies = React49__namespace.useCallback(() => {
     localStorage.setItem(storageKey, "true");
     setHasConsented(true);
     onConsent?.();
   }, [storageKey, onConsent]);
-  const declineCookies = React47__namespace.useCallback(() => {
+  const declineCookies = React49__namespace.useCallback(() => {
     localStorage.setItem(storageKey, "declined");
     setHasConsented(true);
   }, [storageKey]);
-  const resetConsent = React47__namespace.useCallback(() => {
+  const resetConsent = React49__namespace.useCallback(() => {
     localStorage.removeItem(storageKey);
     setHasConsented(false);
   }, [storageKey]);
@@ -9807,17 +10079,17 @@ function CSVColumnMapper({
     return [name, ...parts].join("-").replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("csv-column-mapper", className), children: [
-    importing && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl", children: [
+    importing && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-foreground/50 fixed inset-0 z-50 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-full max-w-lg rounded-lg bg-card text-card-foreground shadow-xl", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary text-primary-foreground p-4", children: /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-lg font-semibold", children: "Processing Employees" }) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "p-6", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-full overflow-hidden rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-full overflow-hidden rounded-full bg-muted", children: /* @__PURE__ */ jsxRuntime.jsx(
           "div",
           {
-            className: "bg-success h-full transition-all duration-300",
+            className: "h-full bg-success transition-all duration-300",
             style: { width: `${importProgress}%` }
           }
         ) }),
-        /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-muted-foreground mt-2 text-center text-sm", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "mt-2 text-center text-sm text-muted-foreground", children: [
           importProgress,
           "% complete"
         ] })
@@ -9825,7 +10097,7 @@ function CSVColumnMapper({
     ] }) }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 flex flex-wrap gap-2", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           variant: "primary",
           size: "sm",
@@ -9834,7 +10106,7 @@ function CSVColumnMapper({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           variant: "primary",
           size: "sm",
@@ -9843,7 +10115,7 @@ function CSVColumnMapper({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           variant: "primary",
           size: "sm",
@@ -9853,10 +10125,10 @@ function CSVColumnMapper({
       )
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-primary/10 border-primary/30 mb-4 rounded-lg border p-4", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-primary-800 dark:text-primary-200 mb-1 font-semibold", children: ensureAccurateData }),
-      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-primary-700 dark:text-primary-300 text-sm", children: ensureAccurateDataDescription })
+      /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "mb-1 font-semibold text-primary-800 dark:text-primary-200", children: ensureAccurateData }),
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-primary-700 dark:text-primary-300", children: ensureAccurateDataDescription })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mb-4", children: instructions }),
+    /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-4 text-muted-foreground", children: instructions }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4", children: columns.map((column, index) => /* @__PURE__ */ jsxRuntime.jsx(
       CSVColumnCard,
       {
@@ -9870,7 +10142,7 @@ function CSVColumnMapper({
       },
       column.name
     )) }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-6 flex justify-end", children: /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "primary", onClick: onImport, disabled: importing, children: importLabel }) })
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-6 flex justify-end", children: /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "primary", onClick: onImport, disabled: importing, children: importLabel }) })
   ] });
 }
 function CSVColumnCard({
@@ -9901,12 +10173,12 @@ function CSVColumnCard({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "bg-card text-card-foreground rounded-xl border-2 shadow-sm",
+        "rounded-xl border-2 bg-card text-card-foreground shadow-sm",
         column.ignored ? "border-border opacity-50" : isMapped ? "border-success/30" : "border-warning/30"
       ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 px-4 py-3", children: [
-          !column.ignored && (isMapped ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(
+          !column.ignored && (isMapped ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
               className: "h-3 w-3",
@@ -9923,7 +10195,7 @@ function CSVColumnCard({
                 }
               )
             }
-          ) }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-3 w-3", fill: "currentColor", viewBox: "0 0 24 24", children: [
+          ) }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warning text-warning-foreground", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-3 w-3", fill: "currentColor", viewBox: "0 0 24 24", children: [
             /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "10", fill: "currentColor" }),
             /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "4", className: "fill-warning" })
           ] }) })),
@@ -9931,18 +10203,18 @@ function CSVColumnCard({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 px-4 pb-4", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: "Sample Data" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: "Sample Data" }),
             /* @__PURE__ */ jsxRuntime.jsx(
               "div",
               {
-                className: "bg-muted truncate rounded-md px-3 py-2 font-mono text-sm",
+                className: "truncate rounded-md bg-muted px-3 py-2 font-mono text-sm",
                 title: column.sampleValue,
                 children: column.sampleValue || /* @__PURE__ */ jsxRuntime.jsx("em", { className: "text-muted-foreground", children: "Empty" })
               }
             )
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: "Map to Field" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: "Map to Field" }),
             /* @__PURE__ */ jsxRuntime.jsx(
               "div",
               {
@@ -9951,7 +10223,7 @@ function CSVColumnCard({
                   hasError && !column.ignored && "ring-warning/50 ring-2"
                 ),
                 children: /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkNL3CZNBH_cjs.Select,
+                  chunkGEKTNWTP_cjs.Select,
                   {
                     id: formatHtmlId(column.name),
                     options: selectOptions,
@@ -9970,9 +10242,9 @@ function CSVColumnCard({
             )
           ] }),
           childSelectOptions && childSelectOptions.length > 0 && column.mappedTo && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: "Sub-field" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: "Sub-field" }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkNL3CZNBH_cjs.Select,
+              chunkGEKTNWTP_cjs.Select,
               {
                 id: formatHtmlId(column.name, column.mappedTo),
                 options: childSelectOptions,
@@ -9990,7 +10262,7 @@ function CSVColumnCard({
             {
               type: "button",
               onClick: () => onIgnoreToggle(!column.ignored),
-              className: "text-muted-foreground hover:text-foreground mx-auto flex items-center gap-1 text-xs transition-colors",
+              className: "mx-auto flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground",
               children: [
                 column.ignored ? /* @__PURE__ */ jsxRuntime.jsx(
                   "svg",
@@ -10047,9 +10319,9 @@ function CSVFileUpload({
     selectFile = "Select a file to upload or drag and drop",
     selectButton = "Select File to Upload"
   } = labels;
-  const inputRef = React47__namespace.useRef(null);
-  const [isDragging, setIsDragging] = React47__namespace.useState(false);
-  const handleDrop = React47__namespace.useCallback(
+  const inputRef = React49__namespace.useRef(null);
+  const [isDragging, setIsDragging] = React49__namespace.useState(false);
+  const handleDrop = React49__namespace.useCallback(
     (e) => {
       e.preventDefault();
       setIsDragging(false);
@@ -10060,14 +10332,14 @@ function CSVFileUpload({
     },
     [onFileSelect]
   );
-  const handleDragOver = React47__namespace.useCallback((e) => {
+  const handleDragOver = React49__namespace.useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
   }, []);
-  const handleDragLeave = React47__namespace.useCallback(() => {
+  const handleDragLeave = React49__namespace.useCallback(() => {
     setIsDragging(false);
   }, []);
-  const handleFileChange = React47__namespace.useCallback(
+  const handleFileChange = React49__namespace.useCallback(
     (e) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -10101,10 +10373,10 @@ function CSVFileUpload({
         ),
         processing ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" }),
-          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mt-4", children: "Processing file..." })
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-4 text-muted-foreground", children: "Processing file..." })
         ] }) : /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-file-csv text-muted-foreground mb-4 text-5xl" }),
-          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mb-4 text-lg", children: selectFile }),
+          /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-file-csv mb-4 text-5xl text-muted-foreground" }),
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-4 text-lg text-muted-foreground", children: selectFile }),
           /* @__PURE__ */ jsxRuntime.jsx(
             "button",
             {
@@ -10270,10 +10542,10 @@ function DateRangePicker({
   const displayValue = value ? formatDateRange(value) : "";
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex items-center gap-0", className), children: [
     /* @__PURE__ */ jsxRuntime.jsx(
-      chunkFIXAVBUA_cjs.Dropdown,
+      chunkTDFPD3YV_cjs.Dropdown,
       {
         trigger: /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "primary",
             size: "md",
@@ -10287,7 +10559,7 @@ function DateRangePicker({
         ),
         className: "max-h-[300px] overflow-auto",
         children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-2 gap-0", children: finalPresets.map((preset) => /* @__PURE__ */ jsxRuntime.jsx(
-          chunkFIXAVBUA_cjs.DropdownItem,
+          chunkTDFPD3YV_cjs.DropdownItem,
           {
             onClick: () => handlePresetSelect(preset.key),
             className: chunkOR5DRJCW_cjs.cn(
@@ -10301,9 +10573,9 @@ function DateRangePicker({
       }
     ),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative min-w-[200px] flex-1", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" }),
+      /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           type: "text",
           value: displayValue,
@@ -10314,7 +10586,7 @@ function DateRangePicker({
       )
     ] }),
     showPrint && /* @__PURE__ */ jsxRuntime.jsx(
-      chunkMKJDBXX4_cjs.Button,
+      chunkIO2XB35K_cjs.Button,
       {
         variant: "primary",
         size: "md",
@@ -10325,7 +10597,7 @@ function DateRangePicker({
       }
     ),
     showExport && /* @__PURE__ */ jsxRuntime.jsx(
-      chunkMKJDBXX4_cjs.Button,
+      chunkIO2XB35K_cjs.Button,
       {
         variant: "primary",
         size: "md",
@@ -10356,16 +10628,16 @@ function DateRangeFilter({
     onChange(range, presetKey);
   };
   return /* @__PURE__ */ jsxRuntime.jsx(
-    chunkFIXAVBUA_cjs.Dropdown,
+    chunkTDFPD3YV_cjs.Dropdown,
     {
-      trigger: /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant, size: "md", className, children: [
+      trigger: /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant, size: "md", className, children: [
         /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "mr-2 h-4 w-4" }),
         activeLabel || labels.filter || "Filter by Date",
         /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "ml-2 h-3 w-3" })
       ] }),
       className: "w-56",
       children: finalPresets.map((preset) => /* @__PURE__ */ jsxRuntime.jsx(
-        chunkFIXAVBUA_cjs.DropdownItem,
+        chunkTDFPD3YV_cjs.DropdownItem,
         {
           onClick: () => handlePresetSelect(preset.key),
           className: chunkOR5DRJCW_cjs.cn(
@@ -10386,11 +10658,11 @@ function DropZone({
   className,
   children
 }) {
-  const [isDragging, setIsDragging] = React47__namespace.useState(false);
-  const inputRef = React47__namespace.useRef(null);
-  const dropZoneRef = React47__namespace.useRef(null);
-  const dragCounter = React47__namespace.useRef(0);
-  const handleDragEnter = React47__namespace.useCallback(
+  const [isDragging, setIsDragging] = React49__namespace.useState(false);
+  const inputRef = React49__namespace.useRef(null);
+  const dropZoneRef = React49__namespace.useRef(null);
+  const dragCounter = React49__namespace.useRef(0);
+  const handleDragEnter = React49__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10402,7 +10674,7 @@ function DropZone({
     },
     [disabled]
   );
-  const handleDragLeave = React47__namespace.useCallback(
+  const handleDragLeave = React49__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10414,11 +10686,11 @@ function DropZone({
     },
     [disabled]
   );
-  const handleDragOver = React47__namespace.useCallback((e) => {
+  const handleDragOver = React49__namespace.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  const handleDrop = React47__namespace.useCallback(
+  const handleDrop = React49__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -10431,12 +10703,12 @@ function DropZone({
     },
     [disabled, onFilesSelected]
   );
-  const handleClick = React47__namespace.useCallback(() => {
+  const handleClick = React49__namespace.useCallback(() => {
     if (!disabled) {
       inputRef.current?.click();
     }
   }, [disabled]);
-  const handleKeyDown = React47__namespace.useCallback(
+  const handleKeyDown = React49__namespace.useCallback(
     (e) => {
       if ((e.key === "Enter" || e.key === " ") && !disabled) {
         e.preventDefault();
@@ -10445,7 +10717,7 @@ function DropZone({
     },
     [disabled]
   );
-  const handleInputChange = React47__namespace.useCallback(
+  const handleInputChange = React49__namespace.useCallback(
     (e) => {
       if (e.target.files && e.target.files.length > 0) {
         onFilesSelected(e.target.files);
@@ -10480,14 +10752,14 @@ function DropZone({
         "border-neutral-300 bg-neutral-50",
         "dark:border-neutral-600 dark:bg-neutral-800/50",
         // Hover state
-        "hover:border-primary-400 hover:bg-primary-50/50",
-        "dark:hover:border-primary-500 dark:hover:bg-primary-900/20",
+        "hover:bg-primary-50/50 hover:border-primary-400",
+        "dark:hover:bg-primary-900/20 dark:hover:border-primary-500",
         // Focus state
-        "focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
         // Dragging state
         isDragging && [
           "border-primary-500 bg-primary-50",
-          "dark:border-primary-400 dark:bg-primary-900/30",
+          "dark:bg-primary-900/30 dark:border-primary-400",
           "scale-[1.01]"
         ],
         // Disabled state
@@ -10522,7 +10794,7 @@ function DropZone({
               "bg-primary-500/10 rounded-xl",
               "pointer-events-none"
             ),
-            children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-primary-600 dark:text-primary-400 text-lg font-medium", children: "Drop files here" })
+            children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-lg font-medium text-primary-600 dark:text-primary-400", children: "Drop files here" })
           }
         )
       ]
@@ -10533,7 +10805,7 @@ DropZone.displayName = "DropZone";
 function FilePreviewItem({ file, onRemove, disabled }) {
   const isPdf = file.file.type === "application/pdf";
   const isImage = file.file.type.startsWith("image/");
-  const handleRemove = React47__namespace.useCallback(() => {
+  const handleRemove = React49__namespace.useCallback(() => {
     onRemove(file.id);
   }, [file.id, onRemove]);
   return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -10543,8 +10815,8 @@ function FilePreviewItem({ file, onRemove, disabled }) {
       "aria-label": `File: ${file.file.name}`,
       className: chunkOR5DRJCW_cjs.cn(
         "group relative overflow-hidden rounded-lg",
-        "border-border bg-card border",
-        "focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2"
+        "border border-border bg-card",
+        "focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2"
       ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800", children: [
@@ -10556,11 +10828,11 @@ function FilePreviewItem({ file, onRemove, disabled }) {
               className: "h-full w-full object-cover"
             }
           ) : isPdf ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full w-full flex-col items-center justify-center gap-2", children: [
-            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.FileText, { className: "text-muted-foreground h-12 w-12" }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs", children: "PDF Document" })
+            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.FileText, { className: "h-12 w-12 text-muted-foreground" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-muted-foreground", children: "PDF Document" })
           ] }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full w-full flex-col items-center justify-center gap-2", children: [
-            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Image, { className: "text-muted-foreground h-12 w-12" }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs", children: "File" })
+            /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Image, { className: "h-12 w-12 text-muted-foreground" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-muted-foreground", children: "File" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
             "div",
@@ -10572,7 +10844,7 @@ function FilePreviewItem({ file, onRemove, disabled }) {
                 disabled && "pointer-events-none"
               ),
               children: /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "danger",
                   size: "icon",
@@ -10607,12 +10879,12 @@ function FilePreviewItem({ file, onRemove, disabled }) {
           /* @__PURE__ */ jsxRuntime.jsx(
             "p",
             {
-              className: "text-foreground truncate text-sm font-medium",
+              className: "truncate text-sm font-medium text-foreground",
               title: file.file.name,
               children: file.file.name
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: formatFileSize3(file.file.size) })
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: formatFileSize3(file.file.size) })
         ] })
       ]
     }
@@ -10677,24 +10949,24 @@ function useCamera({
   width = 1920,
   height = 1080
 } = {}) {
-  const [permission, setPermission] = React47__namespace.useState("prompt");
-  const [stream, setStream] = React47__namespace.useState(null);
-  const [isReady, setIsReady] = React47__namespace.useState(false);
-  const [error, setError] = React47__namespace.useState(null);
-  const [currentFacingMode, setCurrentFacingMode] = React47__namespace.useState(initialFacingMode);
-  const videoRef = React47__namespace.useRef(null);
-  const canvasRef = React47__namespace.useRef(null);
-  React47__namespace.useEffect(() => {
+  const [permission, setPermission] = React49__namespace.useState("prompt");
+  const [stream, setStream] = React49__namespace.useState(null);
+  const [isReady, setIsReady] = React49__namespace.useState(false);
+  const [error, setError] = React49__namespace.useState(null);
+  const [currentFacingMode, setCurrentFacingMode] = React49__namespace.useState(initialFacingMode);
+  const videoRef = React49__namespace.useRef(null);
+  const canvasRef = React49__namespace.useRef(null);
+  React49__namespace.useEffect(() => {
     checkCameraPermission().then(setPermission);
   }, []);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
   }, [stream]);
-  const startCamera = React47__namespace.useCallback(async () => {
+  const startCamera = React49__namespace.useCallback(async () => {
     if (!hasCameraSupport()) {
       setPermission("unavailable");
       setError(new Error("Camera is not supported on this device"));
@@ -10728,7 +11000,7 @@ function useCamera({
       }
     }
   }, [currentFacingMode, width, height]);
-  const stopCamera = React47__namespace.useCallback(() => {
+  const stopCamera = React49__namespace.useCallback(() => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
       setStream(null);
@@ -10738,8 +11010,8 @@ function useCamera({
       videoRef.current.srcObject = null;
     }
   }, [stream]);
-  const shouldRestartRef = React47__namespace.useRef(false);
-  const switchCamera = React47__namespace.useCallback(() => {
+  const shouldRestartRef = React49__namespace.useRef(false);
+  const switchCamera = React49__namespace.useCallback(() => {
     const newFacingMode = currentFacingMode === "user" ? "environment" : "user";
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -10752,13 +11024,13 @@ function useCamera({
     }
     setCurrentFacingMode(newFacingMode);
   }, [currentFacingMode, stream]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (shouldRestartRef.current && !stream) {
       shouldRestartRef.current = false;
       startCamera();
     }
   }, [currentFacingMode, stream, startCamera]);
-  const capturePhoto = React47__namespace.useCallback(() => {
+  const capturePhoto = React49__namespace.useCallback(() => {
     if (!videoRef.current || !isReady) {
       return null;
     }
@@ -10900,7 +11172,7 @@ function compareFingerprints(fp1, fp2) {
   return Math.max(0, Math.min(100, (1 - avgDiff * 5) * 100));
 }
 function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
-  const mergedConfig = React47.useMemo(
+  const mergedConfig = React49.useMemo(
     () => ({ ...DEFAULT_CONFIG, ...config }),
     // Intentionally depend on individual properties to avoid unnecessary re-renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -10916,16 +11188,16 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       config.enableAutoCapture
     ]
   );
-  const [state, setState] = React47.useState(INITIAL_STATE);
-  const canvasRef = React47.useRef(null);
-  const ctxRef = React47.useRef(null);
-  const animationFrameRef = React47.useRef(null);
-  const lastFingerprintRef = React47.useRef([]);
-  const stabilityStartRef = React47.useRef(null);
-  const countdownIntervalRef = React47.useRef(null);
-  const isDetectingRef = React47.useRef(false);
+  const [state, setState] = React49.useState(INITIAL_STATE);
+  const canvasRef = React49.useRef(null);
+  const ctxRef = React49.useRef(null);
+  const animationFrameRef = React49.useRef(null);
+  const lastFingerprintRef = React49.useRef([]);
+  const stabilityStartRef = React49.useRef(null);
+  const countdownIntervalRef = React49.useRef(null);
+  const isDetectingRef = React49.useRef(false);
   const STABILITY_THRESHOLD = 85;
-  React47.useEffect(() => {
+  React49.useEffect(() => {
     canvasRef.current = document.createElement("canvas");
     ctxRef.current = canvasRef.current.getContext("2d", {
       willReadFrequently: true
@@ -10935,7 +11207,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       ctxRef.current = null;
     };
   }, []);
-  const processFrame = React47.useCallback(() => {
+  const processFrame = React49.useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
@@ -11005,7 +11277,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       }
     }, frameDelay);
   }, [videoRef, mergedConfig]);
-  React47.useEffect(() => {
+  React49.useEffect(() => {
     if (state.isReadyForCapture && mergedConfig.enableAutoCapture && state.captureCountdown === 0 && !countdownIntervalRef.current) {
       let countdown = mergedConfig.captureCountdown;
       setState((prev) => ({ ...prev, captureCountdown: countdown }));
@@ -11034,7 +11306,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
     onAutoCapture,
     state.captureCountdown
   ]);
-  React47.useEffect(() => {
+  React49.useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -11044,12 +11316,12 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
       }
     };
   }, []);
-  const startDetection = React47.useCallback(() => {
+  const startDetection = React49.useCallback(() => {
     isDetectingRef.current = true;
     setState((prev) => ({ ...prev, isDetecting: true, error: null }));
     processFrame();
   }, [processFrame]);
-  const stopDetection = React47.useCallback(() => {
+  const stopDetection = React49.useCallback(() => {
     isDetectingRef.current = false;
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -11061,7 +11333,7 @@ function useDocumentDetection(videoRef, config = {}, onAutoCapture) {
     }
     setState((prev) => ({ ...prev, isDetecting: false }));
   }, []);
-  const resetDetection = React47.useCallback(() => {
+  const resetDetection = React49.useCallback(() => {
     stopDetection();
     lastFingerprintRef.current = [];
     stabilityStartRef.current = null;
@@ -11150,15 +11422,15 @@ function DocumentDetectionOverlay({
       {
         className: `absolute inset-4 rounded-lg border-4 transition-colors duration-300 ${borderColor}`,
         children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-1 -left-1 h-6 w-6 rounded-tl border-t-4 border-l-4 border-current" }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-1 -right-1 h-6 w-6 rounded-tr border-t-4 border-r-4 border-current" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -left-1 -top-1 h-6 w-6 rounded-tl border-l-4 border-t-4 border-current" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -right-1 -top-1 h-6 w-6 rounded-tr border-r-4 border-t-4 border-current" }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -bottom-1 -left-1 h-6 w-6 rounded-bl border-b-4 border-l-4 border-current" }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -right-1 -bottom-1 h-6 w-6 rounded-br border-r-4 border-b-4 border-current" })
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -bottom-1 -right-1 h-6 w-6 rounded-br border-b-4 border-r-4 border-current" })
         ]
       }
     ),
     /* @__PURE__ */ jsxRuntime.jsx(CountdownDisplay, { seconds: captureCountdown }),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute top-3 right-3 left-3", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute left-3 right-3 top-3", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
         "div",
         {
@@ -11174,7 +11446,7 @@ function DocumentDetectionOverlay({
         }
       ) })
     ] }),
-    showDetailedMetrics && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute right-3 bottom-3 left-3", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-center gap-2 rounded-lg bg-black/60 p-2 backdrop-blur-sm", children: [
+    showDetailedMetrics && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-3 left-3 right-3", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-center gap-2 rounded-lg bg-black/60 p-2 backdrop-blur-sm", children: [
       /* @__PURE__ */ jsxRuntime.jsx(StatusPill, { label: "Focus", isOk: isInFocus, value: focusScore }),
       /* @__PURE__ */ jsxRuntime.jsx(
         StatusPill,
@@ -11209,44 +11481,44 @@ function CameraViewfinder({
       }
     ),
     !isReady && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center gap-3", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkJYMQJ32S_cjs.Spinner, { size: "lg" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkPN4ZPTTG_cjs.Spinner, { size: "lg" }),
       /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-neutral-400", children: "Starting camera..." })
     ] }),
     isReady && detectionOverlay,
     isReady && !detectionOverlay && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "pointer-events-none absolute inset-0", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute inset-8 rounded-lg border-2 border-white/30", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-0.5 -left-0.5 h-6 w-6 rounded-tl-lg border-t-4 border-l-4 border-white" }),
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -top-0.5 -right-0.5 h-6 w-6 rounded-tr-lg border-t-4 border-r-4 border-white" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -left-0.5 -top-0.5 h-6 w-6 rounded-tl-lg border-l-4 border-t-4 border-white" }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -right-0.5 -top-0.5 h-6 w-6 rounded-tr-lg border-r-4 border-t-4 border-white" }),
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-lg border-b-4 border-l-4 border-white" }),
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -right-0.5 -bottom-0.5 h-6 w-6 rounded-br-lg border-r-4 border-b-4 border-white" })
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-br-lg border-b-4 border-r-4 border-white" })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute right-0 bottom-4 left-0 text-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "rounded-full bg-black/50 px-3 py-1 text-sm text-white", children: "Position document within the frame" }) })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-4 left-0 right-0 text-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "rounded-full bg-black/50 px-3 py-1 text-sm text-white", children: "Position document within the frame" }) })
     ] })
   ] });
 }
 function PermissionDeniedMessage({ onRetry }) {
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-8", children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkIY7UQPDO_cjs.Alert, { variant: "warning", className: "w-full", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunk5N3GFFVP_cjs.Alert, { variant: "warning", className: "w-full", children: [
       /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertTitle, { children: "Camera access denied" }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertDescription, { children: "Please allow camera access in your browser settings to use this feature. You may need to refresh the page after changing permissions." })
+      /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertTitle, { children: "Camera access denied" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertDescription, { children: "Please allow camera access in your browser settings to use this feature. You may need to refresh the page after changing permissions." })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-2 text-center", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm", children: "To enable camera access:" }),
-      /* @__PURE__ */ jsxRuntime.jsxs("ol", { className: "text-muted-foreground list-inside list-decimal space-y-1 text-left text-sm", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: "To enable camera access:" }),
+      /* @__PURE__ */ jsxRuntime.jsxs("ol", { className: "list-inside list-decimal space-y-1 text-left text-sm text-muted-foreground", children: [
         /* @__PURE__ */ jsxRuntime.jsx("li", { children: "Click the camera/lock icon in your browser's address bar" }),
         /* @__PURE__ */ jsxRuntime.jsx("li", { children: "Allow camera access for this site" }),
         /* @__PURE__ */ jsxRuntime.jsx("li", { children: "Click the button below to try again" })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { onClick: onRetry, leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "h-4 w-4" }), children: "Try again" })
+    /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { onClick: onRetry, leftIcon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "h-4 w-4" }), children: "Try again" })
   ] });
 }
 function CameraUnavailableMessage() {
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col items-center justify-center gap-4 py-8", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkIY7UQPDO_cjs.Alert, { variant: "danger", children: [
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col items-center justify-center gap-4 py-8", children: /* @__PURE__ */ jsxRuntime.jsxs(chunk5N3GFFVP_cjs.Alert, { variant: "danger", children: [
     /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertTitle, { children: "Camera unavailable" }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertDescription, { children: "No camera was detected on this device. Please ensure your camera is connected and not in use by another application." })
+    /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertTitle, { children: "Camera unavailable" }),
+    /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertDescription, { children: "No camera was detected on this device. Please ensure your camera is connected and not in use by another application." })
   ] }) });
 }
 function PhotoPreview({
@@ -11265,7 +11537,7 @@ function PhotoPreview({
     ) }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-center gap-3", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           variant: "secondary",
           onClick: onRetake,
@@ -11274,7 +11546,7 @@ function PhotoPreview({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           variant: "primary",
           onClick: onConfirm,
@@ -11305,14 +11577,14 @@ function WebcamModal({
     width: 1920,
     height: 1080
   });
-  const [capturedFile, setCapturedFile] = React47__namespace.useState(null);
-  const [previewUrl, setPreviewUrl] = React47__namespace.useState(null);
-  const [autoDetectEnabled, setAutoDetectEnabled] = React47__namespace.useState(enableAutoCapture);
-  const [videoDimensions, setVideoDimensions] = React47__namespace.useState({
+  const [capturedFile, setCapturedFile] = React49__namespace.useState(null);
+  const [previewUrl, setPreviewUrl] = React49__namespace.useState(null);
+  const [autoDetectEnabled, setAutoDetectEnabled] = React49__namespace.useState(enableAutoCapture);
+  const [videoDimensions, setVideoDimensions] = React49__namespace.useState({
     width: 0,
     height: 0
   });
-  const handleAutoCapture = React47__namespace.useCallback(() => {
+  const handleAutoCapture = React49__namespace.useCallback(() => {
     const file = capturePhoto();
     if (file) {
       setCapturedFile(file);
@@ -11333,8 +11605,8 @@ function WebcamModal({
     },
     handleAutoCapture
   );
-  const hasStartedRef = React47__namespace.useRef(false);
-  React47__namespace.useEffect(() => {
+  const hasStartedRef = React49__namespace.useRef(false);
+  React49__namespace.useEffect(() => {
     const video = videoRef.current;
     if (video && isReady) {
       const updateDimensions = () => {
@@ -11348,7 +11620,7 @@ function WebcamModal({
       return () => video.removeEventListener("resize", updateDimensions);
     }
   }, [isReady, videoRef]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (open && permission !== "denied" && permission !== "unavailable") {
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
@@ -11367,7 +11639,7 @@ function WebcamModal({
       });
     }
   }, [open, permission]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (isReady && autoDetectEnabled && !capturedFile) {
       detection.startDetection();
     }
@@ -11375,7 +11647,7 @@ function WebcamModal({
       detection.stopDetection();
     };
   }, [isReady, autoDetectEnabled, capturedFile]);
-  const handleCapture = React47__namespace.useCallback(() => {
+  const handleCapture = React49__namespace.useCallback(() => {
     const file = capturePhoto();
     if (file) {
       setCapturedFile(file);
@@ -11383,7 +11655,7 @@ function WebcamModal({
       stopCamera();
     }
   }, [capturePhoto, stopCamera]);
-  const handleRetake = React47__namespace.useCallback(() => {
+  const handleRetake = React49__namespace.useCallback(() => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -11392,13 +11664,13 @@ function WebcamModal({
     detection.resetDetection();
     startCamera();
   }, [previewUrl, startCamera, detection]);
-  const handleConfirm = React47__namespace.useCallback(() => {
+  const handleConfirm = React49__namespace.useCallback(() => {
     if (capturedFile) {
       onCapture(capturedFile);
       onOpenChange(false);
     }
   }, [capturedFile, onCapture, onOpenChange]);
-  const handleClose = React47__namespace.useCallback(() => {
+  const handleClose = React49__namespace.useCallback(() => {
     stopCamera();
     detection.stopDetection();
     if (previewUrl) {
@@ -11445,7 +11717,7 @@ function WebcamModal({
       ),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center gap-2", children: /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: autoDetectEnabled ? "primary" : "secondary",
             size: "sm",
@@ -11463,7 +11735,7 @@ function WebcamModal({
         ) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-center gap-3", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "secondary",
               size: "icon",
@@ -11474,7 +11746,7 @@ function WebcamModal({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "primary",
               size: "lg",
@@ -11489,19 +11761,19 @@ function WebcamModal({
     ] });
   };
   return /* @__PURE__ */ jsxRuntime.jsxs(
-    chunkI7L6CQXR_cjs.Modal,
+    chunkAOHWULSD_cjs.Modal,
     {
       open,
       onOpenChange: handleClose,
       size: "lg",
       "aria-label": "Webcam capture",
       children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalHeader, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Take a Photo" }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalClose, {})
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalHeader, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Take a Photo" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalClose, {})
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalBody, { children: renderContent() }),
-        permission !== "denied" && permission !== "unavailable" && !capturedFile && /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalFooter, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "secondary", onClick: handleClose, children: "Cancel" }) })
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalBody, { children: renderContent() }),
+        permission !== "denied" && permission !== "unavailable" && !capturedFile && /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalFooter, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "secondary", onClick: handleClose, children: "Cancel" }) })
       ]
     }
   );
@@ -11550,13 +11822,13 @@ function useFileUpload({
   multiple = false,
   onValidationError
 } = {}) {
-  const [files, setFiles] = React47__namespace.useState([]);
-  React47__namespace.useEffect(() => {
+  const [files, setFiles] = React49__namespace.useState([]);
+  React49__namespace.useEffect(() => {
     return () => {
       files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
     };
   }, []);
-  const addFiles = React47__namespace.useCallback(
+  const addFiles = React49__namespace.useCallback(
     (fileList, source = "upload") => {
       const newFiles = [];
       const errors = [];
@@ -11588,7 +11860,7 @@ function useFileUpload({
     },
     [acceptedFileTypes, maxFileSizeMb, multiple, onValidationError]
   );
-  const addFile = React47__namespace.useCallback(
+  const addFile = React49__namespace.useCallback(
     (file, source = "upload") => {
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(file);
@@ -11596,7 +11868,7 @@ function useFileUpload({
     },
     [addFiles]
   );
-  const removeFile = React47__namespace.useCallback((id) => {
+  const removeFile = React49__namespace.useCallback((id) => {
     setFiles((prev) => {
       const fileToRemove = prev.find((f) => f.id === id);
       if (fileToRemove) {
@@ -11605,13 +11877,13 @@ function useFileUpload({
       return prev.filter((f) => f.id !== id);
     });
   }, []);
-  const clearFiles = React47__namespace.useCallback(() => {
+  const clearFiles = React49__namespace.useCallback(() => {
     setFiles((prev) => {
       prev.forEach((f) => URL.revokeObjectURL(f.previewUrl));
       return [];
     });
   }, []);
-  const getFiles = React47__namespace.useCallback(() => {
+  const getFiles = React49__namespace.useCallback(() => {
     return files.map((f) => f.file);
   }, [files]);
   return {
@@ -11639,12 +11911,12 @@ function DocumentScanner({
   onValidationError,
   onStateChange
 }) {
-  const [state, setState] = React47__namespace.useState("idle");
-  const [error, setError] = React47__namespace.useState(null);
-  const [isWebcamOpen, setIsWebcamOpen] = React47__namespace.useState(false);
-  const [validationErrors, setValidationErrors] = React47__namespace.useState([]);
+  const [state, setState] = React49__namespace.useState("idle");
+  const [error, setError] = React49__namespace.useState(null);
+  const [isWebcamOpen, setIsWebcamOpen] = React49__namespace.useState(false);
+  const [validationErrors, setValidationErrors] = React49__namespace.useState([]);
   const isMobile = chunkR4DM4635_cjs.useIsMobile();
-  const cameraInputRef = React47__namespace.useRef(null);
+  const cameraInputRef = React49__namespace.useRef(null);
   const {
     files,
     addFiles,
@@ -11662,17 +11934,17 @@ function DocumentScanner({
       onValidationError?.(errors);
     }
   });
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     onStateChange?.(state);
   }, [state, onStateChange]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (hasFiles && state === "idle") {
       setState("preview");
     } else if (!hasFiles && state === "preview") {
       setState("idle");
     }
   }, [hasFiles, state]);
-  const handleFilesSelected = React47__namespace.useCallback(
+  const handleFilesSelected = React49__namespace.useCallback(
     (fileList) => {
       setError(null);
       setValidationErrors([]);
@@ -11680,10 +11952,10 @@ function DocumentScanner({
     },
     [addFiles]
   );
-  const handleCameraCapture = React47__namespace.useCallback(() => {
+  const handleCameraCapture = React49__namespace.useCallback(() => {
     cameraInputRef.current?.click();
   }, []);
-  const handleCameraInputChange = React47__namespace.useCallback(
+  const handleCameraInputChange = React49__namespace.useCallback(
     (e) => {
       if (e.target.files && e.target.files.length > 0) {
         setError(null);
@@ -11694,7 +11966,7 @@ function DocumentScanner({
     },
     [addFiles]
   );
-  const handleWebcamCapture = React47__namespace.useCallback(
+  const handleWebcamCapture = React49__namespace.useCallback(
     (file) => {
       setError(null);
       setValidationErrors([]);
@@ -11702,7 +11974,7 @@ function DocumentScanner({
     },
     [addFile]
   );
-  const handleScan = React47__namespace.useCallback(async () => {
+  const handleScan = React49__namespace.useCallback(async () => {
     if (!hasFiles) return;
     try {
       setState("processing");
@@ -11721,11 +11993,11 @@ function DocumentScanner({
       setError(errorMessage);
     }
   }, [hasFiles, getFiles, onScan, onResult, clearFiles]);
-  const handleRetry = React47__namespace.useCallback(() => {
+  const handleRetry = React49__namespace.useCallback(() => {
     setState("preview");
     setError(null);
   }, []);
-  const handleClearAll = React47__namespace.useCallback(() => {
+  const handleClearAll = React49__namespace.useCallback(() => {
     clearFiles();
     setError(null);
     setValidationErrors([]);
@@ -11736,33 +12008,33 @@ function DocumentScanner({
     if (state === "processing") {
       return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkJYMQJ32S_cjs.SpinnerWithLabel,
+          chunkPN4ZPTTG_cjs.SpinnerWithLabel,
           {
             size: "xl",
             label: "Analyzing your document...",
             labelPosition: "bottom"
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", className: "max-w-xs text-center", children: "Our AI is extracting information from your document. This usually takes a few seconds." })
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { variant: "muted", size: "sm", className: "max-w-xs text-center", children: "Our AI is extracting information from your document. This usually takes a few seconds." })
       ] });
     }
     if (state === "success") {
       return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center justify-center gap-4 py-12", children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.CheckCircle, { className: "h-8 w-8 text-green-600 dark:text-green-400" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { weight: "semibold", size: "lg", children: "Document scanned successfully!" }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "The extracted data has been processed." })
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { weight: "semibold", size: "lg", children: "Document scanned successfully!" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { variant: "muted", size: "sm", children: "The extracted data has been processed." })
       ] });
     }
     if (state === "error") {
       return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-4 py-8", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkIY7UQPDO_cjs.Alert, { variant: "danger", className: "w-full", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunk5N3GFFVP_cjs.Alert, { variant: "danger", className: "w-full", children: [
           /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertTitle, { children: "Processing failed" }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertDescription, { children: error })
+          /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertTitle, { children: "Processing failed" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertDescription, { children: error })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "secondary", onClick: handleClearAll, children: "Start over" }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "primary", onClick: handleRetry, children: "Try again" })
+          /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "secondary", onClick: handleClearAll, children: "Start over" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "primary", onClick: handleRetry, children: "Try again" })
         ] })
       ] });
     }
@@ -11777,15 +12049,15 @@ function DocumentScanner({
           }
         ),
         validationErrors.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkIY7UQPDO_cjs.Alert,
+          chunk5N3GFFVP_cjs.Alert,
           {
             variant: "warning",
             dismissible: true,
             onDismiss: () => setValidationErrors([]),
             children: [
               /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertTitle, { children: "Some files were not added" }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertTitle, { children: "Some files were not added" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
                 /* @__PURE__ */ jsxRuntime.jsxs("strong", { children: [
                   err.file.name,
                   ":"
@@ -11798,7 +12070,7 @@ function DocumentScanner({
         ),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-center justify-center gap-3", children: [
           multiple && /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "secondary",
               onClick: () => {
@@ -11818,7 +12090,7 @@ function DocumentScanner({
             }
           ) }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "secondary",
               onClick: handleClearAll,
@@ -11828,7 +12100,7 @@ function DocumentScanner({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsxs(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "primary",
               onClick: handleScan,
@@ -11853,12 +12125,12 @@ function DocumentScanner({
           disabled,
           className: "min-h-[240px]",
           children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-4 text-center", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-100 dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "text-primary-600 dark:text-primary-400 h-7 w-7" }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "dark:bg-primary-900/30 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "h-7 w-7 text-primary-600 dark:text-primary-400" }) }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1", children: [
-              /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { weight: "medium", children: "Drag and drop your files here" }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "or click to browse" })
+              /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { weight: "medium", children: "Drag and drop your files here" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { variant: "muted", size: "sm", children: "or click to browse" })
             ] }),
-            /* @__PURE__ */ jsxRuntime.jsxs(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "xs", className: "max-w-xs", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs(chunkAHNIW7MQ_cjs.Text, { variant: "muted", size: "xs", className: "max-w-xs", children: [
               "Supported formats: JPEG, PNG, HEIC, WebP, PDF",
               /* @__PURE__ */ jsxRuntime.jsx("br", {}),
               "Max size: ",
@@ -11870,13 +12142,13 @@ function DocumentScanner({
       ),
       (enableCamera || enableWebcam) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center gap-3", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full max-w-xs items-center gap-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-border h-px flex-1" }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: "or" }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-border h-px flex-1" })
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-px flex-1 bg-border" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { variant: "muted", size: "sm", children: "or" }),
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-px flex-1 bg-border" })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-center gap-3", children: [
           enableCamera && isMobile && /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "secondary",
               onClick: handleCameraCapture,
@@ -11886,7 +12158,7 @@ function DocumentScanner({
             }
           ),
           enableWebcam && !isMobile && /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "secondary",
               onClick: () => setIsWebcamOpen(true),
@@ -11898,15 +12170,15 @@ function DocumentScanner({
         ] })
       ] }),
       validationErrors.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(
-        chunkIY7UQPDO_cjs.Alert,
+        chunk5N3GFFVP_cjs.Alert,
         {
           variant: "warning",
           dismissible: true,
           onDismiss: () => setValidationErrors([]),
           children: [
             /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5" }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertTitle, { children: "Invalid files" }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertTitle, { children: "Invalid files" }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertDescription, { children: /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-2 list-inside list-disc space-y-1", children: validationErrors.map((err, index) => /* @__PURE__ */ jsxRuntime.jsxs("li", { className: "text-sm", children: [
               /* @__PURE__ */ jsxRuntime.jsxs("strong", { children: [
                 err.file.name,
                 ":"
@@ -11923,14 +12195,14 @@ function DocumentScanner({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "border-border bg-card w-full rounded-xl border p-6",
+        "w-full rounded-xl border border-border bg-card p-6",
         "shadow-sm",
         className
       ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-6 text-center", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { as: "h2", size: "xl", weight: "semibold", className: "mb-1", children: title }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkQDGZBDBI_cjs.Text, { variant: "muted", size: "sm", children: description })
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { as: "h2", size: "xl", weight: "semibold", className: "mb-1", children: title }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAHNIW7MQ_cjs.Text, { variant: "muted", size: "sm", children: description })
         ] }),
         renderContent(),
         /* @__PURE__ */ jsxRuntime.jsx(
@@ -12016,10 +12288,10 @@ function useDropzone({
   multiple = false,
   disabled = false
 }) {
-  const [isDragging, setIsDragging] = React47__namespace.useState(false);
-  const inputRef = React47__namespace.useRef(null);
-  const dragCounter = React47__namespace.useRef(0);
-  const handleDragEnter = React47__namespace.useCallback(
+  const [isDragging, setIsDragging] = React49__namespace.useState(false);
+  const inputRef = React49__namespace.useRef(null);
+  const dragCounter = React49__namespace.useRef(0);
+  const handleDragEnter = React49__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -12031,11 +12303,11 @@ function useDropzone({
     },
     [disabled]
   );
-  const handleDragOver = React47__namespace.useCallback((e) => {
+  const handleDragOver = React49__namespace.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  const handleDragLeave = React47__namespace.useCallback((e) => {
+  const handleDragLeave = React49__namespace.useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current--;
@@ -12043,7 +12315,7 @@ function useDropzone({
       setIsDragging(false);
     }
   }, []);
-  const handleDrop = React47__namespace.useCallback(
+  const handleDrop = React49__namespace.useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -12057,7 +12329,7 @@ function useDropzone({
     },
     [disabled, multiple, onDrop]
   );
-  const handleInputChange = React47__namespace.useCallback(
+  const handleInputChange = React49__namespace.useCallback(
     (e) => {
       const files = e.target.files ? Array.from(e.target.files) : [];
       if (files.length > 0) {
@@ -12067,7 +12339,7 @@ function useDropzone({
     },
     [onDrop]
   );
-  const open = React47__namespace.useCallback(() => {
+  const open = React49__namespace.useCallback(() => {
     if (!disabled) {
       inputRef.current?.click();
     }
@@ -12117,7 +12389,7 @@ function ClaimProviderForm({
   termsUrl = "/terms",
   className = ""
 }) {
-  const [formData, setFormData] = React47__namespace.useState({
+  const [formData, setFormData] = React49__namespace.useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -12135,21 +12407,21 @@ function ClaimProviderForm({
     onSubmit?.(formData);
   };
   const isValid = formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.role && formData.agreedToTerms;
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardHeader, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Claim Provider Listing" }),
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className, children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardHeader, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Claim Provider Listing" }),
       providerName && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-blue-900 dark:text-blue-100", children: providerName }),
         providerAddress && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-xs text-blue-600 dark:text-blue-400", children: providerAddress })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "space-y-4", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "space-y-4", children: [
       errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: "Contact Information" }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "First Name",
               value: formData.firstName,
@@ -12162,7 +12434,7 @@ function ClaimProviderForm({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "Last Name",
               value: formData.lastName,
@@ -12173,7 +12445,7 @@ function ClaimProviderForm({
           )
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Email Address",
             type: "email",
@@ -12184,7 +12456,7 @@ function ClaimProviderForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Phone Number (Optional)",
             type: "tel",
@@ -12197,7 +12469,7 @@ function ClaimProviderForm({
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: "Your Role" }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkNL3CZNBH_cjs.Select,
+          chunkGEKTNWTP_cjs.Select,
           {
             label: "Role at this Organization",
             value: formData.role,
@@ -12207,7 +12479,7 @@ function ClaimProviderForm({
           }
         ),
         formData.role === "other" && /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Please specify your role",
             value: formData.occupation || "",
@@ -12220,7 +12492,7 @@ function ClaimProviderForm({
         )
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkNL3CZNBH_cjs.Select,
+        chunkGEKTNWTP_cjs.Select,
         {
           label: "Preferred Language",
           value: formData.preferredLanguage || "en",
@@ -12230,7 +12502,7 @@ function ClaimProviderForm({
       ) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-t border-gray-200 pt-4 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "flex cursor-pointer items-start gap-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkQYJ7RQJ2_cjs.Checkbox,
+          chunkMFDLN4RH_cjs.Checkbox,
           {
             checked: formData.agreedToTerms,
             onChange: (e) => setFormData((prev) => ({
@@ -12259,7 +12531,7 @@ function ClaimProviderForm({
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-3 pt-4", children: [
         onCancel && /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             type: "button",
             variant: "outline",
@@ -12269,7 +12541,7 @@ function ClaimProviderForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             type: "submit",
             disabled: !isValid || isSubmitting,
@@ -12278,7 +12550,7 @@ function ClaimProviderForm({
               /* @__PURE__ */ jsxRuntime.jsxs(
                 "svg",
                 {
-                  className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                  className: "-ml-1 mr-2 h-4 w-4 animate-spin",
                   fill: "none",
                   viewBox: "0 0 24 24",
                   children: [
@@ -12325,14 +12597,14 @@ function CreateInvoiceModal({
   currency = "$",
   defaultDueDays = 30
 }) {
-  const [step, setStep] = React47__namespace.useState(1);
-  const [employerId, setEmployerId] = React47__namespace.useState("");
-  const [selectedOrders, setSelectedOrders] = React47__namespace.useState(
+  const [step, setStep] = React49__namespace.useState(1);
+  const [employerId, setEmployerId] = React49__namespace.useState("");
+  const [selectedOrders, setSelectedOrders] = React49__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  const [dueDate, setDueDate] = React47__namespace.useState("");
-  const [notes, setNotes] = React47__namespace.useState("");
-  React47__namespace.useEffect(() => {
+  const [dueDate, setDueDate] = React49__namespace.useState("");
+  const [notes, setNotes] = React49__namespace.useState("");
+  React49__namespace.useEffect(() => {
     if (!open) {
       setStep(1);
       setEmployerId("");
@@ -12341,7 +12613,7 @@ function CreateInvoiceModal({
       setNotes("");
     }
   }, [open]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (!dueDate && open) {
       const date = /* @__PURE__ */ new Date();
       date.setDate(date.getDate() + defaultDueDays);
@@ -12395,10 +12667,10 @@ function CreateInvoiceModal({
     value: emp.id,
     label: emp.name
   }));
-  return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Create Invoice" }),
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkEKIQE524_cjs.Badge, { variant: "secondary", children: [
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Create Invoice" }),
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkFOFDJDAY_cjs.Badge, { variant: "secondary", children: [
         "Step ",
         step,
         " of 3"
@@ -12409,7 +12681,7 @@ function CreateInvoiceModal({
       step === 1 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: "Select the employer you want to create an invoice for." }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkNL3CZNBH_cjs.Select,
+          chunkGEKTNWTP_cjs.Select,
           {
             label: "Employer",
             options: employerOptions,
@@ -12540,7 +12812,7 @@ function CreateInvoiceModal({
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             type: "date",
             label: "Due Date",
@@ -12562,7 +12834,7 @@ function CreateInvoiceModal({
             "textarea",
             {
               id: "invoice-notes",
-              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
               rows: 3,
               value: notes,
               onChange: (e) => setNotes(e.target.value),
@@ -12572,9 +12844,9 @@ function CreateInvoiceModal({
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalFooter, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full justify-between", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalFooter, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full justify-between", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { children: step > 1 && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "ghost",
@@ -12585,7 +12857,7 @@ function CreateInvoiceModal({
       ) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             type: "button",
             variant: "outline",
@@ -12595,18 +12867,18 @@ function CreateInvoiceModal({
           }
         ),
         step < 3 ? /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             type: "button",
             onClick: () => setStep(step + 1),
             disabled: !canProceed,
             children: "Continue"
           }
-        ) : /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", disabled: !canSubmit || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+        ) : /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", disabled: !canSubmit || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
           /* @__PURE__ */ jsxRuntime.jsxs(
             "svg",
             {
-              className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+              className: "-ml-1 mr-2 h-4 w-4 animate-spin",
               fill: "none",
               viewBox: "0 0 24 24",
               children: [
@@ -12649,14 +12921,14 @@ function CreateReferralModal({
   errorMessage,
   currency = "$"
 }) {
-  const [selectedServices, setSelectedServices] = React47__namespace.useState(
+  const [selectedServices, setSelectedServices] = React49__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  const [notes, setNotes] = React47__namespace.useState("");
-  const [priority, setPriority] = React47__namespace.useState(
+  const [notes, setNotes] = React49__namespace.useState("");
+  const [priority, setPriority] = React49__namespace.useState(
     "normal"
   );
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (!open) {
       setSelectedServices(/* @__PURE__ */ new Set());
       setNotes("");
@@ -12686,12 +12958,12 @@ function CreateReferralModal({
     });
   };
   const isValid = employee && selectedServices.size > 0;
-  return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Create Referral" }) }),
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Create Referral" }) }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
       errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
       employee && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-lg bg-gray-50 p-4 dark:bg-gray-800", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Employee" }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Employee" }),
         /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "font-medium text-gray-900 dark:text-white", children: [
           employee.firstName,
           " ",
@@ -12777,7 +13049,7 @@ function CreateReferralModal({
           "textarea",
           {
             id: "referral-notes",
-            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
             rows: 2,
             value: notes,
             onChange: (e) => setNotes(e.target.value),
@@ -12801,9 +13073,9 @@ function CreateReferralModal({
         ] })
       ] }) })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "outline",
@@ -12812,11 +13084,11 @@ function CreateReferralModal({
           children: "Cancel"
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", disabled: !isValid || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", disabled: !isValid || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs(
           "svg",
           {
-            className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+            className: "-ml-1 mr-2 h-4 w-4 animate-spin",
             fill: "none",
             viewBox: "0 0 24 24",
             children: [
@@ -12856,15 +13128,15 @@ function EditUserRoleModal({
   isSubmitting = false,
   errorMessage
 }) {
-  const [selectedRoleId, setSelectedRoleId] = React47__namespace.useState(
+  const [selectedRoleId, setSelectedRoleId] = React49__namespace.useState(
     user?.currentRoleId || ""
   );
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (user?.currentRoleId) {
       setSelectedRoleId(user.currentRoleId);
     }
   }, [user?.currentRoleId]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (!open && user?.currentRoleId) {
       setSelectedRoleId(user.currentRoleId);
     }
@@ -12875,18 +13147,18 @@ function EditUserRoleModal({
     if (!user || !selectedRoleId || !onSave) return;
     onSave({ userId: user.id, roleId: selectedRoleId });
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "md", children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Edit User Role" }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
-      user && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-muted rounded-lg p-3", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground font-medium", children: user.name }),
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm", children: user.email })
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "md", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Edit User Role" }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
+      user && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-lg bg-muted p-3", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-foreground", children: user.name }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: user.email })
       ] }),
       errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-destructive/30 bg-destructive/10 rounded-lg border p-3", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
-            className: "text-destructive h-5 w-5",
+            className: "h-5 w-5 text-destructive",
             fill: "none",
             viewBox: "0 0 24 24",
             stroke: "currentColor",
@@ -12901,10 +13173,10 @@ function EditUserRoleModal({
             )
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm", children: errorMessage })
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", children: errorMessage })
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkNL3CZNBH_cjs.Select,
+        chunkGEKTNWTP_cjs.Select,
         {
           label: "Role",
           value: selectedRoleId,
@@ -12918,20 +13190,20 @@ function EditUserRoleModal({
       ),
       selectedRole?.description && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary/10 rounded-lg p-3", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-primary text-sm", children: selectedRole.description }) }),
       selectedRole?.permissions && selectedRole.permissions.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground mb-2 block text-sm font-medium", children: "Permissions" }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-2 block text-sm font-medium text-foreground", children: "Permissions" }),
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-2", children: selectedRole.permissions.map((permission) => /* @__PURE__ */ jsxRuntime.jsx(
           "span",
           {
-            className: "bg-muted text-muted-foreground rounded-full px-2 py-1 text-xs font-medium",
+            className: "rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground",
             children: permission
           },
           permission
         )) })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "outline",
@@ -12941,7 +13213,7 @@ function EditUserRoleModal({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           onClick: handleSave,
@@ -12950,7 +13222,7 @@ function EditUserRoleModal({
             /* @__PURE__ */ jsxRuntime.jsxs(
               "svg",
               {
-                className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                className: "-ml-1 mr-2 h-4 w-4 animate-spin",
                 fill: "none",
                 viewBox: "0 0 24 24",
                 children: [
@@ -13026,24 +13298,24 @@ function EmployeeForm({
     emailRequired = "Email is required",
     dobRequired = "Date of birth is required"
   } = labels;
-  const [firstName, setFirstName] = React47__namespace.useState(initialData.firstName ?? "");
-  const [lastName, setLastName] = React47__namespace.useState(initialData.lastName ?? "");
-  const [email, setEmail] = React47__namespace.useState(initialData.email ?? "");
-  const [dob, setDob] = React47__namespace.useState(initialData.dob ?? "");
-  const [selectedDepartments, setSelectedDepartments] = React47__namespace.useState(initialData.departments ?? []);
-  const [title, setTitle] = React47__namespace.useState(initialData.title ?? "");
-  const [address, setAddress] = React47__namespace.useState(
+  const [firstName, setFirstName] = React49__namespace.useState(initialData.firstName ?? "");
+  const [lastName, setLastName] = React49__namespace.useState(initialData.lastName ?? "");
+  const [email, setEmail] = React49__namespace.useState(initialData.email ?? "");
+  const [dob, setDob] = React49__namespace.useState(initialData.dob ?? "");
+  const [selectedDepartments, setSelectedDepartments] = React49__namespace.useState(initialData.departments ?? []);
+  const [title, setTitle] = React49__namespace.useState(initialData.title ?? "");
+  const [address, setAddress] = React49__namespace.useState(
     initialData.address ?? {}
   );
-  const [phones, setPhones] = React47__namespace.useState(
+  const [phones, setPhones] = React49__namespace.useState(
     initialData.phones ?? [{ number: "", type: "cell" }]
   );
-  const [isActive, setIsActive] = React47__namespace.useState(initialData.isActive ?? true);
-  const [additionalInfo, setAdditionalInfo] = React47__namespace.useState(
+  const [isActive, setIsActive] = React49__namespace.useState(initialData.isActive ?? true);
+  const [additionalInfo, setAdditionalInfo] = React49__namespace.useState(
     initialData.additionalInfo ?? ""
   );
-  const [sendInvite, setSendInvite] = React47__namespace.useState(false);
-  const [errors, setErrors] = React47__namespace.useState({});
+  const [sendInvite, setSendInvite] = React49__namespace.useState(false);
+  const [errors, setErrors] = React49__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!firstName.trim()) newErrors.firstName = firstNameRequired;
@@ -13088,7 +13360,7 @@ function EmployeeForm({
       /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-4 text-lg font-semibold", children: required }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-1 gap-4 sm:grid-cols-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: firstNameLabel,
             value: firstName,
@@ -13098,7 +13370,7 @@ function EmployeeForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: lastNameLabel,
             value: lastName,
@@ -13110,7 +13382,7 @@ function EmployeeForm({
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             type: "email",
             label: emailLabel,
@@ -13121,7 +13393,7 @@ function EmployeeForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             type: "date",
             label: dobLabel,
@@ -13136,7 +13408,7 @@ function EmployeeForm({
     departments.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
       /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-4 text-lg font-semibold", children: departmentLabel }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkNL3CZNBH_cjs.Select,
+        chunkGEKTNWTP_cjs.Select,
         {
           label: selectDepartments,
           value: selectedDepartments[0] ?? "",
@@ -13149,7 +13421,7 @@ function EmployeeForm({
       )
     ] }),
     /* @__PURE__ */ jsxRuntime.jsx(
-      chunkVV4N4WY6_cjs.Input,
+      chunkSZRD5UTO_cjs.Input,
       {
         label: titleLabel,
         value: title,
@@ -13160,7 +13432,7 @@ function EmployeeForm({
       /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-4 text-lg font-semibold", children: addressLabel }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Address Line 1",
             value: address.street1 ?? "",
@@ -13168,7 +13440,7 @@ function EmployeeForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Address Line 2",
             value: address.street2 ?? "",
@@ -13177,7 +13449,7 @@ function EmployeeForm({
         ),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-2 gap-4 sm:grid-cols-4", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "City",
               value: address.city ?? "",
@@ -13185,7 +13457,7 @@ function EmployeeForm({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "State",
               value: address.state ?? "",
@@ -13193,7 +13465,7 @@ function EmployeeForm({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "Postal Code",
               value: address.postalCode ?? "",
@@ -13201,7 +13473,7 @@ function EmployeeForm({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "Country",
               value: address.country ?? "",
@@ -13216,7 +13488,7 @@ function EmployeeForm({
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3", children: [
         phones.map((phone, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-end gap-3", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: index === 0 ? "Phone Number" : void 0,
               value: phone.number,
@@ -13225,7 +13497,7 @@ function EmployeeForm({
             }
           ) }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "w-32", children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkNL3CZNBH_cjs.Select,
+            chunkGEKTNWTP_cjs.Select,
             {
               label: index === 0 ? "Type" : void 0,
               value: phone.type,
@@ -13238,7 +13510,7 @@ function EmployeeForm({
             {
               type: "button",
               onClick: () => removePhone(index),
-              className: "text-destructive hover:text-destructive/80 p-2",
+              className: "hover:text-destructive/80 p-2 text-destructive",
               children: "\u2715"
             }
           )
@@ -13256,7 +13528,7 @@ function EmployeeForm({
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkRRQGH7C5_cjs.Switch,
+        chunkRRARXXV2_cjs.Switch,
         {
           checked: isActive,
           onCheckedChange: setIsActive,
@@ -13270,7 +13542,7 @@ function EmployeeForm({
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsx(
-      chunkB7YGVKTE_cjs.Textarea,
+      chunkJHVDSH6J_cjs.Textarea,
       {
         label: additionalInformation,
         value: additionalInfo,
@@ -13282,7 +13554,7 @@ function EmployeeForm({
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col justify-between gap-4 border-t pt-4 sm:flex-row", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { children: isNew && !isUserLinked && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkRRQGH7C5_cjs.Switch,
+          chunkRRARXXV2_cjs.Switch,
           {
             checked: sendInvite,
             onCheckedChange: setSendInvite,
@@ -13297,7 +13569,7 @@ function EmployeeForm({
           {
             type: "button",
             onClick: onCancel,
-            className: "border-input hover:bg-muted rounded-md border px-4 py-2 text-sm",
+            className: "rounded-md border border-input px-4 py-2 text-sm hover:bg-muted",
             children: cancel
           }
         ),
@@ -13313,7 +13585,7 @@ function EmployeeForm({
     ] })
   ] });
 }
-function formatPhoneNumber2(phone) {
+function formatPhoneNumber(phone) {
   const cleaned = phone.replace(/\D/g, "");
   if (cleaned.length === 10) {
     return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
@@ -13355,8 +13627,8 @@ function EmployeeProfileCard({
   className,
   labels = {}
 }) {
-  const [isExpanded, setIsExpanded] = React47__namespace.useState(defaultExpanded);
-  const fileInputRef = React47__namespace.useRef(null);
+  const [isExpanded, setIsExpanded] = React49__namespace.useState(defaultExpanded);
+  const fileInputRef = React49__namespace.useRef(null);
   const {
     moreDetails = "more details",
     lessDetails = "less details",
@@ -13371,11 +13643,11 @@ function EmployeeProfileCard({
       onPhotoEdit(file);
     }
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("bg-card rounded-lg", className), children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("rounded-lg bg-card", className), children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center p-4 text-center", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative mb-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunk2J2V4TMJ_cjs.Avatar,
+          chunkW4MDIFH6_cjs.Avatar,
           {
             src: employee.photoUrl,
             alt: fullName,
@@ -13400,7 +13672,7 @@ function EmployeeProfileCard({
             {
               type: "button",
               onClick: () => fileInputRef.current?.click(),
-              className: "bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 rounded-full p-1.5 shadow-md transition-colors",
+              className: "bg-primary text-primary-foreground hover:bg-primary/90 absolute bottom-0 right-0 rounded-full p-1.5 shadow-md transition-colors",
               "aria-label": "Edit photo",
               children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Edit2, { className: "h-3 w-3" })
             }
@@ -13430,7 +13702,7 @@ function EmployeeProfileCard({
       /* @__PURE__ */ jsxRuntime.jsxs(
         "p",
         {
-          className: "text-muted-foreground text-sm",
+          className: "text-sm text-muted-foreground",
           "data-cy": "paragraph-employee-title",
           children: [
             employee.title && /* @__PURE__ */ jsxRuntime.jsx("span", { children: employee.title }),
@@ -13472,9 +13744,9 @@ function EmployeeProfileCard({
               className: "flex items-center gap-2",
               "data-cy": "header-employee-dob",
               children: [
-                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "text-muted-foreground h-4 w-4" }),
+                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "h-4 w-4 text-muted-foreground" }),
                 /* @__PURE__ */ jsxRuntime.jsx("span", { children: formatDate(employee.dateOfBirth) }),
-                /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
+                /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs text-muted-foreground", children: [
                   "(",
                   calculateAge2(employee.dateOfBirth),
                   " ",
@@ -13491,8 +13763,8 @@ function EmployeeProfileCard({
                 className: "flex items-center gap-2",
                 "data-cy": "header-employee-phone-number",
                 children: [
-                  /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Phone, { className: "text-muted-foreground h-4 w-4" }),
-                  /* @__PURE__ */ jsxRuntime.jsx("a", { href: `tel:${p.number}`, className: "hover:underline", children: formatPhoneNumber2(p.number) }),
+                  /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Phone, { className: "h-4 w-4 text-muted-foreground" }),
+                  /* @__PURE__ */ jsxRuntime.jsx("a", { href: `tel:${p.number}`, className: "hover:underline", children: formatPhoneNumber(p.number) }),
                   /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground", children: [
                     "(",
                     p.type,
@@ -13509,22 +13781,22 @@ function EmployeeProfileCard({
               className: "flex items-center gap-2",
               "data-cy": "header-employee-email",
               children: [
-                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Mail, { className: "text-muted-foreground h-4 w-4" }),
+                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Mail, { className: "h-4 w-4 text-muted-foreground" }),
                 /* @__PURE__ */ jsxRuntime.jsx("a", { href: `mailto:${employee.email}`, className: "hover:underline", children: employee.email })
               ]
             }
           ),
-          employee.department && employee.department.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-1", children: employee.department.map((dept, idx) => /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "secondary", size: "sm", children: dept }, idx)) }),
+          employee.department && employee.department.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-1", children: employee.department.map((dept, idx) => /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "secondary", size: "sm", children: dept }, idx)) }),
           showPaymentStatus && /* @__PURE__ */ jsxRuntime.jsx(
             "div",
             {
               className: "flex items-center gap-2",
               "data-cy": "header-payment-status",
               children: employee.isPaid ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "text-success h-4 w-4" }),
+                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-4 w-4 text-success" }),
                 /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-success", children: paid })
               ] }) : /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Clock, { className: "text-muted-foreground h-4 w-4" }),
+                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Clock, { className: "h-4 w-4 text-muted-foreground" }),
                 /* @__PURE__ */ jsxRuntime.jsx("span", { children: paymentPending })
               ] })
             }
@@ -13535,7 +13807,7 @@ function EmployeeProfileCard({
               className: "flex items-start gap-2",
               "data-cy": "div-employee-address",
               children: [
-                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.MapPin, { className: "text-muted-foreground mt-0.5 h-4 w-4" }),
+                /* @__PURE__ */ jsxRuntime.jsx(lucideReact.MapPin, { className: "mt-0.5 h-4 w-4 text-muted-foreground" }),
                 /* @__PURE__ */ jsxRuntime.jsx("span", { className: "whitespace-pre-line", children: formatAddress(employee.address) })
               ]
             }
@@ -13584,8 +13856,8 @@ function OrderSidebarTabs({
           "data-cy": tab.dataCy,
           className: chunkOR5DRJCW_cjs.cn(
             "px-4 py-2 text-sm font-medium transition-colors",
-            "focus-visible:ring-ring focus:outline-none focus-visible:ring-2",
-            activeTab === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            activeTab === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
           ),
           children: tab.label
         },
@@ -13654,9 +13926,9 @@ function EmployerContactCard({
   className = ""
 }) {
   if (isLoading) {
-    return /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className, children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { children: title }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: [1, 2].map((i) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex animate-pulse items-center gap-3", children: [
+    return /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className, children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { children: title }) }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: [1, 2].map((i) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex animate-pulse items-center gap-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700" }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 space-y-2", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-24 rounded bg-gray-200 dark:bg-gray-700" }),
@@ -13665,10 +13937,10 @@ function EmployerContactCard({
       ] }, i)) }) })
     ] });
   }
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardHeader, { className: "flex flex-row items-center justify-between", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { children: title }),
-      showActions && onAddContact && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "ghost", size: "sm", onClick: onAddContact, children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className, children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardHeader, { className: "flex flex-row items-center justify-between", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { children: title }),
+      showActions && onAddContact && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "ghost", size: "sm", onClick: onAddContact, children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
@@ -13690,7 +13962,7 @@ function EmployerContactCard({
         "Add"
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: contacts.length === 0 ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-6 text-center", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: contacts.length === 0 ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-6 text-center", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
@@ -13711,7 +13983,7 @@ function EmployerContactCard({
       ),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "No contacts added yet" }),
       showActions && onAddContact && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           variant: "outline",
           size: "sm",
@@ -13729,7 +14001,7 @@ function EmployerContactCard({
         onClick: () => onContactClick?.(contact),
         onKeyDown: (e) => e.key === "Enter" && onContactClick?.(contact),
         children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunk2J2V4TMJ_cjs.Avatar, { name: contact.name, size: "sm" }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkW4MDIFH6_cjs.Avatar, { name: contact.name, size: "sm" }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
               /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate font-medium text-gray-900 dark:text-white", children: contact.name }),
@@ -13813,13 +14085,13 @@ function EmployerList({
   emptyMessage = "No employers linked yet",
   className = ""
 }) {
-  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
+  const [searchQuery, setSearchQuery] = React49__namespace.useState("");
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     onSearch?.(query);
   };
-  const filteredEmployers = React47__namespace.useMemo(() => {
+  const filteredEmployers = React49__namespace.useMemo(() => {
     if (!searchQuery.trim()) return employers;
     const q = searchQuery.toLowerCase();
     return employers.filter(
@@ -13859,7 +14131,7 @@ function EmployerList({
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
-            className: "absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400",
+            className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400",
             fill: "none",
             stroke: "currentColor",
             viewBox: "0 0 24 24",
@@ -13875,7 +14147,7 @@ function EmployerList({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             type: "text",
             placeholder: "Search employers...",
@@ -13885,7 +14157,7 @@ function EmployerList({
           }
         )
       ] }),
-      onAddEmployer && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { onClick: onAddEmployer, size: "sm", children: [
+      onAddEmployer && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { onClick: onAddEmployer, size: "sm", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
@@ -13927,7 +14199,7 @@ function EmployerList({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 text-gray-500 dark:text-gray-400", children: emptyMessage }),
-      onAddEmployer && !searchQuery && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onAddEmployer, children: "Link Employer" })
+      onAddEmployer && !searchQuery && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onAddEmployer, children: "Link Employer" })
     ] }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-2", children: filteredEmployers.map((employer) => /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
@@ -13948,7 +14220,7 @@ function EmployerList({
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
               /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "truncate font-medium text-gray-900 dark:text-white", children: employer.name }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(employer.status), children: employer.status })
+              /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(employer.status), children: employer.status })
             ] }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-0.5 flex items-center gap-4", children: [
               employer.email && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate text-sm text-gray-500 dark:text-gray-400", children: employer.email }),
@@ -14022,20 +14294,20 @@ function EmployerPricingCard({
     }
     return "Any quantity";
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className: `${className} ${!isActive ? "opacity-60" : ""}`, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardHeader, { className: "flex flex-row items-start justify-between space-y-0 pb-2", children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className: `${className} ${!isActive ? "opacity-60" : ""}`, children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardHeader, { className: "flex flex-row items-start justify-between space-y-0 pb-2", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-base font-semibold", children: serviceName }),
-        !isActive && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "secondary", className: "mt-1", children: "Inactive" })
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-base font-semibold", children: serviceName }),
+        !isActive && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "secondary", className: "mt-1", children: "Inactive" })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-right", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-2xl font-bold text-gray-900 dark:text-white", children: formatPrice(basePrice) }),
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "base price" })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "pt-0", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "pt-0", children: [
       tiers.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 space-y-2", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Volume Pricing" }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Volume Pricing" }),
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-1", children: tiers.map((tier) => /* @__PURE__ */ jsxRuntime.jsxs(
           "div",
           {
@@ -14048,7 +14320,7 @@ function EmployerPricingCard({
                   formatQuantityRange(tier),
                   ")"
                 ] }),
-                tier.isDefault && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "outline", className: "text-xs", children: "Default" })
+                tier.isDefault && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "outline", className: "text-xs", children: "Default" })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-gray-900 dark:text-white", children: formatPrice(tier.price) })
             ]
@@ -14062,7 +14334,7 @@ function EmployerPricingCard({
         notes
       ] }) }),
       editable && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-4 flex gap-2", children: [
-        onEdit && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "outline", size: "sm", onClick: onEdit, children: [
+        onEdit && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "outline", size: "sm", onClick: onEdit, children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -14083,7 +14355,7 @@ function EmployerPricingCard({
           ),
           "Edit Pricing"
         ] }),
-        onRemove && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "ghost", size: "sm", onClick: onRemove, children: [
+        onRemove && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "ghost", size: "sm", onClick: onRemove, children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -14156,7 +14428,7 @@ function EmployerView({
     ] });
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: `space-y-6 ${className}`, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "p-6", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "p-6", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col justify-between gap-4 md:flex-row md:items-center", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
           employer.logoUrl ? /* @__PURE__ */ jsxRuntime.jsx(
@@ -14170,7 +14442,7 @@ function EmployerView({
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
               /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "text-2xl font-bold text-gray-900 dark:text-white", children: employer.name }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(employer.status), children: employer.status })
+              /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(employer.status), children: employer.status })
             ] }),
             /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: [
               "Linked since ",
@@ -14183,9 +14455,9 @@ function EmployerView({
             ] })
           ] })
         ] }),
-        onEdit && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onEdit, children: "Edit Employer" })
+        onEdit && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onEdit, children: "Edit Employer" })
       ] }),
-      employer.stats && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-6 grid grid-cols-2 gap-4 border-t border-gray-200 pt-6 md:grid-cols-5 dark:border-gray-700", children: [
+      employer.stats && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-6 grid grid-cols-2 gap-4 border-t border-gray-200 pt-6 dark:border-gray-700 md:grid-cols-5", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center", children: [
           /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-2xl font-bold text-gray-900 dark:text-white", children: employer.stats.totalOrders }),
           /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Total Orders" })
@@ -14208,17 +14480,17 @@ function EmployerView({
         ] })
       ] })
     ] }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkORUPC5TV_cjs.Tabs, { defaultValue: defaultTab, children: [
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkORUPC5TV_cjs.TabsList, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "overview", children: "Overview" }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "orders", children: "Orders" }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "invoices", children: "Invoices" }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "contacts", children: "Contacts" })
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkHFUAI5CX_cjs.Tabs, { defaultValue: defaultTab, children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkHFUAI5CX_cjs.TabsList, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "overview", children: "Overview" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "orders", children: "Orders" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "invoices", children: "Invoices" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "contacts", children: "Contacts" })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "overview", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 md:grid-cols-2", children: [
-        employer.address && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Address" }) }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsxs("address", { className: "text-gray-700 not-italic dark:text-gray-300", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "overview", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 md:grid-cols-2", children: [
+        employer.address && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Address" }) }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsxs("address", { className: "not-italic text-gray-700 dark:text-gray-300", children: [
             employer.address.street,
             employer.address.street2 && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
               /* @__PURE__ */ jsxRuntime.jsx("br", {}),
@@ -14232,19 +14504,19 @@ function EmployerView({
             employer.address.zip
           ] }) })
         ] }),
-        employer.contacts.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Primary Contact" }) }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: (() => {
+        employer.contacts.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Primary Contact" }) }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: (() => {
             const primary = employer.contacts.find((c) => c.isPrimary) || employer.contacts[0];
             return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ jsxRuntime.jsx(chunk2J2V4TMJ_cjs.Avatar, { name: primary.name, size: "md" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkW4MDIFH6_cjs.Avatar, { name: primary.name, size: "md" }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: primary.name }),
                 primary.role && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: primary.role }),
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-300", children: primary.email })
               ] }),
               onContact && /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "outline",
                   size: "sm",
@@ -14256,12 +14528,12 @@ function EmployerView({
           })() })
         ] })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "orders", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardHeader, { className: "flex flex-row items-center justify-between", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Recent Orders" }),
-          onCreateOrder && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { size: "sm", onClick: onCreateOrder, children: "New Order" })
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "orders", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardHeader, { className: "flex flex-row items-center justify-between", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Recent Orders" }),
+          onCreateOrder && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { size: "sm", onClick: onCreateOrder, children: "New Order" })
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: employer.recentOrders.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No orders yet" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: employer.recentOrders.map((order) => /* @__PURE__ */ jsxRuntime.jsxs(
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: employer.recentOrders.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No orders yet" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: employer.recentOrders.map((order) => /* @__PURE__ */ jsxRuntime.jsxs(
           "div",
           {
             className: "flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800",
@@ -14272,11 +14544,11 @@ function EmployerView({
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: order.services.join(", ") })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-right", children: [
-                /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(order.status), children: order.status }),
+                /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(order.status), children: order.status }),
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-xs text-gray-500 dark:text-gray-400", children: formatDate4(order.createdDate) })
               ] }),
               onViewOrder && /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "ghost",
                   size: "sm",
@@ -14289,12 +14561,12 @@ function EmployerView({
           order.id
         )) }) })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "invoices", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardHeader, { className: "flex flex-row items-center justify-between", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Recent Invoices" }),
-          onCreateInvoice && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { size: "sm", onClick: onCreateInvoice, children: "New Invoice" })
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "invoices", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardHeader, { className: "flex flex-row items-center justify-between", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Recent Invoices" }),
+          onCreateInvoice && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { size: "sm", onClick: onCreateInvoice, children: "New Invoice" })
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: employer.recentInvoices.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No invoices yet" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: employer.recentInvoices.map((invoice) => /* @__PURE__ */ jsxRuntime.jsxs(
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: employer.recentInvoices.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No invoices yet" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: employer.recentInvoices.map((invoice) => /* @__PURE__ */ jsxRuntime.jsxs(
           "div",
           {
             className: "flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800",
@@ -14308,10 +14580,10 @@ function EmployerView({
               ] }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-right", children: [
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-semibold text-gray-900 dark:text-white", children: formatCurrency3(invoice.amount) }),
-                /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status })
+                /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status })
               ] }),
               onViewInvoice && /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "ghost",
                   size: "sm",
@@ -14324,19 +14596,19 @@ function EmployerView({
           invoice.id
         )) }) })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "contacts", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "All Contacts" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: employer.contacts.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No contacts added" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-4", children: employer.contacts.map((contact) => /* @__PURE__ */ jsxRuntime.jsxs(
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "contacts", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "All Contacts" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: employer.contacts.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No contacts added" }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-4", children: employer.contacts.map((contact) => /* @__PURE__ */ jsxRuntime.jsxs(
           "div",
           {
             className: "flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800",
             children: [
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-                /* @__PURE__ */ jsxRuntime.jsx(chunk2J2V4TMJ_cjs.Avatar, { name: contact.name, size: "sm" }),
+                /* @__PURE__ */ jsxRuntime.jsx(chunkW4MDIFH6_cjs.Avatar, { name: contact.name, size: "sm" }),
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
                   /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
                     /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: contact.name }),
-                    contact.isPrimary && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "default", children: "Primary" })
+                    contact.isPrimary && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "default", children: "Primary" })
                   ] }),
                   contact.role && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: contact.role }),
                   /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-300", children: contact.email }),
@@ -14344,7 +14616,7 @@ function EmployerView({
                 ] })
               ] }),
               onContact && /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "outline",
                   size: "sm",
@@ -14370,7 +14642,7 @@ function EmployerServiceModal({
   isSubmitting = false,
   errorMessage
 }) {
-  const [config, setConfig] = React47__namespace.useState({
+  const [config, setConfig] = React49__namespace.useState({
     serviceId: service?.id || "",
     employerId: employer?.id || "",
     customPrice: existingConfig?.customPrice,
@@ -14382,7 +14654,7 @@ function EmployerServiceModal({
     notes: existingConfig?.notes,
     billingCode: existingConfig?.billingCode
   });
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     setConfig({
       serviceId: service?.id || "",
       employerId: employer?.id || "",
@@ -14401,13 +14673,13 @@ function EmployerServiceModal({
     if (!onSave) return;
     onSave(config);
   };
-  return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalTitle, { children: [
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalTitle, { children: [
       "Configure Service for ",
       employer?.name || "Employer"
     ] }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
-      errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-destructive/30 bg-destructive/10 rounded-lg border p-3", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm", children: errorMessage }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
+      errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-destructive/30 bg-destructive/10 rounded-lg border p-3", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", children: errorMessage }) }),
       service && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-primary/30 bg-primary/10 rounded-lg border p-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-primary text-sm font-medium", children: service.name }),
         /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-primary/80 text-xs", children: [
@@ -14416,14 +14688,14 @@ function EmployerServiceModal({
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Pricing" }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-foreground", children: "Pricing" }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm", children: "Use Base Price" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Use the service's default pricing" })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-foreground", children: "Use Base Price" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "Use the service's default pricing" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkRRQGH7C5_cjs.Switch,
+            chunkRRARXXV2_cjs.Switch,
             {
               checked: config.useBasePrice,
               onCheckedChange: (checked) => setConfig((prev) => ({
@@ -14434,17 +14706,17 @@ function EmployerServiceModal({
             }
           )
         ] }),
-        !config.useBasePrice && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border ml-4 border-l-2 pl-4", children: [
+        !config.useBasePrice && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "ml-4 border-l-2 border-border pl-4", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "label",
             {
               htmlFor: "custom-price",
-              className: "text-foreground mb-1 block text-sm font-medium",
+              className: "mb-1 block text-sm font-medium text-foreground",
               children: "Custom Price"
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative w-40", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2", children: "$" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground", children: "$" }),
             /* @__PURE__ */ jsxRuntime.jsx(
               "input",
               {
@@ -14452,7 +14724,7 @@ function EmployerServiceModal({
                 type: "number",
                 min: "0",
                 step: "0.01",
-                className: "border-input bg-background text-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none",
+                className: "w-full rounded-md border border-input bg-background py-2 pl-7 pr-4 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring",
                 value: config.customPrice ?? "",
                 onChange: (e) => setConfig((prev) => ({
                   ...prev,
@@ -14465,7 +14737,7 @@ function EmployerServiceModal({
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: "Billing Code (Optional)",
           value: config.billingCode || "",
@@ -14474,14 +14746,14 @@ function EmployerServiceModal({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Order Handling" }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-foreground", children: "Order Handling" }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm", children: "Auto-Accept Orders" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Automatically accept orders from this employer" })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-foreground", children: "Auto-Accept Orders" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "Automatically accept orders from this employer" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkRRQGH7C5_cjs.Switch,
+            chunkRRARXXV2_cjs.Switch,
             {
               checked: config.autoAccept,
               onCheckedChange: (checked) => setConfig((prev) => ({ ...prev, autoAccept: checked }))
@@ -14490,11 +14762,11 @@ function EmployerServiceModal({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm", children: "Requires Approval" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Orders need manual approval before processing" })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-foreground", children: "Requires Approval" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "Orders need manual approval before processing" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkRRQGH7C5_cjs.Switch,
+            chunkRRARXXV2_cjs.Switch,
             {
               checked: config.requiresApproval,
               onCheckedChange: (checked) => setConfig((prev) => ({ ...prev, requiresApproval: checked }))
@@ -14503,22 +14775,22 @@ function EmployerServiceModal({
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Notifications" }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-foreground", children: "Notifications" }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm", children: "Notify on New Orders" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Send email when orders are placed" })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-foreground", children: "Notify on New Orders" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "Send email when orders are placed" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkRRQGH7C5_cjs.Switch,
+            chunkRRARXXV2_cjs.Switch,
             {
               checked: config.notifyOnOrder,
               onCheckedChange: (checked) => setConfig((prev) => ({ ...prev, notifyOnOrder: checked }))
             }
           )
         ] }),
-        config.notifyOnOrder && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-border ml-4 border-l-2 pl-4", children: /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+        config.notifyOnOrder && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "ml-4 border-l-2 border-border pl-4", children: /* @__PURE__ */ jsxRuntime.jsx(
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Notification Email",
             type: "email",
@@ -14536,7 +14808,7 @@ function EmployerServiceModal({
           "label",
           {
             htmlFor: "employer-service-notes",
-            className: "text-foreground mb-1 block text-sm font-medium",
+            className: "mb-1 block text-sm font-medium text-foreground",
             children: "Internal Notes"
           }
         ),
@@ -14544,7 +14816,7 @@ function EmployerServiceModal({
           "textarea",
           {
             id: "employer-service-notes",
-            className: "border-input bg-background text-foreground focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
+            className: "w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring",
             rows: 3,
             value: config.notes || "",
             onChange: (e) => setConfig((prev) => ({ ...prev, notes: e.target.value })),
@@ -14553,9 +14825,9 @@ function EmployerServiceModal({
         )
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "outline",
@@ -14564,11 +14836,11 @@ function EmployerServiceModal({
           children: "Cancel"
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", disabled: isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", disabled: isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs(
           "svg",
           {
-            className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+            className: "-ml-1 mr-2 h-4 w-4 animate-spin",
             fill: "none",
             viewBox: "0 0 24 24",
             children: [
@@ -14674,8 +14946,8 @@ function ErrorPage({
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn(errorPageVariants({ size }), className), children: [
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-8", children: illustration || /* @__PURE__ */ jsxRuntime.jsx(DefaultIllustration, { type }) }),
-    displayCode && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 text-6xl font-bold text-gray-200 sm:text-8xl dark:text-gray-700", children: displayCode }),
-    /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "mb-3 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white", children: displayTitle }),
+    displayCode && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 text-6xl font-bold text-gray-200 dark:text-gray-700 sm:text-8xl", children: displayCode }),
+    /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "mb-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl", children: displayTitle }),
     /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-8 max-w-md text-gray-600 dark:text-gray-400", children: displayDescription }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-3 sm:flex-row", children: [
       primaryAction && /* @__PURE__ */ jsxRuntime.jsx(
@@ -14774,7 +15046,7 @@ function MaintenancePage({
             href: statusUrl,
             target: "_blank",
             rel: "noopener noreferrer",
-            className: "text-primary-600 hover:text-primary-700 text-sm font-medium",
+            className: "text-sm font-medium text-primary-600 hover:text-primary-700",
             children: "Check Status Page \u2192"
           }
         ),
@@ -14805,7 +15077,7 @@ function ActionButton({ label, onClick, href, variant }) {
       {
         href,
         className: chunkOR5DRJCW_cjs.cn(
-          chunkMKJDBXX4_cjs.buttonVariants({ variant, size: "md" }),
+          chunkIO2XB35K_cjs.buttonVariants({ variant, size: "md" }),
           "min-w-[140px] text-center"
         ),
         children: label
@@ -14813,7 +15085,7 @@ function ActionButton({ label, onClick, href, variant }) {
     );
   }
   return /* @__PURE__ */ jsxRuntime.jsx(
-    chunkMKJDBXX4_cjs.Button,
+    chunkIO2XB35K_cjs.Button,
     {
       type: "button",
       onClick,
@@ -15098,8 +15370,8 @@ function FileManager({
   errorMessage,
   className = ""
 }) {
-  const [isDragging, setIsDragging] = React47__namespace.useState(false);
-  const fileInputRef = React47__namespace.useRef(null);
+  const [isDragging, setIsDragging] = React49__namespace.useState(false);
+  const fileInputRef = React49__namespace.useRef(null);
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -15126,7 +15398,7 @@ function FileManager({
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className, children: [
     showDropzone && /* @__PURE__ */ jsxRuntime.jsx(
-      chunkHRA4FUO6_cjs.Card,
+      chunkOGGM27JO_cjs.Card,
       {
         className: `mb-4 cursor-pointer border-2 border-dashed transition-all duration-200 ${isDragging ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"} `.trim(),
         onDragOver: handleDragOver,
@@ -15182,7 +15454,7 @@ function FileManager({
           "%"
         ] })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkNAATBUHR_cjs.Progress, { value: uploadProgress, max: 100 })
+      /* @__PURE__ */ jsxRuntime.jsx(chunk23KJAH6Y_cjs.Progress, { value: uploadProgress, max: 100 })
     ] }),
     errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
     totalStorageUsed !== void 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 rounded-lg bg-gray-50 p-3 text-center dark:bg-gray-800", children: /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: [
@@ -15197,10 +15469,10 @@ function FileManager({
     ] }) }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntime.jsxs("table", { className: "w-full", children: [
       /* @__PURE__ */ jsxRuntime.jsx("thead", { children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { className: "border-b border-gray-200 dark:border-gray-700", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Filename" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Extension" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Size" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Actions" })
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Filename" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Extension" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Size" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Actions" })
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-y divide-gray-100 dark:divide-gray-800", children: files.length > 0 ? files.map((file) => /* @__PURE__ */ jsxRuntime.jsxs(
         "tr",
@@ -15211,7 +15483,7 @@ function FileManager({
               getFileIcon(file.fileExtension),
               /* @__PURE__ */ jsxRuntime.jsx("span", { className: "max-w-xs truncate text-sm text-gray-900 dark:text-white", children: file.filename })
             ] }) }),
-            /* @__PURE__ */ jsxRuntime.jsx("td", { className: "py-3 text-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-gray-500 uppercase dark:text-gray-400", children: file.fileExtension.replace(".", "") }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("td", { className: "py-3 text-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs uppercase text-gray-500 dark:text-gray-400", children: file.fileExtension.replace(".", "") }) }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "py-3 text-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-gray-600 dark:text-gray-400", children: formatFileSize4(file.fileSize) }) }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "py-3", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-end gap-1", children: [
               onPreview && /* @__PURE__ */ jsxRuntime.jsx(
@@ -15346,14 +15618,14 @@ function HelpSupportPanel({
   successMessage,
   className = ""
 }) {
-  const [searchTerm, setSearchTerm] = React47__namespace.useState("");
-  const [expandedFaq, setExpandedFaq] = React47__namespace.useState(null);
-  const [formData, setFormData] = React47__namespace.useState({
+  const [searchTerm, setSearchTerm] = React49__namespace.useState("");
+  const [expandedFaq, setExpandedFaq] = React49__namespace.useState(null);
+  const [formData, setFormData] = React49__namespace.useState({
     subject: "",
     message: "",
     email: ""
   });
-  const [showSuccess, setShowSuccess] = React47__namespace.useState(false);
+  const [showSuccess, setShowSuccess] = React49__namespace.useState(false);
   const filteredFaqs = faqs.filter(
     (faq) => faq.question.toLowerCase().includes(searchTerm.toLowerCase()) || faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -15435,7 +15707,7 @@ function HelpSupportPanel({
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
         docsUrl && /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "outline",
             onClick: () => window.open(docsUrl, "_blank"),
@@ -15462,7 +15734,7 @@ function HelpSupportPanel({
             ]
           }
         ),
-        onStartChat && chatAvailable && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { onClick: onStartChat, children: [
+        onStartChat && chatAvailable && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { onClick: onStartChat, children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -15487,11 +15759,11 @@ function HelpSupportPanel({
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 md:grid-cols-3", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 md:col-span-2", children: [
-        faqs.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Frequently Asked Questions" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-4", children: [
+        faqs.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Frequently Asked Questions" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-4", children: [
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 placeholder: "Search FAQs...",
                 value: searchTerm,
@@ -15540,9 +15812,9 @@ function HelpSupportPanel({
             )) })
           ] })
         ] }),
-        onSubmitRequest && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Contact Support" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { children: [
+        onSubmitRequest && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Contact Support" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { children: [
             showSuccess && successMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 rounded-lg bg-green-100 p-3 text-green-700 dark:bg-green-900/30 dark:text-green-300", children: successMessage }),
             /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "space-y-4", children: [
               /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
@@ -15555,7 +15827,7 @@ function HelpSupportPanel({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "support-email",
                     type: "email",
@@ -15579,7 +15851,7 @@ function HelpSupportPanel({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "support-subject",
                     required: true,
@@ -15602,7 +15874,7 @@ function HelpSupportPanel({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkB7YGVKTE_cjs.Textarea,
+                  chunkJHVDSH6J_cjs.Textarea,
                   {
                     id: "support-message",
                     required: true,
@@ -15616,15 +15888,15 @@ function HelpSupportPanel({
                   }
                 )
               ] }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Sending..." : "Send Message" })
+              /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Sending..." : "Send Message" })
             ] })
           ] })
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
-        contacts.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Contact Us" }) }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-4", children: contacts.map((contact, index) => /* @__PURE__ */ jsxRuntime.jsxs(
+        contacts.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Contact Us" }) }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "space-y-4", children: contacts.map((contact, index) => /* @__PURE__ */ jsxRuntime.jsxs(
             "div",
             {
               className: "flex items-start gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800",
@@ -15654,9 +15926,9 @@ function HelpSupportPanel({
             index
           )) })
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Quick Links" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Quick Links" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-2", children: [
             /* @__PURE__ */ jsxRuntime.jsxs(
               "button",
               {
@@ -15775,6 +16047,83 @@ function HelpSupportPanel({
     ] })
   ] });
 }
+function HeroActionCard({
+  eyebrow,
+  title,
+  description,
+  primaryAction,
+  secondaryActions,
+  illustration,
+  className,
+  children
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "section",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "relative overflow-hidden rounded-2xl border border-primary-200/60",
+        "bg-gradient-to-br from-primary-50 via-white to-primary-100/40",
+        "dark:border-primary-800/60 dark:from-primary-950 dark:via-neutral-900 dark:to-primary-900/20",
+        "shadow-sm",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            "aria-hidden": "true",
+            className: "pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary-200/40 blur-3xl dark:bg-primary-700/20"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            "aria-hidden": "true",
+            className: "pointer-events-none absolute -bottom-20 right-24 h-40 w-40 rounded-full bg-primary-300/30 blur-3xl dark:bg-primary-500/10"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative flex flex-col gap-6 p-6 sm:p-8 md:flex-row md:items-center md:justify-between", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 max-w-2xl", children: [
+            eyebrow && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-2 text-xs font-semibold uppercase tracking-wider text-primary-700 dark:text-primary-300", children: eyebrow }),
+            /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "text-2xl font-bold text-foreground sm:text-3xl", children: title }),
+            description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-2 text-sm text-muted-foreground sm:text-base", children: description }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-5 flex flex-wrap items-center gap-3", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs(
+                chunkIO2XB35K_cjs.Button,
+                {
+                  variant: primaryAction.variant ?? "primary",
+                  size: "lg",
+                  onClick: primaryAction.onClick,
+                  disabled: primaryAction.disabled,
+                  children: [
+                    primaryAction.icon && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-5 w-5", "aria-hidden": "true", children: primaryAction.icon }),
+                    primaryAction.label
+                  ]
+                }
+              ),
+              secondaryActions?.map((action) => /* @__PURE__ */ jsxRuntime.jsxs(
+                chunkIO2XB35K_cjs.Button,
+                {
+                  variant: action.variant ?? "outline",
+                  size: "md",
+                  onClick: action.onClick,
+                  disabled: action.disabled,
+                  children: [
+                    action.icon && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-4 w-4", "aria-hidden": "true", children: action.icon }),
+                    action.label
+                  ]
+                },
+                action.label
+              ))
+            ] }),
+            children && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-4", children })
+          ] }),
+          illustration && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative hidden flex-shrink-0 md:block md:max-w-[220px] lg:max-w-[280px]", children: illustration })
+        ] })
+      ]
+    }
+  );
+}
 function HRISProviderSelector({
   providers,
   currentProvider,
@@ -15799,7 +16148,7 @@ function HRISProviderSelector({
     syncPending = "We are still waiting on data from your HRIS Provider. Please check back later.",
     supportEmail = "support@bluehive.com"
   } = labels;
-  const filteredProviders = React47__namespace.useMemo(() => {
+  const filteredProviders = React49__namespace.useMemo(() => {
     if (!searchQuery.trim()) return providers;
     const query = searchQuery.toLowerCase();
     return providers.filter((p) => p.displayName.toLowerCase().includes(query));
@@ -15810,7 +16159,7 @@ function HRISProviderSelector({
     return d.toLocaleString();
   };
   if (currentProvider) {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("hris-provider-selector", className), children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border bg-muted/50 rounded-lg border p-4", children: [
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("hris-provider-selector", className), children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-muted/50 rounded-lg border border-border p-4", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4 md:flex-row md:items-center", children: [
         currentProvider.logoUrl && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-shrink-0", children: /* @__PURE__ */ jsxRuntime.jsx(
           "img",
@@ -15821,8 +16170,8 @@ function HRISProviderSelector({
           }
         ) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-foreground text-lg font-bold", children: currentProvider.displayName }),
-          /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-muted-foreground text-sm", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-lg font-bold text-foreground", children: currentProvider.displayName }),
+          /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-muted-foreground", children: [
             "Your data will automatically sync as we receive updates from",
             " ",
             currentProvider.displayName,
@@ -15858,7 +16207,7 @@ function HRISProviderSelector({
           {
             type: "button",
             onClick: onDisconnect,
-            className: "border-border bg-card text-foreground hover:bg-muted rounded-lg border px-4 py-2",
+            className: "rounded-lg border border-border bg-card px-4 py-2 text-foreground hover:bg-muted",
             children: [
               /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-link-slash mr-2" }),
               disconnect
@@ -15882,7 +16231,7 @@ function HRISProviderSelector({
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("hris-provider-selector", className), children: [
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2", children: /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-search" }) }),
+      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-search" }) }),
       /* @__PURE__ */ jsxRuntime.jsx(
         "input",
         {
@@ -15890,7 +16239,7 @@ function HRISProviderSelector({
           placeholder: search,
           value: searchQuery,
           onChange: (e) => onSearchChange?.(e.target.value),
-          className: "focus:border-primary focus:ring-primary border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-1 focus:outline-none"
+          className: "focus:border-primary focus:ring-primary w-full rounded-lg border border-input bg-background py-2 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1"
         }
       )
     ] }) }),
@@ -15900,7 +16249,7 @@ function HRISProviderSelector({
         {
           type: "button",
           onClick: onCSVImport,
-          className: "border-border bg-card dark:hover:bg-muted/50 flex flex-col items-center justify-center rounded-lg border p-4 shadow-sm transition-shadow hover:shadow-md",
+          className: "dark:hover:bg-muted/50 flex flex-col items-center justify-center rounded-lg border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md",
           children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex h-16 w-16 items-center justify-center", children: [
               /* @__PURE__ */ jsxRuntime.jsx(
@@ -15917,19 +16266,19 @@ function HRISProviderSelector({
                   }
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-file-csv text-muted-foreground hidden text-4xl" })
+              /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-file-csv hidden text-4xl text-muted-foreground" })
             ] }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-center text-sm font-medium", children: importCSV })
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-center text-sm font-medium text-foreground", children: importCSV })
           ]
         }
       ),
       loading && /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsxRuntime.jsxs(
         "div",
         {
-          className: "border-border bg-card flex flex-col items-center justify-center rounded-lg border p-4 shadow-sm",
+          className: "flex flex-col items-center justify-center rounded-lg border border-border bg-card p-4 shadow-sm",
           children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted mb-3 h-16 w-16 animate-pulse rounded-lg" }),
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-20 animate-pulse rounded" })
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-3 h-16 w-16 animate-pulse rounded-lg bg-muted" }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-20 animate-pulse rounded bg-muted" })
           ]
         },
         i
@@ -15939,7 +16288,7 @@ function HRISProviderSelector({
         {
           type: "button",
           onClick: () => onProviderSelect?.(provider),
-          className: "border-border bg-card dark:hover:bg-muted/50 flex flex-col items-center justify-center rounded-lg border p-4 shadow-sm transition-shadow hover:shadow-md",
+          className: "dark:hover:bg-muted/50 flex flex-col items-center justify-center rounded-lg border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md",
           children: [
             /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-3 flex h-16 w-16 items-center justify-center", children: provider.logoUrl ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
               /* @__PURE__ */ jsxRuntime.jsx(
@@ -15955,14 +16304,14 @@ function HRISProviderSelector({
                   }
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground hidden h-12 w-12 items-center justify-center rounded-lg text-lg font-bold", children: provider.displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() })
-            ] }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground flex h-12 w-12 items-center justify-center rounded-lg text-lg font-bold", children: provider.displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() }) }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-center text-sm font-medium", children: provider.displayName })
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "hidden h-12 w-12 items-center justify-center rounded-lg bg-muted text-lg font-bold text-muted-foreground", children: provider.displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() })
+            ] }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-lg font-bold text-muted-foreground", children: provider.displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-center text-sm font-medium text-foreground", children: provider.displayName })
           ]
         },
         provider.id
       )),
-      !loading && filteredProviders.length === 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground col-span-full py-8 text-center", children: noProviders })
+      !loading && filteredProviders.length === 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-full py-8 text-center text-muted-foreground", children: noProviders })
     ] })
   ] });
 }
@@ -15998,11 +16347,11 @@ function InventoryManager({
   isLoading = false,
   className = ""
 }) {
-  const [updateType, setUpdateType] = React47__namespace.useState(
+  const [updateType, setUpdateType] = React49__namespace.useState(
     "credit"
   );
-  const [updateAmount, setUpdateAmount] = React47__namespace.useState("");
-  const [updateMemo, setUpdateMemo] = React47__namespace.useState("");
+  const [updateAmount, setUpdateAmount] = React49__namespace.useState("");
+  const [updateMemo, setUpdateMemo] = React49__namespace.useState("");
   const handleSubmit = () => {
     if (!updateAmount || !onUpdateSubmit) return;
     const amount = parseInt(updateAmount, 10);
@@ -16019,16 +16368,16 @@ function InventoryManager({
   const previewChange = updateAmount ? updateType === "credit" ? currentInventory + parseInt(updateAmount, 10) : currentInventory - parseInt(updateAmount, 10) : null;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className, children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 flex items-center justify-between", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-foreground text-lg font-semibold", children: "Remaining Inventory" }) }),
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-foreground text-2xl font-bold", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-lg font-semibold text-foreground", children: "Remaining Inventory" }) }),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-2xl font-bold text-foreground", children: [
         currentInventory,
         " ",
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-sm font-normal", children: "units" })
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-normal text-muted-foreground", children: "units" })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "border-border mb-4" }),
+    /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "mb-4 border-border" }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 flex items-center justify-between", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-foreground text-base font-semibold", children: "Inventory Log" }),
+      /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-base font-semibold text-foreground", children: "Inventory Log" }),
       onUpdateClick && /* @__PURE__ */ jsxRuntime.jsxs(
         "button",
         {
@@ -16059,26 +16408,26 @@ function InventoryManager({
         }
       )
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "border-border mb-4" }),
+    /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "mb-4 border-border" }),
     logEntries.length > 0 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntime.jsxs("table", { className: "w-full", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("thead", { children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { className: "border-border border-b", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase", children: "Date" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase", children: "User" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase", children: "Change" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "text-muted-foreground py-2 text-right text-xs font-medium tracking-wider uppercase", children: "Quantity" })
+      /* @__PURE__ */ jsxRuntime.jsx("thead", { children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { className: "border-b border-border", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground", children: "Date" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground", children: "User" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground", children: "Change" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground", children: "Quantity" })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-border/50 divide-y", children: logEntries.map((entry) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-border/50 divide-y", children: logEntries.map((entry) => /* @__PURE__ */ jsxRuntime.jsxs(React49__namespace.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs("tr", { children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "td",
             {
-              className: "text-muted-foreground py-2 text-sm",
+              className: "py-2 text-sm text-muted-foreground",
               title: formatDate2(entry.createdAt),
               children: formatRelativeTime(entry.createdAt)
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "text-muted-foreground py-2 text-sm", children: entry.createdBy.name }),
-          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "text-muted-foreground py-2 text-sm", children: entry.type === "credit" ? "Added" : "Removed" }),
+          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "py-2 text-sm text-muted-foreground", children: entry.createdBy.name }),
+          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "py-2 text-sm text-muted-foreground", children: entry.type === "credit" ? "Added" : "Removed" }),
           /* @__PURE__ */ jsxRuntime.jsx("td", { className: "py-2 text-right text-sm", children: /* @__PURE__ */ jsxRuntime.jsxs(
             "span",
             {
@@ -16124,12 +16473,12 @@ function InventoryManager({
             }
           ) })
         ] }),
-        entry.memo && /* @__PURE__ */ jsxRuntime.jsx("tr", { className: "bg-muted/50", children: /* @__PURE__ */ jsxRuntime.jsx("td", { colSpan: 4, className: "px-2 py-1 text-right", children: /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs italic", children: [
+        entry.memo && /* @__PURE__ */ jsxRuntime.jsx("tr", { className: "bg-muted/50", children: /* @__PURE__ */ jsxRuntime.jsx("td", { colSpan: 4, className: "px-2 py-1 text-right", children: /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs italic text-muted-foreground", children: [
           "Memo: ",
           entry.memo
         ] }) }) })
       ] }, entry.id)) })
-    ] }) }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-muted-foreground py-8 text-center", children: [
+    ] }) }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-8 text-center text-muted-foreground", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
@@ -16151,7 +16500,7 @@ function InventoryManager({
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm", children: "No inventory changes recorded yet." })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs(
-      chunkI7L6CQXR_cjs.Modal,
+      chunkAOHWULSD_cjs.Modal,
       {
         open: showUpdateModal,
         onOpenChange: (open) => {
@@ -16161,10 +16510,10 @@ function InventoryManager({
         },
         size: "lg",
         children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Inventory Manager" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-foreground text-lg font-semibold", children: serviceName }) }),
-            /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx("h5", { className: "text-muted-foreground mb-2 text-sm font-medium", children: "Update Inventory" }) }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Inventory Manager" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-lg font-semibold text-foreground", children: serviceName }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx("h5", { className: "mb-2 text-sm font-medium text-muted-foreground", children: "Update Inventory" }) }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-0", children: [
               /* @__PURE__ */ jsxRuntime.jsxs(
                 "button",
@@ -16200,7 +16549,7 @@ function InventoryManager({
                 {
                   type: "button",
                   onClick: () => setUpdateType("credit"),
-                  className: `rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium transition-colors ${updateType === "credit" ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card text-foreground hover:bg-muted"} `,
+                  className: `rounded-r-md border-b border-r border-t px-4 py-2 text-sm font-medium transition-colors ${updateType === "credit" ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card text-foreground hover:bg-muted"} `,
                   children: [
                     /* @__PURE__ */ jsxRuntime.jsx(
                       "svg",
@@ -16226,7 +16575,7 @@ function InventoryManager({
               )
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 label: "Amount",
                 type: "number",
@@ -16237,7 +16586,7 @@ function InventoryManager({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkB7YGVKTE_cjs.Textarea,
+              chunkJHVDSH6J_cjs.Textarea,
               {
                 label: "Memo",
                 value: updateMemo,
@@ -16275,9 +16624,9 @@ function InventoryManager({
               ] })
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onUpdateModalClose, children: "Cancel" }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { onClick: handleSubmit, disabled: !updateAmount || isLoading, children: isLoading ? "Saving..." : "Save" })
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onUpdateModalClose, children: "Cancel" }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { onClick: handleSubmit, disabled: !updateAmount || isLoading, children: isLoading ? "Saving..." : "Save" })
           ] })
         ]
       }
@@ -16296,12 +16645,12 @@ function InviteUserModal({
   errorMessage,
   successMessage
 }) {
-  const [email, setEmail] = React47__namespace.useState("");
-  const [firstName, setFirstName] = React47__namespace.useState("");
-  const [lastName, setLastName] = React47__namespace.useState("");
-  const [roleId, setRoleId] = React47__namespace.useState(defaultRoleId || "");
-  const [message, setMessage] = React47__namespace.useState("");
-  React47__namespace.useEffect(() => {
+  const [email, setEmail] = React49__namespace.useState("");
+  const [firstName, setFirstName] = React49__namespace.useState("");
+  const [lastName, setLastName] = React49__namespace.useState("");
+  const [roleId, setRoleId] = React49__namespace.useState(defaultRoleId || "");
+  const [message, setMessage] = React49__namespace.useState("");
+  React49__namespace.useEffect(() => {
     if (!open) {
       setEmail("");
       setFirstName("");
@@ -16322,13 +16671,13 @@ function InviteUserModal({
     });
   };
   const isValid = email && roleId;
-  return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Invite User" }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
-      entityDisplayName && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted rounded-lg p-3", children: /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-muted-foreground text-sm", children: [
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Invite User" }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
+      entityDisplayName && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg bg-muted p-3", children: /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-muted-foreground", children: [
         "Inviting user to:",
         " ",
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground font-medium", children: entityDisplayName })
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-foreground", children: entityDisplayName })
       ] }) }),
       successMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
@@ -16373,7 +16722,7 @@ function InviteUserModal({
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage })
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: "Email Address",
           type: "email",
@@ -16386,7 +16735,7 @@ function InviteUserModal({
       ),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "First Name",
             type: "text",
@@ -16396,7 +16745,7 @@ function InviteUserModal({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Last Name",
             type: "text",
@@ -16407,7 +16756,7 @@ function InviteUserModal({
         )
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkNL3CZNBH_cjs.Select,
+        chunkGEKTNWTP_cjs.Select,
         {
           label: "Role",
           value: roleId,
@@ -16425,7 +16774,7 @@ function InviteUserModal({
           "label",
           {
             htmlFor: "invite-message",
-            className: "text-foreground mb-1 block text-sm font-medium",
+            className: "mb-1 block text-sm font-medium text-foreground",
             children: "Personal Message (optional)"
           }
         ),
@@ -16433,7 +16782,7 @@ function InviteUserModal({
           "textarea",
           {
             id: "invite-message",
-            className: "border-input bg-background text-foreground focus:ring-primary w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
+            className: "focus:ring-primary w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2",
             rows: 3,
             value: message,
             onChange: (e) => setMessage(e.target.value),
@@ -16441,11 +16790,11 @@ function InviteUserModal({
           }
         )
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "An email invitation will be sent to this address. If the user doesn't have an account, they'll be prompted to create one." })
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "An email invitation will be sent to this address. If the user doesn't have an account, they'll be prompted to create one." })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "outline",
@@ -16454,11 +16803,11 @@ function InviteUserModal({
           children: "Cancel"
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", disabled: !isValid || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", disabled: !isValid || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs(
           "svg",
           {
-            className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+            className: "-ml-1 mr-2 h-4 w-4 animate-spin",
             fill: "none",
             viewBox: "0 0 24 24",
             children: [
@@ -16500,7 +16849,7 @@ function InvoiceList({
   currency = "$",
   className = ""
 }) {
-  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
+  const [searchQuery, setSearchQuery] = React49__namespace.useState("");
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -16537,7 +16886,7 @@ function InvoiceList({
     { value: "overdue", label: "Overdue" },
     { value: "cancelled", label: "Cancelled" }
   ];
-  const filteredInvoices = React47__namespace.useMemo(() => {
+  const filteredInvoices = React49__namespace.useMemo(() => {
     let result = invoices;
     if (statusFilter !== "all") {
       result = result.filter((inv) => inv.status === statusFilter);
@@ -16550,7 +16899,7 @@ function InvoiceList({
     }
     return result;
   }, [invoices, statusFilter, searchQuery]);
-  const totals = React47__namespace.useMemo(() => {
+  const totals = React49__namespace.useMemo(() => {
     return {
       total: filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0),
       paid: filteredInvoices.filter((inv) => inv.status === "paid").reduce((sum, inv) => sum + inv.amount, 0),
@@ -16578,7 +16927,7 @@ function InvoiceList({
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
-            className: "absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400",
+            className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400",
             fill: "none",
             stroke: "currentColor",
             viewBox: "0 0 24 24",
@@ -16594,7 +16943,7 @@ function InvoiceList({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             type: "text",
             placeholder: "Search invoices...",
@@ -16614,7 +16963,7 @@ function InvoiceList({
           },
           option.value
         )) }),
-        onCreateInvoice && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { onClick: onCreateInvoice, size: "sm", children: [
+        onCreateInvoice && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { onClick: onCreateInvoice, size: "sm", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -16671,15 +17020,15 @@ function InvoiceList({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 text-gray-500 dark:text-gray-400", children: searchQuery || statusFilter !== "all" ? "No invoices match your filters" : "No invoices yet" }),
-      onCreateInvoice && !searchQuery && statusFilter === "all" && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onCreateInvoice, children: "Create Invoice" })
+      onCreateInvoice && !searchQuery && statusFilter === "all" && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onCreateInvoice, children: "Create Invoice" })
     ] }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsxs("table", { className: "w-full", children: [
       /* @__PURE__ */ jsxRuntime.jsx("thead", { className: "bg-gray-50 dark:bg-gray-800", children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { children: [
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Invoice" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400", children: "Employer" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400", children: "Issued" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400", children: "Due" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Amount" }),
-        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Status" })
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Invoice" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:table-cell", children: "Employer" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 md:table-cell", children: "Issued" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 md:table-cell", children: "Due" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Amount" }),
+        /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Status" })
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-y divide-gray-200 dark:divide-gray-700", children: filteredInvoices.map((invoice) => /* @__PURE__ */ jsxRuntime.jsxs(
         "tr",
@@ -16689,7 +17038,7 @@ function InvoiceList({
           children: [
             /* @__PURE__ */ jsxRuntime.jsxs("td", { className: "px-4 py-3", children: [
               /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: invoice.invoiceNumber }),
-              /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 sm:hidden dark:text-gray-400", children: invoice.employerName })
+              /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400 sm:hidden", children: invoice.employerName })
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "hidden px-4 py-3 sm:table-cell", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-700 dark:text-gray-300", children: invoice.employerName }) }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "hidden px-4 py-3 md:table-cell", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: formatDate4(invoice.issuedDate) }) }),
@@ -16701,7 +17050,7 @@ function InvoiceList({
               }
             ) }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-3 text-right", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: formatCurrency3(invoice.amount) }) }),
-            /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status }) })
+            /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status }) })
           ]
         },
         invoice.id
@@ -16721,16 +17070,16 @@ function InvoicePaymentPage({
   showStripeBranding = true,
   className = ""
 }) {
-  const [paymentMethod, setPaymentMethod] = React47__namespace.useState(
+  const [paymentMethod, setPaymentMethod] = React49__namespace.useState(
     acceptedMethods[0] || "card"
   );
-  const [name, setName] = React47__namespace.useState("");
-  const [email, setEmail] = React47__namespace.useState("");
-  const [cardNumber, setCardNumber] = React47__namespace.useState("");
-  const [expiry, setExpiry] = React47__namespace.useState("");
-  const [cvc, setCvc] = React47__namespace.useState("");
-  const [routingNumber, setRoutingNumber] = React47__namespace.useState("");
-  const [accountNumber, setAccountNumber] = React47__namespace.useState("");
+  const [name, setName] = React49__namespace.useState("");
+  const [email, setEmail] = React49__namespace.useState("");
+  const [cardNumber, setCardNumber] = React49__namespace.useState("");
+  const [expiry, setExpiry] = React49__namespace.useState("");
+  const [cvc, setCvc] = React49__namespace.useState("");
+  const [routingNumber, setRoutingNumber] = React49__namespace.useState("");
+  const [accountNumber, setAccountNumber] = React49__namespace.useState("");
   const formatCurrency3 = (amount) => {
     return `${currency}${amount.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
@@ -16765,7 +17114,7 @@ function InvoicePaymentPage({
     return /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        className: `min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`,
+        className: `min-h-screen bg-gray-50 p-4 dark:bg-gray-900 sm:p-8 ${className}`,
         children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mx-auto max-w-4xl", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "animate-pulse space-y-6", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-8 w-48 rounded bg-gray-200 dark:bg-gray-700" }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 lg:grid-cols-2", children: [
@@ -16781,7 +17130,7 @@ function InvoicePaymentPage({
       "div",
       {
         className: `flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`,
-        children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { className: "w-full max-w-md text-center", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "py-12", children: [
+        children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { className: "w-full max-w-md text-center", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "py-12", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -16811,7 +17160,7 @@ function InvoicePaymentPage({
       "div",
       {
         className: `flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`,
-        children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { className: "w-full max-w-md text-center", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "py-12", children: [
+        children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { className: "w-full max-w-md text-center", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "py-12", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", children: /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -16843,7 +17192,7 @@ function InvoicePaymentPage({
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
-      className: `min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`,
+      className: `min-h-screen bg-gray-50 p-4 dark:bg-gray-900 sm:p-8 ${className}`,
       children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mx-auto max-w-4xl", children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-8 flex items-center gap-4", children: invoice.providerLogoUrl ? /* @__PURE__ */ jsxRuntime.jsx(
           "img",
@@ -16854,15 +17203,15 @@ function InvoicePaymentPage({
           }
         ) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xl font-bold text-gray-900 dark:text-white", children: invoice.providerName }) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 lg:grid-cols-2", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
-              /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardTitle, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardTitle, { children: [
                 "Invoice ",
                 invoice.invoiceNumber
               ] }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status })
+              /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status })
             ] }) }),
-            /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-4", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-4", children: [
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1 text-sm text-gray-600 dark:text-gray-400", children: [
                 /* @__PURE__ */ jsxRuntime.jsxs("p", { children: [
                   "Issued: ",
@@ -16909,9 +17258,9 @@ function InvoicePaymentPage({
               ] })
             ] })
           ] }) }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { children: "Payment Details" }) }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "space-y-4", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { children: "Payment Details" }) }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "space-y-4", children: [
               errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
               acceptedMethods.length > 1 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700", children: [
                 acceptedMethods.includes("card") && /* @__PURE__ */ jsxRuntime.jsx(
@@ -16934,7 +17283,7 @@ function InvoicePaymentPage({
                 )
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   label: "Full Name",
                   value: name,
@@ -16944,7 +17293,7 @@ function InvoicePaymentPage({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   type: "email",
                   label: "Email",
@@ -16956,7 +17305,7 @@ function InvoicePaymentPage({
               ),
               paymentMethod === "card" ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     label: "Card Number",
                     value: cardNumber,
@@ -16967,7 +17316,7 @@ function InvoicePaymentPage({
                 ),
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
                   /* @__PURE__ */ jsxRuntime.jsx(
-                    chunkVV4N4WY6_cjs.Input,
+                    chunkSZRD5UTO_cjs.Input,
                     {
                       label: "Expiry",
                       value: expiry,
@@ -16977,7 +17326,7 @@ function InvoicePaymentPage({
                     }
                   ),
                   /* @__PURE__ */ jsxRuntime.jsx(
-                    chunkVV4N4WY6_cjs.Input,
+                    chunkSZRD5UTO_cjs.Input,
                     {
                       label: "CVC",
                       value: cvc,
@@ -16989,7 +17338,7 @@ function InvoicePaymentPage({
                 ] })
               ] }) : /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     label: "Routing Number",
                     value: routingNumber,
@@ -16999,7 +17348,7 @@ function InvoicePaymentPage({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     label: "Account Number",
                     value: accountNumber,
@@ -17010,7 +17359,7 @@ function InvoicePaymentPage({
                 )
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   type: "submit",
                   className: "w-full",
@@ -17019,7 +17368,7 @@ function InvoicePaymentPage({
                     /* @__PURE__ */ jsxRuntime.jsxs(
                       "svg",
                       {
-                        className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                        className: "-ml-1 mr-2 h-4 w-4 animate-spin",
                         fill: "none",
                         viewBox: "0 0 24 24",
                         children: [
@@ -17099,7 +17448,7 @@ function InvoiceView({
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: `space-y-6 ${className}`, children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
-        onBack && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "ghost", size: "sm", onClick: onBack, children: [
+        onBack && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "ghost", size: "sm", onClick: onBack, children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -17123,7 +17472,7 @@ function InvoiceView({
         /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "text-2xl font-bold text-gray-900 dark:text-white", children: invoice.invoiceNumber }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status })
+            /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(invoice.status), children: invoice.status })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: [
             "Issued ",
@@ -17133,7 +17482,7 @@ function InvoiceView({
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap gap-2", children: [
         onDownload && /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "outline",
             size: "sm",
@@ -17163,7 +17512,7 @@ function InvoiceView({
           }
         ),
         onEdit && canEdit && /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "outline",
             size: "sm",
@@ -17193,7 +17542,7 @@ function InvoiceView({
           }
         ),
         onVoid && canVoid && /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "outline",
             size: "sm",
@@ -17203,7 +17552,7 @@ function InvoiceView({
           }
         ),
         onMarkPaid && canMarkPaid && /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "secondary",
             size: "sm",
@@ -17232,7 +17581,7 @@ function InvoiceView({
             ]
           }
         ),
-        onSend && canSend && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { size: "sm", onClick: onSend, disabled: actionsDisabled, children: [
+        onSend && canSend && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { size: "sm", onClick: onSend, disabled: actionsDisabled, children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -17255,7 +17604,7 @@ function InvoiceView({
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { className: "print:border-0 print:shadow-none", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "p-6 sm:p-8", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { className: "print:border-0 print:shadow-none", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "p-6 sm:p-8", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-8 flex flex-col justify-between gap-6 sm:flex-row", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
           providerLogoUrl ? /* @__PURE__ */ jsxRuntime.jsx(
@@ -17266,7 +17615,7 @@ function InvoiceView({
               className: "mb-2 h-12 object-contain"
             }
           ) : /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "mb-2 text-xl font-bold text-gray-900 dark:text-white", children: invoice.providerName }),
-          invoice.providerAddress && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm whitespace-pre-line text-gray-600 dark:text-gray-400", children: invoice.providerAddress }),
+          invoice.providerAddress && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "whitespace-pre-line text-sm text-gray-600 dark:text-gray-400", children: invoice.providerAddress }),
           invoice.providerPhone && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: invoice.providerPhone }),
           invoice.providerEmail && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: invoice.providerEmail })
         ] }),
@@ -17293,17 +17642,17 @@ function InvoiceView({
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-8", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400", children: "Bill To" }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400", children: "Bill To" }),
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: invoice.employerName }),
-        invoice.employerAddress && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm whitespace-pre-line text-gray-600 dark:text-gray-400", children: invoice.employerAddress }),
+        invoice.employerAddress && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "whitespace-pre-line text-sm text-gray-600 dark:text-gray-400", children: invoice.employerAddress }),
         invoice.employerEmail && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: invoice.employerEmail })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsxs("table", { className: "w-full", children: [
         /* @__PURE__ */ jsxRuntime.jsx("thead", { className: "bg-gray-50 dark:bg-gray-800", children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400", children: "Description" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400", children: "Qty" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400", children: "Unit Price" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase dark:text-gray-400", children: "Total" })
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400", children: "Description" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400 sm:table-cell", children: "Qty" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400 sm:table-cell", children: "Unit Price" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400", children: "Total" })
         ] }) }),
         /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-y divide-gray-200 dark:divide-gray-700", children: invoice.lineItems.map((item) => /* @__PURE__ */ jsxRuntime.jsxs("tr", { className: "bg-white dark:bg-gray-900", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("td", { className: "px-4 py-3", children: [
@@ -17313,8 +17662,8 @@ function InvoiceView({
               item.date && ` \u2022 ${formatDate4(item.date)}`
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "hidden px-4 py-3 text-center text-gray-700 sm:table-cell dark:text-gray-300", children: item.quantity }),
-          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "hidden px-4 py-3 text-right text-gray-700 sm:table-cell dark:text-gray-300", children: formatCurrency3(item.unitPrice) }),
+          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "hidden px-4 py-3 text-center text-gray-700 dark:text-gray-300 sm:table-cell", children: item.quantity }),
+          /* @__PURE__ */ jsxRuntime.jsx("td", { className: "hidden px-4 py-3 text-right text-gray-700 dark:text-gray-300 sm:table-cell", children: formatCurrency3(item.unitPrice) }),
           /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-3 text-right font-medium text-gray-900 dark:text-white", children: formatCurrency3(item.total) })
         ] }, item.id)) })
       ] }) }),
@@ -17337,12 +17686,12 @@ function InvoiceView({
       ] }) }),
       (invoice.notes || invoice.paymentTerms) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-8 space-y-4 border-t border-gray-200 pt-6 dark:border-gray-700", children: [
         invoice.paymentTerms && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400", children: "Payment Terms" }),
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400", children: "Payment Terms" }),
           /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-700 dark:text-gray-300", children: invoice.paymentTerms })
         ] }),
         invoice.notes && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400", children: "Notes" }),
-          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm whitespace-pre-line text-gray-700 dark:text-gray-300", children: invoice.notes })
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-1 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400", children: "Notes" }),
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "whitespace-pre-line text-sm text-gray-700 dark:text-gray-300", children: invoice.notes })
         ] })
       ] })
     ] }) })
@@ -17411,10 +17760,10 @@ function LanguageSelector({
   disabled = false,
   className
 }) {
-  const [isOpen, setIsOpen] = React47__namespace.useState(false);
-  const containerRef = React47__namespace.useRef(null);
+  const [isOpen, setIsOpen] = React49__namespace.useState(false);
+  const containerRef = React49__namespace.useRef(null);
   const selectedLanguage = languages.find((l) => l.code === value);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
@@ -17423,7 +17772,7 @@ function LanguageSelector({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") setIsOpen(false);
     };
@@ -17494,12 +17843,12 @@ function LanguageSelector({
                     onKeyDown: (e) => e.key === "Enter" && handleSelect(language),
                     className: chunkOR5DRJCW_cjs.cn(
                       "flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors",
-                      language.code === value ? "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                      language.code === value ? "dark:bg-primary-900/20 bg-primary-50 text-primary-700 dark:text-primary-400" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                     ),
                     children: [
                       showFlags && language.flag && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-base", children: language.flag }),
                       /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1", children: language.name }),
-                      language.code === value && /* @__PURE__ */ jsxRuntime.jsx(CheckIcon2, { className: "text-primary-600 dark:text-primary-400 h-4 w-4" })
+                      language.code === value && /* @__PURE__ */ jsxRuntime.jsx(CheckIcon2, { className: "h-4 w-4 text-primary-600 dark:text-primary-400" })
                     ]
                   },
                   language.code
@@ -17539,7 +17888,7 @@ function LanguageSelectorNative({
         "aria-label": label,
         className: chunkOR5DRJCW_cjs.cn(
           "w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 pr-8 text-sm",
-          "focus:border-primary-500 focus:ring-primary-500 text-gray-700 focus:ring-2 focus:outline-none",
+          "text-gray-700 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500",
           "dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200",
           disabled && "cursor-not-allowed opacity-50",
           className
@@ -17553,7 +17902,7 @@ function LanguageSelectorNative({
         ]
       }
     ),
-    /* @__PURE__ */ jsxRuntime.jsx(ChevronDownIcon2, { className: "pointer-events-none absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 text-gray-400" })
+    /* @__PURE__ */ jsxRuntime.jsx(ChevronDownIcon2, { className: "pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" })
   ] });
 }
 function LanguageSelectorInline({
@@ -17621,6 +17970,288 @@ function CheckIcon2({ className }) {
       strokeWidth: 2,
       "aria-hidden": "true",
       children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+    }
+  );
+}
+var DEFAULT_COLUMNS = [
+  "order_sent",
+  "order_accepted",
+  "order_in_progress",
+  "order_results_ready",
+  "order_completed"
+];
+var STATUS_META = {
+  order_sent: {
+    label: "Sent",
+    dot: "bg-sky-500",
+    tint: "bg-sky-50 dark:bg-sky-950/40",
+    badge: "secondary"
+  },
+  order_accepted: {
+    label: "Accepted",
+    dot: "bg-violet-500",
+    tint: "bg-violet-50 dark:bg-violet-950/40",
+    badge: "default"
+  },
+  order_in_progress: {
+    label: "In Progress",
+    dot: "bg-amber-500",
+    tint: "bg-amber-50 dark:bg-amber-950/40",
+    badge: "warning"
+  },
+  order_results_ready: {
+    label: "Results Ready",
+    dot: "bg-green-500",
+    tint: "bg-green-50 dark:bg-green-950/40",
+    badge: "success"
+  },
+  order_completed: {
+    label: "Completed",
+    dot: "bg-neutral-400",
+    tint: "bg-neutral-50 dark:bg-neutral-900",
+    badge: "outline"
+  },
+  order_refused: {
+    label: "Refused",
+    dot: "bg-red-500",
+    tint: "bg-red-50 dark:bg-red-950/40",
+    badge: "danger"
+  }
+};
+function relativeTime2(input) {
+  if (!input) return "";
+  const d = input instanceof Date ? input : new Date(input);
+  const diffMs = Date.now() - d.getTime();
+  if (Number.isNaN(diffMs)) return "";
+  const sec = Math.max(0, Math.floor(diffMs / 1e3));
+  if (sec < 60) return "just now";
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day}d ago`;
+  return d.toLocaleDateString();
+}
+function initialsOf(name) {
+  if (!name) return "\u2014";
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "\u2014";
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "";
+  return (first + last).toUpperCase() || "\u2014";
+}
+function OrderCardItem({
+  order,
+  onClick
+}) {
+  const meta = STATUS_META[order.status];
+  const interactive = Boolean(onClick);
+  const handleClick = () => {
+    if (onClick) onClick(order);
+  };
+  const handleKey = (e) => {
+    if (!interactive) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    chunkOGGM27JO_cjs.Card,
+    {
+      role: interactive ? "button" : void 0,
+      tabIndex: interactive ? 0 : void 0,
+      onClick: interactive ? handleClick : void 0,
+      onKeyDown: interactive ? handleKey : void 0,
+      "aria-label": order.employeeName ? `Order ${order.orderNumber ?? order.id.slice(-6)} for ${order.employeeName}, ${meta.label}` : `Order ${order.orderNumber ?? order.id.slice(-6)}, ${meta.label}`,
+      className: chunkOR5DRJCW_cjs.cn(
+        "w-full max-w-full border p-3 transition-all",
+        interactive && "cursor-pointer hover:border-primary-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+      ),
+      padding: "none",
+      children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex min-w-0 items-start gap-3", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "span",
+          {
+            "aria-hidden": "true",
+            className: chunkOR5DRJCW_cjs.cn(
+              "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white",
+              meta.dot
+            ),
+            children: initialsOf(order.employeeName)
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start justify-between gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-sm font-semibold text-foreground", children: order.employeeName ?? order.orderNumber ?? `#${order.id.slice(-6)}` }),
+            order.isFresh && /* @__PURE__ */ jsxRuntime.jsxs(
+              "span",
+              {
+                className: "relative mt-1 flex h-2 w-2 flex-shrink-0",
+                title: "Recently updated",
+                "aria-label": "Recently updated",
+                children: [
+                  /* @__PURE__ */ jsxRuntime.jsx(
+                    "span",
+                    {
+                      className: chunkOR5DRJCW_cjs.cn(
+                        "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
+                        meta.dot
+                      )
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntime.jsx(
+                    "span",
+                    {
+                      className: chunkOR5DRJCW_cjs.cn(
+                        "relative inline-flex h-2 w-2 rounded-full",
+                        meta.dot
+                      )
+                    }
+                  )
+                ]
+              }
+            )
+          ] }),
+          order.employeeName && (order.orderNumber || order.id) && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate font-mono text-[11px] text-muted-foreground", children: order.orderNumber ?? `#${order.id.slice(-6)}` }),
+          order.serviceSummary && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 line-clamp-2 text-xs text-foreground/80", children: order.serviceSummary }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-1.5 flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground", children: [
+            order.providerName && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0 flex-1 truncate", children: order.providerName }),
+            order.updatedAt && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-auto flex-shrink-0 whitespace-nowrap", children: relativeTime2(order.updatedAt) })
+          ] })
+        ] })
+      ] })
+    }
+  );
+}
+function Column({
+  status,
+  orders,
+  onOrderClick
+}) {
+  const meta = STATUS_META[status];
+  const isEmpty = orders.length === 0;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        // On mobile we stack vertically and let empty columns collapse to a
+        // single row; on lg+ we render the classic Kanban column.
+        // `min-w-0` is critical on the grid item so long unbreakable content
+        // inside a card doesn't blow out the grid track and push cards past
+        // the column boundary. `overflow-hidden` keeps any stray child inside
+        // the rounded container.
+        "flex min-w-0 flex-col overflow-hidden rounded-xl border border-border p-3 lg:flex-1",
+        meta.tint,
+        // Empty columns keep a slim footprint on small screens so the user
+        // isn't scrolling through 5 "No orders" blocks on a phone.
+        isEmpty && "lg:p-3"
+      ),
+      "aria-label": `${meta.label}: ${orders.length} ${orders.length === 1 ? "order" : "orders"}`,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "flex items-center justify-between gap-2",
+              !isEmpty && "mb-3",
+              isEmpty && "lg:mb-3"
+            ),
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex min-w-0 items-center gap-2", children: [
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "span",
+                  {
+                    className: chunkOR5DRJCW_cjs.cn("h-2 w-2 flex-shrink-0 rounded-full", meta.dot),
+                    "aria-hidden": "true"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "truncate text-sm font-semibold text-foreground", children: meta.label }),
+                isEmpty && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-muted-foreground lg:hidden", children: "\u2014 no orders" })
+              ] }),
+              /* @__PURE__ */ jsxRuntime.jsx(
+                chunkFOFDJDAY_cjs.Badge,
+                {
+                  variant: meta.badge,
+                  size: "sm",
+                  className: chunkOR5DRJCW_cjs.cn("flex-shrink-0", isEmpty && "hidden lg:inline-flex"),
+                  children: orders.length
+                }
+              )
+            ]
+          }
+        ),
+        !isEmpty && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex min-w-0 flex-col gap-2", children: orders.map((o) => /* @__PURE__ */ jsxRuntime.jsx(OrderCardItem, { order: o, onClick: onOrderClick }, o.id)) }),
+        isEmpty && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "hidden py-4 text-center text-xs text-muted-foreground lg:block", children: "No orders" })
+      ]
+    }
+  );
+}
+function LiveOrderTracker({
+  orders,
+  onOrderClick,
+  loading = false,
+  columns = DEFAULT_COLUMNS,
+  emptyState,
+  className
+}) {
+  const grouped = React49__namespace.useMemo(() => {
+    const map = {};
+    for (const col of columns) map[col] = [];
+    for (const o of orders) {
+      if (map[o.status]) map[o.status].push(o);
+    }
+    for (const col of columns) {
+      map[col].sort((a, b) => {
+        const at = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+        const bt = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+        return bt - at;
+      });
+    }
+    return map;
+  }, [orders, columns]);
+  if (loading) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+          className
+        ),
+        children: columns.map((c) => /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: "h-40 animate-pulse rounded-xl border border-border bg-muted/40"
+          },
+          c
+        ))
+      }
+    );
+  }
+  if (!orders.length && emptyState) {
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className, children: emptyState });
+  }
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        // Mobile-first: stack columns vertically so there is no horizontal
+        // scrolling on phones/tablets. On lg+ switch to a 2-up layout and
+        // graduate to the full 5-column Kanban at xl so narrower desktops
+        // (laptops + sidebars) don't overflow their container.
+        "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+        className
+      ),
+      children: columns.map((status) => /* @__PURE__ */ jsxRuntime.jsx(
+        Column,
+        {
+          status,
+          orders: grouped[status] ?? [],
+          onOrderClick
+        },
+        status
+      ))
     }
   );
 }
@@ -17726,7 +18357,7 @@ function LoadingPage({
 }) {
   return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(pageVariants({ size }), className), children: children || /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-6", children: [
-      indicator === "spinner" && /* @__PURE__ */ jsxRuntime.jsx(chunkJYMQJ32S_cjs.Spinner, { size: spinnerSize }),
+      indicator === "spinner" && /* @__PURE__ */ jsxRuntime.jsx(chunkPN4ZPTTG_cjs.Spinner, { size: spinnerSize }),
       indicator === "dots" && /* @__PURE__ */ jsxRuntime.jsx(LoadingDots, { size: "lg" }),
       indicator === "bar" && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "w-48", children: /* @__PURE__ */ jsxRuntime.jsx(LoadingBar, { progress }) }),
       indicator === "pulse" && /* @__PURE__ */ jsxRuntime.jsx(PulseIndicator, {})
@@ -17755,7 +18386,7 @@ function LoadingOverlay({
           backdrop === "transparent" && "bg-transparent"
         ),
         children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkJYMQJ32S_cjs.Spinner, { size: spinnerSize }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkPN4ZPTTG_cjs.Spinner, { size: spinnerSize }),
           message && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-3 text-sm font-medium text-gray-700 dark:text-gray-300", children: message })
         ]
       }
@@ -17838,9 +18469,9 @@ function CardSkeleton({
 }
 function PulseIndicator() {
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative h-16 w-16", children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-200 dark:bg-primary-800 absolute inset-0 animate-ping rounded-full opacity-75" }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-400 dark:bg-primary-600 absolute inset-2 animate-pulse rounded-full" }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-600 dark:bg-primary-400 absolute inset-4 rounded-full" })
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-0 animate-ping rounded-full bg-primary-200 opacity-75 dark:bg-primary-800" }),
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-2 animate-pulse rounded-full bg-primary-400 dark:bg-primary-600" }),
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute inset-4 rounded-full bg-primary-600 dark:bg-primary-400" })
   ] });
 }
 var headerVariants = classVarianceAuthority.cva(
@@ -17902,7 +18533,7 @@ function formatLastSeen(date) {
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString();
 }
-var ConversationHeader = React47__namespace.forwardRef(
+var ConversationHeader = React49__namespace.forwardRef(
   ({
     className,
     size,
@@ -17940,7 +18571,7 @@ var ConversationHeader = React47__namespace.forwardRef(
                 "text-neutral-500 hover:text-neutral-700",
                 "dark:text-neutral-400 dark:hover:text-neutral-200",
                 "hover:bg-neutral-100 dark:hover:bg-neutral-800",
-                "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                "focus:outline-none focus:ring-2 focus:ring-primary-500",
                 "transition-colors"
               ),
               "aria-label": "Go back",
@@ -17986,7 +18617,7 @@ var ConversationHeader = React47__namespace.forwardRef(
               "span",
               {
                 className: chunkOR5DRJCW_cjs.cn(
-                  "absolute right-0 bottom-0",
+                  "absolute bottom-0 right-0",
                   "h-3 w-3 rounded-full",
                   "bg-green-500 ring-2 ring-white dark:ring-neutral-900"
                 ),
@@ -18014,7 +18645,7 @@ var ConversationHeader = React47__namespace.forwardRef(
   }
 );
 ConversationHeader.displayName = "ConversationHeader";
-var ConversationListItem = React47__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
+var ConversationListItem = React49__namespace.forwardRef(({ className, conversation, isSelected, onSelect, ...props }, ref) => {
   const participant = conversation.participants.find((p) => !p.isCurrentUser);
   const title = getConversationTitle(conversation, participant);
   const avatarUrl = conversation.avatarUrl || participant?.avatarUrl;
@@ -18054,7 +18685,7 @@ var ConversationListItem = React47__namespace.forwardRef(({ className, conversat
       className: chunkOR5DRJCW_cjs.cn(
         "flex w-full items-center gap-3 px-4 py-3",
         "text-left transition-colors",
-        isSelected ? "bg-primary-50 dark:bg-primary-900/20" : "hover:bg-neutral-50 dark:hover:bg-neutral-800/50",
+        isSelected ? "dark:bg-primary-900/20 bg-primary-50" : "hover:bg-neutral-50 dark:hover:bg-neutral-800/50",
         "focus:bg-neutral-50 focus:outline-none dark:focus:bg-neutral-800/50",
         className
       ),
@@ -18083,7 +18714,7 @@ var ConversationListItem = React47__namespace.forwardRef(({ className, conversat
             "span",
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "absolute right-0 bottom-0",
+                "absolute bottom-0 right-0",
                 "h-3 w-3 rounded-full",
                 "bg-green-500 ring-2 ring-white dark:ring-neutral-900"
               )
@@ -18132,7 +18763,7 @@ var ConversationListItem = React47__namespace.forwardRef(({ className, conversat
           conversation.isPinned && /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
-              className: "text-primary-500 h-4 w-4",
+              className: "h-4 w-4 text-primary-500",
               fill: "currentColor",
               viewBox: "0 0 24 24",
               children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M16 4v8l2 2v2h-6v6l-1 1-1-1v-6H4v-2l2-2V4c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2z" })
@@ -18204,7 +18835,7 @@ function ConversationListSkeleton({
 }
 ConversationListSkeleton.displayName = "ConversationListSkeleton";
 function LightboxModal({ attachment, onClose }) {
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         onClose();
@@ -18245,11 +18876,11 @@ function LightboxModal({ attachment, onClose }) {
             type: "button",
             onClick: onClose,
             className: chunkOR5DRJCW_cjs.cn(
-              "absolute top-4 right-4 z-10",
+              "absolute right-4 top-4 z-10",
               "rounded-full p-2",
               "bg-white/10 text-white",
               "hover:bg-white/20",
-              "focus:ring-2 focus:ring-white focus:outline-none",
+              "focus:outline-none focus:ring-2 focus:ring-white",
               "transition-colors"
             ),
             "aria-label": "Close",
@@ -18299,7 +18930,7 @@ function LightboxModal({ attachment, onClose }) {
   );
 }
 LightboxModal.displayName = "LightboxModal";
-var MessageThread = React47__namespace.forwardRef(
+var MessageThread = React49__namespace.forwardRef(
   ({
     conversation,
     messages,
@@ -18330,8 +18961,8 @@ var MessageThread = React47__namespace.forwardRef(
     onError,
     className
   }, ref) => {
-    const [lightboxAttachment, setLightboxAttachment] = React47__namespace.useState(null);
-    const [replyTo, setReplyTo] = React47__namespace.useState(null);
+    const [lightboxAttachment, setLightboxAttachment] = React49__namespace.useState(null);
+    const [replyTo, setReplyTo] = React49__namespace.useState(null);
     const participant = conversation?.type === "direct" ? conversation.participants.find((p) => p.id !== currentUser.id) : void 0;
     const handleAttachmentClick = (attachment, message) => {
       if (attachment.type === "image" || attachment.type === "video") {
@@ -18499,13 +19130,13 @@ function useMessages(options) {
     onRetry,
     onLoadMore
   } = options;
-  const [messages, setMessages] = React47__namespace.useState(initialMessages);
-  const [isSending, setIsSending] = React47__namespace.useState(false);
-  const [isLoadingMore, setIsLoadingMore] = React47__namespace.useState(false);
-  React47__namespace.useEffect(() => {
+  const [messages, setMessages] = React49__namespace.useState(initialMessages);
+  const [isSending, setIsSending] = React49__namespace.useState(false);
+  const [isLoadingMore, setIsLoadingMore] = React49__namespace.useState(false);
+  React49__namespace.useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
-  const addMessage = React47__namespace.useCallback((message) => {
+  const addMessage = React49__namespace.useCallback((message) => {
     setMessages((prev) => {
       if (prev.some((m) => m.id === message.id)) {
         return prev;
@@ -18513,7 +19144,7 @@ function useMessages(options) {
       return [...prev, message];
     });
   }, []);
-  const updateMessage = React47__namespace.useCallback(
+  const updateMessage = React49__namespace.useCallback(
     (messageId, updates) => {
       setMessages(
         (prev) => prev.map((m) => m.id === messageId ? { ...m, ...updates } : m)
@@ -18521,22 +19152,22 @@ function useMessages(options) {
     },
     []
   );
-  const removeMessage = React47__namespace.useCallback((messageId) => {
+  const removeMessage = React49__namespace.useCallback((messageId) => {
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
-  const updateStatus = React47__namespace.useCallback(
+  const updateStatus = React49__namespace.useCallback(
     (messageId, status) => {
       updateMessage(messageId, { status });
     },
     [updateMessage]
   );
-  const markAsRead = React47__namespace.useCallback(
+  const markAsRead = React49__namespace.useCallback(
     (messageId) => {
       updateStatus(messageId, "read");
     },
     [updateStatus]
   );
-  const sendMessage = React47__namespace.useCallback(
+  const sendMessage = React49__namespace.useCallback(
     async (newMessage) => {
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticMessage = {
@@ -18568,7 +19199,7 @@ function useMessages(options) {
     },
     [currentUser, onSend, addMessage, updateStatus]
   );
-  const retryMessage = React47__namespace.useCallback(
+  const retryMessage = React49__namespace.useCallback(
     async (messageId) => {
       updateStatus(messageId, "sending");
       try {
@@ -18582,7 +19213,7 @@ function useMessages(options) {
     },
     [onRetry, updateStatus]
   );
-  const loadMore = React47__namespace.useCallback(async () => {
+  const loadMore = React49__namespace.useCallback(async () => {
     if (isLoadingMore || !onLoadMore) return;
     setIsLoadingMore(true);
     try {
@@ -18613,13 +19244,13 @@ function useTypingIndicator(options = {}) {
     onTypingStart,
     onTypingStop
   } = options;
-  const [participants, setParticipants] = React47__namespace.useState(initialParticipants);
-  const [isLocalTyping, setIsLocalTyping] = React47__namespace.useState(false);
-  const typingTimeoutRef = React47__namespace.useRef(null);
-  React47__namespace.useEffect(() => {
+  const [participants, setParticipants] = React49__namespace.useState(initialParticipants);
+  const [isLocalTyping, setIsLocalTyping] = React49__namespace.useState(false);
+  const typingTimeoutRef = React49__namespace.useRef(null);
+  React49__namespace.useEffect(() => {
     setParticipants(initialParticipants);
   }, [initialParticipants]);
-  const startTyping = React47__namespace.useCallback(() => {
+  const startTyping = React49__namespace.useCallback(() => {
     if (!isLocalTyping) {
       setIsLocalTyping(true);
       onTypingStart?.();
@@ -18632,21 +19263,21 @@ function useTypingIndicator(options = {}) {
       onTypingStop?.();
     }, debounceTime);
   }, [isLocalTyping, debounceTime, onTypingStart, onTypingStop]);
-  const stopTyping = React47__namespace.useCallback(() => {
+  const stopTyping = React49__namespace.useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     setIsLocalTyping(false);
     onTypingStop?.();
   }, [onTypingStop]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
     };
   }, []);
-  const typingState = React47__namespace.useMemo(
+  const typingState = React49__namespace.useMemo(
     () => ({
       participants,
       lastUpdated: /* @__PURE__ */ new Date()
@@ -18662,11 +19293,11 @@ function useTypingIndicator(options = {}) {
 }
 function useMessageScroll(options) {
   const { messages, currentUserId, threshold = 100 } = options;
-  const scrollContainerRef = React47__namespace.useRef(null);
-  const bottomRef = React47__namespace.useRef(null);
-  const [isScrolledUp, setIsScrolledUp] = React47__namespace.useState(false);
-  const prevMessageCountRef = React47__namespace.useRef(messages.length);
-  React47__namespace.useEffect(() => {
+  const scrollContainerRef = React49__namespace.useRef(null);
+  const bottomRef = React49__namespace.useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = React49__namespace.useState(false);
+  const prevMessageCountRef = React49__namespace.useRef(messages.length);
+  React49__namespace.useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     const handleScroll = () => {
@@ -18677,12 +19308,12 @@ function useMessageScroll(options) {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [threshold]);
-  const scrollToBottom = React47__namespace.useCallback((smooth = true) => {
+  const scrollToBottom = React49__namespace.useCallback((smooth = true) => {
     bottomRef.current?.scrollIntoView({
       behavior: smooth ? "smooth" : "auto"
     });
   }, []);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     const messageCountChanged = messages.length !== prevMessageCountRef.current;
     prevMessageCountRef.current = messages.length;
     if (!messageCountChanged) return;
@@ -18701,9 +19332,9 @@ function useMessageScroll(options) {
 }
 function useReadReceipts(options) {
   const { currentUserId, onMarkRead, threshold = 0.5 } = options;
-  const observerRef = React47__namespace.useRef(null);
-  const observedMessagesRef = React47__namespace.useRef(/* @__PURE__ */ new Set());
-  React47__namespace.useEffect(() => {
+  const observerRef = React49__namespace.useRef(null);
+  const observedMessagesRef = React49__namespace.useRef(/* @__PURE__ */ new Set());
+  React49__namespace.useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -18722,7 +19353,7 @@ function useReadReceipts(options) {
       observerRef.current?.disconnect();
     };
   }, [onMarkRead, threshold]);
-  const observeMessage = React47__namespace.useCallback(
+  const observeMessage = React49__namespace.useCallback(
     (element, message) => {
       if (!element || !observerRef.current) return;
       if (message.sender.id !== currentUserId && message.status !== "read" && !observedMessagesRef.current.has(message.id)) {
@@ -18776,7 +19407,7 @@ function NearbyProviderCard({
             "div",
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "from-primary-500 to-primary-700 shadow-primary-500/20 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br text-lg font-bold text-white shadow-sm",
+                "shadow-primary-500/20 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 text-lg font-bold text-white shadow-sm",
                 logoUrl && "hidden"
               ),
               children: initials
@@ -18789,11 +19420,11 @@ function NearbyProviderCard({
               LinkWrapper,
               {
                 to: `/provider/${slug}`,
-                className: "hover:text-primary-600 dark:hover:text-primary-400 text-sm font-semibold text-gray-900 transition-colors dark:text-white",
+                className: "text-sm font-semibold text-gray-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400",
                 children: name
               }
             ),
-            /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "dark:bg-primary-900/30 inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary-600 dark:text-primary-400", children: [
               distance.toFixed(1),
               " mi"
             ] })
@@ -18813,7 +19444,7 @@ function NearbyProviderCard({
             "a",
             {
               href: `tel:${phoneNumber}`,
-              className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm",
+              className: "inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
               children: [
                 /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon3, { className: "h-4 w-4" }),
                 formatPhone(phoneNumber)
@@ -18841,7 +19472,7 @@ function NearbyProvidersList({
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-4", className), children: [
     /* @__PURE__ */ jsxRuntime.jsxs("h2", { className: "flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "text-primary-600 dark:text-primary-400 h-5 w-5" }),
+      /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "h-5 w-5 text-primary-600 dark:text-primary-400" }),
       title
     ] }),
     showConciergeBanner && /* @__PURE__ */ jsxRuntime.jsx(ConciergeBanner, {}),
@@ -18858,7 +19489,7 @@ function NearbyProvidersList({
       "a",
       {
         href: `/providers/search/${zipcode}/25`,
-        className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-2 text-sm font-medium",
+        className: "inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
         children: [
           /* @__PURE__ */ jsxRuntime.jsx(LocationIcon, { className: "h-4 w-4" }),
           "SHOW PROVIDERS IN ",
@@ -18869,7 +19500,7 @@ function NearbyProvidersList({
   ] });
 }
 function ConciergeBanner() {
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-primary-200 bg-primary-50 dark:border-primary-800 dark:bg-primary-900/20 rounded-lg border p-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "dark:bg-primary-900/20 rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
     /* @__PURE__ */ jsxRuntime.jsx(
       "img",
       {
@@ -18889,7 +19520,7 @@ function ConciergeBanner() {
           href: "https://bluehive.com/concierge/",
           target: "_blank",
           rel: "noopener noreferrer",
-          className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 mt-1 inline-flex items-center gap-1 text-sm font-medium",
+          className: "mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400",
           children: [
             "LEARN MORE",
             /* @__PURE__ */ jsxRuntime.jsx(ArrowRightIcon, { className: "h-4 w-4" })
@@ -19132,11 +19763,11 @@ function NotificationCenter({
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "font-semibold text-gray-900 dark:text-white", children: "Notifications" }),
-            unreadCount > 0 && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "default", children: unreadCount })
+            unreadCount > 0 && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "default", children: unreadCount })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-            onMarkAllRead && unreadCount > 0 && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "ghost", size: "sm", onClick: onMarkAllRead, children: "Mark all read" }),
-            onClearAll && notifications.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "ghost", size: "sm", onClick: onClearAll, children: "Clear all" })
+            onMarkAllRead && unreadCount > 0 && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "ghost", size: "sm", onClick: onMarkAllRead, children: "Mark all read" }),
+            onClearAll && notifications.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "ghost", size: "sm", onClick: onClearAll, children: "Clear all" })
           ] })
         ] }),
         notifications.length === 0 ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-12 text-center", children: [
@@ -19185,7 +19816,7 @@ function NotificationCenter({
             },
             children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-3", children: [
               notification.senderAvatar || notification.senderName ? /* @__PURE__ */ jsxRuntime.jsx(
-                chunk2J2V4TMJ_cjs.Avatar,
+                chunkW4MDIFH6_cjs.Avatar,
                 {
                   src: notification.senderAvatar,
                   name: notification.senderName,
@@ -19208,8 +19839,8 @@ function NotificationCenter({
                     }
                   ),
                   /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-shrink-0 items-center gap-2", children: [
-                    notification.priority === "urgent" && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "danger", children: "Urgent" }),
-                    notification.priority === "high" && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "warning", children: "High" }),
+                    notification.priority === "urgent" && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "danger", children: "Urgent" }),
+                    notification.priority === "high" && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "warning", children: "High" }),
                     !notification.isRead && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 rounded-full bg-blue-500" })
                   ] })
                 ] }),
@@ -19218,7 +19849,7 @@ function NotificationCenter({
                   /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-gray-400 dark:text-gray-500", children: formatTimestamp(notification.timestamp) }),
                   /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
                     notification.actionLabel && /* @__PURE__ */ jsxRuntime.jsx(
-                      chunkMKJDBXX4_cjs.Button,
+                      chunkIO2XB35K_cjs.Button,
                       {
                         variant: "link",
                         size: "sm",
@@ -19233,7 +19864,7 @@ function NotificationCenter({
                       }
                     ),
                     onDismiss && /* @__PURE__ */ jsxRuntime.jsx(
-                      chunkMKJDBXX4_cjs.Button,
+                      chunkIO2XB35K_cjs.Button,
                       {
                         variant: "ghost",
                         size: "sm",
@@ -19252,7 +19883,7 @@ function NotificationCenter({
           },
           notification.id
         )) }),
-        hasMore && onSeeAll && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-t border-gray-200 px-4 py-3 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "ghost", className: "w-full", onClick: onSeeAll, children: "See all notifications" }) })
+        hasMore && onSeeAll && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-t border-gray-200 px-4 py-3 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "ghost", className: "w-full", onClick: onSeeAll, children: "See all notifications" }) })
       ]
     }
   );
@@ -19309,7 +19940,7 @@ function OnboardingWizard({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "onboarding-wizard bg-background text-foreground fixed inset-0 z-50 flex flex-col",
+        "onboarding-wizard fixed inset-0 z-50 flex flex-col bg-background text-foreground",
         className
       ),
       children: [
@@ -19324,14 +19955,14 @@ function OnboardingWizard({
           headerContent
         ] }),
         loading ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-1 flex-col items-center justify-center", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkJYMQJ32S_cjs.Spinner, { size: "xl" }),
-          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mt-4 text-center text-lg", children: loadingMessage })
+          /* @__PURE__ */ jsxRuntime.jsx(chunkPN4ZPTTG_cjs.Spinner, { size: "xl" }),
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-4 text-center text-lg text-muted-foreground", children: loadingMessage })
         ] }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "container mx-auto flex flex-1 flex-col p-4", children: [
-          error && /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.Alert, { variant: "danger", className: "mb-4", children: error }),
+          error && /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.Alert, { variant: "danger", className: "mb-4", children: error }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1 overflow-y-auto", children: currentStepData?.content }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border mt-auto border-t pt-4", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-auto border-t border-border pt-4", children: [
             !isLastStep && currentStepData?.skippable !== false && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-3 flex justify-end", children: /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 variant: "secondary",
                 size: "sm",
@@ -19340,9 +19971,9 @@ function OnboardingWizard({
                 children: skip
               }
             ) }),
-            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-background flex w-full items-center gap-4", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full items-center gap-4 bg-background", children: [
               /* @__PURE__ */ jsxRuntime.jsxs(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "outline",
                   onClick: handleBack,
@@ -19354,7 +19985,7 @@ function OnboardingWizard({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-                chunkNAATBUHR_cjs.Progress,
+                chunk23KJAH6Y_cjs.Progress,
                 {
                   value: progressPercent,
                   size: "lg",
@@ -19365,7 +19996,7 @@ function OnboardingWizard({
                 }
               ) }),
               /* @__PURE__ */ jsxRuntime.jsxs(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "primary",
                   onClick: handleNext,
@@ -19394,14 +20025,14 @@ function OnboardingStepQuestion({
 }) {
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-4", children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 flex items-start gap-3", children: [
-      icon && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground hidden rounded-full p-3", children: /* @__PURE__ */ jsxRuntime.jsx("i", { className: chunkOR5DRJCW_cjs.cn(icon, "text-lg") }) }),
+      icon && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "hidden rounded-full bg-muted p-3 text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx("i", { className: chunkOR5DRJCW_cjs.cn(icon, "text-lg") }) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-foreground mb-2 text-2xl font-bold", children: title }),
+        /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-2 text-2xl font-bold text-foreground", children: title }),
         description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground", children: description })
       ] })
     ] }),
     options.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-2", children: options.map((option) => /* @__PURE__ */ jsxRuntime.jsxs(
-      chunkMKJDBXX4_cjs.Button,
+      chunkIO2XB35K_cjs.Button,
       {
         variant: option.selected ? "primary" : "outline",
         onClick: () => onSelect?.(option.id),
@@ -19427,22 +20058,22 @@ function OnboardingCompletion({
   if (completed) {
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-4", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-foreground mb-0 text-2xl", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "mb-0 text-2xl text-foreground", children: [
           /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-check-circle mr-2 text-green-500" }),
           "Setup complete!"
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground", children: "You're all set up! You can now start using BlueHive to manage your employees." })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "my-6 flex flex-wrap gap-3", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "primary", onClick: onStartOrder, children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "primary", onClick: onStartOrder, children: [
           /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-shopping-cart mr-2" }),
           "Start your first order"
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onGoToDashboard, children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onGoToDashboard, children: [
           /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-tachometer-alt mr-2" }),
           "Go to Dashboard"
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onGoToEmployees, children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onGoToEmployees, children: [
           /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-users mr-2" }),
           "Go to Employees"
         ] })
@@ -19451,11 +20082,11 @@ function OnboardingCompletion({
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "py-4", children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-foreground mb-2 text-2xl font-bold", children: "Some steps not completed" }),
+      /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-2 text-2xl font-bold text-foreground", children: "Some steps not completed" }),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground", children: "You still need to complete some steps to finish the full guided onboarding. If you're in a hurry, you can skip them for now and come back later." })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-3", children: incompleteSteps.map(({ step, label }) => /* @__PURE__ */ jsxRuntime.jsxs(
-      chunkMKJDBXX4_cjs.Button,
+      chunkIO2XB35K_cjs.Button,
       {
         variant: "outline",
         onClick: () => onGoToStep?.(step),
@@ -19548,7 +20179,7 @@ function OrderCard({
     }
   };
   return /* @__PURE__ */ jsxRuntime.jsx(
-    chunkHRA4FUO6_cjs.Card,
+    chunkOGGM27JO_cjs.Card,
     {
       className: `transition-all duration-200 ${onClick ? "cursor-pointer hover:shadow-md" : ""} ${selected ? "ring-primary ring-2" : ""} ${className} `.trim(),
       onClick: onClick ? handleCardClick : void 0,
@@ -19556,42 +20187,42 @@ function OrderCard({
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-start justify-between gap-4", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-foreground font-semibold", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "font-semibold text-foreground", children: [
                 "#",
                 orderNumber
               ] }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: statusInfo.variant, children: statusInfo.label })
+              /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: statusInfo.variant, children: statusInfo.label })
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx(
               "p",
               {
-                className: "text-muted-foreground mt-1 text-sm",
+                className: "mt-1 text-sm text-muted-foreground",
                 title: formatDate3(createdAt),
                 children: formatRelativeTime2(createdAt)
               }
             )
           ] }),
-          totalAmount !== void 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-shrink-0 text-right", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground font-semibold", children: formatCurrency(totalAmount, currency) }) })
+          totalAmount !== void 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-shrink-0 text-right", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-semibold text-foreground", children: formatCurrency(totalAmount, currency) }) })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-3", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunk2J2V4TMJ_cjs.Avatar,
+            chunkW4MDIFH6_cjs.Avatar,
             {
               name: `${employee.firstName} ${employee.lastName}`,
               size: "sm"
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
-            /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-foreground truncate font-medium", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "truncate font-medium text-foreground", children: [
               employee.firstName,
               " ",
               employee.lastName
             ] }),
-            employer && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground truncate text-sm", children: employer.name })
+            employer && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-sm text-muted-foreground", children: employer.name })
           ] })
         ] }) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-muted-foreground mb-1 text-xs font-medium tracking-wider uppercase", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground", children: [
             "Services (",
             services.length,
             ")"
@@ -19600,19 +20231,19 @@ function OrderCard({
             services.slice(0, 3).map((service) => /* @__PURE__ */ jsxRuntime.jsx(
               "span",
               {
-                className: "bg-muted text-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium",
+                className: "inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground",
                 children: service.name
               },
               service.id
             )),
-            services.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "bg-muted text-muted-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium", children: [
+            services.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground", children: [
               "+",
               services.length - 3,
               " more"
             ] })
           ] })
         ] }),
-        scheduledDate && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-muted-foreground mb-3 flex items-center gap-2 text-sm", children: [
+        scheduledDate && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-center gap-2 text-sm text-muted-foreground", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -19636,12 +20267,12 @@ function OrderCard({
             formatDate3(scheduledDate)
           ] })
         ] }),
-        status === "rejected" && rejectionReason && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-destructive/10 text-destructive mb-3 rounded p-2 text-sm", children: [
+        status === "rejected" && rejectionReason && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-destructive/10 mb-3 rounded p-2 text-sm text-destructive", children: [
           /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: "Reason:" }),
           " ",
           rejectionReason
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border flex items-center justify-between border-t pt-3", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-t border-border pt-3", children: [
           onView && /* @__PURE__ */ jsxRuntime.jsx(
             "button",
             {
@@ -19657,7 +20288,7 @@ function OrderCard({
               {
                 type: "button",
                 onClick: handleRejectClick,
-                className: "text-destructive hover:bg-destructive/10 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                className: "hover:bg-destructive/10 rounded-md px-3 py-1.5 text-sm font-medium text-destructive transition-colors",
                 children: "Reject"
               }
             ),
@@ -19686,13 +20317,13 @@ function OrderConfirmationWizard({
   stepTitles = ["Verify Employee", "Consent & ID", "Confirmation"],
   className = ""
 }) {
-  const [step, setStep] = React47__namespace.useState(initialStep);
-  const [employeeVerified, setEmployeeVerified] = React47__namespace.useState(false);
-  const [verificationNotes, setVerificationNotes] = React47__namespace.useState("");
-  const [consentObtained, setConsentObtained] = React47__namespace.useState(false);
-  const [idVerified, setIdVerified] = React47__namespace.useState(false);
-  const [idType, setIdType] = React47__namespace.useState("");
-  const [confirmationNotes, setConfirmationNotes] = React47__namespace.useState("");
+  const [step, setStep] = React49__namespace.useState(initialStep);
+  const [employeeVerified, setEmployeeVerified] = React49__namespace.useState(false);
+  const [verificationNotes, setVerificationNotes] = React49__namespace.useState("");
+  const [consentObtained, setConsentObtained] = React49__namespace.useState(false);
+  const [idVerified, setIdVerified] = React49__namespace.useState(false);
+  const [idType, setIdType] = React49__namespace.useState("");
+  const [confirmationNotes, setConfirmationNotes] = React49__namespace.useState("");
   const handleStepChange = (newStep) => {
     setStep(newStep);
     onStepChange?.(newStep);
@@ -19720,7 +20351,7 @@ function OrderConfirmationWizard({
       const stepNum = index + 1;
       const isActive = step === stepNum;
       const isComplete = step > stepNum;
-      return /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+      return /* @__PURE__ */ jsxRuntime.jsxs(React49__namespace.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col items-center", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "div",
@@ -19762,14 +20393,14 @@ function OrderConfirmationWizard({
         )
       ] }, stepNum);
     }) }) }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { className: "mb-6", children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "p-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { className: "mb-6", children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "p-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: order.orderNumber }),
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: order.serviceName })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "warning", children: "In Progress" })
+      /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "warning", children: "In Progress" })
     ] }) }) }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { className: "mb-6", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "p-6", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { className: "mb-6", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "p-6", children: [
       step === 1 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-6", children: [
         /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-lg font-semibold text-gray-900 dark:text-white", children: "Verify Employee Identity" }),
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-600 dark:text-gray-400", children: "Please verify the following information matches the employee present." }),
@@ -19816,7 +20447,7 @@ function OrderConfirmationWizard({
             "textarea",
             {
               id: "verification-notes",
-              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
               rows: 2,
               value: verificationNotes,
               onChange: (e) => setVerificationNotes(e.target.value),
@@ -19864,7 +20495,7 @@ function OrderConfirmationWizard({
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: "Photo ID Verified" }),
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-2 text-sm text-gray-500 dark:text-gray-400", children: "Government-issued photo ID matches employee information" }),
             idVerified && /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 placeholder: "ID Type (e.g., Driver's License)",
                 value: idType,
@@ -19968,7 +20599,7 @@ function OrderConfirmationWizard({
             "textarea",
             {
               id: "confirmation-notes",
-              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
               rows: 3,
               value: confirmationNotes,
               onChange: (e) => setConfirmationNotes(e.target.value),
@@ -19980,7 +20611,7 @@ function OrderConfirmationWizard({
     ] }) }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-between", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { children: step > 1 && /* @__PURE__ */ jsxRuntime.jsxs(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           variant: "ghost",
           onClick: () => handleStepChange(step - 1),
@@ -20010,7 +20641,7 @@ function OrderConfirmationWizard({
       ) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-2", children: [
         onCancel && /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "outline",
             onClick: onCancel,
@@ -20019,7 +20650,7 @@ function OrderConfirmationWizard({
           }
         ),
         step < 3 ? /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             onClick: () => handleStepChange(step + 1),
             disabled: step === 1 ? !canProceedStep1 : !canProceedStep2,
@@ -20046,7 +20677,7 @@ function OrderConfirmationWizard({
             ]
           }
         ) : /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             onClick: handleComplete,
             disabled: !canComplete || isSubmitting,
@@ -20054,7 +20685,7 @@ function OrderConfirmationWizard({
               /* @__PURE__ */ jsxRuntime.jsxs(
                 "svg",
                 {
-                  className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                  className: "-ml-1 mr-2 h-4 w-4 animate-spin",
                   fill: "none",
                   viewBox: "0 0 24 24",
                   children: [
@@ -20125,7 +20756,7 @@ function OrderList({
   actions,
   className
 }) {
-  const filteredOrders = React47__namespace.useMemo(() => {
+  const filteredOrders = React49__namespace.useMemo(() => {
     const activeTabConfig = tabs.find((t) => t.id === activeTab);
     if (!activeTabConfig?.statuses || !getOrderStatus) {
       return orders;
@@ -20134,7 +20765,7 @@ function OrderList({
       (order) => activeTabConfig.statuses.includes(getOrderStatus(order))
     );
   }, [orders, activeTab, tabs, getOrderStatus]);
-  const tabCounts = React47__namespace.useMemo(() => {
+  const tabCounts = React49__namespace.useMemo(() => {
     if (!getOrderStatus) return {};
     const counts = {};
     tabs.forEach((tab) => {
@@ -20157,7 +20788,7 @@ function OrderList({
           {
             onClick: () => onTabChange?.(tab.id),
             className: chunkOR5DRJCW_cjs.cn(
-              "rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+              "whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors",
               activeTab === tab.id ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             ),
             children: [
@@ -20182,7 +20813,7 @@ function OrderList({
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
-              className: "absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400",
+              className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400",
               fill: "none",
               viewBox: "0 0 24 24",
               stroke: "currentColor",
@@ -20204,7 +20835,7 @@ function OrderList({
               placeholder: searchPlaceholder,
               value: searchValue,
               onChange: (e) => onSearchChange?.(e.target.value),
-              className: "rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+              className: "rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
             }
           )
         ] }),
@@ -20284,7 +20915,7 @@ function OrderLookupForm({
   welcomeMessage = "Look up your order by entering the information below.",
   className = ""
 }) {
-  const [formData, setFormData] = React47__namespace.useState({
+  const [formData, setFormData] = React49__namespace.useState({
     orderNumber: "",
     dateOfBirth: "",
     lastName: ""
@@ -20319,13 +20950,13 @@ function OrderLookupForm({
         ]
       }
     ),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center bg-white p-8 md:w-1/2 dark:bg-gray-900", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-full max-w-md", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center bg-white p-8 dark:bg-gray-900 md:w-1/2", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-full max-w-md", children: [
       /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "mb-2 text-2xl font-bold text-gray-900 dark:text-white", children: "Order Lookup" }),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-6 text-gray-600 dark:text-gray-400", children: "Enter your order details to view your information." }),
       /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "space-y-4", children: [
         (errorMessage || notFound) && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage || "Order not found. Please check your information and try again." }) }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Order Number",
             value: formData.orderNumber,
@@ -20339,7 +20970,7 @@ function OrderLookupForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Date of Birth",
             type: "date",
@@ -20352,7 +20983,7 @@ function OrderLookupForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Last Name",
             value: formData.lastName,
@@ -20363,7 +20994,7 @@ function OrderLookupForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             type: "submit",
             className: "w-full",
@@ -20372,7 +21003,7 @@ function OrderLookupForm({
               /* @__PURE__ */ jsxRuntime.jsxs(
                 "svg",
                 {
-                  className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                  className: "-ml-1 mr-2 h-4 w-4 animate-spin",
                   fill: "none",
                   viewBox: "0 0 24 24",
                   children: [
@@ -20480,7 +21111,7 @@ function OrderSidebar({
     /* @__PURE__ */ jsxRuntime.jsxs(
       "aside",
       {
-        className: `fixed top-0 right-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className} `,
+        className: `fixed right-0 top-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className} `,
         role: "dialog",
         "aria-modal": "true",
         "aria-label": "Order details",
@@ -20522,7 +21153,7 @@ function OrderSidebar({
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "h-[calc(100%-8rem)] overflow-y-auto p-4", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 flex items-center gap-2", children: [
-              status && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(status), children: status }),
+              status && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(status), children: status }),
               priority !== "normal" && /* @__PURE__ */ jsxRuntime.jsx(
                 "span",
                 {
@@ -20533,36 +21164,36 @@ function OrderSidebar({
             ] }),
             /* @__PURE__ */ jsxRuntime.jsxs("dl", { className: "space-y-4", children: [
               patientName && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Patient" }),
+                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Patient" }),
                 /* @__PURE__ */ jsxRuntime.jsx("dd", { className: "mt-1 text-sm text-gray-900 dark:text-white", children: patientName })
               ] }),
               employerName && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Employer" }),
+                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Employer" }),
                 /* @__PURE__ */ jsxRuntime.jsx("dd", { className: "mt-1 text-sm text-gray-900 dark:text-white", children: employerName })
               ] }),
               serviceName && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Service" }),
+                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Service" }),
                 /* @__PURE__ */ jsxRuntime.jsx("dd", { className: "mt-1 text-sm text-gray-900 dark:text-white", children: serviceName })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Created" }),
+                  /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Created" }),
                   /* @__PURE__ */ jsxRuntime.jsx("dd", { className: "mt-1 text-sm text-gray-900 dark:text-white", children: formatDate4(createdAt) })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Scheduled" }),
+                  /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Scheduled" }),
                   /* @__PURE__ */ jsxRuntime.jsx("dd", { className: "mt-1 text-sm text-gray-900 dark:text-white", children: formatDate4(scheduledDate) })
                 ] })
               ] }),
               notes && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400", children: "Notes" }),
+                /* @__PURE__ */ jsxRuntime.jsx("dt", { className: "text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400", children: "Notes" }),
                 /* @__PURE__ */ jsxRuntime.jsx("dd", { className: "mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300", children: notes })
               ] })
             ] }),
             children && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-6", children })
           ] }),
-          actions.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute right-0 bottom-0 left-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-2", children: actions.map((action) => /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+          actions.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-2", children: actions.map((action) => /* @__PURE__ */ jsxRuntime.jsx(
+            chunkIO2XB35K_cjs.Button,
             {
               variant: action.variant || "primary",
               onClick: action.onClick,
@@ -20809,13 +21440,13 @@ function PaymentHistoryTable({
       className: `overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 ${className}`,
       children: /* @__PURE__ */ jsxRuntime.jsxs("table", { className: "w-full", children: [
         /* @__PURE__ */ jsxRuntime.jsx("thead", { className: "bg-gray-50 dark:bg-gray-800", children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Date" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400", children: "Invoice" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400", children: "Employer" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase lg:table-cell dark:text-gray-400", children: "Method" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Amount" }),
-          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Status" }),
-          onRefund && /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Action" })
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Date" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:table-cell", children: "Invoice" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 md:table-cell", children: "Employer" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 lg:table-cell", children: "Method" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Amount" }),
+          /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Status" }),
+          onRefund && /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Action" })
         ] }) }),
         /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-y divide-gray-200 dark:divide-gray-700", children: payments.map((payment) => /* @__PURE__ */ jsxRuntime.jsxs(
           "tr",
@@ -20825,7 +21456,7 @@ function PaymentHistoryTable({
             children: [
               /* @__PURE__ */ jsxRuntime.jsxs("td", { className: "px-4 py-3", children: [
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: formatDate4(payment.date) }),
-                /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 sm:hidden dark:text-gray-400", children: payment.invoiceNumber })
+                /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400 sm:hidden", children: payment.invoiceNumber })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx("td", { className: "hidden px-4 py-3 sm:table-cell", children: payment.invoiceId && onInvoiceClick ? /* @__PURE__ */ jsxRuntime.jsx(
                 "button",
@@ -20853,9 +21484,9 @@ function PaymentHistoryTable({
                   children: formatCurrency3(payment.amount)
                 }
               ) }),
-              /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(payment.status), children: payment.status }) }),
+              /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-3 text-center", children: /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(payment.status), children: payment.status }) }),
               onRefund && /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-3 text-right", children: payment.status === "completed" && /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "ghost",
                   size: "sm",
@@ -20940,7 +21571,7 @@ function PaymentMethodCard({
                 "aria-hidden": "true"
               }
             ),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs font-medium text-gray-600 uppercase dark:text-gray-400", children: "Credit Card" })
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs font-medium uppercase text-gray-600 dark:text-gray-400", children: "Credit Card" })
           ] }),
           (card.isDefault || selected) && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-brand-600 dark:text-brand-400 text-xs font-medium", children: "Default" })
         ] }),
@@ -21038,7 +21669,7 @@ function PaymentMethodBank({
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx(BankIcon, { className: "h-5 w-5 text-gray-600 dark:text-gray-400" }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs font-medium text-gray-600 uppercase dark:text-gray-400", children: "ACH" })
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs font-medium uppercase text-gray-600 dark:text-gray-400", children: "ACH" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
             isNew && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs font-medium text-yellow-600 dark:text-yellow-400", children: "Pending Verification" }),
@@ -21054,7 +21685,7 @@ function PaymentMethodBank({
             " ",
             account.last4
           ] }),
-          account.accountType && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-xs text-gray-500 capitalize dark:text-gray-500", children: account.accountType })
+          account.accountType && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-xs capitalize text-gray-500 dark:text-gray-500", children: account.accountType })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700", children: [
           selectable && !account.isDefault && !selected ? /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "flex cursor-pointer items-center gap-2", children: [
@@ -21280,15 +21911,15 @@ function PendingClaimsTable({
       children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "hidden md:block", children: /* @__PURE__ */ jsxRuntime.jsxs("table", { className: "w-full", children: [
           /* @__PURE__ */ jsxRuntime.jsx("thead", { className: "bg-gray-50 dark:bg-gray-800", children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Claimant" }),
-            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Role" }),
-            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Submitted" }),
-            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Status" }),
-            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400", children: "Actions" })
+            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Claimant" }),
+            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Role" }),
+            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Submitted" }),
+            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Status" }),
+            /* @__PURE__ */ jsxRuntime.jsx("th", { className: "px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400", children: "Actions" })
           ] }) }),
           /* @__PURE__ */ jsxRuntime.jsx("tbody", { className: "divide-y divide-gray-200 dark:divide-gray-700", children: claims.map((claim) => /* @__PURE__ */ jsxRuntime.jsxs("tr", { className: "bg-white dark:bg-gray-900", children: [
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ jsxRuntime.jsx(chunk2J2V4TMJ_cjs.Avatar, { name: claim.claimantName, size: "sm" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkW4MDIFH6_cjs.Avatar, { name: claim.claimantName, size: "sm" }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: claim.claimantName }),
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: claim.claimantEmail })
@@ -21296,10 +21927,10 @@ function PendingClaimsTable({
             ] }) }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-4", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-700 dark:text-gray-300", children: claim.claimantRole || "Not specified" }) }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-4", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: formatDate4(claim.submittedDate) }) }),
-            /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-4 text-center", children: /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(claim.status), children: claim.status }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-4 text-center", children: /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(claim.status), children: claim.status }) }),
             /* @__PURE__ */ jsxRuntime.jsx("td", { className: "px-4 py-4 text-right", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-end gap-2", children: [
               onViewDetails && /* @__PURE__ */ jsxRuntime.jsx(
-                chunkMKJDBXX4_cjs.Button,
+                chunkIO2XB35K_cjs.Button,
                 {
                   variant: "ghost",
                   size: "sm",
@@ -21309,7 +21940,7 @@ function PendingClaimsTable({
               ),
               claim.status === "pending" && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
                 onReject && /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkMKJDBXX4_cjs.Button,
+                  chunkIO2XB35K_cjs.Button,
                   {
                     variant: "outline",
                     size: "sm",
@@ -21319,7 +21950,7 @@ function PendingClaimsTable({
                   }
                 ),
                 onApprove && /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkMKJDBXX4_cjs.Button,
+                  chunkIO2XB35K_cjs.Button,
                   {
                     size: "sm",
                     onClick: () => onApprove(claim),
@@ -21331,16 +21962,16 @@ function PendingClaimsTable({
             ] }) })
           ] }, claim.id)) })
         ] }) }),
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "divide-y divide-gray-200 md:hidden dark:divide-gray-700", children: claims.map((claim) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-white p-4 dark:bg-gray-900", children: [
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "divide-y divide-gray-200 dark:divide-gray-700 md:hidden", children: claims.map((claim) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-white p-4 dark:bg-gray-900", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start justify-between gap-4", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ jsxRuntime.jsx(chunk2J2V4TMJ_cjs.Avatar, { name: claim.claimantName, size: "sm" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkW4MDIFH6_cjs.Avatar, { name: claim.claimantName, size: "sm" }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: claim.claimantName }),
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: claim.claimantEmail })
               ] })
             ] }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(claim.status), children: claim.status })
+            /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(claim.status), children: claim.status })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-3 flex items-center justify-between", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-sm text-gray-500 dark:text-gray-400", children: [
             /* @__PURE__ */ jsxRuntime.jsx("span", { children: claim.claimantRole || "No role" }),
@@ -21349,7 +21980,7 @@ function PendingClaimsTable({
           ] }) }),
           claim.status === "pending" && (onApprove || onReject) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 flex gap-2", children: [
             onViewDetails && /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 variant: "ghost",
                 size: "sm",
@@ -21359,7 +21990,7 @@ function PendingClaimsTable({
               }
             ),
             onReject && /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 variant: "outline",
                 size: "sm",
@@ -21370,7 +22001,7 @@ function PendingClaimsTable({
               }
             ),
             onApprove && /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 size: "sm",
                 onClick: () => onApprove(claim),
@@ -21393,7 +22024,7 @@ function PermissionItem({
   parentChecked
 }) {
   const hasChildren = permission.children && permission.children.length > 0;
-  const [isExpanded, setIsExpanded] = React47__namespace.useState(true);
+  const [isExpanded, setIsExpanded] = React49__namespace.useState(true);
   const handleChange = (checked) => {
     onToggle(permission.id, checked);
     if (!checked && hasChildren) {
@@ -21412,13 +22043,13 @@ function PermissionItem({
         {
           type: "button",
           onClick: () => setIsExpanded(!isExpanded),
-          className: "hover:bg-muted rounded p-0.5",
-          children: isExpanded ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "text-muted-foreground h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "text-muted-foreground h-4 w-4" })
+          className: "rounded p-0.5 hover:bg-muted",
+          children: isExpanded ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-4 w-4 text-muted-foreground" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-4 w-4 text-muted-foreground" })
         }
       ),
       !hasChildren && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "w-5" }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkQYJ7RQJ2_cjs.Checkbox,
+        chunkMFDLN4RH_cjs.Checkbox,
         {
           id: `permission-${permission.id}`,
           checked: isAssigned,
@@ -21431,7 +22062,7 @@ function PermissionItem({
         {
           htmlFor: `permission-${permission.id}`,
           className: chunkOR5DRJCW_cjs.cn(
-            "cursor-pointer text-sm select-none",
+            "cursor-pointer select-none text-sm",
             level === 0 && "font-semibold",
             level === 1 && "font-medium",
             parentChecked === false && "text-muted-foreground"
@@ -21471,12 +22102,12 @@ function PermissionsEditor({
     summary = "Summary",
     all = "All"
   } = labels;
-  const [expandedGroups, setExpandedGroups] = React47__namespace.useState(
+  const [expandedGroups, setExpandedGroups] = React49__namespace.useState(
     () => new Set(
       groups.filter((g) => g.defaultExpanded !== false).map((g) => g.id)
     )
   );
-  const permissionMap = React47__namespace.useMemo(() => {
+  const permissionMap = React49__namespace.useMemo(() => {
     const map = /* @__PURE__ */ new Map();
     const processPermissions = (permissions) => {
       permissions.forEach((perm) => {
@@ -21520,7 +22151,7 @@ function PermissionsEditor({
       onEmployersChange([...selectedEmployers, employerId]);
     }
   };
-  const assignedPermissionNames = React47__namespace.useMemo(() => {
+  const assignedPermissionNames = React49__namespace.useMemo(() => {
     return assignedPermissions.map((id) => permissionMap.get(id)?.name).filter(Boolean);
   }, [assignedPermissions, permissionMap]);
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-6", className), children: [
@@ -21541,12 +22172,12 @@ function PermissionsEditor({
             onClick: () => toggleGroup(group.id),
             className: "hover:bg-muted/50 -ml-2 flex w-full items-center gap-2 rounded py-2 pl-2 text-left",
             children: [
-              expandedGroups.has(group.id) ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "text-muted-foreground h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "text-muted-foreground h-4 w-4" }),
+              expandedGroups.has(group.id) ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-4 w-4 text-muted-foreground" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-4 w-4 text-muted-foreground" }),
               /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-semibold", children: group.name })
             ]
           }
         ),
-        expandedGroups.has(group.id) && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 ml-6 border-l pl-4", children: group.permissions.map((permission) => /* @__PURE__ */ jsxRuntime.jsx(
+        expandedGroups.has(group.id) && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "ml-6 mt-2 border-l pl-4", children: group.permissions.map((permission) => /* @__PURE__ */ jsxRuntime.jsx(
           PermissionItem,
           {
             permission: {
@@ -21569,7 +22200,7 @@ function PermissionsEditor({
           },
           permission.id
         )) }),
-        groupIndex < groups.length - 1 && /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "border-border my-4" })
+        groupIndex < groups.length - 1 && /* @__PURE__ */ jsxRuntime.jsx("hr", { className: "my-4 border-border" })
       ] }, group.id)) })
     ] }),
     showEmployerAccess && employers.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
@@ -21583,7 +22214,7 @@ function PermissionsEditor({
           className: "hover:bg-muted/50 flex items-center gap-3 rounded px-3 py-2",
           children: [
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkQYJ7RQJ2_cjs.Checkbox,
+              chunkMFDLN4RH_cjs.Checkbox,
               {
                 id: `employer-${employer.id}`,
                 checked: selectedEmployers.includes(employer.id),
@@ -21597,7 +22228,7 @@ function PermissionsEditor({
                 className: "flex-1 cursor-pointer text-sm",
                 children: [
                   /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: employer.name }),
-                  employer.address && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground ml-2", children: [
+                  employer.address && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "ml-2 text-muted-foreground", children: [
                     "| ",
                     employer.address.street1,
                     " - ",
@@ -21628,7 +22259,7 @@ function PermissionsEditor({
           employerAccess,
           ":"
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground text-sm italic", children: selectedEmployers.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("span", { children: all }) : /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-1 space-y-0.5", children: selectedEmployers.map((id) => {
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm italic text-muted-foreground", children: selectedEmployers.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("span", { children: all }) : /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-1 space-y-0.5", children: selectedEmployers.map((id) => {
           const employer = employers.find((e) => e.id === id);
           return /* @__PURE__ */ jsxRuntime.jsx("li", { children: employer?.name }, id);
         }) }) })
@@ -21636,6 +22267,733 @@ function PermissionsEditor({
     ] })
   ] });
 }
+var SidebarContext = React49.createContext(null);
+function SidebarProvider({
+  children,
+  defaultCollapsed = false,
+  storageKey = "sidebar-collapsed",
+  persistCollapsed = true,
+  defaultExpandedGroup = null,
+  mobileBreakpoint = "(max-width: 1023px)"
+}) {
+  const isMobileViewport = chunkR4DM4635_cjs.useMediaQuery(mobileBreakpoint);
+  const [isCollapsed, setIsCollapsed] = React49.useState(() => {
+    if (typeof window !== "undefined" && persistCollapsed) {
+      const stored = localStorage.getItem(storageKey);
+      if (stored !== null) {
+        return stored === "true";
+      }
+    }
+    return defaultCollapsed;
+  });
+  const [isMobileOpen, setIsMobileOpen] = React49.useState(false);
+  const [expandedGroup, setExpandedGroup] = React49.useState(
+    defaultExpandedGroup
+  );
+  React49.useEffect(() => {
+    if (persistCollapsed && typeof window !== "undefined") {
+      localStorage.setItem(storageKey, String(isCollapsed));
+    }
+  }, [isCollapsed, persistCollapsed, storageKey]);
+  React49.useEffect(() => {
+    if (!isMobileViewport && isMobileOpen) {
+      setIsMobileOpen(false);
+    }
+  }, [isMobileViewport, isMobileOpen]);
+  const toggleCollapsed = React49.useCallback(() => {
+    setIsCollapsed((prev) => !prev);
+  }, []);
+  const setCollapsed = React49.useCallback((collapsed) => {
+    setIsCollapsed(collapsed);
+  }, []);
+  const openMobile = React49.useCallback(() => {
+    setIsMobileOpen(true);
+  }, []);
+  const closeMobile = React49.useCallback(() => {
+    setIsMobileOpen(false);
+  }, []);
+  const toggleMobile = React49.useCallback(() => {
+    setIsMobileOpen((prev) => !prev);
+  }, []);
+  const toggleGroup = React49.useCallback((group) => {
+    setExpandedGroup((prev) => prev === group ? null : group);
+  }, []);
+  const contextValue = React49.useMemo(
+    () => ({
+      isCollapsed,
+      toggleCollapsed,
+      setCollapsed,
+      isMobileOpen,
+      openMobile,
+      closeMobile,
+      toggleMobile,
+      isMobileViewport,
+      expandedGroup,
+      setExpandedGroup,
+      toggleGroup
+    }),
+    [
+      isCollapsed,
+      toggleCollapsed,
+      setCollapsed,
+      isMobileOpen,
+      openMobile,
+      closeMobile,
+      toggleMobile,
+      isMobileViewport,
+      expandedGroup,
+      toggleGroup
+    ]
+  );
+  return /* @__PURE__ */ jsxRuntime.jsx(SidebarContext.Provider, { value: contextValue, children });
+}
+function useSidebar() {
+  const context = React49.useContext(SidebarContext);
+  if (!context) {
+    throw new Error("useSidebar must be used within a SidebarProvider");
+  }
+  return context;
+}
+var ChevronLeftIcon = () => /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronLeft, { className: "h-4 w-4", "aria-hidden": "true" });
+var ChevronRightIcon = () => /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-4 w-4", "aria-hidden": "true" });
+var ChevronDownIcon3 = () => /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-4 w-4", "aria-hidden": "true" });
+var XIcon3 = () => /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-5 w-5", "aria-hidden": "true" });
+var MenuIcon = () => /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Menu, { className: "h-5 w-5", "aria-hidden": "true" });
+var SearchIcon3 = () => /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Search, { className: "h-4 w-4", "aria-hidden": "true" });
+function Sidebar({
+  children,
+  className,
+  expandedWidth = "280px",
+  collapsedWidth = "80px",
+  style,
+  "data-testid": testId = "sidebar"
+}) {
+  const { isCollapsed, isMobileOpen, closeMobile, isMobileViewport } = useSidebar();
+  const width = isMobileViewport ? expandedWidth : isCollapsed ? collapsedWidth : expandedWidth;
+  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    isMobileViewport && isMobileOpen && /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: "fixed inset-0 z-40 bg-black/50 lg:hidden",
+        onClick: closeMobile,
+        "aria-hidden": "true"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "nav",
+      {
+        "data-testid": testId,
+        className: chunkOR5DRJCW_cjs.cn(
+          "flex h-screen flex-col",
+          "border-r border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900",
+          "transition-all duration-300 ease-in-out",
+          // Mobile positioning
+          isMobileViewport && "fixed left-0 top-0 z-50",
+          isMobileViewport && (isMobileOpen ? "translate-x-0" : "-translate-x-full"),
+          // Desktop positioning
+          !isMobileViewport && "relative",
+          className
+        ),
+        style: {
+          width,
+          minWidth: width,
+          ...style
+        },
+        "aria-label": "Main navigation",
+        children
+      }
+    )
+  ] });
+}
+function SidebarHeader({
+  children,
+  className,
+  showMobileClose = true
+}) {
+  const { closeMobile, isMobileViewport, isCollapsed } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex items-center border-b border-neutral-200 py-4 dark:border-neutral-700",
+        showCollapsed ? "justify-center px-2" : "justify-between px-4",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: chunkOR5DRJCW_cjs.cn(
+              "min-w-0",
+              showCollapsed ? "flex justify-center" : "flex-1"
+            ),
+            children
+          }
+        ),
+        showMobileClose && isMobileViewport && /* @__PURE__ */ jsxRuntime.jsx(
+          "button",
+          {
+            onClick: closeMobile,
+            className: "-mr-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 lg:hidden",
+            "aria-label": "Close navigation",
+            children: /* @__PURE__ */ jsxRuntime.jsx(XIcon3, {})
+          }
+        )
+      ]
+    }
+  );
+}
+function SidebarFooter({
+  children,
+  className
+}) {
+  const { isCollapsed, isMobileViewport } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "mt-auto border-t border-neutral-200 py-4 dark:border-neutral-700",
+        showCollapsed ? "flex justify-center px-2" : "px-4",
+        className
+      ),
+      children
+    }
+  );
+}
+function SidebarContent({
+  children,
+  className
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("flex-1 overflow-y-auto py-4", className), children });
+}
+function SidebarNav({
+  children,
+  className
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsx("nav", { className: chunkOR5DRJCW_cjs.cn("space-y-1 px-2", className), children });
+}
+function SidebarNavGroup({
+  label,
+  icon,
+  children,
+  defaultExpanded = false,
+  groupId,
+  className
+}) {
+  const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+  const reactId = React49.useId();
+  const panelId = `sidebar-group-${reactId}`;
+  const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
+  const [localExpanded, setLocalExpanded] = React49.useState(defaultExpanded);
+  const effectiveExpanded = groupId ? isExpanded : localExpanded;
+  const handleToggle = React49.useCallback(() => {
+    if (groupId) {
+      toggleGroup(groupId);
+    } else {
+      setLocalExpanded((prev) => !prev);
+    }
+  }, [groupId, toggleGroup]);
+  if (showCollapsed) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn("mb-2", className),
+        role: "group",
+        "aria-label": label,
+        children
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("mb-2", className), children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      "button",
+      {
+        type: "button",
+        onClick: handleToggle,
+        "aria-expanded": effectiveExpanded,
+        "aria-controls": panelId,
+        className: chunkOR5DRJCW_cjs.cn(
+          "flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold",
+          "text-neutral-700 dark:text-neutral-300",
+          "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
+          "focus:outline-none focus:ring-2 focus:ring-primary-500"
+        ),
+        children: [
+          icon && /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: "mr-3 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center text-neutral-500 dark:text-neutral-400",
+              "aria-hidden": "true",
+              children: icon
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 truncate text-left", children: label }),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "ml-2 flex-shrink-0 transition-transform duration-200",
+                effectiveExpanded && "rotate-180"
+              ),
+              "aria-hidden": "true",
+              children: /* @__PURE__ */ jsxRuntime.jsx(ChevronDownIcon3, {})
+            }
+          )
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        id: panelId,
+        role: "region",
+        "aria-label": label,
+        hidden: !effectiveExpanded,
+        className: chunkOR5DRJCW_cjs.cn(
+          "overflow-hidden transition-all duration-300",
+          effectiveExpanded ? "mt-1 max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+        ),
+        children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pl-2", children })
+      }
+    )
+  ] });
+}
+function SidebarNavItem({
+  label,
+  icon,
+  isActive = false,
+  onClick,
+  href,
+  badge,
+  disabled = false,
+  className,
+  "data-testid": testId
+}) {
+  const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
+  const showCollapsed = !isMobileViewport && isCollapsed;
+  const handleClick = React49.useCallback(
+    (e) => {
+      if (disabled) return;
+      if (onClick) {
+        e.preventDefault();
+        onClick();
+      }
+      if (isMobileViewport) {
+        closeMobile();
+      }
+    },
+    [disabled, onClick, isMobileViewport, closeMobile]
+  );
+  const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    icon && /* @__PURE__ */ jsxRuntime.jsx(
+      "span",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "h-5 w-5 flex-shrink-0",
+          isActive ? "text-primary-600 dark:text-primary-400" : "text-neutral-500 dark:text-neutral-400",
+          !showCollapsed && "mr-3"
+        ),
+        children: icon
+      }
+    ),
+    !showCollapsed && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 truncate text-left", children: label }),
+      badge && /* @__PURE__ */ jsxRuntime.jsx(
+        "span",
+        {
+          className: chunkOR5DRJCW_cjs.cn(
+            "ml-2 rounded-full px-2 py-0.5 text-xs font-medium",
+            isActive ? "dark:bg-primary-900/30 bg-primary-100 text-primary-700 dark:text-primary-300" : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400"
+          ),
+          children: badge
+        }
+      )
+    ] })
+  ] });
+  const baseClasses = chunkOR5DRJCW_cjs.cn(
+    "flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors",
+    isActive ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium" : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800",
+    disabled && "opacity-50 cursor-not-allowed",
+    showCollapsed && "justify-center",
+    className
+  );
+  if (href && !disabled) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "a",
+      {
+        href,
+        onClick: handleClick,
+        "data-testid": testId,
+        className: baseClasses,
+        title: showCollapsed ? label : void 0,
+        children: content
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "button",
+    {
+      onClick: handleClick,
+      disabled,
+      "data-testid": testId,
+      className: baseClasses,
+      title: showCollapsed ? label : void 0,
+      children: content
+    }
+  );
+}
+function SidebarToggle({
+  className,
+  position = "inline"
+}) {
+  const { isCollapsed, toggleCollapsed, isMobileViewport } = useSidebar();
+  if (isMobileViewport) return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, {});
+  const button = /* @__PURE__ */ jsxRuntime.jsx(
+    "button",
+    {
+      onClick: toggleCollapsed,
+      className: chunkOR5DRJCW_cjs.cn(
+        "rounded-lg p-2 text-neutral-500 dark:text-neutral-400",
+        "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500",
+        className
+      ),
+      "aria-label": isCollapsed ? "Expand sidebar" : "Collapse sidebar",
+      children: isCollapsed ? /* @__PURE__ */ jsxRuntime.jsx(ChevronRightIcon, {}) : /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon, {})
+    }
+  );
+  if (position === "floating") {
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute -right-3 top-6 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900", children: button });
+  }
+  return button;
+}
+function SidebarMobileToggle({
+  className,
+  icon
+}) {
+  const { openMobile, isMobileViewport } = useSidebar();
+  if (!isMobileViewport) return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, {});
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "button",
+    {
+      onClick: openMobile,
+      className: chunkOR5DRJCW_cjs.cn(
+        "rounded-lg p-2 text-neutral-500 dark:text-neutral-400",
+        "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500",
+        className
+      ),
+      "aria-label": "Open navigation",
+      children: icon ?? /* @__PURE__ */ jsxRuntime.jsx(MenuIcon, {})
+    }
+  );
+}
+function SidebarSearch({
+  value,
+  onChange,
+  placeholder = "Search...",
+  shortcutHint = "/",
+  className,
+  "data-testid": testId = "sidebar-search"
+}) {
+  const { isCollapsed, isMobileViewport, setCollapsed } = useSidebar();
+  const inputRef = React49.useRef(null);
+  const showCollapsed = !isMobileViewport && isCollapsed;
+  React49.useEffect(() => {
+    const handleKeyDown = (e) => {
+      const target = e.target;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return;
+      }
+      if (e.key === "/") {
+        e.preventDefault();
+        if (showCollapsed) {
+          setCollapsed(false);
+          setTimeout(() => inputRef.current?.focus(), 350);
+        } else {
+          inputRef.current?.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showCollapsed, setCollapsed]);
+  if (showCollapsed) return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, {});
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("px-3 py-2", className), children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon3, {}) }),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      "input",
+      {
+        ref: inputRef,
+        type: "text",
+        value,
+        onChange: (e) => onChange(e.target.value),
+        placeholder: `${placeholder} (${shortcutHint})`,
+        "data-testid": testId,
+        className: chunkOR5DRJCW_cjs.cn(
+          "w-full rounded-lg py-2 pl-10 pr-4 text-sm",
+          "border-transparent bg-neutral-100 dark:bg-neutral-800",
+          "text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500",
+          "focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:bg-neutral-700",
+          "transition-colors"
+        )
+      }
+    )
+  ] }) });
+}
+var MAX_WIDTH_CLASS = {
+  none: "max-w-none",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+  "4xl": "max-w-4xl",
+  "5xl": "max-w-5xl",
+  "6xl": "max-w-6xl",
+  "7xl": "max-w-7xl"
+};
+function defaultIsActive(item) {
+  if (typeof window === "undefined") return false;
+  return window.location.pathname === item.href;
+}
+function PortalShell({
+  brand,
+  navGroups,
+  isItemActive = defaultIsActive,
+  onNavigate,
+  topBarLeft,
+  topBarRight,
+  topBarCenter,
+  subHeader,
+  sidebarFooter,
+  hideDefaultSidebarToggle = false,
+  storageKey,
+  children,
+  contentClassName,
+  contentMaxWidth = "7xl"
+}) {
+  const handleActivate = (item) => {
+    if (item.onClick) item.onClick();
+    else if (onNavigate) onNavigate(item);
+  };
+  const renderItem = (item) => {
+    if (item.hidden) return null;
+    const active = isItemActive(item);
+    const props = {
+      label: item.label,
+      icon: item.icon,
+      href: item.href,
+      isActive: active,
+      badge: item.badge,
+      onClick: () => handleActivate(item)
+    };
+    return /* @__PURE__ */ jsxRuntime.jsx(SidebarNavItem, { ...props }, item.key);
+  };
+  return /* @__PURE__ */ jsxRuntime.jsx(SidebarProvider, { storageKey, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-screen overflow-hidden bg-background text-foreground", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(Sidebar, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(SidebarHeader, { children: brand }),
+      /* @__PURE__ */ jsxRuntime.jsx(SidebarContent, { children: /* @__PURE__ */ jsxRuntime.jsx(SidebarNav, { children: navGroups.map((group, gi) => {
+        const visibleItems = group.items.filter((it) => !it.hidden);
+        if (visibleItems.length === 0) return null;
+        if (!group.label) {
+          return /* @__PURE__ */ jsxRuntime.jsx(React49__namespace.Fragment, { children: visibleItems.map(renderItem) }, `g-${gi}`);
+        }
+        return /* @__PURE__ */ jsxRuntime.jsx(SidebarNavGroup, { label: group.label, icon: group.icon, children: visibleItems.map(renderItem) }, group.label);
+      }) }) }),
+      (sidebarFooter || !hideDefaultSidebarToggle) && /* @__PURE__ */ jsxRuntime.jsxs(SidebarFooter, { children: [
+        sidebarFooter,
+        !hideDefaultSidebarToggle && /* @__PURE__ */ jsxRuntime.jsx(SidebarToggle, {})
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex min-w-0 flex-1 flex-col", children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(AppHeader, { children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(AppHeaderSection, { align: "left", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(SidebarMobileToggle, { className: "lg:hidden" }),
+          topBarLeft
+        ] }),
+        topBarCenter && /* @__PURE__ */ jsxRuntime.jsx(AppHeaderSection, { align: "center", className: "hidden md:flex", children: topBarCenter }),
+        topBarRight && /* @__PURE__ */ jsxRuntime.jsx(AppHeaderSection, { align: "right", children: topBarRight })
+      ] }),
+      subHeader && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-b border-border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/60", children: /* @__PURE__ */ jsxRuntime.jsx(
+        "div",
+        {
+          className: chunkOR5DRJCW_cjs.cn(
+            "mx-auto flex w-full items-center gap-3 px-4 py-2 sm:px-6",
+            contentMaxWidth && MAX_WIDTH_CLASS[contentMaxWidth]
+          ),
+          children: subHeader
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "main",
+        {
+          className: "flex-1 overflow-y-auto bg-muted/30",
+          id: "portal-main-content",
+          children: /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: chunkOR5DRJCW_cjs.cn(
+                "mx-auto w-full p-4 sm:p-6",
+                contentMaxWidth && MAX_WIDTH_CLASS[contentMaxWidth],
+                contentClassName
+              ),
+              children
+            }
+          )
+        }
+      )
+    ] })
+  ] }) });
+}
+function stripNonDigits(value) {
+  const hasPlus = value.trim().startsWith("+");
+  const digits = value.replace(/\D/g, "");
+  return hasPlus ? `+${digits}` : digits;
+}
+function formatPhoneNumber2(value) {
+  if (!value) return "";
+  const trimmed = String(value).trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("+")) {
+    const digits2 = trimmed.replace(/\D/g, "");
+    if (digits2.length === 11 && digits2.startsWith("1")) {
+      return `+1 (${digits2.slice(1, 4)}) ${digits2.slice(4, 7)}-${digits2.slice(7)}`;
+    }
+    return trimmed;
+  }
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 7) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  }
+  return trimmed;
+}
+function toTelHref(value, extension) {
+  const normalized = stripNonDigits(value);
+  const dialNumber = /^\d{10}$/.test(normalized) ? `+1${normalized}` : normalized;
+  const ext = extension ? `;ext=${extension.replace(/\D/g, "")}` : "";
+  return `tel:${dialNumber}${ext}`;
+}
+var phoneNumberVariants = classVarianceAuthority.cva("inline-flex items-center gap-1.5", {
+  variants: {
+    size: {
+      xs: "text-xs",
+      sm: "text-sm",
+      md: "text-base",
+      lg: "text-lg"
+    },
+    /**
+     * Visual tone of the link.
+     * - `muted`: muted foreground that brightens on hover (best on list rows)
+     * - `link`:  primary-colored link (best on standalone pages)
+     * - `plain`: inherits color (no distinct link styling)
+     */
+    tone: {
+      muted: "text-muted-foreground hover:text-foreground focus-visible:text-foreground",
+      link: "text-primary-600 hover:text-primary-700 hover:underline focus-visible:underline",
+      plain: "text-inherit hover:underline"
+    }
+  },
+  defaultVariants: {
+    size: "sm",
+    tone: "muted"
+  }
+});
+function PhoneNumber({
+  value,
+  extension,
+  label,
+  showIcon = false,
+  icon,
+  clickable = true,
+  fallback = "\u2014",
+  stopPropagation = true,
+  size,
+  tone,
+  className,
+  onClick,
+  ...anchorProps
+}) {
+  const entry = React49__namespace.useMemo(() => {
+    if (!value) return null;
+    if (typeof value === "string") {
+      return value.trim() ? { number: value } : null;
+    }
+    if (!value.number || !String(value.number).trim()) return null;
+    return value;
+  }, [value]);
+  if (!entry) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "span",
+      {
+        className: chunkOR5DRJCW_cjs.cn("text-xs italic text-muted-foreground", className),
+        "aria-label": "No phone number",
+        children: fallback
+      }
+    );
+  }
+  const ext = entry.extension ?? extension;
+  const formatted = formatPhoneNumber2(entry.number);
+  const derivedLabel = label === false ? void 0 : label ?? entry.type;
+  const iconEl = showIcon ? icon ?? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Phone, { className: "h-3.5 w-3.5 shrink-0", "aria-hidden": "true" }) : null;
+  const body = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    iconEl,
+    /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "truncate", children: [
+      formatted,
+      ext ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "ml-1 opacity-80", children: [
+        "ext. ",
+        ext
+      ] }) : null,
+      derivedLabel ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "ml-1 text-xs opacity-70", children: [
+        "(",
+        derivedLabel,
+        ")"
+      ] }) : null
+    ] })
+  ] });
+  const ariaLabel = [
+    "Call",
+    formatted || entry.number,
+    ext ? `extension ${ext}` : null,
+    derivedLabel ? `(${derivedLabel})` : null
+  ].filter(Boolean).join(" ");
+  if (!clickable) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "span",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          phoneNumberVariants({ size, tone: tone ?? "plain" }),
+          "cursor-default",
+          className
+        ),
+        children: body
+      }
+    );
+  }
+  const handleClick = (e) => {
+    if (stopPropagation) e.stopPropagation();
+    onClick?.(e);
+  };
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "a",
+    {
+      href: toTelHref(entry.number, ext),
+      onClick: handleClick,
+      "aria-label": ariaLabel,
+      className: chunkOR5DRJCW_cjs.cn(phoneNumberVariants({ size, tone }), className),
+      ...anchorProps,
+      children: body
+    }
+  );
+}
+PhoneNumber.displayName = "PhoneNumber";
 function ProductVersion({
   name,
   version,
@@ -21781,8 +23139,8 @@ function ProductVersionBadge({
       ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono font-medium", children: versionDisplay }),
-        build && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground font-mono opacity-70", children: build.substring(0, 7) }),
-        environment && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-[10px] font-semibold tracking-wide uppercase", children: environment.substring(0, 3) })
+        build && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-mono text-muted-foreground opacity-70", children: build.substring(0, 7) }),
+        environment && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-[10px] font-semibold uppercase tracking-wide text-muted-foreground", children: environment.substring(0, 3) })
       ]
     }
   );
@@ -21830,9 +23188,9 @@ var logoContainerVariants = classVarianceAuthority.cva(
   }
 );
 var ProviderLogo = ({ logoURL, name, variant }) => {
-  const [hasError, setHasError] = React47__namespace.useState(false);
+  const [hasError, setHasError] = React49__namespace.useState(false);
   if (!logoURL || hasError) {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(logoContainerVariants({ variant })), children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-100 dark:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-primary-600 dark:text-primary-400 text-lg font-bold", children: name.charAt(0).toUpperCase() }) }) });
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(logoContainerVariants({ variant })), children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-lg font-bold text-primary-600 dark:text-primary-400", children: name.charAt(0).toUpperCase() }) }) });
   }
   return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn(logoContainerVariants({ variant })), children: /* @__PURE__ */ jsxRuntime.jsx(
     "img",
@@ -21848,13 +23206,13 @@ var ProviderLogo = ({ logoURL, name, variant }) => {
 var DistanceBadge = ({ distance }) => {
   if (distance === void 0) return null;
   const formatted = distance < 10 ? parseFloat(distance.toFixed(2)).toString() : distance.toFixed(0);
-  return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "bg-primary-600/10 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400 inline-flex shrink-0 items-center gap-1 rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap", children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "bg-primary-600/10 dark:bg-primary-500/20 inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold text-primary-600 dark:text-primary-400", children: [
     /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-3 w-3", fill: "currentColor", viewBox: "0 0 512 512", children: /* @__PURE__ */ jsxRuntime.jsx("path", { d: "M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19L508.48 67.48c16.49-38.4-14.96-80.35-63.96-63.96z" }) }),
     /* @__PURE__ */ jsxRuntime.jsx("span", { children: formatted }),
     /* @__PURE__ */ jsxRuntime.jsx("span", { className: "uppercase", children: "MI" })
   ] });
 };
-var SafeFromWildfiresNotice = () => /* @__PURE__ */ jsxRuntime.jsx(chunkBXK5TNJE_cjs.Tooltip, { content: "BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-success/10 text-success inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs", children: [
+var SafeFromWildfiresNotice = () => /* @__PURE__ */ jsxRuntime.jsx(chunkQE6UIZ6W_cjs.Tooltip, { content: "BlueHive has confirmed that this provider is operational and not impacted by the January 2025 wildfires.", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-success/10 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-success", children: [
   /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-4 w-4", fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsxRuntime.jsx(
     "path",
     {
@@ -21865,7 +23223,7 @@ var SafeFromWildfiresNotice = () => /* @__PURE__ */ jsxRuntime.jsx(chunkBXK5TNJE
   ) }),
   /* @__PURE__ */ jsxRuntime.jsx("span", { children: "Operational" })
 ] }) });
-var VerifiedBadge = () => /* @__PURE__ */ jsxRuntime.jsx(chunkBXK5TNJE_cjs.Tooltip, { content: "This provider's information has been verified", children: /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-success inline-flex items-center gap-1 text-xs", children: [
+var VerifiedBadge = () => /* @__PURE__ */ jsxRuntime.jsx(chunkQE6UIZ6W_cjs.Tooltip, { content: "This provider's information has been verified", children: /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "inline-flex items-center gap-1 text-xs text-success", children: [
   /* @__PURE__ */ jsxRuntime.jsx("svg", { className: "h-3.5 w-3.5", fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsxRuntime.jsx(
     "path",
     {
@@ -21886,7 +23244,7 @@ function formatPhoneNumber3(phone) {
   }
   return phone;
 }
-var ProviderCard = React47__namespace.forwardRef(
+var ProviderCard = React49__namespace.forwardRef(
   ({
     provider,
     variant = "compact",
@@ -21968,7 +23326,7 @@ var ProviderCard = React47__namespace.forwardRef(
                       "h3",
                       {
                         className: chunkOR5DRJCW_cjs.cn(
-                          "text-primary-600 dark:text-primary-400 line-clamp-2 font-semibold",
+                          "line-clamp-2 font-semibold text-primary-600 dark:text-primary-400",
                           "group-hover:text-primary-700 dark:group-hover:text-primary-300",
                           "transition-colors",
                           variant === "featured" ? "text-lg" : "text-[15px] leading-tight"
@@ -22032,7 +23390,7 @@ var ProviderCard = React47__namespace.forwardRef(
                 ),
                 displayServices && displayServices.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-3 flex flex-wrap gap-1.5", children: [
                   displayServices.map((service) => /* @__PURE__ */ jsxRuntime.jsx(
-                    chunkEKIQE524_cjs.Badge,
+                    chunkFOFDJDAY_cjs.Badge,
                     {
                       variant: "default",
                       size: "sm",
@@ -22041,7 +23399,7 @@ var ProviderCard = React47__namespace.forwardRef(
                     },
                     service._id
                   )),
-                  remainingServices > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkEKIQE524_cjs.Badge, { variant: "secondary", size: "sm", className: "text-xs", children: [
+                  remainingServices > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkFOFDJDAY_cjs.Badge, { variant: "secondary", size: "sm", className: "text-xs", children: [
                     "+",
                     remainingServices,
                     " more"
@@ -22140,7 +23498,7 @@ var ProviderCardSkeleton = ({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "border-border bg-card animate-pulse rounded-xl border",
+        "animate-pulse rounded-xl border border-border bg-card",
         variant === "compact" && "flex flex-col",
         variant === "list" && "flex min-h-[120px] flex-row",
         variant === "featured" && "flex flex-col p-6"
@@ -22165,12 +23523,12 @@ var ProviderCardSkeleton = ({
               variant !== "featured" && "p-4"
             ),
             children: [
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-3/4 rounded" }),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-3 w-full rounded" }),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-3 w-2/3 rounded" }),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-3 w-1/3 rounded" }),
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-3/4 rounded bg-muted" }),
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-full rounded bg-muted" }),
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-2/3 rounded bg-muted" }),
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-1/3 rounded bg-muted" }),
               /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1" }),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-between", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-16 rounded" }) })
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-between", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-16 rounded bg-muted" }) })
             ]
           }
         )
@@ -22208,7 +23566,7 @@ function Breadcrumb2({ items, className }) {
         href: items[items.length - 2].href,
         className: "inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/20",
         children: [
-          /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon, { className: "h-3.5 w-3.5" }),
+          /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon2, { className: "h-3.5 w-3.5" }),
           "Back"
         ]
       }
@@ -22226,7 +23584,7 @@ function ProviderLogo2({
   size = "md",
   className
 }) {
-  const [hasError, setHasError] = React47__namespace.useState(false);
+  const [hasError, setHasError] = React49__namespace.useState(false);
   const initials = name.split(" ").map((word) => word[0]).join("").toUpperCase().slice(0, 2);
   if (!src || hasError) {
     return /* @__PURE__ */ jsxRuntime.jsx(
@@ -22383,7 +23741,7 @@ function AddressDisplay({
       }
     );
   }
-  return /* @__PURE__ */ jsxRuntime.jsx("address", { className: chunkOR5DRJCW_cjs.cn("text-sm text-white/90 not-italic", className), children: addressText });
+  return /* @__PURE__ */ jsxRuntime.jsx("address", { className: chunkOR5DRJCW_cjs.cn("text-sm not-italic text-white/90", className), children: addressText });
 }
 function QuickAction2({
   icon,
@@ -22398,7 +23756,7 @@ function QuickAction2({
   );
   const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
     /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-lg", children: icon }),
-    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-[11px] font-medium tracking-[0.22px] uppercase", children: label })
+    /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-[11px] font-medium uppercase tracking-[0.22px]", children: label })
   ] });
   if (href) {
     return /* @__PURE__ */ jsxRuntime.jsx(
@@ -22424,7 +23782,7 @@ function ClaimListingButton({
     {
       href: href || `/provider/${slug}/claim`,
       className: chunkOR5DRJCW_cjs.cn(
-        "hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5 text-xs text-gray-500 transition-colors dark:text-gray-400",
+        "inline-flex items-center gap-1.5 text-xs text-gray-500 transition-colors hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400",
         className
       ),
       children: [
@@ -22551,7 +23909,7 @@ function ProviderDetailHeader({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
-                /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "mb-2 text-3xl leading-tight font-bold text-white lg:text-4xl", children: provider.name }),
+                /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "mb-2 text-3xl font-bold leading-tight text-white lg:text-4xl", children: provider.name }),
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
                   /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5 text-[13px] font-medium text-white", children: [
                     /* @__PURE__ */ jsxRuntime.jsx(LocationPinIcon, { className: "h-3.5 w-3.5" }),
@@ -22584,7 +23942,7 @@ function ProviderDetailHeader({
                   href: `tel:${provider.phoneNumber}`,
                   className: "mb-4 flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-4 text-lg font-semibold text-[#086684] shadow-[0_2px_8px_rgba(0,0,0,0.1)] lg:hidden",
                   children: [
-                    /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon4, { className: "h-5 w-5" }),
+                    /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon5, { className: "h-5 w-5" }),
                     "Call now"
                   ]
                 }
@@ -22601,7 +23959,7 @@ function ProviderDetailHeader({
                 provider.phoneNumber ? /* @__PURE__ */ jsxRuntime.jsx(
                   QuickAction2,
                   {
-                    icon: /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon4, { className: "h-[18px] w-[18px]" }),
+                    icon: /* @__PURE__ */ jsxRuntime.jsx(PhoneIcon5, { className: "h-[18px] w-[18px]" }),
                     label: "Call now",
                     onClick: () => onCall?.(provider.phoneNumber),
                     className: "hidden lg:flex"
@@ -22706,7 +24064,7 @@ function ProviderDetailHeaderSkeleton({
       ),
       children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative px-4 py-10 pb-12 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mx-auto max-w-7xl", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col lg:flex-row lg:items-start lg:gap-8", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 hidden items-center gap-2 sm:flex", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 hidden items-center gap-2 sm:flex", children: [1, 2, 3, 4].map((i) => /* @__PURE__ */ jsxRuntime.jsxs(React49__namespace.Fragment, { children: [
             i > 1 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-3 w-3 rounded bg-white/20" }),
             /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-16 rounded-full bg-white/20" })
           ] }, i)) }),
@@ -22759,7 +24117,7 @@ function MobileBackButton({
       href,
       className: "inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
       children: [
-        /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon, { className: "h-4 w-4" }),
+        /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon2, { className: "h-4 w-4" }),
         label
       ]
     }
@@ -22798,7 +24156,7 @@ function DirectionsIcon({ className }) {
     }
   );
 }
-function PhoneIcon4({ className }) {
+function PhoneIcon5({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -22888,7 +24246,7 @@ function LocationPinIcon({ className }) {
     }
   );
 }
-function ChevronLeftIcon({ className }) {
+function ChevronLeftIcon2({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -22991,13 +24349,15 @@ function ProviderMap({
   directionsUrl,
   className
 }) {
-  const mapContainerRef = React47__namespace.useRef(null);
-  const mapRef = React47__namespace.useRef(null);
-  const [mapLoaded, setMapLoaded] = React47__namespace.useState(false);
-  const [mapStyle, setMapStyle] = React47__namespace.useState("streets");
-  const [isFullscreen, setIsFullscreen] = React47__namespace.useState(false);
-  const [error, setError] = React47__namespace.useState(null);
-  React47__namespace.useEffect(() => {
+  const mapContainerRef = React49__namespace.useRef(null);
+  const mapRef = React49__namespace.useRef(null);
+  const [mapLoaded, setMapLoaded] = React49__namespace.useState(false);
+  const [mapStyle, setMapStyle] = React49__namespace.useState(
+    "streets"
+  );
+  const [isFullscreen, setIsFullscreen] = React49__namespace.useState(false);
+  const [error, setError] = React49__namespace.useState(null);
+  React49__namespace.useEffect(() => {
     if (!mapboxToken) {
       return;
     }
@@ -23082,8 +24442,16 @@ function ProviderMap({
         mapRef.current = null;
       }
     };
-  }, [mapboxToken, coordinates, zoom, providerName, address, showZoomControls, showFullscreen]);
-  React47__namespace.useEffect(() => {
+  }, [
+    mapboxToken,
+    coordinates,
+    zoom,
+    providerName,
+    address,
+    showZoomControls,
+    showFullscreen
+  ]);
+  React49__namespace.useEffect(() => {
     if (mapRef.current && mapLoaded) {
       const map = mapRef.current;
       map.setStyle(
@@ -23091,7 +24459,7 @@ function ProviderMap({
       );
     }
   }, [mapStyle, mapLoaded]);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -23159,7 +24527,7 @@ function ProviderMap({
           {
             type: "button",
             onClick: () => setMapStyle((s) => s === "streets" ? "satellite" : "streets"),
-            className: "absolute top-2 right-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+            className: "absolute right-2 top-2 z-10 rounded bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
             children: mapStyle === "streets" ? "Satellite view" : "Map view"
           }
         ),
@@ -23169,7 +24537,7 @@ function ProviderMap({
             href: directionsUrl,
             target: "_blank",
             rel: "noopener noreferrer",
-            className: "absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
+            className: "absolute left-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
             children: "GET DIRECTIONS"
           }
         ),
@@ -23202,7 +24570,7 @@ function StaticMapFallback({
         href: directionsUrl,
         target: "_blank",
         rel: "noopener noreferrer",
-        className: "absolute top-2 left-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
+        className: "absolute left-2 top-2 z-10 rounded bg-primary-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-primary-700",
         children: "GET DIRECTIONS"
       }
     )
@@ -23473,9 +24841,9 @@ function ProviderOverview({
         }
       )
     ] }),
-    quickActions.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { children: "Quick Actions" }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-2 gap-2 sm:grid-cols-4", children: quickActions.map((action) => /* @__PURE__ */ jsxRuntime.jsxs(
+    quickActions.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { children: "Quick Actions" }) }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-2 gap-2 sm:grid-cols-4", children: quickActions.map((action) => /* @__PURE__ */ jsxRuntime.jsxs(
         "button",
         {
           onClick: () => {
@@ -23508,9 +24876,9 @@ function ProviderOverview({
         action.id
       )) }) })
     ] }),
-    recentActivity.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { children: "Recent Activity" }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: recentActivity.map((activity) => /* @__PURE__ */ jsxRuntime.jsxs(
+    recentActivity.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { children: "Recent Activity" }) }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-3", children: recentActivity.map((activity) => /* @__PURE__ */ jsxRuntime.jsxs(
         "div",
         {
           role: onActivityClick ? "button" : void 0,
@@ -23524,7 +24892,7 @@ function ProviderOverview({
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate font-medium text-gray-900 dark:text-white", children: activity.title }),
                 activity.status && /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkEKIQE524_cjs.Badge,
+                  chunkFOFDJDAY_cjs.Badge,
                   {
                     variant: activity.status === "completed" ? "success" : activity.status === "cancelled" ? "danger" : "warning",
                     children: activity.status
@@ -23601,7 +24969,7 @@ var CrosshairsIcon = ({ className }) => /* @__PURE__ */ jsxRuntime.jsxs(
     ]
   }
 );
-var SearchIcon3 = ({ className }) => /* @__PURE__ */ jsxRuntime.jsx(
+var SearchIcon4 = ({ className }) => /* @__PURE__ */ jsxRuntime.jsx(
   "svg",
   {
     className,
@@ -23687,9 +25055,9 @@ var GeolocationButton = ({
       case "loading":
         return /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon4, { className: "h-4 w-4" });
       case "success":
-        return /* @__PURE__ */ jsxRuntime.jsx(CheckIcon3, { className: "text-success animate-in zoom-in h-4 w-4" });
+        return /* @__PURE__ */ jsxRuntime.jsx(CheckIcon3, { className: "animate-in zoom-in h-4 w-4 text-success" });
       case "error":
-        return /* @__PURE__ */ jsxRuntime.jsx(WarningIcon2, { className: "text-destructive h-4 w-4" });
+        return /* @__PURE__ */ jsxRuntime.jsx(WarningIcon2, { className: "h-4 w-4 text-destructive" });
       default:
         return /* @__PURE__ */ jsxRuntime.jsx(CrosshairsIcon, { className: "h-4 w-4" });
     }
@@ -23706,8 +25074,8 @@ var GeolocationButton = ({
         return "Click to automatically find your location";
     }
   };
-  return /* @__PURE__ */ jsxRuntime.jsx(chunkBXK5TNJE_cjs.Tooltip, { content: getTooltip(), children: /* @__PURE__ */ jsxRuntime.jsx(
-    chunkMKJDBXX4_cjs.Button,
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkQE6UIZ6W_cjs.Tooltip, { content: getTooltip(), children: /* @__PURE__ */ jsxRuntime.jsx(
+    chunkIO2XB35K_cjs.Button,
     {
       type: "button",
       variant: "ghost",
@@ -23734,14 +25102,14 @@ var SearchResultsMessage = ({
     return /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        className: chunkOR5DRJCW_cjs.cn("text-muted-foreground animate-pulse text-sm", className),
+        className: chunkOR5DRJCW_cjs.cn("animate-pulse text-sm text-muted-foreground", className),
         children: "Searching for providers near you..."
       }
     );
   }
   if (!results) return null;
   if (results.count === 0) {
-    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("text-muted-foreground text-sm", className), children: [
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("text-sm text-muted-foreground", className), children: [
       /* @__PURE__ */ jsxRuntime.jsx("strong", { children: "No providers found" }),
       " for ZIP code",
       " ",
@@ -23789,7 +25157,7 @@ var SearchResultsMessage = ({
     }
   );
 };
-var ProviderSearchBar = React47__namespace.forwardRef(
+var ProviderSearchBar = React49__namespace.forwardRef(
   ({
     onSearch,
     onGeolocate,
@@ -23810,10 +25178,10 @@ var ProviderSearchBar = React47__namespace.forwardRef(
     className,
     ...props
   }, ref) => {
-    const [internalValue, setInternalValue] = React47__namespace.useState(
+    const [internalValue, setInternalValue] = React49__namespace.useState(
       defaultValue || ""
     );
-    const [validationError, setValidationError] = React47__namespace.useState(
+    const [validationError, setValidationError] = React49__namespace.useState(
       null
     );
     const zipValue = value ?? internalValue;
@@ -23868,8 +25236,8 @@ var ProviderSearchBar = React47__namespace.forwardRef(
                   "div",
                   {
                     className: chunkOR5DRJCW_cjs.cn(
-                      "bg-background flex items-center gap-1 rounded-lg border",
-                      "focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2",
+                      "flex items-center gap-1 rounded-lg border bg-background",
+                      "focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2",
                       displayError && "border-destructive",
                       !displayError && "border-input"
                     ),
@@ -23883,7 +25251,7 @@ var ProviderSearchBar = React47__namespace.forwardRef(
                         }
                       ),
                       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-                        chunkVV4N4WY6_cjs.Input,
+                        chunkSZRD5UTO_cjs.Input,
                         {
                           type: "text",
                           inputMode: "numeric",
@@ -23904,7 +25272,7 @@ var ProviderSearchBar = React47__namespace.forwardRef(
                         }
                       ) }),
                       /* @__PURE__ */ jsxRuntime.jsx(
-                        chunkMKJDBXX4_cjs.Button,
+                        chunkIO2XB35K_cjs.Button,
                         {
                           type: "submit",
                           variant: "ghost",
@@ -23912,7 +25280,7 @@ var ProviderSearchBar = React47__namespace.forwardRef(
                           disabled: loading,
                           className: "h-10 w-10 shrink-0",
                           "aria-label": "Search",
-                          children: loading ? /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon4, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(SearchIcon3, { className: "h-4 w-4" })
+                          children: loading ? /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon4, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(SearchIcon4, { className: "h-4 w-4" })
                         }
                       )
                     ]
@@ -23922,7 +25290,7 @@ var ProviderSearchBar = React47__namespace.forwardRef(
                   "p",
                   {
                     id: "search-error",
-                    className: "text-destructive mt-2 text-sm",
+                    className: "mt-2 text-sm text-destructive",
                     role: "alert",
                     children: displayError
                   }
@@ -23951,8 +25319,8 @@ var HeroSearchBar = ({
   ...props
 }) => {
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("text-center", className), children: [
-    title && /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "text-foreground mb-2 text-3xl font-bold md:text-4xl lg:text-5xl", children: title }),
-    subtitle && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mb-6 text-lg md:text-xl", children: subtitle }),
+    title && /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "mb-2 text-3xl font-bold text-foreground md:text-4xl lg:text-5xl", children: title }),
+    subtitle && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-6 text-lg text-muted-foreground md:text-xl", children: subtitle }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mx-auto max-w-xl", children: /* @__PURE__ */ jsxRuntime.jsx(ProviderSearchBar, { ...props, variant: "hero" }) })
   ] });
 };
@@ -24024,7 +25392,7 @@ var fieldGroupVariants = classVarianceAuthority.cva("flex-1 min-w-[150px]", {
     size: "md"
   }
 });
-function SearchIcon4({ className }) {
+function SearchIcon5({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -24077,8 +25445,62 @@ function XMarkIcon({ className }) {
     }
   );
 }
+function CrosshairsIcon2({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      className: chunkOR5DRJCW_cjs.cn("h-4 w-4", className),
+      "aria-hidden": "true",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "10" }),
+        /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "3" }),
+        /* @__PURE__ */ jsxRuntime.jsx("line", { x1: "12", y1: "2", x2: "12", y2: "6" }),
+        /* @__PURE__ */ jsxRuntime.jsx("line", { x1: "12", y1: "18", x2: "12", y2: "22" }),
+        /* @__PURE__ */ jsxRuntime.jsx("line", { x1: "2", y1: "12", x2: "6", y2: "12" }),
+        /* @__PURE__ */ jsxRuntime.jsx("line", { x1: "18", y1: "12", x2: "22", y2: "12" })
+      ]
+    }
+  );
+}
+function SpinnerSmallIcon({ className }) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "svg",
+    {
+      className: chunkOR5DRJCW_cjs.cn("h-4 w-4 animate-spin", className),
+      fill: "none",
+      viewBox: "0 0 24 24",
+      "aria-hidden": "true",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "circle",
+          {
+            className: "opacity-25",
+            cx: "12",
+            cy: "12",
+            r: "10",
+            stroke: "currentColor",
+            strokeWidth: "4"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "path",
+          {
+            className: "opacity-75",
+            fill: "currentColor",
+            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          }
+        )
+      ]
+    }
+  );
+}
 function InputField({ label, icon, className, id, ...props }) {
-  const generatedId = React47__namespace.useId();
+  const generatedId = React49__namespace.useId();
   const inputId = id || generatedId;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
     label && /* @__PURE__ */ jsxRuntime.jsx("label", { htmlFor: inputId, className: labelVariants(), children: label }),
@@ -24102,7 +25524,7 @@ function SelectField({
   id,
   ...props
 }) {
-  const generatedId = React47__namespace.useId();
+  const generatedId = React49__namespace.useId();
   const selectId = id || generatedId;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
     label && /* @__PURE__ */ jsxRuntime.jsx("label", { htmlFor: selectId, className: labelVariants(), children: label }),
@@ -24117,28 +25539,227 @@ function SelectField({
     )
   ] });
 }
+function LocationInput({
+  label,
+  value,
+  onValueChange,
+  onZipCodeResolved,
+  mapboxToken,
+  onGeolocate,
+  geolocating = false,
+  disabled = false,
+  placeholder = "ZIP code or city"
+}) {
+  const [suggestions, setSuggestions] = React49__namespace.useState(
+    []
+  );
+  const [isOpen, setIsOpen] = React49__namespace.useState(false);
+  const [highlightedIndex, setHighlightedIndex] = React49__namespace.useState(-1);
+  const containerRef = React49__namespace.useRef(null);
+  const inputRef = React49__namespace.useRef(null);
+  const debounceRef = React49__namespace.useRef(null);
+  const generatedId = React49__namespace.useId();
+  const listboxId = `${generatedId}-listbox`;
+  React49__namespace.useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  const fetchSuggestions = React49__namespace.useCallback(
+    async (query) => {
+      if (!mapboxToken || query.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?types=postcode,place&country=us&access_token=${mapboxToken}&limit=5`
+        );
+        const data = await res.json();
+        setSuggestions(data.features || []);
+        setIsOpen(true);
+        setHighlightedIndex(-1);
+      } catch {
+        setSuggestions([]);
+      }
+    },
+    [mapboxToken]
+  );
+  const resolveSuggestion = React49__namespace.useCallback(
+    async (suggestion) => {
+      setIsOpen(false);
+      setSuggestions([]);
+      if (suggestion.place_type.includes("postcode")) {
+        onZipCodeResolved(suggestion.text, suggestion.text);
+        onValueChange(suggestion.text);
+        return;
+      }
+      if (mapboxToken) {
+        const [lng, lat] = suggestion.center;
+        try {
+          const res = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=postcode&access_token=${mapboxToken}&limit=1`
+          );
+          const data = await res.json();
+          const zip = data.features?.[0]?.text;
+          if (zip) {
+            const displayName = suggestion.place_name.split(",").slice(0, 2).join(",").trim();
+            onZipCodeResolved(zip, displayName);
+            onValueChange(displayName);
+            return;
+          }
+        } catch {
+        }
+      }
+      onValueChange(suggestion.place_name);
+    },
+    [mapboxToken, onValueChange, onZipCodeResolved]
+  );
+  function handleInputChange(e) {
+    const newValue = e.target.value;
+    onValueChange(newValue);
+    if (/^\d{5}$/.test(newValue)) {
+      onZipCodeResolved(newValue, newValue);
+      setIsOpen(false);
+      setSuggestions([]);
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (mapboxToken && newValue.length >= 2) {
+      debounceRef.current = setTimeout(() => fetchSuggestions(newValue), 300);
+    } else {
+      setSuggestions([]);
+      setIsOpen(false);
+    }
+  }
+  function handleKeyDown(e) {
+    if (!isOpen || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      e.preventDefault();
+      resolveSuggestion(suggestions[highlightedIndex]);
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  }
+  const showGeolocate = Boolean(onGeolocate);
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref: containerRef, className: "relative", children: [
+    label && /* @__PURE__ */ jsxRuntime.jsx("label", { htmlFor: generatedId, className: labelVariants(), children: label }),
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400", children: /* @__PURE__ */ jsxRuntime.jsx(MapPinIcon2, {}) }),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "input",
+        {
+          ref: inputRef,
+          id: generatedId,
+          type: "text",
+          value,
+          onChange: handleInputChange,
+          onKeyDown: handleKeyDown,
+          onFocus: () => {
+            if (suggestions.length > 0) setIsOpen(true);
+          },
+          placeholder,
+          disabled,
+          autoComplete: "off",
+          role: "combobox",
+          "aria-expanded": isOpen,
+          "aria-controls": listboxId,
+          "aria-activedescendant": highlightedIndex >= 0 ? `${listboxId}-${highlightedIndex}` : void 0,
+          className: chunkOR5DRJCW_cjs.cn(
+            inputVariants3({ hasIcon: true }),
+            showGeolocate && "pr-10"
+          ),
+          "data-cy": "input-search-providers-by-location"
+        }
+      ),
+      showGeolocate && /* @__PURE__ */ jsxRuntime.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: onGeolocate,
+          disabled: disabled || geolocating,
+          className: chunkOR5DRJCW_cjs.cn(
+            "absolute inset-y-0 right-0 flex items-center pr-3",
+            "text-neutral-400 transition-colors hover:text-primary-500",
+            "disabled:cursor-not-allowed disabled:opacity-50"
+          ),
+          "aria-label": "Use my location",
+          title: "Use my location",
+          children: geolocating ? /* @__PURE__ */ jsxRuntime.jsx(SpinnerSmallIcon, {}) : /* @__PURE__ */ jsxRuntime.jsx(CrosshairsIcon2, {})
+        }
+      )
+    ] }),
+    isOpen && suggestions.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
+      "ul",
+      {
+        id: listboxId,
+        role: "listbox",
+        className: chunkOR5DRJCW_cjs.cn(
+          "absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg",
+          "dark:border-neutral-700 dark:bg-neutral-800",
+          "max-h-48 overflow-auto py-1"
+        ),
+        children: suggestions.map((suggestion, index) => {
+          const isZip = suggestion.place_type.includes("postcode");
+          return /* @__PURE__ */ jsxRuntime.jsxs(
+            "li",
+            {
+              id: `${listboxId}-${index}`,
+              role: "option",
+              "aria-selected": index === highlightedIndex,
+              onClick: () => resolveSuggestion(suggestion),
+              className: chunkOR5DRJCW_cjs.cn(
+                "flex cursor-pointer items-center gap-2 px-3 py-2 text-sm",
+                index === highlightedIndex ? "dark:bg-primary-900/20 bg-primary-50" : "hover:bg-neutral-50 dark:hover:bg-neutral-700"
+              ),
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsx(MapPinIcon2, { className: "h-4 w-4 shrink-0 text-neutral-400" }),
+                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate", children: suggestion.place_name }),
+                isZip && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-auto shrink-0 rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400", children: "ZIP" })
+              ]
+            },
+            suggestion.id
+          );
+        })
+      }
+    )
+  ] });
+}
 function ServiceTag({ service, onRemove }) {
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "span",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm",
+        "inline-flex items-center gap-0.5 whitespace-nowrap rounded px-1.5 py-0.5 text-xs leading-tight",
         "bg-primary-100 text-primary-800",
         "dark:bg-primary-900/30 dark:text-primary-300"
       ),
       children: [
-        service.label,
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "max-w-[120px] truncate", children: service.label }),
         /* @__PURE__ */ jsxRuntime.jsx(
           "button",
           {
             type: "button",
-            onClick: onRemove,
+            onClick: (e) => {
+              e.stopPropagation();
+              onRemove();
+            },
             className: chunkOR5DRJCW_cjs.cn(
-              "hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5",
-              "focus:ring-primary-500 focus:ring-2 focus:outline-none"
+              "shrink-0 rounded-full p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500"
             ),
             "aria-label": `Remove ${service.label}`,
-            children: /* @__PURE__ */ jsxRuntime.jsx(XMarkIcon, { className: "h-3 w-3" })
+            children: /* @__PURE__ */ jsxRuntime.jsx(XMarkIcon, { className: "h-2.5 w-2.5" })
           }
         )
       ]
@@ -24149,17 +25770,17 @@ function ServiceMultiSelect({
   services,
   selectedServices,
   onSelectionChange,
-  label = "Services",
+  label,
   placeholder = "All services",
   disabled = false,
   showCounts = false
 }) {
-  const [isOpen, setIsOpen] = React47__namespace.useState(false);
-  const [searchTerm, setSearchTerm] = React47__namespace.useState("");
-  const containerRef = React47__namespace.useRef(null);
-  const inputRef = React47__namespace.useRef(null);
-  const listboxId = React47__namespace.useId();
-  React47__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React49__namespace.useState(false);
+  const [searchTerm, setSearchTerm] = React49__namespace.useState("");
+  const containerRef = React49__namespace.useRef(null);
+  const inputRef = React49__namespace.useRef(null);
+  const listboxId = React49__namespace.useId();
+  React49__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -24168,14 +25789,14 @@ function ServiceMultiSelect({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const filteredServices = React47__namespace.useMemo(() => {
+  const filteredServices = React49__namespace.useMemo(() => {
     if (!searchTerm) return services;
     const lowerSearch = searchTerm.toLowerCase();
     return services.filter(
       (service) => service.label.toLowerCase().includes(lowerSearch) || service.category?.toLowerCase().includes(lowerSearch)
     );
   }, [services, searchTerm]);
-  const groupedServices = React47__namespace.useMemo(() => {
+  const groupedServices = React49__namespace.useMemo(() => {
     const groups = {};
     filteredServices.forEach((service) => {
       const category = service.category || "Other";
@@ -24184,7 +25805,7 @@ function ServiceMultiSelect({
     });
     return groups;
   }, [filteredServices]);
-  const selectedServiceObjects = React47__namespace.useMemo(
+  const selectedServiceObjects = React49__namespace.useMemo(
     () => services.filter((s) => selectedServices.includes(s.value)),
     [services, selectedServices]
   );
@@ -24207,14 +25828,6 @@ function ServiceMultiSelect({
   }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref: containerRef, className: "relative", children: [
     label && /* @__PURE__ */ jsxRuntime.jsx("label", { className: labelVariants(), children: label }),
-    selectedServiceObjects.length > 0 && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-2 flex flex-wrap gap-1", children: selectedServiceObjects.map((service) => /* @__PURE__ */ jsxRuntime.jsx(
-      ServiceTag,
-      {
-        service,
-        onRemove: () => handleRemoveService(service.value)
-      },
-      service.value
-    )) }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative", children: /* @__PURE__ */ jsxRuntime.jsx(
       "button",
       {
@@ -24226,12 +25839,25 @@ function ServiceMultiSelect({
         "aria-expanded": isOpen,
         "aria-labelledby": label ? void 0 : "services-label",
         className: chunkOR5DRJCW_cjs.cn(
-          selectVariants(),
-          "w-full text-left",
-          !selectedServices.length && "text-neutral-500 dark:text-neutral-400",
+          "flex h-10 w-full items-center rounded-md border border-neutral-200 bg-white text-sm",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          "dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100",
+          "appearance-none bg-no-repeat",
+          'bg-[url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27M6 8l4 4 4-4%27/%3e%3c/svg%3e")]',
+          "bg-[length:1.5em_1.5em]",
+          "bg-[right_0.5rem_center]",
+          "pr-8 text-left",
           disabled && "cursor-not-allowed opacity-50"
         ),
-        children: selectedServices.length > 0 ? `${selectedServices.length} service${selectedServices.length > 1 ? "s" : ""} selected` : placeholder
+        children: selectedServiceObjects.length > 0 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "scrollbar-none flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-2 py-1", children: selectedServiceObjects.map((service) => /* @__PURE__ */ jsxRuntime.jsx(
+          ServiceTag,
+          {
+            service,
+            onRemove: () => handleRemoveService(service.value)
+          },
+          service.value
+        )) }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "px-3 text-neutral-500 dark:text-neutral-400", children: placeholder })
       }
     ) }),
     isOpen && /* @__PURE__ */ jsxRuntime.jsxs(
@@ -24259,11 +25885,11 @@ function ServiceMultiSelect({
                 autoFocus: true
               }
             ),
-            /* @__PURE__ */ jsxRuntime.jsx(SearchIcon4, { className: "absolute top-1/2 left-4 -translate-y-1/2 text-neutral-400" })
+            /* @__PURE__ */ jsxRuntime.jsx(SearchIcon5, { className: "absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" })
           ] }),
           Object.entries(groupedServices).length > 0 ? Object.entries(groupedServices).map(
             ([category, categoryServices]) => /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-              services.some((s) => s.category) && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-neutral-50 px-3 py-2 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:bg-neutral-900 dark:text-neutral-400", children: category }),
+              services.some((s) => s.category) && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-neutral-50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400", children: category }),
               categoryServices.map((service) => {
                 const isSelected = selectedServices.includes(service.value);
                 return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -24276,7 +25902,7 @@ function ServiceMultiSelect({
                     className: chunkOR5DRJCW_cjs.cn(
                       "flex w-full items-center justify-between px-3 py-2 text-left text-sm",
                       "hover:bg-neutral-100 dark:hover:bg-neutral-700",
-                      isSelected && "bg-primary-50 dark:bg-primary-900/20"
+                      isSelected && "dark:bg-primary-900/20 bg-primary-50"
                     ),
                     children: [
                       /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex items-center gap-2", children: [
@@ -24285,7 +25911,7 @@ function ServiceMultiSelect({
                           {
                             className: chunkOR5DRJCW_cjs.cn(
                               "flex h-4 w-4 items-center justify-center rounded border",
-                              isSelected ? "bg-primary-500 border-primary-500 text-white" : "border-neutral-300 dark:border-neutral-600"
+                              isSelected ? "border-primary-500 bg-primary-500 text-white" : "border-neutral-300 dark:border-neutral-600"
                             ),
                             children: isSelected && /* @__PURE__ */ jsxRuntime.jsx(
                               "svg",
@@ -24344,6 +25970,9 @@ function ProviderSearchFilters({
   formId,
   onSubmit,
   loading = false,
+  mapboxToken,
+  onGeolocate,
+  geolocating = false,
   className
 }) {
   function handleFieldChange(field, value) {
@@ -24368,7 +25997,7 @@ function ProviderSearchFilters({
           InputField,
           {
             label: showLabels ? "Provider Name" : void 0,
-            icon: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon4, {}),
+            icon: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon5, {}),
             type: "text",
             placeholder: "Search by provider",
             value: filters.searchPhrase || "",
@@ -24377,25 +26006,32 @@ function ProviderSearchFilters({
             "data-cy": "input-search-providers-by-name"
           }
         ) }),
-        showZipCode && /* @__PURE__ */ jsxRuntime.jsx("div", { className: fieldGroupVariants({ size: "sm" }), children: /* @__PURE__ */ jsxRuntime.jsx(
-          InputField,
+        showZipCode && /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
           {
-            label: showLabels ? "ZIP Code" : void 0,
-            icon: /* @__PURE__ */ jsxRuntime.jsx(MapPinIcon2, {}),
-            type: "text",
-            inputMode: "numeric",
-            pattern: "[0-9]{5}",
-            maxLength: 5,
-            placeholder: "ZIP code",
-            value: filters.zipCode || "",
-            onChange: (e) => {
-              const value = e.target.value.replace(/\D/g, "").slice(0, 5);
-              handleFieldChange("zipCode", value);
-            },
-            disabled: loading,
-            "data-cy": "input-search-providers-by-zip"
+            className: fieldGroupVariants({ size: mapboxToken ? "lg" : "sm" }),
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              LocationInput,
+              {
+                label: showLabels ? "Location" : void 0,
+                value: filters.locationDisplayName ?? filters.zipCode ?? "",
+                onValueChange: (val) => handleFieldChange("locationDisplayName", val),
+                onZipCodeResolved: (zip, displayName) => {
+                  onFiltersChange({
+                    ...filters,
+                    zipCode: zip,
+                    locationDisplayName: displayName
+                  });
+                },
+                mapboxToken,
+                onGeolocate,
+                geolocating,
+                disabled: loading,
+                placeholder: mapboxToken ? "ZIP code or city" : "ZIP code"
+              }
+            )
           }
-        ) }),
+        ),
         showRadius && /* @__PURE__ */ jsxRuntime.jsx("div", { className: fieldGroupVariants({ size: "sm" }), children: /* @__PURE__ */ jsxRuntime.jsx(
           SelectField,
           {
@@ -24451,7 +26087,7 @@ function CompactFilterBar({
       ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-[150px] flex-1", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(SearchIcon4, { className: "absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" }),
+          /* @__PURE__ */ jsxRuntime.jsx(SearchIcon5, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" }),
           /* @__PURE__ */ jsxRuntime.jsx(
             "input",
             {
@@ -24461,8 +26097,8 @@ function CompactFilterBar({
               onChange: (e) => handleFieldChange("searchPhrase", e.target.value),
               disabled: loading,
               className: chunkOR5DRJCW_cjs.cn(
-                "h-9 w-full rounded-md border border-neutral-200 pr-3 pl-9 text-sm",
-                "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                "h-9 w-full rounded-md border border-neutral-200 pl-9 pr-3 text-sm",
+                "focus:outline-none focus:ring-2 focus:ring-primary-500",
                 "dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
               )
             }
@@ -24485,7 +26121,7 @@ function CompactFilterBar({
               disabled: loading,
               className: chunkOR5DRJCW_cjs.cn(
                 "h-9 w-20 rounded-l-md border border-neutral-200 px-3 text-sm",
-                "focus:ring-primary-500 focus:z-10 focus:ring-2 focus:outline-none",
+                "focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary-500",
                 "dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
               )
             }
@@ -24498,7 +26134,7 @@ function CompactFilterBar({
               disabled: loading,
               className: chunkOR5DRJCW_cjs.cn(
                 "h-9 rounded-r-md border border-l-0 border-neutral-200 px-2 text-sm",
-                "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+                "focus:outline-none focus:ring-2 focus:ring-primary-500",
                 "dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
               ),
               children: DEFAULT_RADIUS_OPTIONS.map((opt) => /* @__PURE__ */ jsxRuntime.jsxs("option", { value: opt.value, children: [
@@ -24519,7 +26155,7 @@ function CompactFilterBar({
             disabled: loading,
             className: chunkOR5DRJCW_cjs.cn(
               "h-9 w-full rounded-md border border-neutral-200 px-3 text-sm",
-              "focus:ring-primary-500 focus:ring-2 focus:outline-none",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500",
               "dark:border-neutral-600 dark:bg-neutral-700 dark:text-white",
               !filters.services.length && "text-neutral-500"
             ),
@@ -24537,8 +26173,8 @@ function CompactFilterBar({
             disabled: loading,
             className: chunkOR5DRJCW_cjs.cn(
               "h-9 rounded-md px-4 text-sm font-medium",
-              "bg-primary-500 hover:bg-primary-600 text-white",
-              "focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none",
+              "bg-primary-500 text-white hover:bg-primary-600",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
               "disabled:cursor-not-allowed disabled:opacity-50"
             ),
             children: loading ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex items-center gap-2", children: [
@@ -24590,7 +26226,7 @@ function ActiveFilters({
   if (filters.zipCode) {
     activeFilters.push({
       key: "zipCode",
-      label: `Near ${filters.zipCode}`,
+      label: `Near ${filters.locationDisplayName || filters.zipCode}`,
       onClear: () => onClearFilter("zipCode")
     });
   }
@@ -24643,7 +26279,7 @@ function ActiveFilters({
       {
         type: "button",
         onClick: onClearAll,
-        className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm",
+        className: "text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
         children: "Clear all"
       }
     )
@@ -24662,10 +26298,10 @@ function ProviderSelector({
   size = "md",
   className
 }) {
-  const [isOpen, setIsOpen] = React47__namespace.useState(false);
-  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
-  const containerRef = React47__namespace.useRef(null);
-  React47__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React49__namespace.useState(false);
+  const [searchQuery, setSearchQuery] = React49__namespace.useState("");
+  const containerRef = React49__namespace.useRef(null);
+  React49__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -24674,7 +26310,7 @@ function ProviderSelector({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     function handleEscape(event) {
       if (event.key === "Escape") {
         setIsOpen(false);
@@ -24683,12 +26319,12 @@ function ProviderSelector({
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
     }
   }, [isOpen]);
-  const filteredProviders = React47__namespace.useMemo(() => {
+  const filteredProviders = React49__namespace.useMemo(() => {
     if (!searchQuery) return providers;
     const query = searchQuery.toLowerCase();
     return providers.filter(
@@ -24708,7 +26344,7 @@ function ProviderSelector({
     return name.split(" ").map((word) => word[0]).join("").substring(0, 2).toUpperCase();
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("relative", className), ref: containerRef, children: [
-    label && /* @__PURE__ */ jsxRuntime.jsx("label", { className: "text-foreground mb-1 block text-sm font-medium", children: label }),
+    label && /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-sm font-medium text-foreground", children: label }),
     /* @__PURE__ */ jsxRuntime.jsxs(
       "button",
       {
@@ -24720,7 +26356,7 @@ function ProviderSelector({
           "bg-background text-foreground",
           "border-input",
           "hover:border-muted-foreground/50",
-          "focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none",
+          "focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring",
           "disabled:cursor-not-allowed disabled:opacity-50",
           sizeStyles[size]
         ),
@@ -24729,7 +26365,7 @@ function ProviderSelector({
             /* @__PURE__ */ jsxRuntime.jsxs(
               "svg",
               {
-                className: "text-muted-foreground h-5 w-5 animate-spin",
+                className: "h-5 w-5 animate-spin text-muted-foreground",
                 fill: "none",
                 viewBox: "0 0 24 24",
                 children: [
@@ -24766,15 +26402,15 @@ function ProviderSelector({
               }
             ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium", children: getInitials3(selectedProvider.name) }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1 leading-tight", children: [
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-foreground truncate text-sm", children: selectedProvider.name }),
-              selectedProvider.location && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground truncate text-[11px]", children: selectedProvider.location })
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "truncate text-sm text-foreground", children: selectedProvider.name }),
+              selectedProvider.location && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "truncate text-[11px] text-muted-foreground", children: selectedProvider.location })
             ] })
-          ] }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground flex-1", children: placeholder }),
+          ] }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 text-muted-foreground", children: placeholder }),
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "text-muted-foreground h-4 w-4 flex-shrink-0 transition-transform",
+                "h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform",
                 isOpen && "rotate-180"
               ),
               fill: "none",
@@ -24794,12 +26430,12 @@ function ProviderSelector({
         ]
       }
     ),
-    isOpen && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border bg-card absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg", children: [
-      searchable && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-border border-b p-2", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
+    isOpen && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-border bg-card shadow-lg", children: [
+      searchable && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-b border-border p-2", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
-            className: "text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2",
+            className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground",
             fill: "none",
             viewBox: "0 0 24 24",
             stroke: "currentColor",
@@ -24821,12 +26457,12 @@ function ProviderSelector({
             placeholder: searchPlaceholder,
             value: searchQuery,
             onChange: (e) => setSearchQuery(e.target.value),
-            className: "border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-1 focus:outline-none",
+            className: "w-full rounded-md border border-input bg-background py-2 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring",
             autoFocus: true
           }
         )
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "max-h-64 overflow-y-auto", children: filteredProviders.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground px-4 py-6 text-center", children: "No providers found" }) : filteredProviders.map((provider) => /* @__PURE__ */ jsxRuntime.jsxs(
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "max-h-64 overflow-y-auto", children: filteredProviders.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-4 py-6 text-center text-muted-foreground", children: "No providers found" }) : filteredProviders.map((provider) => /* @__PURE__ */ jsxRuntime.jsxs(
         "button",
         {
           type: "button",
@@ -24844,18 +26480,18 @@ function ProviderSelector({
                 alt: provider.name,
                 className: "h-8 w-8 rounded object-cover"
               }
-            ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded text-sm font-medium", children: getInitials3(provider.name) }),
+            ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-8 w-8 items-center justify-center rounded bg-muted text-sm font-medium text-muted-foreground", children: getInitials3(provider.name) }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground font-medium", children: provider.name }),
-                provider.code && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
+                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-foreground", children: provider.name }),
+                provider.code && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs text-muted-foreground", children: [
                   "(",
                   provider.code,
                   ")"
                 ] }),
-                provider.isActive === false && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium", children: "Inactive" })
+                provider.isActive === false && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground", children: "Inactive" })
               ] }),
-              (provider.location || provider.type) && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground truncate text-sm", children: [provider.type, provider.location].filter(Boolean).join(" \u2022 ") })
+              (provider.location || provider.type) && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "truncate text-sm text-muted-foreground", children: [provider.type, provider.location].filter(Boolean).join(" \u2022 ") })
             ] }),
             selectedProvider?.id === provider.id && /* @__PURE__ */ jsxRuntime.jsx(
               "svg",
@@ -24890,9 +26526,9 @@ function ProviderSettings({
   defaultTab = "general",
   className = ""
 }) {
-  const [settings, setSettings] = React47__namespace.useState(initialSettings);
-  const [hasChanges, setHasChanges] = React47__namespace.useState(false);
-  React47__namespace.useEffect(() => {
+  const [settings, setSettings] = React49__namespace.useState(initialSettings);
+  const [hasChanges, setHasChanges] = React49__namespace.useState(false);
+  React49__namespace.useEffect(() => {
     setSettings(initialSettings);
     setHasChanges(false);
   }, [initialSettings]);
@@ -24946,21 +26582,21 @@ function ProviderSettings({
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
       /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "text-2xl font-bold text-gray-900 dark:text-white", children: "Provider Settings" }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-        hasChanges && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "warning", children: "Unsaved changes" }),
-        onSave && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { onClick: handleSave, disabled: isSaving || !hasChanges, children: isSaving ? "Saving..." : "Save Changes" })
+        hasChanges && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "warning", children: "Unsaved changes" }),
+        onSave && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { onClick: handleSave, disabled: isSaving || !hasChanges, children: isSaving ? "Saving..." : "Save Changes" })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkORUPC5TV_cjs.Tabs, { defaultValue: defaultTab, children: [
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkORUPC5TV_cjs.TabsList, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "general", children: "General" }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "notifications", children: "Notifications" }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "scheduling", children: "Scheduling" }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsTrigger, { value: "payments", children: "Payments" })
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkHFUAI5CX_cjs.Tabs, { defaultValue: defaultTab, children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkHFUAI5CX_cjs.TabsList, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "general", children: "General" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "notifications", children: "Notifications" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "scheduling", children: "Scheduling" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsTrigger, { value: "payments", children: "Payments" })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "general", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 md:grid-cols-2", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Basic Information" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "general", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 md:grid-cols-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Basic Information" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-4", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
               /* @__PURE__ */ jsxRuntime.jsx(
                 "label",
@@ -24971,7 +26607,7 @@ function ProviderSettings({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "provider-name",
                   value: settings.general.name,
@@ -24989,7 +26625,7 @@ function ProviderSettings({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkB7YGVKTE_cjs.Textarea,
+                chunkJHVDSH6J_cjs.Textarea,
                 {
                   id: "provider-description",
                   value: settings.general.description || "",
@@ -25009,7 +26645,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-npi",
                     value: settings.general.npi || "",
@@ -25027,7 +26663,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-tax-id",
                     value: settings.general.taxId || "",
@@ -25038,9 +26674,9 @@ function ProviderSettings({
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Contact Information" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-4", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Contact Information" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-4", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
               /* @__PURE__ */ jsxRuntime.jsx(
                 "label",
@@ -25051,7 +26687,7 @@ function ProviderSettings({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "provider-phone",
                   type: "tel",
@@ -25070,7 +26706,7 @@ function ProviderSettings({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "provider-email",
                   type: "email",
@@ -25089,7 +26725,7 @@ function ProviderSettings({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "provider-website",
                   type: "url",
@@ -25100,9 +26736,9 @@ function ProviderSettings({
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className: "md:col-span-2", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Address" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-4", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className: "md:col-span-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Address" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-4", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-4 md:grid-cols-2", children: [
               /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
                 /* @__PURE__ */ jsxRuntime.jsx(
@@ -25114,7 +26750,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-street",
                     value: settings.address.street,
@@ -25132,7 +26768,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-street2",
                     value: settings.address.street2 || "",
@@ -25152,7 +26788,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-city",
                     value: settings.address.city,
@@ -25170,7 +26806,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-state",
                     value: settings.address.state,
@@ -25188,7 +26824,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-zip",
                     value: settings.address.zip,
@@ -25206,7 +26842,7 @@ function ProviderSettings({
                   }
                 ),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkVV4N4WY6_cjs.Input,
+                  chunkSZRD5UTO_cjs.Input,
                   {
                     id: "provider-country",
                     value: settings.address.country || "USA",
@@ -25218,9 +26854,9 @@ function ProviderSettings({
           ] })
         ] })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "notifications", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Notification Preferences" }) }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "notifications", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Notification Preferences" }) }),
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-6", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-4 font-medium text-gray-900 dark:text-white", children: "Email Notifications" }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
@@ -25230,7 +26866,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Receive email when a new order is placed" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.notifications.emailNewOrders,
                     onCheckedChange: (checked) => updateNotifications("emailNewOrders", checked)
@@ -25243,7 +26879,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Receive email when an order status changes" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.notifications.emailOrderUpdates,
                     onCheckedChange: (checked) => updateNotifications("emailOrderUpdates", checked)
@@ -25256,7 +26892,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Receive email for invoice activity" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.notifications.emailInvoices,
                     onCheckedChange: (checked) => updateNotifications("emailInvoices", checked)
@@ -25274,7 +26910,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Receive SMS when a new order is placed" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.notifications.smsNewOrders,
                     onCheckedChange: (checked) => updateNotifications("smsNewOrders", checked)
@@ -25287,7 +26923,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Receive SMS when an order status changes" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.notifications.smsOrderUpdates,
                     onCheckedChange: (checked) => updateNotifications("smsOrderUpdates", checked)
@@ -25298,9 +26934,9 @@ function ProviderSettings({
           ] })
         ] })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "scheduling", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Scheduling Settings" }) }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "scheduling", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Scheduling Settings" }) }),
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-6", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
               /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
@@ -25308,7 +26944,7 @@ function ProviderSettings({
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Allow new patients to schedule appointments" })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkRRQGH7C5_cjs.Switch,
+                chunkRRARXXV2_cjs.Switch,
                 {
                   checked: settings.scheduling.acceptingNewPatients,
                   onCheckedChange: (checked) => updateScheduling("acceptingNewPatients", checked)
@@ -25321,7 +26957,7 @@ function ProviderSettings({
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Patients must schedule before arriving" })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkRRQGH7C5_cjs.Switch,
+                chunkRRARXXV2_cjs.Switch,
                 {
                   checked: settings.scheduling.requireAppointment,
                   onCheckedChange: (checked) => updateScheduling("requireAppointment", checked)
@@ -25329,7 +26965,7 @@ function ProviderSettings({
               )
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-4 border-t border-gray-200 pt-6 md:grid-cols-2 dark:border-gray-700", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-4 border-t border-gray-200 pt-6 dark:border-gray-700 md:grid-cols-2", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
               /* @__PURE__ */ jsxRuntime.jsx(
                 "label",
@@ -25340,7 +26976,7 @@ function ProviderSettings({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "appointment-buffer",
                   type: "number",
@@ -25364,7 +27000,7 @@ function ProviderSettings({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "max-daily-appointments",
                   type: "number",
@@ -25381,9 +27017,9 @@ function ProviderSettings({
           ] })
         ] })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkORUPC5TV_cjs.TabsContent, { value: "payments", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Payment Settings" }) }),
-        /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkHFUAI5CX_cjs.TabsContent, { value: "payments", children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Payment Settings" }) }),
+        /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-6", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "mb-4 font-medium text-gray-900 dark:text-white", children: "Accepted Payment Methods" }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-4 sm:grid-cols-2", children: [
@@ -25410,7 +27046,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-gray-700 dark:text-gray-300", children: "Credit Card" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.payments.acceptsCreditCard,
                     onCheckedChange: (checked) => updatePayments("acceptsCreditCard", checked)
@@ -25440,7 +27076,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-gray-700 dark:text-gray-300", children: "ACH / Bank Transfer" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.payments.acceptsACH,
                     onCheckedChange: (checked) => updatePayments("acceptsACH", checked)
@@ -25470,7 +27106,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-gray-700 dark:text-gray-300", children: "Cash" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.payments.acceptsCash,
                     onCheckedChange: (checked) => updatePayments("acceptsCash", checked)
@@ -25500,7 +27136,7 @@ function ProviderSettings({
                   /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-gray-700 dark:text-gray-300", children: "Check" })
                 ] }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkRRQGH7C5_cjs.Switch,
+                  chunkRRARXXV2_cjs.Switch,
                   {
                     checked: settings.payments.acceptsCheck,
                     onCheckedChange: (checked) => updatePayments("acceptsCheck", checked)
@@ -25519,7 +27155,7 @@ function ProviderSettings({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 id: "payment-terms",
                 type: "number",
@@ -25608,20 +27244,20 @@ function ProviderUsersTable({
       }
     );
   }
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: `overflow-x-auto ${className}`, children: /* @__PURE__ */ jsxRuntime.jsxs(chunkLZEY55QZ_cjs.Table, { children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkLZEY55QZ_cjs.TableRow, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHead, { children: "User" }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHead, { children: "Role" }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHead, { children: "Status" }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHead, { children: "Last Active" }),
-      showActions && /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHead, { className: "text-right", children: "Actions" })
+  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: `overflow-x-auto ${className}`, children: /* @__PURE__ */ jsxRuntime.jsxs(chunkS7TMEGSN_cjs.Table, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkS7TMEGSN_cjs.TableRow, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHead, { children: "User" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHead, { children: "Role" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHead, { children: "Status" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHead, { children: "Last Active" }),
+      showActions && /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHead, { className: "text-right", children: "Actions" })
     ] }) }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableBody, { children: users.map((user) => {
+    /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableBody, { children: users.map((user) => {
       const isCurrentUser = currentUserId === user.id;
       const isPending = user.status === "pending";
-      return /* @__PURE__ */ jsxRuntime.jsxs(chunkLZEY55QZ_cjs.TableRow, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunk2J2V4TMJ_cjs.Avatar, { src: user.avatarUrl, name: user.name, size: "sm" }),
+      return /* @__PURE__ */ jsxRuntime.jsxs(chunkS7TMEGSN_cjs.TableRow, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkW4MDIFH6_cjs.Avatar, { src: user.avatarUrl, name: user.name, size: "sm" }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "font-medium text-gray-900 dark:text-white", children: [
               user.name,
@@ -25630,12 +27266,12 @@ function ProviderUsersTable({
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: user.email })
           ] })
         ] }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-gray-700 dark:text-gray-300", children: user.role }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: getStatusVariant(user.status), children: user.status || "active" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-gray-500 dark:text-gray-400", children: isPending ? `Invited ${formatDate4(user.invitedAt)}` : formatDate4(user.lastActive) }) }),
-        showActions && /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { className: "text-right", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-end gap-1", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-gray-700 dark:text-gray-300", children: user.role }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: getStatusVariant(user.status), children: user.status || "active" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-gray-500 dark:text-gray-400", children: isPending ? `Invited ${formatDate4(user.invitedAt)}` : formatDate4(user.lastActive) }) }),
+        showActions && /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { className: "text-right", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-end gap-1", children: [
           isPending && onResendInvite && /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "ghost",
               size: "sm",
@@ -25662,7 +27298,7 @@ function ProviderUsersTable({
             }
           ),
           onEditRole && /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "ghost",
               size: "sm",
@@ -25689,7 +27325,7 @@ function ProviderUsersTable({
             }
           ),
           onRemove && !isCurrentUser && /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: "ghost",
               size: "sm",
@@ -25741,14 +27377,14 @@ function QuickLinksCard({
     3: "grid-cols-3",
     4: "grid-cols-4"
   }[columns];
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { className: "pb-3", children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-base", children: title }) }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "pt-0", children: /* @__PURE__ */ jsxRuntime.jsx(
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { className: "pb-3", children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-base", children: title }) }),
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "pt-0", children: /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
         className: layout === "grid" ? `grid ${gridColsClass} gap-2` : "flex flex-col gap-1",
         children: links.map((link) => /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "ghost",
             className: `h-auto justify-start px-3 py-2 ${link.disabled ? "cursor-not-allowed opacity-50" : ""} ${layout === "grid" ? "h-20 flex-col items-center text-center" : ""} `,
@@ -25763,14 +27399,14 @@ function QuickLinksCard({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex-1 text-left", children: [
-                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground block text-sm font-medium", children: link.label }),
-                link.description && layout !== "grid" && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground block text-xs", children: link.description })
+                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "block text-sm font-medium text-foreground", children: link.label }),
+                link.description && layout !== "grid" && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "block text-xs text-muted-foreground", children: link.description })
               ] }),
               link.badge !== void 0 && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-[var(--mieweb-primary-700)] dark:text-[var(--mieweb-primary-400)]", children: link.badge }),
               !link.badge && layout !== "grid" && /* @__PURE__ */ jsxRuntime.jsx(
                 "svg",
                 {
-                  className: "text-muted-foreground h-4 w-4",
+                  className: "h-4 w-4 text-muted-foreground",
                   fill: "none",
                   stroke: "currentColor",
                   viewBox: "0 0 24 24",
@@ -25847,7 +27483,7 @@ function RecurringServiceCard({
     },
     success: {
       border: "border-success/30",
-      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(
+      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
           className: "h-3 w-3",
@@ -25891,7 +27527,7 @@ function RecurringServiceCard({
     },
     warning: {
       border: "border-warning/30",
-      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-3 w-3", fill: "currentColor", viewBox: "0 0 24 24", children: [
+      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warning text-warning-foreground", children: /* @__PURE__ */ jsxRuntime.jsxs("svg", { className: "h-3 w-3", fill: "currentColor", viewBox: "0 0 24 24", children: [
         /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "10", fill: "currentColor" }),
         /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: "12", cy: "12", r: "4", className: "fill-warning" })
       ] }) }),
@@ -25899,7 +27535,7 @@ function RecurringServiceCard({
     },
     error: {
       border: "border-destructive/30",
-      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-destructive text-destructive-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(
+      icon: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
           className: "h-3 w-3",
@@ -25931,7 +27567,7 @@ function RecurringServiceCard({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "bg-card text-card-foreground rounded-xl border-2 shadow-sm",
+        "rounded-xl border-2 bg-card text-card-foreground shadow-sm",
         currentStyle.border,
         isDisabled && "opacity-50",
         onEdit && !isDisabled && "cursor-pointer transition-shadow hover:shadow-md",
@@ -25960,19 +27596,19 @@ function RecurringServiceCard({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 px-4 pb-4", children: [
           showProvider && service.providerName && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: provider }),
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted truncate rounded-md px-3 py-2 text-sm", children: service.providerName })
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: provider }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "truncate rounded-md bg-muted px-3 py-2 text-sm", children: service.providerName })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: occurrence }),
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted rounded-md px-3 py-2 text-sm", children: getOccurrenceLabel(service.occurrence) })
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: occurrence }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-md bg-muted px-3 py-2 text-sm", children: getOccurrenceLabel(service.occurrence) })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: nextOrder }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: nextOrder }),
             /* @__PURE__ */ jsxRuntime.jsx(
               "div",
               {
-                className: "bg-muted rounded-md px-3 py-2 text-sm",
+                className: "rounded-md bg-muted px-3 py-2 text-sm",
                 title: service.nextOrder?.toString(),
                 children: formatDate4(service.nextOrder)
               }
@@ -25982,7 +27618,7 @@ function RecurringServiceCard({
             /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-exclamation-triangle mr-1" }),
             consentNote
           ] }),
-          effectiveState === "error" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs", children: [
+          effectiveState === "error" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-destructive/10 rounded-md px-3 py-2 text-xs text-destructive", children: [
             /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-times-circle mr-1" }),
             consentNote
           ] }),
@@ -25994,7 +27630,7 @@ function RecurringServiceCard({
                 e.stopPropagation();
                 onDelete?.(service);
               },
-              className: "text-muted-foreground hover:text-destructive mx-auto flex items-center gap-1 text-xs transition-colors",
+              className: "mx-auto flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive",
               children: [
                 /* @__PURE__ */ jsxRuntime.jsx(
                   "svg",
@@ -26034,7 +27670,7 @@ function RecurringServiceAddCard({
       type: "button",
       onClick,
       className: chunkOR5DRJCW_cjs.cn(
-        "text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-primary border-border bg-muted/50 flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 transition-colors",
+        "hover:border-primary hover:bg-primary/5 hover:text-primary bg-muted/50 flex min-h-[200px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-4 text-muted-foreground transition-colors",
         className
       ),
       children: [
@@ -26066,7 +27702,7 @@ function RecurringServiceSetupModal({
     cancel = "Cancel",
     save = "Save"
   } = labels;
-  const [formData, setFormData] = React47__namespace.useState(
+  const [formData, setFormData] = React49__namespace.useState(
     initialData || {
       providerId: "",
       serviceId: "",
@@ -26074,7 +27710,7 @@ function RecurringServiceSetupModal({
       overrideConsent: false
     }
   );
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (initialData) {
       setFormData(initialData);
     } else {
@@ -26095,7 +27731,7 @@ function RecurringServiceSetupModal({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl",
+        "w-full max-w-lg rounded-lg bg-card text-card-foreground shadow-xl",
         className
       ),
       children: [
@@ -26113,13 +27749,13 @@ function RecurringServiceSetupModal({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "p-6", children: [
           showProviderSelector && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: provider }),
+            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: provider }),
             /* @__PURE__ */ jsxRuntime.jsxs(
               "select",
               {
                 value: formData.providerId,
                 onChange: (e) => setFormData({ ...formData, providerId: e.target.value }),
-                className: "bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none",
+                className: "focus:ring-primary w-full rounded-lg border border-input bg-card p-2 focus:outline-none focus:ring-2",
                 required: showProviderSelector,
                 children: [
                   /* @__PURE__ */ jsxRuntime.jsx("option", { value: "", children: "Select provider..." }),
@@ -26129,13 +27765,13 @@ function RecurringServiceSetupModal({
             )
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: service }),
+            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: service }),
             /* @__PURE__ */ jsxRuntime.jsxs(
               "select",
               {
                 value: formData.serviceId,
                 onChange: (e) => setFormData({ ...formData, serviceId: e.target.value }),
-                className: "bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none",
+                className: "focus:ring-primary w-full rounded-lg border border-input bg-card p-2 focus:outline-none focus:ring-2",
                 required: true,
                 children: [
                   /* @__PURE__ */ jsxRuntime.jsx("option", { value: "", children: "Select service..." }),
@@ -26145,13 +27781,13 @@ function RecurringServiceSetupModal({
             )
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase", children: occurrence }),
+            /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground", children: occurrence }),
             /* @__PURE__ */ jsxRuntime.jsxs(
               "select",
               {
                 value: formData.occurrence,
                 onChange: (e) => setFormData({ ...formData, occurrence: e.target.value }),
-                className: "bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none",
+                className: "focus:ring-primary w-full rounded-lg border border-input bg-card p-2 focus:outline-none focus:ring-2",
                 required: true,
                 children: [
                   /* @__PURE__ */ jsxRuntime.jsx("option", { value: "monthly", children: "Monthly" }),
@@ -26173,12 +27809,12 @@ function RecurringServiceSetupModal({
                     ...formData,
                     overrideConsent: e.target.checked
                   }),
-                  className: "border-input accent-primary h-4 w-4 rounded"
+                  className: "accent-primary h-4 w-4 rounded border-input"
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm", children: overrideConsent })
             ] }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground ml-6 text-xs", children: overrideConsentNote })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "ml-6 text-xs text-muted-foreground", children: overrideConsentNote })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-end gap-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx(
@@ -26186,7 +27822,7 @@ function RecurringServiceSetupModal({
               {
                 type: "button",
                 onClick: onClose,
-                className: "border-border text-muted-foreground hover:bg-muted rounded-lg border px-4 py-2 transition-colors",
+                className: "rounded-lg border border-border px-4 py-2 text-muted-foreground transition-colors hover:bg-muted",
                 children: cancel
               }
             ),
@@ -26195,7 +27831,7 @@ function RecurringServiceSetupModal({
               {
                 type: "submit",
                 disabled: saving,
-                className: "bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-lg px-4 py-2 transition-colors",
+                className: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 transition-colors disabled:bg-muted disabled:text-muted-foreground",
                 children: saving ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex items-center gap-2", children: [
                   /* @__PURE__ */ jsxRuntime.jsx("i", { className: "fas fa-spinner fa-spin" }),
                   "Saving..."
@@ -26254,9 +27890,9 @@ function RejectionModal({
   isSubmitting = false,
   variant = "danger"
 }) {
-  const [selectedReasonId, setSelectedReasonId] = React47__namespace.useState("");
-  const [details, setDetails] = React47__namespace.useState("");
-  React47__namespace.useEffect(() => {
+  const [selectedReasonId, setSelectedReasonId] = React49__namespace.useState("");
+  const [details, setDetails] = React49__namespace.useState("");
+  React49__namespace.useEffect(() => {
     if (!open) {
       setSelectedReasonId("");
       setDetails("");
@@ -26273,18 +27909,18 @@ function RejectionModal({
       details: details.trim() || void 0
     });
   };
-  return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "md", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: title }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
-      (description || itemDescription) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-muted rounded-lg p-3", children: [
-        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm", children: description }),
-        itemDescription && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground mt-1 text-sm font-medium", children: itemDescription })
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "md", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: title }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
+      (description || itemDescription) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "rounded-lg bg-muted p-3", children: [
+        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: description }),
+        itemDescription && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-sm font-medium text-foreground", children: itemDescription })
       ] }),
       variant === "danger" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-lg border p-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "svg",
           {
-            className: "text-destructive mt-0.5 h-5 w-5 flex-shrink-0",
+            className: "mt-0.5 h-5 w-5 flex-shrink-0 text-destructive",
             fill: "none",
             viewBox: "0 0 24 24",
             stroke: "currentColor",
@@ -26299,16 +27935,16 @@ function RejectionModal({
             )
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm", children: "This action cannot be undone. The affected party will be notified of this rejection." })
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", children: "This action cannot be undone. The affected party will be notified of this rejection." })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground mb-2 block text-sm font-medium", children: "Reason for rejection" }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mb-2 block text-sm font-medium text-foreground", children: "Reason for rejection" }),
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-2", children: reasons.map((reason) => /* @__PURE__ */ jsxRuntime.jsxs(
           "label",
           {
             className: chunkOR5DRJCW_cjs.cn(
               "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
-              selectedReasonId === reason.id ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground/50"
+              selectedReasonId === reason.id ? "border-primary bg-primary/10" : "hover:border-muted-foreground/50 border-border"
             ),
             children: [
               /* @__PURE__ */ jsxRuntime.jsx(
@@ -26319,25 +27955,25 @@ function RejectionModal({
                   value: reason.id,
                   checked: selectedReasonId === reason.id,
                   onChange: (e) => setSelectedReasonId(e.target.value),
-                  className: "text-primary focus:ring-primary border-border h-4 w-4"
+                  className: "text-primary focus:ring-primary h-4 w-4 border-border"
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-sm", children: reason.label }),
-              reason.requiresDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs", children: "(requires details)" })
+              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-foreground", children: reason.label }),
+              reason.requiresDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs text-muted-foreground", children: "(requires details)" })
             ]
           },
           reason.id
         )) })
       ] }),
       showDetails && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-foreground mb-1 block text-sm font-medium", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "mb-1 block text-sm font-medium text-foreground", children: [
           detailsLabel,
-          needsDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+          needsDetails && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-destructive", children: "*" })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx(
           "textarea",
           {
-            className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
+            className: "w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring",
             rows: 3,
             value: details,
             onChange: (e) => setDetails(e.target.value),
@@ -26345,12 +27981,12 @@ function RejectionModal({
             required: needsDetails
           }
         ),
-        needsDetails && !details.trim() && selectedReasonId && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive mt-1 text-xs", children: "Please provide additional details for this rejection reason." })
+        needsDetails && !details.trim() && selectedReasonId && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-xs text-destructive", children: "Please provide additional details for this rejection reason." })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "outline",
@@ -26360,7 +27996,7 @@ function RejectionModal({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "submit",
           variant: variant === "danger" ? "danger" : "primary",
@@ -26369,7 +28005,7 @@ function RejectionModal({
             /* @__PURE__ */ jsxRuntime.jsxs(
               "svg",
               {
-                className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                className: "-ml-1 mr-2 h-4 w-4 animate-spin",
                 fill: "none",
                 viewBox: "0 0 24 24",
                 children: [
@@ -26511,7 +28147,7 @@ function ReportDashboard({
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkNL3CZNBH_cjs.Select,
+          chunkGEKTNWTP_cjs.Select,
           {
             options: dateRangeOptions,
             value: selectedDateRange,
@@ -26519,7 +28155,7 @@ function ReportDashboard({
             className: "w-40"
           }
         ),
-        onExport && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: onExport, children: [
+        onExport && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: onExport, children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "svg",
             {
@@ -26542,7 +28178,7 @@ function ReportDashboard({
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-2 gap-4 md:grid-cols-4", children: metrics.map((metric, index) => /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "p-4", children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-2 gap-4 md:grid-cols-4", children: metrics.map((metric, index) => /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "p-4", children: [
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: metric.label }),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-2xl font-bold text-gray-900 dark:text-white", children: typeof metric.value === "number" ? metric.label.toLowerCase().includes("revenue") || metric.label.toLowerCase().includes("amount") ? formatCurrency3(metric.value) : formatNumber(metric.value) : metric.value }),
       (metric.change !== void 0 || metric.changeLabel) && /* @__PURE__ */ jsxRuntime.jsxs(
@@ -26559,9 +28195,9 @@ function ReportDashboard({
         }
       )
     ] }) }, index)) }),
-    chartData.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Order Volume" }) }),
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { children: [
+    chartData.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Order Volume" }) }),
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { children: [
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-48 items-end gap-1", children: chartData.map((point, index) => /* @__PURE__ */ jsxRuntime.jsxs(
           "div",
           {
@@ -26607,10 +28243,10 @@ function ReportDashboard({
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid gap-6 md:grid-cols-2", children: [
-      topServices.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Top Services" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-3", children: topServices.map((service, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "secondary", className: "h-6 w-6 justify-center", children: index + 1 }),
+      topServices.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Top Services" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "space-y-3", children: topServices.map((service, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "secondary", className: "h-6 w-6 justify-center", children: index + 1 }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
               /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: service.name }),
@@ -26626,10 +28262,10 @@ function ReportDashboard({
           ] })
         ] }, service.id)) })
       ] }),
-      topEmployers.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Top Employers" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-3", children: topEmployers.map((employer, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "secondary", className: "h-6 w-6 justify-center", children: index + 1 }),
+      topEmployers.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Top Employers" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "space-y-3", children: topEmployers.map((employer, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "secondary", className: "h-6 w-6 justify-center", children: index + 1 }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
               /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: employer.name }),
@@ -26648,7 +28284,7 @@ function ReportDashboard({
     ] })
   ] });
 }
-var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2({
+var ResultsEntryForm = React49__namespace.forwardRef(function ResultsEntryForm2({
   employeeFirstName,
   employeeLastName,
   initialData = {},
@@ -26676,30 +28312,30 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
     addProviderContact = "Click here to add a provider contact",
     pleaseSelectResult = "Please select a result"
   } = labels;
-  const [result, setResult] = React47__namespace.useState(
+  const [result, setResult] = React49__namespace.useState(
     initialData.result ?? null
   );
-  const [alternateText, setAlternateText] = React47__namespace.useState(
+  const [alternateText, setAlternateText] = React49__namespace.useState(
     initialData.alternateText ?? ""
   );
-  const [dateDrawnValue, setDateDrawnValue] = React47__namespace.useState(
+  const [dateDrawnValue, setDateDrawnValue] = React49__namespace.useState(
     initialData.dateDrawn ?? ""
   );
-  const [dateCompletedValue, setDateCompletedValue] = React47__namespace.useState(
+  const [dateCompletedValue, setDateCompletedValue] = React49__namespace.useState(
     initialData.dateCompleted ?? ""
   );
-  const [recommendations, setRecommendations] = React47__namespace.useState(
+  const [recommendations, setRecommendations] = React49__namespace.useState(
     initialData.recommendations ?? ""
   );
-  const [files, setFiles] = React47__namespace.useState(initialData.files ?? []);
-  const [selectedContacts, setSelectedContacts] = React47__namespace.useState(
+  const [files, setFiles] = React49__namespace.useState(initialData.files ?? []);
+  const [selectedContacts, setSelectedContacts] = React49__namespace.useState(
     initialData.providerContacts ?? []
   );
-  const [applyToAll, setApplyToAll] = React47__namespace.useState(
+  const [applyToAll, setApplyToAll] = React49__namespace.useState(
     initialData.applyToAllServices ?? false
   );
-  const [showError, setShowError] = React47__namespace.useState(false);
-  const fileInputRef = React47__namespace.useRef(null);
+  const [showError, setShowError] = React49__namespace.useState(false);
+  const fileInputRef = React49__namespace.useRef(null);
   const handleFileSelect = (e) => {
     const selectedFiles = Array.from(e.target.files || []);
     setFiles((prev) => [...prev, ...selectedFiles]);
@@ -26715,7 +28351,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
       (prev) => prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]
     );
   };
-  const validateAndSubmit = React47__namespace.useCallback(() => {
+  const validateAndSubmit = React49__namespace.useCallback(() => {
     if (!result) {
       setShowError(true);
       return;
@@ -26742,7 +28378,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
     applyToAll,
     onSubmit
   ]);
-  React47__namespace.useImperativeHandle(
+  React49__namespace.useImperativeHandle(
     ref,
     () => ({
       submit: validateAndSubmit
@@ -26752,7 +28388,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("space-y-6", className), children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4 sm:flex-row sm:items-center", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "sm:w-1/2", children: /* @__PURE__ */ jsxRuntime.jsxs(
-        chunkXHJGYBYG_cjs.RadioGroup,
+        chunkJGQIBHAG_cjs.RadioGroup,
         {
           name: "result",
           label: testResults,
@@ -26764,13 +28400,13 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
           orientation: "horizontal",
           error: showError ? pleaseSelectResult : void 0,
           children: [
-            /* @__PURE__ */ jsxRuntime.jsx(chunkXHJGYBYG_cjs.Radio, { value: "passed", label: passed }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkXHJGYBYG_cjs.Radio, { value: "failed", label: failed })
+            /* @__PURE__ */ jsxRuntime.jsx(chunkJGQIBHAG_cjs.Radio, { value: "passed", label: passed }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkJGQIBHAG_cjs.Radio, { value: "failed", label: failed })
           ]
         }
       ) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "sm:w-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: alternateResultsText,
           value: alternateText,
@@ -26785,7 +28421,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
         ":"
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "sm:w-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           type: "date",
           label: dateDrawn,
@@ -26800,7 +28436,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
         ":"
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "sm:w-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           type: "date",
           label: dateCompleted,
@@ -26810,7 +28446,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
       ) })
     ] }),
     showApplyToAll && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-end", children: /* @__PURE__ */ jsxRuntime.jsx(
-      chunkQYJ7RQJ2_cjs.Checkbox,
+      chunkMFDLN4RH_cjs.Checkbox,
       {
         id: "apply-to-all",
         label: useResultsForAllServices,
@@ -26820,7 +28456,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
       }
     ) }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { children: /* @__PURE__ */ jsxRuntime.jsx(
-      chunkB7YGVKTE_cjs.Textarea,
+      chunkJHVDSH6J_cjs.Textarea,
       {
         label: providerRecommendations,
         value: recommendations,
@@ -26831,13 +28467,13 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
     ) }),
     showFileUpload && /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-muted border-input rounded-l-md border border-r-0 px-3 py-2 text-sm font-medium", children: results }),
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "rounded-l-md border border-r-0 border-input bg-muted px-3 py-2 text-sm font-medium", children: results }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             value: files.map((f) => f.name).join(", "),
             readOnly: true,
-            className: "rounded-none border-r-0 border-l-0",
+            className: "rounded-none border-l-0 border-r-0",
             placeholder: "No files selected"
           }
         ),
@@ -26852,7 +28488,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             type: "button",
             variant: "secondary",
@@ -26876,7 +28512,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
               {
                 type: "button",
                 onClick: () => removeFile(index),
-                className: "text-muted-foreground hover:text-destructive ml-2",
+                className: "ml-2 text-muted-foreground hover:text-destructive",
                 children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" })
               }
             )
@@ -26894,7 +28530,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
           className: "hover:bg-muted/50 flex items-center gap-3 rounded px-3 py-2",
           children: [
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkQYJ7RQJ2_cjs.Checkbox,
+              chunkMFDLN4RH_cjs.Checkbox,
               {
                 id: `contact-${contact.id}`,
                 checked: selectedContacts.includes(contact.id),
@@ -26929,10 +28565,10 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
       )) })
     ] }) : showFileUpload && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-warning/10 border-warning/30 rounded-lg border p-4", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("h4", { className: "flex items-center gap-2 font-semibold", children: [
-        /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "text-warning h-5 w-5" }),
+        /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircle, { className: "h-5 w-5 text-warning" }),
         noProviderContacts
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mt-1 text-sm", children: noProviderContactsMessage }),
+      /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-sm text-muted-foreground", children: noProviderContactsMessage }),
       /* @__PURE__ */ jsxRuntime.jsx(
         "button",
         {
@@ -26942,7 +28578,7 @@ var ResultsEntryForm = React47__namespace.forwardRef(function ResultsEntryForm2(
         }
       )
     ] }),
-    showError && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm font-medium", children: pleaseSelectResult })
+    showError && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-destructive", children: pleaseSelectResult })
   ] });
 });
 function ResultsEntryModal({
@@ -26957,18 +28593,18 @@ function ResultsEntryModal({
   ...props
 }) {
   const { submit = "Submit", close = "Close" } = labels;
-  const formRef = React47__namespace.useRef(null);
+  const formRef = React49__namespace.useRef(null);
   const employeeName = employeeFirstName || employeeLastName ? `${employeeFirstName ?? ""} ${employeeLastName ?? ""}`.trim() : void 0;
   const handleSubmitClick = () => {
     formRef.current?.submit();
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "2xl", children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: serviceName }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { children: [
-      employeeName && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted mb-4 rounded-lg p-3", children: /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-muted-foreground text-sm", children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "2xl", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: serviceName }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { children: [
+      employeeName && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-4 rounded-lg bg-muted p-3", children: /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-muted-foreground", children: [
         "Employee:",
         " ",
-        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground font-medium", children: employeeName })
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium text-foreground", children: employeeName })
       ] }) }),
       /* @__PURE__ */ jsxRuntime.jsx(
         ResultsEntryForm,
@@ -26982,9 +28618,9 @@ function ResultsEntryModal({
         }
       )
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "outline",
@@ -26994,7 +28630,7 @@ function ResultsEntryModal({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           onClick: handleSubmitClick,
@@ -27003,7 +28639,7 @@ function ResultsEntryModal({
             /* @__PURE__ */ jsxRuntime.jsxs(
               "svg",
               {
-                className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+                className: "-ml-1 mr-2 h-4 w-4 animate-spin",
                 fill: "none",
                 viewBox: "0 0 24 24",
                 children: [
@@ -27072,7 +28708,7 @@ function ScheduleCalendar({
   isLoading = false,
   className = ""
 }) {
-  const [currentDate, setCurrentDate] = React47__namespace.useState(selectedDate);
+  const [currentDate, setCurrentDate] = React49__namespace.useState(selectedDate);
   const formatTime4 = (date) => {
     const d = typeof date === "string" ? new Date(date) : date;
     return d.toLocaleTimeString("en-US", {
@@ -27172,7 +28808,7 @@ function ScheduleCalendar({
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 variant: "outline",
                 size: "sm",
@@ -27198,7 +28834,7 @@ function ScheduleCalendar({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 variant: "outline",
                 size: "sm",
@@ -27223,7 +28859,7 @@ function ScheduleCalendar({
                 )
               }
             ),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "ghost", size: "sm", onClick: goToToday, children: "Today" })
+            /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "ghost", size: "sm", onClick: goToToday, children: "Today" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "text-lg font-semibold text-gray-900 dark:text-white", children: view === "day" ? currentDate.toLocaleDateString("en-US", {
             weekday: "long",
@@ -27231,7 +28867,7 @@ function ScheduleCalendar({
             day: "numeric",
             year: "numeric"
           }) : `Week of ${weekDates[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })}` }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center gap-2", children: onAddAppointment && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { size: "sm", onClick: () => onAddAppointment(currentDate), children: "Add Appointment" }) })
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center gap-2", children: onAddAppointment && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { size: "sm", onClick: () => onAddAppointment(currentDate), children: "Add Appointment" }) })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx("div", { className: "overflow-auto", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-[600px]", children: [
           view === "week" && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex border-b border-gray-200 dark:border-gray-700", children: [
@@ -27303,7 +28939,7 @@ function ScheduleCalendar({
                         {
                           role: "button",
                           tabIndex: 0,
-                          className: `absolute right-1 left-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`,
+                          className: `absolute left-1 right-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`,
                           style: {
                             top: position.top,
                             height: position.height,
@@ -27415,7 +29051,7 @@ var serviceLinkVariants = classVarianceAuthority.cva(
     }
   }
 );
-function ChevronDownIcon3({ className }) {
+function ChevronDownIcon4({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -27488,7 +29124,7 @@ function SubCategoryAccordion({
   onServiceClick,
   index
 }) {
-  const [isExpanded, setIsExpanded] = React47__namespace.useState(
+  const [isExpanded, setIsExpanded] = React49__namespace.useState(
     subCategory.defaultExpanded ?? false
   );
   const contentId = `sub-content-${index}`;
@@ -27502,7 +29138,7 @@ function SubCategoryAccordion({
           "flex w-full items-center justify-between px-3 py-2",
           "text-left font-medium text-neutral-700 dark:text-neutral-200",
           "hover:text-primary-600 dark:hover:text-primary-400",
-          "focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2"
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         ),
         "aria-expanded": isExpanded,
         "aria-controls": contentId,
@@ -27510,7 +29146,7 @@ function SubCategoryAccordion({
         children: [
           /* @__PURE__ */ jsxRuntime.jsx("span", { children: subCategory.name }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            ChevronDownIcon3,
+            ChevronDownIcon4,
             {
               className: chunkOR5DRJCW_cjs.cn(
                 "transition-transform duration-200",
@@ -27555,7 +29191,7 @@ function CategoryAccordionItem({
   onExpandChange
 }) {
   const isControlled = expandedCategories !== void 0;
-  const [internalExpanded, setInternalExpanded] = React47__namespace.useState(
+  const [internalExpanded, setInternalExpanded] = React49__namespace.useState(
     category.defaultExpanded ?? false
   );
   const isExpanded = isControlled ? expandedCategories.includes(category.name) : internalExpanded;
@@ -27591,7 +29227,7 @@ function CategoryAccordionItem({
                 /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-semibold text-neutral-900 dark:text-white", children: category.name })
               ] }),
               hasContent && /* @__PURE__ */ jsxRuntime.jsx(
-                ChevronDownIcon3,
+                ChevronDownIcon4,
                 {
                   className: chunkOR5DRJCW_cjs.cn(
                     "text-neutral-500 transition-transform duration-200",
@@ -27649,7 +29285,7 @@ function ServiceAccordion({
   onExpandedChange,
   className
 }) {
-  const [internalExpanded, setInternalExpanded] = React47__namespace.useState([]);
+  const [internalExpanded, setInternalExpanded] = React49__namespace.useState([]);
   const isControlled = controlledExpanded !== void 0;
   const expanded = isControlled ? controlledExpanded : internalExpanded;
   const handleExpandChange = (categoryName, isExpanded) => {
@@ -27717,9 +29353,9 @@ function ServiceTagCloud({
           "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5",
           "text-sm font-medium",
           "bg-primary-100 text-primary-800 hover:bg-primary-200",
-          "dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50",
+          "dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-300",
           "transition-colors",
-          "focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2"
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
         ),
         "data-cy": `service-tag-${service.slug}`,
         children: [
@@ -27923,7 +29559,7 @@ function ServiceBadgeGroup({
   size = "md",
   onShowMore
 }) {
-  const badges = React47__namespace.Children.toArray(children);
+  const badges = React49__namespace.Children.toArray(children);
   const visibleBadges = maxVisible ? badges.slice(0, maxVisible) : badges;
   const hiddenCount = maxVisible ? badges.length - maxVisible : 0;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-wrap gap-2", className), children: [
@@ -28255,37 +29891,37 @@ function ServiceCard({
   const showInventory = limitedInventory && inventoryCount !== void 0;
   const isLowInventory = showInventory && inventoryTotal && inventoryCount / inventoryTotal < 0.2;
   return /* @__PURE__ */ jsxRuntime.jsx(
-    chunkHRA4FUO6_cjs.Card,
+    chunkOGGM27JO_cjs.Card,
     {
       className: `h-full transition-all duration-200 ${onClick ? "cursor-pointer hover:shadow-md" : ""} ${selected ? "ring-primary ring-2" : ""} ${!currentlyOffered ? "opacity-60" : ""} ${className} `.trim(),
       onClick: onClick ? handleCardClick : void 0,
       children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full flex-col p-4", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-start justify-between gap-2", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-foreground truncate font-semibold", children: name }),
-            category && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mt-0.5 text-xs", children: category })
+            /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "truncate font-semibold text-foreground", children: name }),
+            category && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-xs text-muted-foreground", children: category })
           ] }),
-          !currentlyOffered && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "warning", size: "sm", children: "Not Offered" })
+          !currentlyOffered && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "warning", size: "sm", children: "Not Offered" })
         ] }),
-        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mb-3 line-clamp-2 text-sm", children: description }),
+        description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 line-clamp-2 text-sm text-muted-foreground", children: description }),
         tags.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex flex-wrap gap-1", children: [
           tags.slice(0, 3).map((tag) => /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
-              className: "bg-muted text-muted-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium",
+              className: "inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground",
               children: tag
             },
             tag
           )),
-          tags.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
+          tags.length > 3 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs text-muted-foreground", children: [
             "+",
             tags.length - 3
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-auto", children: [
           price !== void 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-baseline justify-between", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-xs font-medium uppercase", children: "Base Price" }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-lg font-bold", children: formatCurrency2(price, currency) })
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-xs font-medium uppercase text-muted-foreground", children: "Base Price" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-lg font-bold text-foreground", children: formatCurrency2(price, currency) })
           ] }),
           showInventory && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between text-sm", children: [
             /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "Inventory" }),
@@ -28300,17 +29936,17 @@ function ServiceCard({
               }
             )
           ] }),
-          (hasCustomAvailability || customPricingCount > 0) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-muted-foreground mb-3 flex items-center gap-2 text-xs", children: [
+          (hasCustomAvailability || customPricingCount > 0) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-center gap-2 text-xs text-muted-foreground", children: [
             /* @__PURE__ */ jsxRuntime.jsx(lucideReact.SlidersHorizontal, { className: "h-3.5 w-3.5" }),
             /* @__PURE__ */ jsxRuntime.jsx("span", { children: customPricingCount > 0 ? `${customPricingCount} custom pricing tier${customPricingCount > 1 ? "s" : ""}` : "Custom availability" })
           ] }),
-          (onEdit || onManage || onDelete) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border flex items-center gap-2 border-t pt-2", children: [
+          (onEdit || onManage || onDelete) && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 border-t border-border pt-2", children: [
             onDelete && /* @__PURE__ */ jsxRuntime.jsx(
               "button",
               {
                 type: "button",
                 onClick: handleDeleteClick,
-                className: "text-muted-foreground hover:text-destructive p-1.5 transition-colors",
+                className: "p-1.5 text-muted-foreground transition-colors hover:text-destructive",
                 title: "Delete service",
                 children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Trash2, { className: "h-4 w-4" })
               }
@@ -28320,7 +29956,7 @@ function ServiceCard({
               {
                 type: "button",
                 onClick: handleEditClick,
-                className: "text-muted-foreground hover:text-primary p-1.5 transition-colors",
+                className: "hover:text-primary p-1.5 text-muted-foreground transition-colors",
                 title: "Edit service",
                 children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Pencil, { className: "h-4 w-4" })
               }
@@ -28345,13 +29981,13 @@ function AddServiceCard({
   className = ""
 }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
-    chunkHRA4FUO6_cjs.Card,
+    chunkOGGM27JO_cjs.Card,
     {
-      className: `border-border bg-muted/50 hover:border-primary hover:bg-muted h-full cursor-pointer border-2 border-dashed transition-all duration-200 ${className} `.trim(),
+      className: `bg-muted/50 hover:border-primary h-full cursor-pointer border-2 border-dashed border-border transition-all duration-200 hover:bg-muted ${className} `.trim(),
       onClick,
       children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full min-h-[160px] flex-col items-center justify-center p-4", children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted mb-3 flex h-12 w-12 items-center justify-center rounded-full", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Plus, { className: "text-muted-foreground h-6 w-6" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-sm font-medium", children: "Add New Service" })
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Plus, { className: "h-6 w-6 text-muted-foreground" }) }),
+        /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-muted-foreground", children: "Add New Service" })
       ] })
     }
   );
@@ -28381,23 +30017,23 @@ function ServiceGeneralSettings({
   errorMessage,
   className = ""
 }) {
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardHeader, { className: "pb-4", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "General Settings" }),
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className, children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardHeader, { className: "pb-4", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "General Settings" }),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Basic service information and configuration" })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-6", children: [
       errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap gap-6 border-b border-gray-200 pb-4 dark:border-gray-700", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkRRQGH7C5_cjs.Switch, { checked: isActive, onCheckedChange: onIsActiveChange }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkRRARXXV2_cjs.Switch, { checked: isActive, onCheckedChange: onIsActiveChange }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Active" }),
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Service is available for orders" })
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkRRQGH7C5_cjs.Switch, { checked: isFeatured, onCheckedChange: onIsFeaturedChange }),
+          /* @__PURE__ */ jsxRuntime.jsx(chunkRRARXXV2_cjs.Switch, { checked: isFeatured, onCheckedChange: onIsFeaturedChange }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: "Featured" }),
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Show prominently in listings" })
@@ -28406,7 +30042,7 @@ function ServiceGeneralSettings({
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Service Name",
             value: name,
@@ -28428,7 +30064,7 @@ function ServiceGeneralSettings({
             "textarea",
             {
               id: "service-description",
-              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+              className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
               rows: 3,
               value: description,
               onChange: (e) => onDescriptionChange?.(e.target.value),
@@ -28438,7 +30074,7 @@ function ServiceGeneralSettings({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "Service Code / SKU",
               value: serviceCode,
@@ -28447,7 +30083,7 @@ function ServiceGeneralSettings({
             }
           ),
           categories.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-            chunkNL3CZNBH_cjs.Select,
+            chunkGEKTNWTP_cjs.Select,
             {
               label: "Category",
               value: categoryId || "",
@@ -28474,7 +30110,7 @@ function ServiceGeneralSettings({
               }
             ),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute top-1/2 left-3 -translate-y-1/2 text-gray-500", children: "$" }),
+              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500", children: "$" }),
               /* @__PURE__ */ jsxRuntime.jsx(
                 "input",
                 {
@@ -28482,7 +30118,7 @@ function ServiceGeneralSettings({
                   type: "number",
                   min: "0",
                   step: "0.01",
-                  className: "w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+                  className: "w-full rounded-md border border-gray-300 py-2 pl-7 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
                   value: basePrice,
                   onChange: (e) => onBasePriceChange?.(parseFloat(e.target.value) || 0),
                   placeholder: "0.00"
@@ -28506,13 +30142,13 @@ function ServiceGeneralSettings({
                   id: "turnaround-days",
                   type: "number",
                   min: "0",
-                  className: "w-full rounded-md border border-gray-300 px-3 py-2 pr-16 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+                  className: "w-full rounded-md border border-gray-300 px-3 py-2 pr-16 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
                   value: turnaroundDays ?? "",
                   onChange: (e) => onTurnaroundDaysChange?.(parseInt(e.target.value) || 0),
                   placeholder: "0"
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500", children: "days" })
+              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500", children: "days" })
             ] })
           ] })
         ] })
@@ -28520,7 +30156,7 @@ function ServiceGeneralSettings({
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: "Billing Information" }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "CPT Code",
             value: cptCode,
@@ -28529,23 +30165,23 @@ function ServiceGeneralSettings({
           }
         )
       ] }),
-      onSave && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { onClick: onSave, disabled: isSaving, children: isSaving ? "Saving..." : "Save Settings" }) })
+      onSave && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700", children: /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { onClick: onSave, disabled: isSaving, children: isSaving ? "Saving..." : "Save Settings" }) })
     ] })
   ] });
 }
 function ServiceSkeleton() {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "border-border animate-pulse rounded-lg border p-4", children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "animate-pulse rounded-lg border border-border p-4", children: [
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-start justify-between", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-5 w-32 rounded" }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-5 w-16 rounded" })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-5 w-32 rounded bg-muted" }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-5 w-16 rounded bg-muted" })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-4 space-y-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-full rounded" }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-4 w-3/4 rounded" })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-full rounded bg-muted" }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-4 w-3/4 rounded bg-muted" })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-6 w-20 rounded-full" }),
-      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted h-6 w-20 rounded-full" })
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-6 w-20 rounded-full bg-muted" }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-6 w-20 rounded-full bg-muted" })
     ] })
   ] });
 }
@@ -28593,7 +30229,7 @@ function ServiceGrid({
       /* @__PURE__ */ jsxRuntime.jsx(
         "svg",
         {
-          className: "text-muted-foreground mb-4 h-12 w-12",
+          className: "mb-4 h-12 w-12 text-muted-foreground",
           fill: "none",
           viewBox: "0 0 24 24",
           stroke: "currentColor",
@@ -28677,15 +30313,15 @@ function ServicePicker({
   fullWidth = false,
   className
 }) {
-  const [searchQuery, setSearchQuery] = React47__namespace.useState("");
-  const [expandedGroups, setExpandedGroups] = React47__namespace.useState(
+  const [searchQuery, setSearchQuery] = React49__namespace.useState("");
+  const [expandedGroups, setExpandedGroups] = React49__namespace.useState(
     /* @__PURE__ */ new Set()
   );
-  const filteredGroups = React47__namespace.useMemo(
+  const filteredGroups = React49__namespace.useMemo(
     () => filterServices(groups, searchQuery),
     [groups, searchQuery]
   );
-  const searchResults = React47__namespace.useMemo(
+  const searchResults = React49__namespace.useMemo(
     () => searchQuery ? flattenServices(filteredGroups) : [],
     [filteredGroups, searchQuery]
   );
@@ -28723,17 +30359,17 @@ function ServicePicker({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "bg-card text-card-foreground border-border shadow-card flex flex-col rounded-xl border",
+        "flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-card",
         !fullWidth && "lg:max-w-md",
         className
       ),
       children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "p-3", children: [
-          !hideHeading && /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "text-foreground mb-3 text-xl font-bold", children: heading }),
+          !hideHeading && /* @__PURE__ */ jsxRuntime.jsx("h2", { className: "mb-3 text-xl font-bold text-foreground", children: heading }),
           showSearch && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon5, { className: "text-muted-foreground h-5 w-5" }) }),
+            /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon6, { className: "h-5 w-5 text-muted-foreground" }) }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkVV4N4WY6_cjs.Input,
+              chunkSZRD5UTO_cjs.Input,
               {
                 type: "search",
                 value: searchQuery,
@@ -28746,8 +30382,8 @@ function ServicePicker({
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1 overflow-y-auto p-3", children: [
-          error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-destructive/10 text-destructive mb-4 rounded-lg p-4", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: error }) }),
-          loading ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-muted-foreground flex items-center gap-2", children: [
+          error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-destructive/10 mb-4 rounded-lg p-4 text-destructive", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: error }) }),
+          loading ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 text-muted-foreground", children: [
             /* @__PURE__ */ jsxRuntime.jsx(SpinnerIcon5, { className: "h-5 w-5 animate-spin" }),
             /* @__PURE__ */ jsxRuntime.jsx("span", { children: "Loading available services..." })
           ] }) : isSearching ? (
@@ -28761,7 +30397,7 @@ function ServicePicker({
                 multiple
               },
               service.id
-            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg bg-muted p-4 text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
           ) : (
             // Grouped list - accordion style
             /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "space-y-1", children: filteredGroups.length > 0 ? filteredGroups.map((group) => /* @__PURE__ */ jsxRuntime.jsx(
@@ -28776,7 +30412,7 @@ function ServicePicker({
                 multiple
               },
               group.id
-            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-muted text-muted-foreground rounded-lg p-4", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
+            )) : /* @__PURE__ */ jsxRuntime.jsx("li", { children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg bg-muted p-4 text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx("strong", { children: emptyMessage }) }) }) })
           )
         ] })
       ]
@@ -28804,7 +30440,7 @@ function ServiceGroupItem({
         onClick: () => onToggleGroup(group.id),
         className: chunkOR5DRJCW_cjs.cn(
           "flex w-full items-center justify-between rounded-lg px-3 py-2",
-          "text-muted-foreground text-left text-sm font-medium",
+          "text-left text-sm font-medium text-muted-foreground",
           "hover:bg-muted",
           "transition-colors",
           depth > 0 && "ml-4"
@@ -28825,7 +30461,7 @@ function ServiceGroupItem({
             ChevronIcon3,
             {
               className: chunkOR5DRJCW_cjs.cn(
-                "text-muted-foreground h-5 w-5 transition-transform",
+                "h-5 w-5 text-muted-foreground transition-transform",
                 isExpanded && "rotate-180"
               )
             }
@@ -28887,11 +30523,11 @@ function ServiceItem({
               disabled: service.disabled,
               className: chunkOR5DRJCW_cjs.cn(
                 "peer h-4 w-4 shrink-0 appearance-none rounded",
-                "border-input bg-background border-2",
+                "border-2 border-input bg-background",
                 "cursor-pointer transition-all duration-150",
-                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 "disabled:cursor-not-allowed disabled:opacity-50",
-                "checked:bg-primary-500 checked:border-primary-500"
+                "checked:border-primary-500 checked:bg-primary-500"
               )
             }
           ),
@@ -28906,28 +30542,28 @@ function ServiceItem({
               disabled: service.disabled,
               className: chunkOR5DRJCW_cjs.cn(
                 "peer h-4 w-4 shrink-0 appearance-none rounded-full",
-                "border-input bg-background border-2",
+                "border-2 border-input bg-background",
                 "cursor-pointer transition-all duration-150",
-                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 "checked:border-primary-500"
               )
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100" })
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute h-2 w-2 scale-0 rounded-full bg-primary-500 transition-transform peer-checked:scale-100" })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-foreground text-sm font-medium", children: service.name }),
-            service.code && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-muted-foreground text-xs", children: [
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm font-medium text-foreground", children: service.name }),
+            service.code && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-xs text-muted-foreground", children: [
               "(",
               service.code,
               ")"
             ] })
           ] }),
-          service.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground truncate text-xs", children: service.description })
+          service.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-xs text-muted-foreground", children: service.description })
         ] }),
-        service.price !== void 0 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-foreground text-sm font-medium", children: [
+        service.price !== void 0 && /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-sm font-medium text-foreground", children: [
           "$",
           service.price.toFixed(2)
         ] })
@@ -28948,7 +30584,7 @@ function CheckIcon4({ className }) {
     }
   );
 }
-function SearchIcon5({ className }) {
+function SearchIcon6({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "svg",
     {
@@ -29014,16 +30650,16 @@ function ServicePricingManager({
   categories: _categories = [],
   className = ""
 }) {
-  const [searchTerm, setSearchTerm] = React47__namespace.useState("");
-  const [selectedCategory, setSelectedCategory] = React47__namespace.useState(
+  const [searchTerm, setSearchTerm] = React49__namespace.useState("");
+  const [selectedCategory, setSelectedCategory] = React49__namespace.useState(
     null
   );
-  const [editingService, setEditingService] = React47__namespace.useState(null);
-  const [editPrice, setEditPrice] = React47__namespace.useState("");
-  const [editEmployerPrice, setEditEmployerPrice] = React47__namespace.useState("");
-  const [showBulkModal, setShowBulkModal] = React47__namespace.useState(false);
-  const [bulkAdjustment, setBulkAdjustment] = React47__namespace.useState("");
-  const [bulkAdjustmentType, setBulkAdjustmentType] = React47__namespace.useState("percent");
+  const [editingService, setEditingService] = React49__namespace.useState(null);
+  const [editPrice, setEditPrice] = React49__namespace.useState("");
+  const [editEmployerPrice, setEditEmployerPrice] = React49__namespace.useState("");
+  const [showBulkModal, setShowBulkModal] = React49__namespace.useState(false);
+  const [bulkAdjustment, setBulkAdjustment] = React49__namespace.useState("");
+  const [bulkAdjustmentType, setBulkAdjustmentType] = React49__namespace.useState("percent");
   const formatCurrency3 = (amount) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -29101,11 +30737,11 @@ function ServicePricingManager({
           " services"
         ] })
       ] }),
-      onBulkUpdate && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "outline", onClick: () => setShowBulkModal(true), children: "Bulk Adjust Prices" })
+      onBulkUpdate && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "outline", onClick: () => setShowBulkModal(true), children: "Bulk Adjust Prices" })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.Card, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "p-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4 md:flex-row", children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.Card, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "p-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-4 md:flex-row", children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           placeholder: "Search services...",
           value: searchTerm,
@@ -29114,7 +30750,7 @@ function ServicePricingManager({
       ) }),
       uniqueCategories.length > 0 && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: selectedCategory === null ? "primary" : "ghost",
             size: "sm",
@@ -29123,7 +30759,7 @@ function ServicePricingManager({
           }
         ),
         uniqueCategories.map((category) => /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: selectedCategory === category ? "primary" : "ghost",
             size: "sm",
@@ -29134,14 +30770,14 @@ function ServicePricingManager({
         ))
       ] })
     ] }) }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardHeader, { children: /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: [
         "Services (",
         filteredServices.length,
         ")"
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { children: filteredServices.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No services found" }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "divide-y divide-gray-200 dark:divide-gray-700", children: [
-        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "hidden gap-4 py-3 text-xs font-medium text-gray-500 uppercase md:grid md:grid-cols-6 dark:text-gray-400", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { children: filteredServices.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("p", { className: "py-8 text-center text-gray-500 dark:text-gray-400", children: "No services found" }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "divide-y divide-gray-200 dark:divide-gray-700", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "hidden gap-4 py-3 text-xs font-medium uppercase text-gray-500 dark:text-gray-400 md:grid md:grid-cols-6", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-2", children: "Service" }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-right", children: "Base Price" }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-right", children: "Employer Price" }),
@@ -29157,7 +30793,7 @@ function ServicePricingManager({
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: service.serviceName }),
                 /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400", children: [
                   service.serviceCode && /* @__PURE__ */ jsxRuntime.jsx("span", { children: service.serviceCode }),
-                  service.category && /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: "secondary", children: service.category })
+                  service.category && /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: "secondary", children: service.category })
                 ] })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between md:mb-0 md:block", children: [
@@ -29170,11 +30806,11 @@ function ServicePricingManager({
               ] }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center md:mb-0 md:justify-center", children: [
                 /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mr-2 text-sm text-gray-500 md:hidden", children: "Status:" }),
-                /* @__PURE__ */ jsxRuntime.jsx(chunkEKIQE524_cjs.Badge, { variant: service.isActive ? "success" : "secondary", children: service.isActive ? "Active" : "Inactive" })
+                /* @__PURE__ */ jsxRuntime.jsx(chunkFOFDJDAY_cjs.Badge, { variant: service.isActive ? "success" : "secondary", children: service.isActive ? "Active" : "Inactive" })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-end gap-2", children: [
                 onToggleStatus && /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkMKJDBXX4_cjs.Button,
+                  chunkIO2XB35K_cjs.Button,
                   {
                     variant: "ghost",
                     size: "sm",
@@ -29183,7 +30819,7 @@ function ServicePricingManager({
                   }
                 ),
                 onUpdatePrice && /* @__PURE__ */ jsxRuntime.jsx(
-                  chunkMKJDBXX4_cjs.Button,
+                  chunkIO2XB35K_cjs.Button,
                   {
                     variant: "outline",
                     size: "sm",
@@ -29199,13 +30835,13 @@ function ServicePricingManager({
       ] }) })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs(
-      chunkI7L6CQXR_cjs.Modal,
+      chunkAOHWULSD_cjs.Modal,
       {
         open: !!editingService,
         onOpenChange: () => setEditingService(null),
         children: [
-          /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Edit Service Price" }) }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Edit Service Price" }) }),
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
             /* @__PURE__ */ jsxRuntime.jsx("p", { className: "font-medium text-gray-900 dark:text-white", children: editingService?.serviceName }),
             /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
               /* @__PURE__ */ jsxRuntime.jsx(
@@ -29217,7 +30853,7 @@ function ServicePricingManager({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "edit-base-price",
                   type: "number",
@@ -29238,7 +30874,7 @@ function ServicePricingManager({
                 }
               ),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   id: "edit-employer-price",
                   type: "number",
@@ -29251,16 +30887,16 @@ function ServicePricingManager({
               )
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "ghost", onClick: () => setEditingService(null), children: "Cancel" }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { onClick: handleSaveEdit, disabled: isSaving, children: isSaving ? "Saving..." : "Save Changes" })
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "ghost", onClick: () => setEditingService(null), children: "Cancel" }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { onClick: handleSaveEdit, disabled: isSaving, children: isSaving ? "Saving..." : "Save Changes" })
           ] })
         ]
       }
     ),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.Modal, { open: showBulkModal, onOpenChange: setShowBulkModal, children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: "Bulk Price Adjustment" }) }),
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "space-y-4", children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.Modal, { open: showBulkModal, onOpenChange: setShowBulkModal, children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: "Bulk Price Adjustment" }) }),
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: [
           "Apply adjustment to ",
           filteredServices.length,
@@ -29268,7 +30904,7 @@ function ServicePricingManager({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex gap-2", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: bulkAdjustmentType === "percent" ? "primary" : "ghost",
               size: "sm",
@@ -29277,7 +30913,7 @@ function ServicePricingManager({
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkMKJDBXX4_cjs.Button,
+            chunkIO2XB35K_cjs.Button,
             {
               variant: bulkAdjustmentType === "fixed" ? "primary" : "ghost",
               size: "sm",
@@ -29289,7 +30925,7 @@ function ServicePricingManager({
         /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
           /* @__PURE__ */ jsxRuntime.jsx("label", { className: "mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300", children: bulkAdjustmentType === "percent" ? "Percentage Change (%)" : "Amount Change ($)" }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               type: "number",
               step: bulkAdjustmentType === "percent" ? "1" : "0.01",
@@ -29301,10 +30937,10 @@ function ServicePricingManager({
           /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 text-xs text-gray-500 dark:text-gray-400", children: "Use negative values to decrease prices" })
         ] })
       ] }),
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { variant: "ghost", onClick: () => setShowBulkModal(false), children: "Cancel" }),
+      /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
+        /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { variant: "ghost", onClick: () => setShowBulkModal(false), children: "Cancel" }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             onClick: handleBulkAdjust,
             disabled: isSaving || !bulkAdjustment,
@@ -29385,7 +31021,7 @@ function ServiceShippingSettings({
   isSaving = false,
   className = ""
 }) {
-  const [address, setAddress] = React47__namespace.useState(
+  const [address, setAddress] = React49__namespace.useState(
     defaultAddress || {
       name: "",
       street1: "",
@@ -29401,12 +31037,12 @@ function ServiceShippingSettings({
     setAddress(newAddress);
     onAddressChange?.(newAddress);
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.Card, { className, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardHeader, { className: "pb-4", children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.Card, { className, children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardHeader, { className: "pb-4", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between", children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardTitle, { className: "text-lg", children: "Shipping Settings" }),
+        /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardTitle, { className: "text-lg", children: "Shipping Settings" }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkRRQGH7C5_cjs.Switch,
+          chunkRRARXXV2_cjs.Switch,
           {
             checked: shippingEnabled,
             onCheckedChange: onShippingEnabledChange
@@ -29415,9 +31051,9 @@ function ServiceShippingSettings({
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-gray-500 dark:text-gray-400", children: "Configure how kits and materials are shipped" })
     ] }),
-    shippingEnabled && /* @__PURE__ */ jsxRuntime.jsxs(chunkHRA4FUO6_cjs.CardContent, { className: "space-y-6", children: [
+    shippingEnabled && /* @__PURE__ */ jsxRuntime.jsxs(chunkOGGM27JO_cjs.CardContent, { className: "space-y-6", children: [
       shippingMethods.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkNL3CZNBH_cjs.Select,
+        chunkGEKTNWTP_cjs.Select,
         {
           label: "Shipping Method",
           value: selectedMethodId || "",
@@ -29435,7 +31071,7 @@ function ServiceShippingSettings({
           /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: "Send collection kits to patients" })
         ] }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkRRQGH7C5_cjs.Switch,
+          chunkRRARXXV2_cjs.Switch,
           {
             checked: useKitShipping,
             onCheckedChange: onUseKitShippingChange
@@ -29445,7 +31081,7 @@ function ServiceShippingSettings({
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-700 dark:text-gray-300", children: "Default Return Address" }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Recipient Name",
             value: address.name || "",
@@ -29454,7 +31090,7 @@ function ServiceShippingSettings({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Street Address",
             value: address.street1,
@@ -29464,7 +31100,7 @@ function ServiceShippingSettings({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Street Address 2",
             value: address.street2 || "",
@@ -29474,7 +31110,7 @@ function ServiceShippingSettings({
         ),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "grid grid-cols-6 gap-3", children: [
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-3", children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "City",
               value: address.city,
@@ -29484,7 +31120,7 @@ function ServiceShippingSettings({
             }
           ) }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkNL3CZNBH_cjs.Select,
+            chunkGEKTNWTP_cjs.Select,
             {
               label: "State",
               value: address.state,
@@ -29494,7 +31130,7 @@ function ServiceShippingSettings({
             }
           ) }),
           /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-2", children: /* @__PURE__ */ jsxRuntime.jsx(
-            chunkVV4N4WY6_cjs.Input,
+            chunkSZRD5UTO_cjs.Input,
             {
               label: "ZIP Code",
               value: address.zipCode,
@@ -29506,7 +31142,7 @@ function ServiceShippingSettings({
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: "Carrier Account Number (Optional)",
           value: carrierAccountNumber || "",
@@ -29527,7 +31163,7 @@ function ServiceShippingSettings({
           "textarea",
           {
             id: "shipping-instructions",
-            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white",
+            className: "w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
             rows: 3,
             value: instructions || "",
             onChange: (e) => onInstructionsChange?.(e.target.value),
@@ -29535,7 +31171,7 @@ function ServiceShippingSettings({
           }
         )
       ] }),
-      onSave && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-end pt-2", children: /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { onClick: onSave, disabled: isSaving, children: isSaving ? "Saving..." : "Save Shipping Settings" }) })
+      onSave && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-end pt-2", children: /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { onClick: onSave, disabled: isSaving, children: isSaving ? "Saving..." : "Save Shipping Settings" }) })
     ] })
   ] });
 }
@@ -29550,7 +31186,7 @@ function SetupServiceModal({
   errorMessage,
   title = "Add New Service"
 }) {
-  const [formData, setFormData] = React47__namespace.useState({
+  const [formData, setFormData] = React49__namespace.useState({
     name: "",
     description: "",
     price: 0,
@@ -29560,7 +31196,7 @@ function SetupServiceModal({
     initialInventory: void 0,
     autoAcceptReferrals: false
   });
-  React47__namespace.useEffect(() => {
+  React49__namespace.useEffect(() => {
     if (!open) {
       setFormData({
         name: "",
@@ -29591,12 +31227,12 @@ function SetupServiceModal({
     onSave(formData);
   };
   const isValid = formData.name.trim() && formData.price >= 0;
-  return /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: title }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalBody, { className: "min-w-[320px] space-y-4", children: [
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.Modal, { open, onOpenChange, size: "lg", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
+    /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: title }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalBody, { className: "min-w-[320px] space-y-4", children: [
       errorMessage && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-red-600 dark:text-red-400", children: errorMessage }) }),
       showServicePicker && availableServices.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkNL3CZNBH_cjs.Select,
+        chunkGEKTNWTP_cjs.Select,
         {
           label: "Select Service",
           value: formData.serviceId || "",
@@ -29609,7 +31245,7 @@ function SetupServiceModal({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: "Service Name",
           value: formData.name,
@@ -29624,7 +31260,7 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-description",
-            className: "text-foreground mb-1 block text-sm font-medium",
+            className: "mb-1 block text-sm font-medium text-foreground",
             children: "Description"
           }
         ),
@@ -29632,7 +31268,7 @@ function SetupServiceModal({
           "textarea",
           {
             id: "setup-service-description",
-            className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none",
+            className: "w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring",
             rows: 3,
             value: formData.description,
             onChange: (e) => setFormData((prev) => ({
@@ -29644,7 +31280,7 @@ function SetupServiceModal({
         )
       ] }),
       categories.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
-        chunkNL3CZNBH_cjs.Select,
+        chunkGEKTNWTP_cjs.Select,
         {
           label: "Category",
           value: formData.categoryId || "",
@@ -29661,12 +31297,12 @@ function SetupServiceModal({
           "label",
           {
             htmlFor: "setup-service-price",
-            className: "text-foreground mb-1 block text-sm font-medium",
+            className: "mb-1 block text-sm font-medium text-foreground",
             children: "Base Price"
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2", children: "$" }),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground", children: "$" }),
           /* @__PURE__ */ jsxRuntime.jsx(
             "input",
             {
@@ -29674,7 +31310,7 @@ function SetupServiceModal({
               type: "number",
               min: "0",
               step: "0.01",
-              className: "bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none",
+              className: "w-full rounded-md border border-input bg-background py-2 pl-7 pr-4 text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring",
               value: formData.price,
               onChange: (e) => setFormData((prev) => ({
                 ...prev,
@@ -29689,11 +31325,11 @@ function SetupServiceModal({
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3 pt-2", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-4", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Currently Offered" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Service is available for orders" })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-foreground", children: "Currently Offered" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "Service is available for orders" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkRRQGH7C5_cjs.Switch,
+            chunkRRARXXV2_cjs.Switch,
             {
               className: "flex-shrink-0",
               checked: formData.currentlyOffered,
@@ -29706,11 +31342,11 @@ function SetupServiceModal({
         ] }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-4", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Limited Inventory" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Track inventory for this service" })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-foreground", children: "Limited Inventory" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "Track inventory for this service" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkRRQGH7C5_cjs.Switch,
+            chunkRRARXXV2_cjs.Switch,
             {
               className: "flex-shrink-0",
               checked: formData.limitedInventory,
@@ -29721,8 +31357,8 @@ function SetupServiceModal({
             }
           )
         ] }),
-        formData.limitedInventory && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-border ml-4 border-l-2 pl-4", children: /* @__PURE__ */ jsxRuntime.jsx(
-          chunkVV4N4WY6_cjs.Input,
+        formData.limitedInventory && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "ml-4 border-l-2 border-border pl-4", children: /* @__PURE__ */ jsxRuntime.jsx(
+          chunkSZRD5UTO_cjs.Input,
           {
             label: "Initial Inventory",
             type: "number",
@@ -29737,11 +31373,11 @@ function SetupServiceModal({
         ) }),
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-4", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0", children: [
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground text-sm font-medium", children: "Auto-Accept Referrals" }),
-            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground text-xs", children: "Automatically accept incoming referrals" })
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-foreground", children: "Auto-Accept Referrals" }),
+            /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-muted-foreground", children: "Automatically accept incoming referrals" })
           ] }),
           /* @__PURE__ */ jsxRuntime.jsx(
-            chunkRRQGH7C5_cjs.Switch,
+            chunkRRARXXV2_cjs.Switch,
             {
               className: "flex-shrink-0",
               checked: formData.autoAcceptReferrals,
@@ -29754,9 +31390,9 @@ function SetupServiceModal({
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalFooter, { children: [
+    /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkMKJDBXX4_cjs.Button,
+        chunkIO2XB35K_cjs.Button,
         {
           type: "button",
           variant: "outline",
@@ -29765,11 +31401,11 @@ function SetupServiceModal({
           children: "Cancel"
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", disabled: !isValid || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", disabled: !isValid || isSubmitting, children: isSubmitting ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
         /* @__PURE__ */ jsxRuntime.jsxs(
           "svg",
           {
-            className: "mr-2 -ml-1 h-4 w-4 animate-spin",
+            className: "-ml-1 mr-2 h-4 w-4 animate-spin",
             fill: "none",
             viewBox: "0 0 24 24",
             children: [
@@ -29798,542 +31434,6 @@ function SetupServiceModal({
         "Saving..."
       ] }) : "Add Service" })
     ] })
-  ] }) });
-}
-var SidebarContext = React47.createContext(null);
-function SidebarProvider({
-  children,
-  defaultCollapsed = false,
-  storageKey = "sidebar-collapsed",
-  persistCollapsed = true,
-  defaultExpandedGroup = null,
-  mobileBreakpoint = "(max-width: 1023px)"
-}) {
-  const isMobileViewport = chunkR4DM4635_cjs.useMediaQuery(mobileBreakpoint);
-  const [isCollapsed, setIsCollapsed] = React47.useState(() => {
-    if (typeof window !== "undefined" && persistCollapsed) {
-      const stored = localStorage.getItem(storageKey);
-      if (stored !== null) {
-        return stored === "true";
-      }
-    }
-    return defaultCollapsed;
-  });
-  const [isMobileOpen, setIsMobileOpen] = React47.useState(false);
-  const [expandedGroup, setExpandedGroup] = React47.useState(
-    defaultExpandedGroup
-  );
-  React47.useEffect(() => {
-    if (persistCollapsed && typeof window !== "undefined") {
-      localStorage.setItem(storageKey, String(isCollapsed));
-    }
-  }, [isCollapsed, persistCollapsed, storageKey]);
-  React47.useEffect(() => {
-    if (!isMobileViewport && isMobileOpen) {
-      setIsMobileOpen(false);
-    }
-  }, [isMobileViewport, isMobileOpen]);
-  const toggleCollapsed = React47.useCallback(() => {
-    setIsCollapsed((prev) => !prev);
-  }, []);
-  const setCollapsed = React47.useCallback((collapsed) => {
-    setIsCollapsed(collapsed);
-  }, []);
-  const openMobile = React47.useCallback(() => {
-    setIsMobileOpen(true);
-  }, []);
-  const closeMobile = React47.useCallback(() => {
-    setIsMobileOpen(false);
-  }, []);
-  const toggleMobile = React47.useCallback(() => {
-    setIsMobileOpen((prev) => !prev);
-  }, []);
-  const toggleGroup = React47.useCallback((group) => {
-    setExpandedGroup((prev) => prev === group ? null : group);
-  }, []);
-  const contextValue = React47.useMemo(
-    () => ({
-      isCollapsed,
-      toggleCollapsed,
-      setCollapsed,
-      isMobileOpen,
-      openMobile,
-      closeMobile,
-      toggleMobile,
-      isMobileViewport,
-      expandedGroup,
-      setExpandedGroup,
-      toggleGroup
-    }),
-    [
-      isCollapsed,
-      toggleCollapsed,
-      setCollapsed,
-      isMobileOpen,
-      openMobile,
-      closeMobile,
-      toggleMobile,
-      isMobileViewport,
-      expandedGroup,
-      toggleGroup
-    ]
-  );
-  return /* @__PURE__ */ jsxRuntime.jsx(SidebarContext.Provider, { value: contextValue, children });
-}
-function useSidebar() {
-  const context = React47.useContext(SidebarContext);
-  if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider");
-  }
-  return context;
-}
-var ChevronLeftIcon2 = () => /* @__PURE__ */ jsxRuntime.jsx(
-  "svg",
-  {
-    className: "h-4 w-4",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M15 19l-7-7 7-7" })
-  }
-);
-var ChevronRightIcon = () => /* @__PURE__ */ jsxRuntime.jsx(
-  "svg",
-  {
-    className: "h-4 w-4",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M9 5l7 7-7 7" })
-  }
-);
-var ChevronDownIcon4 = () => /* @__PURE__ */ jsxRuntime.jsx(
-  "svg",
-  {
-    className: "h-3 w-3",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
-  }
-);
-var XIcon3 = () => /* @__PURE__ */ jsxRuntime.jsx(
-  "svg",
-  {
-    className: "h-5 w-5",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    children: /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        d: "M6 18L18 6M6 6l12 12"
-      }
-    )
-  }
-);
-var MenuIcon = () => /* @__PURE__ */ jsxRuntime.jsx(
-  "svg",
-  {
-    className: "h-5 w-5",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    children: /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        d: "M4 6h16M4 12h16M4 18h16"
-      }
-    )
-  }
-);
-var SearchIcon6 = () => /* @__PURE__ */ jsxRuntime.jsx(
-  "svg",
-  {
-    className: "h-4 w-4",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    children: /* @__PURE__ */ jsxRuntime.jsx(
-      "path",
-      {
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-      }
-    )
-  }
-);
-function Sidebar({
-  children,
-  className,
-  expandedWidth = "280px",
-  collapsedWidth = "80px",
-  style,
-  "data-testid": testId = "sidebar"
-}) {
-  const { isCollapsed, isMobileOpen, closeMobile, isMobileViewport } = useSidebar();
-  const width = isMobileViewport ? expandedWidth : isCollapsed ? collapsedWidth : expandedWidth;
-  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-    isMobileViewport && isMobileOpen && /* @__PURE__ */ jsxRuntime.jsx(
-      "div",
-      {
-        className: "fixed inset-0 z-40 bg-black/50 lg:hidden",
-        onClick: closeMobile,
-        "aria-hidden": "true"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "nav",
-      {
-        "data-testid": testId,
-        className: chunkOR5DRJCW_cjs.cn(
-          "flex h-screen flex-col",
-          "border-r border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900",
-          "transition-all duration-300 ease-in-out",
-          // Mobile positioning
-          isMobileViewport && "fixed top-0 left-0 z-50",
-          isMobileViewport && (isMobileOpen ? "translate-x-0" : "-translate-x-full"),
-          // Desktop positioning
-          !isMobileViewport && "relative",
-          className
-        ),
-        style: {
-          width,
-          minWidth: width,
-          ...style
-        },
-        "aria-label": "Main navigation",
-        children
-      }
-    )
-  ] });
-}
-function SidebarHeader({
-  children,
-  className,
-  showMobileClose = true
-}) {
-  const { closeMobile, isMobileViewport, isCollapsed } = useSidebar();
-  const showCollapsed = !isMobileViewport && isCollapsed;
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
-    {
-      className: chunkOR5DRJCW_cjs.cn(
-        "flex items-center border-b border-neutral-200 py-4 dark:border-neutral-700",
-        showCollapsed ? "justify-center px-2" : "justify-between px-4",
-        className
-      ),
-      children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
-          "div",
-          {
-            className: chunkOR5DRJCW_cjs.cn(
-              "min-w-0",
-              showCollapsed ? "flex justify-center" : "flex-1"
-            ),
-            children
-          }
-        ),
-        showMobileClose && isMobileViewport && /* @__PURE__ */ jsxRuntime.jsx(
-          "button",
-          {
-            onClick: closeMobile,
-            className: "-mr-2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 lg:hidden dark:hover:bg-neutral-800",
-            "aria-label": "Close navigation",
-            children: /* @__PURE__ */ jsxRuntime.jsx(XIcon3, {})
-          }
-        )
-      ]
-    }
-  );
-}
-function SidebarFooter({
-  children,
-  className
-}) {
-  const { isCollapsed, isMobileViewport } = useSidebar();
-  const showCollapsed = !isMobileViewport && isCollapsed;
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      className: chunkOR5DRJCW_cjs.cn(
-        "mt-auto border-t border-neutral-200 py-4 dark:border-neutral-700",
-        showCollapsed ? "flex justify-center px-2" : "px-4",
-        className
-      ),
-      children
-    }
-  );
-}
-function SidebarContent({
-  children,
-  className
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("flex-1 overflow-y-auto py-4", className), children });
-}
-function SidebarNav({
-  children,
-  className
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsx("nav", { className: chunkOR5DRJCW_cjs.cn("space-y-1 px-2", className), children });
-}
-function SidebarNavGroup({
-  label,
-  icon,
-  children,
-  defaultExpanded = false,
-  groupId,
-  className
-}) {
-  const { isCollapsed, isMobileViewport, expandedGroup, toggleGroup } = useSidebar();
-  const showCollapsed = !isMobileViewport && isCollapsed;
-  const isExpanded = groupId ? expandedGroup === groupId : defaultExpanded;
-  const [localExpanded, setLocalExpanded] = React47.useState(defaultExpanded);
-  const effectiveExpanded = groupId ? isExpanded : localExpanded;
-  const handleToggle = React47.useCallback(() => {
-    if (groupId) {
-      toggleGroup(groupId);
-    } else {
-      setLocalExpanded((prev) => !prev);
-    }
-  }, [groupId, toggleGroup]);
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("mb-2", className), children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(
-      "button",
-      {
-        onClick: handleToggle,
-        className: chunkOR5DRJCW_cjs.cn(
-          "flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold",
-          "text-neutral-700 dark:text-neutral-300",
-          "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
-          showCollapsed && "justify-center"
-        ),
-        title: showCollapsed ? label : void 0,
-        children: [
-          icon && /* @__PURE__ */ jsxRuntime.jsx(
-            "span",
-            {
-              className: chunkOR5DRJCW_cjs.cn(
-                "h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400",
-                !showCollapsed && "mr-3"
-              ),
-              children: icon
-            }
-          ),
-          !showCollapsed && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 truncate text-left", children: label }),
-            /* @__PURE__ */ jsxRuntime.jsx(
-              "span",
-              {
-                className: chunkOR5DRJCW_cjs.cn(
-                  "ml-2 flex-shrink-0 transition-transform duration-200",
-                  effectiveExpanded && "rotate-180"
-                ),
-                children: /* @__PURE__ */ jsxRuntime.jsx(ChevronDownIcon4, {})
-              }
-            )
-          ] })
-        ]
-      }
-    ),
-    !showCollapsed && /* @__PURE__ */ jsxRuntime.jsx(
-      "div",
-      {
-        className: chunkOR5DRJCW_cjs.cn(
-          "overflow-hidden transition-all duration-300",
-          effectiveExpanded ? "mt-1 max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
-        ),
-        children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pl-2", children })
-      }
-    )
-  ] });
-}
-function SidebarNavItem({
-  label,
-  icon,
-  isActive = false,
-  onClick,
-  href,
-  badge,
-  disabled = false,
-  className,
-  "data-testid": testId
-}) {
-  const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
-  const showCollapsed = !isMobileViewport && isCollapsed;
-  const handleClick = React47.useCallback(() => {
-    if (disabled) return;
-    onClick?.();
-    if (isMobileViewport) {
-      closeMobile();
-    }
-  }, [disabled, onClick, isMobileViewport, closeMobile]);
-  const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-    icon && /* @__PURE__ */ jsxRuntime.jsx(
-      "span",
-      {
-        className: chunkOR5DRJCW_cjs.cn(
-          "h-5 w-5 flex-shrink-0",
-          isActive ? "text-primary-600 dark:text-primary-400" : "text-neutral-500 dark:text-neutral-400",
-          !showCollapsed && "mr-3"
-        ),
-        children: icon
-      }
-    ),
-    !showCollapsed && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1 truncate text-left", children: label }),
-      badge && /* @__PURE__ */ jsxRuntime.jsx(
-        "span",
-        {
-          className: chunkOR5DRJCW_cjs.cn(
-            "ml-2 rounded-full px-2 py-0.5 text-xs font-medium",
-            isActive ? "bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300" : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400"
-          ),
-          children: badge
-        }
-      )
-    ] })
-  ] });
-  const baseClasses = chunkOR5DRJCW_cjs.cn(
-    "flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors",
-    isActive ? "bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium" : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800",
-    disabled && "opacity-50 cursor-not-allowed",
-    showCollapsed && "justify-center",
-    className
-  );
-  if (href && !disabled) {
-    return /* @__PURE__ */ jsxRuntime.jsx(
-      "a",
-      {
-        href,
-        onClick: handleClick,
-        "data-testid": testId,
-        className: baseClasses,
-        title: showCollapsed ? label : void 0,
-        children: content
-      }
-    );
-  }
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "button",
-    {
-      onClick: handleClick,
-      disabled,
-      "data-testid": testId,
-      className: baseClasses,
-      title: showCollapsed ? label : void 0,
-      children: content
-    }
-  );
-}
-function SidebarToggle({
-  className,
-  position = "inline"
-}) {
-  const { isCollapsed, toggleCollapsed, isMobileViewport } = useSidebar();
-  if (isMobileViewport) return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, {});
-  const button = /* @__PURE__ */ jsxRuntime.jsx(
-    "button",
-    {
-      onClick: toggleCollapsed,
-      className: chunkOR5DRJCW_cjs.cn(
-        "rounded-lg p-2 text-neutral-500 dark:text-neutral-400",
-        "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
-        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
-        className
-      ),
-      "aria-label": isCollapsed ? "Expand sidebar" : "Collapse sidebar",
-      children: isCollapsed ? /* @__PURE__ */ jsxRuntime.jsx(ChevronRightIcon, {}) : /* @__PURE__ */ jsxRuntime.jsx(ChevronLeftIcon2, {})
-    }
-  );
-  if (position === "floating") {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute top-6 -right-3 z-10 rounded-full border border-neutral-200 bg-white shadow-md dark:border-neutral-700 dark:bg-neutral-900", children: button });
-  }
-  return button;
-}
-function SidebarMobileToggle({
-  className,
-  icon
-}) {
-  const { openMobile, isMobileViewport } = useSidebar();
-  if (!isMobileViewport) return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, {});
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "button",
-    {
-      onClick: openMobile,
-      className: chunkOR5DRJCW_cjs.cn(
-        "rounded-lg p-2 text-neutral-500 dark:text-neutral-400",
-        "transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
-        "focus:ring-primary-500 focus:ring-2 focus:outline-none",
-        className
-      ),
-      "aria-label": "Open navigation",
-      children: icon ?? /* @__PURE__ */ jsxRuntime.jsx(MenuIcon, {})
-    }
-  );
-}
-function SidebarSearch({
-  value,
-  onChange,
-  placeholder = "Search...",
-  shortcutHint = "/",
-  className,
-  "data-testid": testId = "sidebar-search"
-}) {
-  const { isCollapsed, isMobileViewport, setCollapsed } = useSidebar();
-  const inputRef = React47.useRef(null);
-  const showCollapsed = !isMobileViewport && isCollapsed;
-  React47.useEffect(() => {
-    const handleKeyDown = (e) => {
-      const target = e.target;
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
-        return;
-      }
-      if (e.key === "/") {
-        e.preventDefault();
-        if (showCollapsed) {
-          setCollapsed(false);
-          setTimeout(() => inputRef.current?.focus(), 350);
-        } else {
-          inputRef.current?.focus();
-        }
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showCollapsed, setCollapsed]);
-  if (showCollapsed) return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, {});
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: chunkOR5DRJCW_cjs.cn("px-3 py-2", className), children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400", children: /* @__PURE__ */ jsxRuntime.jsx(SearchIcon6, {}) }),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "input",
-      {
-        ref: inputRef,
-        type: "text",
-        value,
-        onChange: (e) => onChange(e.target.value),
-        placeholder: `${placeholder} (${shortcutHint})`,
-        "data-testid": testId,
-        className: chunkOR5DRJCW_cjs.cn(
-          "w-full rounded-lg py-2 pr-4 pl-10 text-sm",
-          "border-transparent bg-neutral-100 dark:bg-neutral-800",
-          "text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500",
-          "focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-neutral-700",
-          "transition-colors"
-        )
-      }
-    )
   ] }) });
 }
 function InstagramIcon2({ className }) {
@@ -30475,7 +31575,7 @@ function NewsletterForm({
   isLoading = false,
   className
 }) {
-  const [email, setEmail] = React47__namespace.useState("");
+  const [email, setEmail] = React49__namespace.useState("");
   function handleSubmit(e) {
     e.preventDefault();
     if (email.trim()) {
@@ -30494,7 +31594,7 @@ function NewsletterForm({
         required: true,
         className: chunkOR5DRJCW_cjs.cn(
           "min-w-0 flex-1 rounded-lg px-4 py-2 text-sm transition-colors",
-          variant === "light" ? "border border-white/20 bg-white/10 text-white placeholder-white/60 focus:border-white/50 focus:outline-none" : "focus:border-primary-500 border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+          variant === "light" ? "border border-white/20 bg-white/10 text-white placeholder-white/60 focus:border-white/50 focus:outline-none" : "border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
         ),
         disabled: isLoading
       }
@@ -30505,8 +31605,8 @@ function NewsletterForm({
         type: "submit",
         disabled: isLoading,
         className: chunkOR5DRJCW_cjs.cn(
-          "rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
-          variant === "light" ? "text-primary-600 bg-white hover:bg-white/90" : "bg-primary-600 hover:bg-primary-700 text-white",
+          "whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+          variant === "light" ? "bg-white text-primary-600 hover:bg-white/90" : "bg-primary-600 text-white hover:bg-primary-700",
           isLoading && "cursor-not-allowed opacity-50"
         ),
         children: isLoading ? "Sending..." : buttonText
@@ -30524,7 +31624,7 @@ function FooterLinkSection({
       "h3",
       {
         className: chunkOR5DRJCW_cjs.cn(
-          "mb-4 text-sm font-semibold tracking-wider uppercase",
+          "mb-4 text-sm font-semibold uppercase tracking-wider",
           variant === "light" ? "text-white/70" : "text-gray-500 dark:text-gray-400"
         ),
         children: group.title
@@ -30589,7 +31689,7 @@ function LegalLinks({
     "nav",
     {
       className: chunkOR5DRJCW_cjs.cn("flex flex-wrap items-center gap-x-4 gap-y-1", className),
-      children: links.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+      children: links.map((link, index) => /* @__PURE__ */ jsxRuntime.jsxs(React49__namespace.Fragment, { children: [
         index > 0 && /* @__PURE__ */ jsxRuntime.jsx(
           "span",
           {
@@ -30810,7 +31910,7 @@ function SimpleFooter({
     {
       className: chunkOR5DRJCW_cjs.cn(
         "border-t py-4",
-        variant === "light" ? "bg-primary-700 border-white/10" : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900",
+        variant === "light" ? "border-white/10 bg-primary-700" : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900",
         className
       ),
       children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "container mx-auto px-4", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left", children: [
@@ -30969,7 +32069,7 @@ function AuthButtons({
       onClick: onSignUp,
       className: chunkOR5DRJCW_cjs.cn(
         "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-        variant === "light" ? "text-primary-600 bg-white hover:bg-white/90" : "bg-primary-600 hover:bg-primary-700 text-white"
+        variant === "light" ? "bg-white text-primary-600 hover:bg-white/90" : "bg-primary-600 text-white hover:bg-primary-700"
       ),
       children: "Sign Up"
     }
@@ -30993,7 +32093,7 @@ function AuthButtons({
           href: signUpHref,
           className: chunkOR5DRJCW_cjs.cn(
             "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-            variant === "light" ? "text-primary-600 bg-white hover:bg-white/90" : "bg-primary-600 hover:bg-primary-700 text-white"
+            variant === "light" ? "bg-white text-primary-600 hover:bg-white/90" : "bg-primary-600 text-white hover:bg-primary-700"
           ),
           children: "Sign Up"
         }
@@ -31014,9 +32114,9 @@ function UserMenu({
   menuItems = [],
   className
 }) {
-  const [isOpen, setIsOpen] = React47__namespace.useState(false);
-  const menuRef = React47__namespace.useRef(null);
-  React47__namespace.useEffect(() => {
+  const [isOpen, setIsOpen] = React49__namespace.useState(false);
+  const menuRef = React49__namespace.useRef(null);
+  React49__namespace.useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -31075,7 +32175,7 @@ function UserMenu({
             {
               className: chunkOR5DRJCW_cjs.cn(
                 "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium",
-                variant === "light" ? "bg-white/20 text-white" : "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400"
+                variant === "light" ? "bg-white/20 text-white" : "dark:bg-primary-900/30 bg-primary-100 text-primary-700 dark:text-primary-400"
               ),
               children: initials
             }
@@ -31180,7 +32280,7 @@ function MobileMenuPanel({
       "div",
       {
         className: chunkOR5DRJCW_cjs.cn(
-          "fixed top-0 right-0 bottom-0 z-50 w-80 max-w-full bg-white shadow-xl md:hidden dark:bg-gray-900",
+          "fixed bottom-0 right-0 top-0 z-50 w-80 max-w-full bg-white shadow-xl dark:bg-gray-900 md:hidden",
           className
         ),
         children: [
@@ -31212,9 +32312,9 @@ function MobileMenuPanel({
             },
             link.href
           )) }),
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute right-0 bottom-0 left-0 border-t border-gray-200 p-4 dark:border-gray-700", children: user ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-0 left-0 right-0 border-t border-gray-200 p-4 dark:border-gray-700", children: user ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-3", children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3 px-2", children: [
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium", children: user.name.split(" ").map((w) => w[0]).join("").slice(0, 2) }),
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 font-medium text-primary-700 dark:text-primary-400", children: user.name.split(" ").map((w) => w[0]).join("").slice(0, 2) }),
               /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
                 /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-gray-900 dark:text-white", children: user.name }),
                 user.email && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-xs text-gray-500 dark:text-gray-400", children: user.email })
@@ -31253,7 +32353,7 @@ function MobileMenuPanel({
                   onSignUp?.();
                   onClose();
                 },
-                className: "bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-sm font-medium text-white",
+                className: "rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700",
                 children: "Sign Up"
               }
             )
@@ -31294,7 +32394,7 @@ function SiteHeader({
   userMenuItems,
   className
 }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = React47__namespace.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React49__namespace.useState(false);
   const colorVariant = variant === "primary" || variant === "transparent" ? "light" : "dark";
   return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "h-16", "aria-hidden": "true" }),
@@ -31394,7 +32494,7 @@ function CompactHeader({
       "header",
       {
         className: chunkOR5DRJCW_cjs.cn(
-          "fixed top-0 right-0 left-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900",
+          "fixed left-0 right-0 top-0 z-40 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900",
           className
         ),
         children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-14 items-center justify-between px-4", children: [
@@ -31628,29 +32728,29 @@ function SSOConfigForm({
     delete: deleteLabel = "Delete SSO",
     cancel = "Cancel"
   } = labels;
-  const [clientDomain, setClientDomain] = React47__namespace.useState(
+  const [clientDomain, setClientDomain] = React49__namespace.useState(
     initialData.clientDomain ?? ""
   );
-  const [ssoLoginUrl, setSsoLoginUrl] = React47__namespace.useState(
+  const [ssoLoginUrl, setSsoLoginUrl] = React49__namespace.useState(
     initialData.ssoLoginUrl ?? ""
   );
-  const [ssoLogoutUrl, setSsoLogoutUrl] = React47__namespace.useState(
+  const [ssoLogoutUrl, setSsoLogoutUrl] = React49__namespace.useState(
     initialData.ssoLogoutUrl ?? ""
   );
-  const [forceReauth, setForceReauth] = React47__namespace.useState(
+  const [forceReauth, setForceReauth] = React49__namespace.useState(
     initialData.forceReauthentication ?? false
   );
-  const [idpSigns, setIdpSigns] = React47__namespace.useState(
+  const [idpSigns, setIdpSigns] = React49__namespace.useState(
     initialData.idpSignsRequest ?? false
   );
-  const [allowUnencrypted, setAllowUnencrypted] = React47__namespace.useState(
+  const [allowUnencrypted, setAllowUnencrypted] = React49__namespace.useState(
     initialData.allowUnencryptedAssertion ?? false
   );
-  const [certificateFile, setCertificateFile] = React47__namespace.useState(
+  const [certificateFile, setCertificateFile] = React49__namespace.useState(
     null
   );
-  const fileInputRef = React47__namespace.useRef(null);
-  const [errors, setErrors] = React47__namespace.useState({});
+  const fileInputRef = React49__namespace.useRef(null);
+  const [errors, setErrors] = React49__namespace.useState({});
   const validate = () => {
     const newErrors = {};
     if (!clientDomain.trim()) {
@@ -31710,7 +32810,7 @@ function SSOConfigForm({
     /* @__PURE__ */ jsxRuntime.jsx("h3", { className: "text-xl font-semibold", children: title }),
     /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, className: "space-y-6", children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: clientDomainLabel,
           value: clientDomain,
@@ -31721,7 +32821,7 @@ function SSOConfigForm({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: ssoLoginUrlLabel,
           type: "url",
@@ -31733,7 +32833,7 @@ function SSOConfigForm({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           label: ssoLogoutUrlLabel,
           type: "url",
@@ -31752,17 +32852,17 @@ function SSOConfigForm({
               "w-full cursor-pointer rounded-lg border-2 border-dashed p-6",
               "transition-colors duration-200",
               "hover:border-primary hover:bg-primary/5",
-              errors.certificate ? "border-destructive bg-destructive/5" : "border-border bg-muted/30"
+              errors.certificate ? "bg-destructive/5 border-destructive" : "bg-muted/30 border-border"
             ),
             onDragOver: handleDragOver,
             onDrop: handleDrop,
             children: [
               certificateFile ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center", children: [
-                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground text-sm", children: certificateSelected }),
-                /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-foreground mt-1 font-medium", children: certificateFile.name })
+                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-sm text-muted-foreground", children: certificateSelected }),
+                /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 font-medium text-foreground", children: certificateFile.name })
               ] }) : /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "text-center", children: [
-                /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-muted-foreground mb-3 text-sm", children: selectCertificate }),
-                /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "button", variant: "primary", size: "sm", children: selectFileToUpload })
+                /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mb-3 text-sm text-muted-foreground", children: selectCertificate }),
+                /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "button", variant: "primary", size: "sm", children: selectFileToUpload })
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(
                 "input",
@@ -31778,12 +32878,12 @@ function SSOConfigForm({
             ]
           }
         ),
-        errors.certificate && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-destructive text-sm", children: errors.certificate })
+        errors.certificate && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", children: errors.certificate })
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4", children: [
         /* @__PURE__ */ jsxRuntime.jsx("h4", { className: "text-lg font-semibold", children: otherOptions }),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkRRQGH7C5_cjs.Switch,
+          chunkRRARXXV2_cjs.Switch,
           {
             checked: forceReauth,
             onCheckedChange: setForceReauth,
@@ -31793,7 +32893,7 @@ function SSOConfigForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkRRQGH7C5_cjs.Switch,
+          chunkRRARXXV2_cjs.Switch,
           {
             checked: idpSigns,
             onCheckedChange: setIdpSigns,
@@ -31803,7 +32903,7 @@ function SSOConfigForm({
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          chunkRRQGH7C5_cjs.Switch,
+          chunkRRARXXV2_cjs.Switch,
           {
             checked: allowUnencrypted,
             onCheckedChange: setAllowUnencrypted,
@@ -31814,12 +32914,158 @@ function SSOConfigForm({
         )
       ] }),
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-col gap-3 pt-4 sm:flex-row", children: [
-        /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "submit", variant: "primary", children: save }),
-        hasExistingConfig && onDelete && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "button", variant: "danger", onClick: onDelete, children: deleteLabel }),
-        onCancel && /* @__PURE__ */ jsxRuntime.jsx(chunkMKJDBXX4_cjs.Button, { type: "button", variant: "secondary", onClick: onCancel, children: cancel })
+        /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "submit", variant: "primary", children: save }),
+        hasExistingConfig && onDelete && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "button", variant: "danger", onClick: onDelete, children: deleteLabel }),
+        onCancel && /* @__PURE__ */ jsxRuntime.jsx(chunkIO2XB35K_cjs.Button, { type: "button", variant: "secondary", onClick: onCancel, children: cancel })
       ] })
     ] })
   ] });
+}
+var statCardVariants = classVarianceAuthority.cva("transition-all duration-200", {
+  variants: {
+    interactive: {
+      true: "cursor-pointer hover:shadow-md hover:-translate-y-0.5",
+      false: ""
+    },
+    accent: {
+      none: "",
+      primary: "",
+      success: "",
+      warning: "",
+      destructive: "",
+      info: ""
+    }
+  },
+  defaultVariants: {
+    interactive: false,
+    accent: "none"
+  }
+});
+var iconBubbleVariants = classVarianceAuthority.cva(
+  "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg",
+  {
+    variants: {
+      accent: {
+        none: "bg-muted text-muted-foreground",
+        primary: "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300",
+        success: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+        warning: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+        destructive: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+        info: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300"
+      }
+    },
+    defaultVariants: {
+      accent: "none"
+    }
+  }
+);
+function defaultDeltaFormat(value) {
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value}`;
+}
+function deltaColorClass(delta) {
+  const { value, polarity = "normal" } = delta;
+  if (value === 0) return "text-muted-foreground";
+  const isGood = polarity === "inverse" ? value < 0 : value > 0;
+  return isGood ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300";
+}
+function DeltaArrow({ value }) {
+  if (value === 0) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "svg",
+      {
+        className: "h-3 w-3",
+        viewBox: "0 0 12 12",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: 2,
+        "aria-hidden": "true",
+        children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", d: "M2 6h8" })
+      }
+    );
+  }
+  const up = value > 0;
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "svg",
+    {
+      className: "h-3 w-3",
+      viewBox: "0 0 12 12",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: 2,
+      "aria-hidden": "true",
+      children: /* @__PURE__ */ jsxRuntime.jsx(
+        "path",
+        {
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          d: up ? "M6 10V2M2 6l4-4 4 4" : "M6 2v8M2 6l4 4 4-4"
+        }
+      )
+    }
+  );
+}
+function StatCard2({
+  label,
+  value,
+  description,
+  icon,
+  accent = "none",
+  delta,
+  loading = false,
+  onClick,
+  ariaLabel,
+  className,
+  ...rest
+}) {
+  const interactive = Boolean(onClick);
+  const handleKeyDown = (e) => {
+    if (!interactive) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    chunkOGGM27JO_cjs.Card,
+    {
+      role: interactive ? "button" : void 0,
+      tabIndex: interactive ? 0 : void 0,
+      "aria-label": interactive ? ariaLabel ?? label : void 0,
+      onClick: interactive ? onClick : void 0,
+      onKeyDown: interactive ? handleKeyDown : void 0,
+      className: chunkOR5DRJCW_cjs.cn(
+        statCardVariants({ interactive, accent }),
+        className
+      ),
+      ...rest,
+      children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "p-5", children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-4", children: [
+        icon && /* @__PURE__ */ jsxRuntime.jsx("div", { className: iconBubbleVariants({ accent }), "aria-hidden": "true", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-5 w-5", children: icon }) }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm font-medium text-muted-foreground", children: label }),
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mt-1 flex items-baseline gap-2", children: [
+            loading ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "inline-block h-8 w-20 animate-pulse rounded bg-muted" }) : /* @__PURE__ */ jsxRuntime.jsx("p", { className: "truncate text-3xl font-bold tracking-tight text-foreground", children: value }),
+            !loading && delta && /* @__PURE__ */ jsxRuntime.jsxs(
+              "span",
+              {
+                className: chunkOR5DRJCW_cjs.cn(
+                  "inline-flex items-center gap-0.5 text-xs font-semibold",
+                  deltaColorClass(delta)
+                ),
+                title: delta.label,
+                children: [
+                  /* @__PURE__ */ jsxRuntime.jsx(DeltaArrow, { value: delta.value }),
+                  (delta.format ?? defaultDeltaFormat)(delta.value)
+                ]
+              }
+            )
+          ] }),
+          description && !loading && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-1 truncate text-xs text-muted-foreground", children: description }),
+          delta?.label && !loading && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "mt-0.5 text-[11px] text-muted-foreground", children: delta.label })
+        ] })
+      ] }) })
+    }
+  );
 }
 function CheckIcon5({ className }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -31912,7 +33158,7 @@ function StepIndicator({
       type: "button",
       onClick: () => handleStepClick(index),
       disabled: !clickable,
-      className: `${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white" : status === "current" ? "bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900" : "bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300"}`.trim(),
+      className: `${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-neutral-900 ${clickable ? "cursor-pointer" : "cursor-default"} ${step.hasError ? "bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400" : status === "completed" ? "bg-primary-600 text-white focus:ring-primary-500 dark:bg-primary-500" : status === "current" ? "bg-primary-600 text-white ring-2 ring-primary-600 ring-offset-2 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 dark:ring-offset-neutral-900" : "bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300"}`.trim(),
       "aria-current": status === "current" ? "step" : void 0,
       children: step.hasError ? /* @__PURE__ */ jsxRuntime.jsx(ErrorIcon, { className: "h-4 w-4" }) : status === "completed" ? step.icon || /* @__PURE__ */ jsxRuntime.jsx(CheckIcon5, { className: "h-4 w-4" }) : step.icon || /* @__PURE__ */ jsxRuntime.jsx(
         "span",
@@ -31975,7 +33221,7 @@ function StepIndicator({
         const status = getStepStatus(index);
         const isLast = index === steps.length - 1;
         const clickable = isClickable(index);
-        return /* @__PURE__ */ jsxRuntime.jsxs(React47__namespace.Fragment, { children: [
+        return /* @__PURE__ */ jsxRuntime.jsxs(React49__namespace.Fragment, { children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: `flex flex-row items-center ${sizes.gap}`, children: [
             circleButton(step, index, status, clickable),
             stepLabel(step, status, false)
@@ -32096,7 +33342,7 @@ function StripeSecureBadge({
     "div",
     {
       className: chunkOR5DRJCW_cjs.cn(
-        "text-muted-foreground inline-flex items-center",
+        "inline-flex items-center text-muted-foreground",
         sizeClasses2[size].container,
         className
       ),
@@ -32250,11 +33496,11 @@ function TimelineProgress({
                     className: chunkOR5DRJCW_cjs.cn(
                       "relative z-10 flex items-center justify-center rounded-full transition-all duration-200",
                       state === "completed" && chunkOR5DRJCW_cjs.cn(
-                        "bg-primary-100 text-primary-600 ring-primary-200 dark:bg-primary-900/40 dark:text-primary-400 dark:ring-primary-800 ring-2",
+                        "dark:bg-primary-900/40 bg-primary-100 text-primary-600 ring-2 ring-primary-200 dark:text-primary-400 dark:ring-primary-800",
                         sizes.completed
                       ),
                       state === "current" && chunkOR5DRJCW_cjs.cn(
-                        "bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4",
+                        "shadow-primary-500/30 dark:ring-primary-900/50 bg-primary-500 text-white shadow-md ring-4 ring-primary-100 dark:bg-primary-500",
                         sizes.current,
                         pulse && "animate-pulse"
                       ),
@@ -32263,7 +33509,7 @@ function TimelineProgress({
                         sizes.pending
                       ),
                       state === "error" && chunkOR5DRJCW_cjs.cn(
-                        "bg-red-500 text-white shadow-md ring-4 shadow-red-500/30 ring-red-100 dark:bg-red-500 dark:ring-red-900/50",
+                        "bg-red-500 text-white shadow-md shadow-red-500/30 ring-4 ring-red-100 dark:bg-red-500 dark:ring-red-900/50",
                         sizes.error
                       )
                     ),
@@ -32328,12 +33574,12 @@ function TimelineProgress({
 TimelineProgress.displayName = "TimelineProgress";
 function TimelineEventList({
   events,
-  relativeTime = false,
+  relativeTime: relativeTime3 = false,
   className
 }) {
   const formatTime4 = (date) => {
     const d = typeof date === "string" ? new Date(date) : date;
-    if (relativeTime) {
+    if (relativeTime3) {
       const now = /* @__PURE__ */ new Date();
       const diffMs = now.getTime() - d.getTime();
       const diffMins = Math.floor(diffMs / 6e4);
@@ -32390,7 +33636,7 @@ function TimelineEventList({
     events.length > 1 && /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        className: "absolute top-0 bottom-0 left-5 w-px bg-neutral-200 dark:bg-neutral-700",
+        className: "absolute bottom-0 left-5 top-0 w-px bg-neutral-200 dark:bg-neutral-700",
         "aria-hidden": "true"
       }
     ),
@@ -32462,7 +33708,7 @@ function OrderConfirmation({
             onClick: onClose,
             className: chunkOR5DRJCW_cjs.cn(
               "w-full rounded-lg px-4 py-3 font-medium",
-              "bg-primary-600 hover:bg-primary-700 text-white",
+              "bg-primary-600 text-white hover:bg-primary-700",
               "dark:bg-primary-500 dark:hover:bg-primary-600",
               "transition-colors"
             ),
@@ -32758,7 +34004,7 @@ function Toast({
       role: "alert",
       className: chunkOR5DRJCW_cjs.cn(
         "flex items-start gap-3 rounded-lg border p-4 shadow-lg",
-        "max-w-[420px] min-w-[300px]",
+        "min-w-[300px] max-w-[420px]",
         "animate-slide-in-right",
         styles.container
       ),
@@ -32771,7 +34017,7 @@ function Toast({
             "button",
             {
               onClick: action.onClick,
-              className: "mt-2 rounded text-sm font-medium underline hover:no-underline focus:ring-2 focus:ring-current focus:ring-offset-2 focus:outline-none",
+              className: "mt-2 rounded text-sm font-medium underline hover:no-underline focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-2",
               children: action.label
             }
           )
@@ -32780,7 +34026,7 @@ function Toast({
           "button",
           {
             onClick: onClose,
-            className: "flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10",
+            className: "flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-current dark:hover:bg-white/10",
             "aria-label": "Dismiss notification",
             children: /* @__PURE__ */ jsxRuntime.jsx(XIcon5, {})
           }
@@ -32816,7 +34062,7 @@ function ToastContainer({
     }
   );
 }
-var ToastContext = React47.createContext(null);
+var ToastContext = React49.createContext(null);
 var toastIdCounter = 0;
 function generateToastId() {
   return `toast-${++toastIdCounter}-${Date.now()}`;
@@ -32826,8 +34072,8 @@ function ToastProvider({
   maxToasts = 5,
   defaultDuration = 5e3
 }) {
-  const [toasts, setToasts] = React47.useState([]);
-  const dismiss = React47.useCallback((id) => {
+  const [toasts, setToasts] = React49.useState([]);
+  const dismiss = React49.useCallback((id) => {
     setToasts((prev) => {
       const toast2 = prev.find((t) => t.id === id);
       if (toast2?.onDismiss) {
@@ -32836,13 +34082,13 @@ function ToastProvider({
       return prev.filter((t) => t.id !== id);
     });
   }, []);
-  const dismissAll = React47.useCallback(() => {
+  const dismissAll = React49.useCallback(() => {
     setToasts((prev) => {
       prev.forEach((t) => t.onDismiss?.());
       return [];
     });
   }, []);
-  const toast = React47.useCallback(
+  const toast = React49.useCallback(
     (options) => {
       const id = generateToastId();
       const duration = options.duration ?? defaultDuration;
@@ -32869,13 +34115,13 @@ function ToastProvider({
     },
     [maxToasts, defaultDuration, dismiss]
   );
-  const success = React47.useCallback(
+  const success = React49.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "success" });
     },
     [toast]
   );
-  const error = React47.useCallback(
+  const error = React49.useCallback(
     (message, options) => {
       return toast({
         ...options,
@@ -32887,19 +34133,19 @@ function ToastProvider({
     },
     [toast]
   );
-  const warning = React47.useCallback(
+  const warning = React49.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "warning" });
     },
     [toast]
   );
-  const info = React47.useCallback(
+  const info = React49.useCallback(
     (message, options) => {
       return toast({ ...options, message, variant: "info" });
     },
     [toast]
   );
-  const contextValue = React47.useMemo(
+  const contextValue = React49.useMemo(
     () => ({
       toasts,
       toast,
@@ -32915,12 +34161,64 @@ function ToastProvider({
   return /* @__PURE__ */ jsxRuntime.jsx(ToastContext.Provider, { value: contextValue, children });
 }
 function useToast() {
-  const context = React47.useContext(ToastContext);
+  const context = React49.useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
 }
+var dotSizeClasses = {
+  xs: "h-1.5 w-1.5",
+  sm: "h-2 w-2",
+  md: "h-2.5 w-2.5",
+  lg: "h-3 w-3",
+  xl: "h-3.5 w-3.5"
+};
+var UserAvatar = React49__namespace.forwardRef(
+  ({
+    status,
+    statusLabel,
+    wrapperClassName,
+    size = "md",
+    className,
+    ...avatarProps
+  }, ref) => {
+    const effectiveSize = size ?? "md";
+    const showDot = status === "active" || status === "inactive";
+    const dotColor = status === "active" ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-600";
+    const label = statusLabel ?? (status === "active" ? "Active" : "Inactive");
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "span",
+      {
+        className: chunkOR5DRJCW_cjs.cn("relative inline-block shrink-0", wrapperClassName),
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            chunkW4MDIFH6_cjs.Avatar,
+            {
+              ref,
+              size: effectiveSize,
+              className,
+              ...avatarProps
+            }
+          ),
+          showDot ? /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              "aria-hidden": "true",
+              className: chunkOR5DRJCW_cjs.cn(
+                "absolute bottom-0 right-0 rounded-full ring-2 ring-background",
+                dotSizeClasses[effectiveSize],
+                dotColor
+              )
+            }
+          ) : null,
+          showDot ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "sr-only", children: label }) : null
+        ]
+      }
+    );
+  }
+);
+UserAvatar.displayName = "UserAvatar";
 function WebChartReportViewer({
   reports,
   currentReport,
@@ -32949,7 +34247,7 @@ function WebChartReportViewer({
     dateFrom = "From",
     dateTo = "To"
   } = labels;
-  const [modalOpen, setModalOpen] = React47__namespace.useState(false);
+  const [modalOpen, setModalOpen] = React49__namespace.useState(false);
   const handleReportClick = (report) => {
     onReportSelect?.(report);
     setModalOpen(true);
@@ -32963,15 +34261,15 @@ function WebChartReportViewer({
     return d.toISOString().split("T")[0];
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("webchart-report-viewer", className), children: [
-    error && /* @__PURE__ */ jsxRuntime.jsxs(chunkIY7UQPDO_cjs.Alert, { variant: "warning", icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, {}), className: "mb-4", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertTitle, { children: error }),
-      /* @__PURE__ */ jsxRuntime.jsxs(chunkIY7UQPDO_cjs.AlertDescription, { children: [
+    error && /* @__PURE__ */ jsxRuntime.jsxs(chunk5N3GFFVP_cjs.Alert, { variant: "warning", icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, {}), className: "mb-4", children: [
+      /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertTitle, { children: error }),
+      /* @__PURE__ */ jsxRuntime.jsxs(chunk5N3GFFVP_cjs.AlertDescription, { children: [
         "If this error persists, you can try reconnecting",
         " ",
         webchartBrand2.name,
         ".",
         onReconnect && /* @__PURE__ */ jsxRuntime.jsxs(
-          chunkMKJDBXX4_cjs.Button,
+          chunkIO2XB35K_cjs.Button,
           {
             variant: "secondary",
             size: "sm",
@@ -32985,17 +34283,17 @@ function WebChartReportViewer({
         )
       ] })
     ] }),
-    !error && !loading && /* @__PURE__ */ jsxRuntime.jsxs(chunkMKJDBXX4_cjs.Button, { onClick: onRefreshReports, className: "mb-4", children: [
+    !error && !loading && /* @__PURE__ */ jsxRuntime.jsxs(chunkIO2XB35K_cjs.Button, { onClick: onRefreshReports, className: "mb-4", children: [
       /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RefreshCw, { className: "mr-2 h-4 w-4" }),
       refreshReports
     ] }),
     /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3", children: loading ? (
       // Loading placeholders
-      /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsxRuntime.jsx(chunkN3QTYHRZ_cjs.Skeleton, { variant: "button", className: "h-12 w-full" }, i)) })
+      /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: [1, 2, 3, 4, 5, 6].map((i) => /* @__PURE__ */ jsxRuntime.jsx(chunkY5C2WNWC_cjs.Skeleton, { variant: "button", className: "h-12 w-full" }, i)) })
     ) : reports.length > 0 ? (
       // Report buttons
       reports.map((report) => /* @__PURE__ */ jsxRuntime.jsx(
-        chunkHRA4FUO6_cjs.Card,
+        chunkOGGM27JO_cjs.Card,
         {
           interactive: true,
           padding: "none",
@@ -33010,7 +34308,7 @@ function WebChartReportViewer({
             }
           },
           className: "cursor-pointer",
-          children: /* @__PURE__ */ jsxRuntime.jsx(chunkHRA4FUO6_cjs.CardContent, { className: "p-3", children: /* @__PURE__ */ jsxRuntime.jsx(
+          children: /* @__PURE__ */ jsxRuntime.jsx(chunkOGGM27JO_cjs.CardContent, { className: "p-3", children: /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
               className: "block truncate text-sm font-medium",
@@ -33021,9 +34319,9 @@ function WebChartReportViewer({
         },
         report.id
       ))
-    ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground col-span-full py-8 text-center", children: noReports }) }),
+    ) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "col-span-full py-8 text-center text-muted-foreground", children: noReports }) }),
     /* @__PURE__ */ jsxRuntime.jsxs(
-      chunkI7L6CQXR_cjs.Modal,
+      chunkAOHWULSD_cjs.Modal,
       {
         open: modalOpen,
         onOpenChange: (open) => {
@@ -33033,21 +34331,21 @@ function WebChartReportViewer({
         },
         size: "4xl",
         children: [
-          /* @__PURE__ */ jsxRuntime.jsxs(chunkI7L6CQXR_cjs.ModalHeader, { children: [
+          /* @__PURE__ */ jsxRuntime.jsxs(chunkAOHWULSD_cjs.ModalHeader, { children: [
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalTitle, { children: currentReport?.name || "Report Results" }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalTitle, { children: currentReport?.name || "Report Results" }),
               reportResult?.error ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, { className: "h-5 w-5 text-yellow-500" }) : reportResult?.success ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-5 w-5 text-green-500" }) : null
             ] }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalClose, {})
+            /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalClose, {})
           ] }),
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "bg-muted/50 flex flex-wrap items-center gap-3 border-b px-6 py-4", children: [
             onDateRangeChange && dateRange && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-muted-foreground text-sm", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-sm text-muted-foreground", children: [
                 dateFrom,
                 ":"
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   type: "date",
                   size: "sm",
@@ -33056,12 +34354,12 @@ function WebChartReportViewer({
                   className: "w-auto"
                 }
               ),
-              /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-muted-foreground text-sm", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("label", { className: "text-sm text-muted-foreground", children: [
                 dateTo,
                 ":"
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(
-                chunkVV4N4WY6_cjs.Input,
+                chunkSZRD5UTO_cjs.Input,
                 {
                   type: "date",
                   size: "sm",
@@ -33072,7 +34370,7 @@ function WebChartReportViewer({
               )
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx(
-              chunkMKJDBXX4_cjs.Button,
+              chunkIO2XB35K_cjs.Button,
               {
                 size: "sm",
                 onClick: onRefreshReport,
@@ -33082,10 +34380,10 @@ function WebChartReportViewer({
               }
             )
           ] }),
-          /* @__PURE__ */ jsxRuntime.jsx(chunkI7L6CQXR_cjs.ModalBody, { className: "max-h-[60vh] overflow-auto", children: loadingReport ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-64 flex-col items-center justify-center", children: [
-            /* @__PURE__ */ jsxRuntime.jsx(chunkJYMQJ32S_cjs.Spinner, { size: "xl" }),
-            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground mt-4", children: loadingData })
-          ] }) : reportResult?.error ? /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.Alert, { variant: "danger", icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, {}), children: /* @__PURE__ */ jsxRuntime.jsx(chunkIY7UQPDO_cjs.AlertDescription, { children: reportResult.error }) }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsxRuntime.jsx(
+          /* @__PURE__ */ jsxRuntime.jsx(chunkAOHWULSD_cjs.ModalBody, { className: "max-h-[60vh] overflow-auto", children: loadingReport ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-64 flex-col items-center justify-center", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkPN4ZPTTG_cjs.Spinner, { size: "xl" }),
+            /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mt-4 text-muted-foreground", children: loadingData })
+          ] }) : reportResult?.error ? /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.Alert, { variant: "danger", icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertTriangle, {}), children: /* @__PURE__ */ jsxRuntime.jsx(chunk5N3GFFVP_cjs.AlertDescription, { children: reportResult.error }) }) : reportResult?.data ? typeof reportResult.data === "string" ? /* @__PURE__ */ jsxRuntime.jsx(
             "div",
             {
               className: "prose dark:prose-invert max-w-none",
@@ -33094,19 +34392,19 @@ function WebChartReportViewer({
           ) : Array.isArray(reportResult.data) && reportResult.data.length > 0 ? (() => {
             const rows = reportResult.data;
             const columns = Object.keys(rows[0]);
-            return /* @__PURE__ */ jsxRuntime.jsxs(chunkLZEY55QZ_cjs.Table, { children: [
-              /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableRow, { children: columns.map((key) => /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableHead, { children: key }, key)) }) }),
-              /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableBody, { children: rows.map((row) => {
+            return /* @__PURE__ */ jsxRuntime.jsxs(chunkS7TMEGSN_cjs.Table, { children: [
+              /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableRow, { children: columns.map((key) => /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableHead, { children: key }, key)) }) }),
+              /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableBody, { children: rows.map((row) => {
                 const rowKey = columns.map((key) => String(row[key])).join("|") || JSON.stringify(row);
-                return /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableRow, { children: columns.map((key) => /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: columnRenderers?.[key] ? columnRenderers[key](row[key], row) : row[key] == null ? "" : String(row[key]) }, key)) }, rowKey);
+                return /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableRow, { children: columns.map((key) => /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { children: columnRenderers?.[key] ? columnRenderers[key](row[key], row) : row[key] == null ? "" : String(row[key]) }, key)) }, rowKey);
               }) })
             ] });
-          })() : /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.Table, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableBody, { children: Object.entries(
+          })() : /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.Table, { children: /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableBody, { children: Object.entries(
             reportResult.data
-          ).map(([key, val]) => /* @__PURE__ */ jsxRuntime.jsxs(chunkLZEY55QZ_cjs.TableRow, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { className: "text-muted-foreground font-medium", children: key }),
-            /* @__PURE__ */ jsxRuntime.jsx(chunkLZEY55QZ_cjs.TableCell, { children: val == null ? "" : String(val) })
-          ] }, key)) }) }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-muted-foreground py-8 text-center", children: "No data available" }) })
+          ).map(([key, val]) => /* @__PURE__ */ jsxRuntime.jsxs(chunkS7TMEGSN_cjs.TableRow, { children: [
+            /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { className: "font-medium text-muted-foreground", children: key }),
+            /* @__PURE__ */ jsxRuntime.jsx(chunkS7TMEGSN_cjs.TableCell, { children: val == null ? "" : String(val) })
+          ] }, key)) }) }) : /* @__PURE__ */ jsxRuntime.jsx("div", { className: "py-8 text-center text-muted-foreground", children: "No data available" }) })
         ]
       }
     )
@@ -33126,7 +34424,7 @@ function ReportDatePicker({
   ],
   className
 }) {
-  const [preset, setPreset] = React47__namespace.useState("this-month");
+  const [preset, setPreset] = React49__namespace.useState("this-month");
   const formatDate4 = (date) => {
     if (!date) return "";
     const d = typeof date === "string" ? new Date(date) : date;
@@ -33167,7 +34465,7 @@ function ReportDatePicker({
   }));
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: chunkOR5DRJCW_cjs.cn("flex flex-wrap items-center gap-3", className), children: [
     /* @__PURE__ */ jsxRuntime.jsx(
-      chunkNL3CZNBH_cjs.Select,
+      chunkGEKTNWTP_cjs.Select,
       {
         value: preset,
         onValueChange: (value) => handlePresetChange(value),
@@ -33177,7 +34475,7 @@ function ReportDatePicker({
     ),
     preset === "custom" && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           type: "date",
           size: "sm",
@@ -33188,7 +34486,7 @@ function ReportDatePicker({
       ),
       /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: "to" }),
       /* @__PURE__ */ jsxRuntime.jsx(
-        chunkVV4N4WY6_cjs.Input,
+        chunkSZRD5UTO_cjs.Input,
         {
           type: "date",
           size: "sm",
@@ -33214,7 +34512,7 @@ function isValidUrl(url) {
     }
   }
 }
-var WebsiteInput = React47__namespace.forwardRef(
+var WebsiteInput = React49__namespace.forwardRef(
   ({
     value = "",
     onChange,
@@ -33225,7 +34523,7 @@ var WebsiteInput = React47__namespace.forwardRef(
     error,
     ...props
   }, ref) => {
-    const [localError, setLocalError] = React47__namespace.useState();
+    const [localError, setLocalError] = React49__namespace.useState();
     const handleChange = (e) => {
       onChange?.(e.target.value);
       if (localError) {
@@ -33243,7 +34541,7 @@ var WebsiteInput = React47__namespace.forwardRef(
       }
     };
     return /* @__PURE__ */ jsxRuntime.jsx(
-      chunkVV4N4WY6_cjs.Input,
+      chunkSZRD5UTO_cjs.Input,
       {
         ref,
         type: "url",
@@ -33307,7 +34605,7 @@ function WebsiteInputGroup({
   typeLabels,
   className
 }) {
-  const websites = React47__namespace.useMemo(() => {
+  const websites = React49__namespace.useMemo(() => {
     if (value.length >= minEntries) return value;
     const padding = Array(minEntries - value.length).fill(null).map(() => ({ url: "", type: "website" }));
     return [...value, ...padding];
@@ -33363,7 +34661,7 @@ function WebsiteInputGroup({
           className: chunkOR5DRJCW_cjs.cn(
             "w-full rounded-md border px-3 py-2 text-sm",
             "border-gray-300 bg-white text-gray-900",
-            "focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none",
+            "focus:border-brand-500 focus:ring-brand-500/20 focus:outline-none focus:ring-2",
             "disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500",
             "dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100",
             "dark:focus:border-brand-400 dark:focus:ring-brand-400/20",
@@ -33452,38 +34750,189 @@ function WebsiteInputGroup({
   ] }, index)) });
 }
 WebsiteInputGroup.displayName = "WebsiteInputGroup";
+function WorkspaceAvatar({
+  name,
+  logoUrl,
+  className
+}) {
+  const initials = name.split(" ").filter(Boolean).map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+  if (logoUrl) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "img",
+      {
+        src: logoUrl,
+        alt: "",
+        className: chunkOR5DRJCW_cjs.cn("h-6 w-6 rounded object-cover", className)
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "span",
+    {
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex h-6 w-6 items-center justify-center rounded",
+        "bg-primary-100 text-[10px] font-semibold uppercase text-primary-800",
+        "dark:bg-primary-900 dark:text-primary-100",
+        className
+      ),
+      "aria-hidden": "true",
+      children: initials
+    }
+  );
+}
+var ChevronDownIcon6 = () => /* @__PURE__ */ jsxRuntime.jsx(
+  "svg",
+  {
+    className: "h-4 w-4 text-muted-foreground",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    "aria-hidden": "true",
+    children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M19 9l-7 7-7-7" })
+  }
+);
+var CheckIcon8 = () => /* @__PURE__ */ jsxRuntime.jsx(
+  "svg",
+  {
+    className: "h-4 w-4 text-primary-600 dark:text-primary-300",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth: 2.5,
+    "aria-hidden": "true",
+    children: /* @__PURE__ */ jsxRuntime.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+  }
+);
+function WorkspaceSwitcher({
+  workspaces,
+  currentId,
+  onSelect,
+  onCreate,
+  createLabel = "Add workspace",
+  className,
+  alwaysRender = false
+}) {
+  const current = workspaces.find((w) => w.id === currentId) ?? workspaces[0] ?? null;
+  if (!current) return null;
+  const hasMultiple = workspaces.length > 1;
+  if (!hasMultiple && !onCreate && !alwaysRender) {
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        className: chunkOR5DRJCW_cjs.cn(
+          "flex min-w-0 items-center gap-2 px-2 py-1",
+          className
+        ),
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(WorkspaceAvatar, { name: current.name, logoUrl: current.logoUrl }),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "truncate text-sm font-medium text-foreground", children: current.name })
+        ]
+      }
+    );
+  }
+  const trigger = /* @__PURE__ */ jsxRuntime.jsxs(
+    "button",
+    {
+      type: "button",
+      className: chunkOR5DRJCW_cjs.cn(
+        "flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5",
+        "text-left transition-colors hover:bg-muted",
+        "focus:outline-none focus:ring-2 focus:ring-primary-500",
+        className
+      ),
+      "aria-label": "Switch workspace",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(WorkspaceAvatar, { name: current.name, logoUrl: current.logoUrl }),
+        /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "block truncate text-sm font-medium text-foreground", children: current.name }),
+          current.subtitle && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "block truncate text-[11px] text-muted-foreground", children: current.subtitle })
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsx(ChevronDownIcon6, {})
+      ]
+    }
+  );
+  return /* @__PURE__ */ jsxRuntime.jsx(chunkTDFPD3YV_cjs.Dropdown, { trigger, placement: "bottom-start", width: 260, children: /* @__PURE__ */ jsxRuntime.jsxs(chunkTDFPD3YV_cjs.DropdownContent, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "border-b border-border px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground", children: "Workspaces" }),
+    workspaces.map((ws) => {
+      const selected = ws.id === current.id;
+      return /* @__PURE__ */ jsxRuntime.jsx(
+        chunkTDFPD3YV_cjs.DropdownItem,
+        {
+          onClick: () => {
+            if (!selected) onSelect?.(ws);
+          },
+          children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full items-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(WorkspaceAvatar, { name: ws.name, logoUrl: ws.logoUrl }),
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "truncate text-sm font-medium text-foreground", children: ws.name }),
+              ws.subtitle && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "truncate text-[11px] text-muted-foreground", children: ws.subtitle })
+            ] }),
+            selected && /* @__PURE__ */ jsxRuntime.jsx(CheckIcon8, {})
+          ] })
+        },
+        ws.id
+      );
+    }),
+    onCreate && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "my-1 h-px bg-border", role: "separator" }),
+      /* @__PURE__ */ jsxRuntime.jsx(chunkTDFPD3YV_cjs.DropdownItem, { onClick: onCreate, children: /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex w-full items-center gap-2 text-sm text-primary-700 dark:text-primary-300", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "svg",
+          {
+            className: "h-4 w-4",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            stroke: "currentColor",
+            strokeWidth: 2,
+            "aria-hidden": "true",
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              "path",
+              {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                d: "M12 4v16m8-8H4"
+              }
+            )
+          }
+        ),
+        createLabel
+      ] }) })
+    ] })
+  ] }) });
+}
 
 Object.defineProperty(exports, "ThemeProvider", {
   enumerable: true,
-  get: function () { return chunkPDHFC5S5_cjs.ThemeProvider; }
+  get: function () { return chunkZ5MOXAAV_cjs.ThemeProvider; }
 });
 Object.defineProperty(exports, "ThemeProviderContext", {
   enumerable: true,
-  get: function () { return chunkPDHFC5S5_cjs.ThemeProviderContext; }
+  get: function () { return chunkZ5MOXAAV_cjs.ThemeProviderContext; }
 });
 Object.defineProperty(exports, "ThemeToggle", {
   enumerable: true,
-  get: function () { return chunkPDHFC5S5_cjs.ThemeToggle; }
+  get: function () { return chunkZ5MOXAAV_cjs.ThemeToggle; }
 });
 Object.defineProperty(exports, "themeToggleIconVariants", {
   enumerable: true,
-  get: function () { return chunkPDHFC5S5_cjs.themeToggleIconVariants; }
+  get: function () { return chunkZ5MOXAAV_cjs.themeToggleIconVariants; }
 });
 Object.defineProperty(exports, "themeToggleVariants", {
   enumerable: true,
-  get: function () { return chunkPDHFC5S5_cjs.themeToggleVariants; }
+  get: function () { return chunkZ5MOXAAV_cjs.themeToggleVariants; }
 });
 Object.defineProperty(exports, "useThemeContext", {
   enumerable: true,
-  get: function () { return chunkPDHFC5S5_cjs.useThemeContext; }
+  get: function () { return chunkZ5MOXAAV_cjs.useThemeContext; }
 });
 Object.defineProperty(exports, "Tooltip", {
   enumerable: true,
-  get: function () { return chunkBXK5TNJE_cjs.Tooltip; }
+  get: function () { return chunkQE6UIZ6W_cjs.Tooltip; }
 });
 Object.defineProperty(exports, "VisuallyHidden", {
   enumerable: true,
-  get: function () { return chunkZJCPW6MS_cjs.VisuallyHidden; }
+  get: function () { return chunkXQWKU2SZ_cjs.VisuallyHidden; }
 });
 Object.defineProperty(exports, "brands", {
   enumerable: true,
@@ -33527,415 +34976,415 @@ Object.defineProperty(exports, "enterpriseHealthBrand", {
 });
 Object.defineProperty(exports, "Select", {
   enumerable: true,
-  get: function () { return chunkNL3CZNBH_cjs.Select; }
+  get: function () { return chunkGEKTNWTP_cjs.Select; }
 });
 Object.defineProperty(exports, "selectTriggerVariants", {
   enumerable: true,
-  get: function () { return chunkNL3CZNBH_cjs.selectTriggerVariants; }
+  get: function () { return chunkGEKTNWTP_cjs.selectTriggerVariants; }
 });
 Object.defineProperty(exports, "Skeleton", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.Skeleton; }
+  get: function () { return chunkY5C2WNWC_cjs.Skeleton; }
 });
 Object.defineProperty(exports, "SkeletonCard", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonCard; }
+  get: function () { return chunkY5C2WNWC_cjs.SkeletonCard; }
 });
 Object.defineProperty(exports, "SkeletonTable", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonTable; }
+  get: function () { return chunkY5C2WNWC_cjs.SkeletonTable; }
 });
 Object.defineProperty(exports, "SkeletonText", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.SkeletonText; }
+  get: function () { return chunkY5C2WNWC_cjs.SkeletonText; }
 });
 Object.defineProperty(exports, "skeletonVariants", {
   enumerable: true,
-  get: function () { return chunkN3QTYHRZ_cjs.skeletonVariants; }
+  get: function () { return chunkY5C2WNWC_cjs.skeletonVariants; }
 });
 Object.defineProperty(exports, "FullPageSpinner", {
   enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.FullPageSpinner; }
+  get: function () { return chunkPN4ZPTTG_cjs.FullPageSpinner; }
 });
 Object.defineProperty(exports, "Spinner", {
   enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.Spinner; }
+  get: function () { return chunkPN4ZPTTG_cjs.Spinner; }
 });
 Object.defineProperty(exports, "SpinnerWithLabel", {
   enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.SpinnerWithLabel; }
+  get: function () { return chunkPN4ZPTTG_cjs.SpinnerWithLabel; }
 });
 Object.defineProperty(exports, "spinnerVariants", {
   enumerable: true,
-  get: function () { return chunkJYMQJ32S_cjs.spinnerVariants; }
+  get: function () { return chunkPN4ZPTTG_cjs.spinnerVariants; }
 });
 Object.defineProperty(exports, "Switch", {
   enumerable: true,
-  get: function () { return chunkRRQGH7C5_cjs.Switch; }
+  get: function () { return chunkRRARXXV2_cjs.Switch; }
 });
 Object.defineProperty(exports, "switchThumbVariants", {
   enumerable: true,
-  get: function () { return chunkRRQGH7C5_cjs.switchThumbVariants; }
+  get: function () { return chunkRRARXXV2_cjs.switchThumbVariants; }
 });
 Object.defineProperty(exports, "switchTrackVariants", {
   enumerable: true,
-  get: function () { return chunkRRQGH7C5_cjs.switchTrackVariants; }
+  get: function () { return chunkRRARXXV2_cjs.switchTrackVariants; }
 });
 Object.defineProperty(exports, "Table", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.Table; }
+  get: function () { return chunkS7TMEGSN_cjs.Table; }
 });
 Object.defineProperty(exports, "TableBody", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.TableBody; }
+  get: function () { return chunkS7TMEGSN_cjs.TableBody; }
 });
 Object.defineProperty(exports, "TableCaption", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.TableCaption; }
+  get: function () { return chunkS7TMEGSN_cjs.TableCaption; }
 });
 Object.defineProperty(exports, "TableCell", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.TableCell; }
+  get: function () { return chunkS7TMEGSN_cjs.TableCell; }
 });
 Object.defineProperty(exports, "TableFooter", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.TableFooter; }
+  get: function () { return chunkS7TMEGSN_cjs.TableFooter; }
 });
 Object.defineProperty(exports, "TableHead", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.TableHead; }
+  get: function () { return chunkS7TMEGSN_cjs.TableHead; }
 });
 Object.defineProperty(exports, "TableHeader", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.TableHeader; }
+  get: function () { return chunkS7TMEGSN_cjs.TableHeader; }
 });
 Object.defineProperty(exports, "TableRow", {
   enumerable: true,
-  get: function () { return chunkLZEY55QZ_cjs.TableRow; }
+  get: function () { return chunkS7TMEGSN_cjs.TableRow; }
 });
 Object.defineProperty(exports, "Tabs", {
   enumerable: true,
-  get: function () { return chunkORUPC5TV_cjs.Tabs; }
+  get: function () { return chunkHFUAI5CX_cjs.Tabs; }
 });
 Object.defineProperty(exports, "TabsContent", {
   enumerable: true,
-  get: function () { return chunkORUPC5TV_cjs.TabsContent; }
+  get: function () { return chunkHFUAI5CX_cjs.TabsContent; }
 });
 Object.defineProperty(exports, "TabsList", {
   enumerable: true,
-  get: function () { return chunkORUPC5TV_cjs.TabsList; }
+  get: function () { return chunkHFUAI5CX_cjs.TabsList; }
 });
 Object.defineProperty(exports, "TabsTrigger", {
   enumerable: true,
-  get: function () { return chunkORUPC5TV_cjs.TabsTrigger; }
+  get: function () { return chunkHFUAI5CX_cjs.TabsTrigger; }
 });
 Object.defineProperty(exports, "tabsListVariants", {
   enumerable: true,
-  get: function () { return chunkORUPC5TV_cjs.tabsListVariants; }
+  get: function () { return chunkHFUAI5CX_cjs.tabsListVariants; }
 });
 Object.defineProperty(exports, "tabsTriggerVariants", {
   enumerable: true,
-  get: function () { return chunkORUPC5TV_cjs.tabsTriggerVariants; }
+  get: function () { return chunkHFUAI5CX_cjs.tabsTriggerVariants; }
 });
 Object.defineProperty(exports, "SmallMuted", {
   enumerable: true,
-  get: function () { return chunkQDGZBDBI_cjs.SmallMuted; }
+  get: function () { return chunkAHNIW7MQ_cjs.SmallMuted; }
 });
 Object.defineProperty(exports, "Text", {
   enumerable: true,
-  get: function () { return chunkQDGZBDBI_cjs.Text; }
+  get: function () { return chunkAHNIW7MQ_cjs.Text; }
 });
 Object.defineProperty(exports, "textVariants", {
   enumerable: true,
-  get: function () { return chunkQDGZBDBI_cjs.textVariants; }
+  get: function () { return chunkAHNIW7MQ_cjs.textVariants; }
 });
 Object.defineProperty(exports, "Textarea", {
   enumerable: true,
-  get: function () { return chunkB7YGVKTE_cjs.Textarea; }
+  get: function () { return chunkJHVDSH6J_cjs.Textarea; }
 });
 Object.defineProperty(exports, "textareaVariants", {
   enumerable: true,
-  get: function () { return chunkB7YGVKTE_cjs.textareaVariants; }
+  get: function () { return chunkJHVDSH6J_cjs.textareaVariants; }
 });
 Object.defineProperty(exports, "Modal", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.Modal; }
+  get: function () { return chunkAOHWULSD_cjs.Modal; }
 });
 Object.defineProperty(exports, "ModalBody", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.ModalBody; }
+  get: function () { return chunkAOHWULSD_cjs.ModalBody; }
 });
 Object.defineProperty(exports, "ModalClose", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.ModalClose; }
+  get: function () { return chunkAOHWULSD_cjs.ModalClose; }
 });
 Object.defineProperty(exports, "ModalFooter", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.ModalFooter; }
+  get: function () { return chunkAOHWULSD_cjs.ModalFooter; }
 });
 Object.defineProperty(exports, "ModalHeader", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.ModalHeader; }
+  get: function () { return chunkAOHWULSD_cjs.ModalHeader; }
 });
 Object.defineProperty(exports, "ModalTitle", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.ModalTitle; }
+  get: function () { return chunkAOHWULSD_cjs.ModalTitle; }
 });
 Object.defineProperty(exports, "modalContentVariants", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.modalContentVariants; }
+  get: function () { return chunkAOHWULSD_cjs.modalContentVariants; }
 });
 Object.defineProperty(exports, "modalOverlayVariants", {
   enumerable: true,
-  get: function () { return chunkI7L6CQXR_cjs.modalOverlayVariants; }
+  get: function () { return chunkAOHWULSD_cjs.modalOverlayVariants; }
 });
 Object.defineProperty(exports, "Pagination", {
   enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.Pagination; }
+  get: function () { return chunkSND2HWEP_cjs.Pagination; }
 });
 Object.defineProperty(exports, "SimplePagination", {
   enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.SimplePagination; }
+  get: function () { return chunkSND2HWEP_cjs.SimplePagination; }
 });
 Object.defineProperty(exports, "paginationButtonVariants", {
   enumerable: true,
-  get: function () { return chunkPF3XWKE5_cjs.paginationButtonVariants; }
+  get: function () { return chunkSND2HWEP_cjs.paginationButtonVariants; }
 });
 Object.defineProperty(exports, "PhoneInput", {
   enumerable: true,
-  get: function () { return chunkCQCYXHCU_cjs.PhoneInput; }
+  get: function () { return chunkARJXBNYA_cjs.PhoneInput; }
 });
 Object.defineProperty(exports, "PhoneInputGroup", {
   enumerable: true,
-  get: function () { return chunkCQCYXHCU_cjs.PhoneInputGroup; }
+  get: function () { return chunkARJXBNYA_cjs.PhoneInputGroup; }
 });
 Object.defineProperty(exports, "CircularProgress", {
   enumerable: true,
-  get: function () { return chunkNAATBUHR_cjs.CircularProgress; }
+  get: function () { return chunk23KJAH6Y_cjs.CircularProgress; }
 });
 Object.defineProperty(exports, "Progress", {
   enumerable: true,
-  get: function () { return chunkNAATBUHR_cjs.Progress; }
+  get: function () { return chunk23KJAH6Y_cjs.Progress; }
 });
 Object.defineProperty(exports, "circularProgressVariants", {
   enumerable: true,
-  get: function () { return chunkNAATBUHR_cjs.circularProgressVariants; }
+  get: function () { return chunk23KJAH6Y_cjs.circularProgressVariants; }
 });
 Object.defineProperty(exports, "progressBarFillVariants", {
   enumerable: true,
-  get: function () { return chunkNAATBUHR_cjs.progressBarFillVariants; }
+  get: function () { return chunk23KJAH6Y_cjs.progressBarFillVariants; }
 });
 Object.defineProperty(exports, "progressBarTrackVariants", {
   enumerable: true,
-  get: function () { return chunkNAATBUHR_cjs.progressBarTrackVariants; }
+  get: function () { return chunk23KJAH6Y_cjs.progressBarTrackVariants; }
 });
 Object.defineProperty(exports, "QuickAction", {
   enumerable: true,
-  get: function () { return chunkAU5ADTYD_cjs.QuickAction; }
+  get: function () { return chunkXZIAHCNM_cjs.QuickAction; }
 });
 Object.defineProperty(exports, "QuickActionGroup", {
   enumerable: true,
-  get: function () { return chunkAU5ADTYD_cjs.QuickActionGroup; }
+  get: function () { return chunkXZIAHCNM_cjs.QuickActionGroup; }
 });
 Object.defineProperty(exports, "QuickActionIcons", {
   enumerable: true,
-  get: function () { return chunkAU5ADTYD_cjs.QuickActionIcons; }
+  get: function () { return chunkXZIAHCNM_cjs.QuickActionIcons; }
 });
 Object.defineProperty(exports, "quickActionIconVariants", {
   enumerable: true,
-  get: function () { return chunkAU5ADTYD_cjs.quickActionIconVariants; }
+  get: function () { return chunkXZIAHCNM_cjs.quickActionIconVariants; }
 });
 Object.defineProperty(exports, "quickActionVariants", {
   enumerable: true,
-  get: function () { return chunkAU5ADTYD_cjs.quickActionVariants; }
+  get: function () { return chunkXZIAHCNM_cjs.quickActionVariants; }
 });
 Object.defineProperty(exports, "Radio", {
   enumerable: true,
-  get: function () { return chunkXHJGYBYG_cjs.Radio; }
+  get: function () { return chunkJGQIBHAG_cjs.Radio; }
 });
 Object.defineProperty(exports, "RadioGroup", {
   enumerable: true,
-  get: function () { return chunkXHJGYBYG_cjs.RadioGroup; }
+  get: function () { return chunkJGQIBHAG_cjs.RadioGroup; }
 });
 Object.defineProperty(exports, "radioVariants", {
   enumerable: true,
-  get: function () { return chunkXHJGYBYG_cjs.radioVariants; }
+  get: function () { return chunkJGQIBHAG_cjs.radioVariants; }
 });
 Object.defineProperty(exports, "RecordButton", {
   enumerable: true,
-  get: function () { return chunk5T3AWNHG_cjs.RecordButton; }
+  get: function () { return chunkE6PQXOSJ_cjs.RecordButton; }
 });
 Object.defineProperty(exports, "formatDuration", {
   enumerable: true,
-  get: function () { return chunk5T3AWNHG_cjs.formatDuration; }
+  get: function () { return chunkE6PQXOSJ_cjs.formatDuration; }
 });
 Object.defineProperty(exports, "recordButtonVariants", {
   enumerable: true,
-  get: function () { return chunk5T3AWNHG_cjs.recordButtonVariants; }
+  get: function () { return chunkE6PQXOSJ_cjs.recordButtonVariants; }
 });
 Object.defineProperty(exports, "DateButton", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.DateButton; }
+  get: function () { return chunkRXWCUFNF_cjs.DateButton; }
 });
 Object.defineProperty(exports, "DatePicker", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.DatePicker; }
+  get: function () { return chunkRXWCUFNF_cjs.DatePicker; }
 });
 Object.defineProperty(exports, "RadioOption", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.RadioOption; }
+  get: function () { return chunkRXWCUFNF_cjs.RadioOption; }
 });
 Object.defineProperty(exports, "SchedulePicker", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.SchedulePicker; }
+  get: function () { return chunkRXWCUFNF_cjs.SchedulePicker; }
 });
 Object.defineProperty(exports, "TimeButton", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.TimeButton; }
+  get: function () { return chunkRXWCUFNF_cjs.TimeButton; }
 });
 Object.defineProperty(exports, "TimePicker", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.TimePicker; }
+  get: function () { return chunkRXWCUFNF_cjs.TimePicker; }
 });
 Object.defineProperty(exports, "dateButtonVariants", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.dateButtonVariants; }
+  get: function () { return chunkRXWCUFNF_cjs.dateButtonVariants; }
 });
 Object.defineProperty(exports, "radioOptionVariants", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.radioOptionVariants; }
+  get: function () { return chunkRXWCUFNF_cjs.radioOptionVariants; }
 });
 Object.defineProperty(exports, "timeButtonVariants", {
   enumerable: true,
-  get: function () { return chunkEF46XW4Z_cjs.timeButtonVariants; }
+  get: function () { return chunkRXWCUFNF_cjs.timeButtonVariants; }
 });
 Object.defineProperty(exports, "Badge", {
   enumerable: true,
-  get: function () { return chunkEKIQE524_cjs.Badge; }
+  get: function () { return chunkFOFDJDAY_cjs.Badge; }
 });
 Object.defineProperty(exports, "badgeVariants", {
   enumerable: true,
-  get: function () { return chunkEKIQE524_cjs.badgeVariants; }
+  get: function () { return chunkFOFDJDAY_cjs.badgeVariants; }
 });
 Object.defineProperty(exports, "Breadcrumb", {
   enumerable: true,
-  get: function () { return chunkPEFJAWNR_cjs.Breadcrumb; }
+  get: function () { return chunkCYUZ6REQ_cjs.Breadcrumb; }
 });
 Object.defineProperty(exports, "BreadcrumbSlash", {
   enumerable: true,
-  get: function () { return chunkPEFJAWNR_cjs.BreadcrumbSlash; }
+  get: function () { return chunkCYUZ6REQ_cjs.BreadcrumbSlash; }
 });
 Object.defineProperty(exports, "Button", {
   enumerable: true,
-  get: function () { return chunkMKJDBXX4_cjs.Button; }
+  get: function () { return chunkIO2XB35K_cjs.Button; }
 });
 Object.defineProperty(exports, "buttonVariants", {
   enumerable: true,
-  get: function () { return chunkMKJDBXX4_cjs.buttonVariants; }
+  get: function () { return chunkIO2XB35K_cjs.buttonVariants; }
 });
 Object.defineProperty(exports, "Card", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.Card; }
+  get: function () { return chunkOGGM27JO_cjs.Card; }
 });
 Object.defineProperty(exports, "CardActions", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardActions; }
+  get: function () { return chunkOGGM27JO_cjs.CardActions; }
 });
 Object.defineProperty(exports, "CardBadge", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardBadge; }
+  get: function () { return chunkOGGM27JO_cjs.CardBadge; }
 });
 Object.defineProperty(exports, "CardCollapsible", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardCollapsible; }
+  get: function () { return chunkOGGM27JO_cjs.CardCollapsible; }
 });
 Object.defineProperty(exports, "CardContent", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardContent; }
+  get: function () { return chunkOGGM27JO_cjs.CardContent; }
 });
 Object.defineProperty(exports, "CardDescription", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardDescription; }
+  get: function () { return chunkOGGM27JO_cjs.CardDescription; }
 });
 Object.defineProperty(exports, "CardDivider", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardDivider; }
+  get: function () { return chunkOGGM27JO_cjs.CardDivider; }
 });
 Object.defineProperty(exports, "CardFooter", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardFooter; }
+  get: function () { return chunkOGGM27JO_cjs.CardFooter; }
 });
 Object.defineProperty(exports, "CardHeader", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardHeader; }
+  get: function () { return chunkOGGM27JO_cjs.CardHeader; }
 });
 Object.defineProperty(exports, "CardMedia", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardMedia; }
+  get: function () { return chunkOGGM27JO_cjs.CardMedia; }
 });
 Object.defineProperty(exports, "CardStat", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardStat; }
+  get: function () { return chunkOGGM27JO_cjs.CardStat; }
 });
 Object.defineProperty(exports, "CardTitle", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.CardTitle; }
+  get: function () { return chunkOGGM27JO_cjs.CardTitle; }
 });
 Object.defineProperty(exports, "cardAccentVariants", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.cardAccentVariants; }
+  get: function () { return chunkOGGM27JO_cjs.cardAccentVariants; }
 });
 Object.defineProperty(exports, "cardVariants", {
   enumerable: true,
-  get: function () { return chunkHRA4FUO6_cjs.cardVariants; }
+  get: function () { return chunkOGGM27JO_cjs.cardVariants; }
 });
 Object.defineProperty(exports, "Checkbox", {
   enumerable: true,
-  get: function () { return chunkQYJ7RQJ2_cjs.Checkbox; }
+  get: function () { return chunkMFDLN4RH_cjs.Checkbox; }
 });
 Object.defineProperty(exports, "CheckboxGroup", {
   enumerable: true,
-  get: function () { return chunkQYJ7RQJ2_cjs.CheckboxGroup; }
+  get: function () { return chunkMFDLN4RH_cjs.CheckboxGroup; }
 });
 Object.defineProperty(exports, "checkboxVariants", {
   enumerable: true,
-  get: function () { return chunkQYJ7RQJ2_cjs.checkboxVariants; }
+  get: function () { return chunkMFDLN4RH_cjs.checkboxVariants; }
 });
 Object.defineProperty(exports, "DateInput", {
   enumerable: true,
-  get: function () { return chunkB7DA35BY_cjs.DateInput; }
+  get: function () { return chunkNVWPAMCO_cjs.DateInput; }
 });
 Object.defineProperty(exports, "Dropdown", {
   enumerable: true,
-  get: function () { return chunkFIXAVBUA_cjs.Dropdown; }
+  get: function () { return chunkTDFPD3YV_cjs.Dropdown; }
 });
 Object.defineProperty(exports, "DropdownContent", {
   enumerable: true,
-  get: function () { return chunkFIXAVBUA_cjs.DropdownContent; }
+  get: function () { return chunkTDFPD3YV_cjs.DropdownContent; }
 });
 Object.defineProperty(exports, "DropdownHeader", {
   enumerable: true,
-  get: function () { return chunkFIXAVBUA_cjs.DropdownHeader; }
+  get: function () { return chunkTDFPD3YV_cjs.DropdownHeader; }
 });
 Object.defineProperty(exports, "DropdownItem", {
   enumerable: true,
-  get: function () { return chunkFIXAVBUA_cjs.DropdownItem; }
+  get: function () { return chunkTDFPD3YV_cjs.DropdownItem; }
 });
 Object.defineProperty(exports, "DropdownLabel", {
   enumerable: true,
-  get: function () { return chunkFIXAVBUA_cjs.DropdownLabel; }
+  get: function () { return chunkTDFPD3YV_cjs.DropdownLabel; }
 });
 Object.defineProperty(exports, "DropdownSeparator", {
   enumerable: true,
-  get: function () { return chunkFIXAVBUA_cjs.DropdownSeparator; }
+  get: function () { return chunkTDFPD3YV_cjs.DropdownSeparator; }
 });
 Object.defineProperty(exports, "Input", {
   enumerable: true,
-  get: function () { return chunkVV4N4WY6_cjs.Input; }
+  get: function () { return chunkSZRD5UTO_cjs.Input; }
 });
 Object.defineProperty(exports, "inputVariants", {
   enumerable: true,
-  get: function () { return chunkVV4N4WY6_cjs.inputVariants; }
+  get: function () { return chunkSZRD5UTO_cjs.inputVariants; }
 });
 Object.defineProperty(exports, "useCommandK", {
   enumerable: true,
@@ -33975,7 +35424,7 @@ Object.defineProperty(exports, "useMediaQuery", {
 });
 Object.defineProperty(exports, "useTheme", {
   enumerable: true,
-  get: function () { return chunkJZIH3A2A_cjs.useTheme; }
+  get: function () { return chunkELQZWMU3_cjs.useTheme; }
 });
 Object.defineProperty(exports, "usePrefersReducedMotion", {
   enumerable: true,
@@ -33992,10 +35441,6 @@ Object.defineProperty(exports, "useClickOutside", {
 Object.defineProperty(exports, "useEscapeKey", {
   enumerable: true,
   get: function () { return chunkFHY3K6PL_cjs.useEscapeKey; }
-});
-Object.defineProperty(exports, "formatPhoneNumber", {
-  enumerable: true,
-  get: function () { return chunkBTJHYGPI_cjs.formatPhoneNumber; }
 });
 Object.defineProperty(exports, "isPhoneNumberEmpty", {
   enumerable: true,
@@ -34055,75 +35500,75 @@ Object.defineProperty(exports, "miewebUISafelist", {
 });
 Object.defineProperty(exports, "Alert", {
   enumerable: true,
-  get: function () { return chunkIY7UQPDO_cjs.Alert; }
+  get: function () { return chunk5N3GFFVP_cjs.Alert; }
 });
 Object.defineProperty(exports, "AlertDescription", {
   enumerable: true,
-  get: function () { return chunkIY7UQPDO_cjs.AlertDescription; }
+  get: function () { return chunk5N3GFFVP_cjs.AlertDescription; }
 });
 Object.defineProperty(exports, "AlertTitle", {
   enumerable: true,
-  get: function () { return chunkIY7UQPDO_cjs.AlertTitle; }
+  get: function () { return chunk5N3GFFVP_cjs.AlertTitle; }
 });
 Object.defineProperty(exports, "alertVariants", {
   enumerable: true,
-  get: function () { return chunkIY7UQPDO_cjs.alertVariants; }
+  get: function () { return chunk5N3GFFVP_cjs.alertVariants; }
 });
 Object.defineProperty(exports, "AudioPlayer", {
   enumerable: true,
-  get: function () { return chunkAKTUXJPI_cjs.AudioPlayer; }
+  get: function () { return chunkY7HUZPNG_cjs.AudioPlayer; }
 });
 Object.defineProperty(exports, "ProgressBar", {
   enumerable: true,
-  get: function () { return chunkAKTUXJPI_cjs.ProgressBar; }
+  get: function () { return chunkY7HUZPNG_cjs.ProgressBar; }
 });
 Object.defineProperty(exports, "audioPlayerVariants", {
   enumerable: true,
-  get: function () { return chunkAKTUXJPI_cjs.audioPlayerVariants; }
+  get: function () { return chunkY7HUZPNG_cjs.audioPlayerVariants; }
 });
 Object.defineProperty(exports, "formatAudioTime", {
   enumerable: true,
-  get: function () { return chunkAKTUXJPI_cjs.formatTime; }
+  get: function () { return chunkY7HUZPNG_cjs.formatTime; }
 });
 Object.defineProperty(exports, "playButtonVariants", {
   enumerable: true,
-  get: function () { return chunkAKTUXJPI_cjs.playButtonVariants; }
+  get: function () { return chunkY7HUZPNG_cjs.playButtonVariants; }
 });
 Object.defineProperty(exports, "AudioRecorder", {
   enumerable: true,
-  get: function () { return chunk53K3KWXQ_cjs.AudioRecorder; }
+  get: function () { return chunk4E6KW5HC_cjs.AudioRecorder; }
 });
 Object.defineProperty(exports, "audioRecorderVariants", {
   enumerable: true,
-  get: function () { return chunk53K3KWXQ_cjs.audioRecorderVariants; }
+  get: function () { return chunk4E6KW5HC_cjs.audioRecorderVariants; }
 });
 Object.defineProperty(exports, "controlButtonVariants", {
   enumerable: true,
-  get: function () { return chunk53K3KWXQ_cjs.controlButtonVariants; }
+  get: function () { return chunk4E6KW5HC_cjs.controlButtonVariants; }
 });
 Object.defineProperty(exports, "formatTime", {
   enumerable: true,
-  get: function () { return chunk53K3KWXQ_cjs.formatTime; }
+  get: function () { return chunk4E6KW5HC_cjs.formatTime; }
 });
 Object.defineProperty(exports, "waveformContainerVariants", {
   enumerable: true,
-  get: function () { return chunk53K3KWXQ_cjs.waveformContainerVariants; }
+  get: function () { return chunk4E6KW5HC_cjs.waveformContainerVariants; }
 });
 Object.defineProperty(exports, "Avatar", {
   enumerable: true,
-  get: function () { return chunk2J2V4TMJ_cjs.Avatar; }
+  get: function () { return chunkW4MDIFH6_cjs.Avatar; }
 });
 Object.defineProperty(exports, "AvatarGroup", {
   enumerable: true,
-  get: function () { return chunk2J2V4TMJ_cjs.AvatarGroup; }
+  get: function () { return chunkW4MDIFH6_cjs.AvatarGroup; }
 });
 Object.defineProperty(exports, "avatarVariants", {
   enumerable: true,
-  get: function () { return chunk2J2V4TMJ_cjs.avatarVariants; }
+  get: function () { return chunkW4MDIFH6_cjs.avatarVariants; }
 });
 Object.defineProperty(exports, "getInitials", {
   enumerable: true,
-  get: function () { return chunk2J2V4TMJ_cjs.getInitials; }
+  get: function () { return chunkW4MDIFH6_cjs.getInitials; }
 });
 Object.defineProperty(exports, "cn", {
   enumerable: true,
@@ -34148,6 +35593,7 @@ exports.AccordionTrigger = AccordionTrigger;
 exports.ActionButton = ActionButton2;
 exports.ActionButtonsBar = ActionButtonsBar;
 exports.ActiveFilters = ActiveFilters;
+exports.ActivityFeed = ActivityFeed;
 exports.AddContactModal = AddContactModal;
 exports.AddServiceCard = AddServiceCard;
 exports.AdditionalFields = AdditionalFields;
@@ -34196,6 +35642,7 @@ exports.CompactHeader = CompactHeader;
 exports.CompactHours = CompactHours;
 exports.CompactProviderHeader = CompactProviderHeader;
 exports.CompanyRenderer = CompanyRenderer;
+exports.ConfirmDialog = ConfirmDialog;
 exports.ConnectionStatusBadge = ConnectionStatusBadge;
 exports.ConnectionStatusBar = ConnectionStatusBar;
 exports.ConnectionStatusOverlay = ConnectionStatusOverlay;
@@ -34246,6 +35693,7 @@ exports.FooterLinkSection = FooterLinkSection;
 exports.FooterSocialLinks = SocialMediaLinks2;
 exports.HRISProviderSelector = HRISProviderSelector;
 exports.HelpSupportPanel = HelpSupportPanel;
+exports.HeroActionCard = HeroActionCard;
 exports.HeroSearchBar = HeroSearchBar;
 exports.HoursSummary = HoursSummary;
 exports.InlineBookingForm = InlineBookingForm;
@@ -34260,6 +35708,7 @@ exports.LanguageSelectorNative = LanguageSelectorNative;
 exports.LegalLinks = LegalLinks;
 exports.LightboxModal = LightboxModal;
 exports.LinkedInRenderer = LinkedInRenderer;
+exports.LiveOrderTracker = LiveOrderTracker;
 exports.LoadMoreButton = LoadMoreButton;
 exports.LoadingBar = LoadingBar;
 exports.LoadingDots = LoadingDots;
@@ -34319,7 +35768,9 @@ exports.PaymentMethodCard = PaymentMethodCard;
 exports.PaymentMethodList = PaymentMethodList;
 exports.PendingClaimsTable = PendingClaimsTable;
 exports.PermissionsEditor = PermissionsEditor;
+exports.PhoneNumber = PhoneNumber;
 exports.PhoneRenderer = PhoneRenderer;
+exports.PortalShell = PortalShell;
 exports.ProductVersion = ProductVersion;
 exports.ProductVersionBadge = ProductVersionBadge;
 exports.ProgressRenderer = ProgressRenderer;
@@ -34396,6 +35847,7 @@ exports.SiteLogo = SiteLogo;
 exports.SkeletonMessage = SkeletonMessage;
 exports.SparklesIcon = SparklesIcon;
 exports.SpinnerIcon = SpinnerIcon2;
+exports.StatCard = StatCard2;
 exports.StatusBadgeRenderer = StatusBadgeRenderer;
 exports.StepIndicator = StepIndicator;
 exports.StripeBadge = StripeBadge;
@@ -34410,6 +35862,7 @@ exports.ToastProvider = ToastProvider;
 exports.ToolStatusIcon = ToolStatusIcon;
 exports.TypingIndicator = TypingIndicator;
 exports.UpdateAvailableOverlay = UpdateAvailableOverlay;
+exports.UserAvatar = UserAvatar;
 exports.UserMenu = UserMenu;
 exports.VerifiedBadge = VerifiedBadge2;
 exports.WEBSITE_TYPES = WEBSITE_TYPES;
@@ -34417,6 +35870,7 @@ exports.WebChartReportViewer = WebChartReportViewer;
 exports.WebcamModal = WebcamModal;
 exports.WebsiteInput = WebsiteInput;
 exports.WebsiteInputGroup = WebsiteInputGroup;
+exports.WorkspaceSwitcher = WorkspaceSwitcher;
 exports.bubbleVariants = bubbleVariants2;
 exports.create24HourSchedule = create24HourSchedule;
 exports.createDefaultSchedule = createDefaultSchedule;
@@ -34445,6 +35899,7 @@ exports.isSameSenderGroup = isSameSenderGroup;
 exports.isValidUrl = isValidUrl;
 exports.sendButtonVariants = sendButtonVariants;
 exports.statusColors = statusColors;
+exports.toTelHref = toTelHref;
 exports.useCamera = useCamera;
 exports.useCommandPalette = useCommandPalette;
 exports.useConnectionStatus = useConnectionStatus;

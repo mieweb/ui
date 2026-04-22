@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 export type OrderStatus =
@@ -118,7 +119,7 @@ export function OrderList<T>({
                   key={tab.id}
                   onClick={() => onTabChange?.(tab.id)}
                   className={cn(
-                    'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
+                    'whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                     activeTab === tab.id
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
@@ -147,7 +148,7 @@ export function OrderList<T>({
             {showSearch && (
               <div className="relative">
                 <svg
-                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -164,7 +165,7 @@ export function OrderList<T>({
                   placeholder={searchPlaceholder}
                   value={searchValue}
                   onChange={(e) => onSearchChange?.(e.target.value)}
-                  className="rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-9 text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+                  className="rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
                 />
               </div>
             )}

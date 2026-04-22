@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
+
+import { Avatar } from '../Avatar/Avatar';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
-import { Avatar } from '../Avatar/Avatar';
 
 export interface Notification {
   id: string;

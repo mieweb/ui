@@ -1,5 +1,6 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import { Pagination, SimplePagination } from './Pagination';
 
 // Wrapper component that manages state while passing through all props
@@ -225,15 +226,15 @@ export const AllVariants: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Default</p>
+        <p className="mb-2 text-sm text-muted-foreground">Default</p>
         <PaginationWithState page={5} totalPages={10} variant="default" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Outline</p>
+        <p className="mb-2 text-sm text-muted-foreground">Outline</p>
         <PaginationWithState page={5} totalPages={10} variant="outline" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Ghost</p>
+        <p className="mb-2 text-sm text-muted-foreground">Ghost</p>
         <PaginationWithState page={5} totalPages={10} variant="ghost" />
       </div>
     </div>
@@ -247,15 +248,15 @@ export const AllSizes: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Small</p>
+        <p className="mb-2 text-sm text-muted-foreground">Small</p>
         <PaginationWithState page={5} totalPages={10} size="sm" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Medium</p>
+        <p className="mb-2 text-sm text-muted-foreground">Medium</p>
         <PaginationWithState page={5} totalPages={10} size="md" />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm">Large</p>
+        <p className="mb-2 text-sm text-muted-foreground">Large</p>
         <PaginationWithState page={5} totalPages={10} size="lg" />
       </div>
     </div>

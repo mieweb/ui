@@ -8,17 +8,10 @@
  * EmptyState) to maintain DRY principles.
  */
 
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
-import type {
-  AIMessage,
-  AIChatSession,
-  AISuggestedAction,
-  AIChatCallbacks,
-  MCPResourceLink,
-} from './types';
-import { AIMessageDisplay } from './AIMessage';
 import {
   MessageComposer,
   type MessageComposerProps,
@@ -27,7 +20,15 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
-import { SparklesIcon, CloseIcon, RefreshIcon } from './icons';
+import { AIMessageDisplay } from './AIMessage';
+import { CloseIcon, RefreshIcon, SparklesIcon } from './icons';
+import type {
+  AIChatCallbacks,
+  AIChatSession,
+  AIMessage,
+  AISuggestedAction,
+  MCPResourceLink,
+} from './types';
 
 // ============================================================================
 // Suggested Actions Component
@@ -148,9 +149,9 @@ export function SuggestedActions({
           onClick={() => onSelect(action)}
           className={cn(
             'flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5',
-            'hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 text-sm text-neutral-700',
+            'text-sm text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700',
             'dark:border-neutral-700 dark:text-neutral-300',
-            'dark:hover:border-primary-700 dark:hover:bg-primary-900/20 dark:hover:text-primary-300',
+            'dark:hover:bg-primary-900/20 dark:hover:border-primary-700 dark:hover:text-primary-300',
             'transition-colors'
           )}
         >
@@ -180,7 +181,7 @@ function AIEmptyState({
   ...props
 }: AIEmptyStateProps) {
   const aiIcon = (
-    <div className="bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white">
+    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-500 text-white dark:bg-primary-600">
       <SparklesIcon size="lg" className="h-8 w-8" />
     </div>
   );
@@ -234,7 +235,8 @@ const chatVariants = cva('flex flex-col', {
 });
 
 export interface AIChatProps
-  extends VariantProps<typeof chatVariants>, AIChatCallbacks {
+  extends VariantProps<typeof chatVariants>,
+    AIChatCallbacks {
   /** Chat session data */
   session?: AIChatSession;
   /** Messages to display (alternative to session) */
@@ -332,7 +334,7 @@ export function AIChat({
       {showHeader && (
         <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
           <div className="flex items-center gap-3">
-            <div className="bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white dark:bg-primary-600">
               <SparklesIcon size="sm" />
             </div>
             <div>

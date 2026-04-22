@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useTheme, type Theme, type ResolvedTheme } from '../../hooks/useTheme';
+
+import { type ResolvedTheme, type Theme, useTheme } from '../../hooks/useTheme';
 
 export interface ThemeProviderContextValue {
   theme: Theme;
