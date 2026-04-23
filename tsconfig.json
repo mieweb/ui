@@ -15,7 +15,8 @@
     "declaration": true,
     "declarationMap": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ozwell/react": ["./packages/ozwell/packages/react/src/index.ts"]
     },
     "types": ["node"]
   },

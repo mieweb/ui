@@ -61,3 +61,16 @@ export {
   type AIChatTriggerProps,
   type FloatingAIChatProps,
 } from './AIChatModal';
+
+// Ozwell Widget (wraps @ozwell/react)
+export {
+  OzwellWidget,
+  useOzwell,
+  type OzwellWidgetProps,
+  type OzwellChatProps,
+  type OzwellTool,
+  type OzwellToolFunction,
+  type OzwellToolParameter,
+  type OzwellError,
+  type UseOzwellReturn,
+} from './OzwellWidget';

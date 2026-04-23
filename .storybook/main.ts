@@ -48,6 +48,10 @@ const datavisDependencyAliases = missingRootDependencies
 
 const localUiAliases = [
   {
+    find: /^@ozwell\/react$/,
+    replacement: path.join(workspaceRoot, 'packages/ozwell/packages/react/src/index.ts'),
+  },
+  {
     find: /^@mieweb\/ui\/components\/(.+)$/,
     replacement: `${path.join(workspaceRoot, 'src/components')}/$1`,
   },

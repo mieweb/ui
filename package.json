@@ -223,6 +223,7 @@
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
     "datavis": "file:./packages/datavis",
+    "@ozwell/react": "file:./packages/ozwell/packages/react",
     "eslint": "^9.39.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
