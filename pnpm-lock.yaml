@@ -42,6 +42,9 @@ importers:
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
+      '@rive-app/react-canvas':
+        specifier: ^4.28.1
+        version: 4.28.1(react@19.2.4)
       '@storybook/addon-a11y':
         specifier: ^10.2.11
         version: 10.2.11(storybook@10.2.11(@testing-library/dom@10.4.1)(prettier@3.8.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
@@ -676,6 +679,14 @@ packages:
     resolution: {integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@rive-app/canvas@2.37.2':
+    resolution: {integrity: sha512-AWdyanRg1hZ0XLr/KQu4/F9FtPNX2LBhyOGq29WRdVNa8KfQHxJ+LJQY/hEkCbbEtTkv50PYSwWjTFHhFSAZAg==}
+
+  '@rive-app/react-canvas@4.28.1':
+    resolution: {integrity: sha512-izy/UgZAkeczyPTlGY8HqjpM0KfHuGVRLQplEFeslTb4D/gCxg0qupFOkY50upo2dB+CnFl0nYfqm8nGQ7H9gg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0
 
   '@rollup/pluginutils@5.3.0':
     resolution: {integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==}
@@ -3597,6 +3608,13 @@ snapshots:
   '@playwright/test@1.58.2':
     dependencies:
       playwright: 1.58.2
+
+  '@rive-app/canvas@2.37.2': {}
+
+  '@rive-app/react-canvas@4.28.1(react@19.2.4)':
+    dependencies:
+      '@rive-app/canvas': 2.37.2
+      react: 19.2.4
 
   '@rollup/pluginutils@5.3.0(rollup@4.59.0)':
     dependencies:

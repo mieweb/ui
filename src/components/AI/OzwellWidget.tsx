@@ -22,6 +22,10 @@
  */
 import * as React from 'react';
 import { OzwellChat, useOzwell } from '@ozwell/react';
+import {
+  OzwellAnimatedButton,
+  type OzwellAnimatedButtonProps,
+} from './OzwellAnimatedButton';
 import type {
   OzwellChatProps,
   OzwellTool,
@@ -111,15 +115,54 @@ const THEME_OVERRIDES_CSS = `
   }
 `;
 
-export type OzwellWidgetProps = OzwellChatProps;
+export type OzwellWidgetProps = OzwellChatProps & {
+  /** Render an animated Rive mascot as the chat launcher button */
+  animated?: boolean;
+  /** Path to the .riv animation file (default: /ozwell/ozwell2.8.riv) */
+  rivSrc?: OzwellAnimatedButtonProps['rivSrc'];
+  /** Size of the animated button in pixels (default: 80) */
+  animatedSize?: OzwellAnimatedButtonProps['size'];
+};
 
 export function OzwellWidget({
   endpoint = DEFAULT_ENDPOINT,
   widgetUrl = DEFAULT_WIDGET_URL,
   primaryColor = OZWELL_PRIMARY,
   theme = 'auto',
+  animated = false,
+  rivSrc,
+  animatedSize,
   ...rest
 }: OzwellWidgetProps) {
+  // Clean up ozwell-loader DOM artifacts on unmount.
+  // The vanilla loader injects a fixed-position button, chat wrapper, iframe,
+  // and style tags directly into document.body — none of which get removed
+  // when the React component unmounts. Without this, the button persists
+  // across Storybook story navigation (or any SPA route change).
+  React.useEffect(() => {
+    return () => {
+      // Remove loader-injected DOM elements
+      for (const id of [
+        'ozwell-chat-button',
+        'ozwell-chat-wrapper',
+        'ozwell-default-ui-styles',
+      ]) {
+        document.getElementById(id)?.remove();
+      }
+      // Remove the loader script tag so it can be re-injected fresh
+      document
+        .querySelector('script[src*="ozwell-loader.js"]')
+        ?.remove();
+      // Remove the iframe (may not have an ID)
+      document
+        .querySelector('iframe[title="Ozwell Chat"], iframe[title="Ozwell Assistant"]')
+        ?.remove();
+      // Clear global state so next mount starts fresh
+      delete (window as unknown as Record<string, unknown>).OzwellChat;
+      delete (window as unknown as Record<string, unknown>).OzwellChatConfig;
+    };
+  }, []);
+
   // Inject MIE UI theme overrides so the widget inherits brand tokens.
   // This <style> tag overrides the ozwell-loader's hardcoded colors
   // with --mieweb-* CSS custom properties, enabling brand + dark mode.
@@ -162,19 +205,44 @@ export function OzwellWidget({
     };
   }, []);
 
+  // Toggle chat via the global OzwellChat API (used by animated button).
+  // The loader exposes open() / close() / isOpen but no toggle().
+  const handleAnimatedClick = React.useCallback(() => {
+    const ozwell = (window as unknown as Record<string, unknown>)
+      .OzwellChat as
+      | { open?: () => void; close?: () => void; isOpen?: boolean }
+      | undefined;
+    if (ozwell) {
+      if (ozwell.isOpen) {
+        ozwell.close?.();
+      } else {
+        ozwell.open?.();
+      }
+    }
+  }, []);
+
   return (
-    <OzwellChat
-      endpoint={endpoint}
-      widgetUrl={widgetUrl}
-      primaryColor={primaryColor}
-      theme={theme}
-      {...rest}
-    />
+    <>
+      <OzwellChat
+        endpoint={endpoint}
+        widgetUrl={widgetUrl}
+        primaryColor={primaryColor}
+        theme={theme}
+        {...rest}
+      />
+      {animated && (
+        <OzwellAnimatedButton
+          rivSrc={rivSrc}
+          size={animatedSize}
+          onClick={handleAnimatedClick}
+        />
+      )}
+    </>
   );
 }
 
-// Re-export hook and types for convenience
-export { useOzwell };
+// Re-export hook, animated button, and types for convenience
+export { useOzwell, OzwellAnimatedButton };
 export type {
   OzwellChatProps,
   OzwellTool,
