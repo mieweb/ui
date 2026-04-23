@@ -235,6 +235,10 @@ packages:
     resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/runtime@7.29.2':
+    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
+    engines: {node: '>=6.9.0'}
+
   '@babel/template@7.28.6':
     resolution: {integrity: sha512-YA6Ma2KsCdGb+WC6UpBVFJGXL58MDA6oyONbjyF/+5sBgxY/dwkhLogbMT2GXXyU84/IhRw/2D1Os1B/giz+BQ==}
     engines: {node: '>=6.9.0'}
@@ -553,12 +557,13 @@ packages:
   '@mieweb/datavis@file:packages/datavis':
     resolution: {directory: packages/datavis, type: directory}
 
-  '@mieweb/ui@0.2.4':
-    resolution: {integrity: sha512-1OBv6wCgxCGY+s2Di5LVGyqFoYWmX14/zLX1+kUc/qRjI+2NGywvLht73pOvcqomvHhzEtVp3hRuHm5bCsHx3g==}
+  '@mieweb/ui@0.3.0-dev.69':
+    resolution: {integrity: sha512-0bssZkMrzFo0XEgl7IXfmbLhxrq7u8ePDdYcrl9mohcz81sgJwUY4AY3Ijyg0Rzs2sSjlnAw/0UlpW6A03y8Nw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       ag-grid-community: '>=32.0.0'
       ag-grid-react: '>=32.0.0'
+      datavis-ace: '=4.0.0-PRE.1'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
       wavesurfer.js: '>=7.0.0'
@@ -566,6 +571,8 @@ packages:
       ag-grid-community:
         optional: true
       ag-grid-react:
+        optional: true
+      datavis-ace:
         optional: true
       wavesurfer.js:
         optional: true
@@ -1447,6 +1454,9 @@ packages:
   datavis-ace@4.0.0-PRE.1:
     resolution: {integrity: sha512-lRI2ST7UUP+nHDf8lCd/tB8Ccku9g5vyBGE2QwnM9Rga7H1FbEgcrnwO7IeU5N8//XecTF/vMOOjkc6NlieNGA==}
 
+  datavis-ace@4.0.0-PRE.2:
+    resolution: {integrity: sha512-wz7voSTEepUsSyzfhWCtB7FQbbvCoajg4zBQa8X5eWWUc4qt+41wQcvqeShEQu4osOwwbMZTKcAfaU0cqwmo+A==}
+
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
     engines: {node: '>=6.0'}
@@ -1854,10 +1864,10 @@ packages:
     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
     engines: {node: '>= 14'}
 
-  i18next@25.8.18:
-    resolution: {integrity: sha512-lzY5X83BiL5AP77+9DydbrqkQHFN9hUzWGjqjLpPcp5ZOzuu1aSoKaU3xbBLSjWx9dAzW431y+d+aogxOZaKRA==}
+  i18next@26.0.7:
+    resolution: {integrity: sha512-f7tL/iw0VQsx4nC5oNxBM2RjM8alNys5KzyiQTU6A9TI5TI89py4/Ez1cKFvHiLWsvzOXvuGUES+Kk/A2WiANQ==}
     peerDependencies:
-      typescript: ^5
+      typescript: ^5 || ^6
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -2543,14 +2553,14 @@ packages:
     peerDependencies:
       react: ^19.2.4
 
-  react-i18next@16.5.8:
-    resolution: {integrity: sha512-2ABeHHlakxVY+LSirD+OiERxFL6+zip0PaHo979bgwzeHg27Sqc82xxXWIrSFmfWX0ZkrvXMHwhsi/NGUf5VQg==}
+  react-i18next@17.0.4:
+    resolution: {integrity: sha512-hQipmK4EF0y6RO6tt6WuqnmWpWYEXmQUUzecmMBuNsIgYd3smXcG4GtYPWhvgxn0pqMOItKlEO8H24HCs5hc3g==}
     peerDependencies:
-      i18next: '>= 25.6.2'
+      i18next: '>= 26.0.1'
       react: '>= 16.8.0'
       react-dom: '*'
       react-native: '*'
-      typescript: ^5
+      typescript: ^5 || ^6
     peerDependenciesMeta:
       react-dom:
         optional: true
@@ -3234,6 +3244,8 @@ snapshots:
 
   '@babel/runtime@7.28.6': {}
 
+  '@babel/runtime@7.29.2': {}
+
   '@babel/template@7.28.6':
     dependencies:
       '@babel/code-frame': 7.29.0
@@ -3488,12 +3500,12 @@ snapshots:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@dnd-kit/utilities': 3.2.2(react@19.2.4)
-      '@mieweb/ui': 0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
-      datavis-ace: 4.0.0-PRE.1
-      i18next: 25.8.18(typescript@5.9.3)
+      '@mieweb/ui': 0.3.0-dev.69(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
+      datavis-ace: 4.0.0-PRE.2
+      i18next: 26.0.7(typescript@5.9.3)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      react-i18next: 16.5.8(i18next@25.8.18(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      react-i18next: 17.0.4(i18next@26.0.7(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
     transitivePeerDependencies:
       - ag-grid-community
       - ag-grid-react
@@ -3501,11 +3513,12 @@ snapshots:
       - typescript
       - wavesurfer.js
 
-  '@mieweb/ui@0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
+  '@mieweb/ui@0.3.0-dev.69(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
     dependencies:
       '@swc/helpers': 0.5.19
       class-variance-authority: 0.7.1
       clsx: 2.1.1
+      google-libphonenumber: 3.2.44
       lucide-react: 0.562.0(react@19.2.4)
       luxon: 3.7.2
       react: 19.2.4
@@ -3514,6 +3527,7 @@ snapshots:
     optionalDependencies:
       ag-grid-community: 35.1.0
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      datavis-ace: 4.0.0-PRE.2
       wavesurfer.js: 7.12.1
 
   '@parcel/watcher-android-arm64@2.5.6':
@@ -4386,6 +4400,18 @@ snapshots:
       sprintf-js: 1.1.3
       underscore: 1.13.8
 
+  datavis-ace@4.0.0-PRE.2:
+    dependencies:
+      bignumber.js: 9.3.1
+      core-js: 3.47.0
+      es6-symbol: 3.1.4
+      json-formatter-js: https://codeload.github.com/mieweb/json-formatter-js/tar.gz/503be5a8368ecdea777f8a7e98bda827391aa6ac
+      moment: 2.30.1
+      numeral: 2.0.6
+      papaparse: 5.5.3
+      sprintf-js: 1.1.3
+      underscore: 1.13.8
+
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
@@ -4928,9 +4954,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  i18next@25.8.18(typescript@5.9.3):
-    dependencies:
-      '@babel/runtime': 7.28.6
+  i18next@26.0.7(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
 
@@ -5530,11 +5554,11 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
-  react-i18next@16.5.8(i18next@25.8.18(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3):
+  react-i18next@17.0.4(i18next@26.0.7(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.2
       html-parse-stringify: 3.0.1
-      i18next: 25.8.18(typescript@5.9.3)
+      i18next: 26.0.7(typescript@5.9.3)
       react: 19.2.4
       use-sync-external-store: 1.6.0(react@19.2.4)
     optionalDependencies:
