@@ -7,8 +7,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     exclude: [
-      'node_modules/**',
+      '**/node_modules/**',
       'dist/**',
+      'packages/ozwell/**',
       'tests/visual/**',
       '**/*.spec.ts'
     ],

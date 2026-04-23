@@ -150,12 +150,12 @@ export function OzwellWidget({
         document.getElementById(id)?.remove();
       }
       // Remove the loader script tag so it can be re-injected fresh
-      document
-        .querySelector('script[src*="ozwell-loader.js"]')
-        ?.remove();
+      document.querySelector('script[src*="ozwell-loader.js"]')?.remove();
       // Remove the iframe (may not have an ID)
       document
-        .querySelector('iframe[title="Ozwell Chat"], iframe[title="Ozwell Assistant"]')
+        .querySelector(
+          'iframe[title="Ozwell Chat"], iframe[title="Ozwell Assistant"]'
+        )
         ?.remove();
       // Clear global state so next mount starts fresh
       delete (window as unknown as Record<string, unknown>).OzwellChat;
@@ -208,8 +208,7 @@ export function OzwellWidget({
   // Toggle chat via the global OzwellChat API (used by animated button).
   // The loader exposes open() / close() / isOpen but no toggle().
   const handleAnimatedClick = React.useCallback(() => {
-    const ozwell = (window as unknown as Record<string, unknown>)
-      .OzwellChat as
+    const ozwell = (window as unknown as Record<string, unknown>).OzwellChat as
       | { open?: () => void; close?: () => void; isOpen?: boolean }
       | undefined;
     if (ozwell) {

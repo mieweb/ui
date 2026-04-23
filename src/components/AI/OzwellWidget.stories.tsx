@@ -512,6 +512,7 @@ export const Animated: Story = {
     defaultUI: true,
     debug: true,
     welcomeMessage: "Hi! I'm Ozwell. How can I help you today?",
+    animatedSize: 60,
   },
   render: (args) => (
     <div style={{ height: '600px', position: 'relative' }}>
