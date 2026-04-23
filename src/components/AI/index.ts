@@ -65,7 +65,6 @@ export {
 // Ozwell Widget (wraps @ozwell/react)
 export {
   OzwellWidget,
-  OzwellAnimatedButton,
   useOzwell,
   type OzwellWidgetProps,
   type OzwellChatProps,
@@ -76,4 +75,5 @@ export {
   type UseOzwellReturn,
 } from './OzwellWidget';
 
+export { OzwellAnimatedButton } from './OzwellAnimatedButton';
 export type { OzwellAnimatedButtonProps } from './OzwellAnimatedButton';

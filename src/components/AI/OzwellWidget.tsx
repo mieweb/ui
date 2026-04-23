@@ -22,10 +22,7 @@
  */
 import * as React from 'react';
 import { OzwellChat, useOzwell } from '@ozwell/react';
-import {
-  OzwellAnimatedButton,
-  type OzwellAnimatedButtonProps,
-} from './OzwellAnimatedButton';
+import type { OzwellAnimatedButtonProps } from './OzwellAnimatedButton';
 import type {
   OzwellChatProps,
   OzwellTool,
@@ -34,6 +31,13 @@ import type {
   OzwellError,
   UseOzwellReturn,
 } from '@ozwell/react';
+
+/** Lazy-load OzwellAnimatedButton so @rive-app/react-canvas is only pulled in when animated=true */
+const OzwellAnimatedButton = React.lazy(() =>
+  import('./OzwellAnimatedButton').then((m) => ({
+    default: m.OzwellAnimatedButton,
+  }))
+);
 
 /** Default Ozwell dev reference server base */
 const DEV_SERVER = 'https://ozwell-dev-refserver.opensource.mieweb.org';
@@ -166,15 +170,14 @@ export function OzwellWidget({
   // Inject MIE UI theme overrides so the widget inherits brand tokens.
   // This <style> tag overrides the ozwell-loader's hardcoded colors
   // with --mieweb-* CSS custom properties, enabling brand + dark mode.
+  // Not removed on unmount — idempotent CSS safe to leave in place,
+  // prevents multi-instance bugs when one widget unmounts while another is live.
   React.useEffect(() => {
     if (document.getElementById(THEME_OVERRIDES_ID)) return;
     const style = document.createElement('style');
     style.id = THEME_OVERRIDES_ID;
     style.textContent = THEME_OVERRIDES_CSS;
     document.head.appendChild(style);
-    return () => {
-      style.remove();
-    };
   }, []);
 
   // Fix broken launcher icon — the loader hardcodes src="/favicon.ico" which
@@ -230,18 +233,20 @@ export function OzwellWidget({
         {...rest}
       />
       {animated && (
-        <OzwellAnimatedButton
-          rivSrc={rivSrc}
-          size={animatedSize}
-          onClick={handleAnimatedClick}
-        />
+        <React.Suspense fallback={null}>
+          <OzwellAnimatedButton
+            rivSrc={rivSrc}
+            size={animatedSize}
+            onClick={handleAnimatedClick}
+          />
+        </React.Suspense>
       )}
     </>
   );
 }
 
-// Re-export hook, animated button, and types for convenience
-export { useOzwell, OzwellAnimatedButton };
+// Re-export hook and types for convenience
+export { useOzwell };
 export type {
   OzwellChatProps,
   OzwellTool,

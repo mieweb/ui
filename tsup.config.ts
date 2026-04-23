@@ -62,6 +62,7 @@ export default defineConfig({
     '@mieweb/ui',
     '@mieweb/datavis',
     '@ozwell/react',
+    '@rive-app/react-canvas',
     'datavis-ace',
     /^@mieweb\/ui\//,
     /^datavis\//,

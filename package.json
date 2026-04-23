@@ -162,6 +162,8 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@ozwell/react": ">=0.1.0",
+    "@rive-app/react-canvas": ">=4.0.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.1",
@@ -170,6 +172,12 @@
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
+    "@ozwell/react": {
+      "optional": true
+    },
+    "@rive-app/react-canvas": {
+      "optional": true
+    },
     "ag-grid-community": {
       "optional": true
     },

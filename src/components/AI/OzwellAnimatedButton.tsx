@@ -82,16 +82,13 @@ export function OzwellAnimatedButton({
     autoplay: true,
   });
 
-  // Inject CSS (once)
+  // Inject CSS (once) — not removed on unmount to prevent multi-instance bugs
   React.useEffect(() => {
     if (document.getElementById(ANIMATED_STYLES_ID)) return;
     const style = document.createElement('style');
     style.id = ANIMATED_STYLES_ID;
     style.textContent = ANIMATED_CSS;
     document.head.appendChild(style);
-    return () => {
-      style.remove();
-    };
   }, []);
 
   // Add marker class to body so CSS can hide the default button

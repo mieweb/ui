@@ -26,8 +26,8 @@ const meta: Meta<typeof OzwellWidget> = {
           '- Network access to the Ozwell reference server (or your own deployment)',
           '',
           '### Getting an API Key',
-          'Contact `adamerla128@gmail.com` or `horner@mieweb.com` for credentials,',
-          'or create an agent via the [Agent Registration API](https://mieweb.github.io/ozwellai-api/backend/agents).',
+          'Create an agent via the [Agent Registration API](https://mieweb.github.io/ozwellai-api/backend/agents)',
+          'or contact your Ozwell administrator for credentials.',
           '',
           '### Privacy',
           'Ozwell respects user privacy. The host site receives only lifecycle events — never conversation content.',
@@ -104,7 +104,7 @@ type Story = StoryObj<typeof OzwellWidget>;
  */
 export const Default: Story = {
   args: {
-    apiKey: 'agnt_key-moao6r5z2942807d0c04fc6d',
+    apiKey: '',
     defaultUI: true,
     debug: true,
     welcomeMessage: "Hi! I'm Ozwell. How can I help you today?",
@@ -507,7 +507,7 @@ export const ProgrammaticControl: Story = {
  */
 export const Animated: Story = {
   args: {
-    apiKey: 'agnt_key-moao6r5z2942807d0c04fc6d',
+    apiKey: '',
     animated: true,
     defaultUI: true,
     debug: true,
