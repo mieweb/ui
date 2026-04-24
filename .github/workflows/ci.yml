@@ -188,15 +188,7 @@ jobs:
         run: pnpm dlx wait-on http://localhost:6006
 
       - name: Run accessibility tests
-        # Install Playwright browsers inside the same pnpm dlx sandbox as
-        # @storybook/test-runner so the browser revision matches the
-        # playwright-core version the test-runner resolves. Installing
-        # browsers via the project's @playwright/test version (step above)
-        # is not sufficient because the dlx'd test-runner pulls its own
-        # playwright-core, which may expect a different browser build.
-        run: >-
-          pnpm dlx -p @storybook/test-runner sh -c
-          'npx playwright install --with-deps chromium && test-storybook --url http://localhost:6006'
+        run: pnpm test:a11y
 
       - name: Upload accessibility report
         uses: actions/upload-artifact@v4
