@@ -65,13 +65,28 @@ const THEME_OVERRIDES_CSS = `
      ============================ */
 
   /* --- Floating chat button --- */
+  @keyframes ozwellFloat {
+    0%   { transform: translateY(0)    rotate(0deg);  }
+    10%  { transform: translateY(-5px) rotate(-2deg); }
+    20%  { transform: translateY(3px)  rotate(3deg);  }
+    30%  { transform: translateY(-2px) rotate(-1deg); }
+    40%  { transform: translateY(4px)  rotate(2deg);  }
+    50%  { transform: translateY(0)    rotate(0deg);  }
+    60%  { transform: translateY(-4px) rotate(2deg);  }
+    70%  { transform: translateY(2px)  rotate(-3deg); }
+    80%  { transform: translateY(5px)  rotate(1deg);  }
+    90%  { transform: translateY(-3px) rotate(-2deg); }
+    100% { transform: translateY(0)    rotate(0deg);  }
+  }
   .ozwell-chat-button {
     background: color-mix(in srgb, var(--mieweb-primary-500, #27aae1) 45%, transparent) !important;
     box-shadow: 0 4px 16px color-mix(in srgb, var(--mieweb-primary-500, #27aae1) 30%, transparent) !important;
+    animation: ozwellFloat 15s ease-in-out infinite !important;
   }
   .ozwell-chat-button:hover {
     background: color-mix(in srgb, var(--mieweb-primary-500, #27aae1) 65%, transparent) !important;
     box-shadow: 0 6px 20px color-mix(in srgb, var(--mieweb-primary-500, #27aae1) 40%, transparent) !important;
+    animation-play-state: paused !important;
   }
 
   /* --- Unread badge --- */
