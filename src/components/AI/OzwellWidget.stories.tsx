@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { OzwellWidget, useOzwell } from './OzwellWidget';
-import type { OzwellTool } from './OzwellWidget';
+import type { OzwellTool, OzwellWidgetProps } from './OzwellWidget';
 
 // ============================================================================
 // Ozwell Widget Stories
@@ -120,7 +120,7 @@ export const Default: Story = {
     debug: true,
     welcomeMessage: "Hi! I'm Ozwell. How can I help you today?",
   },
-  render: (args) => (
+  render: (args: OzwellWidgetProps) => (
     <div style={{ height: '600px', position: 'relative' }}>
       <div style={{ padding: '2rem' }}>
         <h2 style={{ marginBottom: '0.5rem' }}>Ozwell AI Chat Widget</h2>
@@ -203,7 +203,7 @@ export const Embedded: Story = {
     debug: true,
     welcomeMessage: "Hi! I'm embedded in the page. Ask me anything!",
   },
-  render: (args) => (
+  render: (args: OzwellWidgetProps) => (
     <div style={{ padding: '2rem' }}>
       <h2 style={{ marginBottom: '1rem' }}>Embedded Chat</h2>
       <div
@@ -267,7 +267,7 @@ export const DarkTheme: Story = {
     defaultUI: true,
     debug: true,
   },
-  render: (args) => (
+  render: (args: OzwellWidgetProps) => (
     <div
       className="dark"
       style={{
@@ -430,7 +430,8 @@ export const WithToolCalling: Story = {
     welcomeMessage:
       'Hi! I can help you look up patient info or schedule appointments. Try asking me!',
   },
-  render: (args) => <ToolCallingDemo {...args} />,
+  render: (args: OzwellWidgetProps) => <ToolCallingDemo {...args} />,
+
 };
 
 // ============================================================================
@@ -522,7 +523,7 @@ export const ProgrammaticControl: Story = {
     defaultUI: true,
     debug: true,
   },
-  render: (args) =>
+  render: (args: OzwellWidgetProps) =>
     args.apiKey ? (
       <OzwellWithControls {...args} />
     ) : (
