@@ -124,6 +124,173 @@ const THEME_OVERRIDES_CSS = `
   }
 `;
 
+/**
+ * Reads the current --mieweb-* design-token values from the parent page
+ * and returns CSS text that maps the widget's hardcoded colors to the
+ * active brand + dark/light mode. Injected into the iframe's <head>.
+ */
+function buildIframeThemeCSS(): string {
+  const root = document.documentElement;
+  const get = (v: string, fallback: string) =>
+    getComputedStyle(root).getPropertyValue(v).trim() || fallback;
+
+  const bg = get('--mieweb-background', '#ffffff');
+  const fg = get('--mieweb-foreground', '#171717');
+  const card = get('--mieweb-card', '#ffffff');
+  const cardFg = get('--mieweb-card-foreground', '#171717');
+  const muted = get('--mieweb-muted', '#f5f5f5');
+  const mutedFg = get('--mieweb-muted-foreground', '#737373');
+  const border = get('--mieweb-border', '#e5e7eb');
+  const input = get('--mieweb-input', '#e5e7eb');
+  const primary = get('--mieweb-primary-500', '#27aae1');
+  const primaryFg = get('--mieweb-primary-foreground', '#ffffff');
+  const ring = get('--mieweb-ring', '#27aae1');
+  const fontSans = get(
+    '--mieweb-font-sans',
+    "'Nunito', ui-sans-serif, system-ui, sans-serif"
+  );
+
+  return `
+    /* MIE UI iframe theme overrides — regenerated on theme change */
+
+    /* --- Layout --- */
+    body, .chat-container {
+      background: ${bg} !important;
+      color: ${fg} !important;
+      font-family: ${fontSans} !important;
+    }
+
+    /* --- Status strip --- */
+    .status-strip {
+      background: ${muted} !important;
+      border-color: ${border} !important;
+    }
+    .status { color: ${mutedFg} !important; }
+
+    /* --- Reasoning controls --- */
+    .reasoning-capsule {
+      background: ${muted} !important;
+      color: ${fg} !important;
+      border-color: ${border} !important;
+    }
+    .reasoning-seg {
+      background: ${card} !important;
+      border-color: ${border} !important;
+    }
+    .reasoning-seg-btn {
+      color: ${mutedFg} !important;
+    }
+    .reasoning-seg-btn.active {
+      background: ${primary} !important;
+      color: ${primaryFg} !important;
+    }
+
+    /* --- Messages --- */
+    .messages { background: ${bg} !important; }
+
+    .message.user {
+      background: ${primary} !important;
+      color: ${primaryFg} !important;
+    }
+    .message.assistant {
+      background: ${card} !important;
+      color: ${cardFg} !important;
+      border: 1px solid ${border} !important;
+    }
+    .message.system {
+      background: ${muted} !important;
+      color: ${fg} !important;
+    }
+    .message.welcome {
+      color: ${mutedFg} !important;
+      border-color: ${border} !important;
+    }
+    .message.queued {
+      border-color: ${border} !important;
+      color: ${mutedFg} !important;
+    }
+
+    /* --- Input area --- */
+    .chat-form {
+      background: ${bg} !important;
+      border-top: 1px solid ${border} !important;
+    }
+    .chat-input {
+      background: ${input} !important;
+      color: ${fg} !important;
+      border-color: ${border} !important;
+      font-family: ${fontSans} !important;
+    }
+    .chat-input::placeholder { color: ${mutedFg} !important; }
+    .chat-input:focus {
+      border-color: ${ring} !important;
+      box-shadow: 0 0 0 2px ${ring}33 !important;
+    }
+
+    /* --- Send button --- */
+    .chat-submit {
+      background: ${primary} !important;
+      color: ${primaryFg} !important;
+    }
+    .chat-submit:hover {
+      filter: brightness(1.1) !important;
+    }
+    .chat-submit:disabled {
+      background: ${muted} !important;
+      color: ${mutedFg} !important;
+      filter: none !important;
+    }
+
+    /* --- Footer --- */
+    .chat-footer {
+      background: ${muted} !important;
+      color: ${mutedFg} !important;
+      border-color: ${border} !important;
+    }
+
+    /* --- Tool pills (debug mode) --- */
+    .tool-pill {
+      background: color-mix(in srgb, ${primary} 15%, ${bg}) !important;
+      color: ${fg} !important;
+      border-color: ${border} !important;
+    }
+    .tool-details {
+      background: ${card} !important;
+      border-color: ${border} !important;
+    }
+    .tool-details-header {
+      background: ${muted} !important;
+      color: ${fg} !important;
+    }
+    .tool-details-content {
+      color: ${cardFg} !important;
+    }
+
+    /* --- Thinking bubble --- */
+    .thinking-bubble { color: ${fg} !important; }
+    .thinking-content {
+      background: ${muted} !important;
+      border-color: ${border} !important;
+      color: ${mutedFg} !important;
+    }
+
+    /* --- Queued message actions --- */
+    .queued-input {
+      background: ${input} !important;
+      color: ${fg} !important;
+      border-color: ${border} !important;
+    }
+
+    /* --- Scrollbar (WebKit) --- */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: ${bg}; }
+    ::-webkit-scrollbar-thumb {
+      background: ${border};
+      border-radius: 3px;
+    }
+  `;
+}
+
 export type OzwellWidgetProps = OzwellChatProps & {
   /** Render an animated Rive mascot as the chat launcher button */
   animated?: boolean;
@@ -223,6 +390,64 @@ export function OzwellWidget({
       clearTimeout(timeout);
     };
   }, [iconSrc]);
+
+  // Inject theme-aware CSS into the Ozwell iframe. The iframe content has
+  // hardcoded colors (#0066ff, #ffffff, etc.) with no dark mode or theming.
+  // Since it uses srcdoc it is same-origin, so we can access contentDocument.
+  // We read --mieweb-* token values from the parent and inject them as
+  // literal colors, then re-inject whenever the parent theme changes.
+  React.useEffect(() => {
+    const IFRAME_STYLE_ID = 'ozwell-mieweb-iframe-theme';
+
+    /** Find the ozwell iframe in the parent DOM */
+    const findIframe = () =>
+      document.querySelector(
+        'iframe[title="Ozwell Chat"], iframe[title="Ozwell Assistant"]'
+      ) as HTMLIFrameElement | null;
+
+    /** Inject (or replace) the theme CSS inside the iframe */
+    const injectTheme = () => {
+      const iframe = findIframe();
+      const doc = iframe?.contentDocument;
+      if (!doc) return;
+      let style = doc.getElementById(
+        IFRAME_STYLE_ID
+      ) as HTMLStyleElement | null;
+      if (!style) {
+        style = doc.createElement('style');
+        style.id = IFRAME_STYLE_ID;
+        doc.head.appendChild(style);
+      }
+      style.textContent = buildIframeThemeCSS();
+    };
+
+    // Poll until the iframe is ready, then inject
+    let attempts = 0;
+    const poll = setInterval(() => {
+      attempts++;
+      const iframe = findIframe();
+      if (iframe?.contentDocument?.body) {
+        clearInterval(poll);
+        injectTheme();
+      }
+      if (attempts > 50) clearInterval(poll); // give up after 10s
+    }, 200);
+
+    // Watch for theme changes on <html> (class or data-theme attribute)
+    const observer = new MutationObserver(() => {
+      // Small delay so CSS variables have settled
+      setTimeout(injectTheme, 50);
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    });
+
+    return () => {
+      clearInterval(poll);
+      observer.disconnect();
+    };
+  }, []);
 
   // Toggle chat via the global OzwellChat API (used by animated button).
   // The loader exposes open() / close() / isOpen but no toggle().
