@@ -62,18 +62,6 @@ export {
   type FloatingAIChatProps,
 } from './AIChatModal';
 
-// Ozwell Widget (wraps @ozwell/react)
-export {
-  OzwellWidget,
-  useOzwell,
-  type OzwellWidgetProps,
-  type OzwellChatProps,
-  type OzwellTool,
-  type OzwellToolFunction,
-  type OzwellToolParameter,
-  type OzwellError,
-  type UseOzwellReturn,
-} from './OzwellWidget';
-
-export { OzwellAnimatedButton } from './OzwellAnimatedButton';
-export type { OzwellAnimatedButtonProps } from './OzwellAnimatedButton';
+// Ozwell Widget — available via '@mieweb/ui/ozwell' entry point.
+// Not re-exported here to keep @ozwell/react and @rive-app/react-canvas
+// out of the main bundle. See src/ozwell.ts.

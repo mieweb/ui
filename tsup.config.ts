@@ -5,6 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     'ag-grid': 'src/ag-grid.ts',
     'datavis': 'src/datavis.ts',
+    'ozwell': 'src/ozwell.ts',
     'hooks/index': 'src/hooks/index.ts',
     'utils/index': 'src/utils/index.ts',
     'tailwind-preset': 'src/tailwind-preset.ts',

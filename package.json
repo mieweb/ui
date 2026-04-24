@@ -128,6 +128,16 @@
         "default": "./dist/datavis.cjs"
       }
     },
+    "./ozwell": {
+      "import": {
+        "types": "./dist/ozwell.d.ts",
+        "default": "./dist/ozwell.js"
+      },
+      "require": {
+        "types": "./dist/ozwell.d.cts",
+        "default": "./dist/ozwell.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./init.css": "./dist/styles/init.css"
