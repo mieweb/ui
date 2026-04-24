@@ -169,7 +169,7 @@
     "test:visual": "playwright test",
     "test:visual:ui": "playwright test --ui",
     "test:visual:debug": "playwright test --debug",
-    "test:a11y": "test-storybook --url http://localhost:6006",
+    "test:storybook": "test-storybook --url http://localhost:6006",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -260,6 +260,6 @@
     "wavesurfer.js": "^7.12.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }
