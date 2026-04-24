@@ -22,7 +22,6 @@
  */
 import * as React from 'react';
 import { OzwellChat, useOzwell } from '@ozwell/react';
-import type { OzwellAnimatedButtonProps } from './OzwellAnimatedButton';
 import type {
   OzwellChatProps,
   OzwellTool,
@@ -31,13 +30,6 @@ import type {
   OzwellError,
   UseOzwellReturn,
 } from '@ozwell/react';
-
-/** Lazy-load OzwellAnimatedButton so @rive-app/react-canvas is only pulled in when animated=true */
-const OzwellAnimatedButton = React.lazy(() =>
-  import('./OzwellAnimatedButton').then((m) => ({
-    default: m.OzwellAnimatedButton,
-  }))
-);
 
 /** Default Ozwell dev reference server base */
 const DEV_SERVER = 'https://ozwell-dev-refserver.opensource.mieweb.org';
@@ -293,16 +285,6 @@ function buildIframeThemeCSS(): string {
 }
 
 export type OzwellWidgetProps = OzwellChatProps & {
-  /** Render an animated Rive mascot as the chat launcher button */
-  animated?: boolean;
-  /**
-   * URL to the .riv animation file. **Required when `animated` is true.**
-   * The asset is not bundled with the library — host it yourself and pass the URL.
-   * @example rivSrc="/assets/ozwell.riv"
-   */
-  rivSrc?: OzwellAnimatedButtonProps['rivSrc'];
-  /** Size of the animated button in pixels (default: 80) */
-  animatedSize?: OzwellAnimatedButtonProps['size'];
   /**
    * Custom icon URL for the static (non-animated) chat launcher button.
    * Used as a fallback when the loader's default icon fails to load.
@@ -316,9 +298,6 @@ export function OzwellWidget({
   widgetUrl = DEFAULT_WIDGET_URL,
   primaryColor = OZWELL_PRIMARY,
   theme = 'auto',
-  animated = false,
-  rivSrc,
-  animatedSize,
   iconSrc = OZWELL_ICON_FALLBACK,
   ...rest
 }: OzwellWidgetProps) {
@@ -450,40 +429,14 @@ export function OzwellWidget({
     };
   }, []);
 
-  // Toggle chat via the global OzwellChat API (used by animated button).
-  // The loader exposes open() / close() / isOpen but no toggle().
-  const handleAnimatedClick = React.useCallback(() => {
-    const ozwell = (window as unknown as Record<string, unknown>).OzwellChat as
-      | { open?: () => void; close?: () => void; isOpen?: boolean }
-      | undefined;
-    if (ozwell) {
-      if (ozwell.isOpen) {
-        ozwell.close?.();
-      } else {
-        ozwell.open?.();
-      }
-    }
-  }, []);
-
   return (
-    <>
-      <OzwellChat
-        endpoint={endpoint}
-        widgetUrl={widgetUrl}
-        primaryColor={primaryColor}
-        theme={theme}
-        {...rest}
-      />
-      {animated && (
-        <React.Suspense fallback={null}>
-          <OzwellAnimatedButton
-            rivSrc={rivSrc}
-            size={animatedSize}
-            onClick={handleAnimatedClick}
-          />
-        </React.Suspense>
-      )}
-    </>
+    <OzwellChat
+      endpoint={endpoint}
+      widgetUrl={widgetUrl}
+      primaryColor={primaryColor}
+      theme={theme}
+      {...rest}
+    />
   );
 }
 

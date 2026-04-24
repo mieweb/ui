@@ -56,7 +56,6 @@ Heavy or specialized dependencies are kept in separate entry points so they don'
 | **AG Grid**              | `npm install ag-grid-community ag-grid-react`        | `@mieweb/ui/ag-grid`    |
 | **DataVis**              | `npm install datavis-ace`                             | `@mieweb/ui/datavis`    |
 | **Ozwell AI Widget**     | `npm install @ozwell/react`                           | `@mieweb/ui/ozwell`     |
-| Ozwell + animated button | `npm install @ozwell/react @rive-app/react-canvas`   | `@mieweb/ui/ozwell`     |
 
 ```tsx
 // Example: Ozwell widget
