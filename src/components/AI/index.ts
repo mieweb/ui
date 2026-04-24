@@ -61,3 +61,7 @@ export {
   type AIChatTriggerProps,
   type FloatingAIChatProps,
 } from './AIChatModal';
+
+// Ozwell Widget — available via '@mieweb/ui/ozwell' entry point.
+// Not re-exported here to keep @ozwell/react out of the main bundle.
+// See src/ozwell.ts.

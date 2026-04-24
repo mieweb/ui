@@ -1,3 +1,6 @@
 [submodule "packages/datavis"]
 	path = packages/datavis
 	url = https://github.com/mieweb/datavis.git
+[submodule "packages/ozwell"]
+	path = packages/ozwell
+	url = https://github.com/mieweb/ozwellai-api.git

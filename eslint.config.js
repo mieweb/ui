@@ -45,6 +45,8 @@ export default [
         HTMLHeadingElement: 'readonly',
         HTMLCanvasElement: 'readonly',
         HTMLImageElement: 'readonly',
+        HTMLIFrameElement: 'readonly',
+        HTMLStyleElement: 'readonly',
         HTMLVideoElement: 'readonly',
         HTMLFormElement: 'readonly',
         HTMLSelectElement: 'readonly',
