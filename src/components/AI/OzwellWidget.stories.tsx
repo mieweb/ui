@@ -128,6 +128,35 @@ export const Default: Story = {
           Enter an API key in the Storybook controls panel to activate the chat.
           The floating button will appear in the bottom-right corner.
         </p>
+        <div
+          style={{
+            padding: '0.75rem 1rem',
+            background: '#e8f4fd',
+            border: '1px solid #b6dff6',
+            borderRadius: '8px',
+            marginBottom: '1rem',
+            fontSize: '0.875rem',
+            color: '#1a5276',
+          }}
+        >
+          <strong>Separate install required.</strong> The Ozwell widget is not
+          included in the base <code>@mieweb/ui</code> package. Install its peer
+          dependency first:
+          <pre
+            style={{
+              margin: '0.5rem 0 0',
+              padding: '0.5rem 0.75rem',
+              background: '#f0f8ff',
+              borderRadius: '4px',
+              fontSize: '0.8125rem',
+              overflowX: 'auto',
+            }}
+          >
+            npm install @ozwell/react
+          </pre>
+          Then import from the dedicated entry point:{' '}
+          <code>@mieweb/ui/ozwell</code>
+        </div>
         <p style={{ color: '#999', fontSize: '0.875rem' }}>
           Using endpoint:{' '}
           <code>
