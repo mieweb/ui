@@ -10,8 +10,8 @@
 import * as React from 'react';
 import { useRive } from '@rive-app/react-canvas';
 
-/** Default path to the Rive animation (served from Storybook public dir) */
-const DEFAULT_RIV_SRC = '/ozwell/ozwell2.8.riv';
+/** Storybook-only default — consumers must pass their own rivSrc */
+const STORYBOOK_RIV_SRC = '/ozwell/ozwell2.8.riv';
 
 /** Style ID for the animated button CSS */
 const ANIMATED_STYLES_ID = 'ozwell-animated-button-styles';
@@ -63,7 +63,12 @@ const ANIMATED_CSS = `
 `;
 
 export interface OzwellAnimatedButtonProps {
-  /** Path to the .riv file. Defaults to /ozwell/ozwell2.8.riv */
+  /**
+   * URL to the .riv animation file.
+   * The asset is not bundled — host it yourself and pass the URL.
+   * Falls back to a Storybook-only path for development convenience.
+   * @example rivSrc="/assets/ozwell.riv"
+   */
   rivSrc?: string;
   /** Width of the Rive canvas in pixels. Default 60 */
   size?: number;
@@ -72,7 +77,7 @@ export interface OzwellAnimatedButtonProps {
 }
 
 export function OzwellAnimatedButton({
-  rivSrc = DEFAULT_RIV_SRC,
+  rivSrc = STORYBOOK_RIV_SRC,
   size = 60,
   onClick,
 }: OzwellAnimatedButtonProps) {

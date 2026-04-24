@@ -51,8 +51,13 @@ const DEFAULT_WIDGET_URL = `${DEV_SERVER}/embed/ozwell-chat.html`;
 /** Ozwell brand primary color */
 const OZWELL_PRIMARY = '#27aae1';
 
-/** Ozwell icon path (served from Storybook public dir) */
-const OZWELL_ICON_SRC = '/ozwell/icon.svg';
+/**
+ * Inline fallback icon — a lightweight Ozwell "O" circle in brand blue.
+ * The full 900 KB mascot SVG cannot be inlined; this simple glyph is used
+ * when the loader's default /favicon.ico 404s and no custom iconSrc is given.
+ */
+const OZWELL_ICON_FALLBACK =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2327aae1'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' font-family='system-ui,sans-serif' font-weight='700' fill='white'%3EO%3C/text%3E%3C/svg%3E";
 
 /**
  * Theme-aware CSS overrides for the ozwell-loader's default UI.
@@ -122,10 +127,20 @@ const THEME_OVERRIDES_CSS = `
 export type OzwellWidgetProps = OzwellChatProps & {
   /** Render an animated Rive mascot as the chat launcher button */
   animated?: boolean;
-  /** Path to the .riv animation file (default: /ozwell/ozwell2.8.riv) */
+  /**
+   * URL to the .riv animation file. **Required when `animated` is true.**
+   * The asset is not bundled with the library — host it yourself and pass the URL.
+   * @example rivSrc="/assets/ozwell.riv"
+   */
   rivSrc?: OzwellAnimatedButtonProps['rivSrc'];
   /** Size of the animated button in pixels (default: 80) */
   animatedSize?: OzwellAnimatedButtonProps['size'];
+  /**
+   * Custom icon URL for the static (non-animated) chat launcher button.
+   * Used as a fallback when the loader's default icon fails to load.
+   * Defaults to a lightweight inline Ozwell "O" glyph.
+   */
+  iconSrc?: string;
 };
 
 export function OzwellWidget({
@@ -136,6 +151,7 @@ export function OzwellWidget({
   animated = false,
   rivSrc,
   animatedSize,
+  iconSrc = OZWELL_ICON_FALLBACK,
   ...rest
 }: OzwellWidgetProps) {
   // Clean up ozwell-loader DOM artifacts on unmount.
@@ -190,12 +206,12 @@ export function OzwellWidget({
       ) as HTMLImageElement | null;
       if (img && img.tagName === 'IMG') {
         img.onerror = () => {
-          img.src = OZWELL_ICON_SRC;
+          img.src = iconSrc;
           img.onerror = null; // prevent infinite loop
         };
         // If already broken (naturalWidth 0), fix immediately
         if (img.complete && img.naturalWidth === 0) {
-          img.src = OZWELL_ICON_SRC;
+          img.src = iconSrc;
         }
       }
     };
@@ -206,7 +222,7 @@ export function OzwellWidget({
       clearInterval(timer);
       clearTimeout(timeout);
     };
-  }, []);
+  }, [iconSrc]);
 
   // Toggle chat via the global OzwellChat API (used by animated button).
   // The loader exposes open() / close() / isOpen but no toggle().
