@@ -36,6 +36,9 @@ importers:
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
+      '@ozwell/react':
+        specifier: file:./packages/ozwell/packages/react
+        version: file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
@@ -569,6 +572,13 @@ packages:
         optional: true
       wavesurfer.js:
         optional: true
+
+  '@ozwell/react@file:packages/ozwell/packages/react':
+    resolution: {directory: packages/ozwell/packages/react, type: directory}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
 
   '@parcel/watcher-android-arm64@2.5.6':
     resolution: {integrity: sha512-YQxSS34tPF/6ZG7r/Ih9xy+kP/WwediEUsqmtf0cuCV5TPPKw/PQHRhueUo6JdeFJaqV3pyjm0GdYjZotbRt/A==}
@@ -3515,6 +3525,11 @@ snapshots:
       ag-grid-community: 35.1.0
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       wavesurfer.js: 7.12.1
+
+  '@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@parcel/watcher-android-arm64@2.5.6':
     optional: true

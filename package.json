@@ -128,6 +128,16 @@
         "default": "./dist/datavis.cjs"
       }
     },
+    "./ozwell": {
+      "import": {
+        "types": "./dist/ozwell.d.ts",
+        "default": "./dist/ozwell.js"
+      },
+      "require": {
+        "types": "./dist/ozwell.d.cts",
+        "default": "./dist/ozwell.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./init.css": "./dist/styles/init.css"
@@ -162,6 +172,7 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@ozwell/react": ">=0.1.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.1",
@@ -170,6 +181,9 @@
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
+    "@ozwell/react": {
+      "optional": true
+    },
     "ag-grid-community": {
       "optional": true
     },
@@ -200,6 +214,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
+    "@ozwell/react": "file:./packages/ozwell/packages/react",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
     "@storybook/addon-docs": "^10.2.11",
