@@ -89,6 +89,13 @@ const THEME_OVERRIDES_CSS = `
     animation-play-state: paused !important;
   }
 
+  /* --- Accessibility: respect reduced-motion preference --- */
+  @media (prefers-reduced-motion: reduce) {
+    .ozwell-chat-button {
+      animation: none !important;
+    }
+  }
+
   /* --- Unread badge --- */
   .ozwell-unread-badge {
     background: var(--mieweb-destructive, #ef4444) !important;

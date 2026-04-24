@@ -431,7 +431,6 @@ export const WithToolCalling: Story = {
       'Hi! I can help you look up patient info or schedule appointments. Try asking me!',
   },
   render: (args: OzwellWidgetProps) => <ToolCallingDemo {...args} />,
-
 };
 
 // ============================================================================
