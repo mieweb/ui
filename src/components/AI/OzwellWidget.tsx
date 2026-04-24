@@ -362,23 +362,27 @@ export function OzwellWidget({
   // 404s when hosted on a different origin (e.g. Storybook). Replace with the
   // Ozwell brand icon from the design system.
   React.useEffect(() => {
-    const fixIcon = () => {
+    // The button is created asynchronously by the loader script, so poll briefly.
+    // Once the icon element is found and handled, stop polling immediately.
+    const timer = setInterval(() => {
       const img = document.querySelector(
         '#ozwell-chat-button .ozwell-chat-icon'
       ) as HTMLImageElement | null;
-      if (img && img.tagName === 'IMG') {
-        img.onerror = () => {
-          img.src = iconSrc;
-          img.onerror = null; // prevent infinite loop
-        };
-        // If already broken (naturalWidth 0), fix immediately
-        if (img.complete && img.naturalWidth === 0) {
-          img.src = iconSrc;
-        }
+      if (!img || img.tagName !== 'IMG') return;
+
+      // Found the icon — stop polling
+      clearInterval(timer);
+      clearTimeout(timeout);
+
+      img.onerror = () => {
+        img.src = iconSrc;
+        img.onerror = null; // prevent infinite loop
+      };
+      // If already broken (naturalWidth 0), fix immediately
+      if (img.complete && img.naturalWidth === 0) {
+        img.src = iconSrc;
       }
-    };
-    // The button is created asynchronously by the loader script, so poll briefly
-    const timer = setInterval(fixIcon, 200);
+    }, 200);
     const timeout = setTimeout(() => clearInterval(timer), 5000);
     return () => {
       clearInterval(timer);
