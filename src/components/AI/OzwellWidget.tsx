@@ -202,6 +202,7 @@ function buildIframeThemeCSS(): string {
       color: ${fg} !important;
     }
     .message.welcome {
+      background: ${card} !important;
       color: ${mutedFg} !important;
       border-color: ${border} !important;
     }

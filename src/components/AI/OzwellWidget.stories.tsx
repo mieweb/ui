@@ -88,6 +88,17 @@ const meta: Meta<typeof OzwellWidget> = {
       control: 'text',
       description: 'Input field placeholder text.',
     },
+    iconSrc: {
+      control: 'text',
+      description:
+        'Custom icon URL for the static chat launcher button. Defaults to an inline Ozwell glyph.',
+    },
+  },
+  args: {
+    // In Storybook the full mascot SVG is available via staticDirs.
+    // Consumer apps should either host icon.svg themselves or rely on
+    // the built-in inline "O" glyph fallback.
+    iconSrc: '/ozwell/icon.svg',
   },
 };
 
