@@ -68,6 +68,10 @@ export interface AudioPlayerProps extends VariantProps<
   playbackRates?: number[];
   /** Whether to show playback speed control */
   showPlaybackRate?: boolean;
+  /** Whether to preload audio (set to false for lists with many items) */
+  preload?: boolean;
+  /** Fallback duration in seconds to display before audio metadata is loaded */
+  fallbackDuration?: number;
 }
 
 // ============================================================================
@@ -296,7 +300,7 @@ interface WaveformProps {
   isPlaying: boolean;
   playbackRate?: number;
   onReady: (duration: number) => void;
-  onTimeUpdate: (time: number) => void;
+  onTimeUpdate: (time: number, duration: number) => void;
   onFinish: () => void;
   onSeek: (time: number) => void;
   waveColor?: string;
@@ -398,15 +402,23 @@ function Waveform({
 
         wavesurferRef.current.on('ready', () => {
           setIsLoaded(true);
-          onReady(wavesurferRef.current.getDuration());
+          const duration = wavesurferRef.current.getDuration();
+          onReady(duration);
+          onTimeUpdate(wavesurferRef.current.getCurrentTime(), duration);
         });
 
         wavesurferRef.current.on('audioprocess', () => {
-          onTimeUpdate(wavesurferRef.current.getCurrentTime());
+          onTimeUpdate(
+            wavesurferRef.current.getCurrentTime(),
+            wavesurferRef.current.getDuration()
+          );
         });
 
         wavesurferRef.current.on('seeking', () => {
-          onTimeUpdate(wavesurferRef.current.getCurrentTime());
+          onTimeUpdate(
+            wavesurferRef.current.getCurrentTime(),
+            wavesurferRef.current.getDuration()
+          );
         });
 
         if (!showHoverCursor) {
@@ -487,8 +499,11 @@ function Waveform({
         const rect = containerRef.current.getBoundingClientRect();
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         const percentage = x / rect.width;
+        const duration = wavesurferRef.current.getDuration();
+        const time = duration * percentage;
         wavesurferRef.current.seekTo(percentage);
-        onSeek(wavesurferRef.current.getDuration() * percentage);
+        onSeek(time);
+        onTimeUpdate(time, duration);
         onHoverTimeChange?.(null);
       }
     : undefined;
@@ -505,11 +520,13 @@ function Waveform({
           const newTime = Math.min(currentTime + step, duration);
           wavesurferRef.current.seekTo(newTime / duration);
           onSeek(newTime);
+          onTimeUpdate(newTime, duration);
         } else if (e.key === 'ArrowLeft') {
           e.preventDefault();
           const newTime = Math.max(currentTime - step, 0);
           wavesurferRef.current.seekTo(newTime / duration);
           onSeek(newTime);
+          onTimeUpdate(newTime, duration);
         }
       }
     : undefined;
@@ -579,10 +596,7 @@ function Waveform({
  * // Then: playerRef.current?.seekTo(30); playerRef.current?.play();
  * ```
  */
-const AudioPlayer = React.forwardRef<
-  AudioPlayerRef,
-  AudioPlayerProps & { preload?: boolean; fallbackDuration?: number }
->(function AudioPlayer(
+const AudioPlayer = React.forwardRef<AudioPlayerRef, AudioPlayerProps>(function AudioPlayer(
   {
     src,
     title,
@@ -623,6 +637,7 @@ const AudioPlayer = React.forwardRef<
 
   const isPlaying = state === 'playing';
   const isLoading = state === 'loading';
+  const displayDuration = duration > 0 ? duration : (fallbackDuration ?? 0);
 
   // Update state helper
   const updateState = React.useCallback(
@@ -647,6 +662,7 @@ const AudioPlayer = React.forwardRef<
     });
     audio.addEventListener('loadedmetadata', () => {
       setDuration(audio.duration);
+      onTimeUpdate?.(audio.currentTime, audio.duration);
     });
     audio.addEventListener('timeupdate', () => {
       setCurrentTime(audio.currentTime);
@@ -822,25 +838,36 @@ const AudioPlayer = React.forwardRef<
     onError,
   ]);
 
-  const handleSeek = React.useCallback((time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  }, []);
+  const handleSeek = React.useCallback(
+    (time: number) => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = time;
+        setCurrentTime(time);
+        onTimeUpdate?.(time, audioRef.current.duration);
+      }
+    },
+    [onTimeUpdate]
+  );
 
   // Waveform callbacks
-  const handleWaveformReady = React.useCallback((dur: number) => {
-    setDuration(dur);
-    setState('idle');
-  }, []);
+  const handleWaveformReady = React.useCallback(
+    (dur: number) => {
+      setDuration(dur);
+      setState('idle');
+      onTimeUpdate?.(currentTime, dur);
+    },
+    [currentTime, onTimeUpdate]
+  );
 
   const handleWaveformTimeUpdate = React.useCallback(
-    (time: number) => {
+    (time: number, dur: number) => {
       setCurrentTime(time);
-      onTimeUpdate?.(time, duration);
+      if (dur > 0) {
+        setDuration(dur);
+      }
+      onTimeUpdate?.(time, dur);
     },
-    [duration, onTimeUpdate]
+    [onTimeUpdate]
   );
 
   const handleWaveformFinish = React.useCallback(() => {
@@ -901,7 +928,7 @@ const AudioPlayer = React.forwardRef<
             : 'text-neutral-500 dark:text-neutral-400'
         )}
       >
-        {formatTime(displayTime)} / {formatTime(duration)}
+        {formatTime(displayTime)} / {formatTime(displayDuration)}
       </span>
     );
   };
@@ -929,7 +956,6 @@ const AudioPlayer = React.forwardRef<
   // Inline Variant
   // ============================================================================
   if (variant === 'inline') {
-    const displayDuration = duration > 0 ? duration : (fallbackDuration ?? 0);
     return (
       <div
         ref={containerRef}
@@ -971,7 +997,7 @@ const AudioPlayer = React.forwardRef<
         {renderPlayButton()}
         <ProgressBar
           currentTime={currentTime}
-          duration={duration}
+          duration={displayDuration}
           onSeek={handleSeek}
           disabled={disabled}
         />
