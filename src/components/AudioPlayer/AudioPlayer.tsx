@@ -400,6 +400,13 @@ function Waveform({
           interact: !showHoverCursor,
         });
 
+        const emitTimeUpdate = () => {
+          onTimeUpdate(
+            wavesurferRef.current.getCurrentTime(),
+            wavesurferRef.current.getDuration()
+          );
+        };
+
         wavesurferRef.current.on('ready', () => {
           setIsLoaded(true);
           const duration = wavesurferRef.current.getDuration();
@@ -407,18 +414,11 @@ function Waveform({
           onTimeUpdate(wavesurferRef.current.getCurrentTime(), duration);
         });
 
-        wavesurferRef.current.on('audioprocess', () => {
-          onTimeUpdate(
-            wavesurferRef.current.getCurrentTime(),
-            wavesurferRef.current.getDuration()
-          );
-        });
+        wavesurferRef.current.on('timeupdate', emitTimeUpdate);
+        wavesurferRef.current.on('audioprocess', emitTimeUpdate);
 
         wavesurferRef.current.on('seeking', () => {
-          onTimeUpdate(
-            wavesurferRef.current.getCurrentTime(),
-            wavesurferRef.current.getDuration()
-          );
+          emitTimeUpdate();
         });
 
         if (!showHoverCursor) {
