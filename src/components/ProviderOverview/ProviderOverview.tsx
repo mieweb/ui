@@ -223,9 +223,7 @@ export function ProviderOverview({
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             {providerName}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Dashboard Overview
-          </p>
+          <p className="text-muted-foreground text-sm">Dashboard Overview</p>
         </div>
       </div>
 
@@ -409,11 +407,11 @@ export function ProviderOverview({
                         )}
                       </div>
                       {activity.description && (
-                        <p className="truncate text-sm text-muted-foreground">
+                        <p className="text-muted-foreground truncate text-sm">
                           {activity.description}
                         </p>
                       )}
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="text-muted-foreground mt-0.5 text-xs">
                         {formatTime(activity.timestamp)}
                       </p>
                     </div>
@@ -462,7 +460,7 @@ function StatCard({ label, value, icon, color, onClick }: StatCardProps) {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {value}
           </p>
-          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-muted-foreground text-xs">{label}</p>
         </div>
       </div>
     </div>

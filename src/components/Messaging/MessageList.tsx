@@ -190,9 +190,7 @@ function TypingIndicator({ typingState, className }: TypingIndicatorProps) {
           style={{ animationDelay: '300ms' }}
         />
       </div>
-      <span className="text-xs text-muted-foreground">
-        {typingText}
-      </span>
+      <span className="text-muted-foreground text-xs">{typingText}</span>
     </div>
   );
 }
@@ -293,7 +291,7 @@ function EmptyState({
       <h3 className="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
         {title}
       </h3>
-      <p className="mb-4 max-w-sm text-sm text-muted-foreground">
+      <p className="text-muted-foreground mb-4 max-w-sm text-sm">
         {description}
       </p>
       {action}

@@ -362,7 +362,7 @@ export function SidebarNavGroup({
         {icon && (
           <span
             className={cn(
-              'h-5 w-5 flex-shrink-0 text-muted-foreground',
+              'text-muted-foreground h-5 w-5 flex-shrink-0',
               !showCollapsed && 'mr-3'
             )}
           >
@@ -547,7 +547,7 @@ export function SidebarToggle({
     <button
       onClick={toggleCollapsed}
       className={cn(
-        'rounded-lg p-2 text-muted-foreground',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
@@ -593,7 +593,7 @@ export function SidebarMobileToggle({
     <button
       onClick={openMobile}
       className={cn(
-        'rounded-lg p-2 text-muted-foreground',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className

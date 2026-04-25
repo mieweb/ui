@@ -397,7 +397,7 @@ export const Default: Story = {
                               <p className="text-sm font-medium text-gray-900 dark:text-white">
                                 John Doe
                               </p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-muted-foreground text-sm">
                                 john@example.com
                               </p>
                             </div>
@@ -500,7 +500,7 @@ export const Default: Story = {
                     <div className="font-medium text-gray-900 dark:text-white">
                       John Doe
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       john@example.com
                     </div>
                   </div>

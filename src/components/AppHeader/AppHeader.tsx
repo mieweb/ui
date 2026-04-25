@@ -135,9 +135,7 @@ export function AppHeaderTitle({
         {children}
       </h1>
       {subtitle && (
-        <p className="truncate text-sm text-muted-foreground">
-          {subtitle}
-        </p>
+        <p className="text-muted-foreground truncate text-sm">{subtitle}</p>
       )}
     </div>
   );
@@ -415,7 +413,7 @@ export function AppHeaderUserMenu({
         {email && (
           <div
             data-slot="app-header-user-email"
-            className="max-w-[150px] truncate text-xs text-muted-foreground"
+            className="text-muted-foreground max-w-[150px] truncate text-xs"
           >
             {email}
           </div>

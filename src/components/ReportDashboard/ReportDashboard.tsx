@@ -177,9 +177,7 @@ export function ReportDashboard({
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {title}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {dateRangeLabel}
-          </p>
+          <p className="text-muted-foreground text-sm">{dateRangeLabel}</p>
         </div>
         <div className="flex items-center gap-3">
           <Select
@@ -230,9 +228,7 @@ export function ReportDashboard({
         {metrics.map((metric, index) => (
           <Card key={index}>
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">
-                {metric.label}
-              </p>
+              <p className="text-muted-foreground text-sm">{metric.label}</p>
               <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                 {typeof metric.value === 'number'
                   ? metric.label.toLowerCase().includes('revenue') ||
@@ -291,7 +287,7 @@ export function ReportDashboard({
                         title={`Current: ${point.value}`}
                       />
                     </div>
-                    <span className="w-full truncate text-center text-xs text-muted-foreground">
+                    <span className="text-muted-foreground w-full truncate text-center text-xs">
                       {point.label}
                     </span>
                   </div>

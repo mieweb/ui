@@ -167,7 +167,7 @@ export function OrderConfirmationWizard({
                   {order.orderNumber}
                 </p>
                 <p
-                  className="text-sm text-muted-foreground"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-summary-subtitle"
                 >
                   {order.serviceName}
@@ -193,7 +193,7 @@ export function OrderConfirmationWizard({
                   Verify Employee Identity
                 </h3>
                 <p
-                  className="text-sm text-muted-foreground"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-step-desc"
                 >
                   Please verify the following information matches the employee
@@ -205,7 +205,7 @@ export function OrderConfirmationWizard({
                   data-slot="ocw-detail-grid"
                 >
                   <div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       Employee Name
                     </p>
                     <p className="font-medium text-gray-900 dark:text-white">
@@ -213,7 +213,7 @@ export function OrderConfirmationWizard({
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       Date of Birth
                     </p>
                     <p className="font-medium text-gray-900 dark:text-white">
@@ -221,17 +221,13 @@ export function OrderConfirmationWizard({
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">
-                      Employer
-                    </p>
+                    <p className="text-muted-foreground text-xs">Employer</p>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {order.employerName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">
-                      Scheduled
-                    </p>
+                    <p className="text-muted-foreground text-xs">Scheduled</p>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {formatDate(order.scheduledDate)}
                     </p>
@@ -289,7 +285,7 @@ export function OrderConfirmationWizard({
                   Consent & ID Verification
                 </h3>
                 <p
-                  className="text-sm text-muted-foreground"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-step-desc"
                 >
                   Obtain consent and verify government-issued identification.
@@ -315,7 +311,7 @@ export function OrderConfirmationWizard({
                       Consent Obtained
                     </p>
                     <p
-                      className="text-sm text-muted-foreground"
+                      className="text-muted-foreground text-sm"
                       data-slot="ocw-checkbox-card-desc"
                     >
                       Employee has provided written or verbal consent for the
@@ -343,7 +339,7 @@ export function OrderConfirmationWizard({
                       Photo ID Verified
                     </p>
                     <p
-                      className="mb-2 text-sm text-muted-foreground"
+                      className="text-muted-foreground mb-2 text-sm"
                       data-slot="ocw-checkbox-card-desc"
                     >
                       Government-issued photo ID matches employee information
@@ -371,7 +367,7 @@ export function OrderConfirmationWizard({
                   Review & Confirm
                 </h3>
                 <p
-                  className="text-sm text-muted-foreground"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-step-desc"
                 >
                   Review the verification steps before proceeding.

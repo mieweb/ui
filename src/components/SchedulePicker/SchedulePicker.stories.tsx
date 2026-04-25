@@ -74,7 +74,7 @@ function SchedulePickerWithState(
         onTimeSelect={setSelectedTime}
       />
       <div className="mt-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Selected:{' '}
           {selectedDate
             ? selectedDate.toLocaleDateString('en-US', {
@@ -308,7 +308,7 @@ export const RadioOptions: Story = {
         selected
       >
         <div className="mt-4 rounded bg-neutral-100 p-2 dark:bg-neutral-800">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Additional content shown when selected
           </p>
         </div>
@@ -357,7 +357,7 @@ function CompleteFlowDemo() {
         <h4 className="font-medium text-neutral-900 dark:text-white">
           Selection Summary
         </h4>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           {mode === 'walk-in'
             ? 'Walk-in appointment - no reservation needed'
             : selectedDate

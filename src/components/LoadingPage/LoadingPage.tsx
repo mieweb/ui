@@ -146,7 +146,7 @@ export function LoadingBar({
       </div>
       {showPercentage && !isIndeterminate && (
         <p
-          className="mt-1 text-right text-sm text-muted-foreground"
+          className="text-muted-foreground mt-1 text-right text-sm"
           data-slot="loading-bar-percentage"
         >
           {Math.round(progress)}%
@@ -222,7 +222,7 @@ export function LoadingPage({
           )}
           {subMessage && (
             <p
-              className="text-sm text-muted-foreground"
+              className="text-muted-foreground text-sm"
               data-slot="loading-page-submessage"
             >
               {subMessage}

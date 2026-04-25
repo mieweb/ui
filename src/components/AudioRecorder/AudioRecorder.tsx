@@ -291,7 +291,7 @@ function RecordingIndicator({
         )}
         aria-hidden="true"
       />
-      <span className="text-sm font-medium text-muted-foreground">
+      <span className="text-muted-foreground text-sm font-medium">
         {isPaused ? 'Paused' : 'Recording'}
       </span>
     </div>
@@ -317,7 +317,7 @@ function TimeDisplay({
 }: TimeDisplayProps) {
   return (
     <div
-      className="flex items-center gap-1 font-mono text-sm text-muted-foreground"
+      className="text-muted-foreground flex items-center gap-1 font-mono text-sm"
       data-slot="audio-recorder-time"
     >
       <span>{formatTime(currentTime)}</span>

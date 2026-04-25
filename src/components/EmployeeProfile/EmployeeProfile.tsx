@@ -204,7 +204,7 @@ export function EmployeeProfileCard({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-primary-800 text-white hover:bg-primary-900 absolute right-0 bottom-0 rounded-full p-1.5 shadow-md transition-colors"
+                className="bg-primary-800 hover:bg-primary-900 absolute right-0 bottom-0 rounded-full p-1.5 text-white shadow-md transition-colors"
                 aria-label="Edit photo"
                 data-slot="employee-card-photo-edit"
               >

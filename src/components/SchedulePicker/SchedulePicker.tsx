@@ -49,7 +49,7 @@ const DateButton = React.forwardRef<HTMLButtonElement, DateButtonProps>(
       >
         <div
           data-slot="schedule-date-weekday"
-          className="text-xs text-muted-foreground"
+          className="text-muted-foreground text-xs"
         >
           {date.toLocaleDateString('en-US', { weekday: 'short' })}
         </div>
@@ -61,7 +61,7 @@ const DateButton = React.forwardRef<HTMLButtonElement, DateButtonProps>(
         </div>
         <div
           data-slot="schedule-date-month"
-          className="text-xs text-muted-foreground"
+          className="text-muted-foreground text-xs"
         >
           {date.toLocaleDateString('en-US', { month: 'short' })}
         </div>
@@ -210,7 +210,7 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
             {description && (
               <div
                 data-slot="schedule-radio-desc"
-                className="text-sm text-muted-foreground"
+                className="text-muted-foreground text-sm"
               >
                 {description}
               </div>

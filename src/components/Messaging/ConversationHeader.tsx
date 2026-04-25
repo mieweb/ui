@@ -391,7 +391,7 @@ const ConversationListItem = React.forwardRef<
             {title}
           </h3>
           {lastMessage && (
-            <span className="shrink-0 text-xs text-muted-foreground">
+            <span className="text-muted-foreground shrink-0 text-xs">
               {formatTime(lastMessage.timestamp)}
             </span>
           )}

@@ -162,7 +162,7 @@ export function InvoicePaymentPage({
         >
           <CardContent className="py-12">
             <svg
-              className="mx-auto mb-4 h-16 w-16 text-muted-foreground dark:text-muted-foreground"
+              className="text-muted-foreground dark:text-muted-foreground mx-auto mb-4 h-16 w-16"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -219,11 +219,11 @@ export function InvoicePaymentPage({
             <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Payment Successful
             </h2>
-            <p className="mb-4 text-muted-foreground">
+            <p className="text-muted-foreground mb-4">
               {successMessage ||
                 'Thank you! Your payment has been processed successfully.'}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Invoice {invoice.invoiceNumber}
             </p>
           </CardContent>
@@ -272,7 +272,7 @@ export function InvoicePaymentPage({
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-1 text-sm text-muted-foreground">
+                <div className="text-muted-foreground space-y-1 text-sm">
                   <p>Issued: {formatDate(invoice.issuedDate)}</p>
                   <p
                     className={
@@ -315,16 +315,12 @@ export function InvoicePaymentPage({
                   className="space-y-2 border-t border-gray-200 pt-4 dark:border-gray-700"
                 >
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      Subtotal
-                    </span>
+                    <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatCurrency(invoice.subtotal)}</span>
                   </div>
                   {invoice.tax !== undefined && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Tax
-                      </span>
+                      <span className="text-muted-foreground">Tax</span>
                       <span>{formatCurrency(invoice.tax)}</span>
                     </div>
                   )}
@@ -490,7 +486,7 @@ export function InvoicePaymentPage({
                   </Button>
 
                   {showStripeBranding && (
-                    <p className="text-center text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-center text-xs">
                       Secured by Stripe
                     </p>
                   )}

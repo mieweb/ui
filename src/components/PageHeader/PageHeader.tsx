@@ -65,7 +65,7 @@ export function PageHeader({
           {icon && (
             <div
               data-slot="page-header-icon"
-              className={`flex-shrink-0 text-muted-foreground ${iconAlign === 'top' ? 'mt-1' : ''}`}
+              className={`text-muted-foreground flex-shrink-0 ${iconAlign === 'top' ? 'mt-1' : ''}`}
             >
               {icon}
             </div>
@@ -80,7 +80,7 @@ export function PageHeader({
             {subtitle && (
               <p
                 data-slot="page-header-subtitle"
-                className="mt-1 truncate text-sm text-muted-foreground"
+                className="text-muted-foreground mt-1 truncate text-sm"
               >
                 {subtitle}
               </p>

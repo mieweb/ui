@@ -463,7 +463,7 @@ export function AddContactModal({
 
               {(!formData.customFields ||
                 formData.customFields.length === 0) && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   No custom fields added. Click &quot;Add Field&quot; to add
                   custom information.
                 </p>

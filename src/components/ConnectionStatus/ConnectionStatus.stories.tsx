@@ -124,9 +124,7 @@ function InteractiveDemo() {
           Connection Status Demo
         </h3>
         <div className="mb-4 flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            Status:
-          </span>
+          <span className="text-muted-foreground text-sm">Status:</span>
           <ConnectionStatusBadge status={connection.status} />
         </div>
         <label className="flex items-center gap-2">

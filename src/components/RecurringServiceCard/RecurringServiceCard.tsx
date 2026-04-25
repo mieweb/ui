@@ -461,7 +461,7 @@ export function RecurringServiceSetupModal({
         data-slot="recurring-service-modal"
       >
         {/* Header */}
-        <div className="bg-primary-800 text-white flex items-center justify-between p-4">
+        <div className="bg-primary-800 flex items-center justify-between p-4 text-white">
           <h4 className="text-lg font-semibold">{title}</h4>
           <button
             type="button"
@@ -573,7 +573,7 @@ export function RecurringServiceSetupModal({
             <button
               type="submit"
               disabled={saving}
-              className="bg-primary-800 text-white hover:bg-primary-900 disabled:bg-muted disabled:text-muted-foreground rounded-lg px-4 py-2 transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 disabled:bg-muted disabled:text-muted-foreground rounded-lg px-4 py-2 text-white transition-colors"
             >
               {saving ? (
                 <span className="flex items-center gap-2">

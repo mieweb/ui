@@ -524,7 +524,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {showSenderName && !isOutgoing && (
             <span
               data-slot="message-sender-name"
-              className="mb-1 px-1 text-xs font-medium text-muted-foreground"
+              className="text-muted-foreground mb-1 px-1 text-xs font-medium"
             >
               {message.sender.name}
             </span>
@@ -594,7 +594,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
             )}
           >
             {showTimestamp && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {formatTimestamp(message.timestamp)}
               </span>
             )}

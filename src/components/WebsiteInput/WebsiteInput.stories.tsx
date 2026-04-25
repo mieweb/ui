@@ -205,7 +205,7 @@ function MinMaxEntriesDemo() {
         minEntries={2}
         maxEntries={4}
       />
-      <p className="mt-2 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-2 text-sm">
         Minimum 2 entries required, maximum 4 allowed.
       </p>
     </div>

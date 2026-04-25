@@ -160,7 +160,7 @@ export function ServiceShippingSettings({
           />
         </div>
         <p
-          className="text-sm text-muted-foreground"
+          className="text-muted-foreground text-sm"
           data-slot="shipping-settings-description"
         >
           Configure how kits and materials are shipped
@@ -195,7 +195,7 @@ export function ServiceShippingSettings({
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Use Kit Shipping
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Send collection kits to patients
               </p>
             </div>

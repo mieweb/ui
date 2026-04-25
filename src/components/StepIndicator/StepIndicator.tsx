@@ -181,16 +181,13 @@ export function StepIndicator({
       >
         {step.label}
         {step.optional && (
-          <span className="font-normal text-muted-foreground">
-            {' '}
-            (optional)
-          </span>
+          <span className="text-muted-foreground font-normal"> (optional)</span>
         )}
       </p>
       {step.description && (
         <p
           data-slot="step-indicator-description"
-          className="mt-0.5 text-muted-foreground"
+          className="text-muted-foreground mt-0.5"
         >
           {step.description}
         </p>

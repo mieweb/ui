@@ -315,7 +315,7 @@ export function AuthDialog({
           {mode === 'verify' && (
             <div className="py-4 text-center">
               <MailIcon className="text-primary-800 dark:text-primary-300 mx-auto mb-4 h-12 w-12" />
-              <p className="mb-4 text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 We&apos;ve sent a verification email to your inbox. Please click
                 the link to verify your account.
               </p>
@@ -359,7 +359,7 @@ export function AuthDialog({
 
           {/* Mode Toggle */}
           {(mode === 'login' || mode === 'signup') && (
-            <p className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-6 text-center text-sm">
               {mode === 'login' ? (
                 <>
                   Don&apos;t have an account?{' '}
@@ -476,7 +476,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
             type="checkbox"
             className="text-primary-600 focus:ring-primary-500 rounded border-gray-300"
           />
-          <span className="ml-2 text-sm text-muted-foreground">
+          <span className="text-muted-foreground ml-2 text-sm">
             Remember me
           </span>
         </label>
@@ -612,7 +612,7 @@ function SignupForm({
           required
           className="text-primary-600 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
         />
-        <span className="ml-2 text-sm text-muted-foreground">
+        <span className="text-muted-foreground ml-2 text-sm">
           I agree to the{' '}
           <a
             href={termsUrl}
@@ -664,7 +664,7 @@ function ForgotPasswordForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Enter your email address and we&apos;ll send you a link to reset your
         password.
       </p>

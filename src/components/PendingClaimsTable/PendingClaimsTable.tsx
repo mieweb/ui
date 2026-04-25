@@ -83,7 +83,7 @@ export function PendingClaimsTable({
         className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
-          className="mx-auto mb-3 h-12 w-12 text-muted-foreground dark:text-muted-foreground"
+          className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -95,10 +95,7 @@ export function PendingClaimsTable({
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p
-          data-slot="pending-claims-empty"
-          className="text-muted-foreground"
-        >
+        <p data-slot="pending-claims-empty" className="text-muted-foreground">
           {emptyMessage}
         </p>
       </div>
@@ -146,7 +143,7 @@ export function PendingClaimsTable({
                       <p className="font-medium text-gray-900 dark:text-white">
                         {claim.claimantName}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {claim.claimantEmail}
                       </p>
                     </div>
@@ -158,7 +155,7 @@ export function PendingClaimsTable({
                   </p>
                 </td>
                 <td className="px-4 py-4">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {formatDate(claim.submittedDate)}
                   </p>
                 </td>
@@ -227,7 +224,7 @@ export function PendingClaimsTable({
                   <p className="font-medium text-gray-900 dark:text-white">
                     {claim.claimantName}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {claim.claimantEmail}
                   </p>
                 </div>
@@ -237,7 +234,7 @@ export function PendingClaimsTable({
               </Badge>
             </div>
             <div className="mt-3 flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 <span>{claim.claimantRole || 'No role'}</span>
                 <span className="mx-2">•</span>
                 <span>{formatDate(claim.submittedDate)}</span>

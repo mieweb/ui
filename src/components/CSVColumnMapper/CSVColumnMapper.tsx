@@ -109,7 +109,7 @@ export function CSVColumnMapper({
             data-slot="csv-mapper-progress"
             className="bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl"
           >
-            <div className="bg-primary-800 text-white p-4">
+            <div className="bg-primary-800 p-4 text-white">
               <h4 className="text-lg font-semibold">Processing Employees</h4>
             </div>
             <div className="p-6">
@@ -527,7 +527,7 @@ export function CSVFileUpload({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="bg-primary-800 text-white hover:bg-primary-900 rounded-lg px-6 py-3"
+            className="bg-primary-800 hover:bg-primary-900 rounded-lg px-6 py-3 text-white"
           >
             {selectButton}
           </button>

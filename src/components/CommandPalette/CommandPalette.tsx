@@ -371,7 +371,7 @@ export function CommandPalette({
             {filteredItems.length === 0 ? (
               <div
                 data-slot="command-palette-empty"
-                className="p-8 text-center text-muted-foreground"
+                className="text-muted-foreground p-8 text-center"
               >
                 {emptyState ?? (
                   <>
@@ -482,12 +482,12 @@ export function CommandPalette({
                                 {item.label}
                               </div>
                               {item.subtitle && (
-                                <div className="truncate text-xs text-muted-foreground">
+                                <div className="text-muted-foreground truncate text-xs">
                                   {item.subtitle}
                                 </div>
                               )}
                               {item.description && (
-                                <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                                <div className="text-muted-foreground mt-0.5 truncate text-xs">
                                   {item.description}
                                 </div>
                               )}

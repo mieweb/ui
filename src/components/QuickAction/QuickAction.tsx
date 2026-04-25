@@ -134,7 +134,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
           </div>
           <div
             data-slot="quick-action-subtitle"
-            className="text-xs text-muted-foreground"
+            className="text-muted-foreground text-xs"
           >
             {subtitle}
           </div>

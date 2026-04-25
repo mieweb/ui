@@ -413,7 +413,7 @@ function ControlledDemo() {
       <button
         type="button"
         onClick={() => setValue('')}
-        className="bg-primary-800 text-white hover:bg-primary-900 rounded px-3 py-1.5 text-sm"
+        className="bg-primary-800 hover:bg-primary-900 rounded px-3 py-1.5 text-sm text-white"
       >
         Reset
       </button>

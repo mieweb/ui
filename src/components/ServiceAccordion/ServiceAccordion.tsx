@@ -204,7 +204,7 @@ export function ServiceLink({
       <LinkIcon className="flex-shrink-0 text-neutral-400" />
       <span className="flex-grow">{service.name}</span>
       {service.providerCount !== undefined && (
-        <span className="ml-2 text-xs text-muted-foreground">
+        <span className="text-muted-foreground ml-2 text-xs">
           ({service.providerCount})
         </span>
       )}
@@ -557,7 +557,7 @@ export function ServiceTagCloud({
         </a>
       ))}
       {hasMore && (
-        <span className="inline-flex items-center px-3 py-1.5 text-sm text-muted-foreground">
+        <span className="text-muted-foreground inline-flex items-center px-3 py-1.5 text-sm">
           +{services.length - (maxItems || 0)} more
         </span>
       )}

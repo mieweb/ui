@@ -128,9 +128,7 @@ export function OrderSidebar({
               Order Details
             </h2>
             {orderId && (
-              <p className="text-sm text-muted-foreground">
-                #{orderId}
-              </p>
+              <p className="text-muted-foreground text-sm">#{orderId}</p>
             )}
           </div>
           <button

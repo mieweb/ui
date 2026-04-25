@@ -285,9 +285,7 @@ export function FooterLinkSection({
         data-slot="site-footer-link-title"
         className={cn(
           'mb-4 text-sm font-semibold tracking-wider uppercase',
-          variant === 'light'
-            ? 'text-white/70'
-            : 'text-muted-foreground'
+          variant === 'light' ? 'text-white/70' : 'text-muted-foreground'
         )}
       >
         {group.title}
@@ -340,9 +338,7 @@ export function CopyrightText({
       data-slot="site-footer-copyright"
       className={cn(
         'text-sm',
-        variant === 'light'
-          ? 'text-white/60'
-          : 'text-muted-foreground',
+        variant === 'light' ? 'text-white/60' : 'text-muted-foreground',
         className
       )}
     >
@@ -437,9 +433,7 @@ export function DisclaimerText({
       data-slot="site-footer-disclaimer"
       className={cn(
         'text-xs leading-relaxed',
-        variant === 'light'
-          ? 'text-white/50'
-          : 'text-muted-foreground',
+        variant === 'light' ? 'text-white/50' : 'text-muted-foreground',
         className
       )}
     >

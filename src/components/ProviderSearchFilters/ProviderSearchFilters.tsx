@@ -420,8 +420,7 @@ export function ServiceMultiSelect({
           className={cn(
             selectVariants(),
             'w-full text-left',
-            !selectedServices.length &&
-              'text-muted-foreground',
+            !selectedServices.length && 'text-muted-foreground',
             disabled && 'cursor-not-allowed opacity-50'
           )}
         >
@@ -516,7 +515,7 @@ export function ServiceMultiSelect({
               )
             )
           ) : (
-            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground px-3 py-4 text-center text-sm">
               No services found
             </div>
           )}
@@ -940,9 +939,7 @@ export function ActiveFilters({
       className={cn('flex flex-wrap items-center gap-2', className)}
       data-slot="provider-active-filters"
     >
-      <span className="text-sm text-muted-foreground">
-        Active filters:
-      </span>
+      <span className="text-muted-foreground text-sm">Active filters:</span>
       {activeFilters.map((filter) => (
         <span
           key={filter.key}

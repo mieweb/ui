@@ -367,7 +367,7 @@ function TimeRangeDisplay({ range, use24Hour = false }: TimeRangeDisplayProps) {
         'Hours vary'
       )}
       {range.description && (
-        <span className="mt-0.5 block text-xs text-muted-foreground">
+        <span className="text-muted-foreground mt-0.5 block text-xs">
           {range.description}
         </span>
       )}
@@ -595,7 +595,7 @@ export function BusinessHours({
         {schedule.timezone && (
           <p
             data-slot="business-hours-timezone"
-            className="mt-3 text-xs text-muted-foreground"
+            className="text-muted-foreground mt-3 text-xs"
           >
             All times are in {schedule.timezone}
           </p>

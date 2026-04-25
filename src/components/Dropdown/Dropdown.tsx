@@ -523,7 +523,7 @@ function Dropdown({
                   filteredChildren
                 ) : (
                   <div
-                    className="px-3 py-4 text-center text-sm text-muted-foreground"
+                    className="text-muted-foreground px-3 py-4 text-center text-sm"
                     data-slot="dropdown-empty"
                   >
                     {searchEmptyState}
@@ -596,7 +596,7 @@ const DropdownHeader = React.forwardRef<HTMLDivElement, DropdownHeaderProps>(
             </p>
             {subtitle && (
               <p
-                className="truncate text-xs text-muted-foreground"
+                className="text-muted-foreground truncate text-xs"
                 data-slot="dropdown-header-subtitle"
               >
                 {subtitle}

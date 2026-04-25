@@ -139,12 +139,12 @@ export function ConnectionStatusOverlay({
           {/* Content */}
           <div data-slot="connection-overlay-content" className="flex-1">
             <p className="text-gray-700 dark:text-gray-300">{displayMessage}</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-sm">
               Please check your internet connection.
             </p>
             {connection.retryCount !== undefined &&
               connection.retryCount > 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   Retry attempt #{connection.retryCount}
                   {retryTimeFormatted && ` • Retrying ${retryTimeFormatted}`}
                 </p>
@@ -245,7 +245,7 @@ export function UpdateAvailableOverlay({
             <p className="font-semibold text-gray-900 dark:text-white">
               Update Available
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-sm">
               There is an update available for {appName}.
               {update.version && ` Version ${update.version}`}
             </p>

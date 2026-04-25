@@ -258,7 +258,7 @@ export function NotificationCenter({
           className="py-12 text-center"
         >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-muted-foreground dark:text-muted-foreground"
+            className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -355,14 +355,14 @@ export function NotificationCenter({
                       )}
                     </div>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-0.5 line-clamp-2 text-sm">
                     {notification.message}
                   </p>
                   <div
                     data-slot="notification-center-meta"
                     className="mt-2 flex items-center justify-between"
                   >
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {formatTimestamp(notification.timestamp)}
                     </span>
                     <div className="flex items-center gap-2">

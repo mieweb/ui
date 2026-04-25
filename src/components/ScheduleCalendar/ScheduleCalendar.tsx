@@ -273,7 +273,7 @@ export function ScheduleCalendar({
                       : ''
                   }`}
                 >
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {date.toLocaleDateString('en-US', { weekday: 'short' })}
                   </p>
                   <p
@@ -300,7 +300,7 @@ export function ScheduleCalendar({
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="h-16 pr-2 text-right text-xs text-muted-foreground"
+                  className="text-muted-foreground h-16 pr-2 text-right text-xs"
                 >
                   {new Date(2000, 0, 1, hour).toLocaleTimeString('en-US', {
                     hour: 'numeric',

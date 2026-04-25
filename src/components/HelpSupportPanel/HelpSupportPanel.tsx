@@ -148,7 +148,7 @@ export function HelpSupportPanel({
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Help & Support
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Find answers or get in touch with our support team
           </p>
         </div>
@@ -215,7 +215,7 @@ export function HelpSupportPanel({
 
                 {/* FAQ List */}
                 {filteredFaqs.length === 0 ? (
-                  <p className="py-4 text-center text-muted-foreground">
+                  <p className="text-muted-foreground py-4 text-center">
                     No FAQs match your search
                   </p>
                 ) : (
@@ -396,7 +396,7 @@ export function HelpSupportPanel({
                         </p>
                       )}
                       {contact.availability && (
-                        <p className="mt-1 text-xs text-muted-foreground">
+                        <p className="text-muted-foreground mt-1 text-xs">
                           {contact.availability}
                         </p>
                       )}

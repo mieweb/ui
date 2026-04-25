@@ -137,15 +137,11 @@ export const Compact: StoryObj<typeof CompactHours> = {
   render: () => (
     <div className="space-y-4">
       <div className="rounded-lg border p-4 dark:border-gray-700">
-        <p className="mb-2 text-sm text-muted-foreground">
-          Standard hours
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Standard hours</p>
         <CompactHours schedule={standardSchedule} />
       </div>
       <div className="rounded-lg border p-4 dark:border-gray-700">
-        <p className="mb-2 text-sm text-muted-foreground">
-          No hours available
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">No hours available</p>
         <CompactHours schedule={{}} />
       </div>
     </div>

@@ -102,25 +102,19 @@ export const AllVariants: Story = {
   render: () => (
     <div className="space-y-8">
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">
-          Compact (grid)
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Compact (grid)</p>
         <div className="w-80">
           <ProviderCard provider={sampleProvider} variant="compact" />
         </div>
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">
-          List (horizontal)
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">List (horizontal)</p>
         <div className="max-w-2xl">
           <ProviderCard provider={sampleProvider} variant="list" />
         </div>
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">
-          Featured
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Featured</p>
         <div className="max-w-md">
           <ProviderCard provider={sampleProvider} variant="featured" />
         </div>

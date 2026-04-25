@@ -353,7 +353,7 @@ export const ControlledState: Story = {
           onStateChange={setState}
           maxDuration={30}
         />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Current state: <code className="font-mono">{state}</code>
         </p>
       </div>
@@ -447,7 +447,7 @@ export const CustomControls: Story = {
             </button>
           )}
         </div>
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground text-center text-sm">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
@@ -557,21 +557,15 @@ export const AllSizeComparison: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">
-          Small
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Small</p>
         <AudioRecorder size="sm" waveformHeight={50} />
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">
-          Medium
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Medium</p>
         <AudioRecorder size="md" waveformHeight={80} />
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">
-          Large
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Large</p>
         <AudioRecorder size="lg" waveformHeight={100} />
       </div>
     </div>

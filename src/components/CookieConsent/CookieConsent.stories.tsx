@@ -160,7 +160,7 @@ function InteractiveDemo() {
         <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
           Consent Status
         </h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Has consented: <strong>{hasConsented ? 'Yes' : 'No'}</strong>
         </p>
         <button

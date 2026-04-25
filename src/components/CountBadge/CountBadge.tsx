@@ -380,13 +380,13 @@ function HoverMenu({
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-neutral-700">
-              <th className="px-3 py-1.5 font-medium text-muted-foreground">
+              <th className="text-muted-foreground px-3 py-1.5 font-medium">
                 #
               </th>
-              <th className="px-3 py-1.5 font-medium text-muted-foreground">
+              <th className="text-muted-foreground px-3 py-1.5 font-medium">
                 Label
               </th>
-              <th className="px-3 py-1.5 font-medium text-muted-foreground">
+              <th className="text-muted-foreground px-3 py-1.5 font-medium">
                 Status
               </th>
               <th className="w-8 px-1 py-1.5">
