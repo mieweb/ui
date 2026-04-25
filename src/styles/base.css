@@ -134,7 +134,7 @@
   --color-card: var(--mieweb-card, #ffffff);
   --color-card-foreground: var(--mieweb-card-foreground, #171717);
   --color-muted: var(--mieweb-muted, #f5f5f5);
-  --color-muted-foreground: var(--mieweb-muted-foreground, #737373);
+  --color-muted-foreground: var(--mieweb-muted-foreground, #525252);
 
   /* ── Chart / Data Visualization Colors ─────────────────────────────── */
   --color-chart-1: var(--mieweb-chart-1);
