@@ -157,7 +157,7 @@ export function EmployerList({
           className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700"
         >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+            className="mx-auto mb-3 h-12 w-12 text-muted-foreground dark:text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -169,7 +169,7 @@ export function EmployerList({
               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
             />
           </svg>
-          <p className="mb-3 text-gray-500 dark:text-gray-400">
+          <p className="mb-3 text-muted-foreground">
             {emptyMessage}
           </p>
           {onAddEmployer && !searchQuery && (
@@ -230,12 +230,12 @@ export function EmployerList({
                   </div>
                   <div className="mt-0.5 flex items-center gap-4">
                     {employer.email && (
-                      <span className="truncate text-sm text-gray-500 dark:text-gray-400">
+                      <span className="truncate text-sm text-muted-foreground">
                         {employer.email}
                       </span>
                     )}
                     {employer.linkedDate && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         Linked {formatDate(employer.linkedDate)}
                       </span>
                     )}
@@ -252,7 +252,7 @@ export function EmployerList({
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
                         {employer.activeEmployees}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-muted-foreground">
                         Employees
                       </p>
                     </div>
@@ -264,7 +264,7 @@ export function EmployerList({
                       >
                         {employer.pendingOrders}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-muted-foreground">
                         Pending
                       </p>
                     </div>

@@ -163,7 +163,7 @@ export function EmployerView({
                   data-slot="employer-view-logo"
                   className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"
                 >
-                  <span className="text-2xl font-bold text-gray-500 dark:text-gray-400">
+                  <span className="text-2xl font-bold text-muted-foreground">
                     {employer.name.charAt(0)}
                   </span>
                 </div>
@@ -177,7 +177,7 @@ export function EmployerView({
                     {employer.status}
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Linked since {formatDate(employer.linkedDate)}
                 </p>
                 {employer.address && (
@@ -208,7 +208,7 @@ export function EmployerView({
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {employer.stats.totalOrders}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Total Orders
                 </p>
               </div>
@@ -216,7 +216,7 @@ export function EmployerView({
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {employer.stats.completedOrders}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Completed
                 </p>
               </div>
@@ -224,7 +224,7 @@ export function EmployerView({
                 <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                   {employer.stats.pendingOrders}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Pending
                 </p>
               </div>
@@ -232,7 +232,7 @@ export function EmployerView({
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {formatCurrency(employer.stats.totalRevenue)}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Total Revenue
                 </p>
               </div>
@@ -240,7 +240,7 @@ export function EmployerView({
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                   {formatCurrency(employer.stats.outstandingBalance)}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Outstanding
                 </p>
               </div>
@@ -303,7 +303,7 @@ export function EmployerView({
                             {primary.name}
                           </p>
                           {primary.role && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               {primary.role}
                             </p>
                           )}
@@ -342,7 +342,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.recentOrders.length === 0 ? (
-                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+                <p className="py-8 text-center text-muted-foreground">
                   No orders yet
                 </p>
               ) : (
@@ -360,7 +360,7 @@ export function EmployerView({
                         <p className="text-sm text-gray-600 dark:text-gray-300">
                           {order.patientName}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-muted-foreground">
                           {order.services.join(', ')}
                         </p>
                       </div>
@@ -368,7 +368,7 @@ export function EmployerView({
                         <Badge variant={getStatusVariant(order.status)}>
                           {order.status}
                         </Badge>
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {formatDate(order.createdDate)}
                         </p>
                       </div>
@@ -402,7 +402,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.recentInvoices.length === 0 ? (
-                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+                <p className="py-8 text-center text-muted-foreground">
                   No invoices yet
                 </p>
               ) : (
@@ -454,7 +454,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.contacts.length === 0 ? (
-                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+                <p className="py-8 text-center text-muted-foreground">
                   No contacts added
                 </p>
               ) : (
@@ -477,7 +477,7 @@ export function EmployerView({
                             )}
                           </div>
                           {contact.role && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               {contact.role}
                             </p>
                           )}
@@ -485,7 +485,7 @@ export function EmployerView({
                             {contact.email}
                           </p>
                           {contact.phone && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               {contact.phone}
                             </p>
                           )}

@@ -190,7 +190,7 @@ export function ErrorPage({
 
       {/* Description */}
       <p
-        className="mb-8 max-w-md text-gray-600 dark:text-gray-400"
+        className="mb-8 max-w-md text-muted-foreground"
         data-slot="error-page-description"
       >
         {displayDescription}

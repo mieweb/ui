@@ -287,7 +287,7 @@ export function FooterLinkSection({
           'mb-4 text-sm font-semibold tracking-wider uppercase',
           variant === 'light'
             ? 'text-white/70'
-            : 'text-gray-600 dark:text-gray-400'
+            : 'text-muted-foreground'
         )}
       >
         {group.title}
@@ -342,7 +342,7 @@ export function CopyrightText({
         'text-sm',
         variant === 'light'
           ? 'text-white/60'
-          : 'text-gray-600 dark:text-gray-400',
+          : 'text-muted-foreground',
         className
       )}
     >
@@ -439,7 +439,7 @@ export function DisclaimerText({
         'text-xs leading-relaxed',
         variant === 'light'
           ? 'text-white/50'
-          : 'text-gray-500 dark:text-gray-400',
+          : 'text-muted-foreground',
         className
       )}
     >
@@ -583,7 +583,7 @@ export function SiteFooter({
                   'mb-4 text-sm',
                   colorVariant === 'light'
                     ? 'text-white/70'
-                    : 'text-gray-600 dark:text-gray-400'
+                    : 'text-muted-foreground'
                 )}
               >
                 {description}

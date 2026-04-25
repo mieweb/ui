@@ -19,7 +19,7 @@ const statusIconVariants = cva(
       status: {
         sending: 'text-neutral-500',
         sent: 'text-neutral-500',
-        delivered: 'text-neutral-600 dark:text-neutral-400',
+        delivered: 'text-muted-foreground',
         read: 'text-primary-800 dark:text-primary-300',
         failed: 'text-red-500',
       },
@@ -368,7 +368,7 @@ const bubbleVariants = cva(
         ],
         system: [
           'mx-auto max-w-none',
-          'bg-transparent text-neutral-500 dark:text-neutral-400',
+          'bg-transparent text-muted-foreground',
           'text-center text-sm',
           'py-1 px-2',
         ],
@@ -524,7 +524,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {showSenderName && !isOutgoing && (
             <span
               data-slot="message-sender-name"
-              className="mb-1 px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400"
+              className="mb-1 px-1 text-xs font-medium text-muted-foreground"
             >
               {message.sender.name}
             </span>
@@ -594,7 +594,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
             )}
           >
             {showTimestamp && (
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="text-xs text-muted-foreground">
                 {formatTimestamp(message.timestamp)}
               </span>
             )}

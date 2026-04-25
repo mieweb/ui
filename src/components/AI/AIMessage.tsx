@@ -195,7 +195,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="flex w-full items-center justify-between px-3 py-2 text-left"
         >
-          <span className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+          <span className="flex items-center gap-2 text-sm text-muted-foreground">
             <svg
               className="h-4 w-4"
               fill="none"

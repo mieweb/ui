@@ -223,7 +223,7 @@ export function ProviderOverview({
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             {providerName}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Dashboard Overview
           </p>
         </div>
@@ -338,7 +338,7 @@ export function ProviderOverview({
                     }}
                     className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
                   >
-                    <span className="text-gray-500 dark:text-gray-400">
+                    <span className="text-muted-foreground">
                       {action.icon || (
                         <svg
                           className="h-5 w-5"
@@ -409,11 +409,11 @@ export function ProviderOverview({
                         )}
                       </div>
                       {activity.description && (
-                        <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+                        <p className="truncate text-sm text-muted-foreground">
                           {activity.description}
                         </p>
                       )}
-                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {formatTime(activity.timestamp)}
                       </p>
                     </div>
@@ -462,7 +462,7 @@ function StatCard({ label, value, icon, color, onClick }: StatCardProps) {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {value}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
         </div>
       </div>
     </div>

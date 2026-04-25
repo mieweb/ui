@@ -98,7 +98,7 @@ export function OrderLookupForm({
           <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
             Order Lookup
           </h2>
-          <p className="mb-6 text-gray-600 dark:text-gray-400">
+          <p className="mb-6 text-muted-foreground">
             Enter your order details to view your information.
           </p>
 
@@ -185,7 +185,7 @@ export function OrderLookupForm({
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             Need help?{' '}
             <button
               type="button"

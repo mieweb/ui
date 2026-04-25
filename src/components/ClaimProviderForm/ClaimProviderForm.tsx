@@ -282,7 +282,7 @@ export function ClaimProviderForm({
               />
               <span
                 data-slot="claim-form-terms-text"
-                className="text-sm text-gray-600 dark:text-gray-400"
+                className="text-sm text-muted-foreground"
               >
                 I agree to the{' '}
                 <a

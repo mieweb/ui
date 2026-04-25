@@ -61,7 +61,7 @@ const meta: Meta<typeof SiteHeader> = {
       <div className="min-h-[300px] bg-gray-100 dark:bg-gray-950">
         <Story />
         <div className="p-8">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Page content below header
           </p>
         </div>

@@ -94,7 +94,7 @@ export function OrderSidebar({
       case 'urgent':
         return 'text-orange-600 dark:text-orange-400';
       default:
-        return 'text-gray-600 dark:text-gray-400';
+        return 'text-muted-foreground';
     }
   };
 
@@ -128,7 +128,7 @@ export function OrderSidebar({
               Order Details
             </h2>
             {orderId && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 #{orderId}
               </p>
             )}

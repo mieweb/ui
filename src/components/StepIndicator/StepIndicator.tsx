@@ -176,12 +176,12 @@ export function StepIndicator({
             ? 'text-red-600 dark:text-red-400'
             : status === 'completed' || status === 'current'
               ? 'text-neutral-900 dark:text-white'
-              : 'text-neutral-500 dark:text-neutral-400'
+              : 'text-muted-foreground'
         }`.trim()}
       >
         {step.label}
         {step.optional && (
-          <span className="font-normal text-neutral-500 dark:text-neutral-400">
+          <span className="font-normal text-muted-foreground">
             {' '}
             (optional)
           </span>
@@ -190,7 +190,7 @@ export function StepIndicator({
       {step.description && (
         <p
           data-slot="step-indicator-description"
-          className="mt-0.5 text-neutral-500 dark:text-neutral-400"
+          className="mt-0.5 text-muted-foreground"
         >
           {step.description}
         </p>

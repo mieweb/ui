@@ -375,7 +375,7 @@ export function UserMenu({
             'h-4 w-4 transition-transform',
             variant === 'light'
               ? 'text-white/70'
-              : 'text-gray-500 dark:text-gray-400',
+              : 'text-muted-foreground',
             isOpen && 'rotate-180'
           )}
         />
@@ -392,7 +392,7 @@ export function UserMenu({
               {user.name}
             </p>
             {user.email && (
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+              <p className="truncate text-xs text-muted-foreground">
                 {user.email}
               </p>
             )}
@@ -570,7 +570,7 @@ export function MobileMenuPanel({
                     {user.name}
                   </p>
                   {user.email && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-muted-foreground">
                       {user.email}
                     </p>
                   )}

@@ -145,7 +145,7 @@ export const statusColors: Record<string, StatusConfig> = {
   inactive: {
     label: 'Inactive',
     bgClass: 'bg-gray-200 dark:bg-gray-700',
-    textClass: 'text-gray-600 dark:text-gray-400',
+    textClass: 'text-muted-foreground',
   },
   pending: {
     label: 'Pending',
@@ -272,7 +272,7 @@ export function StatusBadgeRenderer(
   const config = statusConfig[normalizedValue] || {
     label: value,
     bgClass: 'bg-gray-200 dark:bg-gray-700',
-    textClass: 'text-gray-600 dark:text-gray-400',
+    textClass: 'text-muted-foreground',
   };
 
   return (
@@ -316,7 +316,7 @@ function getEngagementScoreColors(score: number): {
     };
   return {
     barColor: 'bg-gray-400',
-    textColor: 'text-gray-600 dark:text-gray-400',
+    textColor: 'text-muted-foreground',
   };
 }
 

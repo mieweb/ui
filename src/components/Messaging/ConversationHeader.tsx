@@ -246,7 +246,7 @@ const ConversationHeader = React.forwardRef<
                 'truncate text-sm',
                 isOnline
                   ? 'text-green-600 dark:text-green-400'
-                  : 'text-neutral-500 dark:text-neutral-400'
+                  : 'text-muted-foreground'
               )}
             >
               {displaySubtitle}
@@ -391,7 +391,7 @@ const ConversationListItem = React.forwardRef<
             {title}
           </h3>
           {lastMessage && (
-            <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+            <span className="shrink-0 text-xs text-muted-foreground">
               {formatTime(lastMessage.timestamp)}
             </span>
           )}
@@ -402,7 +402,7 @@ const ConversationListItem = React.forwardRef<
               'truncate text-sm',
               isUnread
                 ? 'text-neutral-700 dark:text-neutral-300'
-                : 'text-neutral-500 dark:text-neutral-400'
+                : 'text-muted-foreground'
             )}
           >
             {lastMessage?.content || 'No messages yet'}

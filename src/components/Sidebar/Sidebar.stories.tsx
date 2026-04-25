@@ -227,7 +227,7 @@ function CollapsibleDemo() {
         <h1 className="mb-4 text-xl font-semibold text-neutral-900 capitalize dark:text-white">
           {activePage}
         </h1>
-        <p className="text-neutral-600 dark:text-neutral-400">
+        <p className="text-muted-foreground">
           Try clicking the collapse button in the sidebar footer to see the
           collapsed state.
         </p>
@@ -362,7 +362,7 @@ function ConfigurableSidebarDemo({
           </h1>
         </div>
         <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-          <p className="text-neutral-600 dark:text-neutral-400">
+          <p className="text-muted-foreground">
             Content for the {activePage} page goes here. Click navigation items
             to change pages.
           </p>

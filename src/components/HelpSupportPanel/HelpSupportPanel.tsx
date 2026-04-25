@@ -148,7 +148,7 @@ export function HelpSupportPanel({
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Help & Support
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Find answers or get in touch with our support team
           </p>
         </div>
@@ -215,7 +215,7 @@ export function HelpSupportPanel({
 
                 {/* FAQ List */}
                 {filteredFaqs.length === 0 ? (
-                  <p className="py-4 text-center text-gray-500 dark:text-gray-400">
+                  <p className="py-4 text-center text-muted-foreground">
                     No FAQs match your search
                   </p>
                 ) : (
@@ -369,7 +369,7 @@ export function HelpSupportPanel({
                     data-slot="help-support-contact-item"
                     className="flex items-start gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                   >
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-muted-foreground">
                       {getContactIcon(contact.type)}
                     </div>
                     <div>
@@ -396,7 +396,7 @@ export function HelpSupportPanel({
                         </p>
                       )}
                       {contact.availability && (
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {contact.availability}
                         </p>
                       )}

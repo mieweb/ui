@@ -102,7 +102,7 @@ export const AllVariants: Story = {
   render: () => (
     <div className="space-y-8">
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mb-2 text-sm text-muted-foreground">
           Compact (grid)
         </p>
         <div className="w-80">
@@ -110,7 +110,7 @@ export const AllVariants: Story = {
         </div>
       </div>
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mb-2 text-sm text-muted-foreground">
           List (horizontal)
         </p>
         <div className="max-w-2xl">
@@ -118,7 +118,7 @@ export const AllVariants: Story = {
         </div>
       </div>
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mb-2 text-sm text-muted-foreground">
           Featured
         </p>
         <div className="max-w-md">

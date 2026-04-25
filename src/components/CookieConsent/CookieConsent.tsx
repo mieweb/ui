@@ -181,7 +181,7 @@ export function CookieConsentBanner({
               className={cn(
                 'text-xs',
                 variant === 'default'
-                  ? 'text-gray-600 dark:text-gray-400'
+                  ? 'text-muted-foreground'
                   : 'text-white/80'
               )}
             >

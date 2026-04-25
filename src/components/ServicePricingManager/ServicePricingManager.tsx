@@ -190,7 +190,7 @@ export function ServicePricingManager({
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Service Pricing
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Manage pricing for {services.length} services
           </p>
         </div>
@@ -251,7 +251,7 @@ export function ServicePricingManager({
           </CardHeader>
           <CardContent>
             {filteredServices.length === 0 ? (
-              <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+              <p className="py-8 text-center text-muted-foreground">
                 No services found
               </p>
             ) : (
@@ -276,7 +276,7 @@ export function ServicePricingManager({
                       <p className="font-medium text-gray-900 dark:text-white">
                         {service.serviceName}
                       </p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         {service.serviceCode && (
                           <span>{service.serviceCode}</span>
                         )}
@@ -414,7 +414,7 @@ export function ServicePricingManager({
           <ModalTitle>Bulk Price Adjustment</ModalTitle>
         </ModalHeader>
         <ModalBody className="space-y-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Apply adjustment to {filteredServices.length} filtered services
           </p>
           <div className="flex gap-2">
@@ -448,7 +448,7 @@ export function ServicePricingManager({
                 bulkAdjustmentType === 'percent' ? 'e.g., 5' : 'e.g., 10.00'
               }
             />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-xs text-muted-foreground">
               Use negative values to decrease prices
             </p>
           </div>

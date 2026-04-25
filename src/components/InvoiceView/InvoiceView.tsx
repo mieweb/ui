@@ -150,7 +150,7 @@ export function InvoiceView({
                 {invoice.status}
               </Badge>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Issued {formatDate(invoice.issuedDate)}
             </p>
           </div>
@@ -282,17 +282,17 @@ export function InvoiceView({
                 </h2>
               )}
               {invoice.providerAddress && (
-                <p className="text-sm whitespace-pre-line text-gray-600 dark:text-gray-400">
+                <p className="text-sm whitespace-pre-line text-muted-foreground">
                   {invoice.providerAddress}
                 </p>
               )}
               {invoice.providerPhone && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   {invoice.providerPhone}
                 </p>
               )}
               {invoice.providerEmail && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   {invoice.providerEmail}
                 </p>
               )}
@@ -307,7 +307,7 @@ export function InvoiceView({
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {invoice.invoiceNumber}
               </p>
-              <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
+              <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                 <p>
                   <span className="font-medium">Issue Date:</span>{' '}
                   {formatDate(invoice.issuedDate)}
@@ -335,12 +335,12 @@ export function InvoiceView({
               {invoice.employerName}
             </p>
             {invoice.employerAddress && (
-              <p className="text-sm whitespace-pre-line text-gray-600 dark:text-gray-400">
+              <p className="text-sm whitespace-pre-line text-muted-foreground">
                 {invoice.employerAddress}
               </p>
             )}
             {invoice.employerEmail && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 {invoice.employerEmail}
               </p>
             )}
@@ -376,7 +376,7 @@ export function InvoiceView({
                         {item.description}
                       </p>
                       {item.employeeName && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-muted-foreground">
                           {item.employeeName}
                           {item.date && ` • ${formatDate(item.date)}`}
                         </p>
@@ -401,7 +401,7 @@ export function InvoiceView({
           <div data-slot="invoice-view-totals" className="flex justify-end">
             <div className="w-full space-y-2 sm:w-64">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-muted-foreground">
                   Subtotal
                 </span>
                 <span className="text-gray-900 dark:text-white">
@@ -410,7 +410,7 @@ export function InvoiceView({
               </div>
               {invoice.tax !== undefined && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="text-muted-foreground">
                     Tax {invoice.taxRate && `(${invoice.taxRate}%)`}
                   </span>
                   <span className="text-gray-900 dark:text-white">

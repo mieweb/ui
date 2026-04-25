@@ -224,7 +224,7 @@ export function InvoiceList({
           data-slot="invoice-list-summary-item"
           className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
         >
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+          <p className="text-xs text-muted-foreground">Total</p>
           <p className="text-lg font-bold text-gray-900 dark:text-white">
             {formatCurrency(totals.total)}
           </p>
@@ -258,7 +258,7 @@ export function InvoiceList({
           className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700"
         >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+            className="mx-auto mb-3 h-12 w-12 text-muted-foreground dark:text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -270,7 +270,7 @@ export function InvoiceList({
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <p className="mb-3 text-gray-500 dark:text-gray-400">
+          <p className="mb-3 text-muted-foreground">
             {searchQuery || statusFilter !== 'all'
               ? 'No invoices match your filters'
               : 'No invoices yet'}
@@ -331,13 +331,13 @@ export function InvoiceList({
                     </p>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       {formatDate(invoice.issuedDate)}
                     </p>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
                     <p
-                      className={`text-sm ${invoice.status === 'overdue' ? 'font-medium text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}
+                      className={`text-sm ${invoice.status === 'overdue' ? 'font-medium text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}
                     >
                       {formatDate(invoice.dueDate)}
                     </p>

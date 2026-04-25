@@ -722,7 +722,7 @@ export function MCPToolCallDisplay({
 
           {/* Parameter Summary (user-friendly) */}
           {paramSummary && toolCall.status !== 'success' && (
-            <p className="mt-0.5 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="mt-0.5 text-sm text-muted-foreground">
               {paramSummary}
             </p>
           )}

@@ -371,7 +371,7 @@ export function CommandPalette({
             {filteredItems.length === 0 ? (
               <div
                 data-slot="command-palette-empty"
-                className="p-8 text-center text-gray-500 dark:text-gray-400"
+                className="p-8 text-center text-muted-foreground"
               >
                 {emptyState ?? (
                   <>
@@ -397,7 +397,7 @@ export function CommandPalette({
                         data-slot="command-palette-group"
                         className={cn(
                           'sticky top-0 px-3 py-2 text-xs font-semibold',
-                          'text-gray-500 dark:text-gray-400',
+                          'text-muted-foreground',
                           'bg-gray-50 dark:bg-gray-900/50'
                         )}
                       >
@@ -482,12 +482,12 @@ export function CommandPalette({
                                 {item.label}
                               </div>
                               {item.subtitle && (
-                                <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                                <div className="truncate text-xs text-muted-foreground">
                                   {item.subtitle}
                                 </div>
                               )}
                               {item.description && (
-                                <div className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                                <div className="mt-0.5 truncate text-xs text-muted-foreground">
                                   {item.description}
                                 </div>
                               )}
@@ -498,7 +498,7 @@ export function CommandPalette({
                                   'hidden items-center px-1.5 py-0.5 text-[10px] sm:inline-flex',
                                   'rounded border bg-gray-100 dark:bg-gray-700',
                                   'border-gray-200 dark:border-gray-600',
-                                  'text-gray-600 dark:text-gray-400'
+                                  'text-muted-foreground'
                                 )}
                               >
                                 {item.shortcut}

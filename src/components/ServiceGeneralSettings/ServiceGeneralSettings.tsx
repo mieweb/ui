@@ -91,7 +91,7 @@ export function ServiceGeneralSettings({
           General Settings
         </CardTitle>
         <p
-          className="text-sm text-gray-500 dark:text-gray-400"
+          className="text-sm text-muted-foreground"
           data-slot="service-settings-description"
         >
           Basic service information and configuration
@@ -122,7 +122,7 @@ export function ServiceGeneralSettings({
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Active
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 Service is available for orders
               </p>
             </div>
@@ -134,7 +134,7 @@ export function ServiceGeneralSettings({
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Featured
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 Show prominently in listings
               </p>
             </div>

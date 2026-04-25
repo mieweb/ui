@@ -90,7 +90,7 @@ export function EmployerPricingCard({
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatPrice(basePrice)}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">base price</p>
+          <p className="text-xs text-muted-foreground">base price</p>
         </div>
       </CardHeader>
 

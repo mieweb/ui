@@ -380,13 +380,13 @@ function HoverMenu({
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-neutral-700">
-              <th className="px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-400">
+              <th className="px-3 py-1.5 font-medium text-muted-foreground">
                 #
               </th>
-              <th className="px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-400">
+              <th className="px-3 py-1.5 font-medium text-muted-foreground">
                 Label
               </th>
-              <th className="px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-400">
+              <th className="px-3 py-1.5 font-medium text-muted-foreground">
                 Status
               </th>
               <th className="w-8 px-1 py-1.5">
@@ -414,7 +414,7 @@ function HoverMenu({
                         statusDotColor[item.status]
                       )}
                     />
-                    <span className="text-neutral-600 dark:text-neutral-400">
+                    <span className="text-muted-foreground">
                       {statusLabel[item.status]}
                     </span>
                   </span>

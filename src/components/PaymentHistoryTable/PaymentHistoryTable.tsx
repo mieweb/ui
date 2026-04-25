@@ -175,7 +175,7 @@ export function PaymentHistoryTable({
         className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
-          className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+          className="mx-auto mb-3 h-12 w-12 text-muted-foreground dark:text-muted-foreground"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -189,7 +189,7 @@ export function PaymentHistoryTable({
         </svg>
         <p
           data-slot="payment-history-empty"
-          className="text-gray-500 dark:text-gray-400"
+          className="text-muted-foreground"
         >
           {emptyMessage}
         </p>
@@ -269,7 +269,7 @@ export function PaymentHistoryTable({
                 </p>
               </td>
               <td className="hidden px-4 py-3 lg:table-cell">
-                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   {getMethodIcon(payment.method)}
                   <span className="text-sm">
                     {getMethodLabel(payment.method)}

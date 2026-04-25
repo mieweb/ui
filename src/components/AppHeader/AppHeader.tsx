@@ -135,7 +135,7 @@ export function AppHeaderTitle({
         {children}
       </h1>
       {subtitle && (
-        <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+        <p className="truncate text-sm text-muted-foreground">
           {subtitle}
         </p>
       )}
@@ -226,7 +226,7 @@ export function AppHeaderIconButton({
       data-testid={testId}
       className={cn(
         'relative rounded-lg p-2 transition-colors',
-        'text-gray-500 dark:text-gray-400',
+        'text-muted-foreground',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         isActive &&
@@ -415,7 +415,7 @@ export function AppHeaderUserMenu({
         {email && (
           <div
             data-slot="app-header-user-email"
-            className="max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400"
+            className="max-w-[150px] truncate text-xs text-muted-foreground"
           >
             {email}
           </div>

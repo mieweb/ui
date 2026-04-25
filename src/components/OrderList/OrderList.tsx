@@ -235,7 +235,7 @@ export function OrderList<T>({
               </svg>
             )}
             <p
-              className="text-gray-500 dark:text-gray-400"
+              className="text-muted-foreground"
               data-slot="order-list-empty-message"
             >
               {emptyMessage}

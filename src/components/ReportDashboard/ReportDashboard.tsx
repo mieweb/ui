@@ -98,7 +98,7 @@ export function ReportDashboard({
       case 'down':
         return 'text-red-700 dark:text-red-300';
       default:
-        return 'text-gray-500 dark:text-gray-400';
+        return 'text-muted-foreground';
     }
   };
 
@@ -177,7 +177,7 @@ export function ReportDashboard({
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {title}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {dateRangeLabel}
           </p>
         </div>
@@ -230,7 +230,7 @@ export function ReportDashboard({
         {metrics.map((metric, index) => (
           <Card key={index}>
             <CardContent className="p-4">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 {metric.label}
               </p>
               <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
@@ -291,7 +291,7 @@ export function ReportDashboard({
                         title={`Current: ${point.value}`}
                       />
                     </div>
-                    <span className="w-full truncate text-center text-xs text-gray-500 dark:text-gray-400">
+                    <span className="w-full truncate text-center text-xs text-muted-foreground">
                       {point.label}
                     </span>
                   </div>

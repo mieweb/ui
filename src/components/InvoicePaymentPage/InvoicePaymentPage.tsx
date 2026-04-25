@@ -162,7 +162,7 @@ export function InvoicePaymentPage({
         >
           <CardContent className="py-12">
             <svg
-              className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-gray-600"
+              className="mx-auto mb-4 h-16 w-16 text-muted-foreground dark:text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -177,7 +177,7 @@ export function InvoicePaymentPage({
             <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Invoice Not Found
             </h2>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground">
               The invoice you&apos;re looking for doesn&apos;t exist or has
               expired.
             </p>
@@ -219,11 +219,11 @@ export function InvoicePaymentPage({
             <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Payment Successful
             </h2>
-            <p className="mb-4 text-gray-500 dark:text-gray-400">
+            <p className="mb-4 text-muted-foreground">
               {successMessage ||
                 'Thank you! Your payment has been processed successfully.'}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Invoice {invoice.invoiceNumber}
             </p>
           </CardContent>
@@ -272,7 +272,7 @@ export function InvoicePaymentPage({
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <div className="space-y-1 text-sm text-muted-foreground">
                   <p>Issued: {formatDate(invoice.issuedDate)}</p>
                   <p
                     className={
@@ -292,7 +292,7 @@ export function InvoicePaymentPage({
                 >
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-gray-500 dark:text-gray-400">
+                      <tr className="text-muted-foreground">
                         <th className="pb-2 text-left font-medium">Item</th>
                         <th className="pb-2 text-right font-medium">Amount</th>
                       </tr>
@@ -315,14 +315,14 @@ export function InvoicePaymentPage({
                   className="space-y-2 border-t border-gray-200 pt-4 dark:border-gray-700"
                 >
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">
+                    <span className="text-muted-foreground">
                       Subtotal
                     </span>
                     <span>{formatCurrency(invoice.subtotal)}</span>
                   </div>
                   {invoice.tax !== undefined && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">
+                      <span className="text-muted-foreground">
                         Tax
                       </span>
                       <span>{formatCurrency(invoice.tax)}</span>
@@ -490,7 +490,7 @@ export function InvoicePaymentPage({
                   </Button>
 
                   {showStripeBranding && (
-                    <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-center text-xs text-muted-foreground">
                       Secured by Stripe
                     </p>
                   )}

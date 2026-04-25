@@ -210,7 +210,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
         {items.map((item, index) => (
           <li key={item.href} className="flex items-center">
             {index > 0 && (
-              <ChevronRightIcon className="mx-2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <ChevronRightIcon className="mx-2 h-4 w-4 text-muted-foreground" />
             )}
             {index === items.length - 1 ? (
               <span className="max-w-[200px] truncate font-medium text-gray-900 dark:text-white">
@@ -453,7 +453,7 @@ export function VerifiedBadge({
     <div
       data-slot="provider-detail-verified"
       className={cn(
-        'flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400',
+        'flex items-center gap-2 text-sm text-muted-foreground',
         className
       )}
     >
@@ -548,7 +548,7 @@ export function ClaimListingButton({
     <a
       href={claimUrl}
       className={cn(
-        'hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400',
+        'hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-2 text-sm text-muted-foreground',
         className
       )}
     >
@@ -841,7 +841,7 @@ export function CompactProviderHeader({
           <h2 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
             {provider.name}
           </h2>
-          <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+          <p className="truncate text-sm text-muted-foreground">
             {provider.address.city}, {provider.address.state}{' '}
             {provider.address.postalCode}
           </p>

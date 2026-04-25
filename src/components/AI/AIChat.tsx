@@ -195,7 +195,7 @@ function AIEmptyState({
   const suggestionsAction =
     suggestions && suggestions.length > 0 && onSuggestionSelect ? (
       <div className="mt-6">
-        <p className="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="mb-3 text-sm text-muted-foreground">
           Try asking:
         </p>
         <SuggestedActions actions={suggestions} onSelect={onSuggestionSelect} />

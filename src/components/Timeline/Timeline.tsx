@@ -189,7 +189,7 @@ export function TimelineProgress({
               {showTimestamps && (
                 <div
                   className={cn(
-                    'h-4 text-center text-neutral-500 dark:text-neutral-400',
+                    'h-4 text-center text-muted-foreground',
                     sizes.timestamp,
                     sizes.timestampMargin
                   )}
@@ -300,7 +300,7 @@ export function TimelineProgress({
                   state === 'current' &&
                     'font-semibold text-neutral-900 dark:text-white',
                   state === 'pending' &&
-                    'text-neutral-500 dark:text-neutral-400',
+                    'text-muted-foreground',
                   state === 'error' &&
                     'font-semibold text-red-600 dark:text-red-400'
                 )}
@@ -445,12 +445,12 @@ export function TimelineEventList({
                     {event.title}
                   </h4>
                   {event.author && (
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    <p className="text-sm text-muted-foreground">
                       by {event.author}
                     </p>
                   )}
                 </div>
-                <time className="shrink-0 pt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                <time className="shrink-0 pt-0.5 text-xs text-muted-foreground">
                   {formatTime(event.timestamp)}
                 </time>
               </div>
@@ -538,7 +538,7 @@ export function OrderConfirmation({
         </h2>
 
         {orderNumber && (
-          <p className="mb-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="mb-4 text-center text-sm text-muted-foreground">
             Order #{orderNumber}
           </p>
         )}
