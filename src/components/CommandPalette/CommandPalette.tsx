@@ -459,7 +459,7 @@ export function CommandPalette({
                             className={cn(
                               'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
                               isSelected
-                                ? 'bg-primary-50 dark:bg-primary-500/20'
+                                ? 'bg-primary-50 dark:bg-primary-900/20'
                                 : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
                               item.disabled && 'cursor-not-allowed opacity-50'
                             )}

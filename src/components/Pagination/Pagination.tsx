@@ -18,7 +18,7 @@ const paginationButtonVariants = cva(
       variant: {
         default: [
           'text-muted-foreground hover:text-foreground hover:bg-muted',
-          'data-[active=true]:bg-primary-500 data-[active=true]:text-white',
+          'data-[active=true]:bg-primary-800 data-[active=true]:text-white',
         ],
         outline: [
           'border border-border text-muted-foreground',

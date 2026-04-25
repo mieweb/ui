@@ -254,7 +254,7 @@ export function NewsletterForm({
           'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
           variant === 'light'
             ? 'text-primary-900 bg-white hover:bg-white/90'
-            : 'bg-primary-700 hover:bg-primary-800 text-white',
+            : 'bg-primary-800 hover:bg-primary-900 text-white',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -457,7 +457,7 @@ const footerVariants = cva('', {
     variant: {
       default: 'bg-gray-100 dark:bg-gray-900',
       dark: 'bg-gray-900 dark:bg-gray-950',
-      primary: 'bg-primary-600 dark:bg-primary-800',
+      primary: 'bg-primary-800 dark:bg-primary-800',
       white:
         'bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800',
     },
@@ -715,7 +715,7 @@ export function SimpleFooter({
       className={cn(
         'border-t py-4',
         variant === 'light'
-          ? 'bg-primary-700 border-white/10'
+          ? 'bg-primary-800 border-white/10'
           : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
         className
       )}

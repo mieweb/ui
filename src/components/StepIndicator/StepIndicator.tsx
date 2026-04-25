@@ -138,9 +138,9 @@ export function StepIndicator({
         step.hasError
           ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
           : status === 'completed'
-            ? 'bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white'
+            ? 'bg-primary-800 focus:ring-primary-500 dark:bg-primary-800 text-white'
             : status === 'current'
-              ? 'bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
+              ? 'bg-primary-800 ring-primary-600 focus:ring-primary-500 dark:bg-primary-800 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
               : 'bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
       }`.trim()}
       aria-current={status === 'current' ? 'step' : undefined}
@@ -219,7 +219,7 @@ export function StepIndicator({
                     data-slot="step-indicator-connector"
                     className={`flex-1 ${sizes.line} ${
                       index <= currentStep
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     }`}
                     aria-hidden="true"
@@ -235,7 +235,7 @@ export function StepIndicator({
                     data-slot="step-indicator-connector"
                     className={`flex-1 ${sizes.line} ${
                       index < currentStep
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     }`}
                     aria-hidden="true"
@@ -282,7 +282,7 @@ export function StepIndicator({
                 <div
                   className={`h-full min-h-4 ${sizes.line} ${
                     index < currentStep
-                      ? 'bg-primary-600 dark:bg-primary-500'
+                      ? 'bg-primary-800 dark:bg-primary-800'
                       : 'bg-neutral-200 dark:bg-neutral-700'
                   }`}
                 />

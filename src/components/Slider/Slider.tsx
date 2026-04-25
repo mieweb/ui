@@ -32,7 +32,7 @@ const sliderRangeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary-500',
+        default: 'bg-primary-800',
         success: 'bg-green-500',
         warning: 'bg-yellow-500',
         danger: 'bg-red-500',

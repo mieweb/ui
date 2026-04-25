@@ -137,8 +137,8 @@ const controlButtonVariants = cva(
     variants: {
       variant: {
         primary: [
-          'bg-primary-600 text-white',
-          'hover:bg-primary-700',
+          'bg-primary-800 text-white',
+          'hover:bg-primary-900',
           'active:bg-primary-800',
         ],
         secondary: [

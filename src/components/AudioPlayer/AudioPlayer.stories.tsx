@@ -481,7 +481,7 @@ export const ChatMessage: Story = {
       <div className="flex flex-row-reverse gap-2">
         <Avatar name="You" size="sm" />
         <div className="space-y-1">
-          <div className="bg-primary-600 rounded-2xl rounded-tr-sm px-3 py-2">
+          <div className="bg-primary-800 rounded-2xl rounded-tr-sm px-3 py-2">
             <AudioPlayer
               src={getShortAudio()}
               variant="compact"
@@ -505,7 +505,7 @@ export const PodcastPlayer: Story = {
       <CardContent className="pt-6">
         <div className="flex gap-4" data-slot="podcast-header">
           <div
-            className="bg-primary-500 h-24 w-24 shrink-0 overflow-hidden rounded-lg"
+            className="bg-primary-800 h-24 w-24 shrink-0 overflow-hidden rounded-lg"
             data-slot="podcast-cover"
           >
             <div className="flex h-full items-center justify-center text-2xl text-white">

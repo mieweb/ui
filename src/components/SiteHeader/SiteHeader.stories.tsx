@@ -111,7 +111,7 @@ export const GlassVariant: Story = {
 export const LogoVariants: StoryObj<typeof SiteLogo> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="bg-primary-600 rounded-lg p-4">
+      <div className="bg-primary-800 rounded-lg p-4">
         <SiteLogo name="BlueHive" variant="light" />
       </div>
       <div className="rounded-lg border bg-white p-4">
@@ -124,7 +124,7 @@ export const LogoVariants: StoryObj<typeof SiteLogo> = {
 export const NavLinksDemo: StoryObj<typeof NavLinks> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="bg-primary-600 rounded-lg p-4">
+      <div className="bg-primary-800 rounded-lg p-4">
         <NavLinks links={defaultLinks} variant="light" />
       </div>
       <div className="rounded-lg border bg-white p-4">
@@ -137,7 +137,7 @@ export const NavLinksDemo: StoryObj<typeof NavLinks> = {
 export const AuthButtonsDemo: StoryObj<typeof AuthButtons> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="bg-primary-600 rounded-lg p-4">
+      <div className="bg-primary-800 rounded-lg p-4">
         <AuthButtons variant="light" onLogin={() => {}} onSignUp={() => {}} />
       </div>
       <div className="rounded-lg border bg-white p-4">
@@ -150,7 +150,7 @@ export const AuthButtonsDemo: StoryObj<typeof AuthButtons> = {
 export const UserMenuDemo: StoryObj<typeof UserMenu> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="bg-primary-600 flex justify-end rounded-lg p-4">
+      <div className="bg-primary-800 flex justify-end rounded-lg p-4">
         <UserMenu user={sampleUser} variant="light" onLogout={() => {}} />
       </div>
       <div className="flex justify-end rounded-lg border bg-white p-4">

@@ -636,7 +636,7 @@ function NotificationsDropdown() {
             className="hover:bg-muted/50 flex w-full items-start gap-3 p-4 text-left transition-colors"
           >
             <div
-              className={`mt-1 h-2 w-2 rounded-full ${notification.unread ? 'bg-primary-500' : 'bg-transparent'}`}
+              className={`mt-1 h-2 w-2 rounded-full ${notification.unread ? 'bg-primary-800' : 'bg-transparent'}`}
             />
             <div className="min-w-0 flex-1">
               <Text
@@ -715,7 +715,7 @@ function Sidebar({ currentPage, onNavigate }: SidebarProps) {
     <SidebarComponent>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+          <div className="bg-primary-800 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
             M
           </div>
           <Text weight="bold" size="lg">
@@ -1154,7 +1154,7 @@ function AnalyticsPage() {
               {[65, 45, 80, 55, 70, 90, 75].map((height, i) => (
                 <div
                   key={i}
-                  className="bg-primary-500 hover:bg-primary-600 w-8 rounded-t transition-all"
+                  className="bg-primary-800 hover:bg-primary-900 w-8 rounded-t transition-all"
                   style={{ height: `${height}%` }}
                 />
               ))}
@@ -1984,7 +1984,7 @@ function AppShell() {
       <div className="bg-background flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="bg-primary-500 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold text-white">
+            <div className="bg-primary-800 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold text-white">
               M
             </div>
             <CardTitle>You&apos;ve been logged out</CardTitle>

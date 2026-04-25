@@ -189,7 +189,7 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
             className={cn(
               'flex h-5 w-5 items-center justify-center rounded-full border-2',
               selected
-                ? 'border-primary-500 bg-primary-500'
+                ? 'border-primary-500 bg-primary-800'
                 : 'border-neutral-300'
             )}
           >

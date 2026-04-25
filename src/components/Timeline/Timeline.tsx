@@ -211,7 +211,7 @@ export function TimelineProgress({
                       state === 'completed' ||
                         state === 'current' ||
                         state === 'error'
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     )}
                   />
@@ -235,7 +235,7 @@ export function TimelineProgress({
                         ),
                       state === 'current' &&
                         cn(
-                          'bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4',
+                          'bg-primary-800 shadow-primary-500/30 ring-primary-100 dark:bg-primary-800 dark:ring-primary-900/50 text-white shadow-md ring-4',
                           sizes.current,
                           pulse && 'animate-pulse'
                         ),
@@ -281,7 +281,7 @@ export function TimelineProgress({
                       'flex-1',
                       sizes.connector,
                       state === 'completed'
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     )}
                   />
@@ -554,8 +554,8 @@ export function OrderConfirmation({
           onClick={onClose}
           className={cn(
             'w-full rounded-lg px-4 py-3 font-medium',
-            'bg-primary-700 hover:bg-primary-800 text-white',
-            'dark:bg-primary-600 dark:hover:bg-primary-700',
+            'bg-primary-800 hover:bg-primary-900 text-white',
+            'dark:bg-primary-800 dark:hover:bg-primary-900',
             'transition-colors'
           )}
         >

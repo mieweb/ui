@@ -667,7 +667,7 @@ export function DateRangePicker({
                       'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
                       'hover:bg-muted',
                       activePreset === preset.key &&
-                        'bg-primary text-primary-foreground'
+                        'bg-primary-800 text-white'
                     )}
                   >
                     {preset.label}

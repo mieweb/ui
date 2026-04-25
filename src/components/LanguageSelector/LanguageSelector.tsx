@@ -404,7 +404,7 @@ export function LanguageSelectorInline({
             index === languages.length - 1 && 'rounded-r-lg',
             index > 0 && 'border-l border-gray-200 dark:border-gray-700',
             language.code === value
-              ? 'bg-primary-600 text-white'
+              ? 'bg-primary-800 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
           )}
         >

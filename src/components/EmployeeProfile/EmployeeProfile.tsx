@@ -204,7 +204,7 @@ export function EmployeeProfileCard({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 rounded-full p-1.5 shadow-md transition-colors"
+                className="bg-primary-800 text-white hover:bg-primary-900 absolute right-0 bottom-0 rounded-full p-1.5 shadow-md transition-colors"
                 aria-label="Edit photo"
                 data-slot="employee-card-photo-edit"
               >
@@ -472,7 +472,7 @@ export function OrderSidebarTabs({
             'px-4 py-2 text-sm font-medium transition-colors',
             'focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
             activeTab === tab.id
-              ? 'bg-primary text-primary-foreground'
+              ? 'bg-primary-800 text-white'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
           )}
         >

@@ -52,8 +52,8 @@ export function AIChatTrigger({
       data-slot="ai-chat-trigger"
       className={cn(
         'fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg',
-        'bg-primary-500 text-white',
-        'hover:bg-primary-600',
+        'bg-primary-800 text-white',
+        'hover:bg-primary-800',
         'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
         'dark:focus:ring-offset-neutral-900',
         'transition-all duration-200',

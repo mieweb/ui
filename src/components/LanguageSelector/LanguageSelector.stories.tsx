@@ -234,7 +234,7 @@ export const InHeader: Story = {
             value={value}
             onChange={(language) => setValue(language.code)}
           />
-          <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm">
+          <button className="bg-primary-800 text-white rounded-lg px-3 py-1.5 text-sm">
             Sign In
           </button>
         </div>

@@ -56,7 +56,7 @@ const cardVariants = cva(
 const cardAccentVariants = cva('absolute left-0 top-0 bottom-0 w-1', {
   variants: {
     color: {
-      primary: 'bg-primary-500',
+      primary: 'bg-primary-800',
       success: 'bg-success',
       warning: 'bg-warning',
       destructive: 'bg-destructive',
@@ -135,9 +135,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {loading && (
           <div className="bg-card/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
             <div className="flex gap-1">
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full" />
             </div>
           </div>
         )}
@@ -308,7 +308,7 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
   ) => {
     const variantClasses = {
       default: 'bg-muted text-muted-foreground',
-      primary: 'bg-primary-500 text-white',
+      primary: 'bg-primary-800 text-white',
       success: 'bg-success text-success-foreground',
       warning: 'bg-warning text-warning-foreground',
       destructive: 'bg-destructive text-destructive-foreground',

@@ -11,8 +11,8 @@ const checkboxVariants = cva(
     'cursor-pointer',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
-    'checked:bg-primary-500 checked:border-primary-500',
-    'indeterminate:bg-primary-500 indeterminate:border-primary-500',
+    'checked:bg-primary-800 checked:border-primary-500',
+    'indeterminate:bg-primary-800 indeterminate:border-primary-500',
   ],
   {
     variants: {

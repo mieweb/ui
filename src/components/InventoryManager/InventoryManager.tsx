@@ -311,7 +311,7 @@ export function InventoryManager({
               onClick={() => setUpdateType('debit')}
               className={`rounded-l-md border px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'debit'
-                  ? 'border-primary bg-primary text-primary-foreground'
+                  ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >
@@ -335,7 +335,7 @@ export function InventoryManager({
               onClick={() => setUpdateType('credit')}
               className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'credit'
-                  ? 'border-primary bg-primary text-primary-foreground'
+                  ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >

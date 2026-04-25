@@ -311,7 +311,7 @@ export const ControlledState: Story = {
             onClick={() => setState('idle')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'idle'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -321,7 +321,7 @@ export const ControlledState: Story = {
             onClick={() => setState('recording')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'recording'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -331,7 +331,7 @@ export const ControlledState: Story = {
             onClick={() => setState('paused')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'paused'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -341,7 +341,7 @@ export const ControlledState: Story = {
             onClick={() => setState('stopped')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'stopped'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -433,7 +433,7 @@ export const CustomControls: Story = {
           {state === 'stopped' && (
             <button
               onClick={onPlay}
-              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ▶️ Play Recording
             </button>
@@ -441,7 +441,7 @@ export const CustomControls: Story = {
           {isPlaying && (
             <button
               onClick={onPause}
-              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ⏸️ Pause Playback
             </button>
@@ -534,7 +534,7 @@ export const InlineRecorder: Story = {
             showTime={false}
           />
         </div>
-        <button className="bg-primary-700 hover:bg-primary-800 rounded-lg px-3 py-1.5 text-sm text-white transition-colors">
+        <button className="bg-primary-800 hover:bg-primary-900 rounded-lg px-3 py-1.5 text-sm text-white transition-colors">
           Send
         </button>
       </div>

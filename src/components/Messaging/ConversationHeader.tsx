@@ -413,7 +413,7 @@ const ConversationListItem = React.forwardRef<
               className={cn(
                 'flex shrink-0 items-center justify-center',
                 'h-5 min-w-[20px] rounded-full px-1.5',
-                'bg-primary-600 text-xs font-medium text-white'
+                'bg-primary-800 text-xs font-medium text-white'
               )}
             >
               {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}

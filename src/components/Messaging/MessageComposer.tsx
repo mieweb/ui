@@ -87,7 +87,7 @@ const sendButtonVariants = cva(
       variant: {
         primary: [
           'bg-primary-800 text-white',
-          'hover:bg-primary-700',
+          'hover:bg-primary-900',
           'active:scale-95',
         ],
         subtle: [

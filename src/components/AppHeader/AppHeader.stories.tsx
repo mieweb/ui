@@ -157,7 +157,7 @@ function HeaderWithTitleDemo() {
 
       <AppHeaderSection align="right">
         <AppHeaderActions>
-          <button className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors">
+          <button className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors">
             Add User
           </button>
         </AppHeaderActions>
@@ -308,7 +308,7 @@ export const Default: Story = {
             {showBranding && (
               <AppHeaderBrand
                 logo={
-                  <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white">
+                  <div className="bg-primary-800 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white">
                     A
                   </div>
                 }
@@ -474,7 +474,7 @@ export const Default: Story = {
                   {/* Sign In button when signed out */}
                   {!isSignedIn && (
                     <button
-                      className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+                      className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
                       onClick={() => console.log('Sign in')}
                     >
                       Sign in
@@ -510,7 +510,7 @@ export const Default: Story = {
               {/* Signed out state - Sign In button */}
               {!isSignedIn && (
                 <button
-                  className="bg-primary-500 hover:bg-primary-600 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors"
+                  className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors"
                   onClick={() => console.log('Sign in')}
                 >
                   Sign in

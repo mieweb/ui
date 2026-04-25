@@ -186,7 +186,7 @@ function AIEmptyState({
   const aiIcon = (
     <div
       data-slot="ai-empty-state-icon"
-      className="bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white"
+      className="bg-primary-800 dark:bg-primary-800 flex h-16 w-16 items-center justify-center rounded-full text-white"
     >
       <SparklesIcon size="lg" className="h-8 w-8" />
     </div>
@@ -345,7 +345,7 @@ export function AIChat({
           <div className="flex items-center gap-3">
             <div
               data-slot="ai-chat-header-icon"
-              className="bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white"
+              className="bg-primary-800 dark:bg-primary-800 flex h-8 w-8 items-center justify-center rounded-full text-white"
             >
               <SparklesIcon size="sm" />
             </div>

@@ -28,7 +28,7 @@ const progressBarFillVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary-500',
+        default: 'bg-primary-800',
         success: 'bg-green-500',
         warning: 'bg-yellow-500',
         danger: 'bg-red-500',
@@ -151,7 +151,7 @@ function Progress({
             progressBarFillVariants({ variant, animated, striped }),
             indeterminate &&
               'w-1/3 animate-[indeterminate_1.5s_ease-in-out_infinite]',
-            !striped && variant === 'default' && 'bg-primary-500',
+            !striped && variant === 'default' && 'bg-primary-800',
             !striped && variant === 'success' && 'bg-green-500',
             !striped && variant === 'warning' && 'bg-yellow-500',
             !striped && variant === 'danger' && 'bg-red-500'

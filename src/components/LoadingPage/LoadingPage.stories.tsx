@@ -106,7 +106,7 @@ function LoadingPageDemo({
                     2000
                   );
                 }}
-                className="bg-primary text-primary-foreground w-full rounded px-4 py-2"
+                className="bg-primary-800 text-white w-full rounded px-4 py-2"
               >
                 Save
               </button>

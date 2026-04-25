@@ -253,7 +253,7 @@ export function MobileBackButton({
     >
       <a
         href={href}
-        className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        className="bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
       >
         <ChevronLeftIcon className="h-4 w-4" />
         {label}
@@ -600,7 +600,7 @@ const bookButtonVariants = cva(
       },
       variant: {
         primary:
-          'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+          'bg-primary-800 text-white hover:bg-primary-900 focus:ring-primary-500',
         outline:
           'border-2 border-primary-800 text-primary-800 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-300 dark:text-primary-300 dark:hover:bg-primary-900/20',
       },

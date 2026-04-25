@@ -669,7 +669,7 @@ function DropdownItemCheckbox({
       className={cn(
         'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors duration-150',
         checked || indeterminate
-          ? 'border-primary-500 bg-primary-500 text-white'
+          ? 'border-primary-500 bg-primary-800 text-white'
           : 'border-input bg-background text-transparent'
       )}
     >

@@ -62,7 +62,7 @@ export function SiteLogo({
             'flex h-8 w-8 items-center justify-center rounded-lg text-lg font-bold',
             variant === 'light'
               ? 'bg-white/20 text-white'
-              : 'bg-primary-600 text-white'
+              : 'bg-primary-800 text-white'
           )}
         >
           {name?.[0] || 'B'}
@@ -188,7 +188,7 @@ export function AuthButtons({
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
           ? 'text-primary-600 bg-white hover:bg-white/90'
-          : 'bg-primary-700 hover:bg-primary-800 text-white'
+          : 'bg-primary-800 hover:bg-primary-900 text-white'
       )}
     >
       Sign Up
@@ -223,7 +223,7 @@ export function AuthButtons({
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
                 ? 'text-primary-600 bg-white hover:bg-white/90'
-                : 'bg-primary-700 hover:bg-primary-800 text-white'
+                : 'bg-primary-800 hover:bg-primary-900 text-white'
             )}
           >
             Sign Up
@@ -605,7 +605,7 @@ export function MobileMenuPanel({
                   onSignUp?.();
                   onClose();
                 }}
-                className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-sm font-medium text-white"
+                className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-sm font-medium text-white"
               >
                 Sign Up
               </button>
@@ -626,7 +626,7 @@ const headerVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-primary-600',
+        primary: 'bg-primary-800',
         white:
           'bg-white shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800',
         transparent: 'bg-transparent',

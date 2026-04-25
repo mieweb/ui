@@ -285,7 +285,7 @@ function InModalContextDemo() {
 
   return (
     <div className="bg-background mx-auto max-w-2xl rounded-lg border shadow-lg">
-      <div className="bg-primary text-primary-foreground rounded-t-lg p-4">
+      <div className="bg-primary-800 text-white rounded-t-lg p-4">
         <h4 className="text-lg font-semibold">User Permissions</h4>
       </div>
       <div className="p-6">

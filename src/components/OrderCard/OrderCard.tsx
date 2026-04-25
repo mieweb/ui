@@ -297,7 +297,7 @@ export function OrderCard({
                 <button
                   type="button"
                   onClick={handleAcceptClick}
-                  className="bg-primary hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors"
+                  className="bg-primary hover:bg-primary-900 rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors"
                 >
                   Accept
                 </button>

@@ -488,7 +488,7 @@ export function ServiceMultiSelect({
                             className={cn(
                               'flex h-4 w-4 items-center justify-center rounded border',
                               isSelected
-                                ? 'bg-primary-500 border-primary-500 text-white'
+                                ? 'bg-primary-800 border-primary-500 text-white'
                                 : 'border-neutral-300 dark:border-neutral-600'
                             )}
                           >
@@ -837,7 +837,7 @@ export function CompactFilterBar({
           disabled={loading}
           className={cn(
             'h-9 rounded-md px-4 text-sm font-medium',
-            'bg-primary-500 hover:bg-primary-600 text-white',
+            'bg-primary-800 hover:bg-primary-900 text-white',
             'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
             'disabled:cursor-not-allowed disabled:opacity-50'
           )}

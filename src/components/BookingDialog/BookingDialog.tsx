@@ -288,7 +288,7 @@ export function ConsentSwitch({
         data-slot="consent-switch-toggle"
         className={cn(
           'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
-          checked ? 'bg-primary-600' : 'bg-muted'
+          checked ? 'bg-primary-800' : 'bg-muted'
         )}
       >
         <span
@@ -653,7 +653,7 @@ export function BookingDialog({
               disabled={isLoading}
               data-slot="booking-dialog-footer-btn"
               className={cn(
-                'bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
+                'bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
                 isLoading && 'cursor-not-allowed opacity-50'
               )}
             >
@@ -785,7 +785,7 @@ export function InlineBookingForm({
         disabled={isLoading}
         data-slot="inline-booking-form-submit"
         className={cn(
-          'bg-primary-700 hover:bg-primary-800 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
+          'bg-primary-800 hover:bg-primary-900 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -847,7 +847,7 @@ export function QuickBookCard({
         <button
           type="button"
           onClick={onBook}
-          className="bg-primary-700 hover:bg-primary-800 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          className="bg-primary-800 hover:bg-primary-900 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
           data-slot="quick-book-card-btn"
         >
           <CalendarIcon className="h-4 w-4" />

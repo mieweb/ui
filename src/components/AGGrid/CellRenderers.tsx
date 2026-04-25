@@ -91,12 +91,12 @@ function getInitials(name: string): string {
  */
 function getAvatarColor(name: string): string {
   const colors = [
-    'bg-primary-600',
+    'bg-primary-800',
     'bg-green-600',
     'bg-orange-600',
     'bg-secondary-600',
     'bg-pink-600',
-    'bg-primary-700',
+    'bg-primary-800',
     'bg-teal-600',
     'bg-amber-600',
   ];
@@ -660,7 +660,7 @@ export interface ProgressRendererProps extends ICellRendererParams {
 export function ProgressRenderer(
   props: ProgressRendererProps
 ): React.ReactElement {
-  const { value, barColor = 'bg-primary-500', max = 100 } = props;
+  const { value, barColor = 'bg-primary-800', max = 100 } = props;
   if (value == null) return <span className="text-muted-foreground">--</span>;
 
   const percentage = Math.min(100, Math.max(0, (Number(value) / max) * 100));

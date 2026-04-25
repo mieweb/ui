@@ -115,7 +115,7 @@ function AppLogo() {
 
   if (showCollapsed) {
     return (
-      <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+      <div className="bg-primary-800 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
         M
       </div>
     );
@@ -123,7 +123,7 @@ function AppLogo() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+      <div className="bg-primary-800 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
         M
       </div>
       <div className="font-semibold text-neutral-900 dark:text-white">

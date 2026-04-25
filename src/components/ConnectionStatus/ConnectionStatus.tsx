@@ -157,7 +157,7 @@ export function ConnectionStatusOverlay({
               type="button"
               data-slot="connection-overlay-action"
               onClick={onReload || (() => window.location.reload())}
-              className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
             >
               <ReloadIcon className="h-4 w-4" />
               Reload

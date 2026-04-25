@@ -166,7 +166,7 @@ function CustomTriggerDemo() {
   return (
     <button
       onClick={open}
-      className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-white transition-colors"
+      className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white transition-colors"
     >
       Open Search
     </button>
