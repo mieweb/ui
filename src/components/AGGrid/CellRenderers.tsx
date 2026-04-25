@@ -96,7 +96,7 @@ function getAvatarColor(name: string): string {
     'bg-orange-600',
     'bg-secondary-600',
     'bg-pink-600',
-    'bg-primary-800',
+    'bg-primary-700',
     'bg-teal-600',
     'bg-amber-600',
   ];

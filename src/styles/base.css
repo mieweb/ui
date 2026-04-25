@@ -78,14 +78,14 @@
   /* ── Destructive / Error Scale ─────────────────────────────────────── */
   --color-destructive: var(
     --mieweb-destructive,
-    var(--mieweb-destructive-500, #ef4444)
+    var(--mieweb-destructive-500, #dc2626)
   );
   --color-destructive-50: var(--mieweb-destructive-50, #fef2f2);
   --color-destructive-100: var(--mieweb-destructive-100, #fee2e2);
   --color-destructive-200: var(--mieweb-destructive-200, #fecaca);
   --color-destructive-300: var(--mieweb-destructive-300, #fca5a5);
   --color-destructive-400: var(--mieweb-destructive-400, #f87171);
-  --color-destructive-500: var(--mieweb-destructive-500, #ef4444);
+  --color-destructive-500: var(--mieweb-destructive-500, #dc2626);
   --color-destructive-600: var(--mieweb-destructive-600, #dc2626);
   --color-destructive-700: var(--mieweb-destructive-700, #b91c1c);
   --color-destructive-800: var(--mieweb-destructive-800, #991b1b);
@@ -94,13 +94,13 @@
   --color-destructive-foreground: var(--mieweb-destructive-foreground, #ffffff);
 
   /* ── Success Scale ─────────────────────────────────────────────────── */
-  --color-success: var(--mieweb-success, var(--mieweb-success-500, #22c55e));
+  --color-success: var(--mieweb-success, var(--mieweb-success-500, #15803d));
   --color-success-50: var(--mieweb-success-50, #f0fdf4);
   --color-success-100: var(--mieweb-success-100, #dcfce7);
   --color-success-200: var(--mieweb-success-200, #bbf7d0);
   --color-success-300: var(--mieweb-success-300, #86efac);
   --color-success-400: var(--mieweb-success-400, #4ade80);
-  --color-success-500: var(--mieweb-success-500, #22c55e);
+  --color-success-500: var(--mieweb-success-500, #15803d);
   --color-success-600: var(--mieweb-success-600, #16a34a);
   --color-success-700: var(--mieweb-success-700, #15803d);
   --color-success-800: var(--mieweb-success-800, #166534);
@@ -212,7 +212,7 @@
   --mieweb-destructive-200: #fecaca;
   --mieweb-destructive-300: #fca5a5;
   --mieweb-destructive-400: #f87171;
-  --mieweb-destructive-500: #ef4444;
+  --mieweb-destructive-500: #dc2626;
   --mieweb-destructive-600: #dc2626;
   --mieweb-destructive-700: #b91c1c;
   --mieweb-destructive-800: #991b1b;
@@ -226,7 +226,7 @@
   --mieweb-success-200: #bbf7d0;
   --mieweb-success-300: #86efac;
   --mieweb-success-400: #4ade80;
-  --mieweb-success-500: #22c55e;
+  --mieweb-success-500: #15803d;
   --mieweb-success-600: #16a34a;
   --mieweb-success-700: #15803d;
   --mieweb-success-800: #166534;

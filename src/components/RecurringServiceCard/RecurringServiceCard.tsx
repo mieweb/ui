@@ -146,7 +146,7 @@ export function RecurringServiceCard({
     primary: {
       border: 'border-primary/30',
       icon: (
-        <span className="bg-primary-800 text-white flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+        <span className="bg-primary-800 text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
           <svg
             className="h-3 w-3"
             fill="none"
