@@ -169,6 +169,7 @@
     "test:visual": "playwright test",
     "test:visual:ui": "playwright test --ui",
     "test:visual:debug": "playwright test --debug",
+    "test:storybook": "test-storybook --url http://localhost:6006",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -221,6 +222,7 @@
     "@storybook/addon-links": "^10.2.11",
     "@storybook/react": "^10.2.11",
     "@storybook/react-vite": "^10.2.11",
+    "@storybook/test-runner": "0.24.3",
     "@tailwindcss/cli": "^4.2.1",
     "@tailwindcss/postcss": "^4.2.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -258,6 +260,6 @@
     "wavesurfer.js": "^7.12.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }
