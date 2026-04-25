@@ -121,7 +121,7 @@
   --color-warning-800: var(--mieweb-warning-800, #92400e);
   --color-warning-900: var(--mieweb-warning-900, #78350f);
   --color-warning-950: var(--mieweb-warning-950, #451a03);
-  --color-warning-foreground: var(--mieweb-warning-foreground, #ffffff);
+  --color-warning-foreground: var(--mieweb-warning-foreground, #451a03);
 
   /* ── Info Scale ────────────────────────────────────────────────────── */
   --color-info: var(--mieweb-info, var(--mieweb-info-500, #0ea5e9));
@@ -246,7 +246,7 @@
   --mieweb-warning-800: #92400e;
   --mieweb-warning-900: #78350f;
   --mieweb-warning-950: #451a03;
-  --mieweb-warning-foreground: #ffffff;
+  --mieweb-warning-foreground: #451a03;
 
   /* ── Info Scale (Sky Blue) ─────────────────────────────────────────── */
   --mieweb-info-50: #f0f9ff;
@@ -319,7 +319,7 @@
   /* Status foregrounds */
   --mieweb-destructive-foreground: #fafafa;
   --mieweb-success-foreground: #fafafa;
-  --mieweb-warning-foreground: #fafafa;
+  --mieweb-warning-foreground: #451a03;
   --mieweb-info-foreground: #fafafa;
   --mieweb-secondary-foreground: #fafafa;
 
