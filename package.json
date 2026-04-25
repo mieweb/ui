@@ -148,14 +148,14 @@
     "LICENSE"
   ],
   "scripts": {
-    "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
+    "preinstall": "node scripts/ensure-submodules.mjs",
     "postinstall": "if [ -z \"$_DATAVIS_RELINK\" ] && [ ! -f node_modules/datavis/package.json ] && [ -f packages/datavis/package.json ]; then echo '⚠️  Stale datavis link detected — re-linking submodule...'; _DATAVIS_RELINK=1 pnpm install; fi",
     "dev": "tsup --watch",
     "build": "tsup && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
     "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node scripts/ensure-submodules.mjs && tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "format": "prettier --check \"src/**/*.{ts,tsx,css}\"",
