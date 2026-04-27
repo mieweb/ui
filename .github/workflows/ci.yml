@@ -35,7 +35,14 @@ jobs:
         run: pnpm typecheck
 
       - name: Format check
-        run: pnpm format
+        run: |
+          pnpm exec prettier --write "src/**/*.{ts,tsx,css}"
+          if ! git diff --quiet; then
+            echo "::error::Prettier found formatting differences:"
+            git diff --name-only
+            git diff
+            exit 1
+          fi
 
   unit-tests:
     name: Unit Tests
