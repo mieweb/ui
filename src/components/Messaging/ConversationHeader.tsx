@@ -426,7 +426,7 @@ const ConversationListItem = React.forwardRef<
       <div className="flex shrink-0 flex-col items-center gap-1">
         {conversation.isPinned && (
           <svg
-            className="text-primary-500 h-4 w-4"
+            className="text-primary-800 h-4 w-4"
             fill="currentColor"
             viewBox="0 0 24 24"
           >

@@ -244,7 +244,7 @@ export function LanguageSelector({
                 )}
                 <span className="flex-1">{language.name}</span>
                 {language.code === value && (
-                  <CheckIcon className="text-primary-600 dark:text-primary-400 h-4 w-4" />
+                  <CheckIcon className="text-primary-800 dark:text-primary-400 h-4 w-4" />
                 )}
               </li>
             ))}

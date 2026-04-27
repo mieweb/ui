@@ -8,7 +8,7 @@ const quickActionIconVariants = cva(
     variants: {
       color: {
         primary:
-          'bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400',
+          'bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-400',
         green:
           'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400',
         purple:

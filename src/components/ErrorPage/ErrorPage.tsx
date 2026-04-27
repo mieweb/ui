@@ -399,7 +399,7 @@ export function MaintenancePage({
           href={statusUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+          className="text-primary-800 hover:text-primary-900 text-sm font-medium"
         >
           Check Status Page →
         </a>

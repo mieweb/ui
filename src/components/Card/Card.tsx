@@ -441,7 +441,7 @@ const CardCollapsible = React.forwardRef<HTMLDivElement, CardCollapsibleProps>(
         <button
           type="button"
           onClick={handleToggle}
-          className="text-primary-600 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="text-primary-800 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           aria-expanded={expanded}
         >
           {typeof trigger === 'string' ? (
@@ -509,7 +509,7 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
         {...props}
       >
         {icon && (
-          <div className="bg-primary-500/10 text-primary-600 rounded-lg p-2">
+          <div className="bg-primary-500/10 text-primary-800 rounded-lg p-2">
             {icon}
           </div>
         )}

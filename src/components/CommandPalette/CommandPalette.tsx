@@ -319,7 +319,7 @@ export function CommandPalette({
               </button>
             )}
             {isLoading && (
-              <div className="text-primary-500 absolute top-1/2 right-4 -translate-y-1/2">
+              <div className="text-primary-800 absolute top-1/2 right-4 -translate-y-1/2">
                 <SpinnerIcon />
               </div>
             )}

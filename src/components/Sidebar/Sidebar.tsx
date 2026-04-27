@@ -456,7 +456,7 @@ export function SidebarNavItem({
           className={cn(
             'h-5 w-5 flex-shrink-0',
             isActive
-              ? 'text-primary-600 dark:text-primary-400'
+              ? 'text-primary-800 dark:text-primary-400'
               : 'text-muted-foreground',
             !showCollapsed && 'mr-3'
           )}

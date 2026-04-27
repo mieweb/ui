@@ -59,7 +59,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'running' && (
         <svg
-          className="text-primary-600 dark:text-primary-400 h-3 w-3 animate-spin"
+          className="text-primary-800 dark:text-primary-400 h-3 w-3 animate-spin"
           fill="none"
           viewBox="0 0 24 24"
         >

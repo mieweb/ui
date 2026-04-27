@@ -155,7 +155,7 @@ export const statusColors: Record<string, StatusConfig> = {
   new: {
     label: 'New',
     bgClass: 'bg-primary-100 dark:bg-primary-900/30',
-    textClass: 'text-primary-600 dark:text-primary-400',
+    textClass: 'text-primary-800 dark:text-primary-400',
   },
   verified: {
     label: 'Verified',
@@ -360,7 +360,7 @@ export function EmailRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`mailto:${value}`}
-      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
+      className="text-primary-800 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
       <MailIcon className="h-3 w-3 opacity-60" />
@@ -385,7 +385,7 @@ export function PhoneRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`tel:${value}`}
-      className="text-foreground hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5"
+      className="text-foreground hover:text-primary-800 dark:hover:text-primary-400 inline-flex items-center gap-1.5"
       onClick={(e) => e.stopPropagation()}
     >
       <PhoneIcon className="h-3 w-3 text-green-500 opacity-70" />
@@ -413,7 +413,7 @@ export function DomainRenderer(props: ICellRendererParams): React.ReactElement {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
+      className="text-primary-800 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
       <GlobeIcon className="h-3 w-3 opacity-60" />
@@ -633,7 +633,7 @@ export function CompanyRenderer(
         />
       ) : null}
       <div
-        className="bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 flex h-5 w-5 items-center justify-center rounded text-[9px] font-semibold"
+        className="bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400 flex h-5 w-5 items-center justify-center rounded text-[9px] font-semibold"
         style={{ display: faviconUrl ? 'none' : 'flex' }}
       >
         {getInitials(value)}

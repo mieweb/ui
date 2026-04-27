@@ -474,7 +474,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
         <label className="flex items-center">
           <input
             type="checkbox"
-            className="text-primary-600 focus:ring-primary-500 rounded border-gray-300"
+            className="text-primary-800 focus:ring-primary-500 rounded border-gray-300"
           />
           <span className="text-muted-foreground ml-2 text-sm">
             Remember me
@@ -610,7 +610,7 @@ function SignupForm({
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
           required
-          className="text-primary-600 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
+          className="text-primary-800 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
         />
         <span className="text-muted-foreground ml-2 text-sm">
           I agree to the{' '}

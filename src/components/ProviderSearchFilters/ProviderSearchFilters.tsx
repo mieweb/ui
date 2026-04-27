@@ -963,7 +963,7 @@ export function ActiveFilters({
       <button
         type="button"
         onClick={onClearAll}
-        className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm"
+        className="text-primary-800 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 text-sm"
       >
         Clear all
       </button>

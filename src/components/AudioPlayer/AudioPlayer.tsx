@@ -897,7 +897,7 @@ const AudioPlayer = React.forwardRef<
         className={cn(
           'font-mono text-xs tabular-nums',
           isShowingHoverTime
-            ? 'text-primary-600 dark:text-primary-400'
+            ? 'text-primary-800 dark:text-primary-400'
             : 'text-muted-foreground'
         )}
       >

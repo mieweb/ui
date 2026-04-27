@@ -187,7 +187,7 @@ export function AuthButtons({
       className={cn(
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
-          ? 'text-primary-600 bg-white hover:bg-white/90'
+          ? 'text-primary-800 bg-white hover:bg-white/90'
           : 'bg-primary-800 hover:bg-primary-900 text-white'
       )}
     >
@@ -222,7 +222,7 @@ export function AuthButtons({
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
-                ? 'text-primary-600 bg-white hover:bg-white/90'
+                ? 'text-primary-800 bg-white hover:bg-white/90'
                 : 'bg-primary-800 hover:bg-primary-900 text-white'
             )}
           >

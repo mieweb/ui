@@ -55,7 +55,7 @@ const actionButtonVariants = cva(
     variants: {
       variant: {
         default:
-          'text-gray-600 hover:text-primary-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800',
+          'text-gray-600 hover:text-primary-800 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800',
         active:
           'text-primary-800 bg-primary-50 dark:text-primary-300 dark:bg-primary-900/20',
       },
@@ -410,7 +410,7 @@ export function SocialMediaLinks({
           rel="noopener noreferrer"
           title={`Visit ${providerName} on ${link.label}`}
           className={cn(
-            'hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-gray-400',
+            'hover:text-primary-800 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-gray-400',
             socialIconSizes[size]
           )}
         >
@@ -509,7 +509,7 @@ export function AddressDisplay({
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
-          'hover:text-primary-600 dark:hover:text-primary-400 text-gray-600 hover:underline dark:text-gray-300',
+          'hover:text-primary-800 dark:hover:text-primary-400 text-gray-600 hover:underline dark:text-gray-300',
           className
         )}
       >
@@ -548,7 +548,7 @@ export function ClaimListingButton({
     <a
       href={claimUrl}
       className={cn(
-        'hover:text-primary-600 dark:hover:text-primary-400 text-muted-foreground inline-flex items-center gap-2 text-sm',
+        'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground inline-flex items-center gap-2 text-sm',
         className
       )}
     >

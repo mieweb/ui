@@ -545,7 +545,7 @@ export const AudioAttachment: Story = {
         <div className="mb-2 flex items-center gap-2">
           <div className="bg-primary-100 dark:bg-primary-900/30 flex h-8 w-8 items-center justify-center rounded">
             <svg
-              className="text-primary-600 dark:text-primary-400 h-4 w-4"
+              className="text-primary-800 dark:text-primary-400 h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

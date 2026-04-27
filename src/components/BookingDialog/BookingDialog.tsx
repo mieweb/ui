@@ -232,7 +232,7 @@ export function ServiceSelect({
                 type="checkbox"
                 checked={selectedServices.includes(service.slug)}
                 onChange={() => toggleService(service.slug)}
-                className="text-primary-600 focus:ring-primary-500 border-input h-4 w-4 rounded"
+                className="text-primary-800 focus:ring-primary-500 border-input h-4 w-4 rounded"
               />
               <span className="text-foreground">{service.name}</span>
             </label>
@@ -516,7 +516,7 @@ export function BookingDialog({
               href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-primary-600 text-muted-foreground text-sm"
+              className="hover:text-primary-800 text-muted-foreground text-sm"
               data-slot="booking-dialog-provider-address"
             >
               {provider.address.street1}

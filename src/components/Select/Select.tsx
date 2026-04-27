@@ -607,7 +607,7 @@ function SelectOptionItem({
     >
       <span className="flex-1 truncate">{option.label}</span>
       {isSelected && (
-        <CheckIcon className="text-primary-500 h-4 w-4 shrink-0" />
+        <CheckIcon className="text-primary-800 h-4 w-4 shrink-0" />
       )}
     </li>
   );

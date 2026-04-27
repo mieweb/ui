@@ -152,7 +152,7 @@ export function SuggestedActions({
           onClick={() => onSelect(action)}
           className={cn(
             'flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5',
-            'hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 text-sm text-neutral-700',
+            'hover:border-primary-300 hover:bg-primary-50 hover:text-primary-900 text-sm text-neutral-700',
             'dark:border-neutral-700 dark:text-neutral-300',
             'dark:hover:border-primary-700 dark:hover:bg-primary-900/20 dark:hover:text-primary-300',
             'transition-colors'

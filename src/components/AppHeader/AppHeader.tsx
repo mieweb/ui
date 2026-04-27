@@ -228,7 +228,7 @@ export function AppHeaderIconButton({
         'hover:bg-gray-100 dark:hover:bg-gray-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         isActive &&
-          'text-primary-600 dark:text-primary-400 bg-gray-100 dark:bg-gray-800',
+          'text-primary-800 dark:text-primary-400 bg-gray-100 dark:bg-gray-800',
         className
       )}
       aria-label={label}

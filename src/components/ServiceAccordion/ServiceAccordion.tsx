@@ -114,7 +114,7 @@ const serviceLinkVariants = cva(
   [
     'flex items-center gap-2 py-2 px-3 rounded-md',
     'text-neutral-700 dark:text-neutral-300',
-    'hover:bg-neutral-100 dark:hover:bg-neutral-700/50 hover:text-primary-600 dark:hover:text-primary-400',
+    'hover:bg-neutral-100 dark:hover:bg-neutral-700/50 hover:text-primary-800 dark:hover:text-primary-400',
     'transition-colors',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
   ],
@@ -238,7 +238,7 @@ function SubCategoryAccordion({
         className={cn(
           'flex w-full items-center justify-between px-3 py-2',
           'text-left font-medium text-neutral-700 dark:text-neutral-200',
-          'hover:text-primary-600 dark:hover:text-primary-400',
+          'hover:text-primary-800 dark:hover:text-primary-400',
           'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
         )}
         aria-expanded={isExpanded}
@@ -341,7 +341,7 @@ function CategoryAccordionItem({
       >
         <div className="flex items-center gap-3">
           {category.icon && (
-            <span className="text-primary-500 dark:text-primary-400">
+            <span className="text-primary-800 dark:text-primary-400">
               {typeof category.icon === 'string' ? (
                 <span className="text-xl">{category.icon}</span>
               ) : (
@@ -617,7 +617,7 @@ export function ServiceList({
             className={cn(
               'flex items-center gap-2 py-1.5',
               'text-neutral-700 dark:text-neutral-300',
-              'hover:text-primary-600 dark:hover:text-primary-400',
+              'hover:text-primary-800 dark:hover:text-primary-400',
               'transition-colors'
             )}
           >
