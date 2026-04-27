@@ -127,13 +127,13 @@ const playButtonVariants = cva(
           'dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800',
         ],
         compact: [
-          'bg-primary-600 text-white',
-          'hover:bg-primary-700',
+          'bg-primary-800 text-white',
+          'hover:bg-primary-900',
           'active:bg-primary-800',
         ],
         waveform: [
-          'bg-primary-600 text-white',
-          'hover:bg-primary-700',
+          'bg-primary-800 text-white',
+          'hover:bg-primary-900',
           'active:bg-primary-800',
         ],
       },
@@ -271,11 +271,11 @@ function ProgressBar({
       }}
     >
       <div
-        className="bg-primary-600 absolute inset-y-0 left-0 rounded-full transition-all"
+        className="bg-primary-800 absolute inset-y-0 left-0 rounded-full transition-all"
         style={{ width: `${progress}%` }}
       />
       <div
-        className="bg-primary-600 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all"
+        className="bg-primary-800 absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-sm transition-all"
         style={{ left: `calc(${progress}% - 6px)` }}
       />
     </div>
@@ -925,8 +925,8 @@ const AudioPlayer = React.forwardRef<AudioPlayerRef, AudioPlayerProps>(
           className={cn(
             'font-mono text-xs tabular-nums',
             isShowingHoverTime
-              ? 'text-primary-600 dark:text-primary-400'
-              : 'text-neutral-500 dark:text-neutral-400'
+              ? 'text-primary-800 dark:text-primary-400'
+              : 'text-muted-foreground'
           )}
         >
           {formatTime(displayTime)} / {formatTime(displayDuration)}
