@@ -384,7 +384,7 @@ export function ProviderOverview({
                     }
                     className={`flex items-start gap-3 rounded-lg p-2 ${onActivityClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
                   >
-                    <div className="rounded-full bg-gray-100 p-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                    <div className="text-muted-foreground rounded-full bg-gray-100 p-2 dark:bg-gray-800">
                       {getActivityIcon(activity.type)}
                     </div>
                     <div className="min-w-0 flex-1">

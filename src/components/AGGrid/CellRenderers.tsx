@@ -209,10 +209,10 @@ export function AvatarNameRenderer(
   if (isSystemValue) {
     return (
       <div className="flex items-center gap-2 py-1">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-500">
+        <div className="dark:text-muted-foreground flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700">
           {displayName === 'Unassigned' ? '—' : '??'}
         </div>
-        <span className="truncate text-gray-400 italic dark:text-gray-500">
+        <span className="dark:text-muted-foreground truncate text-gray-400 italic">
           {displayName}
         </span>
       </div>
@@ -579,7 +579,7 @@ export function BooleanRenderer(
         'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
         isTrue
           ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-          : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+          : 'text-muted-foreground bg-gray-200 dark:bg-gray-700'
       )}
     >
       {isTrue ? (
@@ -698,7 +698,7 @@ export function TagsRenderer(props: ICellRendererParams): React.ReactElement {
       {value.slice(0, 3).map((tag: string, index: number) => (
         <span
           key={index}
-          className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+          className="text-muted-foreground inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium dark:bg-gray-800"
         >
           {tag}
         </span>

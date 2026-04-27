@@ -209,7 +209,7 @@ export function ServiceGeneralSettings({
                 Base Price
               </label>
               <div className="relative">
-                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                   $
                 </span>
                 <input
@@ -246,7 +246,7 @@ export function ServiceGeneralSettings({
                   }
                   placeholder="0"
                 />
-                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500">
+                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
                   days
                 </span>
               </div>

@@ -55,7 +55,7 @@ const actionButtonVariants = cva(
     variants: {
       variant: {
         default:
-          'text-gray-600 hover:text-primary-800 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800',
+          'text-muted-foreground hover:text-primary-800 hover:bg-gray-50  dark:hover:text-primary-400 dark:hover:bg-gray-800',
         active:
           'text-primary-800 bg-primary-50 dark:text-primary-300 dark:bg-primary-900/20',
       },
@@ -410,7 +410,7 @@ export function SocialMediaLinks({
           rel="noopener noreferrer"
           title={`Visit ${providerName} on ${link.label}`}
           className={cn(
-            'hover:text-primary-800 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-gray-400',
+            'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground transition-colors',
             socialIconSizes[size]
           )}
         >
@@ -509,7 +509,7 @@ export function AddressDisplay({
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
-          'hover:text-primary-800 dark:hover:text-primary-400 text-gray-600 hover:underline dark:text-gray-300',
+          'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground hover:underline',
           className
         )}
       >
@@ -519,9 +519,7 @@ export function AddressDisplay({
   }
 
   return (
-    <address
-      className={cn('text-gray-600 not-italic dark:text-gray-300', className)}
-    >
+    <address className={cn('text-muted-foreground not-italic', className)}>
       {addressContent}
     </address>
   );
@@ -575,7 +573,7 @@ export function ReportLink({ slug, href, className }: ReportLinkProps) {
     <a
       href={reportUrl}
       className={cn(
-        'inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
+        'text-muted-foreground inline-flex items-center gap-2 text-sm hover:text-gray-700 dark:hover:text-gray-300',
         className
       )}
     >

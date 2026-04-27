@@ -304,7 +304,7 @@ export function AppHeaderSearch({
       data-testid={testId}
       className={cn(
         'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-600',
-        'bg-white px-4 py-2 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+        'text-muted-foreground bg-white px-4 py-2 text-sm dark:bg-gray-700',
         'hover:border-gray-400 dark:hover:border-gray-500',
         'transition-colors hover:bg-gray-50 dark:hover:bg-gray-600',
         !showOnMobile && 'hidden sm:flex',
@@ -318,7 +318,7 @@ export function AppHeaderSearch({
         className={cn(
           'hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex',
           'rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600',
-          'flex-shrink-0 text-xs text-gray-600 dark:text-gray-300'
+          'text-muted-foreground flex-shrink-0 text-xs'
         )}
       >
         {isMac ? '⌘' : 'Ctrl'}+K

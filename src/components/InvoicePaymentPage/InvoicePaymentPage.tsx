@@ -365,7 +365,7 @@ export function InvoicePaymentPage({
                           className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                             paymentMethod === 'card'
                               ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                              : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-800'
                           } `}
                         >
                           Credit Card
@@ -378,7 +378,7 @@ export function InvoicePaymentPage({
                           className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                             paymentMethod === 'ach'
                               ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                              : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-800'
                           } `}
                         >
                           Bank Transfer

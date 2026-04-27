@@ -174,7 +174,7 @@ export function EmployerContactCard({
                           e.stopPropagation();
                           onEmail(contact);
                         }}
-                        className="rounded p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="hover:text-muted-foreground rounded p-1.5 text-gray-400 dark:hover:text-gray-300"
                         title={`Email ${contact.name}`}
                       >
                         <svg
@@ -198,7 +198,7 @@ export function EmployerContactCard({
                           e.stopPropagation();
                           onCall(contact);
                         }}
-                        className="rounded p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="hover:text-muted-foreground rounded p-1.5 text-gray-400 dark:hover:text-gray-300"
                         title={`Call ${contact.name}`}
                       >
                         <svg

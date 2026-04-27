@@ -328,7 +328,7 @@ export function InvoiceView({
 
           {/* Bill To */}
           <div data-slot="invoice-view-bill-to" className="mb-8">
-            <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
+            <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">
               Bill To
             </p>
             <p className="font-medium text-gray-900 dark:text-white">
@@ -354,16 +354,16 @@ export function InvoiceView({
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+                  <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium uppercase">
                     Description
                   </th>
-                  <th className="hidden px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+                  <th className="text-muted-foreground hidden px-4 py-3 text-center text-xs font-medium uppercase sm:table-cell">
                     Qty
                   </th>
-                  <th className="hidden px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+                  <th className="text-muted-foreground hidden px-4 py-3 text-right text-xs font-medium uppercase sm:table-cell">
                     Unit Price
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+                  <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium uppercase">
                     Total
                   </th>
                 </tr>
@@ -435,7 +435,7 @@ export function InvoiceView({
             >
               {invoice.paymentTerms && (
                 <div>
-                  <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
+                  <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">
                     Payment Terms
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -445,7 +445,7 @@ export function InvoiceView({
               )}
               {invoice.notes && (
                 <div>
-                  <p className="mb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
+                  <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">
                     Notes
                   </p>
                   <p className="text-sm whitespace-pre-line text-gray-700 dark:text-gray-300">

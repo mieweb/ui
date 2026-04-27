@@ -137,7 +137,7 @@ export function OrderSidebar({
             aria-label="Close sidebar"
           >
             <svg
-              className="h-5 w-5 text-gray-500"
+              className="text-muted-foreground h-5 w-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -178,7 +178,7 @@ export function OrderSidebar({
           <dl data-slot="order-sidebar-details" className="space-y-4">
             {patientName && (
               <div data-slot="order-sidebar-detail">
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Patient
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -189,7 +189,7 @@ export function OrderSidebar({
 
             {employerName && (
               <div data-slot="order-sidebar-detail">
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Employer
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -200,7 +200,7 @@ export function OrderSidebar({
 
             {serviceName && (
               <div data-slot="order-sidebar-detail">
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Service
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -214,7 +214,7 @@ export function OrderSidebar({
               className="grid grid-cols-2 gap-4"
             >
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Created
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -222,7 +222,7 @@ export function OrderSidebar({
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Scheduled
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -233,12 +233,12 @@ export function OrderSidebar({
 
             {notes && (
               <div data-slot="order-sidebar-detail">
-                <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Notes
                 </dt>
                 <dd
                   data-slot="order-sidebar-notes"
-                  className="mt-1 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                  className="text-muted-foreground mt-1 rounded-lg bg-gray-50 p-3 text-sm dark:bg-gray-800"
                 >
                   {notes}
                 </dd>

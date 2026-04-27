@@ -174,7 +174,7 @@ export function AuthDialog({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="text-muted-foreground absolute top-4 right-4 rounded-full p-1 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           aria-label="Close"
         >
           <CloseIcon className="h-5 w-5" />
@@ -338,7 +338,7 @@ export function AuthDialog({
                     <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="bg-white px-2 text-gray-500 dark:bg-gray-800">
+                    <span className="text-muted-foreground bg-white px-2 dark:bg-gray-800">
                       Or continue with
                     </span>
                   </div>
@@ -460,7 +460,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -568,7 +568,7 @@ function SignupForm({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -700,7 +700,7 @@ function ForgotPasswordForm({
       <button
         type="button"
         onClick={onBack}
-        className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+        className="text-muted-foreground w-full py-2 text-sm hover:text-gray-800 dark:hover:text-gray-200"
       >
         ← Back to login
       </button>
@@ -750,7 +750,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />

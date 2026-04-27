@@ -111,7 +111,7 @@ export function OrderConfirmationWizard({
                         ? 'bg-green-500 text-white'
                         : isActive
                           ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                          : 'text-muted-foreground bg-gray-200 dark:bg-gray-700'
                     } `}
                   >
                     {isComplete ? (

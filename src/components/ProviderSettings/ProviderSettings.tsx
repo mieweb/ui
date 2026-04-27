@@ -628,7 +628,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -654,7 +654,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -680,7 +680,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -706,7 +706,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

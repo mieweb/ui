@@ -198,7 +198,7 @@ export function NotificationCenter({
       case 'alert':
         return 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900/30';
       default:
-        return 'text-gray-500 bg-gray-100 dark:bg-gray-800';
+        return 'text-muted-foreground bg-gray-100 dark:bg-gray-800';
     }
   };
 

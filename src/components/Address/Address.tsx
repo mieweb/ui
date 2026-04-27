@@ -241,7 +241,7 @@ export function Address({
   // Base styling
   const baseStyles = cn(
     addressVariants({ format, size }),
-    'text-gray-600 dark:text-gray-300',
+    'text-muted-foreground ',
     className
   );
 

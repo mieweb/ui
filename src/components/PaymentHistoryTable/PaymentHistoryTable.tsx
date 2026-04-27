@@ -202,26 +202,26 @@ export function PaymentHistoryTable({
       <table data-slot="payment-history-table" className="w-full">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
               Date
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase sm:table-cell">
               Invoice
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
+            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase md:table-cell">
               Employer
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase lg:table-cell dark:text-gray-400">
+            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase lg:table-cell">
               Method
             </th>
-            <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
               Amount
             </th>
-            <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="text-muted-foreground px-4 py-3 text-center text-xs font-medium tracking-wider uppercase">
               Status
             </th>
             {onRefund && (
-              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
                 Action
               </th>
             )}
@@ -239,7 +239,7 @@ export function PaymentHistoryTable({
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatDate(payment.date)}
                 </p>
-                <p className="text-xs text-gray-500 sm:hidden dark:text-gray-400">
+                <p className="text-muted-foreground text-xs sm:hidden">
                   {payment.invoiceNumber}
                 </p>
               </td>
@@ -276,7 +276,7 @@ export function PaymentHistoryTable({
               </td>
               <td className="px-4 py-3 text-right">
                 <p
-                  className={`font-medium ${payment.status === 'refunded' ? 'text-gray-500 line-through dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}
+                  className={`font-medium ${payment.status === 'refunded' ? 'text-muted-foreground line-through' : 'text-gray-900 dark:text-white'}`}
                 >
                   {formatCurrency(payment.amount)}
                 </p>

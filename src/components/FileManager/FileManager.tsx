@@ -249,7 +249,7 @@ export function FileManager({
             <p className="text-muted-foreground text-sm font-medium">
               {isDragging ? 'Drop files here' : 'Add File'}
             </p>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+            <p className="text-muted-foreground mt-1 text-xs">
               Click or drag and drop
             </p>
             <input
@@ -299,7 +299,7 @@ export function FileManager({
               {formatFileSize(totalStorageUsed)}
             </span>
             {storageLimit && (
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {' '}
                 / {formatFileSize(storageLimit)}
               </span>
@@ -336,7 +336,7 @@ export function FileManager({
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="text-xs text-gray-500 uppercase dark:text-gray-400">
+                    <span className="text-muted-foreground text-xs uppercase">
                       {file.fileExtension.replace('.', '')}
                     </span>
                   </TableCell>
@@ -366,7 +366,7 @@ export function FileManager({
                 <TableCell colSpan={hasActions ? 4 : 3} className="py-8">
                   <div data-slot="file-manager-empty" className="text-center">
                     <svg
-                      className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
+                      className="dark:text-muted-foreground mx-auto mb-3 h-12 w-12 text-gray-300"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

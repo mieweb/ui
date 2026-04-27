@@ -223,7 +223,7 @@ export function ProviderUsersTable({
                       <p className="font-medium text-gray-900 dark:text-white">
                         {user.name}
                         {isCurrentUser && (
-                          <span className="ml-1.5 text-xs text-gray-500">
+                          <span className="text-muted-foreground ml-1.5 text-xs">
                             (you)
                           </span>
                         )}

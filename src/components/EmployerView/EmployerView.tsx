@@ -181,7 +181,7 @@ export function EmployerView({
                   Linked since {formatDate(employer.linkedDate)}
                 </p>
                 {employer.address && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-muted-foreground text-sm">
                     {employer.address.city}, {employer.address.state}
                   </p>
                 )}
@@ -297,7 +297,7 @@ export function EmployerView({
                               {primary.role}
                             </p>
                           )}
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <p className="text-muted-foreground text-sm">
                             {primary.email}
                           </p>
                         </div>
@@ -347,7 +347,7 @@ export function EmployerView({
                         <p className="font-medium text-gray-900 dark:text-white">
                           {order.orderNumber}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           {order.patientName}
                         </p>
                         <p className="text-muted-foreground text-xs">
@@ -407,7 +407,7 @@ export function EmployerView({
                         <p className="font-medium text-gray-900 dark:text-white">
                           {invoice.invoiceNumber}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           Due: {formatDate(invoice.dueDate)}
                         </p>
                       </div>
@@ -471,7 +471,7 @@ export function EmployerView({
                               {contact.role}
                             </p>
                           )}
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <p className="text-muted-foreground text-sm">
                             {contact.email}
                           </p>
                           {contact.phone && (

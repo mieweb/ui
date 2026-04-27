@@ -67,9 +67,9 @@ const buttonVariants = cva(
         default:
           'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700',
         ghost:
-          'border-transparent bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800',
+          'border-transparent bg-transparent text-muted-foreground hover:bg-gray-100  dark:hover:bg-gray-800',
         minimal:
-          'border-transparent bg-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+          'border-transparent bg-transparent text-muted-foreground hover:text-gray-700  dark:hover:text-gray-200',
       },
     },
     defaultVariants: {

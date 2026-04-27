@@ -250,7 +250,7 @@ export function UpdateAvailableOverlay({
               {update.version && ` Version ${update.version}`}
             </p>
             {update.description && (
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+              <p className="text-muted-foreground mt-1 text-xs">
                 {update.description}
               </p>
             )}

@@ -255,7 +255,7 @@ export function HelpSupportPanel({
                         </button>
                         {expandedFaq === faq.id && (
                           <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-                            <p className="text-gray-600 dark:text-gray-300">
+                            <p className="text-muted-foreground">
                               {faq.answer}
                             </p>
                           </div>
@@ -391,7 +391,7 @@ export function HelpSupportPanel({
                           {contact.value}
                         </a>
                       ) : (
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           {contact.value}
                         </p>
                       )}

@@ -173,7 +173,7 @@ export function ErrorPage({
       {/* Error Code */}
       {displayCode && (
         <div
-          className="mb-4 text-6xl font-bold text-gray-300 sm:text-8xl dark:text-gray-600"
+          className="dark:text-muted-foreground mb-4 text-6xl font-bold text-gray-300 sm:text-8xl"
           data-slot="error-page-code"
         >
           {displayCode}
@@ -305,7 +305,7 @@ export function ServerErrorPage({
                 {errorMessage}
               </p>
               {errorStack && (
-                <pre className="overflow-x-auto rounded bg-gray-50 p-2 text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-400">
+                <pre className="text-muted-foreground overflow-x-auto rounded bg-gray-50 p-2 text-xs dark:bg-gray-900">
                   {errorStack}
                 </pre>
               )}
@@ -492,7 +492,7 @@ interface DefaultIllustrationProps {
 }
 
 function DefaultIllustration({ type }: DefaultIllustrationProps) {
-  const iconClasses = 'h-24 w-24 text-gray-300 dark:text-gray-600';
+  const iconClasses = 'h-24 w-24 text-gray-300 dark:text-muted-foreground';
 
   switch (type) {
     case '404':
