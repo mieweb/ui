@@ -18,7 +18,7 @@
  *
  * NOTE: Included via base.css alongside datavis-dark.css.
  *
- * Uses design-system tokens instead of hardcoded hex values:
+ * Defines --color-datavis-a11y-text, a semantic token that resolves to:
  *   Light: var(--color-neutral-600) = #525252 (~7.4:1 on #f5f5f5)
  *   Dark:  var(--color-neutral-400) = #a3a3a3 (~5.3:1 on #262626)
  *
@@ -27,6 +27,15 @@
  * palette tokens are stable across brands.
  */
 
+/* ── Semantic token — auto-switches with theme ─────────────────────── */
+:root {
+  --color-datavis-a11y-text: var(--color-neutral-600);
+}
+.dark,
+[data-theme='dark'] {
+  --color-datavis-a11y-text: var(--color-neutral-400);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
  * Color Contrast — Table headers
  *
@@ -34,33 +43,17 @@
  * which gives 4.34:1 contrast. WCAG AA requires 4.5:1 for normal text.
  * ═══════════════════════════════════════════════════════════════════════ */
 .wcdv-th {
-  color: var(--color-neutral-600) !important;
-}
-.dark .wcdv-th,
-[data-theme='dark'] .wcdv-th {
-  color: var(--color-neutral-400) !important;
+  color: var(--color-datavis-a11y-text) !important;
 }
 
 /* ── Color Contrast — Aggregate footer row (COUNT, SUM, etc.) ──────── */
 .wcdv-grid td.text-gray-500,
 .wcdv-grid td.text-gray-600 {
-  color: var(--color-neutral-600) !important;
-}
-.dark .wcdv-grid td.text-gray-500,
-.dark .wcdv-grid td.text-gray-600,
-[data-theme='dark'] .wcdv-grid td.text-gray-500,
-[data-theme='dark'] .wcdv-grid td.text-gray-600 {
-  color: var(--color-neutral-400) !important;
+  color: var(--color-datavis-a11y-text) !important;
 }
 
 /* ── Color Contrast — Status bar ("Showing N rows") ──────────────────── */
 .wcdv-table-footer span,
 .wcdv-agg-footer span {
-  color: var(--color-neutral-600) !important;
-}
-.dark .wcdv-table-footer span,
-.dark .wcdv-agg-footer span,
-[data-theme='dark'] .wcdv-table-footer span,
-[data-theme='dark'] .wcdv-agg-footer span {
-  color: var(--color-neutral-400) !important;
+  color: var(--color-datavis-a11y-text) !important;
 }
