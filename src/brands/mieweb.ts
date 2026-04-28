@@ -43,7 +43,7 @@ export const miewebBrand: BrandConfig = {
       border: '#e5e7eb',
       input: '#e5e7eb',
       ring: '#27ae60',
-      destructive: '#ef4444',
+      destructive: '#dc2626',
       destructiveForeground: '#ffffff',
       success: '#22c55e',
       successForeground: '#ffffff',

@@ -43,7 +43,7 @@ export const bluehiveBrand: BrandConfig = {
       border: '#e5e7eb',
       input: '#e5e7eb',
       ring: '#27aae1',
-      destructive: '#ef4444',
+      destructive: '#dc2626',
       destructiveForeground: '#ffffff',
       success: '#22c55e',
       successForeground: '#ffffff',

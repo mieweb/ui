@@ -89,7 +89,7 @@
   /* Control panel */
   --ag-control-panel-background-color: var(--mieweb-background, #ffffff);
   --ag-subheader-background-color: var(--mieweb-muted, #f9fafb);
-  --ag-invalid-background-color: var(--mieweb-destructive, #ef4444);
+  --ag-invalid-background-color: var(--mieweb-destructive, #dc2626);
 
   /* Other colors */
   --ag-chip-background-color: var(--mieweb-muted, #f3f4f6);

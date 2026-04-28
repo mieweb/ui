@@ -293,9 +293,9 @@ export function SidebarNav({
   className,
 }: SidebarNavProps): React.JSX.Element {
   return (
-    <nav data-slot="sidebar-nav" className={cn('space-y-1 px-2', className)}>
+    <div data-slot="sidebar-nav" className={cn('space-y-1 px-2', className)}>
       {children}
-    </nav>
+    </div>
   );
 }
 

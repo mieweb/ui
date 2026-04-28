@@ -43,7 +43,7 @@ export const webchartBrand: BrandConfig = {
       border: '#e5e7eb',
       input: '#e5e7eb',
       ring: '#f5841f',
-      destructive: '#ef4444',
+      destructive: '#dc2626',
       destructiveForeground: '#ffffff',
       success: '#22c55e',
       successForeground: '#ffffff',

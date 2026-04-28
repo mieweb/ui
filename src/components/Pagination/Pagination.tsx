@@ -70,6 +70,8 @@ export interface PaginationProps extends VariantProps<
     next?: string;
     last?: string;
   };
+  /** Accessible label for the navigation landmark */
+  label?: string;
   /** Additional class name */
   className?: string;
 }
@@ -96,6 +98,7 @@ function Pagination({
   variant,
   size,
   labels,
+  label,
   className,
 }: PaginationProps) {
   // Calculate page range to display
@@ -144,7 +147,7 @@ function Pagination({
     <nav
       data-slot="pagination"
       role="navigation"
-      aria-label="Pagination"
+      aria-label={label || 'Pagination'}
       className={cn('flex items-center gap-1', className)}
     >
       {/* First Page Button */}
@@ -267,6 +270,8 @@ export interface SimplePaginationProps extends VariantProps<
   onPageChange: (page: number) => void;
   /** Show page info */
   showPageInfo?: boolean;
+  /** Accessible label for the navigation landmark */
+  label?: string;
   /** Additional class name */
   className?: string;
 }
@@ -291,6 +296,7 @@ function SimplePagination({
   showPageInfo = true,
   variant,
   size,
+  label,
   className,
 }: SimplePaginationProps) {
   const canGoPrev = page > 1;
@@ -300,7 +306,7 @@ function SimplePagination({
     <nav
       data-slot="simple-pagination"
       role="navigation"
-      aria-label="Pagination"
+      aria-label={label || 'Pagination'}
       className={cn('flex items-center gap-2', className)}
     >
       <button

@@ -96,7 +96,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {showImage ? (
           <img
             src={src}
-            alt={alt || name || 'Avatar'}
+            alt={alt !== undefined ? alt : name || 'Avatar'}
             className="h-full w-full object-cover"
             onError={() => setImageError(true)}
           />
