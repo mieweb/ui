@@ -356,13 +356,14 @@ export const miewebUIPreset: MiewebUIPreset = {
         },
         // Destructive / error scale
         destructive: {
-          DEFAULT: 'var(--mieweb-destructive-500, #ef4444)',
+          DEFAULT:
+            'var(--mieweb-destructive, var(--mieweb-destructive-500, #dc2626))',
           50: 'var(--mieweb-destructive-50, #fef2f2)',
           100: 'var(--mieweb-destructive-100, #fee2e2)',
           200: 'var(--mieweb-destructive-200, #fecaca)',
           300: 'var(--mieweb-destructive-300, #fca5a5)',
           400: 'var(--mieweb-destructive-400, #f87171)',
-          500: 'var(--mieweb-destructive-500, #ef4444)',
+          500: 'var(--mieweb-destructive-500, #dc2626)',
           600: 'var(--mieweb-destructive-600, #dc2626)',
           700: 'var(--mieweb-destructive-700, #b91c1c)',
           800: 'var(--mieweb-destructive-800, #991b1b)',

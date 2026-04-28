@@ -50,7 +50,7 @@ const countBadgeVariants = cva(
           'dark:border-border/40 dark:hover:border-border dark:hover:bg-muted/30',
         ],
         info: [
-          'border-primary-200 text-primary-700',
+          'border-primary-200 text-primary-800',
           'hover:border-primary-300 hover:bg-primary-50',
           'dark:border-primary-800 dark:text-primary-300',
           'dark:hover:border-primary-700 dark:hover:bg-primary-950/50',

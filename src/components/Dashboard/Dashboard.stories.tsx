@@ -545,7 +545,7 @@ function UserMenu({ user, onProfile, onSettings, onLogout }: UserMenuProps) {
           className="focus:ring-primary-500/40 hover:bg-muted flex items-center gap-2 rounded-full p-1 transition-colors focus:ring-2 focus:outline-none"
           aria-label="User menu"
         >
-          <Avatar src={user.avatarUrl} name={user.name} size="sm" ring />
+          <Avatar src={user.avatarUrl} name={user.name} alt="" size="sm" ring />
           <span className="text-foreground hidden text-sm font-medium md:block">
             {user.name}
           </span>
@@ -923,7 +923,7 @@ function DashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Recent Orders</CardTitle>
+                <CardTitle as="h2">Recent Orders</CardTitle>
                 <CardDescription>Latest customer orders</CardDescription>
               </div>
               <Button variant="outline" size="sm">
@@ -945,12 +945,12 @@ function DashboardPage() {
         {/* Recent Activity */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle as="h2">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {mockActivity.map((item, i) => (
               <div key={i} className="flex items-center gap-3">
-                <Avatar name={item.user} size="sm" />
+                <Avatar name={item.user} alt="" size="sm" />
                 <div className="min-w-0 flex-1">
                   <Text size="sm" weight="medium" truncate>
                     {item.user}
@@ -971,7 +971,7 @@ function DashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle as="h2">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <QuickActionGroup>
@@ -2254,7 +2254,12 @@ export const AllComponents: StoryObj = {
         </Text>
         <div className="space-y-4">
           <Pagination page={1} totalPages={10} onPageChange={() => {}} />
-          <SimplePagination page={1} totalPages={10} onPageChange={() => {}} />
+          <SimplePagination
+            page={1}
+            totalPages={10}
+            onPageChange={() => {}}
+            label="Simple pagination"
+          />
         </div>
       </section>
     </div>

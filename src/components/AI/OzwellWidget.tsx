@@ -98,7 +98,7 @@ const THEME_OVERRIDES_CSS = `
 
   /* --- Unread badge --- */
   .ozwell-unread-badge {
-    background: var(--mieweb-destructive, #ef4444) !important;
+    background: var(--mieweb-destructive, #dc2626) !important;
     border-color: var(--mieweb-background, #ffffff) !important;
   }
 

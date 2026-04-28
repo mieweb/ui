@@ -169,11 +169,16 @@ CardHeader.displayName = 'CardHeader';
 /**
  * Title for a Card
  */
+export interface CardTitleProps extends React.HTMLAttributes<globalThis.HTMLHeadingElement> {
+  /** Heading level — defaults to `h3` */
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+}
+
 const CardTitle = React.forwardRef<
   globalThis.HTMLHeadingElement,
-  React.HTMLAttributes<globalThis.HTMLHeadingElement>
->(({ className, children, ...props }, ref) => (
-  <h3
+  CardTitleProps
+>(({ className, children, as: Comp = 'h3', ...props }, ref) => (
+  <Comp
     ref={ref}
     data-slot="card-title"
     className={cn(
@@ -183,7 +188,7 @@ const CardTitle = React.forwardRef<
     {...props}
   >
     {children}
-  </h3>
+  </Comp>
 ));
 
 CardTitle.displayName = 'CardTitle';
