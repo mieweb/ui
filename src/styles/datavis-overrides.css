@@ -41,8 +41,13 @@
  *
  * .wcdv-th uses text-gray-600 (#737373) on bg-gray-50 (#f5f5f5)
  * which gives 4.34:1 contrast. WCAG AA requires 4.5:1 for normal text.
+ *
+ * Include dark-scoped selectors so this override matches the specificity
+ * of datavis-dark.css rules such as `.dark .wcdv-th`.
  * ═══════════════════════════════════════════════════════════════════════ */
-.wcdv-th {
+.wcdv-th,
+.dark .wcdv-th,
+[data-theme='dark'] .wcdv-th {
   color: var(--color-datavis-a11y-text) !important;
 }
 
@@ -54,6 +59,10 @@
 
 /* ── Color Contrast — Status bar ("Showing N rows") ──────────────────── */
 .wcdv-table-footer span,
-.wcdv-agg-footer span {
+.wcdv-agg-footer span,
+.dark .wcdv-table-footer span,
+.dark .wcdv-agg-footer span,
+[data-theme='dark'] .wcdv-table-footer span,
+[data-theme='dark'] .wcdv-agg-footer span {
   color: var(--color-datavis-a11y-text) !important;
 }
