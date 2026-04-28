@@ -140,32 +140,42 @@ export const statusColors: Record<string, StatusConfig> = {
   active: {
     label: 'Active',
     bgClass: 'bg-green-100 dark:bg-green-900/30',
-    textClass: 'text-green-600 dark:text-green-400',
+    textClass: 'text-green-700 dark:text-green-400',
   },
   inactive: {
     label: 'Inactive',
     bgClass: 'bg-gray-200 dark:bg-gray-700',
-    textClass: 'text-muted-foreground',
+    textClass: 'text-gray-600 dark:text-gray-300',
+  },
+  closed_won: {
+    label: 'Closed Won',
+    bgClass: 'bg-green-100 dark:bg-green-900/30',
+    textClass: 'text-green-700 dark:text-green-400',
+  },
+  closed_lost: {
+    label: 'Closed Lost',
+    bgClass: 'bg-red-100 dark:bg-red-900/30',
+    textClass: 'text-red-700 dark:text-red-400',
   },
   pending: {
     label: 'Pending',
     bgClass: 'bg-amber-100 dark:bg-amber-900/30',
-    textClass: 'text-amber-600 dark:text-amber-400',
+    textClass: 'text-amber-700 dark:text-amber-400',
   },
   new: {
     label: 'New',
     bgClass: 'bg-primary-100 dark:bg-primary-900/30',
-    textClass: 'text-primary-800 dark:text-primary-400',
+    textClass: 'text-green-700 dark:text-green-400',
   },
   verified: {
     label: 'Verified',
     bgClass: 'bg-green-100 dark:bg-green-900/30',
-    textClass: 'text-green-600 dark:text-green-400',
+    textClass: 'text-green-700 dark:text-green-400',
   },
   flagged: {
     label: 'Flagged',
     bgClass: 'bg-red-100 dark:bg-red-900/30',
-    textClass: 'text-red-600 dark:text-red-400',
+    textClass: 'text-red-700 dark:text-red-400',
   },
 };
 
@@ -272,7 +282,7 @@ export function StatusBadgeRenderer(
   const config = statusConfig[normalizedValue] || {
     label: value,
     bgClass: 'bg-gray-200 dark:bg-gray-700',
-    textClass: 'text-muted-foreground',
+    textClass: 'text-gray-600 dark:text-gray-300',
   };
 
   return (
@@ -302,17 +312,17 @@ function getEngagementScoreColors(score: number): {
   if (score >= 70)
     return {
       barColor: 'bg-green-500',
-      textColor: 'text-green-600 dark:text-green-400',
+      textColor: 'text-green-700 dark:text-green-400',
     };
   if (score >= 40)
     return {
       barColor: 'bg-amber-500',
-      textColor: 'text-amber-600 dark:text-amber-400',
+      textColor: 'text-amber-700 dark:text-amber-400',
     };
   if (score >= 20)
     return {
       barColor: 'bg-orange-500',
-      textColor: 'text-orange-600 dark:text-orange-400',
+      textColor: 'text-orange-700 dark:text-orange-400',
     };
   return {
     barColor: 'bg-gray-400',
@@ -578,8 +588,8 @@ export function BooleanRenderer(
       className={cn(
         'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
         isTrue
-          ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-          : 'text-muted-foreground bg-gray-200 dark:bg-gray-700'
+          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+          : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
       )}
     >
       {isTrue ? (

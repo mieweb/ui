@@ -28,7 +28,7 @@
 
   /* Header */
   --ag-header-background-color: var(--mieweb-muted, #f9fafb);
-  --ag-header-foreground-color: var(--mieweb-muted-foreground, #6b7280);
+  --ag-header-foreground-color: #525252;
   --ag-header-cell-hover-background-color: var(--mieweb-card, #f3f4f6);
 
   /* Rows */
@@ -111,10 +111,7 @@
 
   /* Header */
   --ag-header-background-color: var(--mieweb-card, #111827) !important;
-  --ag-header-foreground-color: var(
-    --mieweb-muted-foreground,
-    #9ca3af
-  ) !important;
+  --ag-header-foreground-color: #d4d4d8 !important;
   --ag-header-cell-hover-background-color: var(
     --mieweb-muted,
     #2d3748
@@ -250,7 +247,7 @@
 
 .dark .ag-theme-custom .ag-header-cell-text,
 .dark .ag-theme-custom .ag-header-cell-label {
-  color: var(--mieweb-muted-foreground, #9ca3af) !important;
+  color: #d4d4d8 !important;
 }
 
 .dark .ag-theme-custom .ag-row:hover {
