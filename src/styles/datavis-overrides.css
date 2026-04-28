@@ -1,0 +1,62 @@
+/*
+ * DataVis NITRO — Accessibility Overrides (Light & Dark)
+ *
+ * The datavis package uses hardcoded Tailwind utility classes that
+ * produce WCAG 2.1 AA violations. These overrides fix issues that
+ * can be addressed with CSS without modifying the datavis submodule.
+ *
+ * Fixes applied:
+ *   1. color-contrast: text-gray-600 (#737373) on bg-gray-50 (#f5f5f5)
+ *      gives 4.34:1 — needs 4.5:1. Bump to #525252 (~7.4:1).
+ *
+ * Remaining violations that require datavis submodule changes:
+ *   - aria-allowed-attr: aria-sort="none" on role="button" (.wcdv-th)
+ *   - aria-required-attr: role="separator" missing aria-valuenow
+ *   - aria-required-children: role="grid" with wrong child structure
+ *   - landmark-banner-is-top-level: .wcdv-title-bar has role="banner"
+ *   - landmark-no-duplicate-banner / landmark-unique: duplicate banners
+ *
+ * NOTE: Included via base.css alongside datavis-dark.css.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * Color Contrast — Table headers
+ *
+ * .wcdv-th uses text-gray-600 (#737373) on bg-gray-50 (#f5f5f5)
+ * which gives 4.34:1 contrast. WCAG AA requires 4.5:1 for normal text.
+ * Override to #525252 (gray-700 equivalent) which gives ~7.4:1.
+ *
+ * Dark mode uses #a3a3a3 (neutral-400 equivalent) on dark backgrounds
+ * for ~5.3:1 contrast, matching the existing dark theme tokens.
+ * ═══════════════════════════════════════════════════════════════════════ */
+.wcdv-th {
+  color: #525252 !important;
+}
+.dark .wcdv-th,
+[data-theme='dark'] .wcdv-th {
+  color: #a3a3a3 !important;
+}
+
+/* ── Color Contrast — Aggregate footer row (COUNT, SUM, etc.) ──────── */
+.wcdv-grid td.text-gray-500,
+.wcdv-grid td.text-gray-600 {
+  color: #525252 !important;
+}
+.dark .wcdv-grid td.text-gray-500,
+.dark .wcdv-grid td.text-gray-600,
+[data-theme='dark'] .wcdv-grid td.text-gray-500,
+[data-theme='dark'] .wcdv-grid td.text-gray-600 {
+  color: #a3a3a3 !important;
+}
+
+/* ── Color Contrast — Status bar ("Showing N rows") ──────────────────── */
+.wcdv-table-footer span,
+.wcdv-agg-footer span {
+  color: #525252 !important;
+}
+.dark .wcdv-table-footer span,
+.dark .wcdv-agg-footer span,
+[data-theme='dark'] .wcdv-table-footer span,
+[data-theme='dark'] .wcdv-agg-footer span {
+  color: #a3a3a3 !important;
+}
