@@ -185,7 +185,7 @@ export function SocialMediaLinks({
               sizeClasses[size],
               variant === 'light'
                 ? 'text-white/70 hover:bg-white/10 hover:text-white'
-                : 'text-muted-foreground hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'
+                : 'dark:text-muted-foreground text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'
             )}
           >
             <Icon />
@@ -285,7 +285,9 @@ export function FooterLinkSection({
         data-slot="site-footer-link-title"
         className={cn(
           'mb-4 text-sm font-semibold tracking-wider uppercase',
-          variant === 'light' ? 'text-white/70' : 'text-muted-foreground'
+          variant === 'light'
+            ? 'text-white/70'
+            : 'dark:text-muted-foreground text-gray-600'
         )}
       >
         {group.title}
@@ -301,7 +303,7 @@ export function FooterLinkSection({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               {link.label}
@@ -338,7 +340,9 @@ export function CopyrightText({
       data-slot="site-footer-copyright"
       className={cn(
         'text-sm',
-        variant === 'light' ? 'text-white/60' : 'text-muted-foreground',
+        variant === 'light'
+          ? 'text-white/60'
+          : 'dark:text-muted-foreground text-gray-600',
         className
       )}
     >
@@ -402,7 +406,7 @@ export function LegalLinks({
               'text-sm transition-colors',
               variant === 'light'
                 ? 'text-white/60 hover:text-white'
-                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
             )}
           >
             {link.label}
@@ -433,7 +437,9 @@ export function DisclaimerText({
       data-slot="site-footer-disclaimer"
       className={cn(
         'text-xs leading-relaxed',
-        variant === 'light' ? 'text-white/50' : 'text-muted-foreground',
+        variant === 'light'
+          ? 'text-white/50'
+          : 'dark:text-muted-foreground text-gray-600',
         className
       )}
     >
@@ -577,7 +583,7 @@ export function SiteFooter({
                   'mb-4 text-sm',
                   colorVariant === 'light'
                     ? 'text-white/70'
-                    : 'text-muted-foreground'
+                    : 'dark:text-muted-foreground text-gray-600'
                 )}
               >
                 {description}
@@ -724,7 +730,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               Privacy
@@ -735,7 +741,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               Terms
