@@ -90,9 +90,9 @@ export function OrderSidebar({
   const getPriorityColor = () => {
     switch (priority) {
       case 'stat':
-        return 'text-red-600 dark:text-red-400';
+        return 'text-red-700 dark:text-red-400';
       case 'urgent':
-        return 'text-orange-600 dark:text-orange-400';
+        return 'text-orange-700 dark:text-orange-400';
       default:
         return 'text-muted-foreground';
     }
@@ -111,7 +111,7 @@ export function OrderSidebar({
       />
 
       {/* Sidebar */}
-      <aside
+      <div
         data-slot="order-sidebar"
         className={`fixed top-0 right-0 z-50 h-full w-full max-w-md translate-x-0 transform bg-white shadow-xl transition-transform duration-300 dark:bg-gray-900 ${className}`}
         role="dialog"
@@ -175,9 +175,12 @@ export function OrderSidebar({
           </div>
 
           {/* Details */}
-          <dl data-slot="order-sidebar-details" className="space-y-4">
+          <dl
+            data-slot="order-sidebar-details"
+            className="grid grid-cols-2 gap-4"
+          >
             {patientName && (
-              <div data-slot="order-sidebar-detail">
+              <div data-slot="order-sidebar-detail" className="col-span-2">
                 <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Patient
                 </dt>
@@ -188,7 +191,7 @@ export function OrderSidebar({
             )}
 
             {employerName && (
-              <div data-slot="order-sidebar-detail">
+              <div data-slot="order-sidebar-detail" className="col-span-2">
                 <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Employer
                 </dt>
@@ -199,7 +202,7 @@ export function OrderSidebar({
             )}
 
             {serviceName && (
-              <div data-slot="order-sidebar-detail">
+              <div data-slot="order-sidebar-detail" className="col-span-2">
                 <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Service
                 </dt>
@@ -209,30 +212,25 @@ export function OrderSidebar({
               </div>
             )}
 
-            <div
-              data-slot="order-sidebar-detail"
-              className="grid grid-cols-2 gap-4"
-            >
-              <div>
-                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                  Created
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                  {formatDate(createdAt)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                  Scheduled
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                  {formatDate(scheduledDate)}
-                </dd>
-              </div>
+            <div data-slot="order-sidebar-detail">
+              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Created
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900 dark:text-white">
+                {formatDate(createdAt)}
+              </dd>
+            </div>
+            <div data-slot="order-sidebar-detail">
+              <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Scheduled
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900 dark:text-white">
+                {formatDate(scheduledDate)}
+              </dd>
             </div>
 
             {notes && (
-              <div data-slot="order-sidebar-detail">
+              <div data-slot="order-sidebar-detail" className="col-span-2">
                 <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                   Notes
                 </dt>
@@ -271,7 +269,7 @@ export function OrderSidebar({
             </div>
           </div>
         )}
-      </aside>
+      </div>
     </>
   );
 }
