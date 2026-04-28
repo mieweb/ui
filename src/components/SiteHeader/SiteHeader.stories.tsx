@@ -125,7 +125,7 @@ export const NavLinksDemo: StoryObj<typeof NavLinks> = {
       <div className="bg-primary-800 rounded-lg p-4">
         <NavLinks links={defaultLinks} variant="light" />
       </div>
-      <div className="rounded-lg border bg-white p-4">
+      <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <NavLinks links={defaultLinks} variant="dark" />
       </div>
     </div>
@@ -138,7 +138,7 @@ export const AuthButtonsDemo: StoryObj<typeof AuthButtons> = {
       <div className="bg-primary-800 rounded-lg p-4">
         <AuthButtons variant="light" onLogin={() => {}} onSignUp={() => {}} />
       </div>
-      <div className="rounded-lg border bg-white p-4">
+      <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <AuthButtons variant="dark" onLogin={() => {}} onSignUp={() => {}} />
       </div>
     </div>
@@ -151,10 +151,10 @@ export const UserMenuDemo: StoryObj<typeof UserMenu> = {
       <div className="bg-primary-800 flex justify-end rounded-lg p-4">
         <UserMenu user={sampleUser} variant="light" onLogout={() => {}} />
       </div>
-      <div className="flex justify-end rounded-lg border bg-white p-4">
+      <div className="flex justify-end rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <UserMenu user={sampleUser} variant="dark" onLogout={() => {}} />
       </div>
-      <div className="flex justify-end rounded-lg border bg-white p-4">
+      <div className="flex justify-end rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <UserMenu
           user={{ ...sampleUser, avatarUrl: undefined }}
           variant="dark"
