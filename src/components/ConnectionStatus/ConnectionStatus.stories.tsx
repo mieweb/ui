@@ -23,7 +23,7 @@ const meta: Meta<typeof ConnectionStatusOverlay> = {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             App Content
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             The connection status overlay will appear on top of this content.
           </p>
         </div>
@@ -124,9 +124,7 @@ function InteractiveDemo() {
           Connection Status Demo
         </h3>
         <div className="mb-4 flex items-center gap-4">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Status:
-          </span>
+          <span className="text-muted-foreground text-sm">Status:</span>
           <ConnectionStatusBadge status={connection.status} />
         </div>
         <label className="flex items-center gap-2">

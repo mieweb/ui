@@ -18,17 +18,17 @@ const paginationButtonVariants = cva(
       variant: {
         default: [
           'text-muted-foreground hover:text-foreground hover:bg-muted',
-          'data-[active=true]:bg-primary-500 data-[active=true]:text-white',
+          'data-[active=true]:bg-primary-800 data-[active=true]:text-white',
         ],
         outline: [
           'border border-border text-muted-foreground',
           'hover:bg-muted hover:text-foreground',
-          'data-[active=true]:border-primary-500 data-[active=true]:bg-primary-50 data-[active=true]:text-primary-500',
+          'data-[active=true]:border-primary-500 data-[active=true]:bg-primary-50 data-[active=true]:text-primary-800',
           'dark:data-[active=true]:bg-primary-950',
         ],
         ghost: [
           'text-muted-foreground hover:text-foreground hover:bg-muted',
-          'data-[active=true]:text-primary-500 data-[active=true]:font-semibold',
+          'data-[active=true]:text-primary-800 data-[active=true]:font-semibold',
         ],
       },
       size: {

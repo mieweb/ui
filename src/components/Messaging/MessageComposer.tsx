@@ -87,11 +87,11 @@ const sendButtonVariants = cva(
       variant: {
         primary: [
           'bg-primary-800 text-white',
-          'hover:bg-primary-700',
+          'hover:bg-primary-900',
           'active:scale-95',
         ],
         subtle: [
-          'bg-transparent text-primary-600',
+          'bg-transparent text-primary-800',
           'hover:bg-primary-50 dark:hover:bg-primary-900/20',
         ],
       },
@@ -437,7 +437,7 @@ const MessageComposer = React.forwardRef<
               )}
             >
               <div className="min-w-0 flex-1">
-                <span className="text-primary-600 dark:text-primary-400 text-xs font-medium">
+                <span className="text-primary-800 dark:text-primary-400 text-xs font-medium">
                   Replying to {replyTo.senderName}
                 </span>
                 <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">

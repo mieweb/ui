@@ -246,7 +246,7 @@ const ConversationHeader = React.forwardRef<
                 'truncate text-sm',
                 isOnline
                   ? 'text-green-600 dark:text-green-400'
-                  : 'text-neutral-500 dark:text-neutral-400'
+                  : 'text-muted-foreground'
               )}
             >
               {displaySubtitle}
@@ -391,7 +391,7 @@ const ConversationListItem = React.forwardRef<
             {title}
           </h3>
           {lastMessage && (
-            <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+            <span className="text-muted-foreground shrink-0 text-xs">
               {formatTime(lastMessage.timestamp)}
             </span>
           )}
@@ -402,7 +402,7 @@ const ConversationListItem = React.forwardRef<
               'truncate text-sm',
               isUnread
                 ? 'text-neutral-700 dark:text-neutral-300'
-                : 'text-neutral-500 dark:text-neutral-400'
+                : 'text-muted-foreground'
             )}
           >
             {lastMessage?.content || 'No messages yet'}
@@ -413,7 +413,7 @@ const ConversationListItem = React.forwardRef<
               className={cn(
                 'flex shrink-0 items-center justify-center',
                 'h-5 min-w-[20px] rounded-full px-1.5',
-                'bg-primary-600 text-xs font-medium text-white'
+                'bg-primary-800 text-xs font-medium text-white'
               )}
             >
               {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
@@ -426,7 +426,7 @@ const ConversationListItem = React.forwardRef<
       <div className="flex shrink-0 flex-col items-center gap-1">
         {conversation.isPinned && (
           <svg
-            className="text-primary-500 h-4 w-4"
+            className="text-primary-800 h-4 w-4"
             fill="currentColor"
             viewBox="0 0 24 24"
           >

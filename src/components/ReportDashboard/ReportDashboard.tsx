@@ -98,7 +98,7 @@ export function ReportDashboard({
       case 'down':
         return 'text-red-700 dark:text-red-300';
       default:
-        return 'text-gray-500 dark:text-gray-400';
+        return 'text-muted-foreground';
     }
   };
 
@@ -177,9 +177,7 @@ export function ReportDashboard({
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {title}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {dateRangeLabel}
-          </p>
+          <p className="text-muted-foreground text-sm">{dateRangeLabel}</p>
         </div>
         <div className="flex items-center gap-3">
           <Select
@@ -230,9 +228,7 @@ export function ReportDashboard({
         {metrics.map((metric, index) => (
           <Card key={index}>
             <CardContent className="p-4">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {metric.label}
-              </p>
+              <p className="text-muted-foreground text-sm">{metric.label}</p>
               <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                 {typeof metric.value === 'number'
                   ? metric.label.toLowerCase().includes('revenue') ||
@@ -291,7 +287,7 @@ export function ReportDashboard({
                         title={`Current: ${point.value}`}
                       />
                     </div>
-                    <span className="w-full truncate text-center text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-muted-foreground w-full truncate text-center text-xs">
                       {point.label}
                     </span>
                   </div>
@@ -300,14 +296,12 @@ export function ReportDashboard({
               <div className="mt-4 flex items-center justify-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded bg-blue-500 dark:bg-blue-400" />
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Current Period
-                  </span>
+                  <span className="text-muted-foreground">Current Period</span>
                 </div>
                 {chartData.some((d) => d.previousValue !== undefined) && (
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded bg-gray-200 dark:bg-gray-700" />
-                    <span className="text-gray-600 dark:text-gray-300">
+                    <span className="text-muted-foreground">
                       Previous Period
                     </span>
                   </div>
@@ -344,7 +338,7 @@ export function ReportDashboard({
                         <p className="font-medium text-gray-900 dark:text-white">
                           {service.name}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           {formatNumber(service.value)}
                         </p>
                       </div>
@@ -385,7 +379,7 @@ export function ReportDashboard({
                         <p className="font-medium text-gray-900 dark:text-white">
                           {employer.name}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           {formatCurrency(employer.value)}
                         </p>
                       </div>

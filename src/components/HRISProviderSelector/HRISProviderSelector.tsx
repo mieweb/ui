@@ -177,7 +177,7 @@ export function HRISProviderSelector({
             <button
               type="button"
               onClick={onRefreshSync}
-              className="bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 text-white"
+              className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white"
               data-slot="hris-connected-btn-primary"
             >
               <i className="fas fa-rotate mr-2" />

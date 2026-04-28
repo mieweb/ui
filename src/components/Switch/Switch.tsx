@@ -10,7 +10,7 @@ const switchTrackVariants = cva(
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
     'bg-neutral-200 dark:bg-neutral-700',
-    'data-[state=checked]:bg-primary-500',
+    'data-[state=checked]:bg-primary-800',
   ],
   {
     variants: {

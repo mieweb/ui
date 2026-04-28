@@ -18,7 +18,7 @@ const sampleCategories: CommandPaletteCategory[] = [
     id: 'pages',
     label: 'Pages',
     icon: <span>📄</span>,
-    colorClass: 'text-primary-500',
+    colorClass: 'text-primary-800',
   },
   {
     id: 'users',
@@ -130,7 +130,7 @@ function CommandPaletteDemo() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-muted-foreground text-sm">
         Press{' '}
         <kbd className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
           ⌘K
@@ -166,7 +166,7 @@ function CustomTriggerDemo() {
   return (
     <button
       onClick={open}
-      className="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-white transition-colors"
+      className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white transition-colors"
     >
       Open Search
     </button>
@@ -292,7 +292,7 @@ function PlaygroundDemo(props: React.ComponentProps<typeof CommandPalette>) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-muted-foreground text-sm">
         Press{' '}
         <kbd className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
           ⌘K

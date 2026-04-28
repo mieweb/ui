@@ -137,8 +137,8 @@ const controlButtonVariants = cva(
     variants: {
       variant: {
         primary: [
-          'bg-primary-600 text-white',
-          'hover:bg-primary-700',
+          'bg-primary-800 text-white',
+          'hover:bg-primary-900',
           'active:bg-primary-800',
         ],
         secondary: [
@@ -291,7 +291,7 @@ function RecordingIndicator({
         )}
         aria-hidden="true"
       />
-      <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+      <span className="text-muted-foreground text-sm font-medium">
         {isPaused ? 'Paused' : 'Recording'}
       </span>
     </div>
@@ -317,7 +317,7 @@ function TimeDisplay({
 }: TimeDisplayProps) {
   return (
     <div
-      className="flex items-center gap-1 font-mono text-sm text-neutral-600 dark:text-neutral-400"
+      className="text-muted-foreground flex items-center gap-1 font-mono text-sm"
       data-slot="audio-recorder-time"
     >
       <span>{formatTime(currentTime)}</span>

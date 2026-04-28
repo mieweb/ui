@@ -119,7 +119,7 @@ function ServiceSelectDemoWrapper() {
         onChange={setSelected}
         placeholder="Select services..."
       />
-      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-muted-foreground mt-2 text-sm">
         Selected: {selected.join(', ') || 'None'}
       </p>
     </div>

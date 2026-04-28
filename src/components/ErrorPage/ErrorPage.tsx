@@ -173,7 +173,7 @@ export function ErrorPage({
       {/* Error Code */}
       {displayCode && (
         <div
-          className="mb-4 text-6xl font-bold text-gray-300 sm:text-8xl dark:text-gray-600"
+          className="dark:text-muted-foreground mb-4 text-6xl font-bold text-gray-300 sm:text-8xl"
           data-slot="error-page-code"
         >
           {displayCode}
@@ -190,7 +190,7 @@ export function ErrorPage({
 
       {/* Description */}
       <p
-        className="mb-8 max-w-md text-gray-600 dark:text-gray-400"
+        className="text-muted-foreground mb-8 max-w-md"
         data-slot="error-page-description"
       >
         {displayDescription}
@@ -305,7 +305,7 @@ export function ServerErrorPage({
                 {errorMessage}
               </p>
               {errorStack && (
-                <pre className="overflow-x-auto rounded bg-gray-50 p-2 text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-400">
+                <pre className="text-muted-foreground overflow-x-auto rounded bg-gray-50 p-2 text-xs dark:bg-gray-900">
                   {errorStack}
                 </pre>
               )}
@@ -399,7 +399,7 @@ export function MaintenancePage({
           href={statusUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+          className="text-primary-800 hover:text-primary-900 text-sm font-medium"
         >
           Check Status Page →
         </a>
@@ -492,7 +492,7 @@ interface DefaultIllustrationProps {
 }
 
 function DefaultIllustration({ type }: DefaultIllustrationProps) {
-  const iconClasses = 'h-24 w-24 text-gray-300 dark:text-gray-600';
+  const iconClasses = 'h-24 w-24 text-gray-300 dark:text-muted-foreground';
 
   switch (type) {
     case '404':

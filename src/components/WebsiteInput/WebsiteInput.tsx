@@ -295,7 +295,7 @@ function WebsiteInputGroup({
                 'w-full rounded-md border px-3 py-2 text-sm',
                 'border-gray-300 bg-white text-gray-900',
                 'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none',
-                'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500',
+                'disabled:text-muted-foreground disabled:cursor-not-allowed disabled:bg-gray-50',
                 'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100',
                 'dark:focus:border-brand-400 dark:focus:ring-brand-400/20',
                 index === 0 && label ? 'mt-6' : ''
@@ -326,7 +326,7 @@ function WebsiteInputGroup({
                   'text-brand-600 hover:bg-brand-50',
                   'disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent',
                   'dark:text-brand-400 dark:hover:bg-brand-900/20',
-                  'dark:disabled:text-gray-600'
+                  'dark:disabled:text-muted-foreground'
                 )}
                 aria-label="Add website"
               >
@@ -354,7 +354,7 @@ function WebsiteInputGroup({
                   'text-red-600 hover:bg-red-50',
                   'disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent',
                   'dark:text-red-400 dark:hover:bg-red-900/20',
-                  'dark:disabled:text-gray-600'
+                  'dark:disabled:text-muted-foreground'
                 )}
                 aria-label="Remove website"
               >

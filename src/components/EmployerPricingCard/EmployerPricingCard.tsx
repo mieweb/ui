@@ -90,7 +90,7 @@ export function EmployerPricingCard({
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatPrice(basePrice)}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">base price</p>
+          <p className="text-muted-foreground text-xs">base price</p>
         </div>
       </CardHeader>
 
@@ -98,7 +98,7 @@ export function EmployerPricingCard({
         {/* Pricing tiers */}
         {tiers.length > 0 && (
           <div data-slot="employer-pricing-tiers" className="mt-3 space-y-2">
-            <p className="text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               Volume Pricing
             </p>
             <div className="space-y-1">
@@ -109,7 +109,7 @@ export function EmployerPricingCard({
                   className="flex items-center justify-between rounded bg-gray-50 px-2 py-1.5 dark:bg-gray-800/50"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                    <span className="text-muted-foreground text-sm">
                       {tier.name}
                     </span>
                     <span className="text-xs text-gray-400">

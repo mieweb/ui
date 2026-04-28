@@ -273,7 +273,7 @@ export function ScheduleCalendar({
                       : ''
                   }`}
                 >
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground text-xs">
                     {date.toLocaleDateString('en-US', { weekday: 'short' })}
                   </p>
                   <p
@@ -300,7 +300,7 @@ export function ScheduleCalendar({
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="h-16 pr-2 text-right text-xs text-gray-500 dark:text-gray-400"
+                  className="text-muted-foreground h-16 pr-2 text-right text-xs"
                 >
                   {new Date(2000, 0, 1, hour).toLocaleTimeString('en-US', {
                     hour: 'numeric',
@@ -390,19 +390,19 @@ export function ScheduleCalendar({
       >
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-blue-700" />
-          <span className="text-gray-600 dark:text-gray-400">Confirmed</span>
+          <span className="text-muted-foreground">Confirmed</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-yellow-700" />
-          <span className="text-gray-600 dark:text-gray-400">Pending</span>
+          <span className="text-muted-foreground">Pending</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-green-700" />
-          <span className="text-gray-600 dark:text-gray-400">Completed</span>
+          <span className="text-muted-foreground">Completed</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-gray-600" />
-          <span className="text-gray-600 dark:text-gray-400">Cancelled</span>
+          <span className="text-muted-foreground">Cancelled</span>
         </div>
       </div>
     </div>

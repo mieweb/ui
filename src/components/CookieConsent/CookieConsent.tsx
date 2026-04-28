@@ -181,7 +181,7 @@ export function CookieConsentBanner({
               className={cn(
                 'text-xs',
                 variant === 'default'
-                  ? 'text-gray-600 dark:text-gray-400'
+                  ? 'text-muted-foreground'
                   : 'text-white/80'
               )}
             >
@@ -223,7 +223,7 @@ export function CookieConsentBanner({
                 className={cn(
                   'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                   variant === 'default'
-                    ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'
+                    ? 'text-muted-foreground hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-200'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                 )}
               >
@@ -238,7 +238,7 @@ export function CookieConsentBanner({
                 className={cn(
                   'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                   variant === 'default'
-                    ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'
+                    ? 'text-muted-foreground hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-200'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                 )}
               >
@@ -252,7 +252,7 @@ export function CookieConsentBanner({
               className={cn(
                 'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                 variant === 'default'
-                  ? 'bg-primary-700 hover:bg-primary-800 text-white'
+                  ? 'bg-primary-800 hover:bg-primary-900 text-white'
                   : 'bg-white text-gray-900 hover:bg-gray-100'
               )}
             >

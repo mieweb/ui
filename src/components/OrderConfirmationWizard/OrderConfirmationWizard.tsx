@@ -111,7 +111,7 @@ export function OrderConfirmationWizard({
                         ? 'bg-green-500 text-white'
                         : isActive
                           ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                          : 'text-muted-foreground bg-gray-200 dark:bg-gray-700'
                     } `}
                   >
                     {isComplete ? (
@@ -134,7 +134,7 @@ export function OrderConfirmationWizard({
                   </div>
                   <span
                     data-slot="ocw-step-label"
-                    className={`mt-2 text-center text-xs font-medium ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} `}
+                    className={`mt-2 text-center text-xs font-medium ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'} `}
                   >
                     {title}
                   </span>
@@ -167,7 +167,7 @@ export function OrderConfirmationWizard({
                   {order.orderNumber}
                 </p>
                 <p
-                  className="text-sm text-gray-500 dark:text-gray-400"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-summary-subtitle"
                 >
                   {order.serviceName}
@@ -193,7 +193,7 @@ export function OrderConfirmationWizard({
                   Verify Employee Identity
                 </h3>
                 <p
-                  className="text-sm text-gray-600 dark:text-gray-400"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-step-desc"
                 >
                   Please verify the following information matches the employee
@@ -205,7 +205,7 @@ export function OrderConfirmationWizard({
                   data-slot="ocw-detail-grid"
                 >
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground text-xs">
                       Employee Name
                     </p>
                     <p className="font-medium text-gray-900 dark:text-white">
@@ -213,7 +213,7 @@ export function OrderConfirmationWizard({
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground text-xs">
                       Date of Birth
                     </p>
                     <p className="font-medium text-gray-900 dark:text-white">
@@ -221,17 +221,13 @@ export function OrderConfirmationWizard({
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Employer
-                    </p>
+                    <p className="text-muted-foreground text-xs">Employer</p>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {order.employerName}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Scheduled
-                    </p>
+                    <p className="text-muted-foreground text-xs">Scheduled</p>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {formatDate(order.scheduledDate)}
                     </p>
@@ -289,7 +285,7 @@ export function OrderConfirmationWizard({
                   Consent & ID Verification
                 </h3>
                 <p
-                  className="text-sm text-gray-600 dark:text-gray-400"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-step-desc"
                 >
                   Obtain consent and verify government-issued identification.
@@ -315,7 +311,7 @@ export function OrderConfirmationWizard({
                       Consent Obtained
                     </p>
                     <p
-                      className="text-sm text-gray-500 dark:text-gray-400"
+                      className="text-muted-foreground text-sm"
                       data-slot="ocw-checkbox-card-desc"
                     >
                       Employee has provided written or verbal consent for the
@@ -343,7 +339,7 @@ export function OrderConfirmationWizard({
                       Photo ID Verified
                     </p>
                     <p
-                      className="mb-2 text-sm text-gray-500 dark:text-gray-400"
+                      className="text-muted-foreground mb-2 text-sm"
                       data-slot="ocw-checkbox-card-desc"
                     >
                       Government-issued photo ID matches employee information
@@ -371,7 +367,7 @@ export function OrderConfirmationWizard({
                   Review & Confirm
                 </h3>
                 <p
-                  className="text-sm text-gray-600 dark:text-gray-400"
+                  className="text-muted-foreground text-sm"
                   data-slot="ocw-step-desc"
                 >
                   Review the verification steps before proceeding.

@@ -167,13 +167,13 @@ export const Controlled: Story = {
           </button>
           <button
             onClick={() => setValue(50)}
-            className="bg-primary-500 hover:bg-primary-600 rounded px-3 py-1 text-sm text-white"
+            className="bg-primary-800 hover:bg-primary-900 rounded px-3 py-1 text-sm text-white"
           >
             Set 50
           </button>
           <button
             onClick={() => setValue(100)}
-            className="bg-primary-500 hover:bg-primary-600 rounded px-3 py-1 text-sm text-white"
+            className="bg-primary-800 hover:bg-primary-900 rounded px-3 py-1 text-sm text-white"
           >
             Max
           </button>

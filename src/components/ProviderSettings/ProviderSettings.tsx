@@ -426,7 +426,7 @@ export function ProviderSettings({
                         <p className="font-medium text-gray-700 dark:text-gray-300">
                           New Orders
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground text-sm">
                           Receive email when a new order is placed
                         </p>
                       </div>
@@ -442,7 +442,7 @@ export function ProviderSettings({
                         <p className="font-medium text-gray-700 dark:text-gray-300">
                           Order Updates
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground text-sm">
                           Receive email when an order status changes
                         </p>
                       </div>
@@ -458,7 +458,7 @@ export function ProviderSettings({
                         <p className="font-medium text-gray-700 dark:text-gray-300">
                           Invoice Notifications
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground text-sm">
                           Receive email for invoice activity
                         </p>
                       </div>
@@ -482,7 +482,7 @@ export function ProviderSettings({
                         <p className="font-medium text-gray-700 dark:text-gray-300">
                           New Orders
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground text-sm">
                           Receive SMS when a new order is placed
                         </p>
                       </div>
@@ -498,7 +498,7 @@ export function ProviderSettings({
                         <p className="font-medium text-gray-700 dark:text-gray-300">
                           Order Updates
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground text-sm">
                           Receive SMS when an order status changes
                         </p>
                       </div>
@@ -530,7 +530,7 @@ export function ProviderSettings({
                       <p className="font-medium text-gray-700 dark:text-gray-300">
                         Accepting New Patients
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-muted-foreground text-sm">
                         Allow new patients to schedule appointments
                       </p>
                     </div>
@@ -546,7 +546,7 @@ export function ProviderSettings({
                       <p className="font-medium text-gray-700 dark:text-gray-300">
                         Require Appointment
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-muted-foreground text-sm">
                         Patients must schedule before arriving
                       </p>
                     </div>
@@ -579,7 +579,7 @@ export function ProviderSettings({
                         )
                       }
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       Minimum time between appointments
                     </p>
                   </div>
@@ -602,7 +602,7 @@ export function ProviderSettings({
                         )
                       }
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       Maximum appointments allowed per day
                     </p>
                   </div>
@@ -628,7 +628,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -654,7 +654,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -680,7 +680,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -706,7 +706,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
-                          className="h-8 w-8 text-gray-600 dark:text-gray-300"
+                          className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -752,7 +752,7 @@ export function ProviderSettings({
                         )
                       }
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       Number of days until invoice is due (e.g., Net 30)
                     </p>
                   </div>

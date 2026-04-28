@@ -90,7 +90,7 @@ const meta: Meta<typeof CookieConsentBanner> = {
           <h1 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
             Welcome to BlueHive
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Page content to demonstrate the cookie consent banner.
           </p>
         </div>
@@ -160,7 +160,7 @@ function InteractiveDemo() {
         <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
           Consent Status
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-muted-foreground text-sm">
           Has consented: <strong>{hasConsented ? 'Yes' : 'No'}</strong>
         </p>
         <button

@@ -67,9 +67,9 @@ const buttonVariants = cva(
         default:
           'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700',
         ghost:
-          'border-transparent bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800',
+          'border-transparent bg-transparent text-muted-foreground hover:bg-gray-100  dark:hover:bg-gray-800',
         minimal:
-          'border-transparent bg-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+          'border-transparent bg-transparent text-muted-foreground hover:text-gray-700  dark:hover:text-gray-200',
       },
     },
     defaultVariants: {
@@ -244,7 +244,7 @@ export function LanguageSelector({
                 )}
                 <span className="flex-1">{language.name}</span>
                 {language.code === value && (
-                  <CheckIcon className="text-primary-600 dark:text-primary-400 h-4 w-4" />
+                  <CheckIcon className="text-primary-800 dark:text-primary-400 h-4 w-4" />
                 )}
               </li>
             ))}
@@ -404,7 +404,7 @@ export function LanguageSelectorInline({
             index === languages.length - 1 && 'rounded-r-lg',
             index > 0 && 'border-l border-gray-200 dark:border-gray-700',
             language.code === value
-              ? 'bg-primary-600 text-white'
+              ? 'bg-primary-800 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
           )}
         >

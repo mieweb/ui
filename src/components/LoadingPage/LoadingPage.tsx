@@ -53,7 +53,7 @@ export function LoadingDots({
   }[size];
 
   const dotColor = {
-    primary: 'bg-primary-600',
+    primary: 'bg-primary-800',
     secondary: 'bg-gray-400',
     white: 'bg-white',
     current: 'bg-current',
@@ -111,7 +111,7 @@ export function LoadingBar({
 }: LoadingBarProps) {
   const isIndeterminate = progress === undefined;
   const barColor = {
-    primary: 'bg-primary-600',
+    primary: 'bg-primary-800',
     success: 'bg-green-600',
     warning: 'bg-yellow-500',
     error: 'bg-red-600',
@@ -146,7 +146,7 @@ export function LoadingBar({
       </div>
       {showPercentage && !isIndeterminate && (
         <p
-          className="mt-1 text-right text-sm text-gray-600 dark:text-gray-400"
+          className="text-muted-foreground mt-1 text-right text-sm"
           data-slot="loading-bar-percentage"
         >
           {Math.round(progress)}%
@@ -222,7 +222,7 @@ export function LoadingPage({
           )}
           {subMessage && (
             <p
-              className="text-sm text-gray-500 dark:text-gray-400"
+              className="text-muted-foreground text-sm"
               data-slot="loading-page-submessage"
             >
               {subMessage}
@@ -438,8 +438,8 @@ function PulseIndicator() {
   return (
     <div className="relative h-16 w-16" data-slot="pulse-indicator">
       <div className="bg-primary-200 dark:bg-primary-800 absolute inset-0 animate-ping rounded-full opacity-75" />
-      <div className="bg-primary-400 dark:bg-primary-600 absolute inset-2 animate-pulse rounded-full" />
-      <div className="bg-primary-600 dark:bg-primary-400 absolute inset-4 rounded-full" />
+      <div className="bg-primary-400 dark:bg-primary-800 absolute inset-2 animate-pulse rounded-full" />
+      <div className="bg-primary-800 dark:bg-primary-400 absolute inset-4 rounded-full" />
     </div>
   );
 }

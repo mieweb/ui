@@ -370,7 +370,7 @@ function FloatingChatButtonDemo() {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <div className="relative h-[400px] bg-neutral-100 p-4 dark:bg-neutral-800">
-      <p className="text-neutral-600 dark:text-neutral-400">
+      <p className="text-muted-foreground">
         Click the AI button in the corner to open the chat.
       </p>
       <AIChatTrigger
@@ -389,7 +389,7 @@ export const FloatingChatButton: StoryObj<typeof AIChatTrigger> = {
 export const FloatingChatComplete: StoryObj<typeof FloatingAIChat> = {
   render: () => (
     <div className="relative h-[700px] bg-neutral-100 p-4 dark:bg-neutral-800">
-      <p className="text-neutral-600 dark:text-neutral-400">
+      <p className="text-muted-foreground">
         Click the AI button in the corner to open the chat.
       </p>
       <FloatingAIChat

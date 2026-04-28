@@ -374,7 +374,7 @@ export function SelectedServicesBadges({
         <button
           type="button"
           onClick={onClearAll}
-          className="ml-1 text-xs text-gray-500 underline hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="text-muted-foreground ml-1 text-xs underline hover:text-gray-700 dark:hover:text-gray-200"
         >
           Clear all
         </button>

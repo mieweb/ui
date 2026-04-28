@@ -146,7 +146,7 @@ export function RecurringServiceCard({
     primary: {
       border: 'border-primary/30',
       icon: (
-        <span className="bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+        <span className="bg-primary-800 text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
           <svg
             className="h-3 w-3"
             fill="none"
@@ -461,7 +461,7 @@ export function RecurringServiceSetupModal({
         data-slot="recurring-service-modal"
       >
         {/* Header */}
-        <div className="bg-primary text-primary-foreground flex items-center justify-between p-4">
+        <div className="bg-primary-800 text-primary-foreground flex items-center justify-between p-4">
           <h4 className="text-lg font-semibold">{title}</h4>
           <button
             type="button"
@@ -573,7 +573,7 @@ export function RecurringServiceSetupModal({
             <button
               type="submit"
               disabled={saving}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground rounded-lg px-4 py-2 transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-lg px-4 py-2 transition-colors"
             >
               {saving ? (
                 <span className="flex items-center gap-2">

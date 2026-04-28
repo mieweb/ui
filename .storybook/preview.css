@@ -214,7 +214,7 @@ html, body {
 
 /* Story name labels */
 [data-theme="dark"] .sbdocs-a,
-[data-theme="dark"] .sbdocs a {
+[data-theme="dark"] .sbdocs a:not(.docs-story a):not(.sb-story a):not(.sb-unstyled a) {
   color: var(--mieweb-primary, #3b82f6) !important;
 }
 

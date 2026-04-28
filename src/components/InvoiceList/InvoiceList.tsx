@@ -190,7 +190,7 @@ export function InvoiceList({
                 className={`px-3 py-2 text-sm font-medium transition-colors ${
                   statusFilter === option.value
                     ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                    : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-800'
                 } `}
               >
                 {option.label}
@@ -224,7 +224,7 @@ export function InvoiceList({
           data-slot="invoice-list-summary-item"
           className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
         >
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+          <p className="text-muted-foreground text-xs">Total</p>
           <p className="text-lg font-bold text-gray-900 dark:text-white">
             {formatCurrency(totals.total)}
           </p>
@@ -258,7 +258,7 @@ export function InvoiceList({
           className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700"
         >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+            className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -270,7 +270,7 @@ export function InvoiceList({
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <p className="mb-3 text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground mb-3">
             {searchQuery || statusFilter !== 'all'
               ? 'No invoices match your filters'
               : 'No invoices yet'}
@@ -289,22 +289,22 @@ export function InvoiceList({
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                   Invoice
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase sm:table-cell">
                   Employer
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase md:table-cell">
                   Issued
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
+                <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase md:table-cell">
                   Due
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                <th className="text-muted-foreground px-4 py-3 text-center text-xs font-medium tracking-wider uppercase">
                   Status
                 </th>
               </tr>
@@ -321,7 +321,7 @@ export function InvoiceList({
                     <p className="font-medium text-gray-900 dark:text-white">
                       {invoice.invoiceNumber}
                     </p>
-                    <p className="text-xs text-gray-500 sm:hidden dark:text-gray-400">
+                    <p className="text-muted-foreground text-xs sm:hidden">
                       {invoice.employerName}
                     </p>
                   </td>
@@ -331,13 +331,13 @@ export function InvoiceList({
                     </p>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground text-sm">
                       {formatDate(invoice.issuedDate)}
                     </p>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
                     <p
-                      className={`text-sm ${invoice.status === 'overdue' ? 'font-medium text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}
+                      className={`text-sm ${invoice.status === 'overdue' ? 'font-medium text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}
                     >
                       {formatDate(invoice.dueDate)}
                     </p>

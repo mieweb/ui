@@ -157,7 +157,7 @@ export function EmployerList({
           className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700"
         >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+            className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -169,9 +169,7 @@ export function EmployerList({
               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
             />
           </svg>
-          <p className="mb-3 text-gray-500 dark:text-gray-400">
-            {emptyMessage}
-          </p>
+          <p className="text-muted-foreground mb-3">{emptyMessage}</p>
           {onAddEmployer && !searchQuery && (
             <Button variant="outline" onClick={onAddEmployer}>
               Link Employer
@@ -230,12 +228,12 @@ export function EmployerList({
                   </div>
                   <div className="mt-0.5 flex items-center gap-4">
                     {employer.email && (
-                      <span className="truncate text-sm text-gray-500 dark:text-gray-400">
+                      <span className="text-muted-foreground truncate text-sm">
                         {employer.email}
                       </span>
                     )}
                     {employer.linkedDate && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-muted-foreground text-xs">
                         Linked {formatDate(employer.linkedDate)}
                       </span>
                     )}
@@ -252,9 +250,7 @@ export function EmployerList({
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
                         {employer.activeEmployees}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Employees
-                      </p>
+                      <p className="text-muted-foreground text-xs">Employees</p>
                     </div>
                   )}
                   {employer.pendingOrders !== undefined && (
@@ -264,9 +260,7 @@ export function EmployerList({
                       >
                         {employer.pendingOrders}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Pending
-                      </p>
+                      <p className="text-muted-foreground text-xs">Pending</p>
                     </div>
                   )}
                 </div>
