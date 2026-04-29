@@ -708,7 +708,7 @@ export function TagsRenderer(props: ICellRendererParams): React.ReactElement {
       {value.slice(0, 3).map((tag: string, index: number) => (
         <span
           key={index}
-          className="text-muted-foreground inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium dark:bg-gray-800"
+          className="text-foreground inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium dark:bg-gray-800"
         >
           {tag}
         </span>
