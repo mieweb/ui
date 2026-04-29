@@ -230,6 +230,7 @@ const ConversationHeader = React.forwardRef<
                 'h-3 w-3 rounded-full',
                 'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
               )}
+              role="status"
               aria-label="Online"
             />
           )}
@@ -245,7 +246,7 @@ const ConversationHeader = React.forwardRef<
               className={cn(
                 'truncate text-sm',
                 isOnline
-                  ? 'text-green-600 dark:text-green-400'
+                  ? 'text-green-700 dark:text-green-400'
                   : 'text-muted-foreground'
               )}
             >
@@ -391,7 +392,7 @@ const ConversationListItem = React.forwardRef<
             {title}
           </h3>
           {lastMessage && (
-            <span className="text-muted-foreground shrink-0 text-xs">
+            <span className="shrink-0 text-xs text-neutral-600 dark:text-neutral-400">
               {formatTime(lastMessage.timestamp)}
             </span>
           )}
@@ -402,7 +403,7 @@ const ConversationListItem = React.forwardRef<
               'truncate text-sm',
               isUnread
                 ? 'text-neutral-700 dark:text-neutral-300'
-                : 'text-muted-foreground'
+                : 'text-neutral-600 dark:text-neutral-400'
             )}
           >
             {lastMessage?.content || 'No messages yet'}

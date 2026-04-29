@@ -54,10 +54,10 @@ function CharacterCounter({
       className={cn(
         'text-xs tabular-nums',
         isOver
-          ? 'font-medium text-red-500'
+          ? 'font-medium text-red-700 dark:text-red-400'
           : isWarning
-            ? 'text-amber-500'
-            : 'text-neutral-500',
+            ? 'text-amber-700 dark:text-amber-400'
+            : 'text-neutral-600 dark:text-neutral-400',
         className
       )}
       aria-live="polite"

@@ -506,6 +506,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
     if (isLoading) {
       return (
         <div
+          role="status"
           className={cn(
             'flex flex-1 flex-col gap-3 overflow-y-auto p-4',
             className

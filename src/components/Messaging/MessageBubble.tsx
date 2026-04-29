@@ -374,7 +374,7 @@ const bubbleVariants = cva(
         ],
       },
       status: {
-        sending: 'opacity-70',
+        sending: '',
         sent: '',
         delivered: '',
         read: '',
@@ -617,7 +617,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
                 onClick={onRetry}
                 className={cn(
                   'flex items-center gap-1 rounded px-2 py-0.5',
-                  'text-xs font-medium text-red-500',
+                  'text-xs font-medium text-red-700 dark:text-red-400',
                   'hover:bg-red-50 dark:hover:bg-red-900/20',
                   'focus:ring-2 focus:ring-red-500 focus:outline-none'
                 )}
