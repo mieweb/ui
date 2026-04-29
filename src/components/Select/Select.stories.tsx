@@ -406,7 +406,7 @@ function ControlledDemo() {
       />
       <p className="text-muted-foreground text-sm">
         Selected:{' '}
-        <code className="bg-muted rounded px-1 font-mono">
+        <code className="bg-muted text-foreground rounded px-1 font-mono">
           {value || 'none'}
         </code>
       </p>
