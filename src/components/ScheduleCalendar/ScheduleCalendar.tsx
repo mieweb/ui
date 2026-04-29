@@ -195,6 +195,7 @@ export function ScheduleCalendar({
             variant="outline"
             size="sm"
             onClick={() => navigateDate('prev')}
+            aria-label="Previous"
           >
             <svg
               className="h-4 w-4"
@@ -214,6 +215,7 @@ export function ScheduleCalendar({
             variant="outline"
             size="sm"
             onClick={() => navigateDate('next')}
+            aria-label="Next"
           >
             <svg
               className="h-4 w-4"
@@ -273,7 +275,9 @@ export function ScheduleCalendar({
                       : ''
                   }`}
                 >
-                  <p className="text-muted-foreground text-xs">
+                  <p
+                    className={`text-xs ${isSameDay(date, new Date()) ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+                  >
                     {date.toLocaleDateString('en-US', { weekday: 'short' })}
                   </p>
                   <p
@@ -329,6 +333,11 @@ export function ScheduleCalendar({
                       key={hour}
                       role={onAddAppointment ? 'button' : undefined}
                       tabIndex={onAddAppointment ? 0 : undefined}
+                      aria-label={
+                        onAddAppointment
+                          ? `Add appointment at ${new Date(2000, 0, 1, hour).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })}`
+                          : undefined
+                      }
                       className="h-16 border-b border-gray-100 dark:border-gray-800"
                       onClick={() => {
                         if (onAddAppointment) {
@@ -338,7 +347,11 @@ export function ScheduleCalendar({
                         }
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && onAddAppointment) {
+                        if (
+                          (e.key === 'Enter' || e.key === ' ') &&
+                          onAddAppointment
+                        ) {
+                          e.preventDefault();
                           const clickDate = new Date(date);
                           clickDate.setHours(hour, 0, 0, 0);
                           onAddAppointment(clickDate, `${hour}:00`);
@@ -356,6 +369,7 @@ export function ScheduleCalendar({
                         data-slot="schedule-calendar-appointment"
                         role="button"
                         tabIndex={0}
+                        aria-label={`${appointment.patientName || appointment.title}, ${formatTime(appointment.startTime)}`}
                         className={`absolute right-1 left-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
                         style={{
                           top: position.top,
@@ -363,9 +377,12 @@ export function ScheduleCalendar({
                           minHeight: '1.5rem',
                         }}
                         onClick={() => onAppointmentClick?.(appointment)}
-                        onKeyDown={(e) =>
-                          e.key === 'Enter' && onAppointmentClick?.(appointment)
-                        }
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onAppointmentClick?.(appointment);
+                          }
+                        }}
                       >
                         <p className="truncate font-medium">
                           {appointment.patientName || appointment.title}

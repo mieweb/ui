@@ -181,6 +181,7 @@ export function ReportDashboard({
         </div>
         <div className="flex items-center gap-3">
           <Select
+            aria-label="Date range"
             options={
               Array.isArray(dateRangeOptions) &&
               dateRangeOptions.every(
@@ -260,7 +261,9 @@ export function ReportDashboard({
         <div data-slot="report-dashboard-chart">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Order Volume</CardTitle>
+              <CardTitle as="h2" className="text-lg">
+                Order Volume
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex h-48 items-end gap-1">
@@ -322,7 +325,9 @@ export function ReportDashboard({
           <div data-slot="report-dashboard-services">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Top Services</CardTitle>
+                <CardTitle as="h2" className="text-lg">
+                  Top Services
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {topServices.map((service, index) => (
@@ -363,7 +368,9 @@ export function ReportDashboard({
           <div data-slot="report-dashboard-employers">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Top Employers</CardTitle>
+                <CardTitle as="h2" className="text-lg">
+                  Top Employers
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {topEmployers.map((employer, index) => (
