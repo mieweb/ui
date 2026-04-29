@@ -121,8 +121,14 @@ function PermissionItem({
         {hasChildren && (
           <button
             type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => setIsExpanded((prev) => !prev)}
             className="hover:bg-muted rounded p-0.5"
+            aria-expanded={isExpanded}
+            aria-label={
+              isExpanded
+                ? `Collapse ${permission.name}`
+                : `Expand ${permission.name}`
+            }
             data-slot="perm-item-toggle"
           >
             {isExpanded ? (
@@ -450,7 +456,7 @@ export function PermissionsEditor({
               >
                 {employerAccess}:
               </h5>
-              <div className="text-muted-foreground text-sm italic">
+              <div className="text-foreground/80 text-sm italic">
                 {selectedEmployers.length === 0 ? (
                   <span>{all}</span>
                 ) : (
