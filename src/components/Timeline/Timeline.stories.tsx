@@ -326,7 +326,7 @@ export const Confirmation: StoryObj<typeof OrderConfirmation> = {
       <div>
         <button
           onClick={() => setOpen(true)}
-          className="bg-primary-600 rounded px-4 py-2 text-white"
+          className="bg-primary-800 rounded px-4 py-2 text-white"
         >
           Show Confirmation
         </button>

@@ -189,7 +189,7 @@ export function TimelineProgress({
               {showTimestamps && (
                 <div
                   className={cn(
-                    'h-4 text-center text-neutral-500 dark:text-neutral-400',
+                    'text-muted-foreground h-4 text-center',
                     sizes.timestamp,
                     sizes.timestampMargin
                   )}
@@ -211,7 +211,7 @@ export function TimelineProgress({
                       state === 'completed' ||
                         state === 'current' ||
                         state === 'error'
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     )}
                   />
@@ -235,7 +235,7 @@ export function TimelineProgress({
                         ),
                       state === 'current' &&
                         cn(
-                          'bg-primary-500 shadow-primary-500/30 ring-primary-100 dark:bg-primary-500 dark:ring-primary-900/50 text-white shadow-md ring-4',
+                          'bg-primary-800 shadow-primary-500/30 ring-primary-100 dark:bg-primary-800 dark:ring-primary-900/50 text-white shadow-md ring-4',
                           sizes.current,
                           pulse && 'animate-pulse'
                         ),
@@ -281,7 +281,7 @@ export function TimelineProgress({
                       'flex-1',
                       sizes.connector,
                       state === 'completed'
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     )}
                   />
@@ -299,8 +299,7 @@ export function TimelineProgress({
                     'text-primary-800 dark:text-primary-300',
                   state === 'current' &&
                     'font-semibold text-neutral-900 dark:text-white',
-                  state === 'pending' &&
-                    'text-neutral-500 dark:text-neutral-400',
+                  state === 'pending' && 'text-muted-foreground',
                   state === 'error' &&
                     'font-semibold text-red-600 dark:text-red-400'
                 )}
@@ -445,12 +444,12 @@ export function TimelineEventList({
                     {event.title}
                   </h4>
                   {event.author && (
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    <p className="text-muted-foreground text-sm">
                       by {event.author}
                     </p>
                   )}
                 </div>
-                <time className="shrink-0 pt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                <time className="text-muted-foreground shrink-0 pt-0.5 text-xs">
                   {formatTime(event.timestamp)}
                 </time>
               </div>
@@ -538,7 +537,7 @@ export function OrderConfirmation({
         </h2>
 
         {orderNumber && (
-          <p className="mb-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="text-muted-foreground mb-4 text-center text-sm">
             Order #{orderNumber}
           </p>
         )}
@@ -554,8 +553,8 @@ export function OrderConfirmation({
           onClick={onClose}
           className={cn(
             'w-full rounded-lg px-4 py-3 font-medium',
-            'bg-primary-700 hover:bg-primary-800 text-white',
-            'dark:bg-primary-600 dark:hover:bg-primary-700',
+            'bg-primary-800 hover:bg-primary-900 text-white',
+            'dark:bg-primary-800 dark:hover:bg-primary-900',
             'transition-colors'
           )}
         >

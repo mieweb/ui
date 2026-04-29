@@ -106,7 +106,7 @@ const variantStyles: Record<ToastVariant, { container: string; icon: string }> =
     info: {
       container:
         'bg-primary-50 dark:bg-primary-900 border-primary-200 dark:border-primary-800 text-primary-800 dark:text-primary-200',
-      icon: 'text-primary-500 dark:text-primary-400',
+      icon: 'text-primary-800 dark:text-primary-400',
     },
   };
 

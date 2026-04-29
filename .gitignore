@@ -9,4 +9,5 @@ coverage/
 # Playwright test results
 playwright-report/
 playwright-results/
-test-results/
+test-results/*.swp
+TODO.local.md

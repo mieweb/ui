@@ -186,7 +186,7 @@ export const WithCustomLink: Story = {
       renderLink={(item) => (
         <a
           href={item.href}
-          className="text-primary-500 hover:text-primary-600 text-sm underline"
+          className="text-primary-800 hover:text-primary-800 text-sm underline"
         >
           {item.label}
         </a>

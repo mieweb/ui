@@ -175,7 +175,7 @@ export function PaymentHistoryTable({
         className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
-          className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+          className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -187,10 +187,7 @@ export function PaymentHistoryTable({
             d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
           />
         </svg>
-        <p
-          data-slot="payment-history-empty"
-          className="text-gray-500 dark:text-gray-400"
-        >
+        <p data-slot="payment-history-empty" className="text-muted-foreground">
           {emptyMessage}
         </p>
       </div>
@@ -205,26 +202,26 @@ export function PaymentHistoryTable({
       <table data-slot="payment-history-table" className="w-full">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
               Date
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase sm:table-cell dark:text-gray-400">
+            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase sm:table-cell">
               Invoice
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase md:table-cell dark:text-gray-400">
+            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase md:table-cell">
               Employer
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase lg:table-cell dark:text-gray-400">
+            <th className="text-muted-foreground hidden px-4 py-3 text-left text-xs font-medium tracking-wider uppercase lg:table-cell">
               Method
             </th>
-            <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
               Amount
             </th>
-            <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            <th className="text-muted-foreground px-4 py-3 text-center text-xs font-medium tracking-wider uppercase">
               Status
             </th>
             {onRefund && (
-              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
                 Action
               </th>
             )}
@@ -242,7 +239,7 @@ export function PaymentHistoryTable({
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatDate(payment.date)}
                 </p>
-                <p className="text-xs text-gray-500 sm:hidden dark:text-gray-400">
+                <p className="text-muted-foreground text-xs sm:hidden">
                   {payment.invoiceNumber}
                 </p>
               </td>
@@ -269,7 +266,7 @@ export function PaymentHistoryTable({
                 </p>
               </td>
               <td className="hidden px-4 py-3 lg:table-cell">
-                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                <div className="text-muted-foreground flex items-center gap-2">
                   {getMethodIcon(payment.method)}
                   <span className="text-sm">
                     {getMethodLabel(payment.method)}
@@ -279,7 +276,7 @@ export function PaymentHistoryTable({
               </td>
               <td className="px-4 py-3 text-right">
                 <p
-                  className={`font-medium ${payment.status === 'refunded' ? 'text-gray-500 line-through dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}
+                  className={`font-medium ${payment.status === 'refunded' ? 'text-muted-foreground line-through' : 'text-gray-900 dark:text-white'}`}
                 >
                   {formatCurrency(payment.amount)}
                 </p>

@@ -54,10 +54,10 @@ function CharacterCounter({
       className={cn(
         'text-xs tabular-nums',
         isOver
-          ? 'font-medium text-red-500'
+          ? 'font-medium text-red-700 dark:text-red-400'
           : isWarning
-            ? 'text-amber-500'
-            : 'text-neutral-500',
+            ? 'text-amber-700 dark:text-amber-400'
+            : 'text-neutral-600 dark:text-neutral-400',
         className
       )}
       aria-live="polite"
@@ -87,11 +87,11 @@ const sendButtonVariants = cva(
       variant: {
         primary: [
           'bg-primary-800 text-white',
-          'hover:bg-primary-700',
+          'hover:bg-primary-900',
           'active:scale-95',
         ],
         subtle: [
-          'bg-transparent text-primary-600',
+          'bg-transparent text-primary-800',
           'hover:bg-primary-50 dark:hover:bg-primary-900/20',
         ],
       },
@@ -437,7 +437,7 @@ const MessageComposer = React.forwardRef<
               )}
             >
               <div className="min-w-0 flex-1">
-                <span className="text-primary-600 dark:text-primary-400 text-xs font-medium">
+                <span className="text-primary-800 dark:text-primary-400 text-xs font-medium">
                   Replying to {replyTo.senderName}
                 </span>
                 <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">

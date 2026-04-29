@@ -54,6 +54,8 @@ export interface DashboardWidgetProps
   accent?: 'primary' | 'success' | 'warning' | 'destructive' | 'info';
   /** Optional footer content beneath the widget body */
   footer?: React.ReactNode;
+  /** Heading level for the widget title — defaults to `h3` */
+  headingLevel?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 }
 
 /**
@@ -85,6 +87,7 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
       loading,
       accent,
       footer,
+      headingLevel: Heading = 'h3',
       children,
       ...props
     },
@@ -111,9 +114,9 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
             {icon && (
               <span className="text-muted-foreground shrink-0">{icon}</span>
             )}
-            <h3 className="text-foreground text-sm font-semibold tracking-wide uppercase">
+            <Heading className="text-foreground text-sm font-semibold tracking-wide uppercase">
               {title}
-            </h3>
+            </Heading>
             {count !== undefined && (
               <span className="bg-primary-100 text-primary-900 dark:bg-primary-900/50 dark:text-primary-300 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold">
                 {count}
@@ -186,7 +189,7 @@ export interface InfoItem {
   className?: string;
 }
 
-export interface DashboardWidgetInfoProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DashboardWidgetInfoProps extends React.HTMLAttributes<HTMLDListElement> {
   /** Array of label/value items to display */
   items: InfoItem[];
   /** Number of columns in the grid */
@@ -211,7 +214,7 @@ export interface DashboardWidgetInfoProps extends React.HTMLAttributes<HTMLDivEl
  * ```
  */
 const DashboardWidgetInfo = React.forwardRef<
-  HTMLDivElement,
+  HTMLDListElement,
   DashboardWidgetInfoProps
 >(({ className, items, columns = 2, layout = 'stacked', ...props }, ref) => {
   const gridCols = {
@@ -222,7 +225,7 @@ const DashboardWidgetInfo = React.forwardRef<
   };
 
   return (
-    <div
+    <dl
       ref={ref}
       data-slot="dashboard-widget-info"
       className={cn('grid gap-x-6 gap-y-3', gridCols[columns], className)}
@@ -250,7 +253,7 @@ const DashboardWidgetInfo = React.forwardRef<
           </dd>
         </div>
       ))}
-    </div>
+    </dl>
   );
 });
 
@@ -382,7 +385,9 @@ function DashboardWidgetTableInner<T extends Record<string, unknown>>(
                 </TableHead>
               ))}
               {actions && actions.length > 0 && (
-                <TableHead className="w-0 px-4" />
+                <TableHead className="w-0 px-4">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -763,7 +768,7 @@ const DashboardWidgetDataCards = React.forwardRef<
       className={cn('space-y-3', className)}
       {...props}
     >
-      <div className={cn('grid gap-x-6 gap-y-3', gridCols[columns])}>
+      <dl className={cn('grid gap-x-6 gap-y-3', gridCols[columns])}>
         {items.map((item, i) => (
           <div key={`${item.label}-${i}`} className={cn('', item.className)}>
             <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
@@ -779,7 +784,7 @@ const DashboardWidgetDataCards = React.forwardRef<
             </dd>
           </div>
         ))}
-      </div>
+      </dl>
       {footer && (
         <div className="border-border text-muted-foreground flex items-center gap-2 border-t pt-2 text-xs">
           {footer}

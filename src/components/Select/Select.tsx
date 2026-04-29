@@ -91,6 +91,8 @@ export interface SelectProps extends VariantProps<
   searchPlaceholder?: string;
   /** No results text */
   noResultsText?: string;
+  /** Accessible label for the trigger (used when no `label` prop is provided) */
+  'aria-label'?: string;
   /** Additional class name */
   className?: string;
   /** ID for the select */
@@ -127,6 +129,7 @@ function Select({
   helperText,
   size,
   hasError,
+  'aria-label': ariaLabel,
   searchable = false,
   searchPlaceholder = 'Search...',
   noResultsText = 'No results found',
@@ -393,6 +396,7 @@ function Select({
           aria-expanded={isOpen}
           aria-controls={listboxId}
           aria-invalid={hasError || !!error}
+          aria-label={!label ? ariaLabel : undefined}
           aria-describedby={describedByIds || undefined}
           disabled={disabled}
           onClick={() => setIsOpen(!isOpen)}
@@ -607,7 +611,7 @@ function SelectOptionItem({
     >
       <span className="flex-1 truncate">{option.label}</span>
       {isSelected && (
-        <CheckIcon className="text-primary-500 h-4 w-4 shrink-0" />
+        <CheckIcon className="text-primary-800 h-4 w-4 shrink-0" />
       )}
     </li>
   );

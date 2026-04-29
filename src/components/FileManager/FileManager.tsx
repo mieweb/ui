@@ -246,10 +246,10 @@ export function FileManager({
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-muted-foreground text-sm font-medium">
               {isDragging ? 'Drop files here' : 'Add File'}
             </p>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+            <p className="text-muted-foreground mt-1 text-xs">
               Click or drag and drop
             </p>
             <input
@@ -267,7 +267,7 @@ export function FileManager({
       {/* Upload Progress */}
       {isUploading && uploadProgress !== undefined && (
         <div data-slot="file-manager-progress" className="mb-4">
-          <div className="mb-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-muted-foreground mb-2 flex items-center justify-between text-sm">
             <span>Uploading...</span>
             <span>{uploadProgress}%</span>
           </div>
@@ -293,13 +293,13 @@ export function FileManager({
           data-slot="file-manager-storage"
           className="mb-4 rounded-lg bg-gray-50 p-3 text-center dark:bg-gray-800"
         >
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground text-sm">
             Used Storage:{' '}
             <span className="font-semibold text-gray-900 dark:text-white">
               {formatFileSize(totalStorageUsed)}
             </span>
             {storageLimit && (
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {' '}
                 / {formatFileSize(storageLimit)}
               </span>
@@ -336,12 +336,12 @@ export function FileManager({
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="text-xs text-gray-500 uppercase dark:text-gray-400">
+                    <span className="text-muted-foreground text-xs uppercase">
                       {file.fileExtension.replace('.', '')}
                     </span>
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <span className="text-muted-foreground text-sm">
                       {formatFileSize(file.fileSize)}
                     </span>
                   </TableCell>
@@ -366,7 +366,7 @@ export function FileManager({
                 <TableCell colSpan={hasActions ? 4 : 3} className="py-8">
                   <div data-slot="file-manager-empty" className="text-center">
                     <svg
-                      className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600"
+                      className="dark:text-muted-foreground mx-auto mb-3 h-12 w-12 text-gray-300"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -378,10 +378,10 @@ export function FileManager({
                         d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                       />
                     </svg>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground text-sm font-medium">
                       No Files
                     </p>
-                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       Upload files to get started
                     </p>
                   </div>

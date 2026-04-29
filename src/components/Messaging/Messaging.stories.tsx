@@ -548,7 +548,10 @@ export const HeaderWithBack: StoryObj<typeof ConversationHeader> = {
           // Back clicked
         }}
         actions={
-          <button className="rounded-full p-2 hover:bg-neutral-100">
+          <button
+            className="rounded-full p-2 hover:bg-neutral-100"
+            aria-label="More options"
+          >
             <svg
               className="h-5 w-5"
               fill="none"

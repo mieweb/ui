@@ -311,7 +311,7 @@ export const ControlledState: Story = {
             onClick={() => setState('idle')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'idle'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -321,7 +321,7 @@ export const ControlledState: Story = {
             onClick={() => setState('recording')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'recording'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -331,7 +331,7 @@ export const ControlledState: Story = {
             onClick={() => setState('paused')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'paused'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -341,7 +341,7 @@ export const ControlledState: Story = {
             onClick={() => setState('stopped')}
             className={`rounded px-3 py-1 text-sm ${
               state === 'stopped'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-800 text-white'
                 : 'bg-neutral-200 dark:bg-neutral-700'
             }`}
           >
@@ -353,7 +353,7 @@ export const ControlledState: Story = {
           onStateChange={setState}
           maxDuration={30}
         />
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-muted-foreground text-sm">
           Current state: <code className="font-mono">{state}</code>
         </p>
       </div>
@@ -433,7 +433,7 @@ export const CustomControls: Story = {
           {state === 'stopped' && (
             <button
               onClick={onPlay}
-              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ▶️ Play Recording
             </button>
@@ -441,13 +441,13 @@ export const CustomControls: Story = {
           {isPlaying && (
             <button
               onClick={onPause}
-              className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-white transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white transition-colors"
             >
               ⏸️ Pause Playback
             </button>
           )}
         </div>
-        <div className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+        <div className="text-muted-foreground text-center text-sm">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
@@ -534,7 +534,7 @@ export const InlineRecorder: Story = {
             showTime={false}
           />
         </div>
-        <button className="bg-primary-700 hover:bg-primary-800 rounded-lg px-3 py-1.5 text-sm text-white transition-colors">
+        <button className="bg-primary-800 hover:bg-primary-900 rounded-lg px-3 py-1.5 text-sm text-white transition-colors">
           Send
         </button>
       </div>
@@ -557,21 +557,15 @@ export const AllSizeComparison: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-sm text-neutral-600 dark:text-neutral-400">
-          Small
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Small</p>
         <AudioRecorder size="sm" waveformHeight={50} />
       </div>
       <div>
-        <p className="mb-2 text-sm text-neutral-600 dark:text-neutral-400">
-          Medium
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Medium</p>
         <AudioRecorder size="md" waveformHeight={80} />
       </div>
       <div>
-        <p className="mb-2 text-sm text-neutral-600 dark:text-neutral-400">
-          Large
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Large</p>
         <AudioRecorder size="lg" waveformHeight={100} />
       </div>
     </div>

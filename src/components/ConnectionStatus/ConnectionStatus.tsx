@@ -139,12 +139,12 @@ export function ConnectionStatusOverlay({
           {/* Content */}
           <div data-slot="connection-overlay-content" className="flex-1">
             <p className="text-gray-700 dark:text-gray-300">{displayMessage}</p>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground mt-1 text-sm">
               Please check your internet connection.
             </p>
             {connection.retryCount !== undefined &&
               connection.retryCount > 0 && (
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground mt-1 text-xs">
                   Retry attempt #{connection.retryCount}
                   {retryTimeFormatted && ` • Retrying ${retryTimeFormatted}`}
                 </p>
@@ -157,7 +157,7 @@ export function ConnectionStatusOverlay({
               type="button"
               data-slot="connection-overlay-action"
               onClick={onReload || (() => window.location.reload())}
-              className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+              className="bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
             >
               <ReloadIcon className="h-4 w-4" />
               Reload
@@ -245,12 +245,12 @@ export function UpdateAvailableOverlay({
             <p className="font-semibold text-gray-900 dark:text-white">
               Update Available
             </p>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-muted-foreground mt-1 text-sm">
               There is an update available for {appName}.
               {update.version && ` Version ${update.version}`}
             </p>
             {update.description && (
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+              <p className="text-muted-foreground mt-1 text-xs">
                 {update.description}
               </p>
             )}

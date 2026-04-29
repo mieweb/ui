@@ -131,7 +131,7 @@ export function OrderList<T>({
                     'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
                     activeTab === tab.id
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
+                      : 'text-muted-foreground hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-200'
                   )}
                 >
                   {tab.label}
@@ -142,7 +142,7 @@ export function OrderList<T>({
                         'ml-2 rounded-full px-2 py-0.5 text-xs',
                         activeTab === tab.id
                           ? 'bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200'
-                          : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                          : 'text-muted-foreground bg-gray-200 dark:bg-gray-700'
                       )}
                     >
                       {count}
@@ -235,7 +235,7 @@ export function OrderList<T>({
               </svg>
             )}
             <p
-              className="text-gray-500 dark:text-gray-400"
+              className="text-muted-foreground"
               data-slot="order-list-empty-message"
             >
               {emptyMessage}

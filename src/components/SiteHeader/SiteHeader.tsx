@@ -62,7 +62,7 @@ export function SiteLogo({
             'flex h-8 w-8 items-center justify-center rounded-lg text-lg font-bold',
             variant === 'light'
               ? 'bg-white/20 text-white'
-              : 'bg-primary-600 text-white'
+              : 'bg-primary-800 text-white'
           )}
         >
           {name?.[0] || 'B'}
@@ -187,8 +187,8 @@ export function AuthButtons({
       className={cn(
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
-          ? 'text-primary-600 bg-white hover:bg-white/90'
-          : 'bg-primary-700 hover:bg-primary-800 text-white'
+          ? 'text-primary-800 bg-white hover:bg-white/90'
+          : 'bg-primary-800 hover:bg-primary-900 text-white'
       )}
     >
       Sign Up
@@ -222,8 +222,8 @@ export function AuthButtons({
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
-                ? 'text-primary-600 bg-white hover:bg-white/90'
-                : 'bg-primary-700 hover:bg-primary-800 text-white'
+                ? 'text-primary-800 bg-white hover:bg-white/90'
+                : 'bg-primary-800 hover:bg-primary-900 text-white'
             )}
           >
             Sign Up
@@ -373,9 +373,7 @@ export function UserMenu({
         <ChevronDownIcon
           className={cn(
             'h-4 w-4 transition-transform',
-            variant === 'light'
-              ? 'text-white/70'
-              : 'text-gray-500 dark:text-gray-400',
+            variant === 'light' ? 'text-white/70' : 'text-muted-foreground',
             isOpen && 'rotate-180'
           )}
         />
@@ -392,7 +390,7 @@ export function UserMenu({
               {user.name}
             </p>
             {user.email && (
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground truncate text-xs">
                 {user.email}
               </p>
             )}
@@ -529,7 +527,7 @@ export function MobileMenuPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="text-muted-foreground rounded-lg p-2 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             aria-label="Close menu"
           >
             <CloseIcon className="h-5 w-5" />
@@ -570,7 +568,7 @@ export function MobileMenuPanel({
                     {user.name}
                   </p>
                   {user.email && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground text-xs">
                       {user.email}
                     </p>
                   )}
@@ -605,7 +603,7 @@ export function MobileMenuPanel({
                   onSignUp?.();
                   onClose();
                 }}
-                className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-sm font-medium text-white"
+                className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-sm font-medium text-white"
               >
                 Sign Up
               </button>
@@ -626,7 +624,7 @@ const headerVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-primary-600',
+        primary: 'bg-primary-800',
         white:
           'bg-white shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800',
         transparent: 'bg-transparent',

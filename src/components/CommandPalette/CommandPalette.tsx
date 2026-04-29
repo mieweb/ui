@@ -291,7 +291,7 @@ export function CommandPalette({
             data-slot="command-palette-search"
             className="relative border-b border-gray-200 dark:border-gray-700"
           >
-            <div className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-500">
+            <div className="text-muted-foreground absolute top-1/2 left-4 -translate-y-1/2">
               <SearchIcon />
             </div>
             <input
@@ -313,13 +313,13 @@ export function CommandPalette({
               <button
                 onClick={() => setQuery('')}
                 data-testid={`${testId}-clear`}
-                className="absolute top-1/2 right-12 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
+                className="text-muted-foreground absolute top-1/2 right-12 -translate-y-1/2 hover:text-gray-700 dark:hover:text-gray-200"
               >
                 <XIcon />
               </button>
             )}
             {isLoading && (
-              <div className="text-primary-500 absolute top-1/2 right-4 -translate-y-1/2">
+              <div className="text-primary-800 absolute top-1/2 right-4 -translate-y-1/2">
                 <SpinnerIcon />
               </div>
             )}
@@ -338,7 +338,7 @@ export function CommandPalette({
                   'rounded px-2 py-1 text-xs font-medium transition-colors',
                   activeCategory === null
                     ? 'bg-primary-800 text-white'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                    : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
                 )}
               >
                 All
@@ -352,7 +352,7 @@ export function CommandPalette({
                     'flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors',
                     activeCategory === cat.id
                       ? 'bg-primary-800 text-white'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                      : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
                   )}
                 >
                   {cat.icon && <span className="h-3 w-3">{cat.icon}</span>}
@@ -371,7 +371,7 @@ export function CommandPalette({
             {filteredItems.length === 0 ? (
               <div
                 data-slot="command-palette-empty"
-                className="p-8 text-center text-gray-500 dark:text-gray-400"
+                className="text-muted-foreground p-8 text-center"
               >
                 {emptyState ?? (
                   <>
@@ -397,7 +397,7 @@ export function CommandPalette({
                         data-slot="command-palette-group"
                         className={cn(
                           'sticky top-0 px-3 py-2 text-xs font-semibold',
-                          'text-gray-500 dark:text-gray-400',
+                          'text-muted-foreground',
                           'bg-gray-50 dark:bg-gray-900/50'
                         )}
                       >
@@ -459,7 +459,7 @@ export function CommandPalette({
                             className={cn(
                               'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
                               isSelected
-                                ? 'bg-primary-50 dark:bg-primary-500/20'
+                                ? 'bg-primary-50 dark:bg-primary-900/20'
                                 : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
                               item.disabled && 'cursor-not-allowed opacity-50'
                             )}
@@ -471,7 +471,7 @@ export function CommandPalette({
                                   'mt-0.5 h-4 w-4 flex-shrink-0',
                                   isSelected
                                     ? 'text-primary-800 dark:text-primary-300'
-                                    : 'text-gray-500'
+                                    : 'text-muted-foreground'
                                 )}
                               >
                                 {item.icon}
@@ -482,12 +482,12 @@ export function CommandPalette({
                                 {item.label}
                               </div>
                               {item.subtitle && (
-                                <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-muted-foreground truncate text-xs">
                                   {item.subtitle}
                                 </div>
                               )}
                               {item.description && (
-                                <div className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-muted-foreground mt-0.5 truncate text-xs">
                                   {item.description}
                                 </div>
                               )}
@@ -498,7 +498,7 @@ export function CommandPalette({
                                   'hidden items-center px-1.5 py-0.5 text-[10px] sm:inline-flex',
                                   'rounded border bg-gray-100 dark:bg-gray-700',
                                   'border-gray-200 dark:border-gray-600',
-                                  'text-gray-600 dark:text-gray-400'
+                                  'text-muted-foreground'
                                 )}
                               >
                                 {item.shortcut}
@@ -520,7 +520,7 @@ export function CommandPalette({
               data-slot="command-palette-footer"
               className={cn(
                 'border-t border-gray-100 p-2 dark:border-gray-700',
-                'bg-gray-50 text-xs text-gray-500 dark:bg-gray-900/50 dark:text-gray-400',
+                'text-muted-foreground bg-gray-50 text-xs dark:bg-gray-900/50',
                 'flex items-center justify-between'
               )}
             >
@@ -577,7 +577,7 @@ export function CommandPaletteTrigger({
       data-slot="command-palette-trigger"
       className={cn(
         'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-400',
-        'bg-white px-4 py-2.5 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-300',
+        'text-muted-foreground bg-white px-4 py-2.5 text-sm dark:bg-gray-700',
         'hover:border-gray-400 dark:hover:border-gray-300',
         'transition-colors hover:bg-gray-50 dark:hover:bg-gray-600',
         'min-w-[200px] sm:min-w-[300px]',

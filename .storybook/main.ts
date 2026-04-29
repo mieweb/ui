@@ -46,7 +46,20 @@ const datavisDependencyAliases = missingRootDependencies
     replacement: `${path.join(pnpmVirtualNodeModulesDir, dependencyName)}$1`,
   }));
 
+const ozwellReactEntry = path.join(
+  workspaceRoot,
+  'packages/ozwell/packages/react/src/index.ts',
+);
+
 const localUiAliases = [
+  ...(existsSync(ozwellReactEntry)
+    ? [
+        {
+          find: /^@ozwell\/react$/,
+          replacement: ozwellReactEntry,
+        },
+      ]
+    : []),
   {
     find: /^@mieweb\/ui\/components\/(.+)$/,
     replacement: `${path.join(workspaceRoot, 'src/components')}/$1`,

@@ -171,9 +171,7 @@ export function ProviderUsersTable({
 
   if (users.length === 0) {
     return (
-      <div
-        className={`py-12 text-center text-gray-500 dark:text-gray-400 ${className}`}
-      >
+      <div className={`text-muted-foreground py-12 text-center ${className}`}>
         <svg
           className="mx-auto h-12 w-12 text-gray-400"
           fill="none"
@@ -225,12 +223,12 @@ export function ProviderUsersTable({
                       <p className="font-medium text-gray-900 dark:text-white">
                         {user.name}
                         {isCurrentUser && (
-                          <span className="ml-1.5 text-xs text-gray-500">
+                          <span className="text-muted-foreground ml-1.5 text-xs">
                             (you)
                           </span>
                         )}
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-muted-foreground text-sm">
                         {user.email}
                       </p>
                     </div>
@@ -247,7 +245,7 @@ export function ProviderUsersTable({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="text-muted-foreground text-sm">
                     {isPending
                       ? `Invited ${formatDate(user.invitedAt)}`
                       : formatDate(user.lastActive)}

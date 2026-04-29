@@ -481,7 +481,7 @@ function ServiceItem({
                 'cursor-pointer transition-all duration-150',
                 'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                 'disabled:cursor-not-allowed disabled:opacity-50',
-                'checked:bg-primary-500 checked:border-primary-500'
+                'checked:bg-primary-800 checked:border-primary-500'
               )}
             />
             <CheckIcon className="pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
@@ -507,7 +507,7 @@ function ServiceItem({
             />
             <span
               data-slot="service-picker-radio-dot"
-              className="bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100"
+              className="bg-primary-800 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100"
             />
           </span>
         )}

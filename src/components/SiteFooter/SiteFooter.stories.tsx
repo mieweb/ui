@@ -163,7 +163,7 @@ export const SocialLinksDemo: StoryObj<typeof SocialMediaLinks> = {
 export const NewsletterDemo: StoryObj<typeof NewsletterForm> = {
   render: () => (
     <div className="max-w-md space-y-4 p-4">
-      <div className="bg-primary-600 rounded-lg p-6">
+      <div className="bg-primary-800 rounded-lg p-6">
         <NewsletterForm
           variant="light"
           onSubmit={(email) => window.alert(`Subscribed: ${email}`)}

@@ -174,7 +174,7 @@ export function AuthDialog({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="text-muted-foreground absolute top-4 right-4 rounded-full p-1 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           aria-label="Close"
         >
           <CloseIcon className="h-5 w-5" />
@@ -315,7 +315,7 @@ export function AuthDialog({
           {mode === 'verify' && (
             <div className="py-4 text-center">
               <MailIcon className="text-primary-800 dark:text-primary-300 mx-auto mb-4 h-12 w-12" />
-              <p className="mb-4 text-gray-600 dark:text-gray-400">
+              <p className="text-muted-foreground mb-4">
                 We&apos;ve sent a verification email to your inbox. Please click
                 the link to verify your account.
               </p>
@@ -338,7 +338,7 @@ export function AuthDialog({
                     <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="bg-white px-2 text-gray-500 dark:bg-gray-800">
+                    <span className="text-muted-foreground bg-white px-2 dark:bg-gray-800">
                       Or continue with
                     </span>
                   </div>
@@ -359,7 +359,7 @@ export function AuthDialog({
 
           {/* Mode Toggle */}
           {(mode === 'login' || mode === 'signup') && (
-            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-muted-foreground mt-6 text-center text-sm">
               {mode === 'login' ? (
                 <>
                   Don&apos;t have an account?{' '}
@@ -460,7 +460,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -474,9 +474,9 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
         <label className="flex items-center">
           <input
             type="checkbox"
-            className="text-primary-600 focus:ring-primary-500 rounded border-gray-300"
+            className="text-primary-800 focus:ring-primary-500 rounded border-gray-300"
           />
-          <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-muted-foreground ml-2 text-sm">
             Remember me
           </span>
         </label>
@@ -491,7 +491,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
       <button
         type="submit"
         disabled={isLoading}
-        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? <Spinner className="mx-auto h-5 w-5" /> : 'Sign in'}
       </button>
@@ -568,7 +568,7 @@ function SignupForm({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -610,9 +610,9 @@ function SignupForm({
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
           required
-          className="text-primary-600 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
+          className="text-primary-800 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
         />
-        <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+        <span className="text-muted-foreground ml-2 text-sm">
           I agree to the{' '}
           <a
             href={termsUrl}
@@ -636,7 +636,7 @@ function SignupForm({
       <button
         type="submit"
         disabled={isLoading || !passwordsMatch || !acceptedTerms}
-        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? <Spinner className="mx-auto h-5 w-5" /> : 'Create account'}
       </button>
@@ -664,7 +664,7 @@ function ForgotPasswordForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-sm text-gray-600 dark:text-gray-400">
+      <p className="text-muted-foreground text-sm">
         Enter your email address and we&apos;ll send you a link to reset your
         password.
       </p>
@@ -689,7 +689,7 @@ function ForgotPasswordForm({
       <button
         type="submit"
         disabled={isLoading}
-        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <Spinner className="mx-auto h-5 w-5" />
@@ -700,7 +700,7 @@ function ForgotPasswordForm({
       <button
         type="button"
         onClick={onBack}
-        className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+        className="text-muted-foreground w-full py-2 text-sm hover:text-gray-800 dark:hover:text-gray-200"
       >
         ← Back to login
       </button>
@@ -750,7 +750,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -789,7 +789,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
       <button
         type="submit"
         disabled={isLoading || !passwordsMatch}
-        className="bg-primary-700 hover:bg-primary-800 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary-800 hover:bg-primary-900 w-full rounded-lg py-2.5 font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <Spinner className="mx-auto h-5 w-5" />

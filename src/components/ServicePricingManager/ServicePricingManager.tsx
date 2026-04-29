@@ -190,7 +190,7 @@ export function ServicePricingManager({
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Service Pricing
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground text-sm">
             Manage pricing for {services.length} services
           </p>
         </div>
@@ -251,13 +251,13 @@ export function ServicePricingManager({
           </CardHeader>
           <CardContent>
             {filteredServices.length === 0 ? (
-              <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground py-8 text-center">
                 No services found
               </p>
             ) : (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {/* Desktop header */}
-                <div className="hidden gap-4 py-3 text-xs font-medium text-gray-500 uppercase md:grid md:grid-cols-6 dark:text-gray-400">
+                <div className="text-muted-foreground hidden gap-4 py-3 text-xs font-medium uppercase md:grid md:grid-cols-6">
                   <div className="col-span-2">Service</div>
                   <div className="text-right">Base Price</div>
                   <div className="text-right">Employer Price</div>
@@ -276,7 +276,7 @@ export function ServicePricingManager({
                       <p className="font-medium text-gray-900 dark:text-white">
                         {service.serviceName}
                       </p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
                         {service.serviceCode && (
                           <span>{service.serviceCode}</span>
                         )}
@@ -288,7 +288,7 @@ export function ServicePricingManager({
 
                     {/* Base price */}
                     <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
-                      <span className="text-sm text-gray-500 md:hidden">
+                      <span className="text-muted-foreground text-sm md:hidden">
                         Base:
                       </span>
                       <p className="text-right font-semibold text-gray-900 dark:text-white">
@@ -298,10 +298,10 @@ export function ServicePricingManager({
 
                     {/* Employer price */}
                     <div className="mb-2 flex items-center justify-between md:mb-0 md:block">
-                      <span className="text-sm text-gray-500 md:hidden">
+                      <span className="text-muted-foreground text-sm md:hidden">
                         Employer:
                       </span>
-                      <p className="text-right text-gray-600 dark:text-gray-300">
+                      <p className="text-muted-foreground text-right">
                         {service.employerPrice
                           ? formatCurrency(service.employerPrice)
                           : '—'}
@@ -310,7 +310,7 @@ export function ServicePricingManager({
 
                     {/* Status */}
                     <div className="mb-2 flex items-center md:mb-0 md:justify-center">
-                      <span className="mr-2 text-sm text-gray-500 md:hidden">
+                      <span className="text-muted-foreground mr-2 text-sm md:hidden">
                         Status:
                       </span>
                       <Badge
@@ -414,7 +414,7 @@ export function ServicePricingManager({
           <ModalTitle>Bulk Price Adjustment</ModalTitle>
         </ModalHeader>
         <ModalBody className="space-y-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground text-sm">
             Apply adjustment to {filteredServices.length} filtered services
           </p>
           <div className="flex gap-2">
@@ -448,7 +448,7 @@ export function ServicePricingManager({
                 bulkAdjustmentType === 'percent' ? 'e.g., 5' : 'e.g., 10.00'
               }
             />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground mt-1 text-xs">
               Use negative values to decrease prices
             </p>
           </div>

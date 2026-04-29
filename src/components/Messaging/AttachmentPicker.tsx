@@ -520,7 +520,7 @@ function DragDropZone({
         >
           <div className="text-center">
             <svg
-              className="text-primary-500 mx-auto h-12 w-12"
+              className="text-primary-800 mx-auto h-12 w-12"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

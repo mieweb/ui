@@ -109,7 +109,7 @@ export function CSVColumnMapper({
             data-slot="csv-mapper-progress"
             className="bg-card text-card-foreground w-full max-w-lg rounded-lg shadow-xl"
           >
-            <div className="bg-primary text-primary-foreground p-4">
+            <div className="bg-primary-800 p-4 text-white">
               <h4 className="text-lg font-semibold">Processing Employees</h4>
             </div>
             <div className="p-6">
@@ -157,12 +157,12 @@ export function CSVColumnMapper({
         data-slot="csv-mapper-alert"
         className="bg-primary/10 border-primary/30 mb-4 rounded-lg border p-4"
       >
-        <h4
+        <h3
           data-slot="csv-mapper-alert-title"
           className="text-primary-800 dark:text-primary-200 mb-1 font-semibold"
         >
           {ensureAccurateData}
-        </h4>
+        </h3>
         <p
           data-slot="csv-mapper-alert-desc"
           className="text-primary-800 dark:text-primary-300 text-sm"
@@ -257,7 +257,7 @@ function CSVColumnCard({
       className={cn(
         'bg-card text-card-foreground rounded-xl border-2 shadow-sm',
         column.ignored
-          ? 'border-border opacity-50'
+          ? 'border-border border-dashed shadow-none'
           : isMapped
             ? 'border-success/30'
             : 'border-warning/30'
@@ -293,13 +293,13 @@ function CSVColumnCard({
               </svg>
             </span>
           ))}
-        <h6
+        <h4
           data-slot="csv-card-title"
           className="truncate text-sm font-semibold"
           title={column.name}
         >
           {column.name}
-        </h6>
+        </h4>
       </div>
 
       {/* Card Body */}
@@ -341,6 +341,7 @@ function CSVColumnCard({
           >
             <Select
               id={formatHtmlId(column.name)}
+              label={`Map ${column.name} to field`}
               options={selectOptions}
               value={column.mappedTo || ''}
               onValueChange={(value) => onMappingChange(value, undefined)}
@@ -370,6 +371,7 @@ function CSVColumnCard({
               </span>
               <Select
                 id={formatHtmlId(column.name, column.mappedTo)}
+                label={`${column.name} sub-field`}
                 options={childSelectOptions}
                 value={column.childField || ''}
                 onValueChange={(value) =>
@@ -527,7 +529,7 @@ export function CSVFileUpload({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-3"
+            className="bg-primary-800 hover:bg-primary-900 rounded-lg px-6 py-3 text-white"
           >
             {selectButton}
           </button>

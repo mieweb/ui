@@ -285,7 +285,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         <span
           data-slot="radio-dot"
           className={cn(
-            'bg-primary-500 pointer-events-none absolute rounded-full transition-transform',
+            'bg-primary-800 pointer-events-none absolute rounded-full transition-transform',
             size === 'sm' && 'h-2 w-2',
             size === 'md' && 'h-2.5 w-2.5',
             size === 'lg' && 'h-3 w-3',

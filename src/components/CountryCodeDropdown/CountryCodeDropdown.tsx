@@ -431,7 +431,7 @@ function CountryCodeDropdown({
                   </span>
                   <span
                     data-slot="country-dropdown-option-dialcode"
-                    className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400"
+                    className="text-muted-foreground shrink-0 text-xs"
                   >
                     {country.dialCode}
                   </span>

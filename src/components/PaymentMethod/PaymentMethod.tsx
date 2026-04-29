@@ -172,7 +172,7 @@ export function PaymentMethodCard({
             aria-hidden="true"
           />
           <span
-            className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400"
+            className="text-muted-foreground text-xs font-medium uppercase"
             data-slot="payment-card-label"
           >
             Credit Card
@@ -196,7 +196,7 @@ export function PaymentMethodCard({
         <div className="font-mono text-sm text-gray-900 dark:text-gray-100">
           <span className="hidden lg:inline">•••• •••• </span>•••• {card.last4}
         </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-muted-foreground text-sm">
           {expMonth}/{expYear}
         </div>
       </div>
@@ -217,7 +217,7 @@ export function PaymentMethodCard({
               disabled={disabled}
               className="text-brand-600 focus:ring-brand-500"
             />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
+            <span className="text-muted-foreground text-xs">
               Set as default
             </span>
           </label>
@@ -352,9 +352,9 @@ export function PaymentMethodBank({
         data-slot="payment-bank-header"
       >
         <div className="flex items-center gap-2">
-          <BankIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <BankIcon className="text-muted-foreground h-5 w-5" />
           <span
-            className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400"
+            className="text-muted-foreground text-xs font-medium uppercase"
             data-slot="payment-bank-label"
           >
             ACH
@@ -386,12 +386,12 @@ export function PaymentMethodBank({
             {account.bankName}
           </div>
         )}
-        <div className="font-mono text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-muted-foreground font-mono text-sm">
           <span className="hidden lg:inline">•••• •••• </span>••••{' '}
           {account.last4}
         </div>
         {account.accountType && (
-          <div className="text-xs text-gray-500 capitalize dark:text-gray-500">
+          <div className="text-muted-foreground text-xs capitalize">
             {account.accountType}
           </div>
         )}
@@ -413,7 +413,7 @@ export function PaymentMethodBank({
               disabled={disabled}
               className="text-brand-600 focus:ring-brand-500"
             />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
+            <span className="text-muted-foreground text-xs">
               Set as default
             </span>
           </label>

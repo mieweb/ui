@@ -420,8 +420,7 @@ export function ServiceMultiSelect({
           className={cn(
             selectVariants(),
             'w-full text-left',
-            !selectedServices.length &&
-              'text-neutral-500 dark:text-neutral-400',
+            !selectedServices.length && 'text-muted-foreground',
             disabled && 'cursor-not-allowed opacity-50'
           )}
         >
@@ -488,7 +487,7 @@ export function ServiceMultiSelect({
                             className={cn(
                               'flex h-4 w-4 items-center justify-center rounded border',
                               isSelected
-                                ? 'bg-primary-500 border-primary-500 text-white'
+                                ? 'bg-primary-800 border-primary-500 text-white'
                                 : 'border-neutral-300 dark:border-neutral-600'
                             )}
                           >
@@ -516,7 +515,7 @@ export function ServiceMultiSelect({
               )
             )
           ) : (
-            <div className="px-3 py-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+            <div className="text-muted-foreground px-3 py-4 text-center text-sm">
               No services found
             </div>
           )}
@@ -837,7 +836,7 @@ export function CompactFilterBar({
           disabled={loading}
           className={cn(
             'h-9 rounded-md px-4 text-sm font-medium',
-            'bg-primary-500 hover:bg-primary-600 text-white',
+            'bg-primary-800 hover:bg-primary-900 text-white',
             'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
             'disabled:cursor-not-allowed disabled:opacity-50'
           )}
@@ -940,9 +939,7 @@ export function ActiveFilters({
       className={cn('flex flex-wrap items-center gap-2', className)}
       data-slot="provider-active-filters"
     >
-      <span className="text-sm text-neutral-500 dark:text-neutral-400">
-        Active filters:
-      </span>
+      <span className="text-muted-foreground text-sm">Active filters:</span>
       {activeFilters.map((filter) => (
         <span
           key={filter.key}
@@ -966,7 +963,7 @@ export function ActiveFilters({
       <button
         type="button"
         onClick={onClearAll}
-        className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm"
+        className="text-primary-800 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 text-sm"
       >
         Clear all
       </button>

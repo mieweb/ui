@@ -241,7 +241,7 @@ export function Address({
   // Base styling
   const baseStyles = cn(
     addressVariants({ format, size }),
-    'text-gray-600 dark:text-gray-300',
+    'text-muted-foreground ',
     className
   );
 
@@ -271,7 +271,7 @@ export function Address({
         rel="noopener noreferrer"
         className={cn(
           baseStyles,
-          'hover:text-primary-600 dark:hover:text-primary-400 hover:underline',
+          'hover:text-primary-800 dark:hover:text-primary-400 hover:underline',
           'focus:ring-primary-500 rounded focus:ring-2 focus:ring-offset-2 focus:outline-none'
         )}
         {...props}
@@ -364,7 +364,7 @@ export function AddressCard({
           data-slot="address-card-phone"
           href={`tel:${phoneNumber.replace(/\D/g, '')}`}
           onClick={handlePhoneClick}
-          className="hover:text-primary-600 dark:hover:text-primary-400 mt-2 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+          className="hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground mt-2 inline-flex items-center gap-2 text-sm"
         >
           <PhoneIcon className="h-4 w-4" />
           {phoneNumber}

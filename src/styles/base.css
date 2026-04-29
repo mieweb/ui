@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './condensed-view.css';
 @import './datavis-dark.css';
+@import './datavis-overrides.css';
 @custom-variant dark (&:where(.dark, [data-theme=dark], .dark *, [data-theme=dark] *));
 
 /* Hide DataVis slider from layout when closed to prevent horizontal overflow */
@@ -62,17 +63,30 @@
   --color-neutral-900: var(--mieweb-neutral-900, #171717);
   --color-neutral-950: var(--mieweb-neutral-950, #0a0a0a);
 
+  /* ── Gray → Neutral Alias (a11y: unify gray with themed neutral) ─── */
+  --color-gray-50: var(--color-neutral-50);
+  --color-gray-100: var(--color-neutral-100);
+  --color-gray-200: var(--color-neutral-200);
+  --color-gray-300: var(--color-neutral-300);
+  --color-gray-400: var(--color-neutral-400);
+  --color-gray-500: var(--color-neutral-500);
+  --color-gray-600: var(--color-neutral-600);
+  --color-gray-700: var(--color-neutral-700);
+  --color-gray-800: var(--color-neutral-800);
+  --color-gray-900: var(--color-neutral-900);
+  --color-gray-950: var(--color-neutral-950);
+
   /* ── Destructive / Error Scale ─────────────────────────────────────── */
   --color-destructive: var(
     --mieweb-destructive,
-    var(--mieweb-destructive-500, #ef4444)
+    var(--mieweb-destructive-500, #dc2626)
   );
   --color-destructive-50: var(--mieweb-destructive-50, #fef2f2);
   --color-destructive-100: var(--mieweb-destructive-100, #fee2e2);
   --color-destructive-200: var(--mieweb-destructive-200, #fecaca);
   --color-destructive-300: var(--mieweb-destructive-300, #fca5a5);
   --color-destructive-400: var(--mieweb-destructive-400, #f87171);
-  --color-destructive-500: var(--mieweb-destructive-500, #ef4444);
+  --color-destructive-500: var(--mieweb-destructive-500, #dc2626);
   --color-destructive-600: var(--mieweb-destructive-600, #dc2626);
   --color-destructive-700: var(--mieweb-destructive-700, #b91c1c);
   --color-destructive-800: var(--mieweb-destructive-800, #991b1b);
@@ -81,13 +95,13 @@
   --color-destructive-foreground: var(--mieweb-destructive-foreground, #ffffff);
 
   /* ── Success Scale ─────────────────────────────────────────────────── */
-  --color-success: var(--mieweb-success, var(--mieweb-success-500, #22c55e));
+  --color-success: var(--mieweb-success, var(--mieweb-success-500, #15803d));
   --color-success-50: var(--mieweb-success-50, #f0fdf4);
   --color-success-100: var(--mieweb-success-100, #dcfce7);
   --color-success-200: var(--mieweb-success-200, #bbf7d0);
   --color-success-300: var(--mieweb-success-300, #86efac);
   --color-success-400: var(--mieweb-success-400, #4ade80);
-  --color-success-500: var(--mieweb-success-500, #22c55e);
+  --color-success-500: var(--mieweb-success-500, #15803d);
   --color-success-600: var(--mieweb-success-600, #16a34a);
   --color-success-700: var(--mieweb-success-700, #15803d);
   --color-success-800: var(--mieweb-success-800, #166534);
@@ -108,7 +122,7 @@
   --color-warning-800: var(--mieweb-warning-800, #92400e);
   --color-warning-900: var(--mieweb-warning-900, #78350f);
   --color-warning-950: var(--mieweb-warning-950, #451a03);
-  --color-warning-foreground: var(--mieweb-warning-foreground, #ffffff);
+  --color-warning-foreground: var(--mieweb-warning-foreground, #451a03);
 
   /* ── Info Scale ────────────────────────────────────────────────────── */
   --color-info: var(--mieweb-info, var(--mieweb-info-500, #0ea5e9));
@@ -134,7 +148,7 @@
   --color-card: var(--mieweb-card, #ffffff);
   --color-card-foreground: var(--mieweb-card-foreground, #171717);
   --color-muted: var(--mieweb-muted, #f5f5f5);
-  --color-muted-foreground: var(--mieweb-muted-foreground, #737373);
+  --color-muted-foreground: var(--mieweb-muted-foreground, #525252);
 
   /* ── Chart / Data Visualization Colors ─────────────────────────────── */
   --color-chart-1: var(--mieweb-chart-1);
@@ -199,7 +213,7 @@
   --mieweb-destructive-200: #fecaca;
   --mieweb-destructive-300: #fca5a5;
   --mieweb-destructive-400: #f87171;
-  --mieweb-destructive-500: #ef4444;
+  --mieweb-destructive-500: #dc2626;
   --mieweb-destructive-600: #dc2626;
   --mieweb-destructive-700: #b91c1c;
   --mieweb-destructive-800: #991b1b;
@@ -213,7 +227,7 @@
   --mieweb-success-200: #bbf7d0;
   --mieweb-success-300: #86efac;
   --mieweb-success-400: #4ade80;
-  --mieweb-success-500: #22c55e;
+  --mieweb-success-500: #15803d;
   --mieweb-success-600: #16a34a;
   --mieweb-success-700: #15803d;
   --mieweb-success-800: #166534;
@@ -233,7 +247,7 @@
   --mieweb-warning-800: #92400e;
   --mieweb-warning-900: #78350f;
   --mieweb-warning-950: #451a03;
-  --mieweb-warning-foreground: #ffffff;
+  --mieweb-warning-foreground: #451a03;
 
   /* ── Info Scale (Sky Blue) ─────────────────────────────────────────── */
   --mieweb-info-50: #f0f9ff;
@@ -306,7 +320,7 @@
   /* Status foregrounds */
   --mieweb-destructive-foreground: #fafafa;
   --mieweb-success-foreground: #fafafa;
-  --mieweb-warning-foreground: #fafafa;
+  --mieweb-warning-foreground: #451a03;
   --mieweb-info-foreground: #fafafa;
   --mieweb-secondary-foreground: #fafafa;
 

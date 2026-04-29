@@ -116,7 +116,7 @@ function FiltersDemo(
         services={mockServices}
         {...props}
       />
-      <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="text-muted-foreground text-sm">
         <strong>Current filters:</strong>
         <pre className="mt-1">{JSON.stringify(filters, null, 2)}</pre>
       </div>

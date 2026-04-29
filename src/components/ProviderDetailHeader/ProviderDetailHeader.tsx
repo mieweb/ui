@@ -55,7 +55,7 @@ const actionButtonVariants = cva(
     variants: {
       variant: {
         default:
-          'text-gray-600 hover:text-primary-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800',
+          'text-muted-foreground hover:text-primary-800 hover:bg-gray-50  dark:hover:text-primary-400 dark:hover:bg-gray-800',
         active:
           'text-primary-800 bg-primary-50 dark:text-primary-300 dark:bg-primary-900/20',
       },
@@ -210,7 +210,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
         {items.map((item, index) => (
           <li key={item.href} className="flex items-center">
             {index > 0 && (
-              <ChevronRightIcon className="mx-2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <ChevronRightIcon className="text-muted-foreground mx-2 h-4 w-4" />
             )}
             {index === items.length - 1 ? (
               <span className="max-w-[200px] truncate font-medium text-gray-900 dark:text-white">
@@ -253,7 +253,7 @@ export function MobileBackButton({
     >
       <a
         href={href}
-        className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        className="bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
       >
         <ChevronLeftIcon className="h-4 w-4" />
         {label}
@@ -410,7 +410,7 @@ export function SocialMediaLinks({
           rel="noopener noreferrer"
           title={`Visit ${providerName} on ${link.label}`}
           className={cn(
-            'hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-gray-400',
+            'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground transition-colors',
             socialIconSizes[size]
           )}
         >
@@ -453,7 +453,7 @@ export function VerifiedBadge({
     <div
       data-slot="provider-detail-verified"
       className={cn(
-        'flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400',
+        'text-muted-foreground flex items-center gap-2 text-sm',
         className
       )}
     >
@@ -509,7 +509,7 @@ export function AddressDisplay({
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
-          'hover:text-primary-600 dark:hover:text-primary-400 text-gray-600 hover:underline dark:text-gray-300',
+          'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground hover:underline',
           className
         )}
       >
@@ -519,9 +519,7 @@ export function AddressDisplay({
   }
 
   return (
-    <address
-      className={cn('text-gray-600 not-italic dark:text-gray-300', className)}
-    >
+    <address className={cn('text-muted-foreground not-italic', className)}>
       {addressContent}
     </address>
   );
@@ -548,7 +546,7 @@ export function ClaimListingButton({
     <a
       href={claimUrl}
       className={cn(
-        'hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400',
+        'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground inline-flex items-center gap-2 text-sm',
         className
       )}
     >
@@ -575,7 +573,7 @@ export function ReportLink({ slug, href, className }: ReportLinkProps) {
     <a
       href={reportUrl}
       className={cn(
-        'inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
+        'text-muted-foreground inline-flex items-center gap-2 text-sm hover:text-gray-700 dark:hover:text-gray-300',
         className
       )}
     >
@@ -600,7 +598,7 @@ const bookButtonVariants = cva(
       },
       variant: {
         primary:
-          'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+          'bg-primary-800 text-white hover:bg-primary-900 focus:ring-primary-500',
         outline:
           'border-2 border-primary-800 text-primary-800 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-300 dark:text-primary-300 dark:hover:bg-primary-900/20',
       },
@@ -841,7 +839,7 @@ export function CompactProviderHeader({
           <h2 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
             {provider.name}
           </h2>
-          <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground truncate text-sm">
             {provider.address.city}, {provider.address.state}{' '}
             {provider.address.postalCode}
           </p>

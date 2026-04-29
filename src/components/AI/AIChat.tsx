@@ -152,7 +152,7 @@ export function SuggestedActions({
           onClick={() => onSelect(action)}
           className={cn(
             'flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5',
-            'hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 text-sm text-neutral-700',
+            'hover:border-primary-300 hover:bg-primary-50 hover:text-primary-900 text-sm text-neutral-700',
             'dark:border-neutral-700 dark:text-neutral-300',
             'dark:hover:border-primary-700 dark:hover:bg-primary-900/20 dark:hover:text-primary-300',
             'transition-colors'
@@ -186,7 +186,7 @@ function AIEmptyState({
   const aiIcon = (
     <div
       data-slot="ai-empty-state-icon"
-      className="bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white"
+      className="bg-primary-800 dark:bg-primary-800 flex h-16 w-16 items-center justify-center rounded-full text-white"
     >
       <SparklesIcon size="lg" className="h-8 w-8" />
     </div>
@@ -195,9 +195,7 @@ function AIEmptyState({
   const suggestionsAction =
     suggestions && suggestions.length > 0 && onSuggestionSelect ? (
       <div className="mt-6">
-        <p className="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
-          Try asking:
-        </p>
+        <p className="text-muted-foreground mb-3 text-sm">Try asking:</p>
         <SuggestedActions actions={suggestions} onSelect={onSuggestionSelect} />
       </div>
     ) : undefined;
@@ -345,7 +343,7 @@ export function AIChat({
           <div className="flex items-center gap-3">
             <div
               data-slot="ai-chat-header-icon"
-              className="bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white"
+              className="bg-primary-800 dark:bg-primary-800 flex h-8 w-8 items-center justify-center rounded-full text-white"
             >
               <SparklesIcon size="sm" />
             </div>

@@ -21,7 +21,7 @@ const avatarVariants = cva(
     variants: {
       role: {
         user: 'bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300',
-        assistant: 'bg-primary-500 text-white dark:bg-primary-600',
+        assistant: 'bg-primary-800 text-white dark:bg-primary-800',
         system:
           'bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400',
         tool: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
@@ -195,7 +195,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="flex w-full items-center justify-between px-3 py-2 text-left"
         >
-          <span className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+          <span className="text-muted-foreground flex items-center gap-2 text-sm">
             <svg
               className="h-4 w-4"
               fill="none"
@@ -266,7 +266,7 @@ const messageVariants = cva('flex gap-3', {
 const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
   variants: {
     role: {
-      user: 'bg-primary-600 text-white dark:bg-primary-500',
+      user: 'bg-primary-800 text-white dark:bg-primary-800',
       assistant:
         'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
       system:

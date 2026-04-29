@@ -91,7 +91,7 @@ function getInitials(name: string): string {
  */
 function getAvatarColor(name: string): string {
   const colors = [
-    'bg-primary-600',
+    'bg-primary-800',
     'bg-green-600',
     'bg-orange-600',
     'bg-secondary-600',
@@ -140,32 +140,42 @@ export const statusColors: Record<string, StatusConfig> = {
   active: {
     label: 'Active',
     bgClass: 'bg-green-100 dark:bg-green-900/30',
-    textClass: 'text-green-600 dark:text-green-400',
+    textClass: 'text-green-700 dark:text-green-400',
   },
   inactive: {
     label: 'Inactive',
     bgClass: 'bg-gray-200 dark:bg-gray-700',
-    textClass: 'text-gray-600 dark:text-gray-400',
+    textClass: 'text-gray-600 dark:text-gray-300',
+  },
+  closed_won: {
+    label: 'Closed Won',
+    bgClass: 'bg-green-100 dark:bg-green-900/30',
+    textClass: 'text-green-700 dark:text-green-400',
+  },
+  closed_lost: {
+    label: 'Closed Lost',
+    bgClass: 'bg-red-100 dark:bg-red-900/30',
+    textClass: 'text-red-700 dark:text-red-400',
   },
   pending: {
     label: 'Pending',
     bgClass: 'bg-amber-100 dark:bg-amber-900/30',
-    textClass: 'text-amber-600 dark:text-amber-400',
+    textClass: 'text-amber-700 dark:text-amber-400',
   },
   new: {
     label: 'New',
     bgClass: 'bg-primary-100 dark:bg-primary-900/30',
-    textClass: 'text-primary-600 dark:text-primary-400',
+    textClass: 'text-green-700 dark:text-green-400',
   },
   verified: {
     label: 'Verified',
     bgClass: 'bg-green-100 dark:bg-green-900/30',
-    textClass: 'text-green-600 dark:text-green-400',
+    textClass: 'text-green-700 dark:text-green-400',
   },
   flagged: {
     label: 'Flagged',
     bgClass: 'bg-red-100 dark:bg-red-900/30',
-    textClass: 'text-red-600 dark:text-red-400',
+    textClass: 'text-red-700 dark:text-red-400',
   },
 };
 
@@ -209,10 +219,10 @@ export function AvatarNameRenderer(
   if (isSystemValue) {
     return (
       <div className="flex items-center gap-2 py-1">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-500">
+        <div className="dark:text-muted-foreground flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-400 dark:bg-gray-700">
           {displayName === 'Unassigned' ? '—' : '??'}
         </div>
-        <span className="truncate text-gray-400 italic dark:text-gray-500">
+        <span className="dark:text-muted-foreground truncate text-gray-400 italic">
           {displayName}
         </span>
       </div>
@@ -272,7 +282,7 @@ export function StatusBadgeRenderer(
   const config = statusConfig[normalizedValue] || {
     label: value,
     bgClass: 'bg-gray-200 dark:bg-gray-700',
-    textClass: 'text-gray-600 dark:text-gray-400',
+    textClass: 'text-gray-600 dark:text-gray-300',
   };
 
   return (
@@ -302,21 +312,21 @@ function getEngagementScoreColors(score: number): {
   if (score >= 70)
     return {
       barColor: 'bg-green-500',
-      textColor: 'text-green-600 dark:text-green-400',
+      textColor: 'text-green-700 dark:text-green-400',
     };
   if (score >= 40)
     return {
       barColor: 'bg-amber-500',
-      textColor: 'text-amber-600 dark:text-amber-400',
+      textColor: 'text-amber-700 dark:text-amber-400',
     };
   if (score >= 20)
     return {
       barColor: 'bg-orange-500',
-      textColor: 'text-orange-600 dark:text-orange-400',
+      textColor: 'text-orange-700 dark:text-orange-400',
     };
   return {
     barColor: 'bg-gray-400',
-    textColor: 'text-gray-600 dark:text-gray-400',
+    textColor: 'text-muted-foreground',
   };
 }
 
@@ -360,7 +370,7 @@ export function EmailRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`mailto:${value}`}
-      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
+      className="text-primary-800 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
       <MailIcon className="h-3 w-3 opacity-60" />
@@ -385,7 +395,7 @@ export function PhoneRenderer(props: ICellRendererParams): React.ReactElement {
   return (
     <a
       href={`tel:${value}`}
-      className="text-foreground hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5"
+      className="text-foreground hover:text-primary-800 dark:hover:text-primary-400 inline-flex items-center gap-1.5"
       onClick={(e) => e.stopPropagation()}
     >
       <PhoneIcon className="h-3 w-3 text-green-500 opacity-70" />
@@ -413,7 +423,7 @@ export function DomainRenderer(props: ICellRendererParams): React.ReactElement {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-primary-600 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
+      className="text-primary-800 dark:text-primary-400 inline-flex items-center gap-1.5 hover:underline"
       onClick={(e) => e.stopPropagation()}
     >
       <GlobeIcon className="h-3 w-3 opacity-60" />
@@ -578,8 +588,8 @@ export function BooleanRenderer(
       className={cn(
         'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
         isTrue
-          ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-          : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+          : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
       )}
     >
       {isTrue ? (
@@ -633,7 +643,7 @@ export function CompanyRenderer(
         />
       ) : null}
       <div
-        className="bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 flex h-5 w-5 items-center justify-center rounded text-[9px] font-semibold"
+        className="bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400 flex h-5 w-5 items-center justify-center rounded text-[9px] font-semibold"
         style={{ display: faviconUrl ? 'none' : 'flex' }}
       >
         {getInitials(value)}
@@ -660,7 +670,7 @@ export interface ProgressRendererProps extends ICellRendererParams {
 export function ProgressRenderer(
   props: ProgressRendererProps
 ): React.ReactElement {
-  const { value, barColor = 'bg-primary-500', max = 100 } = props;
+  const { value, barColor = 'bg-primary-800', max = 100 } = props;
   if (value == null) return <span className="text-muted-foreground">--</span>;
 
   const percentage = Math.min(100, Math.max(0, (Number(value) / max) * 100));
@@ -698,7 +708,7 @@ export function TagsRenderer(props: ICellRendererParams): React.ReactElement {
       {value.slice(0, 3).map((tag: string, index: number) => (
         <span
           key={index}
-          className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+          className="text-foreground inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium dark:bg-gray-800"
         >
           {tag}
         </span>

@@ -228,7 +228,7 @@ function IconCard({ name, Icon }: IconCardProps) {
       className="border-border bg-card hover:bg-muted/50 hover:border-primary-300 group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border p-4 transition-all"
       title={`Click to copy import for ${name}`}
     >
-      <Icon className="text-foreground group-hover:text-primary-500 h-6 w-6 transition-colors" />
+      <Icon className="text-foreground group-hover:text-primary-800 h-6 w-6 transition-colors" />
       <span className="text-muted-foreground group-hover:text-foreground text-center text-xs break-all transition-colors">
         {copied ? '✓ Copied!' : name.replace('Icon', '')}
       </span>
@@ -454,7 +454,7 @@ function MyComponent() {
                 {`<HomeIcon className="h-4 w-4" />           {/* 16px */}
 <HomeIcon className="h-5 w-5" />           {/* 20px - default */}
 <HomeIcon className="h-6 w-6" />           {/* 24px */}
-<HomeIcon className="text-primary-500" />  {/* Brand color */}
+<HomeIcon className="text-primary-800" />  {/* Brand color */}
 <HomeIcon className="text-muted-foreground" /> {/* Muted */}`}
               </pre>
             </div>

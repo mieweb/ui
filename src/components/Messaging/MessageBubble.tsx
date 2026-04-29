@@ -19,7 +19,7 @@ const statusIconVariants = cva(
       status: {
         sending: 'text-neutral-500',
         sent: 'text-neutral-500',
-        delivered: 'text-neutral-600 dark:text-neutral-400',
+        delivered: 'text-muted-foreground',
         read: 'text-primary-800 dark:text-primary-300',
         failed: 'text-red-500',
       },
@@ -368,13 +368,13 @@ const bubbleVariants = cva(
         ],
         system: [
           'mx-auto max-w-none',
-          'bg-transparent text-neutral-500 dark:text-neutral-400',
+          'bg-transparent text-muted-foreground',
           'text-center text-sm',
           'py-1 px-2',
         ],
       },
       status: {
-        sending: 'opacity-70',
+        sending: '',
         sent: '',
         delivered: '',
         read: '',
@@ -524,7 +524,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {showSenderName && !isOutgoing && (
             <span
               data-slot="message-sender-name"
-              className="mb-1 px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400"
+              className="text-muted-foreground mb-1 px-1 text-xs font-medium"
             >
               {message.sender.name}
             </span>
@@ -594,7 +594,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
             )}
           >
             {showTimestamp && (
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="text-muted-foreground text-xs">
                 {formatTimestamp(message.timestamp)}
               </span>
             )}
@@ -617,7 +617,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
                 onClick={onRetry}
                 className={cn(
                   'flex items-center gap-1 rounded px-2 py-0.5',
-                  'text-xs font-medium text-red-500',
+                  'text-xs font-medium text-red-700 dark:text-red-400',
                   'hover:bg-red-50 dark:hover:bg-red-900/20',
                   'focus:ring-2 focus:ring-red-500 focus:outline-none'
                 )}

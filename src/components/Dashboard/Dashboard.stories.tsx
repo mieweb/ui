@@ -545,7 +545,7 @@ function UserMenu({ user, onProfile, onSettings, onLogout }: UserMenuProps) {
           className="focus:ring-primary-500/40 hover:bg-muted flex items-center gap-2 rounded-full p-1 transition-colors focus:ring-2 focus:outline-none"
           aria-label="User menu"
         >
-          <Avatar src={user.avatarUrl} name={user.name} size="sm" ring />
+          <Avatar src={user.avatarUrl} name={user.name} alt="" size="sm" ring />
           <span className="text-foreground hidden text-sm font-medium md:block">
             {user.name}
           </span>
@@ -636,7 +636,7 @@ function NotificationsDropdown() {
             className="hover:bg-muted/50 flex w-full items-start gap-3 p-4 text-left transition-colors"
           >
             <div
-              className={`mt-1 h-2 w-2 rounded-full ${notification.unread ? 'bg-primary-500' : 'bg-transparent'}`}
+              className={`mt-1 h-2 w-2 rounded-full ${notification.unread ? 'bg-primary-800' : 'bg-transparent'}`}
             />
             <div className="min-w-0 flex-1">
               <Text
@@ -715,7 +715,7 @@ function Sidebar({ currentPage, onNavigate }: SidebarProps) {
     <SidebarComponent>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <div className="bg-primary-500 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+          <div className="bg-primary-800 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
             M
           </div>
           <Text weight="bold" size="lg">
@@ -923,7 +923,7 @@ function DashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Recent Orders</CardTitle>
+                <CardTitle as="h2">Recent Orders</CardTitle>
                 <CardDescription>Latest customer orders</CardDescription>
               </div>
               <Button variant="outline" size="sm">
@@ -945,12 +945,12 @@ function DashboardPage() {
         {/* Recent Activity */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle as="h2">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {mockActivity.map((item, i) => (
               <div key={i} className="flex items-center gap-3">
-                <Avatar name={item.user} size="sm" />
+                <Avatar name={item.user} alt="" size="sm" />
                 <div className="min-w-0 flex-1">
                   <Text size="sm" weight="medium" truncate>
                     {item.user}
@@ -971,7 +971,7 @@ function DashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle as="h2">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <QuickActionGroup>
@@ -1154,7 +1154,7 @@ function AnalyticsPage() {
               {[65, 45, 80, 55, 70, 90, 75].map((height, i) => (
                 <div
                   key={i}
-                  className="bg-primary-500 hover:bg-primary-600 w-8 rounded-t transition-all"
+                  className="bg-primary-800 hover:bg-primary-900 w-8 rounded-t transition-all"
                   style={{ height: `${height}%` }}
                 />
               ))}
@@ -1664,7 +1664,7 @@ function VoiceNotesPage() {
                 <div
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
                     note.status === 'transcribing'
-                      ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                      ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >
@@ -1984,7 +1984,7 @@ function AppShell() {
       <div className="bg-background flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="bg-primary-500 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold text-white">
+            <div className="bg-primary-800 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold text-white">
               M
             </div>
             <CardTitle>You&apos;ve been logged out</CardTitle>
@@ -2254,7 +2254,12 @@ export const AllComponents: StoryObj = {
         </Text>
         <div className="space-y-4">
           <Pagination page={1} totalPages={10} onPageChange={() => {}} />
-          <SimplePagination page={1} totalPages={10} onPageChange={() => {}} />
+          <SimplePagination
+            page={1}
+            totalPages={10}
+            onPageChange={() => {}}
+            label="Simple pagination"
+          />
         </div>
       </section>
     </div>

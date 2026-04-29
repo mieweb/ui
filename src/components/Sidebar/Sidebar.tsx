@@ -293,9 +293,9 @@ export function SidebarNav({
   className,
 }: SidebarNavProps): React.JSX.Element {
   return (
-    <nav data-slot="sidebar-nav" className={cn('space-y-1 px-2', className)}>
+    <div data-slot="sidebar-nav" className={cn('space-y-1 px-2', className)}>
       {children}
-    </nav>
+    </div>
   );
 }
 
@@ -362,7 +362,7 @@ export function SidebarNavGroup({
         {icon && (
           <span
             className={cn(
-              'h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400',
+              'text-muted-foreground h-5 w-5 flex-shrink-0',
               !showCollapsed && 'mr-3'
             )}
           >
@@ -456,8 +456,8 @@ export function SidebarNavItem({
           className={cn(
             'h-5 w-5 flex-shrink-0',
             isActive
-              ? 'text-primary-600 dark:text-primary-400'
-              : 'text-neutral-500 dark:text-neutral-400',
+              ? 'text-primary-800 dark:text-primary-400'
+              : 'text-muted-foreground',
             !showCollapsed && 'mr-3'
           )}
         >
@@ -547,7 +547,7 @@ export function SidebarToggle({
     <button
       onClick={toggleCollapsed}
       className={cn(
-        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
@@ -593,7 +593,7 @@ export function SidebarMobileToggle({
     <button
       onClick={openMobile}
       className={cn(
-        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
