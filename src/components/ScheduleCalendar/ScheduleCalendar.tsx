@@ -347,7 +347,11 @@ export function ScheduleCalendar({
                         }
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && onAddAppointment) {
+                        if (
+                          (e.key === 'Enter' || e.key === ' ') &&
+                          onAddAppointment
+                        ) {
+                          e.preventDefault();
                           const clickDate = new Date(date);
                           clickDate.setHours(hour, 0, 0, 0);
                           onAddAppointment(clickDate, `${hour}:00`);
@@ -373,9 +377,12 @@ export function ScheduleCalendar({
                           minHeight: '1.5rem',
                         }}
                         onClick={() => onAppointmentClick?.(appointment)}
-                        onKeyDown={(e) =>
-                          e.key === 'Enter' && onAppointmentClick?.(appointment)
-                        }
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onAppointmentClick?.(appointment);
+                          }
+                        }}
                       >
                         <p className="truncate font-medium">
                           {appointment.patientName || appointment.title}

@@ -91,7 +91,7 @@ export interface SelectProps extends VariantProps<
   searchPlaceholder?: string;
   /** No results text */
   noResultsText?: string;
-  /** Accessible label for the trigger (used when no visible label) */
+  /** Accessible label for the trigger (used when no `label` prop is provided) */
   'aria-label'?: string;
   /** Additional class name */
   className?: string;
