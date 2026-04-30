@@ -257,6 +257,11 @@ export const miewebUISafelist = [
   'border-chart-5',
   // Switch component
   'bg-primary-500',
+  // Primary scale (a11y contrast)
+  'text-primary-800',
+  'dark:text-primary-300',
+  // Text decoration
+  'underline',
   'h-5',
   'w-9',
   'h-6',
