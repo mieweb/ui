@@ -53,7 +53,7 @@ const sliderThumbVariants = cva(
     'cursor-grab active:cursor-grabbing',
     'hover:shadow-lg',
     'active:shadow-xl active:scale-110',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'group-focus-visible:outline-none group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2',
     'group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50',
   ],
   {
@@ -180,7 +180,11 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     ref
   ) => {
     const hasExplicitLabel = !!label;
-    const ariaLabelledBy = ariaLabelledByProp;
+    const labelId = React.useId();
+    const descriptionId = React.useId();
+    const ariaLabelledBy =
+      ariaLabelledByProp ?? (hasExplicitLabel ? labelId : undefined);
+    const ariaDescribedBy = description ? descriptionId : undefined;
     const ariaLabel =
       ariaLabelProp ??
       (!hasExplicitLabel && !ariaLabelledByProp ? 'Slider' : undefined);
@@ -200,6 +204,10 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     const inputId = id ?? generatedId;
 
     const trackRef = React.useRef<HTMLDivElement>(null);
+    const latestValueRef = React.useRef(clampedValue);
+    latestValueRef.current = clampedValue;
+
+    const safeStep = step > 0 ? step : 1;
 
     const computeValueFromPointer = React.useCallback(
       (clientX: number) => {
@@ -211,15 +219,16 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           1
         );
         const raw = min + ratio * (max - min);
-        // Snap to step
-        const stepped = Math.round(raw / step) * step;
+        // Snap to step relative to min
+        const stepped = min + Math.round((raw - min) / safeStep) * safeStep;
         return Math.min(Math.max(stepped, min), max);
       },
-      [min, max, step, clampedValue]
+      [min, max, safeStep, clampedValue]
     );
 
     const setValue = React.useCallback(
       (newValue: number) => {
+        latestValueRef.current = newValue;
         if (!isControlled) {
           setUncontrolledValue(newValue);
         }
@@ -232,6 +241,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
       (e: React.PointerEvent) => {
         if (disabled) return;
         e.preventDefault();
+        (e.currentTarget as HTMLElement).focus();
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
         const newValue = computeValueFromPointer(e.clientX);
         setValue(newValue);
@@ -253,19 +263,14 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
       (e: React.PointerEvent) => {
         if (disabled) return;
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-        onValueCommit?.(
-          isControlled ? (controlledValue ?? clampedValue) : uncontrolledValue
-        );
+        onValueCommit?.(latestValueRef.current);
       },
-      [
-        disabled,
-        onValueCommit,
-        isControlled,
-        controlledValue,
-        clampedValue,
-        uncontrolledValue,
-      ]
+      [disabled, onValueCommit]
     );
+
+    const handleLostPointerCapture = React.useCallback(() => {
+      onValueCommit?.(latestValueRef.current);
+    }, [onValueCommit]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = parseFloat(e.target.value);
@@ -275,10 +280,6 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
       onValueChange?.(newValue);
     };
 
-    const handleCommit = () => {
-      onValueCommit?.(clampedValue);
-    };
-
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent) => {
         if (disabled) return;
@@ -286,11 +287,11 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         switch (e.key) {
           case 'ArrowRight':
           case 'ArrowUp':
-            newValue = Math.min(clampedValue + step, max);
+            newValue = Math.min(clampedValue + safeStep, max);
             break;
           case 'ArrowLeft':
           case 'ArrowDown':
-            newValue = Math.max(clampedValue - step, min);
+            newValue = Math.max(clampedValue - safeStep, min);
             break;
           case 'Home':
             newValue = min;
@@ -305,7 +306,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         setValue(newValue);
         onValueCommit?.(newValue);
       },
-      [disabled, clampedValue, step, min, max, setValue, onValueCommit]
+      [disabled, clampedValue, safeStep, min, max, setValue, onValueCommit]
     );
 
     const displayValue = formatValue
@@ -326,6 +327,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           >
             {label && (
               <label
+                id={labelId}
                 htmlFor={inputId}
                 data-slot="slider-label"
                 className={cn(
@@ -358,6 +360,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         {/* Description */}
         {description && (
           <p
+            id={descriptionId}
             data-slot="slider-description"
             className={cn(
               'text-muted-foreground mb-2 text-xs',
@@ -373,7 +376,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           ref={trackRef}
           data-slot="slider-track-wrapper"
           className="group focus-visible:ring-ring relative rounded py-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          style={{ touchAction: 'none' }}
+          style={{ touchAction: disabled ? 'auto' : 'none' }}
           role="slider"
           tabIndex={disabled ? -1 : 0}
           aria-valuemin={min}
@@ -381,11 +384,13 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
           aria-valuenow={clampedValue}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
+          aria-describedby={ariaDescribedBy}
           aria-disabled={disabled || undefined}
           data-disabled={disabled || undefined}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onLostPointerCapture={handleLostPointerCapture}
           onKeyDown={handleKeyDown}
         >
           {/* Visual track background */}
@@ -401,15 +406,13 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             />
           </div>
 
-          {/* Native range input — for keyboard accessibility and form submission */}
+          {/* Native range input — for form submission only */}
           <input
             ref={ref}
             type="range"
-            className={cn(
-              'peer pointer-events-none absolute inset-0 h-full w-full cursor-pointer opacity-0',
-              disabled && 'cursor-not-allowed'
-            )}
+            className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
             tabIndex={-1}
+            aria-hidden="true"
             id={inputId}
             name={name}
             min={min}
@@ -417,16 +420,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             step={step}
             value={clampedValue}
             onChange={handleChange}
-            onMouseUp={handleCommit}
-            onTouchEnd={handleCommit}
-            onKeyUp={handleCommit}
-            onBlur={handleCommit}
             disabled={disabled}
-            aria-label={ariaLabel}
-            aria-labelledby={ariaLabelledBy}
-            aria-valuemin={min}
-            aria-valuemax={max}
-            aria-valuenow={clampedValue}
           />
 
           {/* Thumb indicator */}
