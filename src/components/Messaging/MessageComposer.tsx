@@ -244,7 +244,7 @@ const MessageComposer = React.forwardRef<
       isSending = false,
       showAttachmentPicker = true,
       showCameraButton = false,
-      acceptedFileTypes = ['image/*', 'video/*', '.pdf', '.doc', '.docx'],
+      acceptedFileTypes = ['image/*', 'video/*', 'audio/*', '.pdf', '.doc', '.docx'],
       maxFileSize = 25 * 1024 * 1024,
       maxAttachments = 10,
       onError,

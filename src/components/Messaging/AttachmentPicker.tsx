@@ -301,7 +301,7 @@ const AttachmentPicker = React.forwardRef<
   (
     {
       onFilesSelected,
-      acceptedTypes = ['image/*', 'video/*', '.pdf', '.doc', '.docx'],
+      acceptedTypes = ['image/*', 'video/*', 'audio/*', '.pdf', '.doc', '.docx'],
       maxFileSize = 25 * 1024 * 1024, // 25MB
       maxFiles = 10,
       multiple = true,
