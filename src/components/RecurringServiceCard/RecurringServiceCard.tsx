@@ -211,23 +211,12 @@ export function RecurringServiceCard({
     <div
       data-slot="recurring-service-card"
       className={cn(
-        'bg-card text-card-foreground rounded-xl border-2 shadow-sm',
+        'bg-card text-card-foreground relative rounded-xl border-2 shadow-sm',
         currentStyle.border,
-        isDisabled && 'opacity-50',
-        onEdit &&
-          !isDisabled &&
-          'cursor-pointer transition-shadow hover:shadow-md',
+        isDisabled && 'pointer-events-none grayscale',
+        onEdit && !isDisabled && 'transition-shadow hover:shadow-md',
         className
       )}
-      onClick={() => !isDisabled && onEdit?.(service)}
-      role={onEdit && !isDisabled ? 'button' : undefined}
-      tabIndex={onEdit && !isDisabled ? 0 : undefined}
-      onKeyDown={(e) => {
-        if (onEdit && !isDisabled && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault();
-          onEdit(service);
-        }
-      }}
     >
       {/* Card Header - matches CSVColumnMapper style */}
       <div
@@ -242,6 +231,16 @@ export function RecurringServiceCard({
         >
           {service.serviceName}
         </h6>
+        {/* Keyboard-accessible edit trigger */}
+        {onEdit && !isDisabled && (
+          <button
+            type="button"
+            className="absolute inset-0 z-0 cursor-pointer"
+            aria-label={`Edit ${service.serviceName}`}
+            onClick={() => onEdit(service)}
+            tabIndex={0}
+          />
+        )}
       </div>
 
       {/* Card Body - matches CSVColumnMapper style */}
@@ -289,7 +288,7 @@ export function RecurringServiceCard({
           </div>
         )}
         {effectiveState === 'error' && (
-          <div className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs">
+          <div className="bg-destructive/10 text-destructive-800 dark:text-destructive-200 rounded-md px-3 py-2 text-xs">
             <i className="fas fa-times-circle mr-1" />
             {consentNote}
           </div>
@@ -303,7 +302,7 @@ export function RecurringServiceCard({
               e.stopPropagation();
               onDelete?.(service);
             }}
-            className="text-muted-foreground hover:text-destructive mx-auto flex items-center gap-1 text-xs transition-colors"
+            className="text-muted-foreground hover:text-destructive relative z-10 mx-auto flex items-center gap-1 text-xs transition-colors"
           >
             <svg
               className="h-3 w-3"
@@ -422,6 +421,11 @@ export function RecurringServiceSetupModal({
     save = 'Save',
   } = labels;
 
+  const instanceId = React.useId();
+  const providerSelectId = `${instanceId}-provider`;
+  const serviceSelectId = `${instanceId}-service`;
+  const occurrenceSelectId = `${instanceId}-occurrence`;
+
   const [formData, setFormData] = React.useState<RecurringServiceFormData>(
     initialData || {
       providerId: '',
@@ -466,6 +470,7 @@ export function RecurringServiceSetupModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="text-2xl leading-none hover:opacity-80"
           >
             &times;
@@ -477,10 +482,14 @@ export function RecurringServiceSetupModal({
           {/* Provider Select */}
           {showProviderSelector && (
             <div className="mb-4">
-              <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+              <label
+                htmlFor={providerSelectId}
+                className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase"
+              >
                 {provider}
               </label>
               <select
+                id={providerSelectId}
                 value={formData.providerId}
                 onChange={(e) =>
                   setFormData({ ...formData, providerId: e.target.value })
@@ -500,10 +509,14 @@ export function RecurringServiceSetupModal({
 
           {/* Service Select */}
           <div className="mb-4">
-            <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+            <label
+              htmlFor={serviceSelectId}
+              className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase"
+            >
               {service}
             </label>
             <select
+              id={serviceSelectId}
               value={formData.serviceId}
               onChange={(e) =>
                 setFormData({ ...formData, serviceId: e.target.value })
@@ -522,10 +535,14 @@ export function RecurringServiceSetupModal({
 
           {/* Occurrence Select */}
           <div className="mb-4">
-            <label className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase">
+            <label
+              htmlFor={occurrenceSelectId}
+              className="text-muted-foreground mb-1 block text-xs font-semibold tracking-wider uppercase"
+            >
               {occurrence}
             </label>
             <select
+              id={occurrenceSelectId}
               value={formData.occurrence}
               onChange={(e) =>
                 setFormData({ ...formData, occurrence: e.target.value })
