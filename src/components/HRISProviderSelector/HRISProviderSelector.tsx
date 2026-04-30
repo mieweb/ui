@@ -109,7 +109,7 @@ export function HRISProviderSelector({
               <div className="flex-shrink-0">
                 <img
                   src={currentProvider.logoUrl}
-                  alt={currentProvider.displayName}
+                  alt=""
                   className="h-16 w-auto object-contain"
                   data-slot="hris-connected-logo"
                 />
@@ -134,7 +134,7 @@ export function HRISProviderSelector({
                 email{' '}
                 <a
                   href={`mailto:${supportEmail}`}
-                  className="text-primary hover:underline"
+                  className="text-primary-800 dark:text-primary-300 underline"
                 >
                   {supportEmail}
                 </a>
@@ -143,7 +143,7 @@ export function HRISProviderSelector({
 
               <div className="mt-2 text-sm" data-slot="hris-connected-sync">
                 <strong>{lastSync}:</strong>{' '}
-                <span className="text-primary">
+                <span className="text-primary-800 dark:text-primary-300">
                   {formatLastSync(currentProvider.lastSync)}
                 </span>
               </div>
@@ -277,7 +277,7 @@ export function HRISProviderSelector({
                   <>
                     <img
                       src={provider.logoUrl}
-                      alt={provider.displayName}
+                      alt=""
                       className="max-h-full max-w-full object-contain"
                       onError={(e) => {
                         // Hide broken image and show fallback
