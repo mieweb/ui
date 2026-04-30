@@ -50,9 +50,10 @@ const sliderThumbVariants = cva(
     'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
     'rounded-full border-2 bg-white',
     'shadow-md transition-shadow duration-150',
-    'peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2',
-    'peer-hover:shadow-lg',
-    'peer-active:shadow-xl peer-active:scale-110',
+    'cursor-grab active:cursor-grabbing',
+    'hover:shadow-lg',
+    'active:shadow-xl active:scale-110',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50',
   ],
   {
@@ -198,6 +199,74 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     const generatedId = React.useId();
     const inputId = id ?? generatedId;
 
+    const trackRef = React.useRef<HTMLDivElement>(null);
+
+    const computeValueFromPointer = React.useCallback(
+      (clientX: number) => {
+        const track = trackRef.current;
+        if (!track) return clampedValue;
+        const rect = track.getBoundingClientRect();
+        const ratio = Math.min(
+          Math.max((clientX - rect.left) / rect.width, 0),
+          1
+        );
+        const raw = min + ratio * (max - min);
+        // Snap to step
+        const stepped = Math.round(raw / step) * step;
+        return Math.min(Math.max(stepped, min), max);
+      },
+      [min, max, step, clampedValue]
+    );
+
+    const setValue = React.useCallback(
+      (newValue: number) => {
+        if (!isControlled) {
+          setUncontrolledValue(newValue);
+        }
+        onValueChange?.(newValue);
+      },
+      [isControlled, onValueChange]
+    );
+
+    const handlePointerDown = React.useCallback(
+      (e: React.PointerEvent) => {
+        if (disabled) return;
+        e.preventDefault();
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        const newValue = computeValueFromPointer(e.clientX);
+        setValue(newValue);
+      },
+      [disabled, computeValueFromPointer, setValue]
+    );
+
+    const handlePointerMove = React.useCallback(
+      (e: React.PointerEvent) => {
+        if (disabled) return;
+        if (!(e.target as HTMLElement).hasPointerCapture(e.pointerId)) return;
+        const newValue = computeValueFromPointer(e.clientX);
+        setValue(newValue);
+      },
+      [disabled, computeValueFromPointer, setValue]
+    );
+
+    const handlePointerUp = React.useCallback(
+      (e: React.PointerEvent) => {
+        if (disabled) return;
+        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+        onValueCommit?.(
+          isControlled ? (controlledValue ?? clampedValue) : uncontrolledValue
+        );
+      },
+      [
+        disabled,
+        onValueCommit,
+        isControlled,
+        controlledValue,
+        clampedValue,
+        uncontrolledValue,
+      ]
+    );
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = parseFloat(e.target.value);
       if (!isControlled) {
@@ -209,6 +278,35 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     const handleCommit = () => {
       onValueCommit?.(clampedValue);
     };
+
+    const handleKeyDown = React.useCallback(
+      (e: React.KeyboardEvent) => {
+        if (disabled) return;
+        let newValue: number | null = null;
+        switch (e.key) {
+          case 'ArrowRight':
+          case 'ArrowUp':
+            newValue = Math.min(clampedValue + step, max);
+            break;
+          case 'ArrowLeft':
+          case 'ArrowDown':
+            newValue = Math.max(clampedValue - step, min);
+            break;
+          case 'Home':
+            newValue = min;
+            break;
+          case 'End':
+            newValue = max;
+            break;
+          default:
+            return;
+        }
+        e.preventDefault();
+        setValue(newValue);
+        onValueCommit?.(newValue);
+      },
+      [disabled, clampedValue, step, min, max, setValue, onValueCommit]
+    );
 
     const displayValue = formatValue
       ? formatValue(clampedValue)
@@ -272,9 +370,23 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
 
         {/* Track + Thumb */}
         <div
+          ref={trackRef}
           data-slot="slider-track-wrapper"
-          className="group relative"
+          className="group focus-visible:ring-ring relative rounded py-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style={{ touchAction: 'none' }}
+          role="slider"
+          tabIndex={disabled ? -1 : 0}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={clampedValue}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          aria-disabled={disabled || undefined}
           data-disabled={disabled || undefined}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onKeyDown={handleKeyDown}
         >
           {/* Visual track background */}
           <div
@@ -289,14 +401,15 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             />
           </div>
 
-          {/* Native range input — stretched to fill, made invisible */}
+          {/* Native range input — for keyboard accessibility and form submission */}
           <input
             ref={ref}
             type="range"
             className={cn(
-              'peer absolute inset-0 h-full w-full cursor-pointer opacity-0',
+              'peer pointer-events-none absolute inset-0 h-full w-full cursor-pointer opacity-0',
               disabled && 'cursor-not-allowed'
             )}
+            tabIndex={-1}
             id={inputId}
             name={name}
             min={min}
@@ -316,7 +429,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             aria-valuenow={clampedValue}
           />
 
-          {/* Thumb indicator (visual only) */}
+          {/* Thumb indicator */}
           <div
             data-slot="slider-thumb"
             className={sliderThumbVariants({ size, variant })}
