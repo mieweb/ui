@@ -247,6 +247,18 @@ const preview: Preview = {
     },
   },
   parameters: {
+    a11y: {
+      config: {
+        rules: [
+          // These rules fire on every story because Storybook renders components
+          // in an iframe without <main>, <h1>, or landmark regions. They are not
+          // real-world issues — host applications provide these structural elements.
+          { id: 'landmark-one-main', enabled: false },
+          { id: 'page-has-heading-one', enabled: false },
+          { id: 'region', enabled: false },
+        ],
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,
