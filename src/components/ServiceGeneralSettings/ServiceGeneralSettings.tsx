@@ -105,7 +105,7 @@ export function ServiceGeneralSettings({
             className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
             data-slot="service-settings-error"
           >
-            <p className="text-sm text-red-600 dark:text-red-400">
+            <p className="text-sm text-red-700 dark:text-red-400">
               {errorMessage}
             </p>
           </div>
@@ -117,7 +117,11 @@ export function ServiceGeneralSettings({
           data-slot="service-settings-toggles"
         >
           <div className="flex items-center gap-3">
-            <Switch checked={isActive} onCheckedChange={onIsActiveChange} />
+            <Switch
+              aria-label="Active"
+              checked={isActive}
+              onCheckedChange={onIsActiveChange}
+            />
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Active
@@ -129,7 +133,11 @@ export function ServiceGeneralSettings({
           </div>
 
           <div className="flex items-center gap-3">
-            <Switch checked={isFeatured} onCheckedChange={onIsFeaturedChange} />
+            <Switch
+              aria-label="Featured"
+              checked={isFeatured}
+              onCheckedChange={onIsFeaturedChange}
+            />
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Featured
