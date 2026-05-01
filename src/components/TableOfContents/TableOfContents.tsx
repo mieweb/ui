@@ -350,7 +350,7 @@ function TocList({
               'hover:text-foreground',
               activeId === item.id
                 ? 'text-primary font-medium'
-                : 'text-muted-foreground'
+                : 'text-neutral-600 dark:text-neutral-400'
             )}
           >
             {item.title}

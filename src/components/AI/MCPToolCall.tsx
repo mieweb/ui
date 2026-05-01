@@ -487,7 +487,7 @@ function ToolResultDisplay({
         <div className="mt-2">
           <button
             onClick={() => setShowJson(!showJson)}
-            className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
+            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
           >
             <svg
               className={cn(
@@ -714,7 +714,7 @@ export function MCPToolCallDisplay({
             </span>
             <ToolStatusIcon status={toolCall.status} />
             {toolCall.duration && (
-              <span className="text-xs text-neutral-400">
+              <span className="text-xs text-neutral-600 dark:text-neutral-400">
                 {formatDuration(toolCall.duration)}
               </span>
             )}
@@ -751,7 +751,7 @@ export function MCPToolCallDisplay({
           {collapsible && showParameters && toolCall.parameters.length > 0 && (
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="mt-2 flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
+              className="mt-2 flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
             >
               <svg
                 className={cn(
@@ -779,7 +779,7 @@ export function MCPToolCallDisplay({
               data-slot="ai-tool-parameters"
               className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800"
             >
-              <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400">
+              <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-600 uppercase dark:text-neutral-400">
                 Parameters
               </h4>
               <div className="space-y-0.5">
@@ -788,7 +788,7 @@ export function MCPToolCallDisplay({
                     key={param.name}
                     className="flex items-start gap-2 text-xs"
                   >
-                    <span className="font-mono text-neutral-500 dark:text-neutral-500">
+                    <span className="font-mono text-neutral-600 dark:text-neutral-400">
                       {param.name}:
                     </span>
                     <span className="font-mono text-neutral-700 dark:text-neutral-300">

@@ -128,7 +128,7 @@ function Progress({
           {showValue && !indeterminate && (
             <span
               data-slot="progress-value"
-              className="text-muted-foreground text-sm"
+              className="text-sm text-neutral-600 dark:text-neutral-400"
             >
               {displayValue}
             </span>

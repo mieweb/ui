@@ -327,7 +327,7 @@ export function ProviderSelector({
                       {provider.code && (
                         <span
                           data-slot="provider-selector-option-code"
-                          className="text-muted-foreground text-xs"
+                          className="text-xs text-neutral-600 dark:text-neutral-400"
                         >
                           ({provider.code})
                         </span>
@@ -335,7 +335,7 @@ export function ProviderSelector({
                       {provider.isActive === false && (
                         <span
                           data-slot="provider-selector-option-badge"
-                          className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium"
+                          className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400"
                         >
                           Inactive
                         </span>
