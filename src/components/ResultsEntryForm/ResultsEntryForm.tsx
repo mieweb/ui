@@ -484,8 +484,9 @@ export const ResultsEntryForm = React.forwardRef<
       {/* Error Message */}
       {showError && (
         <p
-          className="text-destructive text-sm font-medium"
+          className="text-destructive-700 dark:text-destructive-400 text-sm font-medium"
           data-slot="ref-error"
+          role="alert"
         >
           {pleaseSelectResult}
         </p>

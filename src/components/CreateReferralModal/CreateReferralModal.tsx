@@ -130,7 +130,12 @@ export function CreateReferralModal({
               data-slot="referral-modal-error"
               className="border-destructive/30 bg-destructive/10 rounded-lg border p-3"
             >
-              <p className="text-destructive text-sm">{errorMessage}</p>
+              <p
+                className="text-destructive-700 dark:text-destructive-400 text-sm"
+                role="alert"
+              >
+                {errorMessage}
+              </p>
             </div>
           )}
 

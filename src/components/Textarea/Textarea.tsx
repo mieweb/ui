@@ -192,7 +192,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               <p
                 id={errorId}
                 data-slot="textarea-error"
-                className="text-destructive text-sm"
+                className="text-destructive-700 dark:text-destructive-400 text-sm"
                 role="alert"
               >
                 {error}

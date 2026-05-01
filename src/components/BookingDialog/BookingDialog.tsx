@@ -116,8 +116,9 @@ export function FloatingInput({
       </label>
       {error && (
         <p
-          className="text-destructive mt-1 text-sm"
+          className="text-destructive-700 dark:text-destructive-400 mt-1 text-sm"
           data-slot="floating-input-error"
+          role="alert"
         >
           {error}
         </p>
@@ -245,7 +246,14 @@ export function ServiceSelect({
         </div>
       )}
 
-      {error && <p className="text-destructive mt-1 text-sm">{error}</p>}
+      {error && (
+        <p
+          className="text-destructive-700 dark:text-destructive-400 mt-1 text-sm"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
