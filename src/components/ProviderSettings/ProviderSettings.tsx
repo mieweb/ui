@@ -199,7 +199,9 @@ export function ProviderSettings({
             {/* Basic Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Basic Information</CardTitle>
+                <CardTitle as="h2" className="text-lg">
+                  Basic Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -265,7 +267,9 @@ export function ProviderSettings({
             {/* Contact Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Contact Information</CardTitle>
+                <CardTitle as="h2" className="text-lg">
+                  Contact Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -316,7 +320,9 @@ export function ProviderSettings({
             {/* Address */}
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle className="text-lg">Address</CardTitle>
+                <CardTitle as="h2" className="text-lg">
+                  Address
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
@@ -411,7 +417,7 @@ export function ProviderSettings({
           <div data-slot="provider-settings-notifications">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">
+                <CardTitle as="h2" className="text-lg">
                   Notification Preferences
                 </CardTitle>
               </CardHeader>
@@ -435,6 +441,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updateNotifications('emailNewOrders', checked)
                         }
+                        aria-label="Email new orders"
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -451,6 +458,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updateNotifications('emailOrderUpdates', checked)
                         }
+                        aria-label="Email order updates"
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -467,6 +475,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updateNotifications('emailInvoices', checked)
                         }
+                        aria-label="Email invoice notifications"
                       />
                     </div>
                   </div>
@@ -491,6 +500,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updateNotifications('smsNewOrders', checked)
                         }
+                        aria-label="SMS new orders"
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -507,6 +517,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updateNotifications('smsOrderUpdates', checked)
                         }
+                        aria-label="SMS order updates"
                       />
                     </div>
                   </div>
@@ -521,7 +532,9 @@ export function ProviderSettings({
           <div data-slot="provider-settings-scheduling">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Scheduling Settings</CardTitle>
+                <CardTitle as="h2" className="text-lg">
+                  Scheduling Settings
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
@@ -539,6 +552,7 @@ export function ProviderSettings({
                       onCheckedChange={(checked) =>
                         updateScheduling('acceptingNewPatients', checked)
                       }
+                      aria-label="Accepting new patients"
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -555,6 +569,7 @@ export function ProviderSettings({
                       onCheckedChange={(checked) =>
                         updateScheduling('requireAppointment', checked)
                       }
+                      aria-label="Require appointment"
                     />
                   </div>
                 </div>
@@ -617,7 +632,9 @@ export function ProviderSettings({
           <div data-slot="provider-settings-payments">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Payment Settings</CardTitle>
+                <CardTitle as="h2" className="text-lg">
+                  Payment Settings
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
@@ -649,6 +666,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updatePayments('acceptsCreditCard', checked)
                         }
+                        aria-label="Accept credit card"
                       />
                     </div>
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
@@ -675,6 +693,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updatePayments('acceptsACH', checked)
                         }
+                        aria-label="Accept ACH / bank transfer"
                       />
                     </div>
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
@@ -701,6 +720,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updatePayments('acceptsCash', checked)
                         }
+                        aria-label="Accept cash"
                       />
                     </div>
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
@@ -727,6 +747,7 @@ export function ProviderSettings({
                         onCheckedChange={(checked) =>
                           updatePayments('acceptsCheck', checked)
                         }
+                        aria-label="Accept check"
                       />
                     </div>
                   </div>
