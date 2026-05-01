@@ -110,7 +110,12 @@ export function EditUserRoleModal({
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="text-destructive text-sm">{errorMessage}</p>
+              <p
+                className="text-destructive-700 dark:text-destructive-400 text-sm"
+                role="alert"
+              >
+                {errorMessage}
+              </p>
             </div>
           </div>
         )}

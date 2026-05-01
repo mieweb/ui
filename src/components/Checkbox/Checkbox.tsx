@@ -161,7 +161,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           <p
             id={errorId}
             data-slot="checkbox-error"
-            className="text-destructive text-sm"
+            className="text-destructive-700 dark:text-destructive-400 text-sm"
             role="alert"
           >
             {error}

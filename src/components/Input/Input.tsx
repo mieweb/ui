@@ -127,7 +127,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p
             id={errorId}
             data-slot="input-error"
-            className="text-destructive text-sm"
+            className="text-destructive-700 dark:text-destructive-400 text-sm"
             role="alert"
           >
             {error}

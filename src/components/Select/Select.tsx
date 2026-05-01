@@ -537,7 +537,7 @@ function Select({
         <p
           id={errorId}
           data-slot="select-error"
-          className="text-destructive text-sm"
+          className="text-destructive-700 dark:text-destructive-400 text-sm"
           role="alert"
         >
           {error}
