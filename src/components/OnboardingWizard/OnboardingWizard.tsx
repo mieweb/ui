@@ -312,7 +312,7 @@ export function OnboardingStepQuestion({
           </h3>
           {description && (
             <p
-              className="text-muted-foreground"
+              className="text-neutral-600 dark:text-neutral-400"
               data-slot="onboarding-step-description"
             >
               {description}

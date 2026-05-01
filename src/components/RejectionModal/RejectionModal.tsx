@@ -119,7 +119,9 @@ export function RejectionModal({
               data-slot="rejection-modal-info"
             >
               {description && (
-                <p className="text-muted-foreground text-sm">{description}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  {description}
+                </p>
               )}
               {itemDescription && (
                 <p className="text-foreground mt-1 text-sm font-medium">

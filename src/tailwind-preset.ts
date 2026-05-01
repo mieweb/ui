@@ -175,6 +175,14 @@ export const miewebUISafelist = [
   'dark:text-neutral-400',
   'dark:border-neutral-600',
   'dark:border-neutral-700',
+  // Indigo (StripeBadge)
+  'bg-indigo-500/10',
+  'dark:bg-indigo-400/20',
+  'text-indigo-700',
+  'dark:text-indigo-300',
+  'border-indigo-500/30',
+  'hover:text-indigo-700',
+  'dark:hover:text-indigo-300',
   // Destructive scale
   'bg-destructive-50',
   'bg-destructive-100',
