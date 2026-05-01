@@ -23,7 +23,7 @@ const meta: Meta<typeof ConnectionStatusOverlay> = {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             App Content
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-neutral-600 dark:text-neutral-400">
             The connection status overlay will appear on top of this content.
           </p>
         </div>
@@ -93,7 +93,9 @@ export const AllBadgeStates: StoryObj<typeof ConnectionStatusBadge> = {
       ).map((status) => (
         <div key={status} className="flex items-center gap-4">
           <ConnectionStatusBadge status={status} />
-          <span className="text-sm text-gray-500">{status}</span>
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
+            {status}
+          </span>
         </div>
       ))}
     </div>
@@ -120,11 +122,13 @@ function InteractiveDemo() {
   return (
     <div className="space-y-4">
       <div className="rounded-lg bg-white p-4 dark:bg-gray-800">
-        <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
+        <h2 className="mb-2 font-medium text-gray-900 dark:text-white">
           Connection Status Demo
-        </h3>
+        </h2>
         <div className="mb-4 flex items-center gap-4">
-          <span className="text-muted-foreground text-sm">Status:</span>
+          <span className="text-sm text-neutral-600 dark:text-neutral-400">
+            Status:
+          </span>
           <ConnectionStatusBadge status={connection.status} />
         </div>
         <label className="flex items-center gap-2">

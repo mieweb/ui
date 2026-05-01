@@ -245,12 +245,12 @@ export function UpdateAvailableOverlay({
             <p className="font-semibold text-gray-900 dark:text-white">
               Update Available
             </p>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
               There is an update available for {appName}.
               {update.version && ` Version ${update.version}`}
             </p>
             {update.description && (
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
                 {update.description}
               </p>
             )}
@@ -262,7 +262,7 @@ export function UpdateAvailableOverlay({
               <button
                 type="button"
                 onClick={onLater}
-                className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600"
+                className="bg-destructive-700 hover:bg-destructive-800 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
               >
                 Later
               </button>
@@ -270,7 +270,7 @@ export function UpdateAvailableOverlay({
             <button
               type="button"
               onClick={onUpdateNow}
-              className="rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-600"
+              className="bg-success-700 hover:bg-success-800 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
             >
               Update Now
             </button>
@@ -391,8 +391,8 @@ export function ConnectionStatusBar({
         'fixed right-0 left-0 z-40 px-4 py-2',
         position === 'top' ? 'top-0' : 'bottom-0',
         isConnecting
-          ? 'bg-yellow-500 text-yellow-900'
-          : 'bg-red-500 text-white',
+          ? 'bg-warning-500 text-warning-900'
+          : 'bg-destructive-700 text-white',
         className
       )}
     >
