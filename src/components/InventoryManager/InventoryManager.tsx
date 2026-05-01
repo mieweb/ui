@@ -146,7 +146,7 @@ export function InventoryManager({
           <button
             type="button"
             onClick={onUpdateClick}
-            className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
+            className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 flex items-center gap-1 text-sm font-medium"
           >
             Update Inventory
             <svg
@@ -208,8 +208,8 @@ export function InventoryManager({
                       <span
                         className={`inline-flex items-center gap-1 ${
                           entry.type === 'credit'
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-red-600 dark:text-red-400'
+                            ? 'text-green-700 dark:text-green-400'
+                            : 'text-red-700 dark:text-red-400'
                         }`}
                       >
                         {entry.type === 'credit' ? (
@@ -293,15 +293,15 @@ export function InventoryManager({
         </ModalHeader>
         <ModalBody className="space-y-4">
           <div>
-            <h4 className="text-foreground text-lg font-semibold">
+            <h3 className="text-foreground text-lg font-semibold">
               {serviceName}
-            </h4>
+            </h3>
           </div>
 
           <div>
-            <h5 className="text-muted-foreground mb-2 text-sm font-medium">
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
               Update Inventory
-            </h5>
+            </h4>
           </div>
 
           {/* Add/Remove Toggle */}
