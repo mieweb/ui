@@ -106,16 +106,19 @@ export interface NavLinksProps {
   links: NavLink[];
   variant?: 'light' | 'dark';
   className?: string;
+  'aria-label'?: string;
 }
 
 export function NavLinks({
   links,
   variant = 'light',
   className,
+  'aria-label': ariaLabel = 'Main navigation',
 }: NavLinksProps) {
   return (
     <nav
       data-slot="site-header-nav"
+      aria-label={ariaLabel}
       className={cn('hidden items-center gap-1 md:flex', className)}
     >
       {links.map((link) => (
@@ -364,7 +367,7 @@ export function UserMenu({
               'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
               variant === 'light'
                 ? 'bg-white/20 text-white'
-                : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                : 'bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-400'
             )}
           >
             {initials}
@@ -556,7 +559,7 @@ export function MobileMenuPanel({
           {user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3 px-2">
-                <div className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium">
+                <div className="bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium">
                   {user.name
                     .split(' ')
                     .map((w) => w[0])

@@ -61,7 +61,9 @@ const meta: Meta<typeof SiteHeader> = {
       <div className="min-h-[300px] bg-gray-100 dark:bg-gray-950">
         <Story />
         <div className="p-8">
-          <p className="text-muted-foreground">Page content below header</p>
+          <p className="text-neutral-600 dark:text-neutral-400">
+            Page content below header
+          </p>
         </div>
       </div>
     ),
@@ -123,10 +125,18 @@ export const NavLinksDemo: StoryObj<typeof NavLinks> = {
   render: () => (
     <div className="space-y-4 p-4">
       <div className="bg-primary-800 rounded-lg p-4">
-        <NavLinks links={defaultLinks} variant="light" />
+        <NavLinks
+          links={defaultLinks}
+          variant="light"
+          aria-label="Light variant navigation"
+        />
       </div>
       <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
-        <NavLinks links={defaultLinks} variant="dark" />
+        <NavLinks
+          links={defaultLinks}
+          variant="dark"
+          aria-label="Dark variant navigation"
+        />
       </div>
     </div>
   ),
