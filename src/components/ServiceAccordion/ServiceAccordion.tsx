@@ -260,7 +260,7 @@ function SubCategoryAccordion({
           'overflow-hidden transition-all duration-200 ease-in-out',
           isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
         )}
-        aria-hidden={!isExpanded}
+        inert={!isExpanded || undefined}
       >
         <div className="space-y-1 pb-2 pl-4">
           {subCategory.services.map((service, serviceIdx) => (
@@ -373,7 +373,7 @@ function CategoryAccordionItem({
             variant === 'cards' &&
               'rounded-b-lg border border-t-0 border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'
           )}
-          aria-hidden={!isExpanded}
+          inert={!isExpanded || undefined}
         >
           <div className="space-y-2 p-4">
             {/* Direct services */}
@@ -432,6 +432,8 @@ export interface ServiceAccordionProps extends VariantProps<
   onExpandedChange?: (expanded: string[]) => void;
   /** Additional CSS classes */
   className?: string;
+  /** Accessible label for the region */
+  'aria-label'?: string;
 }
 
 export function ServiceAccordion({
@@ -443,6 +445,7 @@ export function ServiceAccordion({
   expandedCategories: controlledExpanded,
   onExpandedChange,
   className,
+  'aria-label': ariaLabel = 'Service categories',
 }: ServiceAccordionProps) {
   const [internalExpanded, setInternalExpanded] = React.useState<string[]>([]);
 
@@ -474,7 +477,7 @@ export function ServiceAccordion({
       data-slot="service-accordion"
       className={cn(accordionVariants({ variant }), className)}
       role="region"
-      aria-label="Service categories"
+      aria-label={ariaLabel}
     >
       {categories.map((category, index) => (
         <CategoryAccordionItem
@@ -541,7 +544,7 @@ export function ServiceTagCloud({
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5',
             'text-sm font-medium',
-            'bg-primary-100 text-primary-800 hover:bg-primary-200',
+            'bg-primary-100 text-primary-900 hover:bg-primary-200',
             'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
             'transition-colors',
             'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
@@ -550,7 +553,7 @@ export function ServiceTagCloud({
         >
           {service.name}
           {showCounts && service.providerCount !== undefined && (
-            <span className="text-xs opacity-70">
+            <span className="text-primary-900 dark:text-primary-300 text-xs">
               ({service.providerCount})
             </span>
           )}
