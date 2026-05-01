@@ -115,7 +115,9 @@ export function EmployerServiceModal({
               className="border-destructive/30 bg-destructive/10 rounded-lg border p-3"
               data-slot="employer-service-error"
             >
-              <p className="text-destructive text-sm">{errorMessage}</p>
+              <p className="text-destructive-700 dark:text-destructive-300 text-sm">
+                {errorMessage}
+              </p>
             </div>
           )}
 
@@ -160,6 +162,7 @@ export function EmployerServiceModal({
                 </p>
               </div>
               <Switch
+                aria-label="Use Base Price"
                 checked={config.useBasePrice}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({
@@ -241,6 +244,7 @@ export function EmployerServiceModal({
                 </p>
               </div>
               <Switch
+                aria-label="Auto-Accept Orders"
                 checked={config.autoAccept}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({ ...prev, autoAccept: checked }))
@@ -259,6 +263,7 @@ export function EmployerServiceModal({
                 </p>
               </div>
               <Switch
+                aria-label="Requires Approval"
                 checked={config.requiresApproval}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({ ...prev, requiresApproval: checked }))
@@ -287,6 +292,7 @@ export function EmployerServiceModal({
                 </p>
               </div>
               <Switch
+                aria-label="Notify on New Orders"
                 checked={config.notifyOnOrder}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({ ...prev, notifyOnOrder: checked }))
