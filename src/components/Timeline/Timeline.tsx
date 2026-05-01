@@ -173,9 +173,10 @@ export function TimelineProgress({
       data-slot="timeline-progress"
       className={cn(sizes.padding, 'overflow-x-auto', className)}
       role="progressbar"
-      aria-valuenow={currentIndex + 1}
+      aria-label="Timeline progress"
+      aria-valuenow={Math.max(currentIndex + 1, 1)}
       aria-valuemin={1}
-      aria-valuemax={visibleSteps.length}
+      aria-valuemax={visibleSteps.length || 1}
     >
       {/* Progress track with circles overlaid */}
       <div className="relative flex items-start">

@@ -134,6 +134,7 @@ export function StepIndicator({
       data-slot="step-indicator-circle"
       onClick={() => handleStepClick(index)}
       disabled={!clickable}
+      aria-label={`Step ${index + 1}: ${step.label}`}
       className={`${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
         step.hasError
           ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'

@@ -316,7 +316,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     return (
       <div
         data-slot="slider"
-        className={cn('w-full', className)}
+        className={cn('relative w-full', className)}
         data-disabled={disabled || undefined}
       >
         {/* Label row */}
@@ -406,23 +406,6 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             />
           </div>
 
-          {/* Native range input — for form submission only */}
-          <input
-            ref={ref}
-            type="range"
-            className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
-            tabIndex={-1}
-            aria-hidden="true"
-            id={inputId}
-            name={name}
-            min={min}
-            max={max}
-            step={step}
-            value={clampedValue}
-            onChange={handleChange}
-            disabled={disabled}
-          />
-
           {/* Thumb indicator */}
           <div
             data-slot="slider-thumb"
@@ -431,6 +414,23 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             aria-hidden="true"
           />
         </div>
+
+        {/* Native range input — for form submission only, rendered outside role="slider" to avoid nested-interactive */}
+        <input
+          ref={ref}
+          type="range"
+          className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+          tabIndex={-1}
+          aria-hidden="true"
+          id={inputId}
+          name={name}
+          min={min}
+          max={max}
+          step={step}
+          value={clampedValue}
+          onChange={handleChange}
+          disabled={disabled}
+        />
 
         {/* Min / Max labels */}
         {(minLabel || maxLabel) && (

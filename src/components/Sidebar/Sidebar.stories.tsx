@@ -143,7 +143,7 @@ function UserFooter() {
       <button
         onClick={toggleCollapsed}
         className="hover:ring-primary-500 rounded-full p-0.5 transition-colors hover:ring-2"
-        title="Expand sidebar"
+        aria-label="Expand sidebar"
       >
         <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
       </button>
@@ -172,7 +172,7 @@ function CollapseToggle() {
     <button
       onClick={toggleCollapsed}
       className="w-full rounded-lg py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
-      title={showCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      aria-label={showCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
     >
       {showCollapsed ? '→' : '← Collapse'}
     </button>

@@ -926,7 +926,7 @@ const AudioPlayer = React.forwardRef<AudioPlayerRef, AudioPlayerProps>(
             'font-mono text-xs tabular-nums',
             isShowingHoverTime
               ? 'text-primary-800 dark:text-primary-400'
-              : 'text-muted-foreground'
+              : 'text-neutral-600 dark:text-neutral-400'
           )}
         >
           {formatTime(displayTime)} / {formatTime(displayDuration)}
