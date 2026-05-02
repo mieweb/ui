@@ -84,7 +84,9 @@ export const DisabledChecked: Story = {
 };
 
 export const NoLabel: Story = {
-  args: {},
+  args: {
+    'aria-label': 'Toggle setting',
+  },
 };
 
 function ControlledSwitchDemo() {

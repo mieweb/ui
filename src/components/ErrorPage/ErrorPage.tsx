@@ -173,7 +173,7 @@ export function ErrorPage({
       {/* Error Code */}
       {displayCode && (
         <div
-          className="dark:text-muted-foreground mb-4 text-6xl font-bold text-gray-300 sm:text-8xl"
+          className="text-muted-foreground mb-4 text-6xl font-bold sm:text-8xl"
           data-slot="error-page-code"
         >
           {displayCode}
@@ -492,7 +492,7 @@ interface DefaultIllustrationProps {
 }
 
 function DefaultIllustration({ type }: DefaultIllustrationProps) {
-  const iconClasses = 'h-24 w-24 text-gray-300 dark:text-muted-foreground';
+  const iconClasses = 'h-24 w-24 text-muted-foreground';
 
   switch (type) {
     case '404':
