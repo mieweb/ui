@@ -252,6 +252,7 @@ function CircularProgress({
       className={cn(circularProgressVariants({ size }), className)}
     >
       <svg
+        aria-hidden="true"
         className={cn('-rotate-90 transform', indeterminate && 'animate-spin')}
         width={svgSize}
         height={svgSize}

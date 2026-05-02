@@ -331,6 +331,7 @@ function WebsiteInputGroup({
                 aria-label="Add website"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -359,6 +360,7 @@ function WebsiteInputGroup({
                 aria-label="Remove website"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"

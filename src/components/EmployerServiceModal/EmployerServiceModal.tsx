@@ -357,6 +357,7 @@ export function EmployerServiceModal({
             {isSubmitting ? (
               <>
                 <svg
+                  aria-hidden="true"
                   className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   data-slot="employer-service-spinner"
                   fill="none"

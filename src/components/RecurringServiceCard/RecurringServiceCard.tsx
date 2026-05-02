@@ -127,6 +127,7 @@ export function RecurringServiceCard({
       icon: (
         <span className="bg-success text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
           <svg
+            aria-hidden="true"
             className="h-3 w-3"
             fill="none"
             viewBox="0 0 24 24"
@@ -148,6 +149,7 @@ export function RecurringServiceCard({
       icon: (
         <span className="bg-primary-800 text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
           <svg
+            aria-hidden="true"
             className="h-3 w-3"
             fill="none"
             viewBox="0 0 24 24"
@@ -168,7 +170,12 @@ export function RecurringServiceCard({
       border: 'border-warning/30',
       icon: (
         <span className="bg-warning text-warning-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+          <svg
+            aria-hidden="true"
+            className="h-3 w-3"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
             <circle cx="12" cy="12" r="10" fill="currentColor" />
             <circle cx="12" cy="12" r="4" className="fill-warning" />
           </svg>
@@ -181,6 +188,7 @@ export function RecurringServiceCard({
       icon: (
         <span className="bg-destructive text-destructive-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
           <svg
+            aria-hidden="true"
             className="h-3 w-3"
             fill="none"
             viewBox="0 0 24 24"
@@ -305,6 +313,7 @@ export function RecurringServiceCard({
             className="text-muted-foreground hover:text-destructive relative z-10 mx-auto flex items-center gap-1 text-xs transition-colors"
           >
             <svg
+              aria-hidden="true"
               className="h-3 w-3"
               fill="none"
               viewBox="0 0 24 24"

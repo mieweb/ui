@@ -518,6 +518,7 @@ function DefaultIllustration({ type }: DefaultIllustrationProps) {
 function Search404Icon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -541,6 +542,7 @@ function Search404Icon({ className }: { className?: string }) {
 function ServerErrorIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -559,6 +561,7 @@ function ServerErrorIcon({ className }: { className?: string }) {
 function LockIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -577,6 +580,7 @@ function LockIcon({ className }: { className?: string }) {
 function WifiOffIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -596,6 +600,7 @@ function WifiOffIcon({ className }: { className?: string }) {
 function WrenchIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -619,6 +624,7 @@ function WrenchIcon({ className }: { className?: string }) {
 function AlertIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

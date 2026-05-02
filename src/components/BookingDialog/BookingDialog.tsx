@@ -873,6 +873,7 @@ export function QuickBookCard({
 function CloseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -893,6 +894,7 @@ function CloseIcon({ className }: { className?: string }) {
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -913,6 +915,7 @@ function ChevronDownIcon({ className }: { className?: string }) {
 function PhoneIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -927,6 +930,7 @@ function PhoneIcon({ className }: { className?: string }) {
 function CalendarIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -941,6 +945,7 @@ function CalendarIcon({ className }: { className?: string }) {
 function LoadingSpinner({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={cn('animate-spin', className)}
       fill="none"
       viewBox="0 0 24 24"

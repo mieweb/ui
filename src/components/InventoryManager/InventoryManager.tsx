@@ -150,6 +150,7 @@ export function InventoryManager({
           >
             Update Inventory
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -214,6 +215,7 @@ export function InventoryManager({
                       >
                         {entry.type === 'credit' ? (
                           <svg
+                            aria-hidden="true"
                             className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -228,6 +230,7 @@ export function InventoryManager({
                           </svg>
                         ) : (
                           <svg
+                            aria-hidden="true"
                             className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -262,6 +265,7 @@ export function InventoryManager({
       ) : (
         <div className="text-muted-foreground py-8 text-center">
           <svg
+            aria-hidden="true"
             className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12"
             fill="none"
             viewBox="0 0 24 24"
@@ -316,6 +320,7 @@ export function InventoryManager({
               } `}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -340,6 +345,7 @@ export function InventoryManager({
               } `}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"

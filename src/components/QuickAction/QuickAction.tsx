@@ -177,6 +177,7 @@ QuickAction.displayName = 'QuickAction';
 export const QuickActionIcons = {
   Calendar: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -194,6 +195,7 @@ export const QuickActionIcons = {
   ),
   Clipboard: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -211,6 +213,7 @@ export const QuickActionIcons = {
   ),
   User: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -228,6 +231,7 @@ export const QuickActionIcons = {
   ),
   Document: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -245,6 +249,7 @@ export const QuickActionIcons = {
   ),
   Settings: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -268,6 +273,7 @@ export const QuickActionIcons = {
   ),
   Help: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -285,6 +291,7 @@ export const QuickActionIcons = {
   ),
   Search: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -302,6 +309,7 @@ export const QuickActionIcons = {
   ),
   Bell: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"

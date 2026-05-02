@@ -696,6 +696,7 @@ export function HoursSummary({
         </div>
         {hasStructuredHours && (
           <svg
+            aria-hidden="true"
             className={cn(
               'h-5 w-5 text-neutral-400 transition-transform',
               isExpanded && 'rotate-180'

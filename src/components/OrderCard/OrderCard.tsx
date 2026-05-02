@@ -248,6 +248,7 @@ export function OrderCard({
         {scheduledDate && (
           <div className="text-muted-foreground mb-3 flex items-center gap-2 text-sm">
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"

@@ -84,6 +84,7 @@ function LightboxModal({ attachment, onClose }: LightboxModalProps) {
         aria-label="Close"
       >
         <svg
+          aria-hidden="true"
           className="h-6 w-6"
           fill="none"
           viewBox="0 0 24 24"

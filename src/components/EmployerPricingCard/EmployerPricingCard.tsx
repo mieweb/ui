@@ -148,6 +148,7 @@ export function EmployerPricingCard({
             {onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <svg
+                  aria-hidden="true"
                   className="mr-1 h-3.5 w-3.5"
                   fill="none"
                   stroke="currentColor"
@@ -166,6 +167,7 @@ export function EmployerPricingCard({
             {onRemove && (
               <Button variant="ghost" size="sm" onClick={onRemove}>
                 <svg
+                  aria-hidden="true"
                   className="mr-1 h-3.5 w-3.5 text-red-500"
                   fill="none"
                   stroke="currentColor"

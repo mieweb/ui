@@ -74,6 +74,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['pdf'].includes(ext)) {
     return (
       <svg
+        aria-hidden="true"
         className="h-5 w-5 text-red-500"
         fill="currentColor"
         viewBox="0 0 20 20"
@@ -90,6 +91,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['doc', 'docx'].includes(ext)) {
     return (
       <svg
+        aria-hidden="true"
         className="h-5 w-5 text-blue-500"
         fill="currentColor"
         viewBox="0 0 20 20"
@@ -106,6 +108,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['xls', 'xlsx', 'csv'].includes(ext)) {
     return (
       <svg
+        aria-hidden="true"
         className="h-5 w-5 text-green-500"
         fill="currentColor"
         viewBox="0 0 20 20"
@@ -123,6 +126,7 @@ function getFileIcon(extension: string): React.ReactNode {
   if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
     return (
       <svg
+        aria-hidden="true"
         className="h-5 w-5 text-purple-500"
         fill="currentColor"
         viewBox="0 0 20 20"
@@ -139,6 +143,7 @@ function getFileIcon(extension: string): React.ReactNode {
   // Default file icon
   return (
     <svg
+      aria-hidden="true"
       className="h-5 w-5 text-gray-400"
       fill="currentColor"
       viewBox="0 0 20 20"
@@ -233,6 +238,7 @@ export function FileManager({
               }`}
             >
               <svg
+                aria-hidden="true"
                 className={`h-6 w-6 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`}
                 fill="none"
                 viewBox="0 0 24 24"
@@ -366,6 +372,7 @@ export function FileManager({
                 <TableCell colSpan={hasActions ? 4 : 3} className="py-8">
                   <div data-slot="file-manager-empty" className="text-center">
                     <svg
+                      aria-hidden="true"
                       className="dark:text-muted-foreground mx-auto mb-3 h-12 w-12 text-gray-300"
                       fill="none"
                       viewBox="0 0 24 24"

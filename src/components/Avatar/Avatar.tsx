@@ -106,6 +106,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           initials
         ) : (
           <svg
+            aria-hidden="true"
             className="h-[60%] w-[60%] text-white/80"
             fill="currentColor"
             viewBox="0 0 24 24"

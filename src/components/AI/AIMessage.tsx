@@ -71,6 +71,7 @@ function MessageAvatar({
         <span className="font-medium">{getInitials(userName)}</span>
       ) : role === 'system' ? (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -85,6 +86,7 @@ function MessageAvatar({
         </svg>
       ) : (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -197,6 +199,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
         >
           <span className="text-muted-foreground flex items-center gap-2 text-sm">
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"

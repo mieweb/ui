@@ -557,6 +557,7 @@ function ServiceItem({
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -571,6 +572,7 @@ function CheckIcon({ className }: { className?: string }) {
 function SearchIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -588,7 +590,12 @@ function SearchIcon({ className }: { className?: string }) {
 
 function SpinnerIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <circle
         className="opacity-25"
         cx="12"
@@ -609,6 +616,7 @@ function SpinnerIcon({ className }: { className?: string }) {
 function ChevronIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

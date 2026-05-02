@@ -274,6 +274,7 @@ function EmptyState({
           className="mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800"
         >
           <svg
+            aria-hidden="true"
             className="h-12 w-12 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
@@ -341,6 +342,7 @@ function LoadMoreButton({
         {isLoading ? (
           <span className="flex items-center gap-2">
             <svg
+              aria-hidden="true"
               className="h-4 w-4 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -628,6 +630,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
             aria-label="Scroll to bottom"
           >
             <svg
+              aria-hidden="true"
               className="h-5 w-5 text-neutral-600 dark:text-neutral-300"
               fill="none"
               viewBox="0 0 24 24"

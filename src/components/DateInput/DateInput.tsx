@@ -593,6 +593,7 @@ DateInput.displayName = 'DateInput';
 function ChevronLeftIcon() {
   return (
     <svg
+      aria-hidden="true"
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -610,6 +611,7 @@ function ChevronLeftIcon() {
 function ChevronRightIcon() {
   return (
     <svg
+      aria-hidden="true"
       width="16"
       height="16"
       viewBox="0 0 24 24"

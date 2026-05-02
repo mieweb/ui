@@ -137,6 +137,7 @@ export function OrderSidebar({
             aria-label="Close sidebar"
           >
             <svg
+              aria-hidden="true"
               className="text-muted-foreground h-5 w-5"
               fill="none"
               stroke="currentColor"

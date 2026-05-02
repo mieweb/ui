@@ -91,6 +91,7 @@ export function PaymentHistoryTable({
       case 'credit_card':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -107,6 +108,7 @@ export function PaymentHistoryTable({
       case 'ach':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -123,6 +125,7 @@ export function PaymentHistoryTable({
       case 'check':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -139,6 +142,7 @@ export function PaymentHistoryTable({
       default:
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -175,6 +179,7 @@ export function PaymentHistoryTable({
         className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
+          aria-hidden="true"
           className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
           fill="none"
           stroke="currentColor"

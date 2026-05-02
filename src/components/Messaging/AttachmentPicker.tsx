@@ -133,6 +133,7 @@ function AttachmentPreviewItem({
           {isVideo && (
             <div className="absolute inset-0 flex items-center justify-center">
               <svg
+                aria-hidden="true"
                 className="h-6 w-6 text-white drop-shadow"
                 fill="currentColor"
                 viewBox="0 0 24 24"
@@ -146,6 +147,7 @@ function AttachmentPreviewItem({
         /* File preview */
         <div className="flex h-20 w-20 flex-col items-center justify-center p-2">
           <svg
+            aria-hidden="true"
             className="h-8 w-8 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
@@ -169,6 +171,7 @@ function AttachmentPreviewItem({
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <div className="text-center text-white">
             <svg
+              aria-hidden="true"
               className="mx-auto h-6 w-6 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -197,6 +200,7 @@ function AttachmentPreviewItem({
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <div className="text-center">
             <svg
+              aria-hidden="true"
               className="mx-auto h-6 w-6 text-red-400"
               fill="none"
               viewBox="0 0 24 24"
@@ -237,6 +241,7 @@ function AttachmentPreviewItem({
         aria-label={`Remove ${file.name}`}
       >
         <svg
+          aria-hidden="true"
           className="h-3 w-3"
           fill="none"
           viewBox="0 0 24 24"
@@ -380,6 +385,7 @@ const AttachmentPicker = React.forwardRef<
         >
           {children || (
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
@@ -520,6 +526,7 @@ function DragDropZone({
         >
           <div className="text-center">
             <svg
+              aria-hidden="true"
               className="text-primary-800 mx-auto h-12 w-12"
               fill="none"
               viewBox="0 0 24 24"
@@ -611,6 +618,7 @@ function CameraButton({
         aria-label="Take a photo"
       >
         <svg
+          aria-hidden="true"
           className="h-5 w-5"
           fill="none"
           viewBox="0 0 24 24"

@@ -105,6 +105,7 @@ export function ServiceGrid({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <svg
+          aria-hidden="true"
           className="text-muted-foreground mb-4 h-12 w-12"
           fill="none"
           viewBox="0 0 24 24"

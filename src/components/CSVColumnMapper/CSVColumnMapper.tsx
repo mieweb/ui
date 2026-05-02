@@ -272,6 +272,7 @@ function CSVColumnCard({
           (isMapped ? (
             <span className="bg-success-700 text-success-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
               <svg
+                aria-hidden="true"
                 className="h-3 w-3"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -287,7 +288,12 @@ function CSVColumnCard({
             </span>
           ) : (
             <span className="bg-warning-700 text-warning-50 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-              <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                aria-hidden="true"
+                className="h-3 w-3"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <circle cx="12" cy="12" r="10" fill="currentColor" />
                 <circle cx="12" cy="12" r="4" className="fill-warning" />
               </svg>
@@ -394,6 +400,7 @@ function CSVColumnCard({
         >
           {column.ignored ? (
             <svg
+              aria-hidden="true"
               className="h-3 w-3"
               fill="none"
               viewBox="0 0 24 24"
@@ -408,6 +415,7 @@ function CSVColumnCard({
             </svg>
           ) : (
             <svg
+              aria-hidden="true"
               className="h-3 w-3"
               fill="none"
               viewBox="0 0 24 24"

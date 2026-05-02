@@ -939,6 +939,7 @@ export function ProviderDetailHeaderSkeleton({
 function DirectionsIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -953,6 +954,7 @@ function DirectionsIcon({ className }: { className?: string }) {
 function PhoneIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -967,6 +969,7 @@ function PhoneIcon({ className }: { className?: string }) {
 function WebsiteIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -981,6 +984,7 @@ function WebsiteIcon({ className }: { className?: string }) {
 function ShareIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -995,6 +999,7 @@ function ShareIcon({ className }: { className?: string }) {
 function CopyIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1009,6 +1014,7 @@ function CopyIcon({ className }: { className?: string }) {
 function ChevronRightIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1023,6 +1029,7 @@ function ChevronRightIcon({ className }: { className?: string }) {
 function ChevronLeftIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1037,6 +1044,7 @@ function ChevronLeftIcon({ className }: { className?: string }) {
 function CheckCircleIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1051,6 +1059,7 @@ function CheckCircleIcon({ className }: { className?: string }) {
 function FlagIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1065,6 +1074,7 @@ function FlagIcon({ className }: { className?: string }) {
 function CalendarCheckIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1079,6 +1089,7 @@ function CalendarCheckIcon({ className }: { className?: string }) {
 function LinkedInIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1093,6 +1104,7 @@ function LinkedInIcon({ className }: { className?: string }) {
 function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1107,6 +1119,7 @@ function FacebookIcon({ className }: { className?: string }) {
 function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1121,6 +1134,7 @@ function InstagramIcon({ className }: { className?: string }) {
 function TwitterIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1135,6 +1149,7 @@ function TwitterIcon({ className }: { className?: string }) {
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1149,6 +1164,7 @@ function TikTokIcon({ className }: { className?: string }) {
 function YelpIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1163,6 +1179,7 @@ function YelpIcon({ className }: { className?: string }) {
 function YouTubeIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1177,6 +1194,7 @@ function YouTubeIcon({ className }: { className?: string }) {
 function PinterestIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1191,6 +1209,7 @@ function PinterestIcon({ className }: { className?: string }) {
 function BlogIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"

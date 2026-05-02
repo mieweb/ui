@@ -25,6 +25,7 @@ export interface StripeBadgeProps {
 function StripeLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
+      aria-hidden="true"
       viewBox="0 0 60 25"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
@@ -186,6 +187,7 @@ export function StripeSecureBadge({
       aria-label="Secure payments powered by Stripe"
     >
       <svg
+        aria-hidden="true"
         className={cn(
           sizeClasses[size].icon,
           'text-green-600 dark:text-green-500'

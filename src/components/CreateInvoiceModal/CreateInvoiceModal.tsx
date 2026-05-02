@@ -256,6 +256,7 @@ export function CreateInvoiceModal({
                   className="border-border rounded-lg border border-dashed py-8 text-center"
                 >
                   <svg
+                    aria-hidden="true"
                     data-slot="invoice-modal-empty-icon"
                     className="text-muted-foreground/60 mx-auto mb-2 h-10 w-10"
                     fill="none"
@@ -303,6 +304,7 @@ export function CreateInvoiceModal({
                           >
                             {isSelected && (
                               <svg
+                                aria-hidden="true"
                                 className="text-primary-foreground h-3 w-3"
                                 fill="none"
                                 stroke="currentColor"
@@ -469,6 +471,7 @@ export function CreateInvoiceModal({
                   {isSubmitting ? (
                     <>
                       <svg
+                        aria-hidden="true"
                         className="mr-2 -ml-1 h-4 w-4 animate-spin"
                         fill="none"
                         viewBox="0 0 24 24"

@@ -838,6 +838,7 @@ export function CompactHeader({
 function MenuIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -858,6 +859,7 @@ function MenuIcon({ className }: { className?: string }) {
 function CloseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -878,6 +880,7 @@ function CloseIcon({ className }: { className?: string }) {
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -898,6 +901,7 @@ function ChevronDownIcon({ className }: { className?: string }) {
 function ChevronLeftIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -918,6 +922,7 @@ function ChevronLeftIcon({ className }: { className?: string }) {
 function ExternalLinkIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -938,6 +943,7 @@ function ExternalLinkIcon({ className }: { className?: string }) {
 function UserIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -958,6 +964,7 @@ function UserIcon({ className }: { className?: string }) {
 function SettingsIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -984,6 +991,7 @@ function SettingsIcon({ className }: { className?: string }) {
 function LogoutIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"

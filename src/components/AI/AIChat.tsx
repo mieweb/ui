@@ -45,6 +45,7 @@ export interface SuggestedActionsProps {
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   patient: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -60,6 +61,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   search: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -75,6 +77,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   appointment: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -90,6 +93,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   document: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -105,6 +109,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   help: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -120,6 +125,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   default: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"

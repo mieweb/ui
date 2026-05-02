@@ -161,6 +161,7 @@ export function OrderList<T>({
             {showSearch && (
               <div className="relative" data-slot="order-list-search">
                 <svg
+                  aria-hidden="true"
                   className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -195,6 +196,7 @@ export function OrderList<T>({
             data-slot="order-list-loading"
           >
             <svg
+              aria-hidden="true"
               className="h-8 w-8 animate-spin text-blue-500"
               fill="none"
               viewBox="0 0 24 24"
@@ -221,6 +223,7 @@ export function OrderList<T>({
           >
             {emptyIcon || (
               <svg
+                aria-hidden="true"
                 className="mb-4 h-12 w-12 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"

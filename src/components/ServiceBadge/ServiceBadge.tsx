@@ -474,6 +474,7 @@ export function DOTBadge({
 function CloseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -494,6 +495,7 @@ function CloseIcon({ className }: { className?: string }) {
 function TestTubeIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -508,6 +510,7 @@ function TestTubeIcon({ className }: { className?: string }) {
 function MedicalIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -522,6 +525,7 @@ function MedicalIcon({ className }: { className?: string }) {
 function BriefcaseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -536,6 +540,7 @@ function BriefcaseIcon({ className }: { className?: string }) {
 function HeartIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -550,6 +555,7 @@ function HeartIcon({ className }: { className?: string }) {
 function LabIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -564,6 +570,7 @@ function LabIcon({ className }: { className?: string }) {
 function TagIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -578,6 +585,7 @@ function TagIcon({ className }: { className?: string }) {
 function DOTIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"

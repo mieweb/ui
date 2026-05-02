@@ -220,6 +220,7 @@ export function CreateReferralModal({
                           >
                             {isSelected && (
                               <svg
+                                aria-hidden="true"
                                 className="text-primary-foreground h-3 w-3"
                                 fill="none"
                                 stroke="currentColor"
@@ -350,6 +351,7 @@ export function CreateReferralModal({
             {isSubmitting ? (
               <>
                 <svg
+                  aria-hidden="true"
                   className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"

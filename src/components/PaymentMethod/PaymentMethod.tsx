@@ -570,6 +570,7 @@ PaymentMethodList.displayName = 'PaymentMethodList';
 function BankIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -588,6 +589,7 @@ function BankIcon({ className }: { className?: string }) {
 function TrashIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -606,6 +608,7 @@ function TrashIcon({ className }: { className?: string }) {
 function WarningIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

@@ -124,6 +124,7 @@ export function InviteUserModal({
             >
               <div className="flex items-center gap-2">
                 <svg
+                  aria-hidden="true"
                   className="h-5 w-5 text-green-500"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -151,6 +152,7 @@ export function InviteUserModal({
             >
               <div className="flex items-center gap-2">
                 <svg
+                  aria-hidden="true"
                   className="h-5 w-5 text-red-500"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -260,6 +262,7 @@ export function InviteUserModal({
             {isSubmitting ? (
               <>
                 <svg
+                  aria-hidden="true"
                   className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   data-slot="invite-user-spinner"
                   fill="none"

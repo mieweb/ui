@@ -106,6 +106,7 @@ export function QuickLinksCard({
               )}
               {link.badge == null && layout !== 'grid' && (
                 <svg
+                  aria-hidden="true"
                   data-slot="quick-links-chevron"
                   className="text-muted-foreground h-4 w-4"
                   fill="none"

@@ -186,6 +186,7 @@ const ConversationHeader = React.forwardRef<
               aria-label="Go back"
             >
               <svg
+                aria-hidden="true"
                 className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -427,6 +428,7 @@ const ConversationListItem = React.forwardRef<
       <div className="flex shrink-0 flex-col items-center gap-1">
         {conversation.isPinned && (
           <svg
+            aria-hidden="true"
             className="text-primary-800 h-4 w-4"
             fill="currentColor"
             viewBox="0 0 24 24"
@@ -436,6 +438,7 @@ const ConversationListItem = React.forwardRef<
         )}
         {conversation.isMuted && (
           <svg
+            aria-hidden="true"
             className="h-4 w-4 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"

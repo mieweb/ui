@@ -447,6 +447,7 @@ function ConnectionIcon({
   if (status === 'connected') {
     return (
       <svg
+        aria-hidden="true"
         className={cn('text-green-500', className)}
         fill="none"
         viewBox="0 0 24 24"
@@ -472,6 +473,7 @@ function ConnectionIcon({
 
   return (
     <svg
+      aria-hidden="true"
       className={cn(colorClass, animateClass, className)}
       fill="none"
       viewBox="0 0 24 24"
@@ -490,6 +492,7 @@ function ConnectionIcon({
 function ReloadIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -508,6 +511,7 @@ function ReloadIcon({ className }: { className?: string }) {
 function UpdateIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

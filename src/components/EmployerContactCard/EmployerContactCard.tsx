@@ -82,6 +82,7 @@ export function EmployerContactCard({
         {showActions && onAddContact && (
           <Button variant="ghost" size="sm" onClick={onAddContact}>
             <svg
+              aria-hidden="true"
               className="mr-1 h-4 w-4"
               fill="none"
               stroke="currentColor"
@@ -102,6 +103,7 @@ export function EmployerContactCard({
         {contacts.length === 0 ? (
           <div data-slot="employer-contact-empty" className="py-6 text-center">
             <svg
+              aria-hidden="true"
               className="text-muted-foreground dark:text-muted-foreground mx-auto mb-2 h-10 w-10"
               fill="none"
               stroke="currentColor"
@@ -178,6 +180,7 @@ export function EmployerContactCard({
                         title={`Email ${contact.name}`}
                       >
                         <svg
+                          aria-hidden="true"
                           className="h-4 w-4"
                           fill="none"
                           stroke="currentColor"
@@ -202,6 +205,7 @@ export function EmployerContactCard({
                         title={`Call ${contact.name}`}
                       >
                         <svg
+                          aria-hidden="true"
                           className="h-4 w-4"
                           fill="none"
                           stroke="currentColor"
