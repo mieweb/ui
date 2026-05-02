@@ -130,9 +130,7 @@ export function ProductVersion({
             )}
           </div>
           {build && (
-            <span className="text-muted-foreground">
-              Build: {build}
-            </span>
+            <span className="text-muted-foreground">Build: {build}</span>
           )}
           {(author || copyright) && (
             <span className="text-muted-foreground">{copyrightText}</span>
@@ -149,9 +147,7 @@ export function ProductVersion({
       >
         <span className="font-medium">{name}</span>
         <span className="text-muted-foreground">{versionDisplay}</span>
-        {build && (
-          <span className="text-muted-foreground">({build})</span>
-        )}
+        {build && <span className="text-muted-foreground">({build})</span>}
         {environment && (
           <span
             className={cn(
