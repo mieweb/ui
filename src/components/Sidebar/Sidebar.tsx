@@ -364,6 +364,7 @@ export function SidebarNavGroup({
           showCollapsed && 'justify-center'
         )}
         title={showCollapsed ? label : undefined}
+        aria-label={showCollapsed ? label : undefined}
       >
         {icon && (
           <span
@@ -509,6 +510,7 @@ export function SidebarNavItem({
         data-testid={testId}
         className={baseClasses}
         title={showCollapsed ? label : undefined}
+        aria-label={showCollapsed ? label : undefined}
       >
         {content}
       </a>
@@ -523,6 +525,7 @@ export function SidebarNavItem({
       data-testid={testId}
       className={baseClasses}
       title={showCollapsed ? label : undefined}
+      aria-label={showCollapsed ? label : undefined}
     >
       {content}
     </button>
