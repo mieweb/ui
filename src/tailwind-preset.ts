@@ -73,6 +73,7 @@ export const miewebUISafelist = [
   'border-success',
   'focus:ring-success/20',
   'focus:ring-destructive/20',
+  'focus:opacity-100',
   // Opacity-modifier variants for semantic colors used by components
   'bg-background/60',
   'bg-background/80',

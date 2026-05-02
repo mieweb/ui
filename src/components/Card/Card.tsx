@@ -527,8 +527,8 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
               className={cn(
                 'mt-1 flex items-center gap-1 text-sm',
                 trend.value >= 0
-                  ? 'text-success-700 dark:text-success'
-                  : 'text-destructive-700 dark:text-destructive'
+                  ? 'text-success-700 dark:text-success-300'
+                  : 'text-destructive-700 dark:text-destructive-400'
               )}
             >
               <svg
