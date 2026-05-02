@@ -14,6 +14,7 @@ import {
 
 const SearchIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -30,6 +31,7 @@ const SearchIcon = () => (
 
 const XIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -45,7 +47,12 @@ const XIcon = () => (
 );
 
 const SpinnerIcon = () => (
-  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+  <svg
+    aria-hidden="true"
+    className="h-4 w-4 animate-spin"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
     <circle
       className="opacity-25"
       cx="12"

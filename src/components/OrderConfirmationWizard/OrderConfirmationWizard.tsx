@@ -116,6 +116,7 @@ export function OrderConfirmationWizard({
                   >
                     {isComplete ? (
                       <svg
+                        aria-hidden="true"
                         className="h-5 w-5"
                         fill="none"
                         stroke="currentColor"
@@ -380,6 +381,7 @@ export function OrderConfirmationWizard({
                   >
                     <div className="flex items-center gap-3">
                       <svg
+                        aria-hidden="true"
                         className="h-5 w-5 text-green-600 dark:text-green-400"
                         fill="none"
                         stroke="currentColor"
@@ -410,6 +412,7 @@ export function OrderConfirmationWizard({
                   >
                     <div className="flex items-center gap-3">
                       <svg
+                        aria-hidden="true"
                         className="h-5 w-5 text-green-600 dark:text-green-400"
                         fill="none"
                         stroke="currentColor"
@@ -440,6 +443,7 @@ export function OrderConfirmationWizard({
                   >
                     <div className="flex items-center gap-3">
                       <svg
+                        aria-hidden="true"
                         className="h-5 w-5 text-green-600 dark:text-green-400"
                         fill="none"
                         stroke="currentColor"
@@ -499,6 +503,7 @@ export function OrderConfirmationWizard({
               disabled={isSubmitting}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -532,6 +537,7 @@ export function OrderConfirmationWizard({
             >
               Continue
               <svg
+                aria-hidden="true"
                 className="ml-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -553,6 +559,7 @@ export function OrderConfirmationWizard({
               {isSubmitting ? (
                 <>
                   <svg
+                    aria-hidden="true"
                     className="mr-2 -ml-1 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -577,6 +584,7 @@ export function OrderConfirmationWizard({
                 <>
                   Start Service
                   <svg
+                    aria-hidden="true"
                     className="ml-1 h-4 w-4"
                     fill="none"
                     stroke="currentColor"

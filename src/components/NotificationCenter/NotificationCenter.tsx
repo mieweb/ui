@@ -81,6 +81,7 @@ export function NotificationCenter({
       case 'order':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -97,6 +98,7 @@ export function NotificationCenter({
       case 'invoice':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -113,6 +115,7 @@ export function NotificationCenter({
       case 'claim':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -129,6 +132,7 @@ export function NotificationCenter({
       case 'message':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -145,6 +149,7 @@ export function NotificationCenter({
       case 'alert':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -161,6 +166,7 @@ export function NotificationCenter({
       default:
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -258,6 +264,7 @@ export function NotificationCenter({
           className="py-12 text-center"
         >
           <svg
+            aria-hidden="true"
             className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"

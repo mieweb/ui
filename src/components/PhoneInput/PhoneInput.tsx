@@ -298,6 +298,7 @@ function PhoneInputGroup({
                 aria-label="Add phone number"
               >
                 <svg
+                  aria-hidden="true"
                   data-slot="phone-add-icon"
                   className="h-5 w-5"
                   fill="none"
@@ -328,6 +329,7 @@ function PhoneInputGroup({
                 aria-label="Remove phone number"
               >
                 <svg
+                  aria-hidden="true"
                   data-slot="phone-remove-icon"
                   className="h-5 w-5"
                   fill="none"

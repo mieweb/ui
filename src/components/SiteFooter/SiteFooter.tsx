@@ -37,6 +37,7 @@ export interface SocialLink {
 function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -51,6 +52,7 @@ function InstagramIcon({ className }: { className?: string }) {
 function LinkedInIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -65,6 +67,7 @@ function LinkedInIcon({ className }: { className?: string }) {
 function TwitterIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -79,6 +82,7 @@ function TwitterIcon({ className }: { className?: string }) {
 function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -93,6 +97,7 @@ function FacebookIcon({ className }: { className?: string }) {
 function YouTubeIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -107,6 +112,7 @@ function YouTubeIcon({ className }: { className?: string }) {
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -121,6 +127,7 @@ function TikTokIcon({ className }: { className?: string }) {
 function GitHubIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -760,6 +767,7 @@ export function SimpleFooter({
 function ExternalLinkIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"

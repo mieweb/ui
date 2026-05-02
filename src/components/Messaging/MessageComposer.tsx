@@ -130,7 +130,12 @@ const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
         {...props}
       >
         {isLoading ? (
-          <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+          <svg
+            aria-hidden="true"
+            className="h-5 w-5 animate-spin"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
             <circle
               className="opacity-25"
               cx="12"
@@ -147,6 +152,7 @@ const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
           </svg>
         ) : (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             viewBox="0 0 24 24"
@@ -456,6 +462,7 @@ const MessageComposer = React.forwardRef<
                 aria-label="Cancel reply"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"

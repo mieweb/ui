@@ -106,6 +106,7 @@ export function ReportDashboard({
     if (trend === 'up') {
       return (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           stroke="currentColor"
@@ -123,6 +124,7 @@ export function ReportDashboard({
     if (trend === 'down') {
       return (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           stroke="currentColor"
@@ -203,6 +205,7 @@ export function ReportDashboard({
           {onExport && (
             <Button variant="outline" onClick={onExport}>
               <svg
+                aria-hidden="true"
                 className="mr-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"

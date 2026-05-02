@@ -493,6 +493,7 @@ export function ServiceMultiSelect({
                           >
                             {isSelected && (
                               <svg
+                                aria-hidden="true"
                                 className="h-3 w-3"
                                 viewBox="0 0 12 12"
                                 fill="currentColor"
@@ -843,7 +844,11 @@ export function CompactFilterBar({
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4 animate-spin"
+                viewBox="0 0 24 24"
+              >
                 <circle
                   className="opacity-25"
                   cx="12"

@@ -50,6 +50,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
     >
       {status === 'pending' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-neutral-500"
           fill="currentColor"
           viewBox="0 0 20 20"
@@ -59,6 +60,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'running' && (
         <svg
+          aria-hidden="true"
           className="text-primary-800 dark:text-primary-400 h-3 w-3 animate-spin"
           fill="none"
           viewBox="0 0 24 24"
@@ -80,6 +82,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'success' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-green-600 dark:text-green-400"
           fill="none"
           viewBox="0 0 24 24"
@@ -95,6 +98,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'error' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-red-600 dark:text-red-400"
           fill="none"
           viewBox="0 0 24 24"
@@ -110,6 +114,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'cancelled' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-neutral-500"
           fill="none"
           viewBox="0 0 24 24"
@@ -131,6 +136,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Patient tools
   create_patient: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -146,6 +152,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   ),
   get_patient: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -161,6 +168,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   ),
   search_patients: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -177,6 +185,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Appointment tools
   schedule_appointment: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -193,6 +202,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Document tools
   create_document: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -209,6 +219,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Provider tools
   search_providers: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -230,6 +241,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Default tool icon
   default: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -270,6 +282,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
   const linkTypeIcons: Record<string, React.ReactNode> = {
     patient: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -285,6 +298,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     document: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -300,6 +314,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     appointment: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -315,6 +330,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     order: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -330,6 +346,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     provider: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -350,6 +367,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     external: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -365,6 +383,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     internal: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -400,6 +419,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
       <span>{link.label}</span>
       {link.type === 'external' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 opacity-60"
           fill="none"
           viewBox="0 0 24 24"
@@ -490,6 +510,7 @@ function ToolResultDisplay({
             className="flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
           >
             <svg
+              aria-hidden="true"
               className={cn(
                 'h-3 w-3 transition-transform',
                 showJson && 'rotate-90'
@@ -754,6 +775,7 @@ export function MCPToolCallDisplay({
               className="mt-2 flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
             >
               <svg
+                aria-hidden="true"
                 className={cn(
                   'h-3 w-3 transition-transform',
                   showDetails && 'rotate-90'

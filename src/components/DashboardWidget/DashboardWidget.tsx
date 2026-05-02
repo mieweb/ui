@@ -134,6 +134,7 @@ const DashboardWidget = React.forwardRef<HTMLDivElement, DashboardWidgetProps>(
                   aria-label={addLabel}
                 >
                   <svg
+                    aria-hidden="true"
                     className="h-4 w-4"
                     fill="none"
                     stroke="currentColor"

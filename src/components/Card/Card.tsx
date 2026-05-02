@@ -453,6 +453,7 @@ const CardCollapsible = React.forwardRef<HTMLDivElement, CardCollapsibleProps>(
             <>
               {expanded ? 'Show less' : trigger}
               <svg
+                aria-hidden="true"
                 className={cn(
                   'h-4 w-4 transition-transform',
                   expanded && 'rotate-180'
@@ -529,6 +530,7 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
               )}
             >
               <svg
+                aria-hidden="true"
                 className={cn('h-4 w-4', trend.value < 0 && 'rotate-180')}
                 fill="none"
                 stroke="currentColor"

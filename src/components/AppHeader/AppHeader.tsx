@@ -269,6 +269,7 @@ export interface AppHeaderSearchProps {
 
 const SearchIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -422,6 +423,7 @@ export function AppHeaderUserMenu({
 
       {/* Chevron */}
       <svg
+        aria-hidden="true"
         className={cn(
           'hidden h-4 w-4 text-gray-400 transition-transform lg:block',
           isOpen && 'rotate-180'

@@ -47,6 +47,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
     >
       {status === 'sending' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5 animate-spin"
           fill="none"
           viewBox="0 0 24 24"
@@ -68,6 +69,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {status === 'sent' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5"
           fill="none"
           viewBox="0 0 24 24"
@@ -83,6 +85,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {(status === 'delivered' || status === 'read') && (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -104,6 +107,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {status === 'failed' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5"
           fill="none"
           viewBox="0 0 24 24"
@@ -241,6 +245,7 @@ function AttachmentPreview({
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
             <div className="rounded-full bg-white/90 p-3">
               <svg
+                aria-hidden="true"
                 className="h-6 w-6 text-neutral-900"
                 fill="currentColor"
                 viewBox="0 0 24 24"
@@ -255,6 +260,7 @@ function AttachmentPreview({
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <div className="text-center text-white">
                 <svg
+                  aria-hidden="true"
                   className="mx-auto h-8 w-8 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -281,6 +287,7 @@ function AttachmentPreview({
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <div className="text-center text-white">
               <svg
+                aria-hidden="true"
                 className="mx-auto h-8 w-8 text-red-400"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -316,6 +323,7 @@ function AttachmentPreview({
     >
       <div className="rounded-lg bg-white/20 p-2">
         <svg
+          aria-hidden="true"
           className="h-6 w-6"
           fill="none"
           viewBox="0 0 24 24"
@@ -624,6 +632,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
                 aria-label="Retry sending message"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-3 w-3"
                   fill="none"
                   viewBox="0 0 24 24"

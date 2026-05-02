@@ -14,6 +14,7 @@ import { useSidebar } from './SidebarProvider';
 
 const ChevronLeftIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -26,6 +27,7 @@ const ChevronLeftIcon = () => (
 
 const ChevronRightIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -38,6 +40,7 @@ const ChevronRightIcon = () => (
 
 const ChevronDownIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-3 w-3"
     fill="none"
     viewBox="0 0 24 24"
@@ -50,6 +53,7 @@ const ChevronDownIcon = () => (
 
 const XIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -66,6 +70,7 @@ const XIcon = () => (
 
 const MenuIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -82,6 +87,7 @@ const MenuIcon = () => (
 
 const SearchIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"

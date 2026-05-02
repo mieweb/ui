@@ -198,6 +198,7 @@ export function ScheduleCalendar({
             aria-label="Previous"
           >
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               stroke="currentColor"
@@ -218,6 +219,7 @@ export function ScheduleCalendar({
             aria-label="Next"
           >
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               stroke="currentColor"

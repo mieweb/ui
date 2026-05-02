@@ -575,6 +575,7 @@ OrderConfirmation.displayName = 'OrderConfirmation';
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -593,6 +594,7 @@ function CheckIcon({ className }: { className?: string }) {
 function XIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -611,6 +613,7 @@ function XIcon({ className }: { className?: string }) {
 function MessageIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -629,6 +632,7 @@ function MessageIcon({ className }: { className?: string }) {
 function StatusIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -647,6 +651,7 @@ function StatusIcon({ className }: { className?: string }) {
 function AttachmentIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -665,6 +670,7 @@ function AttachmentIcon({ className }: { className?: string }) {
 function UserIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -683,6 +689,7 @@ function UserIcon({ className }: { className?: string }) {
 function NoteIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -701,6 +708,7 @@ function NoteIcon({ className }: { className?: string }) {
 function PlaneIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

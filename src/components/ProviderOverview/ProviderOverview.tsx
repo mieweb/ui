@@ -92,6 +92,7 @@ export function ProviderOverview({
       case 'order':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -108,6 +109,7 @@ export function ProviderOverview({
       case 'appointment':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -124,6 +126,7 @@ export function ProviderOverview({
       case 'invoice':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -140,6 +143,7 @@ export function ProviderOverview({
       case 'employer':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -156,6 +160,7 @@ export function ProviderOverview({
       case 'user':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -237,6 +242,7 @@ export function ProviderOverview({
           value={stats.pendingOrders}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -258,6 +264,7 @@ export function ProviderOverview({
           value={stats.completedToday}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -279,6 +286,7 @@ export function ProviderOverview({
           value={stats.upcomingAppointments}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -300,6 +308,7 @@ export function ProviderOverview({
           value={stats.linkedEmployers}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -339,6 +348,7 @@ export function ProviderOverview({
                     <span className="text-muted-foreground">
                       {action.icon || (
                         <svg
+                          aria-hidden="true"
                           className="h-5 w-5"
                           fill="none"
                           stroke="currentColor"

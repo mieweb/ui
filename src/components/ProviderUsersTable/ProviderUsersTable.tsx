@@ -173,6 +173,7 @@ export function ProviderUsersTable({
     return (
       <div className={`text-muted-foreground py-12 text-center ${className}`}>
         <svg
+          aria-hidden="true"
           className="mx-auto h-12 w-12 text-gray-400"
           fill="none"
           stroke="currentColor"

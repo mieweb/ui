@@ -126,6 +126,7 @@ export function InvoiceView({
           {onBack && (
             <Button variant="ghost" size="sm" onClick={onBack}>
               <svg
+                aria-hidden="true"
                 className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -166,6 +167,7 @@ export function InvoiceView({
               disabled={actionsDisabled}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -189,6 +191,7 @@ export function InvoiceView({
               disabled={actionsDisabled}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -222,6 +225,7 @@ export function InvoiceView({
               disabled={actionsDisabled}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -240,6 +244,7 @@ export function InvoiceView({
           {onSend && canSend && (
             <Button size="sm" onClick={onSend} disabled={actionsDisabled}>
               <svg
+                aria-hidden="true"
                 className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"

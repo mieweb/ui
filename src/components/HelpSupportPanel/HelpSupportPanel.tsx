@@ -89,6 +89,7 @@ export function HelpSupportPanel({
       case 'email':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -105,6 +106,7 @@ export function HelpSupportPanel({
       case 'phone':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -121,6 +123,7 @@ export function HelpSupportPanel({
       case 'chat':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -159,6 +162,7 @@ export function HelpSupportPanel({
               onClick={() => window.open(docsUrl, '_blank')}
             >
               <svg
+                aria-hidden="true"
                 className="mr-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -177,6 +181,7 @@ export function HelpSupportPanel({
           {onStartChat && chatAvailable && (
             <Button onClick={onStartChat}>
               <svg
+                aria-hidden="true"
                 className="mr-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -238,6 +243,7 @@ export function HelpSupportPanel({
                             {faq.question}
                           </span>
                           <svg
+                            aria-hidden="true"
                             className={`h-5 w-5 text-gray-400 transition-transform ${
                               expandedFaq === faq.id ? 'rotate-180' : ''
                             }`}
@@ -418,6 +424,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
@@ -437,6 +444,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
@@ -456,6 +464,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
@@ -475,6 +484,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"

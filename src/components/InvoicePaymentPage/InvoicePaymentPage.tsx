@@ -162,6 +162,7 @@ export function InvoicePaymentPage({
         >
           <CardContent className="py-12">
             <svg
+              aria-hidden="true"
               className="text-muted-foreground dark:text-muted-foreground mx-auto mb-4 h-16 w-16"
               fill="none"
               stroke="currentColor"
@@ -203,6 +204,7 @@ export function InvoicePaymentPage({
               className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
             >
               <svg
+                aria-hidden="true"
                 className="h-8 w-8 text-green-600 dark:text-green-400"
                 fill="none"
                 stroke="currentColor"
@@ -460,6 +462,7 @@ export function InvoicePaymentPage({
                     {isProcessing ? (
                       <>
                         <svg
+                          aria-hidden="true"
                           className="mr-2 -ml-1 h-4 w-4 animate-spin"
                           fill="none"
                           viewBox="0 0 24 24"

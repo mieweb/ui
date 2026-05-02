@@ -164,6 +164,7 @@ export function ProviderSelector({
         {isLoading ? (
           <div className="flex flex-1 items-center gap-2">
             <svg
+              aria-hidden="true"
               className="text-muted-foreground h-5 w-5 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -225,6 +226,7 @@ export function ProviderSelector({
 
         {/* Dropdown arrow */}
         <svg
+          aria-hidden="true"
           data-slot="provider-selector-arrow"
           className={cn(
             'text-muted-foreground h-4 w-4 flex-shrink-0 transition-transform',
@@ -254,6 +256,7 @@ export function ProviderSelector({
             <div className="border-border border-b p-2">
               <div className="relative">
                 <svg
+                  aria-hidden="true"
                   className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -356,6 +359,7 @@ export function ProviderSelector({
                   {/* Selected checkmark */}
                   {selectedProvider?.id === provider.id && (
                     <svg
+                      aria-hidden="true"
                       className="text-primary h-5 w-5 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"

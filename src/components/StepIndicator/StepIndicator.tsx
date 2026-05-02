@@ -37,6 +37,7 @@ export interface StepIndicatorProps {
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -55,6 +56,7 @@ function CheckIcon({ className }: { className?: string }) {
 function ErrorIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

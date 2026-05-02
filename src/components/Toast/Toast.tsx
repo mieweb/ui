@@ -8,6 +8,7 @@ import type { ToastData, ToastVariant, ToastPosition } from './ToastProvider';
 
 const CheckIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -20,6 +21,7 @@ const CheckIcon = () => (
 
 const XCircleIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -36,6 +38,7 @@ const XCircleIcon = () => (
 
 const ExclamationIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -52,6 +55,7 @@ const ExclamationIcon = () => (
 
 const InfoIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -68,6 +72,7 @@ const InfoIcon = () => (
 
 const XIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"

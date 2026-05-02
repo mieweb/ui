@@ -645,6 +645,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
+                          aria-hidden="true"
                           className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
@@ -672,6 +673,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
+                          aria-hidden="true"
                           className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
@@ -699,6 +701,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
+                          aria-hidden="true"
                           className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"
@@ -726,6 +729,7 @@ export function ProviderSettings({
                     <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center gap-3">
                         <svg
+                          aria-hidden="true"
                           className="text-muted-foreground h-8 w-8"
                           fill="none"
                           stroke="currentColor"

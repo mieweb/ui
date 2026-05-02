@@ -109,6 +109,7 @@ export function EmployerList({
         {showSearch && (
           <div data-slot="employer-list-search" className="relative flex-1">
             <svg
+              aria-hidden="true"
               className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
               fill="none"
               stroke="currentColor"
@@ -133,6 +134,7 @@ export function EmployerList({
         {onAddEmployer && (
           <Button onClick={onAddEmployer} size="sm">
             <svg
+              aria-hidden="true"
               className="mr-1 h-4 w-4"
               fill="none"
               stroke="currentColor"
@@ -157,6 +159,7 @@ export function EmployerList({
           className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700"
         >
           <svg
+            aria-hidden="true"
             className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"
@@ -268,6 +271,7 @@ export function EmployerList({
                 {/* Arrow */}
                 {onEmployerClick && (
                   <svg
+                    aria-hidden="true"
                     className="h-5 w-5 text-gray-400"
                     fill="none"
                     stroke="currentColor"
