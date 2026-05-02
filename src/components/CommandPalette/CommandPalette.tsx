@@ -321,6 +321,7 @@ export function CommandPalette({
                 onClick={() => setQuery('')}
                 data-testid={`${testId}-clear`}
                 className="text-muted-foreground absolute top-1/2 right-12 -translate-y-1/2 hover:text-gray-700 dark:hover:text-gray-200"
+                aria-label="Clear search"
               >
                 <XIcon />
               </button>

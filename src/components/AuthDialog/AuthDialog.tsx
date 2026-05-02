@@ -461,6 +461,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -569,6 +570,7 @@ function SignupForm({
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />
@@ -751,6 +753,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 hover:text-gray-700"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
               <EyeOffIcon className="h-4 w-4" />

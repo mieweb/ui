@@ -221,6 +221,7 @@ export function OnboardingWizard({
                 variant="outline"
                 onClick={handleBack}
                 disabled={!backEnabled || isFirstStep}
+                aria-label={back}
               >
                 <span className="hidden sm:inline">{back}</span>
                 <i className="fas fa-chevron-left sm:hidden" />
@@ -243,6 +244,7 @@ export function OnboardingWizard({
                 variant="primary"
                 onClick={handleNext}
                 disabled={!nextEnabled && !isLastStep}
+                aria-label={isLastStep ? finish : next}
               >
                 <span className="hidden sm:inline">
                   {isLastStep ? finish : next}

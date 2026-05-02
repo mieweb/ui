@@ -383,6 +383,7 @@ export function AIChat({
                 data-slot="ai-chat-header-action"
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Clear chat"
+                aria-label="Clear chat"
               >
                 <RefreshIcon />
               </button>

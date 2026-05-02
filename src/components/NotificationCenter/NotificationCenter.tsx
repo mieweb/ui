@@ -393,6 +393,7 @@ export function NotificationCenter({
                           variant="ghost"
                           size="sm"
                           className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100"
+                          aria-label="Dismiss notification"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDismiss(notification.id);
