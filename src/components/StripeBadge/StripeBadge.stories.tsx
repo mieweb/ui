@@ -276,6 +276,9 @@ export const DarkModeShowcase: Story = {
   parameters: {
     a11y: {
       config: {
+        // This story forces dark-mode elements inside a light-mode page to
+        // show both side-by-side. The dark-mode CSS variables don't propagate
+        // correctly in this artificial context, causing false contrast failures.
         rules: [{ id: 'color-contrast', enabled: false }],
       },
     },

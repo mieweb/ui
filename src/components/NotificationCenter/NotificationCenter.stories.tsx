@@ -9,6 +9,9 @@ const meta: Meta<typeof NotificationCenter> = {
     layout: 'padded',
     a11y: {
       config: {
+        // NotificationCenter uses a clickable card pattern (onClick on card)
+        // with inner action buttons — this is an intentional UX pattern that
+        // triggers nested-interactive. Not fixable without architectural change.
         rules: [{ id: 'nested-interactive', enabled: false }],
       },
     },

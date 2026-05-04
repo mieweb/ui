@@ -56,13 +56,6 @@ export const Default: Story = {};
 
 // All variants comparison
 export const AllVariants: Story = {
-  parameters: {
-    a11y: {
-      config: {
-        rules: [{ id: 'landmark-unique', enabled: false }],
-      },
-    },
-  },
   render: () => (
     <div className="space-y-6">
       {(['default', 'hero'] as const).map((variant) => (
@@ -70,6 +63,7 @@ export const AllVariants: Story = {
           <div className="text-sm font-medium text-gray-500">{variant}</div>
           <ProviderSearchBar
             variant={variant}
+            aria-label={`Provider search (${variant})`}
             onSearch={() => {}}
             providerCount={17500}
           />

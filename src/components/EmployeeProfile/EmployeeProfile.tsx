@@ -467,6 +467,7 @@ export function OrderSidebarTabs({
           role="tab"
           id={`tab-${tab.id}`}
           aria-selected={activeTab === tab.id}
+          aria-controls={`panel-${tab.id}`}
           onClick={() => onTabChange(tab.id)}
           data-cy={tab.dataCy}
           data-slot="order-sidebar-tab"

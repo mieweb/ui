@@ -164,6 +164,9 @@ export const ThemedContent: Story = {
   parameters: {
     a11y: {
       config: {
+        // ThemedContent demo renders sample colored elements to showcase
+        // theme switching; the demo colors are illustrative and don't
+        // represent real UI, so contrast checking is not meaningful here.
         rules: [{ id: 'color-contrast', enabled: false }],
       },
     },
