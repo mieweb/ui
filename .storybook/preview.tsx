@@ -256,6 +256,10 @@ const preview: Preview = {
           { id: 'landmark-one-main', enabled: false },
           { id: 'page-has-heading-one', enabled: false },
           { id: 'region', enabled: false },
+          // Components use <h3> (Card titles) correctly in context, but stories
+          // render in isolation without parent <h1>/<h2> elements, causing false
+          // positives. Host apps provide proper heading hierarchy.
+          { id: 'heading-order', enabled: false },
         ],
       },
     },
