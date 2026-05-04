@@ -232,7 +232,7 @@ export function CreateInvoiceModal({
                     type="button"
                     data-slot="invoice-modal-toggle-all"
                     onClick={toggleAllOrders}
-                    className="text-primary text-sm hover:underline"
+                    className="text-primary-800 dark:text-primary-400 text-sm hover:underline"
                   >
                     {selectedOrders.size === orders.length
                       ? 'Deselect All'

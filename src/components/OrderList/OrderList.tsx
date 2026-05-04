@@ -119,6 +119,10 @@ export function OrderList<T>({
           <div
             className="flex gap-1 overflow-x-auto"
             data-slot="order-list-tabs"
+            role="region"
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region needs keyboard access
+            tabIndex={0}
+            aria-label="Order filter tabs"
           >
             {tabs.map((tab) => {
               const count = tab.count ?? tabCounts[tab.id];
@@ -189,7 +193,14 @@ export function OrderList<T>({
       </div>
 
       {/* Order list */}
-      <div className="flex-1 overflow-y-auto" data-slot="order-list-body">
+      <div
+        className="flex-1 overflow-y-auto"
+        data-slot="order-list-body"
+        role="region"
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region needs keyboard access
+        tabIndex={0}
+        aria-label="Order list"
+      >
         {isLoading ? (
           <div
             className="flex items-center justify-center py-12"

@@ -198,7 +198,7 @@ export function ProviderSelector({
             ) : (
               <div
                 data-slot="provider-selector-trigger-avatar"
-                className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium"
+                className="bg-primary/10 text-primary-800 dark:text-primary-400 flex h-6 w-6 items-center justify-center rounded text-xs font-medium"
               >
                 {getInitials(selectedProvider.name)}
               </div>
@@ -360,7 +360,7 @@ export function ProviderSelector({
                   {selectedProvider?.id === provider.id && (
                     <svg
                       aria-hidden="true"
-                      className="text-primary h-5 w-5 flex-shrink-0"
+                      className="text-primary-800 dark:text-primary-400 h-5 w-5 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

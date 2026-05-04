@@ -240,7 +240,7 @@ export function AppHeaderIconButton({
           className={cn(
             'absolute -top-1 -right-1 flex items-center justify-center',
             'h-[18px] min-w-[18px] px-1 text-[10px] font-bold',
-            'rounded-full bg-red-500 text-white'
+            'rounded-full bg-red-700 text-white'
           )}
         >
           {badge > 99 ? '99+' : badge}

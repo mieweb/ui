@@ -349,7 +349,7 @@ function TocList({
               'block rounded-sm px-2 py-1 transition-colors duration-150',
               'hover:text-foreground',
               activeId === item.id
-                ? 'text-primary font-medium'
+                ? 'text-primary-800 dark:text-primary-400 font-medium'
                 : 'text-neutral-600 dark:text-neutral-400'
             )}
           >

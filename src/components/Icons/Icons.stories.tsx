@@ -298,7 +298,7 @@ function BrandIconCard({ icon }: { icon: BrandIconInfo }) {
     >
       <img
         src={src}
-        alt={icon.name}
+        alt=""
         className="h-6 w-6 object-contain transition-transform group-hover:scale-110"
       />
       <span className="text-muted-foreground group-hover:text-foreground text-center text-xs break-all transition-colors">

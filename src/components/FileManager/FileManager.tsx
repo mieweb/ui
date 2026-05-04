@@ -287,7 +287,7 @@ export function FileManager({
           data-slot="file-manager-error"
           className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
         >
-          <p className="text-sm text-red-600 dark:text-red-400">
+          <p className="text-sm text-red-700 dark:text-red-400">
             {errorMessage}
           </p>
         </div>

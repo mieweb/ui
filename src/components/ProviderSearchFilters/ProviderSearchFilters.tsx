@@ -788,6 +788,7 @@ export function CompactFilterBar({
           value={filters.radius}
           onChange={(e) => handleFieldChange('radius', Number(e.target.value))}
           disabled={loading}
+          aria-label="Search radius"
           className={cn(
             'h-9 rounded-r-md border border-l-0 border-neutral-200 px-2 text-sm',
             'focus:ring-primary-500 focus:ring-2 focus:outline-none',
@@ -812,6 +813,7 @@ export function CompactFilterBar({
               handleFieldChange('services', value ? [value] : []);
             }}
             disabled={loading}
+            aria-label="Service filter"
             className={cn(
               'h-9 w-full rounded-md border border-neutral-200 px-3 text-sm',
               'focus:ring-primary-500 focus:ring-2 focus:outline-none',

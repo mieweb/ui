@@ -112,7 +112,7 @@ export function EmployerPricingCard({
                     <span className="text-muted-foreground text-sm">
                       {tier.name}
                     </span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       ({formatQuantityRange(tier)})
                     </span>
                     {tier.isDefault && (

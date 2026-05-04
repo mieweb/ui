@@ -157,6 +157,7 @@ export function ServiceShippingSettings({
           <Switch
             checked={shippingEnabled}
             onCheckedChange={onShippingEnabledChange}
+            aria-label="Enable shipping"
           />
         </div>
         <p
@@ -202,6 +203,7 @@ export function ServiceShippingSettings({
             <Switch
               checked={useKitShipping}
               onCheckedChange={onUseKitShippingChange}
+              aria-label="Use kit shipping"
             />
           </div>
 

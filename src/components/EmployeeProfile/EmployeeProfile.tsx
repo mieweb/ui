@@ -350,8 +350,10 @@ export function EmployeeProfileCard({
             >
               {employee.isPaid ? (
                 <>
-                  <Check className="text-success h-4 w-4" />
-                  <span className="text-success">{paid}</span>
+                  <Check className="text-success-700 dark:text-success-400 h-4 w-4" />
+                  <span className="text-success-700 dark:text-success-400">
+                    {paid}
+                  </span>
                 </>
               ) : (
                 <>
@@ -463,6 +465,7 @@ export function OrderSidebarTabs({
           key={tab.id}
           type="button"
           role="tab"
+          id={`tab-${tab.id}`}
           aria-selected={activeTab === tab.id}
           aria-controls={`panel-${tab.id}`}
           onClick={() => onTabChange(tab.id)}
@@ -588,6 +591,9 @@ export function OrderDetailSidebar({
       {/* Tab Content */}
       {children && (
         <div
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
           className="flex-1 overflow-auto p-3"
           data-slot="order-sidebar-content"
         >

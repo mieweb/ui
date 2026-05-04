@@ -279,7 +279,7 @@ export function InvoicePaymentPage({
                   <p
                     className={
                       invoice.status === 'overdue'
-                        ? 'font-medium text-red-600 dark:text-red-400'
+                        ? 'font-medium text-red-700 dark:text-red-400'
                         : ''
                     }
                   >
@@ -348,7 +348,7 @@ export function InvoicePaymentPage({
                       data-slot="invoice-payment-error"
                       className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
                     >
-                      <p className="text-sm text-red-600 dark:text-red-400">
+                      <p className="text-sm text-red-700 dark:text-red-400">
                         {errorMessage}
                       </p>
                     </div>

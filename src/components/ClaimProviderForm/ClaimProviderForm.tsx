@@ -147,7 +147,7 @@ export function ClaimProviderForm({
             >
               <p
                 data-slot="claim-form-error-text"
-                className="text-sm text-red-600 dark:text-red-400"
+                className="text-sm text-red-700 dark:text-red-400"
               >
                 {errorMessage}
               </p>
