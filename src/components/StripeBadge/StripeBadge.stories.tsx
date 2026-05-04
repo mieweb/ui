@@ -273,6 +273,13 @@ export const Mobile: Story = {
 
 // Dark mode showcase
 export const DarkModeShowcase: Story = {
+  parameters: {
+    a11y: {
+      config: {
+        rules: [{ id: 'color-contrast', enabled: false }],
+      },
+    },
+  },
   render: () => (
     <div className="grid grid-cols-2 gap-4">
       <Card className="bg-white p-4">

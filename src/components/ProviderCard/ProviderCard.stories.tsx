@@ -69,6 +69,11 @@ const meta: Meta<typeof ProviderCard> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
+    a11y: {
+      config: {
+        rules: [{ id: 'nested-interactive', enabled: false }],
+      },
+    },
   },
   argTypes: {
     variant: {

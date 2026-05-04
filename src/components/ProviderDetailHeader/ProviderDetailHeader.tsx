@@ -300,7 +300,7 @@ export function ProviderLogo({
         data-slot="provider-detail-logo"
         className={cn(
           logoSizeClasses[size],
-          'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex items-center justify-center rounded-lg font-bold',
+          'bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-400 flex items-center justify-center rounded-lg font-bold',
           size === 'sm' && 'text-lg',
           size === 'md' && 'text-2xl',
           size === 'lg' && 'text-3xl',

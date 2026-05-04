@@ -378,7 +378,7 @@ function DisabledDemo() {
     <div className="p-8">
       <div
         {...getRootProps()}
-        className="border-muted-foreground/25 bg-muted/10 relative h-48 cursor-not-allowed rounded-lg border-2 border-dashed opacity-50"
+        className="border-muted-foreground/25 bg-muted/10 relative h-48 cursor-not-allowed rounded-lg border-2 border-dashed"
       >
         <input {...getInputProps()} />
         <DropzoneOverlay isVisible={isDragging} message="Disabled" />

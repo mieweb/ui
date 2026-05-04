@@ -157,7 +157,7 @@ export const Default: Story = {
           Then import from the dedicated entry point:{' '}
           <code>@mieweb/ui/ozwell</code>
         </div>
-        <p style={{ color: '#999', fontSize: '0.875rem' }}>
+        <p style={{ color: '#666', fontSize: '0.875rem' }}>
           Using endpoint:{' '}
           <code>
             {args.endpoint ||
@@ -237,7 +237,7 @@ export const Embedded: Story = {
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: '#f9fafb',
-                color: '#999',
+                color: '#666',
                 padding: '2rem',
                 textAlign: 'center',
               }}
@@ -279,7 +279,7 @@ export const DarkTheme: Story = {
       }}
     >
       <h2 style={{ marginBottom: '0.5rem' }}>Dark Theme</h2>
-      <p style={{ color: 'var(--mieweb-muted-foreground, #999)' }}>
+      <p style={{ color: 'var(--mieweb-muted-foreground, #666)' }}>
         The widget button, header, and wrapper all inherit the dark mode tokens
         from the <code style={{ color: '#7dd3fc' }}>--mieweb-*</code> design
         system. Wrap your container in{' '}
@@ -396,7 +396,7 @@ function ToolCallingDemo(props: React.ComponentProps<typeof OzwellWidget>) {
         This widget has two MCP tools registered: <code>get_patient_info</code>{' '}
         and <code>schedule_appointment</code>.
       </p>
-      <p style={{ color: '#999', fontSize: '0.875rem' }}>
+      <p style={{ color: '#666', fontSize: '0.875rem' }}>
         Try: &quot;Look up patient 12345&quot; or &quot;Schedule a checkup for
         patient 12345 on 2026-05-01&quot;
       </p>

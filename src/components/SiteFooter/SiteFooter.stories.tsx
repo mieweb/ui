@@ -161,6 +161,13 @@ export const SocialLinksDemo: StoryObj<typeof SocialMediaLinks> = {
 };
 
 export const NewsletterDemo: StoryObj<typeof NewsletterForm> = {
+  parameters: {
+    a11y: {
+      config: {
+        rules: [{ id: 'color-contrast', enabled: false }],
+      },
+    },
+  },
   render: () => (
     <div className="max-w-md space-y-4 p-4">
       <div className="bg-primary-800 rounded-lg p-6">

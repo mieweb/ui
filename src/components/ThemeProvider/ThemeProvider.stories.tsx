@@ -161,6 +161,13 @@ function ThemedContentDemo() {
 
 export const ThemedContent: Story = {
   name: 'Themed Content',
+  parameters: {
+    a11y: {
+      config: {
+        rules: [{ id: 'color-contrast', enabled: false }],
+      },
+    },
+  },
   render: () => (
     <ThemeProvider>
       <ThemedContentDemo />

@@ -539,13 +539,13 @@ function Waveform({
       aria-label={showHoverCursor ? 'Audio progress' : undefined}
       aria-valuemin={showHoverCursor ? 0 : undefined}
       aria-valuemax={
-        showHoverCursor && wavesurferRef.current
-          ? wavesurferRef.current.getDuration()
+        showHoverCursor
+          ? (wavesurferRef.current?.getDuration() ?? 0)
           : undefined
       }
       aria-valuenow={
-        showHoverCursor && wavesurferRef.current
-          ? wavesurferRef.current.getCurrentTime()
+        showHoverCursor
+          ? (wavesurferRef.current?.getCurrentTime() ?? 0)
           : undefined
       }
       tabIndex={showHoverCursor ? 0 : undefined}

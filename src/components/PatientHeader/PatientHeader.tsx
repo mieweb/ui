@@ -269,7 +269,9 @@ function MedicationRow({
           </Badge>
         ))}
         {remaining > 0 && (
-          <span className="text-primary text-xs">+{remaining} more</span>
+          <span className="text-primary-800 dark:text-primary-400 text-xs">
+            +{remaining} more
+          </span>
         )}
       </div>
     </div>

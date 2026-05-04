@@ -146,7 +146,10 @@ function HeaderWithTitleDemo() {
   return (
     <AppHeader className="w-full">
       <AppHeaderSection align="left">
-        <button className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <button
+          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+          aria-label="Menu"
+        >
           <MenuIcon />
         </button>
         <AppHeaderDivider />

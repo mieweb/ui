@@ -407,7 +407,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
       onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
-        'bg-primary-50 text-primary-700 hover:bg-primary-100',
+        'bg-primary-50 text-primary-900 hover:bg-primary-100',
         'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
         'text-sm font-medium transition-colors',
         'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',

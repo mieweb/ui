@@ -267,7 +267,7 @@ export function OrderCard({
 
         {/* Rejection Reason */}
         {status === 'rejected' && rejectionReason && (
-          <div className="bg-destructive/10 text-destructive mb-3 rounded p-2 text-sm">
+          <div className="bg-destructive/10 text-destructive-700 dark:text-destructive-400 mb-3 rounded p-2 text-sm">
             <span className="font-medium">Reason:</span> {rejectionReason}
           </div>
         )}
@@ -278,7 +278,7 @@ export function OrderCard({
             <button
               type="button"
               onClick={handleViewClick}
-              className="text-primary hover:text-primary/80 text-sm font-medium"
+              className="text-primary-800 hover:text-primary-800/80 dark:text-primary-400 text-sm font-medium"
             >
               View Details
             </button>

@@ -1,0 +1,1520 @@
+Run pnpm test:storybook
+  pnpm test:storybook
+  shell: /usr/bin/bash -e {0}
+  env:
+    PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+> @mieweb/ui@0.3.0 test:storybook /home/runner/work/ui/ui
+> test-storybook --url http://localhost:6006
+[test-storybook] Detected Vite-based Storybook project: You might benefit from migrating to the Vitest addon. A modern, faster, and more feature-rich testing solution for Storybook:
+https://storybook.js.org/docs/writing-tests/integrations/vitest-addon/migration-guide?ref=test-runner-migration
+--------------------------
+Product/Feature Modules/Dashboard > Dashboard
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-dashboard--dashboard&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------------------------------
+Browser logs:
+warn: [DataVis // Source(Source #1, undefined)] Providing a name for this Source instance is strongly recommended to improve logging.
+warn: [DataVis // ComputedView(ComputedView #1)] Providing a name for this ComputedView instance is strongly recommended to improve logging.
+log: ~~~ ASYNC: HttpSource#getData[0] - START
+log: ~~~ ASYNC: HttpSource#getData[0] - FINISH
+--------------------------
+Components/Text & Data Display/AGGrid > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Dashboard/Dashboard.stories.tsx
+--------------------------
+Components/Text & Data Display/AGGrid > Bordered
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--bordered&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > Striped
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--striped&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Images & Media/RecordButton > Interactive Demos
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-images-media-recordbutton--interactive-demos&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > Small Size
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--small-size&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/RecordButton/RecordButton.stories.tsx
+--------------------------
+Components/Text & Data Display/AGGrid > Large Size
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--large-size&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > With Custom Cell Renderers
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-custom-cell-renderers&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > With Pagination
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-pagination&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > With Sorting
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-sorting&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Table/Table.stories.tsx
+--------------------------
+Components/Text & Data Display/AGGrid > With Filtering
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-filtering&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > With Row Selection
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-row-selection&addonPanel=storybook/a11y/panel
+Message:
+ Found 2 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Dashboard/DashboardWidgets.stories.tsx
+--------------------------
+Components/Text & Data Display/AGGrid > With Row Click
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-row-click&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > With Editable Cells
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-editable-cells&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > With Action Column
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-action-column&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > Full Featured
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--full-featured&addonPanel=storybook/a11y/panel
+Message:
+ Found 2 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Layout & Structure/AppHeader > With Title
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-appheader--with-title&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > Cell Renderers Showcase
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--cell-renderers-showcase&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Layout & Structure/AppHeader > Icon Buttons
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-appheader--icon-buttons&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Layout & Structure/AppHeader > User Menu
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-appheader--user-menu&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/AppHeader/AppHeader.stories.tsx
+--------------------------
+Components/Text & Data Display/AGGrid > Company And Links Renderers
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--company-and-links-renderers&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > Date Formats Showcase
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--date-formats-showcase&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/DashboardWidget/DashboardWidget.stories.tsx
+--------------------------
+Components/Text & Data Display/AGGrid > Progress And Booleans Showcase
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--progress-and-booleans-showcase&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > Status Colors Variations
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--status-colors-variations&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/AGGrid/AGGrid.stories.tsx (11.715 s)
+--------------------------
+Components/Navigation/TableOfContents > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-navigation-tableofcontents--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid > With Floating Filters
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid--with-floating-filters&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Navigation/TableOfContents > Controlled
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-navigation-tableofcontents--controlled&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/TableOfContents/TableOfContents.stories.tsx
+--------------------------
+Components/Layout & Structure/Card > Card Variants
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-card--variants&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Layout & Structure/Card > With Badges
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-card--with-badges&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Icons/Icons.stories.tsx
+--------------------------
+Components/Messaging/MessageBubble > MessageThread (Full)
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-messaging-messagebubble--full-thread&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Foundations/Icons > All Icons
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/foundations-icons--all-icons&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Card/Card.stories.tsx
+--------------------------
+Components/Layout & Structure/Card > Complex Example
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-card--complex-card&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Messaging/MessageBubble > MessageThread (With Typing)
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-messaging-messagebubble--thread-with-typing&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Messaging/MessageBubble > MessagingSplitView
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-messaging-messagebubble--split-view-story&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Messaging/Messaging.stories.tsx (6.617 s)
+--------------------------
+Product/Feature Modules/AI/OzwellWidget > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-ozwellwidget--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/OzwellWidget > Embedded
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-ozwellwidget--embedded&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/OzwellWidget > With Tool Calling
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-ozwellwidget--with-tool-calling&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/AI/OzwellWidget.stories.tsx
+--------------------------
+Components/Images & Media/AudioPlayer > Waveform
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-images-media-audioplayer--waveform&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Navigation/Sidebar > Collapsible
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-navigation-sidebar--collapsible&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Sidebar/Sidebar.stories.tsx
+--------------------------
+Components/Images & Media/AudioPlayer > Waveform With Title
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-images-media-audioplayer--waveform-with-title&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Images & Media/AudioPlayer > Custom Waveform Colors
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-images-media-audioplayer--custom-waveform-colors&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Images & Media/AudioPlayer > Podcast Player
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-images-media-audioplayer--podcast-player&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/AudioPlayer/AudioPlayer.stories.tsx (5.383 s)
+--------------------------
+Components/Images & Media/AudioPlayer > All Variants
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-images-media-audioplayer--all-variants&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Colors/Colors.stories.tsx
+ PASS   browser: chromium  src/components/AudioRecorder/AudioRecorder.stories.tsx
+--------------------------
+Product/Feature Modules/OrderList > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-orderlist--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OrderList > With Search
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-orderlist--with-search&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OrderList > With Actions
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-orderlist--with-actions&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OrderList > With Search And Actions
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-orderlist--with-search-and-actions&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OrderList > Simple Tabs
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-orderlist--simple-tabs&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/OrderList/OrderList.stories.tsx
+--------------------------
+Components/Layout & Structure/Tabs > Pills
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-tabs--pills&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Tabs/Tabs.stories.tsx
+--------------------------
+Components/Layout & Structure/Tabs > Controlled
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-tabs--controlled&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Skeleton/Skeleton.stories.tsx
+--------------------------
+Product/Feature Modules/OnboardingWizard > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OnboardingWizard > Loading
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--loading&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OnboardingWizard > With Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--with-error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OnboardingWizard > Custom Branding
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--custom-branding&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OnboardingWizard > Incomplete Steps
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--incomplete-steps&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OnboardingWizard > Import Step
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--import-step&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OnboardingWizard > Payment Step
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--payment-step&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/DocumentScanner/DocumentScanner.stories.tsx
+--------------------------
+Product/Feature Modules/OnboardingWizard > Completion Step
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--completion-step&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/OnboardingWizard/OnboardingWizard.stories.tsx
+--------------------------
+Product/Feature Modules/OnboardingWizard > Mobile
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-onboardingwizard--mobile&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/DropzoneOverlay/DropzoneOverlay.stories.tsx
+--------------------------
+Components/Forms & Inputs/DropzoneOverlay > Disabled
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-dropzoneoverlay--disabled&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/PatientHeader > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-patientheader--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/PatientHeader > With Back Button
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-patientheader--with-back-button&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/PatientHeader > With Providers
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-patientheader--with-providers&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Overlays & Layering/Tooltip > Toolbar Example
+ PASS   browser: chromium  src/components/Tooltip/Tooltip.stories.tsx
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-overlays-layering-tooltip--toolbar&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/PatientHeader > With Actions
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-patientheader--with-actions&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/PatientHeader > Sticky
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-patientheader--sticky&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/PatientHeader/PatientHeader.stories.tsx
+ PASS   browser: chromium  src/components/Select/Select.stories.tsx
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > Success
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--success&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > Compact
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--compact&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > User Message
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--user-message&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > Message With Tool Call
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--message-with-tool-call&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/DateRangePicker/DateRangePicker.stories.tsx
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > Chat With Messages
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--chat-with-messages&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > Generating Response
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--generating-response&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > Floating Chat Button
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--floating-chat-button&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/AI/MCPToolCall > Floating Chat Complete
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-ai-mcptoolcall--floating-chat-complete&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/AI/AI.stories.tsx
+ PASS   browser: chromium  src/components/PermissionsEditor/PermissionsEditor.stories.tsx
+--------------------------
+Product/Feature Modules/LoadingPage > With Progress
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-loadingpage--with-progress&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/LoadingPage/LoadingPage.stories.tsx
+--------------------------
+Product/Feature Modules/LoadingPage > Progress Bar Colors
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-loadingpage--progress-bar-colors&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/SchedulePicker > Date Buttons
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-schedulepicker--date-buttons&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/SchedulePicker > Radio Options
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-schedulepicker--radio-options&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/SchedulePicker/SchedulePicker.stories.tsx
+--------------------------
+Components/Navigation/CommandPalette > Loading
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-navigation-commandpalette--loading&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/CommandPalette/CommandPalette.stories.tsx
+ PASS   browser: chromium  src/components/QuickAction/QuickAction.stories.tsx
+ PASS   browser: chromium  src/components/Timeline/Timeline.stories.tsx
+ PASS   browser: chromium  src/components/Progress/Progress.stories.tsx
+--------------------------
+Product/Feature Modules/CheckrIntegration > Mixed Statuses
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-checkrintegration--mixed-statuses&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/CheckrIntegration/CheckrIntegration.stories.tsx
+--------------------------
+Components/Forms & Inputs/ResultsEntryForm > With File Upload
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-resultsentryform--with-file-upload&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ResultsEntryForm > No Provider Contacts
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-resultsentryform--no-provider-contacts&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ResultsEntryForm > Modal Variant
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-resultsentryform--modal-variant&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ResultsEntryForm/ResultsEntryForm.stories.tsx
+ PASS   browser: chromium  src/components/BusinessHoursEditor/BusinessHoursEditor.stories.tsx
+ PASS   browser: chromium  src/components/PaymentMethod/PaymentMethod.stories.tsx
+--------------------------
+Product/Feature Modules/EmployeeProfile/Card > Expanded
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-employeeprofile-card--expanded&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/EmployeeProfile/Card > Tabs Horizontal
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-employeeprofile-card--tabs-horizontal&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/EmployeeProfile/Card > Tabs Vertical
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-employeeprofile-card--tabs-vertical&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/EmployeeProfile/Card > Order Sidebar
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-employeeprofile-card--order-sidebar&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/EmployeeProfile/Card > Mobile
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-employeeprofile-card--mobile&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/EmployeeProfile/EmployeeProfile.stories.tsx
+--------------------------
+Components/Forms & Inputs/ProviderSelector > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-providerselector--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/EmployeeProfile/Card > Custom Labels
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-employeeprofile-card--custom-labels&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ProviderSelector > With Label
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-providerselector--with-label&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ProviderSelector > With Search
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-providerselector--with-search&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ProviderSelector > Small Size
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-providerselector--small-size&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ProviderSelector > Large Size
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-providerselector--large-size&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ProviderSelector > Many Providers
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-providerselector--many-providers&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ProviderSelector/ProviderSelector.stories.tsx
+--------------------------
+Components/Forms & Inputs/ProviderSelector > Inactive Providers
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-providerselector--inactive-providers&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Radio/Radio.stories.tsx
+ PASS   browser: chromium  src/components/CountBadge/CountBadge.stories.tsx
+--------------------------
+Components/Forms & Inputs/ServicePicker > Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-servicepicker--error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/ServicePicker > Empty
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-servicepicker--empty&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ServicePicker/ServicePicker.stories.tsx
+ PASS   browser: chromium  src/components/RecurringServiceCard/RecurringServiceCard.stories.tsx
+ PASS   browser: chromium  src/components/RejectionModal/RejectionModal.stories.tsx
+ PASS   browser: chromium  src/components/Dropdown/Dropdown.stories.tsx
+ PASS   browser: chromium  src/components/StripeBadge/StripeBadge.stories.tsx
+--------------------------
+Components/Text & Data Display/StripeBadge > Dark Mode Showcase
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-stripebadge--dark-mode-showcase&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Foundations/VisuallyHidden > Skip Navigation Link
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/foundations-visuallyhidden--skip-link&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/WebChartReportViewer > Time Range
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-webchartreportviewer--time-range&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/VisuallyHidden/VisuallyHidden.stories.tsx
+ PASS   browser: chromium  src/components/WebChartReportViewer/WebChartReportViewer.stories.tsx
+ PASS   browser: chromium  src/components/CSVColumnMapper/CSVColumnMapper.stories.tsx
+ PASS   browser: chromium  src/components/WebsiteInput/WebsiteInput.stories.tsx
+ PASS   browser: chromium  src/components/ScheduleCalendar/ScheduleCalendar.stories.tsx
+ PASS   browser: chromium  src/components/Address/AddressForm.stories.tsx
+--------------------------
+Product/Feature Modules/ProductVersion > Badge
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-productversion--badge&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/ProductVersion > Multiple Products
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-productversion--multiple-products&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ProductVersion/ProductVersion.stories.tsx
+--------------------------
+Product/Provider/ServiceCard > Not Offered
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicecard--not-offered&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ReportDashboard/ReportDashboard.stories.tsx
+ PASS   browser: chromium  src/components/ServiceCard/ServiceCard.stories.tsx
+--------------------------
+Product/Provider/ServiceCard > Service Grid
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicecard--service-grid&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Messaging/Toast > Info
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-messaging-toast--info&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Messaging/Toast > With Action
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-messaging-toast--with-action&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Toast/Toast.stories.tsx
+ PASS   browser: chromium  src/components/AuthDialog/AuthDialog.stories.tsx
+ PASS   browser: chromium  src/components/LanguageSelector/LanguageSelector.stories.tsx
+ PASS   browser: chromium  src/components/Modal/Modal.stories.tsx
+ PASS   browser: chromium  src/components/AdditionalFields/AdditionalFields.stories.tsx
+ PASS   browser: chromium  src/components/ProviderDetailHeader/ProviderDetailHeader.stories.tsx
+--------------------------
+Components/Text & Data Display/AGGrid/Enhanced > Enhanced
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid-enhanced--enhanced&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------------------------------
+Browser logs:
+warn: AG Grid: warning #48, Cell data type is "object" but no Value Formatter has been provided. Please either provide an object data type definition with a Value Formatter, or set "colDef.valueFormatter", 
+See https://www.ag-grid.com/react-data-grid/errors/48?_version_=35.1.0&property=Formatter
+--------------------------
+Product/Provider/ProviderDetailHeader > Full Page Demo
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-providerdetailheader--full-page-demo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid/Enhanced > With Pagination
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid-enhanced--with-pagination&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid/Enhanced > Compact Size
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid-enhanced--compact-size&addonPanel=storybook/a11y/panel
+Message:
+ Found 2 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/AGGrid/Enhanced > Card Variant
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-aggrid-enhanced--card-variant&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/AGGrid/AGGrid.enhanced.stories.tsx
+--------------------------
+Components/Layout & Structure/SiteFooter > Newsletter Demo
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-sitefooter--newsletter-demo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/SiteFooter/SiteFooter.stories.tsx
+--------------------------
+Components/Layout & Structure/SiteFooter > Full Page Demo
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-sitefooter--full-page-demo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Navigation/Pagination > All Variants
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-navigation-pagination--all-variants&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Pagination/Pagination.stories.tsx
+--------------------------
+Components/Navigation/Pagination > All Sizes
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-navigation-pagination--all-sizes&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ServiceBadge/ServiceBadge.stories.tsx
+--------------------------
+Components/Forms & Inputs/EmployeeForm > Edit Existing
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-employeeform--edit-existing&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/EmployeeForm > With Custom Fields
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-employeeform--with-custom-fields&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/EmployeeForm/EmployeeForm.stories.tsx
+ PASS   browser: chromium  src/components/EditUserRoleModal/EditUserRoleModal.stories.tsx
+ PASS   browser: chromium  src/components/Breadcrumb/Breadcrumb.stories.tsx
+--------------------------
+Product/Provider/NotificationCenter > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > All Unread
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--all-unread&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > All Read
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--all-read&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/ServiceGrid > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ProviderSearchFilters/ProviderSearchFilters.stories.tsx
+--------------------------
+Product/Provider/NotificationCenter > With Max Visible
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--with-max-visible&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ProviderSearchFilters > Compact Filter Bar Demo
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-providersearchfilters--compact-filter-bar-demo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/ServiceGrid > Two Columns
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--two-columns&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > Urgent Notifications
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--urgent-notifications&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/ServiceGrid > Four Columns
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--four-columns&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > Mixed Priorities
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--mixed-priorities&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > Single Notification
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--single-notification&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/ServiceGrid > Small Gap
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--small-gap&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > With Sender Avatars
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--with-sender-avatars&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/ServiceGrid > Large Gap
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--large-gap&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > No Actions
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--no-actions&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/NotificationCenter/NotificationCenter.stories.tsx
+--------------------------
+Components/Text & Data Display/ServiceGrid > Without Add Card
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--without-add-card&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/NotificationCenter > Mobile
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-notificationcenter--mobile&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Text & Data Display/ServiceGrid > Many Services
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--many-services&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ServiceGrid/ServiceGrid.stories.tsx
+--------------------------
+Components/Text & Data Display/ServiceGrid > Read Only
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-servicegrid--read-only&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ServiceAccordion/ServiceAccordion.stories.tsx
+--------------------------
+Product/Provider/ProviderOverview > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-provideroverview--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ProviderOverview > With Logo
+ PASS   browser: chromium  src/components/AddContactModal/AddContactModal.stories.tsx
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-provideroverview--with-logo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ProviderOverview > No Activity
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-provideroverview--no-activity&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ProviderOverview/ProviderOverview.stories.tsx
+--------------------------
+Product/Provider/ProviderOverview > Mobile
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-provideroverview--mobile&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Button/Button.stories.tsx
+ PASS   browser: chromium  src/components/ThemeProvider/ThemeProvider.stories.tsx
+--------------------------
+Foundations/ThemeProvider > Themed Content
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/foundations-themeprovider--themed-content&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Textarea/Textarea.stories.tsx
+ PASS   browser: chromium  src/components/Alert/Alert.stories.tsx
+--------------------------
+Components/Images & Media/FileManager > With Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-images-media-filemanager--with-error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Layout & Structure/QuickLinksCard > With Badges
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-layout-structure-quicklinkscard--with-badges&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/QuickLinksCard/QuickLinksCard.stories.tsx
+ PASS   browser: chromium  src/components/FileManager/FileManager.stories.tsx
+ PASS   browser: chromium  src/components/PageHeader/PageHeader.stories.tsx
+ PASS   browser: chromium  src/components/CookieConsent/CookieConsent.stories.tsx
+ PASS   browser: chromium  src/components/HRISProviderSelector/HRISProviderSelector.stories.tsx
+ PASS   browser: chromium  src/components/SiteHeader/SiteHeader.stories.tsx
+--------------------------
+Product/Provider/EmployerView > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > Without Logo
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--without-logo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > Inactive Employer
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--inactive-employer&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > Pending Employer
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--pending-employer&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > No Orders
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--no-orders&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > No Invoices
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--no-invoices&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > Single Contact
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--single-contact&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > No Address
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--no-address&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > No Stats
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--no-stats&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > Orders Tab
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--orders-tab&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/PhoneInput/PhoneInputGroup.stories.tsx
+--------------------------
+Product/Provider/EmployerView > Invoices Tab
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--invoices-tab&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerView > Contacts Tab
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--contacts-tab&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/EmployerView/EmployerView.stories.tsx
+ PASS   browser: chromium  src/components/StepIndicator/StepIndicator.stories.tsx
+--------------------------
+Product/Provider/EmployerView > Mobile
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerview--mobile&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/HelpSupportPanel > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/HelpSupportPanel > With Success Message
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--with-success-message&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/HelpSupportPanel > Submitting
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--submitting&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Slider/Slider.stories.tsx
+--------------------------
+Product/Provider/HelpSupportPanel > No Chat Available
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--no-chat-available&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/HelpSupportPanel > FA Qs Only
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--fa-qs-only&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/HelpSupportPanel > Contact Form Only
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--contact-form-only&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/HelpSupportPanel > No FA Qs
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--no-fa-qs&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Checkbox/Checkbox.stories.tsx
+--------------------------
+Product/Provider/HelpSupportPanel > Minimal Contacts
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--minimal-contacts&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/HelpSupportPanel > No Docs Link
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--no-docs-link&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/HelpSupportPanel/HelpSupportPanel.stories.tsx
+--------------------------
+Product/Provider/HelpSupportPanel > Mobile
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-helpsupportpanel--mobile&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ConnectionStatus/ConnectionStatus.stories.tsx
+ PASS   browser: chromium  src/components/SSOConfigForm/SSOConfigForm.stories.tsx
+--------------------------
+Product/Provider/InvoiceView > With Logo
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-invoiceview--with-logo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/InvoiceView/InvoiceView.stories.tsx
+ PASS   browser: chromium  src/components/ErrorPage/ErrorPage.stories.tsx
+--------------------------
+Product/Provider/ProviderSearchBar > All Variants
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-providersearchbar--all-variants&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ProviderSearchBar/ProviderSearchBar.stories.tsx
+ PASS   browser: chromium  src/components/Avatar/Avatar.stories.tsx
+--------------------------
+Product/Provider/ProviderCard > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-providercard--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/InventoryManager/InventoryManager.stories.tsx
+--------------------------
+Product/Provider/ProviderCard > All Variants
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-providercard--all-variants&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ProviderCard > No Logo
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-providercard--no-logo&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ProviderCard > Grid
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-providercard--grid&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ProviderCard/ProviderCard.stories.tsx
+--------------------------
+Components/Forms & Inputs/CreateInvoiceModal > Step 2 Select Orders
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-createinvoicemodal--step-2-select-orders&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/CreateInvoiceModal > Loading Orders
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-createinvoicemodal--loading-orders&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/CreateInvoiceModal > With Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-createinvoicemodal--with-error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/CreateInvoiceModal/CreateInvoiceModal.stories.tsx
+ PASS   browser: chromium  src/components/ProviderSettings/ProviderSettings.stories.tsx
+--------------------------
+Components/Forms & Inputs/CreateInvoiceModal > Submitting
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-createinvoicemodal--submitting&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/BookingDialog/BookingDialog.stories.tsx
+--------------------------
+Product/Provider/BusinessHours > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-businesshours--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/BusinessHours > Card Variant
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-businesshours--card-variant&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Foundations/Text > All Variants
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/foundations-text--all-variants&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Pending With Actions
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--pending-with-actions&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Active
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--active&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/BusinessHours > Split Shifts
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-businesshours--split-shifts&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Scheduled
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--scheduled&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > In Progress
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--in-progress&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/Text/Text.stories.tsx
+ PASS   browser: chromium  src/components/BusinessHours/BusinessHours.stories.tsx
+--------------------------
+Product/Provider/OrderCard > Completed
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--completed&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Rejected
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--rejected&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Invoiced
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--invoiced&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Many Services
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--many-services&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Selected
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--selected&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/OrderCard > Old Order
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--old-order&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/OrderCard/OrderCard.stories.tsx
+--------------------------
+Product/Provider/OrderCard > No Price
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-ordercard--no-price&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > Empty
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--empty&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > Saving
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--saving&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > No Bulk Update
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--no-bulk-update&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/InvoiceList/InvoiceList.stories.tsx
+--------------------------
+Product/Provider/ServicePricingManager > Read Only
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--read-only&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > Few Services
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--few-services&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > Many Inactive
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--many-inactive&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > No Employer Prices
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--no-employer-prices&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/ServicePricingManager > No Categories
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--no-categories&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ServicePricingManager/ServicePricingManager.stories.tsx
+--------------------------
+Product/Provider/ServicePricingManager > Mobile
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-servicepricingmanager--mobile&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/PendingClaimsTable/PendingClaimsTable.stories.tsx
+--------------------------
+Product/Provider/InvoicePaymentPage > With Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-invoicepaymentpage--with-error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/InvoicePaymentPage/InvoicePaymentPage.stories.tsx
+ PASS   browser: chromium  src/components/EmployerList/EmployerList.stories.tsx
+ PASS   browser: chromium  src/components/DateInput/DateInput.stories.tsx
+ PASS   browser: chromium  src/components/OrderSidebar/OrderSidebar.stories.tsx
+ PASS   browser: chromium  src/components/Badge/Badge.stories.tsx
+ PASS   browser: chromium  src/components/CreateReferralModal/CreateReferralModal.stories.tsx
+ PASS   browser: chromium  src/components/Address/Address.stories.tsx
+ PASS   browser: chromium  src/components/Spinner/Spinner.stories.tsx
+ PASS   browser: chromium  src/components/Switch/Switch.stories.tsx
+--------------------------
+Components/Forms & Inputs/InviteUserModal > With Provider
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-inviteusermodal--with-provider&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/InviteUserModal > With Employer
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-inviteusermodal--with-employer&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/InviteUserModal > With Default Role
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-inviteusermodal--with-default-role&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/InviteUserModal > With Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-inviteusermodal--with-error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/InviteUserModal > With Success
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-inviteusermodal--with-success&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/InviteUserModal/InviteUserModal.stories.tsx
+--------------------------
+Components/Forms & Inputs/ClaimProviderForm > With Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-claimproviderform--with-error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Components/Forms & Inputs/InviteUserModal > Minimal Roles
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-forms-inputs-inviteusermodal--minimal-roles&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ClaimProviderForm/ClaimProviderForm.stories.tsx
+ PASS   browser: chromium  src/components/CountryCodeDropdown/CountryCodeDropdown.stories.tsx
+ PASS   browser: chromium  src/components/PaymentHistoryTable/PaymentHistoryTable.stories.tsx
+ PASS   browser: chromium  src/components/EmployerServiceModal/EmployerServiceModal.stories.tsx
+ PASS   browser: chromium  src/components/ServiceGeneralSettings/ServiceGeneralSettings.stories.tsx
+--------------------------
+Product/Feature Modules/ServiceShippingSettings > Disabled
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-serviceshippingsettings--disabled&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/ServiceShippingSettings > Enabled
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-serviceshippingsettings--enabled&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ProviderUsersTable/ProviderUsersTable.stories.tsx
+--------------------------
+Product/Feature Modules/ServiceShippingSettings > With Address
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-serviceshippingsettings--with-address&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/ServiceShippingSettings > With Save Button
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-serviceshippingsettings--with-save-button&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/ServiceShippingSettings/ServiceShippingSettings.stories.tsx
+--------------------------
+Product/Feature Modules/ServiceShippingSettings > Saving
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-serviceshippingsettings--saving&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerPricingCard > With Tiers
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerpricingcard--with-tiers&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerPricingCard > Inactive
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerpricingcard--inactive&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerPricingCard > Read Only
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerpricingcard--read-only&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/EmployerPricingCard/EmployerPricingCard.stories.tsx
+--------------------------
+Product/Provider/EmployerPricingCard > Full Featured
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employerpricingcard--full-featured&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Provider/EmployerContactCard > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-provider-employercontactcard--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/OrderConfirmationWizard/OrderConfirmationWizard.stories.tsx
+ PASS   browser: chromium  src/components/SetupServiceModal/SetupServiceModal.stories.tsx
+ PASS   browser: chromium  src/components/EmployerContactCard/EmployerContactCard.stories.tsx
+ PASS   browser: chromium  src/components/Input/Input.stories.tsx
+ PASS   browser: chromium  src/components/PhoneInput/PhoneInput.stories.tsx
+--------------------------
+Components/Text & Data Display/DataVis NITRO > Default
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-datavis-nitro--default&addonPanel=storybook/a11y/panel
+Message:
+ Found 5 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------------------------------
+Browser logs:
+warn: [DataVis // Source(Source #1, undefined)] Providing a name for this Source instance is strongly recommended to improve logging.
+warn: [DataVis // ComputedView(ComputedView #1)] Providing a name for this ComputedView instance is strongly recommended to improve logging.
+log: ~~~ ASYNC: HttpSource#getData[0] - START
+log: ~~~ ASYNC: HttpSource#getData[0] - FINISH
+--------------------------
+Components/Text & Data Display/DataVis NITRO > With Controls
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-datavis-nitro--with-controls&addonPanel=storybook/a11y/panel
+Message:
+ Found 3 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------------------------------
+Browser logs:
+log: ~~~ ASYNC: HttpSource#getData[1] - START
+log: ~~~ ASYNC: HttpSource#getData[1] - FINISH
+ PASS   browser: chromium  src/components/DataVisNITRO/DataVisNITRO.stories.tsx
+--------------------------
+Components/Text & Data Display/DataVis NITRO > Derived Columns
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/components-text-data-display-datavis-nitro--derived-columns&addonPanel=storybook/a11y/panel
+Message:
+ Found 3 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------------------------------
+Browser logs:
+log: ~~~ ASYNC: HttpSource#getData[2] - START
+--------------------------
+Product/Feature Modules/OrderLookupForm > Not Found
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-orderlookupform--not-found&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+--------------------------
+Product/Feature Modules/OrderLookupForm > With Error
+Click to debug the error directly in Storybook:
+http://localhost:6006/?path=/story/product-feature-modules-orderlookupform--with-error&addonPanel=storybook/a11y/panel
+Message:
+ Found 1 a11y violations, run the test with 'a11y: { test: 'error' }' parameter to see the full report or debug it directly in Storybook.
+ PASS   browser: chromium  src/components/OrderLookupForm/OrderLookupForm.stories.tsx
+Test Suites: 133 passed, 133 total
+Tests:       1271 passed, 1271 total
+Snapshots:   0 total
+Time:        143.084 s
+Ran all test suites.

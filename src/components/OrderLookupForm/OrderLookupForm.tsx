@@ -111,7 +111,7 @@ export function OrderLookupForm({
             {/* Error message */}
             {(errorMessage || notFound) && (
               <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <p className="text-sm text-red-700 dark:text-red-400">
                   {errorMessage ||
                     'Order not found. Please check your information and try again.'}
                 </p>

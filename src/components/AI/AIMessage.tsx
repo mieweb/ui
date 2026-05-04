@@ -20,7 +20,7 @@ const avatarVariants = cva(
   {
     variants: {
       role: {
-        user: 'bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300',
+        user: 'bg-primary-100 text-primary-900 dark:bg-primary-900/50 dark:text-primary-300',
         assistant: 'bg-primary-800 text-white dark:bg-primary-800',
         system:
           'bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400',

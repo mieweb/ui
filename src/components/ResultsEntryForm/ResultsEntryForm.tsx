@@ -473,7 +473,7 @@ export const ResultsEntryForm = React.forwardRef<
             </p>
             <button
               type="button"
-              className="text-primary mt-2 inline-block text-sm hover:underline"
+              className="text-primary-800 dark:text-primary-400 mt-2 inline-block text-sm hover:underline"
             >
               {addProviderContact}
             </button>

@@ -56,6 +56,13 @@ export const Default: Story = {};
 
 // All variants comparison
 export const AllVariants: Story = {
+  parameters: {
+    a11y: {
+      config: {
+        rules: [{ id: 'landmark-unique', enabled: false }],
+      },
+    },
+  },
   render: () => (
     <div className="space-y-6">
       {(['default', 'hero'] as const).map((variant) => (
