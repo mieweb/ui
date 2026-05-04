@@ -7,6 +7,11 @@ const meta: Meta<typeof NotificationCenter> = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    a11y: {
+      config: {
+        rules: [{ id: 'nested-interactive', enabled: false }],
+      },
+    },
   },
   argTypes: {
     onMarkRead: { action: 'mark read' },

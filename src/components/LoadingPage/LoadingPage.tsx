@@ -138,6 +138,7 @@ export function LoadingBar({
             )}
             style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
             role="progressbar"
+            aria-label="Loading progress"
             aria-valuenow={progress}
             aria-valuemin={0}
             aria-valuemax={100}

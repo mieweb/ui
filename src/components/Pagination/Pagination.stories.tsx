@@ -226,15 +226,30 @@ export const AllVariants: Story = {
     <div className="space-y-6">
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Default</p>
-        <PaginationWithState page={5} totalPages={10} variant="default" />
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          variant="default"
+          label="Default pagination"
+        />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Outline</p>
-        <PaginationWithState page={5} totalPages={10} variant="outline" />
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          variant="outline"
+          label="Outline pagination"
+        />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Ghost</p>
-        <PaginationWithState page={5} totalPages={10} variant="ghost" />
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          variant="ghost"
+          label="Ghost pagination"
+        />
       </div>
     </div>
   ),
@@ -248,15 +263,30 @@ export const AllSizes: Story = {
     <div className="space-y-6">
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Small</p>
-        <PaginationWithState page={5} totalPages={10} size="sm" />
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          size="sm"
+          label="Small pagination"
+        />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Medium</p>
-        <PaginationWithState page={5} totalPages={10} size="md" />
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          size="md"
+          label="Medium pagination"
+        />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm">Large</p>
-        <PaginationWithState page={5} totalPages={10} size="lg" />
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          size="lg"
+          label="Large pagination"
+        />
       </div>
     </div>
   ),

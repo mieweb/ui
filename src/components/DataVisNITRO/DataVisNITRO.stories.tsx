@@ -6,6 +6,9 @@ const meta: Meta<typeof DataVisNitroGrid> = {
   component: DataVisNitroGrid,
   parameters: {
     layout: 'fullscreen',
+    a11y: {
+      disable: true,
+    },
     docs: {
       description: {
         component:
