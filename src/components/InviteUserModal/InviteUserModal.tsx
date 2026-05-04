@@ -137,7 +137,7 @@ export function InviteUserModal({
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <p className="text-sm text-green-600 dark:text-green-400">
+                <p className="text-sm text-green-700 dark:text-green-400">
                   {successMessage}
                 </p>
               </div>

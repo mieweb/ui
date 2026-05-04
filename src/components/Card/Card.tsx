@@ -315,7 +315,7 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
       default: 'bg-muted text-muted-foreground',
       primary: 'bg-primary-800 text-white',
       success: 'bg-success-700 text-success-foreground',
-      warning: 'bg-warning text-warning-foreground',
+      warning: 'bg-warning-700 text-warning-foreground',
       destructive: 'bg-destructive text-destructive-foreground',
     };
 
