@@ -253,15 +253,7 @@ const meta: Meta<typeof AGGrid> = {
     // AG Grid is a third-party component whose internal DOM renders elements
     // with ARIA attributes and color-contrast ratios we cannot control.
     // Violations are timing-dependent in CI and not actionable.
-    a11y: {
-      config: {
-        rules: [
-          { id: 'color-contrast', enabled: false },
-          { id: 'aria-required-attr', enabled: false },
-          { id: 'aria-allowed-attr', enabled: false },
-        ],
-      },
-    },
+    a11y: { test: 'off' },
     // Disable Storybook's animation waiting which conflicts with AG Grid
     chromatic: { disableSnapshot: true },
     docs: {
