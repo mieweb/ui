@@ -103,7 +103,7 @@ export function ProductVersion({
           data-slot="product-version-minimal"
         >
           {name} {versionDisplay}
-          {build && <span className="ml-1 opacity-60">({build})</span>}
+          {build && <span className="ml-1">({build})</span>}
         </span>
       );
     }
@@ -130,9 +130,7 @@ export function ProductVersion({
             )}
           </div>
           {build && (
-            <span className="text-muted-foreground opacity-60">
-              Build: {build}
-            </span>
+            <span className="text-muted-foreground">Build: {build}</span>
           )}
           {(author || copyright) && (
             <span className="text-muted-foreground">{copyrightText}</span>
@@ -149,9 +147,7 @@ export function ProductVersion({
       >
         <span className="font-medium">{name}</span>
         <span className="text-muted-foreground">{versionDisplay}</span>
-        {build && (
-          <span className="text-muted-foreground opacity-60">({build})</span>
-        )}
+        {build && <span className="text-muted-foreground">({build})</span>}
         {environment && (
           <span
             className={cn(
@@ -165,7 +161,7 @@ export function ProductVersion({
         )}
         {(author || copyright) && (
           <>
-            <span className="text-muted-foreground/50">•</span>
+            <span className="text-muted-foreground">•</span>
             <span className="text-muted-foreground">{copyrightText}</span>
           </>
         )}

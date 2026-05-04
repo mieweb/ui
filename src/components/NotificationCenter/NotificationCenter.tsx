@@ -290,7 +290,7 @@ export function NotificationCenter({
               role="button"
               tabIndex={0}
               data-slot="notification-center-item"
-              className={`cursor-pointer px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+              className={`group cursor-pointer px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
                 !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
               }`}
               onClick={() => {
@@ -392,7 +392,7 @@ export function NotificationCenter({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100"
+                          className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100 focus:opacity-100"
                           aria-label="Dismiss notification"
                           onClick={(e) => {
                             e.stopPropagation();
