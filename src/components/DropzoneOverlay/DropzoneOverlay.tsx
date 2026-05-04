@@ -98,9 +98,7 @@ export function DropzoneOverlay({
       aria-live="polite"
     >
       {IconComponent ? (
-        <IconComponent
-          className={cn(sizeStyles[size].icon, 'text-muted-foreground')}
-        />
+        <IconComponent className={sizeStyles[size].icon} />
       ) : (
         icon
       )}
