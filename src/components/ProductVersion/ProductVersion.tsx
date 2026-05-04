@@ -268,7 +268,7 @@ export function ProductVersionBadge({
     >
       <span className="font-mono font-medium">{versionDisplay}</span>
       {build && (
-        <span className="text-muted-foreground font-mono opacity-70">
+        <span className="text-muted-foreground font-mono">
           {build.substring(0, 7)}
         </span>
       )}

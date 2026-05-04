@@ -47,6 +47,7 @@ export const miewebUISafelist = [
   'bg-card',
   'bg-muted',
   'bg-primary',
+  'bg-primary-800',
   'bg-success',
   'bg-warning',
   'bg-destructive',

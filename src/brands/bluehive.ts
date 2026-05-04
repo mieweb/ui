@@ -39,7 +39,7 @@ export const bluehiveBrand: BrandConfig = {
       card: '#ffffff',
       cardForeground: '#171717',
       muted: '#f5f5f5',
-      mutedForeground: '#737373',
+      mutedForeground: '#494949',
       border: '#e5e7eb',
       input: '#e5e7eb',
       ring: '#27aae1',

@@ -166,7 +166,7 @@ export function Toast({
             {title}
           </p>
         )}
-        <div data-slot="toast-message" className="text-sm opacity-90">
+        <div data-slot="toast-message" className="text-sm">
           {message}
         </div>
         {action && (

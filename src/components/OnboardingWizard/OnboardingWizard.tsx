@@ -130,7 +130,7 @@ export function OnboardingWizard({
       {/* Header */}
       {showHeader && (
         <nav
-          className="bg-primary flex items-center px-4 py-3"
+          className="bg-primary-800 flex items-center px-4 py-3"
           data-slot="onboarding-header"
         >
           <div className="flex items-center">
@@ -149,7 +149,7 @@ export function OnboardingWizard({
               >
                 <span className="text-lg font-semibold">{brandName}</span>
                 {brandSubname && (
-                  <span className="text-sm opacity-90">{brandSubname}</span>
+                  <span className="text-sm">{brandSubname}</span>
                 )}
               </div>
             </span>
