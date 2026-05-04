@@ -264,7 +264,7 @@ export function ServicePicker({
         {error && (
           <div
             data-slot="service-picker-error"
-            className="bg-destructive/10 text-destructive-foreground mb-4 rounded-lg p-4"
+            className="bg-destructive/10 text-destructive-700 dark:text-destructive-foreground mb-4 rounded-lg p-4"
           >
             <strong>{error}</strong>
           </div>

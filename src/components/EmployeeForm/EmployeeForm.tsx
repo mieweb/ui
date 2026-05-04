@@ -431,6 +431,7 @@ export function EmployeeForm({
               <div className="w-32">
                 <Select
                   label={index === 0 ? 'Type' : undefined}
+                  aria-label={index > 0 ? 'Phone type' : undefined}
                   value={phone.type}
                   onValueChange={(value) =>
                     updatePhone(index, 'type', value as EmployeePhone['type'])

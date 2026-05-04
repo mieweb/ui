@@ -369,7 +369,7 @@ export function AIChat({
                 onClick={onCancel}
                 className={cn(
                   'rounded-lg px-3 py-1.5 text-sm',
-                  'bg-red-100 text-red-600 hover:bg-red-200',
+                  'bg-red-100 text-red-700 hover:bg-red-200',
                   'dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50',
                   'transition-colors'
                 )}
