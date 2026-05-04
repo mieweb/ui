@@ -70,7 +70,7 @@ export function EmployerPricingCard({
   return (
     <Card
       data-slot="employer-pricing-card"
-      className={`${className} ${!isActive ? 'opacity-60' : ''}`}
+      className={`${className} ${!isActive ? 'grayscale' : ''}`}
     >
       <CardHeader
         data-slot="employer-pricing-header"

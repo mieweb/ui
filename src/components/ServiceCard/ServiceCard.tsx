@@ -116,7 +116,7 @@ export function ServiceCard({
           'h-full transition-all duration-200',
           onClick && 'cursor-pointer hover:shadow-md',
           selected && 'ring-primary ring-2',
-          !currentlyOffered && 'opacity-60',
+          !currentlyOffered && 'grayscale',
           className
         )}
         onClick={onClick ? handleCardClick : undefined}

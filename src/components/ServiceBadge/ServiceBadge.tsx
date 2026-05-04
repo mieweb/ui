@@ -312,7 +312,9 @@ export function ServiceTagCloudBadges({
         >
           {service.name}
           {showCounts && service.count !== undefined && (
-            <span className="ml-1 opacity-70">({service.count})</span>
+            <span className="text-muted-foreground ml-1">
+              ({service.count})
+            </span>
           )}
         </ServiceBadge>
       ))}
