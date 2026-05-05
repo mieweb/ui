@@ -7,6 +7,7 @@ import {
   FloatingAIChat,
   AIChatTrigger,
   type AIMessage,
+  type AIRenderTextContent,
   type MCPToolCall,
   type AISuggestedAction,
 } from './index';
@@ -230,10 +231,7 @@ export const WithCustomMarkdownRenderer: StoryObj<typeof AIMessageDisplay> = {
       status: 'complete',
     };
     // Demo: **bold** -> <strong>. Hosts plug in a real Markdown renderer.
-    const renderTextContent = (
-      text: string,
-      ctx: { messageId: string; streaming: boolean }
-    ) => {
+    const renderTextContent: AIRenderTextContent = (text, ctx) => {
       const parts = text.split(/(\*\*[^*]+\*\*)/g);
       return (
         <p data-message-id={ctx.messageId} data-streaming={ctx.streaming}>

@@ -188,7 +188,7 @@ export interface AITextRenderContext {
  */
 export type AIRenderTextContent = (
   text: string,
-  ctx: AITextRenderContext,
+  ctx: AITextRenderContext
 ) => React.ReactNode;
 
 // ============================================================================
