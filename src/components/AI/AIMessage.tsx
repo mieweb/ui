@@ -7,7 +7,12 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
+import type {
+  AIMessage,
+  AIMessageContent,
+  AIRenderTextContent,
+  MCPResourceLink,
+} from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
 import { SparklesIcon, ChevronIcon } from './icons';
 
@@ -162,14 +167,32 @@ function AITypingIndicator({ className }: { className?: string }) {
 interface ContentBlockProps {
   content: AIMessageContent;
   onLinkClick?: (link: MCPResourceLink) => void;
+  messageId: string;
+  streaming: boolean;
+  role: AIMessage['role'];
+  renderTextContent?: AIRenderTextContent;
 }
 
-function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
+function ContentBlock({
+  content,
+  onLinkClick,
+  messageId,
+  streaming,
+  role,
+  renderTextContent,
+}: ContentBlockProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(
     content.collapsed ?? false
   );
 
   if (content.type === 'text' && content.text) {
+    if (renderTextContent) {
+      return (
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          {renderTextContent(content.text, { messageId, streaming, role })}
+        </div>
+      );
+    }
     return (
       <div className="prose prose-sm dark:prose-invert max-w-none">
         <p className="whitespace-pre-wrap">{content.text}</p>
@@ -293,6 +316,11 @@ export interface AIMessageDisplayProps {
   showTimestamp?: boolean;
   /** Callback when a resource link is clicked */
   onLinkClick?: (link: MCPResourceLink) => void;
+  /**
+   * Optional renderer for `text` content blocks (e.g. Markdown). Called per
+   * text block with `{ messageId, streaming, role }`. Host must sanitize.
+   */
+  renderTextContent?: AIRenderTextContent;
   /** Additional class name */
   className?: string;
 }
@@ -306,6 +334,7 @@ export function AIMessageDisplay({
   showAvatar = true,
   showTimestamp = false,
   onLinkClick,
+  renderTextContent,
   className,
 }: AIMessageDisplayProps) {
   const isStreaming = message.status === 'streaming';
@@ -333,6 +362,10 @@ export function AIMessageDisplay({
               key={index}
               content={content}
               onLinkClick={onLinkClick}
+              messageId={message.id}
+              streaming={isStreaming}
+              role={message.role}
+              renderTextContent={renderTextContent}
             />
           ))}
         </div>
@@ -370,6 +403,10 @@ export function AIMessageDisplay({
                   key={index}
                   content={content}
                   onLinkClick={onLinkClick}
+                  messageId={message.id}
+                  streaming={isStreaming}
+                  role={message.role}
+                  renderTextContent={renderTextContent}
                 />
               ))}
             </div>

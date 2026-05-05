@@ -5,6 +5,8 @@
  * interactions, tool calls, and chat messages.
  */
 
+import type * as React from 'react';
+
 // ============================================================================
 // MCP Tool Types
 // ============================================================================
@@ -165,6 +167,29 @@ export interface AIMessage {
   /** Custom metadata */
   metadata?: Record<string, unknown>;
 }
+
+// ============================================================================
+// Render Customization Types
+// ============================================================================
+
+/** Context passed to a custom text content renderer. */
+export interface AITextRenderContext {
+  /** id of the parent message (useful as a render cache key) */
+  messageId: string;
+  /** true while the message is still streaming */
+  streaming: boolean;
+  /** role of the parent message */
+  role: AIMessage['role'];
+}
+
+/**
+ * Render-prop for customizing `text` content blocks. Host is responsible
+ * for sanitizing untrusted input.
+ */
+export type AIRenderTextContent = (
+  text: string,
+  ctx: AITextRenderContext,
+) => React.ReactNode;
 
 // ============================================================================
 // AI Chat Types

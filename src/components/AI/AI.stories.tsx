@@ -215,6 +215,47 @@ export const ThinkingBlock: StoryObj<typeof AIMessageDisplay> = {
   },
 };
 
+export const WithCustomMarkdownRenderer: StoryObj<typeof AIMessageDisplay> = {
+  render: () => {
+    const message: AIMessage = {
+      id: '6',
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: 'Here is some **bold** text rendered via a host-supplied renderer.',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    // Demo: **bold** -> <strong>. Hosts plug in a real Markdown renderer.
+    const renderTextContent = (
+      text: string,
+      ctx: { messageId: string; streaming: boolean }
+    ) => {
+      const parts = text.split(/(\*\*[^*]+\*\*)/g);
+      return (
+        <p data-message-id={ctx.messageId} data-streaming={ctx.streaming}>
+          {parts.map((part, i) =>
+            /^\*\*[^*]+\*\*$/.test(part) ? (
+              <strong key={i}>{part.slice(2, -2)}</strong>
+            ) : (
+              <React.Fragment key={i}>{part}</React.Fragment>
+            )
+          )}
+        </p>
+      );
+    };
+    return (
+      <AIMessageDisplay
+        message={message}
+        renderTextContent={renderTextContent}
+      />
+    );
+  },
+};
+
 // ============================================================================
 // AI Chat Stories
 // ============================================================================

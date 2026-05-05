@@ -16,6 +16,7 @@ import type {
   AIChatSession,
   AISuggestedAction,
   AIChatCallbacks,
+  AIRenderTextContent,
   MCPResourceLink,
 } from './types';
 import { AIMessageDisplay } from './AIMessage';
@@ -270,6 +271,11 @@ export interface AIChatProps
   composerProps?: Partial<MessageComposerProps>;
   /** Callback when close button is clicked (shows close button when provided) */
   onClose?: () => void;
+  /**
+   * Optional renderer for `text` content blocks (e.g. Markdown). Called per
+   * text block with `{ messageId, streaming, role }`. Host must sanitize.
+   */
+  renderTextContent?: AIRenderTextContent;
   /** Additional class name */
   className?: string;
 }
@@ -300,6 +306,7 @@ export function AIChat({
   onCancel,
   onClear,
   onClose,
+  renderTextContent,
 }: AIChatProps) {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -422,6 +429,7 @@ export function AIChat({
                 userName={userName}
                 showTimestamp={showTimestamps}
                 onLinkClick={handleLinkClick}
+                renderTextContent={renderTextContent}
               />
             ))}
             <div ref={messagesEndRef} />
