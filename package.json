@@ -173,7 +173,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "cd packages/esheet && npm ci && cd ../.. && storybook build",
     "test:coverage": "vitest run --coverage",
     "playwright:install": "playwright install --with-deps",
     "test:visual": "playwright test",
