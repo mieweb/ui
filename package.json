@@ -138,6 +138,16 @@
         "default": "./dist/ozwell.cjs"
       }
     },
+    "./esheet": {
+      "import": {
+        "types": "./dist/esheet.d.ts",
+        "default": "./dist/esheet.js"
+      },
+      "require": {
+        "types": "./dist/esheet.d.cts",
+        "default": "./dist/esheet.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./init.css": "./dist/styles/init.css"
@@ -173,6 +183,8 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@esheet/builder": ">=0.0.2",
+    "@esheet/renderer": ">=0.0.2",
     "@ozwell/react": ">=0.1.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
@@ -182,6 +194,12 @@
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
+    "@esheet/builder": {
+      "optional": true
+    },
+    "@esheet/renderer": {
+      "optional": true
+    },
     "@ozwell/react": {
       "optional": true
     },
@@ -215,6 +233,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
+    "@esheet/builder": "file:./packages/esheet/packages/builder",
+    "@esheet/renderer": "file:./packages/esheet/packages/renderer",
+    "@esheet/adapters": "file:./packages/esheet/packages/adapters",
+    "@esheet/core": "file:./packages/esheet/packages/core",
+    "@esheet/fields": "file:./packages/esheet/packages/fields",
     "@ozwell/react": "file:./packages/ozwell/packages/react",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
@@ -261,5 +284,12 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@esheet/adapters": "file:./packages/esheet/packages/adapters",
+      "@esheet/core": "file:./packages/esheet/packages/core",
+      "@esheet/fields": "file:./packages/esheet/packages/fields"
+    }
   }
 }
