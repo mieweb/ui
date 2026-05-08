@@ -7,6 +7,7 @@ import {
   FloatingAIChat,
   AIChatTrigger,
   type AIMessage,
+  type AIRenderTextContent,
   type MCPToolCall,
   type AISuggestedAction,
 } from './index';
@@ -212,6 +213,44 @@ export const ThinkingBlock: StoryObj<typeof AIMessageDisplay> = {
       status: 'complete',
     };
     return <AIMessageDisplay message={message} />;
+  },
+};
+
+export const WithCustomMarkdownRenderer: StoryObj<typeof AIMessageDisplay> = {
+  render: () => {
+    const message: AIMessage = {
+      id: '6',
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: 'Here is some **bold** text rendered via a host-supplied renderer.',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    // Demo: **bold** -> <strong>. Hosts plug in a real Markdown renderer.
+    const renderTextContent: AIRenderTextContent = (text, ctx) => {
+      const parts = text.split(/(\*\*[^*]+\*\*)/g);
+      return (
+        <p data-message-id={ctx.messageId} data-streaming={ctx.streaming}>
+          {parts.map((part, i) =>
+            /^\*\*[^*]+\*\*$/.test(part) ? (
+              <strong key={i}>{part.slice(2, -2)}</strong>
+            ) : (
+              <React.Fragment key={i}>{part}</React.Fragment>
+            )
+          )}
+        </p>
+      );
+    };
+    return (
+      <AIMessageDisplay
+        message={message}
+        renderTextContent={renderTextContent}
+      />
+    );
   },
 };
 
