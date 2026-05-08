@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { FormDefinition } from '@esheet/core';
-import { EsheetBuilder, type EsheetBuilderProps } from '@esheet/builder';
+import {
+  EsheetBuilder,
+  type EsheetBuilderProps,
+  type FormDefinition,
+} from '../../esheet';
 
 // ============================================================================
 // Sample Form Definition

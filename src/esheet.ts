@@ -9,6 +9,9 @@
  * install/bundle so consumers who don't need the form builder aren't burdened.
  */
 
+// Core types
+export { type FormDefinition } from '@esheet/core';
+
 // Builder
 export { EsheetBuilder, type EsheetBuilderProps } from '@esheet/builder';
 
