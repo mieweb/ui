@@ -233,11 +233,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
-    "@esheet/builder": "file:./packages/esheet/packages/builder",
-    "@esheet/renderer": "file:./packages/esheet/packages/renderer",
-    "@esheet/adapters": "file:./packages/esheet/packages/adapters",
-    "@esheet/core": "file:./packages/esheet/packages/core",
-    "@esheet/fields": "file:./packages/esheet/packages/fields",
+    "@esheet/builder": "link:./packages/esheet/packages/builder",
+    "@esheet/renderer": "link:./packages/esheet/packages/renderer",
+    "@esheet/adapters": "link:./packages/esheet/packages/adapters",
+    "@esheet/core": "link:./packages/esheet/packages/core",
+    "@esheet/fields": "link:./packages/esheet/packages/fields",
     "@ozwell/react": "file:./packages/ozwell/packages/react",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
@@ -288,9 +288,9 @@
   "pnpm": {
     "overrides": {
       "datavis-ace": "=4.0.0-PRE.2",
-      "@esheet/adapters": "file:./packages/esheet/packages/adapters",
-      "@esheet/core": "file:./packages/esheet/packages/core",
-      "@esheet/fields": "file:./packages/esheet/packages/fields"
+      "@esheet/adapters": "link:./packages/esheet/packages/adapters",
+      "@esheet/core": "link:./packages/esheet/packages/core",
+      "@esheet/fields": "link:./packages/esheet/packages/fields"
     }
   }
 }
