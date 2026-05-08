@@ -5,6 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@mieweb/ui': link:.
+  datavis-ace: '=4.0.0-PRE.2'
   '@esheet/adapters': file:./packages/esheet/packages/adapters
   '@esheet/core': file:./packages/esheet/packages/core
   '@esheet/fields': file:./packages/esheet/packages/fields
@@ -130,7 +132,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       datavis:
         specifier: file:./packages/datavis
-        version: '@mieweb/datavis@file:packages/datavis(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)'
+        version: '@mieweb/datavis@file:packages/datavis(typescript@5.9.3)'
       eslint:
         specifier: ^9.39.3
         version: 9.39.3(jiti@2.6.1)
@@ -805,23 +807,6 @@ packages:
 
   '@mieweb/datavis@file:packages/datavis':
     resolution: {directory: packages/datavis, type: directory}
-
-  '@mieweb/ui@0.2.4':
-    resolution: {integrity: sha512-1OBv6wCgxCGY+s2Di5LVGyqFoYWmX14/zLX1+kUc/qRjI+2NGywvLht73pOvcqomvHhzEtVp3hRuHm5bCsHx3g==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      ag-grid-community: '>=32.0.0'
-      ag-grid-react: '>=32.0.0'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-      wavesurfer.js: '>=7.0.0'
-    peerDependenciesMeta:
-      ag-grid-community:
-        optional: true
-      ag-grid-react:
-        optional: true
-      wavesurfer.js:
-        optional: true
 
   '@monaco-editor/loader@1.7.0':
     resolution: {integrity: sha512-gIwR1HrJrrx+vfyOhYmCZ0/JcWqG5kbfG7+d3f/C1LXk2EvzAbHSg3MQ5lO2sMlo9izoAZ04shohfKLVT6crVA==}
@@ -2120,9 +2105,6 @@ packages:
   data-view-byte-offset@1.0.1:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
-
-  datavis-ace@4.0.0-PRE.1:
-    resolution: {integrity: sha512-lRI2ST7UUP+nHDf8lCd/tB8Ccku9g5vyBGE2QwnM9Rga7H1FbEgcrnwO7IeU5N8//XecTF/vMOOjkc6NlieNGA==}
 
   datavis-ace@4.0.0-PRE.2:
     resolution: {integrity: sha512-wz7voSTEepUsSyzfhWCtB7FQbbvCoajg4zBQa8X5eWWUc4qt+41wQcvqeShEQu4osOwwbMZTKcAfaU0cqwmo+A==}
@@ -4996,6 +4978,7 @@ snapshots:
   '@esheet/fields@file:packages/esheet/packages/fields(@types/react@19.2.14)(use-sync-external-store@1.6.0(react@19.2.4))':
     dependencies:
       '@esheet/core': file:packages/esheet/packages/core(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@mieweb/ui': 'link:'
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       sortablejs: 1.15.7
@@ -5314,38 +5297,20 @@ snapshots:
       '@types/react': 19.2.14
       react: 19.2.4
 
-  '@mieweb/datavis@file:packages/datavis(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)':
+  '@mieweb/datavis@file:packages/datavis(typescript@5.9.3)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@dnd-kit/utilities': 3.2.2(react@19.2.4)
-      '@mieweb/ui': 0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
-      datavis-ace: 4.0.0-PRE.1
+      '@mieweb/ui': 'link:'
+      datavis-ace: 4.0.0-PRE.2
       i18next: 25.10.10(typescript@5.9.3)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       react-i18next: 16.6.6(i18next@25.10.10(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
     transitivePeerDependencies:
-      - ag-grid-community
-      - ag-grid-react
       - react-native
       - typescript
-      - wavesurfer.js
-
-  '@mieweb/ui@0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
-    dependencies:
-      '@swc/helpers': 0.5.19
-      class-variance-authority: 0.7.1
-      clsx: 2.1.1
-      lucide-react: 0.562.0(react@19.2.4)
-      luxon: 3.7.2
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      tailwind-merge: 2.6.1
-    optionalDependencies:
-      ag-grid-community: 35.1.0
-      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      wavesurfer.js: 7.12.1
 
   '@monaco-editor/loader@1.7.0':
     dependencies:
@@ -6606,18 +6571,6 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-data-view: 1.0.2
-
-  datavis-ace@4.0.0-PRE.1:
-    dependencies:
-      bignumber.js: 9.3.1
-      core-js: 3.47.0
-      es6-symbol: 3.1.4
-      json-formatter-js: https://codeload.github.com/mieweb/json-formatter-js/tar.gz/503be5a8368ecdea777f8a7e98bda827391aa6ac
-      moment: 2.30.1
-      numeral: 2.0.6
-      papaparse: 5.5.3
-      sprintf-js: 1.1.3
-      underscore: 1.13.8
 
   datavis-ace@4.0.0-PRE.2:
     dependencies:

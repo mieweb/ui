@@ -287,6 +287,8 @@
   },
   "pnpm": {
     "overrides": {
+      "@mieweb/ui": "link:.",
+      "datavis-ace": "=4.0.0-PRE.2",
       "@esheet/adapters": "file:./packages/esheet/packages/adapters",
       "@esheet/core": "file:./packages/esheet/packages/core",
       "@esheet/fields": "file:./packages/esheet/packages/fields"
