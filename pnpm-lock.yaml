@@ -5,7 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@mieweb/ui': link:.
   datavis-ace: '=4.0.0-PRE.2'
   '@esheet/adapters': file:./packages/esheet/packages/adapters
   '@esheet/core': file:./packages/esheet/packages/core
@@ -45,16 +44,16 @@ importers:
         version: file:packages/esheet/packages/adapters(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/builder':
         specifier: file:./packages/esheet/packages/builder
-        version: file:packages/esheet/packages/builder(@types/react@19.2.14)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))
+        version: file:packages/esheet/packages/builder(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@esheet/core':
         specifier: file:packages/esheet/packages/core
         version: file:packages/esheet/packages/core(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/fields':
         specifier: file:packages/esheet/packages/fields
-        version: file:packages/esheet/packages/fields(@types/react@19.2.14)(use-sync-external-store@1.6.0(react@19.2.4))
+        version: file:packages/esheet/packages/fields(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@esheet/renderer':
         specifier: file:./packages/esheet/packages/renderer
-        version: file:packages/esheet/packages/renderer(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+        version: file:packages/esheet/packages/renderer(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
@@ -132,7 +131,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       datavis:
         specifier: file:./packages/datavis
-        version: '@mieweb/datavis@file:packages/datavis(typescript@5.9.3)'
+        version: '@mieweb/datavis@file:packages/datavis(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)'
       eslint:
         specifier: ^9.39.3
         version: 9.39.3(jiti@2.6.1)
@@ -807,6 +806,47 @@ packages:
 
   '@mieweb/datavis@file:packages/datavis':
     resolution: {directory: packages/datavis, type: directory}
+
+  '@mieweb/ui@0.2.4':
+    resolution: {integrity: sha512-1OBv6wCgxCGY+s2Di5LVGyqFoYWmX14/zLX1+kUc/qRjI+2NGywvLht73pOvcqomvHhzEtVp3hRuHm5bCsHx3g==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      ag-grid-community: '>=32.0.0'
+      ag-grid-react: '>=32.0.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+      wavesurfer.js: '>=7.0.0'
+    peerDependenciesMeta:
+      ag-grid-community:
+        optional: true
+      ag-grid-react:
+        optional: true
+      wavesurfer.js:
+        optional: true
+
+  '@mieweb/ui@0.3.0-dev.108':
+    resolution: {integrity: sha512-cNG8USU4usMJhNGxL0Wek8h37C1URyZArjE1vtwpv2nEFD38yN2Vsf0ky9cEdGdPJwV6a8hcXCT/6FnFa1Wo7w==}
+    version: 0.3.0-dev.108
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      '@ozwell/react': '>=0.1.0'
+      ag-grid-community: '>=32.0.0'
+      ag-grid-react: '>=32.0.0'
+      datavis-ace: '=4.0.0-PRE.2'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+      wavesurfer.js: '>=7.0.0'
+    peerDependenciesMeta:
+      '@ozwell/react':
+        optional: true
+      ag-grid-community:
+        optional: true
+      ag-grid-react:
+        optional: true
+      datavis-ace:
+        optional: true
+      wavesurfer.js:
+        optional: true
 
   '@monaco-editor/loader@1.7.0':
     resolution: {integrity: sha512-gIwR1HrJrrx+vfyOhYmCZ0/JcWqG5kbfG7+d3f/C1LXk2EvzAbHSg3MQ5lO2sMlo9izoAZ04shohfKLVT6crVA==}
@@ -4947,22 +4987,27 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/builder@file:packages/esheet/packages/builder(@types/react@19.2.14)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))':
+  '@esheet/builder@file:packages/esheet/packages/builder(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
     dependencies:
       '@esheet/adapters': file:packages/esheet/packages/adapters(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/core': file:packages/esheet/packages/core(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': file:packages/esheet/packages/fields(@types/react@19.2.14)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@esheet/fields': file:packages/esheet/packages/fields(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       js-yaml: 4.1.1
       react: 19.2.4
       sortablejs: 1.15.7
       tslib: 2.8.1
     transitivePeerDependencies:
+      - '@ozwell/react'
       - '@types/react'
+      - ag-grid-community
+      - ag-grid-react
+      - datavis-ace
       - immer
       - monaco-editor
       - react-dom
       - use-sync-external-store
+      - wavesurfer.js
 
   '@esheet/core@file:packages/esheet/packages/core(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
     dependencies:
@@ -4975,31 +5020,41 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/fields@file:packages/esheet/packages/fields(@types/react@19.2.14)(use-sync-external-store@1.6.0(react@19.2.4))':
+  '@esheet/fields@file:packages/esheet/packages/fields(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
     dependencies:
       '@esheet/core': file:packages/esheet/packages/core(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@mieweb/ui': 'link:'
+      '@mieweb/ui': 0.3.0-dev.108(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       sortablejs: 1.15.7
       tslib: 2.8.1
     transitivePeerDependencies:
+      - '@ozwell/react'
       - '@types/react'
+      - ag-grid-community
+      - ag-grid-react
+      - datavis-ace
       - immer
       - use-sync-external-store
+      - wavesurfer.js
 
-  '@esheet/renderer@file:packages/esheet/packages/renderer(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
+  '@esheet/renderer@file:packages/esheet/packages/renderer(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
     dependencies:
       '@esheet/adapters': file:packages/esheet/packages/adapters(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/core': file:packages/esheet/packages/core(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': file:packages/esheet/packages/fields(@types/react@19.2.14)(use-sync-external-store@1.6.0(react@19.2.4))
+      '@esheet/fields': file:packages/esheet/packages/fields(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       js-yaml: 4.1.1
     optionalDependencies:
       react: 19.2.4
     transitivePeerDependencies:
+      - '@ozwell/react'
       - '@types/react'
+      - ag-grid-community
+      - ag-grid-react
+      - datavis-ace
       - immer
       - use-sync-external-store
+      - wavesurfer.js
 
   '@eslint-community/eslint-utils@4.9.1(eslint@9.39.3(jiti@2.6.1))':
     dependencies:
@@ -5297,20 +5352,56 @@ snapshots:
       '@types/react': 19.2.14
       react: 19.2.4
 
-  '@mieweb/datavis@file:packages/datavis(typescript@5.9.3)':
+  '@mieweb/datavis@file:packages/datavis(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(wavesurfer.js@7.12.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@dnd-kit/utilities': 3.2.2(react@19.2.4)
-      '@mieweb/ui': 'link:'
+      '@mieweb/ui': 0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
       datavis-ace: 4.0.0-PRE.2
       i18next: 25.10.10(typescript@5.9.3)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       react-i18next: 16.6.6(i18next@25.10.10(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
     transitivePeerDependencies:
+      - ag-grid-community
+      - ag-grid-react
       - react-native
       - typescript
+      - wavesurfer.js
+
+  '@mieweb/ui@0.2.4(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
+    dependencies:
+      '@swc/helpers': 0.5.19
+      class-variance-authority: 0.7.1
+      clsx: 2.1.1
+      lucide-react: 0.562.0(react@19.2.4)
+      luxon: 3.7.2
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      tailwind-merge: 2.6.1
+    optionalDependencies:
+      ag-grid-community: 35.1.0
+      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      wavesurfer.js: 7.12.1
+
+  '@mieweb/ui@0.3.0-dev.108(@ozwell/react@file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
+    dependencies:
+      '@swc/helpers': 0.5.19
+      class-variance-authority: 0.7.1
+      clsx: 2.1.1
+      google-libphonenumber: 3.2.44
+      lucide-react: 0.562.0(react@19.2.4)
+      luxon: 3.7.2
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      tailwind-merge: 2.6.1
+    optionalDependencies:
+      '@ozwell/react': file:packages/ozwell/packages/react(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      ag-grid-community: 35.1.0
+      ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      datavis-ace: 4.0.0-PRE.2
+      wavesurfer.js: 7.12.1
 
   '@monaco-editor/loader@1.7.0':
     dependencies:

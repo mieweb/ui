@@ -31,11 +31,6 @@ jobs:
       - name: Build eSheet submodule
         run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
 
-      - name: Build package
-        run: pnpm build
-        env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
-
       - name: Lint
         run: pnpm lint
 
@@ -68,11 +63,6 @@ jobs:
 
       - name: Build eSheet submodule
         run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
-
-      - name: Build package
-        run: pnpm build
-        env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Run unit tests
         run: pnpm test
