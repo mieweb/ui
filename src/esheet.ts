@@ -10,10 +10,7 @@
  */
 
 // Builder
-export {
-  EsheetBuilder,
-  type EsheetBuilderProps,
-} from '@esheet/builder';
+export { EsheetBuilder, type EsheetBuilderProps } from '@esheet/builder';
 
 // Renderer
 export {

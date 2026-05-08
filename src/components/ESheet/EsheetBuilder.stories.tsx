@@ -102,7 +102,9 @@ function BuilderDemo(props: EsheetBuilderProps) {
         {...props}
         definition={def}
         onChange={setDef}
-        className={[isDark ? 'dark' : '', props.className].filter(Boolean).join(' ')}
+        className={[isDark ? 'dark' : '', props.className]
+          .filter(Boolean)
+          .join(' ')}
       />
     </div>
   );

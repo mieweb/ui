@@ -10,6 +10,7 @@ export default defineConfig({
       '**/node_modules/**',
       'dist/**',
       'packages/ozwell/**',
+      'packages/esheet/**',
       'tests/visual/**',
       '**/*.spec.ts'
     ],

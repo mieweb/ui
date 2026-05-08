@@ -110,7 +110,9 @@ function RendererDemo(props: EsheetRendererProps) {
       <EsheetRenderer
         {...props}
         ref={rendererRef}
-        className={[isDark ? 'dark' : '', props.className].filter(Boolean).join(' ')}
+        className={[isDark ? 'dark' : '', props.className]
+          .filter(Boolean)
+          .join(' ')}
       />
       <div style={{ marginTop: '1rem', textAlign: 'right' }}>
         <button

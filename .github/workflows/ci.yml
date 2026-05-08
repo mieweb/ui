@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build eSheet submodule
+        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+
       - name: Lint
         run: pnpm lint
 
@@ -57,6 +60,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build eSheet submodule
+        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
 
       - name: Run unit tests
         run: pnpm test
@@ -93,6 +99,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build eSheet submodule
+        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
 
       - name: Install Playwright browsers
         run: pnpm playwright:install
@@ -134,6 +143,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build eSheet submodule
+        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
+
       - name: Build package
         run: pnpm build
         env:
@@ -172,6 +184,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build eSheet submodule
+        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
 
       - name: Install Playwright browsers
         run: pnpm playwright:install
