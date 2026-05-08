@@ -276,10 +276,7 @@ const preview: Preview = {
           'Introduction',
           'Foundations',
           'Components',
-          [
-            'Forms & Inputs',
-            ['eSheet', '*'],
-          ],
+          ['Forms & Inputs', ['eSheet', '*']],
           'Inputs & Controls',
           'Data Display',
           'Navigation',
