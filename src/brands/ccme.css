@@ -10,8 +10,17 @@
  *   @import '@mieweb/ui/brands/ccme.css' layer(theme);
  */
 
-/* Nunito font — load alongside this brand */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap');
+/*
+ * NOTE: The Google Fonts @import for Nunito was intentionally omitted from
+ * this file because CSS @import url() inside an @imported file causes
+ * bundler warnings ("@import rules in the middle of a file").
+ *
+ * Consumers should load the font themselves, e.g. via an HTML <link> tag:
+ *   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" />
+ *
+ * Storybook loads the font automatically based on the BrandConfig's
+ * typography.fontFamily.sans value (see .storybook/preview.tsx).
+ */
 
 /* ============================================
    ccMe Design Tokens
@@ -46,7 +55,7 @@
   --mieweb-success: #16a34a;
   --mieweb-success-foreground: #ffffff;
   --mieweb-warning: #d97706;
-  --mieweb-warning-foreground: #ffffff;
+  --mieweb-warning-foreground: #451a03;
   --mieweb-info: #0284c7;
   --mieweb-info-foreground: #ffffff;
   --mieweb-secondary-foreground: #ffffff;
@@ -97,7 +106,7 @@
   --mieweb-success: #16a34a;
   --mieweb-success-foreground: #fafafa;
   --mieweb-warning: #d97706;
-  --mieweb-warning-foreground: #fafafa;
+  --mieweb-warning-foreground: #451a03;
   --mieweb-info: #0284c7;
   --mieweb-info-foreground: #fafafa;
   --mieweb-secondary-foreground: #fafafa;

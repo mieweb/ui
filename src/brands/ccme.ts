@@ -10,7 +10,7 @@ import type { BrandConfig } from './types';
 
 /**
  * ccMe brand configuration.
- * Sage-green primary with indigo secondary, Nunito display font.
+ * Sage-green primary palette with Nunito display font.
  */
 export const ccmeBrand: BrandConfig = {
   name: 'ccme',
@@ -49,7 +49,7 @@ export const ccmeBrand: BrandConfig = {
       success: '#16a34a',
       successForeground: '#ffffff',
       warning: '#d97706',
-      warningForeground: '#ffffff',
+      warningForeground: '#451a03',
     },
 
     // Dark mode semantic colors
@@ -68,7 +68,7 @@ export const ccmeBrand: BrandConfig = {
       success: '#16a34a',
       successForeground: '#fafafa',
       warning: '#d97706',
-      warningForeground: '#fafafa',
+      warningForeground: '#451a03',
     },
   },
 
