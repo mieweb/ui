@@ -119,7 +119,7 @@ function RendererDemo(props: EsheetRendererProps) {
           onClick={handleSubmit}
           style={{
             padding: '0.5rem 1.5rem',
-            background: 'var(--mieweb-primary-500, #27aae1)',
+            background: 'var(--mieweb-primary-800, #1e40af)',
             color: 'white',
             border: 'none',
             borderRadius: '6px',

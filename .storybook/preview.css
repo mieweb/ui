@@ -286,6 +286,7 @@ html, body {
 .ms-builder-root.dark,
 .esheet-renderer-root.dark {
   --ms-color-msprimary: var(--mieweb-primary-500, #3b82f6) !important;
+  --ms-color-msprimary-active: var(--mieweb-primary-800, #1e40af) !important;
   --ms-color-mssecondary: var(--mieweb-muted-foreground, #6b7280) !important;
   --ms-color-msaccent: var(--mieweb-success, #10b981) !important;
   --ms-color-msdanger: var(--mieweb-destructive, #ef4444) !important;
