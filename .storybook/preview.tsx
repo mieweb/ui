@@ -5,6 +5,7 @@ import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import './preview.css';
 import { bluehiveBrand } from '../src/brands/bluehive';
+import { ccmeBrand } from '../src/brands/ccme';
 import { defaultBrand } from '../src/brands/default';
 import { enterpriseHealthBrand } from '../src/brands/enterprise-health';
 import { miewebBrand } from '../src/brands/mieweb';
@@ -15,6 +16,7 @@ import type { BrandConfig } from '../src/brands/types';
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
   bluehive: bluehiveBrand,
+  ccme: ccmeBrand,
   default: defaultBrand,
   'enterprise-health': enterpriseHealthBrand,
   mieweb: miewebBrand,
@@ -212,6 +214,7 @@ const preview: Preview = {
         icon: 'paintbrush',
         items: [
           { value: 'bluehive', title: '🐝 BlueHive' },
+          { value: 'ccme', title: '🌿 ccMe' },
           { value: 'default', title: '⚪ Default' },
           { value: 'enterprise-health', title: '🏥 Enterprise Health' },
           { value: 'mieweb', title: '🟢 MIE Web' },
