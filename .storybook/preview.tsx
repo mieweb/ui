@@ -275,6 +275,7 @@ const preview: Preview = {
         order: [
           'Introduction',
           'Foundations',
+          ['Components', ['Forms & Inputs', ['eSheet', '*']]],
           'Inputs & Controls',
           'Data Display',
           'Navigation',

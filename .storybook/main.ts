@@ -51,6 +51,14 @@ const ozwellReactEntry = path.join(
   'packages/ozwell/packages/react/src/index.ts',
 );
 
+const esheetPackagesDir = path.join(workspaceRoot, 'packages/esheet/packages');
+const esheetSourceAliases = ['core', 'fields', 'adapters', 'builder', 'renderer'].map(
+  (pkg) => ({
+    find: new RegExp(`^@esheet/${pkg}$`),
+    replacement: path.join(esheetPackagesDir, pkg, 'src/index.ts'),
+  }),
+);
+
 const localUiAliases = [
   ...(existsSync(ozwellReactEntry)
     ? [
@@ -123,6 +131,7 @@ const config: StorybookConfig = {
           : []),
       ...localUiAliases,
       ...datavisDependencyAliases,
+      ...esheetSourceAliases,
     ];
 
     config.esbuild = {

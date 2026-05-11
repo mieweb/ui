@@ -138,6 +138,16 @@
         "default": "./dist/ozwell.cjs"
       }
     },
+    "./esheet": {
+      "import": {
+        "types": "./dist/esheet.d.ts",
+        "default": "./dist/esheet.js"
+      },
+      "require": {
+        "types": "./dist/esheet.d.cts",
+        "default": "./dist/esheet.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./init.css": "./dist/styles/init.css"
@@ -163,7 +173,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel && cd ../.. && storybook build",
     "test:coverage": "vitest run --coverage",
     "playwright:install": "playwright install --with-deps",
     "test:visual": "playwright test",
@@ -173,6 +183,8 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@esheet/builder": ">=0.0.2",
+    "@esheet/renderer": ">=0.0.2",
     "@ozwell/react": ">=0.1.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
@@ -182,6 +194,12 @@
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
+    "@esheet/builder": {
+      "optional": true
+    },
+    "@esheet/renderer": {
+      "optional": true
+    },
     "@ozwell/react": {
       "optional": true
     },
@@ -215,6 +233,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
+    "@esheet/builder": "link:./packages/esheet/packages/builder",
+    "@esheet/renderer": "link:./packages/esheet/packages/renderer",
+    "@esheet/adapters": "link:./packages/esheet/packages/adapters",
+    "@esheet/core": "link:./packages/esheet/packages/core",
+    "@esheet/fields": "link:./packages/esheet/packages/fields",
     "@ozwell/react": "file:./packages/ozwell/packages/react",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
@@ -261,5 +284,13 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "datavis-ace": "=4.0.0-PRE.2",
+      "@esheet/adapters": "link:./packages/esheet/packages/adapters",
+      "@esheet/core": "link:./packages/esheet/packages/core",
+      "@esheet/fields": "link:./packages/esheet/packages/fields"
+    }
   }
 }
