@@ -33,6 +33,22 @@ export const ccmeBrand: BrandConfig = {
       950: '#1a524a',
     },
 
+    // Neutral scale — sage-tinted grays so dark:bg-neutral-* utilities and
+    // surfaces feel cohesive with the sage primary instead of cool slate.
+    neutral: {
+      50: '#f5faf8',
+      100: '#e8f0ed',
+      200: '#cfdcd7',
+      300: '#a9bcb5',
+      400: '#7a918a',
+      500: '#5b736d',
+      600: '#445853',
+      700: '#2f3f3b',
+      800: '#1f2c29',
+      900: '#142220',
+      950: '#0a1614',
+    },
+
     // Light mode semantic colors
     light: {
       background: '#ffffff',
@@ -52,16 +68,17 @@ export const ccmeBrand: BrandConfig = {
       warningForeground: '#451a03',
     },
 
-    // Dark mode semantic colors
+    // Dark mode semantic colors — sage-tinted dark neutrals so the page
+    // chrome feels warm and on-brand instead of cool Tailwind slate.
     dark: {
-      background: '#111827',
-      foreground: '#f9fafb',
-      card: '#1f2937',
-      cardForeground: '#f9fafb',
-      muted: '#1f2937',
-      mutedForeground: '#9ca3af',
-      border: '#374151',
-      input: '#374151',
+      background: '#0a1614',
+      foreground: '#f0f7f5',
+      card: '#132521',
+      cardForeground: '#f0f7f5',
+      muted: '#1a2e2a',
+      mutedForeground: '#94aaa3',
+      border: '#284037',
+      input: '#132521',
       ring: '#9ed0c4',
       destructive: '#dc2626',
       destructiveForeground: '#fafafa',

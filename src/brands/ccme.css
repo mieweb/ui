@@ -40,6 +40,20 @@
   --mieweb-primary-900: #2b6b60;
   --mieweb-primary-950: #1a524a;
 
+  /* Neutral Color Scale — Sage-tinted grays so dark:bg-neutral-* utilities
+     and surfaces feel cohesive with the sage primary instead of cool slate. */
+  --mieweb-neutral-50: #f5faf8;
+  --mieweb-neutral-100: #e8f0ed;
+  --mieweb-neutral-200: #cfdcd7;
+  --mieweb-neutral-300: #a9bcb5;
+  --mieweb-neutral-400: #7a918a;
+  --mieweb-neutral-500: #5b736d;
+  --mieweb-neutral-600: #445853;
+  --mieweb-neutral-700: #2f3f3b;
+  --mieweb-neutral-800: #1f2c29;
+  --mieweb-neutral-900: #142220;
+  --mieweb-neutral-950: #0a1614;
+
   /* Light Mode Semantic Colors */
   --mieweb-background: #ffffff;
   --mieweb-foreground: #171717;
@@ -89,17 +103,18 @@
     0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-/* Dark Mode */
+/* Dark Mode — sage-tinted dark neutrals so the page chrome feels warm
+   and on-brand instead of cool Tailwind slate. */
 [data-theme='dark'],
 .dark {
-  --mieweb-background: #111827;
-  --mieweb-foreground: #f9fafb;
-  --mieweb-card: #1f2937;
-  --mieweb-card-foreground: #f9fafb;
-  --mieweb-muted: #1f2937;
-  --mieweb-muted-foreground: #9ca3af;
-  --mieweb-border: #374151;
-  --mieweb-input: #374151;
+  --mieweb-background: #0a1614;
+  --mieweb-foreground: #f0f7f5;
+  --mieweb-card: #132521;
+  --mieweb-card-foreground: #f0f7f5;
+  --mieweb-muted: #1a2e2a;
+  --mieweb-muted-foreground: #94aaa3;
+  --mieweb-border: #284037;
+  --mieweb-input: #132521;
   --mieweb-ring: #9ed0c4;
   --mieweb-destructive: #dc2626;
   --mieweb-destructive-foreground: #fafafa;
