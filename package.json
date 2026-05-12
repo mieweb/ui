@@ -1,6 +1,6 @@
 {
   "name": "@mieweb/ui",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A themeable, accessible React component library built with Tailwind CSS",
   "author": "Medical Informatics Engineering, Inc.",
   "license": "SEE LICENSE IN LICENSE",
@@ -94,6 +94,7 @@
       }
     },
     "./brands/bluehive.css": "./dist/brands/bluehive.css",
+    "./brands/ccme.css": "./dist/brands/ccme.css",
     "./brands/mieweb.css": "./dist/brands/mieweb.css",
     "./brands/ozwell.css": "./dist/brands/ozwell.css",
     "./brands/webchart.css": "./dist/brands/webchart.css",
