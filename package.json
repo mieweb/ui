@@ -141,6 +141,7 @@
     },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
+    "./markdown.css": "./dist/components/Markdown/styles.css",
     "./init.css": "./dist/styles/init.css"
   },
   "files": [
@@ -153,11 +154,12 @@
     "postinstall": "if [ -z \"$_DATAVIS_RELINK\" ] && [ ! -f node_modules/datavis/package.json ] && [ -f packages/datavis/package.json ]; then echo '⚠️  Stale datavis link detected — re-linking submodule...'; _DATAVIS_RELINK=1 pnpm install; fi",
     "dev": "tsup --watch",
     "prebuild": "npm run build:esheet",
-    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
+    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css",
     "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ]; then cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel; fi",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
     "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
+    "copy:markdown-css": "mkdir -p dist/components/Markdown && cp src/components/Markdown/styles.css dist/components/Markdown/ 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -181,6 +183,9 @@
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.2",
+    "js-yaml": ">=4.0.0",
+    "mermaid": ">=10.0.0",
+    "papaparse": ">=5.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "wavesurfer.js": ">=7.0.0"
@@ -201,6 +206,15 @@
     "datavis-ace": {
       "optional": true
     },
+    "js-yaml": {
+      "optional": true
+    },
+    "mermaid": {
+      "optional": true
+    },
+    "papaparse": {
+      "optional": true
+    },
     "react": {
       "optional": false
     },
@@ -215,9 +229,12 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.3.1",
     "google-libphonenumber": "^3.2.44",
+    "highlight.js": "^11.11.1",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
+    "marked": "^17.0.3",
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
@@ -246,8 +263,10 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/google-libphonenumber": "^7.4.30",
+    "@types/js-yaml": "^4.0.9",
     "@types/luxon": "^3.7.1",
     "@types/node": "^22.19.11",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
@@ -275,6 +294,8 @@
     "eslint-plugin-storybook": "^10.2.11",
     "js-yaml": "^4.1.1",
     "jsdom": "^26.1.0",
+    "mermaid": "^11.12.3",
+    "papaparse": "^5.5.3",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
