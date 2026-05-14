@@ -521,10 +521,19 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           </div>
         )}
 
-        {/* Message content container */}
+        {/* Message content container.
+         *
+         * `flex-1 min-w-0` lets this column expand to fill the row so the
+         * bubble's `max-w-[85%]` resolves against the row width instead of
+         * collapsing to the bubble's own min-content. Without this, short
+         * words like "Yes!" get squeezed into a vertical stack because the
+         * column shrink-wraps the bubble and the bubble's max-width then
+         * shrinks the bubble further — a feedback loop that bottoms out at
+         * `overflow-wrap: break-word` breaking every character.
+         */}
         <div
           className={cn(
-            'flex flex-col',
+            'flex flex-1 flex-col min-w-0',
             isOutgoing ? 'items-end' : 'items-start'
           )}
         >
