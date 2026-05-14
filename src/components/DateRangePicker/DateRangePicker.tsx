@@ -159,15 +159,7 @@ export function getExtendedPresets(
 
 /** Last millisecond of the given calendar day (local time). */
 function endOfDay(d: Date): Date {
-  return new Date(
-    d.getFullYear(),
-    d.getMonth(),
-    d.getDate(),
-    23,
-    59,
-    59,
-    999
-  );
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 }
 
 /**
