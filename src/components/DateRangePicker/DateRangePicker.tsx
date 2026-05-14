@@ -52,6 +52,15 @@ export interface DateRangePickerProps {
   placeholder?: string;
   /** Custom className */
   className?: string;
+  /**
+   * Horizontal alignment of the desktop popup relative to the trigger.
+   * - `'start'` (default historical behavior): popup left edge aligns with trigger left edge.
+   * - `'end'`: popup right edge aligns with trigger right edge.
+   * - `'auto'`: starts as `'start'`, then automatically flips to `'end'` if the popup
+   *   would overflow the right edge of the viewport. Recommended for triggers placed
+   *   in the right side of a layout (e.g. page header action slots).
+   */
+  align?: 'start' | 'end' | 'auto';
   /** Whether to show the preset sidebar in the calendar popup (default: true) */
   showPresets?: boolean;
   /** Display variant: desktop (default), mobile (bottom sheet), or responsive (auto-adapts at md breakpoint) */
@@ -316,6 +325,7 @@ export function DateRangePicker({
   activePreset,
   placeholder = 'Pick a date range',
   className,
+  align = 'auto',
   showPresets = true,
   variant = 'desktop',
   labels = {},
@@ -341,6 +351,13 @@ export function DateRangePicker({
 
   const calendarRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  // Resolved horizontal alignment for the desktop popup. Starts at the
+  // requested value and may flip to 'end' under 'auto' when the popup
+  // would overflow the viewport on the right.
+  const [resolvedAlign, setResolvedAlign] = React.useState<'start' | 'end'>(
+    align === 'end' ? 'end' : 'start'
+  );
 
   const isMobileVariant = variant === 'mobile';
   const isResponsive = variant === 'responsive';
@@ -391,6 +408,32 @@ export function DateRangePicker({
       };
     }
   }, [isMobileVariant, isCalendarOpen]);
+
+  // Resolve popup horizontal alignment. For explicit 'start' or 'end' we
+  // honor the consumer's choice. For 'auto' we measure the trigger and pick
+  // 'end' when right-aligning would keep more of the popup on-screen — this
+  // prevents the calendar from spilling past the right edge of the viewport
+  // when the trigger sits in a right-aligned header slot.
+  React.useLayoutEffect(() => {
+    if (isMobileVariant || !isCalendarOpen) return;
+    if (align === 'start' || align === 'end') {
+      setResolvedAlign(align);
+      return;
+    }
+    if (typeof window === 'undefined') return;
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    // Approximate popup width: preset sidebar (200px) + dual calendar panel
+    // (~640px including padding). Slight overestimate is fine — we just want
+    // to flip when 'start' alignment would clearly overflow.
+    const estimatedPopupWidth = showPresets ? 840 : 640;
+    const margin = 8;
+    const overflowsRight =
+      rect.left + estimatedPopupWidth > window.innerWidth - margin;
+    const fitsLeftAligned = rect.right - estimatedPopupWidth >= margin;
+    setResolvedAlign(overflowsRight && fitsLeftAligned ? 'end' : 'start');
+  }, [align, isCalendarOpen, isMobileVariant, showPresets]);
 
   const handlePresetSelect = (presetKey: string) => {
     const range = calculateDateRange(presetKey);
@@ -769,7 +812,8 @@ export function DateRangePicker({
         <div
           ref={calendarRef}
           className={cn(
-            'absolute top-full left-0 z-50 mt-1',
+            'absolute top-full z-50 mt-1',
+            resolvedAlign === 'end' ? 'right-0' : 'left-0',
             'bg-background border-border rounded-lg border shadow-lg'
           )}
           role="dialog"
