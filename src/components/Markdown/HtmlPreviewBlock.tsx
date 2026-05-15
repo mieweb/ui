@@ -2,7 +2,7 @@
  * HtmlPreviewBlock — Sandboxed iframe preview for HTML code blocks.
  */
 import { Code, Eye, Maximize2 } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '../Button';
 import { FenceBlock } from './FenceBlock';
@@ -27,7 +27,6 @@ function wrapFragment(html: string): string {
 export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeHeight, setIframeHeight] = useState(200);
 
   const srcdoc = isFullDocument(code) ? code : wrapFragment(code);
@@ -42,10 +41,8 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
     return () => window.removeEventListener('message', handleMessage);
   }, [id]);
 
-  const handleCloseExpanded = useCallback((e: React.MouseEvent | React.KeyboardEvent) => {
-    if (e.type === 'click' || (e as React.KeyboardEvent).key === 'Escape') {
-      setExpanded(false);
-    }
+  const handleCloseExpanded = useCallback(() => {
+    setExpanded(false);
   }, []);
 
   useEffect(() => {
@@ -86,7 +83,6 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
 
           {showPreview ? (
             <iframe
-              ref={iframeRef}
               srcDoc={srcdoc}
               sandbox="allow-scripts allow-forms"
               referrerPolicy="no-referrer"

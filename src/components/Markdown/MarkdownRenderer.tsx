@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { CodeBlock } from './CodeBlock';
 import { CsvBlock } from './CsvBlock';
 import { HtmlPreviewBlock } from './HtmlPreviewBlock';
 import { MermaidBlock } from './MermaidBlock';
@@ -28,6 +29,7 @@ interface BlockPortal {
   id: string;
   type: string;
   code: string;
+  language?: string;
   container: Element;
 }
 
@@ -83,11 +85,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       const encodedCode = el.getAttribute('data-code');
 
       if (!type || !id || !encodedCode) continue;
-      // Skip regular code blocks — they're already rendered as HTML
-      if (type === 'code') continue;
 
       const code = decodeURIComponent(encodedCode);
-      blocks.push({ id, type, code, container: el });
+      const language = el.getAttribute('data-lang') ?? undefined;
+      blocks.push({ id, type, code, language, container: el });
     }
 
     setPortals(blocks);
@@ -95,6 +96,12 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   const renderPortal = useCallback((portal: BlockPortal) => {
     switch (portal.type) {
+      case 'code':
+        return createPortal(
+          <CodeBlock code={portal.code} language={portal.language} />,
+          portal.container,
+          portal.id,
+        );
       case 'mermaid':
         return createPortal(
           <MermaidBlock code={portal.code} id={portal.id} />,
