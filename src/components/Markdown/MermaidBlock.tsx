@@ -2,7 +2,7 @@
  * MermaidBlock — Renders Mermaid diagrams.
  * Requires `mermaid` to be installed by the consumer (optional peer dependency).
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { FenceBlock } from './FenceBlock';
 
@@ -38,7 +38,6 @@ async function getMermaid(): Promise<MermaidApi> {
 }
 
 export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -70,7 +69,6 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
         </div>
       ) : (
         <div
-          ref={containerRef}
           className="flex justify-center p-4"
           dangerouslySetInnerHTML={{ __html: svg }}
         />
