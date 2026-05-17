@@ -90,6 +90,28 @@ export interface CommandPaletteProps {
   isLoading?: boolean;
   /** Called when an item is selected */
   onSelect?: (item: CommandPaletteItem) => void;
+  /**
+   * Fires whenever the search query changes. Consumers should debounce
+   * inside this callback if they're hitting a network. Provider's `items`
+   * is still the source of truth for what renders.
+   */
+  onQueryChange?: (query: string) => void;
+  /**
+   * Items always shown at the top, regardless of query. Use for smart
+   * actions ("Call John", "Ask AI: …") or other affordances that should
+   * remain reachable while typing. Filtered out when a category filter
+   * is active so the category view stays scoped.
+   */
+  pinnedItems?: CommandPaletteItem[];
+  /** Group label rendered above pinned items. Defaults to "Actions". */
+  pinnedCategoryLabel?: string;
+  /**
+   * Items shown only when the query is empty and there are no provider
+   * items to display. Use for recent searches / recently opened records.
+   */
+  recentItems?: CommandPaletteItem[];
+  /** Group label rendered above recent items. Defaults to "Recent". */
+  recentCategoryLabel?: string;
   /** Custom empty state content */
   emptyState?: React.ReactNode;
   /** Custom render function for items */
@@ -103,17 +125,29 @@ export interface CommandPaletteProps {
   className?: string;
   /** Test ID for testing */
   'data-testid'?: string;
+  /**
+   * Skip the built-in client-side query filter. Use when `items` are
+   * already filtered server-side (e.g. semantic search) and labels
+   * won't necessarily contain the query as a substring.
+   */
+  serverFiltered?: boolean;
 }
 
 export function CommandPalette({
   placeholder = 'Search...',
   isLoading = false,
   onSelect,
+  onQueryChange,
+  pinnedItems,
+  pinnedCategoryLabel = 'Actions',
+  recentItems,
+  recentCategoryLabel = 'Recent',
   emptyState,
   renderItem,
   footer,
   className,
   'data-testid': testId = 'command-palette',
+  serverFiltered = false,
 }: CommandPaletteProps): React.JSX.Element | null {
   const {
     isOpen,
@@ -132,6 +166,17 @@ export function CommandPalette({
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Notify consumers of query changes so they can fetch async results.
+  useEffect(() => {
+    if (!isOpen) return;
+    onQueryChange?.(query);
+  }, [query, isOpen, onQueryChange]);
+
+  // Reserved category IDs so consumers can't collide with the synthetic
+  // pinned/recent groups.
+  const PINNED_CATEGORY_ID = '__palette_pinned__';
+  const RECENT_CATEGORY_ID = '__palette_recent__';
+
   // Filter items by query and category
   const filteredItems = useMemo(() => {
     let result = items;
@@ -141,8 +186,10 @@ export function CommandPalette({
       result = result.filter((item) => item.category === activeCategory);
     }
 
-    // Filter by query
-    if (query.trim()) {
+    // Filter by query (skipped when consumer signals items are already
+    // server-filtered — e.g. semantic search where the query won't
+    // appear as a literal substring in result labels).
+    if (query.trim() && !serverFiltered) {
       const lowerQuery = query.toLowerCase();
       result = result.filter(
         (item) =>
@@ -153,13 +200,46 @@ export function CommandPalette({
     }
 
     return result;
-  }, [items, query, activeCategory]);
+  }, [items, query, activeCategory, serverFiltered]);
+
+  // Effective list: prepend pinned, fall back to recents on empty state.
+  // Pinned/recent are hidden when a category filter is active so the
+  // filtered view stays scoped to that category.
+  const effectiveItems = useMemo(() => {
+    const pinned =
+      !activeCategory && pinnedItems?.length
+        ? pinnedItems.map((it) => ({
+            ...it,
+            category: it.category ?? PINNED_CATEGORY_ID,
+          }))
+        : [];
+
+    const showRecents =
+      !activeCategory &&
+      !query.trim() &&
+      filteredItems.length === 0 &&
+      !!recentItems?.length;
+    const recents = showRecents
+      ? recentItems!.map((it) => ({
+          ...it,
+          category: it.category ?? RECENT_CATEGORY_ID,
+        }))
+      : [];
+
+    return [...pinned, ...filteredItems, ...recents];
+  }, [
+    pinnedItems,
+    recentItems,
+    filteredItems,
+    activeCategory,
+    query,
+  ]);
 
   // Group items by category
   const groupedItems = useMemo(() => {
     const groups: Map<string, CommandPaletteItem[]> = new Map();
 
-    filteredItems.forEach((item) => {
+    effectiveItems.forEach((item) => {
       const category = item.category ?? 'Other';
       const group = groups.get(category) ?? [];
       group.push(item);
@@ -167,7 +247,7 @@ export function CommandPalette({
     });
 
     return groups;
-  }, [filteredItems]);
+  }, [effectiveItems]);
 
   // Handle close
   useEscapeKey(close, isOpen);
@@ -180,10 +260,10 @@ export function CommandPalette({
     }
   }, [isOpen]);
 
-  // Reset selected index when filtered items change
+  // Reset selected index when effective items change
   useEffect(() => {
-    setSelectedIndex(filteredItems.length > 0 ? 0 : -1);
-  }, [filteredItems.length, setSelectedIndex]);
+    setSelectedIndex(effectiveItems.length > 0 ? 0 : -1);
+  }, [effectiveItems.length, setSelectedIndex]);
 
   // Scroll selected item into view
   useEffect(() => {
@@ -202,7 +282,7 @@ export function CommandPalette({
         case 'ArrowDown':
           e.preventDefault();
           setSelectedIndex(
-            Math.min(selectedIndex + 1, filteredItems.length - 1)
+            Math.min(selectedIndex + 1, effectiveItems.length - 1)
           );
           break;
         case 'ArrowUp':
@@ -211,8 +291,8 @@ export function CommandPalette({
           break;
         case 'Enter':
           e.preventDefault();
-          if (selectedIndex >= 0 && filteredItems[selectedIndex]) {
-            const item = filteredItems[selectedIndex];
+          if (selectedIndex >= 0 && effectiveItems[selectedIndex]) {
+            const item = effectiveItems[selectedIndex];
             if (!item.disabled) {
               onSelect?.(item);
               close();
@@ -239,7 +319,7 @@ export function CommandPalette({
       }
     },
     [
-      filteredItems,
+      effectiveItems,
       selectedIndex,
       setSelectedIndex,
       onSelect,
@@ -262,9 +342,15 @@ export function CommandPalette({
 
   const getCategoryInfo = useCallback(
     (categoryId: string): CommandPaletteCategory | undefined => {
+      if (categoryId === PINNED_CATEGORY_ID) {
+        return { id: PINNED_CATEGORY_ID, label: pinnedCategoryLabel };
+      }
+      if (categoryId === RECENT_CATEGORY_ID) {
+        return { id: RECENT_CATEGORY_ID, label: recentCategoryLabel };
+      }
       return categories.find((c) => c.id === categoryId);
     },
-    [categories]
+    [categories, pinnedCategoryLabel, recentCategoryLabel]
   );
 
   if (!isOpen) return null;
@@ -376,7 +462,7 @@ export function CommandPalette({
             data-slot="command-palette-results"
             className="max-h-[60vh] overflow-y-auto"
           >
-            {filteredItems.length === 0 ? (
+            {effectiveItems.length === 0 ? (
               <div
                 data-slot="command-palette-empty"
                 className="text-muted-foreground p-8 text-center"
@@ -387,9 +473,11 @@ export function CommandPalette({
                       <SearchIcon />
                     </div>
                     <p className="text-sm">
-                      {query.trim()
-                        ? `No results for "${query}"`
-                        : 'Start typing to search...'}
+                      {isLoading && query.trim()
+                        ? `Searching for "${query}"…`
+                        : query.trim()
+                          ? `No results for "${query}"`
+                          : 'Start typing to search...'}
                     </p>
                   </>
                 )}
@@ -546,7 +634,7 @@ export function CommandPalette({
                 </kbd>
                 <span>close</span>
               </div>
-              <span>{filteredItems.length} results</span>
+              <span>{effectiveItems.length} results</span>
             </div>
           )}
         </div>

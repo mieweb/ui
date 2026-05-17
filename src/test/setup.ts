@@ -111,6 +111,11 @@ beforeAll(() => {
   if (!globalThis.URL.revokeObjectURL) {
     globalThis.URL.revokeObjectURL = () => {};
   }
+
+  // scrollIntoView is not implemented in jsdom
+  if (!Element.prototype.scrollIntoView) {
+    Element.prototype.scrollIntoView = function () {};
+  }
 });
 
 // Cleanup after each test case (e.g. clearing jsdom)

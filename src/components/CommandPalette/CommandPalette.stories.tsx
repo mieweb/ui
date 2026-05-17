@@ -382,3 +382,83 @@ export const Empty: Story = {
     },
   },
 };
+
+// =============================================================================
+// Async Search Story
+// =============================================================================
+
+function AsyncSearchDemo(): React.JSX.Element {
+  const { setItems } = useCommandPalette();
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  // Simulate a debounced server search by sleeping briefly on each query.
+  const handleQueryChange = React.useCallback(
+    async (q: string) => {
+      if (!q.trim()) {
+        setItems([]);
+        return;
+      }
+      setIsLoading(true);
+      await new Promise((r) => setTimeout(r, 250));
+      setItems([
+        {
+          id: `call-${q}`,
+          label: `Call about "${q}"`,
+          subtitle: 'Yesterday • 4 min',
+          category: 'Calls',
+        },
+        {
+          id: `vm-${q}`,
+          label: `Voicemail mentioning "${q}"`,
+          subtitle: '2 days ago',
+          category: 'Voicemails',
+        },
+        {
+          id: `contact-${q}`,
+          label: q,
+          subtitle: '+1 (555) 010-2024',
+          category: 'Contacts',
+        },
+      ]);
+      setIsLoading(false);
+    },
+    [setItems]
+  );
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <CommandPaletteTrigger placeholder="Search anything…" />
+      <CommandPalette
+        placeholder="Search anything…"
+        isLoading={isLoading}
+        onQueryChange={(q) => {
+          void handleQueryChange(q);
+        }}
+        pinnedItems={[
+          {
+            id: 'ai-answer',
+            label: 'Ask AI to answer',
+            subtitle: 'Run semantic search across summaries',
+          },
+        ]}
+        pinnedCategoryLabel="Smart actions"
+        recentItems={[
+          { id: 'r1', label: 'Acme Corp', subtitle: '+1 (555) 010-2024' },
+          { id: 'r2', label: 'Billing call recap', subtitle: '12 min ago' },
+        ]}
+      />
+    </div>
+  );
+}
+
+export const AsyncSearch: Story = {
+  render: () => <AsyncSearchDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Hooks `onQueryChange` to a (mock) server, surfaces results grouped by category, pins a smart-action row, and falls back to recents on empty query.',
+      },
+    },
+  },
+};
