@@ -533,7 +533,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
          */}
         <div
           className={cn(
-            'flex flex-1 flex-col min-w-0',
+            'flex min-w-0 flex-1 flex-col',
             isOutgoing ? 'items-end' : 'items-start'
           )}
         >

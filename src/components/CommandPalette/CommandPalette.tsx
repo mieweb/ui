@@ -227,13 +227,7 @@ export function CommandPalette({
       : [];
 
     return [...pinned, ...filteredItems, ...recents];
-  }, [
-    pinnedItems,
-    recentItems,
-    filteredItems,
-    activeCategory,
-    query,
-  ]);
+  }, [pinnedItems, recentItems, filteredItems, activeCategory, query]);
 
   // Group items by category
   const groupedItems = useMemo(() => {
