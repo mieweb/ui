@@ -11434,3 +11434,151 @@ body.condensed [data-slot='service-pricing-row'] [data-slot='button'] {
   padding: 0 0.375rem !important;
   font-size: 0.6875rem !important;
 }
+
+/* ============================================
+   DataVis NITRO — Condensed Overrides
+   Reduces row height, padding, and font sizes
+   for maximum data density in grids/tables.
+   ============================================ */
+
+/* Title bar — compact height */
+body.condensed .wcdv-title-bar {
+  padding: 4px 8px !important;
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  min-height: unset !important;
+}
+
+body.condensed .wcdv-title {
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed .wcdv-status-info {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+/* Column headers — tighter */
+body.condensed .wcdv-th {
+  padding: 2px 8px !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  height: auto !important;
+}
+
+body.condensed .wcdv-th > div {
+  gap: 1px !important;
+  min-height: unset !important;
+}
+
+body.condensed .wcdv-th button,
+body.condensed .wcdv-th [role='button'] {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+  padding: 0 !important;
+  gap: 1px !important;
+  min-height: unset !important;
+  height: auto !important;
+}
+
+body.condensed .wcdv-th svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* Table rows & cells — denser */
+body.condensed .wcdv-tr {
+  height: auto !important;
+}
+
+body.condensed .wcdv-td {
+  padding: 3px 8px !important;
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Table footer — compact */
+body.condensed .wcdv-table-footer {
+  padding: 3px 8px !important;
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed .wcdv-table-footer span {
+  font-size: 0.6875rem !important;
+}
+
+/* Aggregate footer — compact */
+body.condensed .wcdv-agg-footer {
+  font-size: 0.6875rem !important;
+  line-height: 1rem !important;
+}
+
+body.condensed .wcdv-agg-footer td {
+  padding: 3px 8px !important;
+  font-size: 0.6875rem !important;
+}
+
+/* Control panel — tighter */
+body.condensed .wcdv-control-panel {
+  padding: 4px 8px !important;
+  font-size: 0.75rem !important;
+  gap: 0.25rem !important;
+}
+
+/* Filter bar — compact */
+body.condensed .wcdv-filter-bar {
+  padding: 4px 8px !important;
+  font-size: 0.75rem !important;
+  gap: 0.25rem !important;
+}
+
+/* Field pills (sort/group controls) — smaller */
+body.condensed .wcdv-field-pill {
+  padding: 2px 6px !important;
+  font-size: 0.6875rem !important;
+  border-radius: 3px !important;
+  gap: 0.125rem !important;
+}
+
+body.condensed .wcdv-field-pill svg {
+  width: 0.625rem !important;
+  height: 0.625rem !important;
+}
+
+/* Toolbar — compact */
+body.condensed .wcdv-toolbar {
+  padding: 4px 8px !important;
+  gap: 0.25rem !important;
+}
+
+body.condensed .wcdv-toolbar button {
+  padding: 2px 6px !important;
+  font-size: 0.6875rem !important;
+}
+
+body.condensed .wcdv-toolbar svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* Slider (detail panel) — compact header */
+body.condensed .wcdv-slider-header {
+  padding: 6px 10px !important;
+  font-size: 0.75rem !important;
+}
+
+/* Group headers — compact */
+body.condensed .wcdv-group-header {
+  padding: 3px 8px !important;
+  font-size: 0.75rem !important;
+  line-height: 1.125rem !important;
+}
+
+/* Aggregate entries — compact */
+body.condensed .wcdv-aggregate-entry {
+  padding: 2px 6px !important;
+  font-size: 0.6875rem !important;
+  border-radius: 3px !important;
+}
