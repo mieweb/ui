@@ -79,6 +79,7 @@ export default [
         ArrayBuffer: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
+        queueMicrotask: 'readonly',
         getComputedStyle: 'readonly',
         // File APIs
         File: 'readonly',
