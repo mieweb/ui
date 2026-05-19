@@ -150,7 +150,8 @@ export function HRISProviderSelector({
 
               {!currentProvider.lastSync && (
                 <div
-                  className="mt-3 flex items-center gap-2 rounded-lg border border-yellow-400 bg-yellow-50 p-3 text-yellow-800 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300"
+                  role="status"
+                  className="border-warning/40 bg-warning/10 text-warning-800 dark:border-warning/40 dark:bg-warning/15 dark:text-warning-300 mt-3 flex items-center gap-2 rounded-lg border p-3"
                   data-slot="hris-connected-alert"
                 >
                   <i className="fas fa-exclamation-triangle text-lg" />
@@ -206,7 +207,7 @@ export function HRISProviderSelector({
             placeholder={search}
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            className="focus:border-primary focus:ring-primary border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-1 focus:outline-none"
+            className="focus:border-primary focus-visible:ring-primary border-input bg-background text-foreground placeholder:text-muted-foreground w-full rounded-lg border py-2 pr-4 pl-10 focus:outline-none focus-visible:ring-1"
             data-slot="hris-search-input"
           />
         </div>

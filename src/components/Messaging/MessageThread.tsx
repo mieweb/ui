@@ -78,7 +78,7 @@ function LightboxModal({ attachment, onClose }: LightboxModalProps) {
           'rounded-full p-2',
           'bg-white/10 text-white',
           'hover:bg-white/20',
-          'focus:ring-2 focus:ring-white focus:outline-none',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-white',
           'transition-colors'
         )}
         aria-label="Close"

@@ -837,7 +837,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
                   className={cn(
                     'border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-base',
                     'transition-colors duration-200',
-                    'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none'
+                    'focus-visible:ring-ring focus:border-transparent focus:outline-none focus-visible:ring-2'
                   )}
                 >
                   <option value="active">Active</option>
@@ -864,7 +864,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
                   className={cn(
                     'border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-base',
                     'transition-colors duration-200',
-                    'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none'
+                    'focus-visible:ring-ring focus:border-transparent focus:outline-none focus-visible:ring-2'
                   )}
                 >
                   <option value="Low">Low</option>
@@ -909,7 +909,7 @@ const CountBadge = React.forwardRef<HTMLButtonElement, CountBadgeProps>(
                     'border-input bg-background text-foreground w-full rounded-lg border px-3 py-2 text-base',
                     'placeholder:text-muted-foreground',
                     'transition-colors duration-200',
-                    'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none'
+                    'focus-visible:ring-ring focus:border-transparent focus:outline-none focus-visible:ring-2'
                   )}
                   placeholder="Add notes…"
                 />

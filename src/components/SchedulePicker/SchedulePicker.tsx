@@ -9,8 +9,8 @@ import { cn } from '../../utils/cn';
 const dateButtonVariants = cva(
   [
     'flex-shrink-0 rounded-xl border px-3 py-2 text-center transition-colors',
-    'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-    'dark:focus:ring-offset-neutral-900',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
+    'dark:focus-visible:ring-offset-neutral-900',
   ],
   {
     variants: {
@@ -79,8 +79,8 @@ DateButton.displayName = 'DateButton';
 const timeButtonVariants = cva(
   [
     'rounded-xl border px-2 py-2 text-sm transition-colors',
-    'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-    'dark:focus:ring-offset-neutral-900',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
+    'dark:focus-visible:ring-offset-neutral-900',
   ],
   {
     variants: {

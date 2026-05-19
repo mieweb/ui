@@ -12,6 +12,13 @@ import { miewebBrand } from '../src/brands/mieweb';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
+import {
+  defaultDensity,
+  defaultElevation,
+  defaultFocusRing,
+  defaultMotion,
+  defaultSpacing,
+} from '../src/brands/types';
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -46,8 +53,10 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
   // Toggle condensed density class on body
   if (isCondensed) {
     document.body.classList.add('condensed');
+    document.documentElement.setAttribute('data-density', 'compact');
   } else {
     document.body.classList.remove('condensed');
+    document.documentElement.setAttribute('data-density', 'comfortable');
   }
 
   document.body.style.backgroundColor = semanticColors.background;
@@ -88,9 +97,13 @@ try {
 
 // Function to apply brand CSS variables to document
 function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
-  const root = document.documentElement;
   const colors = brand.colors;
   const semanticColors = isDark ? colors.dark : colors.light;
+  const spacing = brand.spacing ?? defaultSpacing;
+  const motion = brand.motion ?? defaultMotion;
+  const focusRing = brand.focusRing ?? defaultFocusRing;
+  const density = brand.density ?? defaultDensity;
+  const shadow = brand.boxShadow;
 
   // Remove any existing brand style tag
   const existingStyle = document.getElementById('mieweb-brand-styles');
@@ -138,9 +151,34 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
       --mieweb-radius-xl: ${brand.borderRadius.xl} !important;
       --mieweb-radius-2xl: ${brand.borderRadius['2xl']} !important;
       --mieweb-radius-full: ${brand.borderRadius.full} !important;
-      --mieweb-shadow-card: ${brand.boxShadow.card} !important;
-      --mieweb-shadow-dropdown: ${brand.boxShadow.dropdown} !important;
-      --mieweb-shadow-modal: ${brand.boxShadow.modal} !important;
+      --mieweb-shadow-card: ${shadow.card} !important;
+      --mieweb-shadow-dropdown: ${shadow.dropdown} !important;
+      --mieweb-shadow-modal: ${shadow.modal} !important;
+      --mieweb-shadow-1: ${shadow[1] ?? defaultElevation[1]} !important;
+      --mieweb-shadow-2: ${shadow[2] ?? defaultElevation[2]} !important;
+      --mieweb-shadow-3: ${shadow[3] ?? defaultElevation[3]} !important;
+      --mieweb-shadow-4: ${shadow[4] ?? defaultElevation[4]} !important;
+      --mieweb-shadow-5: ${shadow[5] ?? defaultElevation[5]} !important;
+      --mieweb-shadow-6: ${shadow[6] ?? defaultElevation[6]} !important;
+      --mieweb-shadow-inner: ${shadow.inner ?? defaultElevation.inner} !important;
+      --mieweb-spacing-xs: ${spacing.xs} !important;
+      --mieweb-spacing-sm: ${spacing.sm} !important;
+      --mieweb-spacing-md: ${spacing.md} !important;
+      --mieweb-spacing-lg: ${spacing.lg} !important;
+      --mieweb-spacing-xl: ${spacing.xl} !important;
+      --mieweb-spacing-2xl: ${spacing['2xl']} !important;
+      --mieweb-duration-fast: ${motion.durations.fast} !important;
+      --mieweb-duration-base: ${motion.durations.base} !important;
+      --mieweb-duration-slow: ${motion.durations.slow} !important;
+      --mieweb-ease-standard: ${motion.easings.standard} !important;
+      --mieweb-ease-emphasized: ${motion.easings.emphasized} !important;
+      --mieweb-ease-decelerate: ${motion.easings.decelerate} !important;
+      --mieweb-focus-ring-width: ${focusRing.width} !important;
+      --mieweb-focus-ring-offset: ${focusRing.offset} !important;
+      --mieweb-focus-ring-style: ${focusRing.style ?? 'solid'} !important;
+    }
+    [data-density='compact'], body.condensed {
+      --mieweb-density-scale: ${density.compactScale} !important;
     }
   `;
   document.head.appendChild(styleTag);

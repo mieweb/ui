@@ -114,12 +114,73 @@ export interface BrandBorderRadius {
 }
 
 /**
- * Box shadow configuration.
+ * Box shadow configuration. `card`, `dropdown`, `modal` remain for back-compat;
+ * the numbered `1`–`6` levels form a consistent elevation ramp, with `inner` for
+ * inset surfaces.
  */
 export interface BrandBoxShadow {
   card: string;
   dropdown: string;
   modal: string;
+  /** Elevation ramp — increasing depth from 1 (subtle) to 6 (pronounced) */
+  1?: string;
+  2?: string;
+  3?: string;
+  4?: string;
+  5?: string;
+  6?: string;
+  /** Inset shadow */
+  inner?: string;
+}
+
+/**
+ * Spacing scale (rem). Used for component padding, gap, and rhythm.
+ * Brands may override to set their overall density/breathing room.
+ */
+export interface BrandSpacing {
+  xs: string;
+  sm: string;
+  md: string;
+  lg: string;
+  xl: string;
+  '2xl': string;
+}
+
+/**
+ * Density configuration. `comfortable` is the default; `compact` multiplies
+ * spacing tokens by `compactScale` (e.g. 0.75) when `[data-density='compact']`
+ * (or the legacy `body.condensed` class) is active.
+ */
+export interface BrandDensity {
+  default: 'comfortable' | 'compact';
+  compactScale: number;
+}
+
+/**
+ * Motion tokens. Durations in ms, easings as CSS timing functions.
+ * Honors `prefers-reduced-motion` via the `usePrefersReducedMotion` hook.
+ */
+export interface BrandMotion {
+  durations: {
+    fast: string;
+    base: string;
+    slow: string;
+  };
+  easings: {
+    standard: string;
+    emphasized: string;
+    decelerate: string;
+  };
+}
+
+/**
+ * Focus ring tokens. `color` is a semantic key (defaults to `ring`).
+ */
+export interface BrandFocusRing {
+  width: string;
+  offset: string;
+  color?: 'ring' | 'primary' | 'destructive';
+  style?: 'solid' | 'dashed' | 'dotted';
 }
 
 /**
@@ -140,7 +201,66 @@ export interface BrandConfig {
   borderRadius: BrandBorderRadius;
   /** Box shadow definitions */
   boxShadow: BrandBoxShadow;
+  /** Spacing scale (optional — falls back to library defaults) */
+  spacing?: BrandSpacing;
+  /** Density configuration (optional — defaults to comfortable, 0.75 compact) */
+  density?: BrandDensity;
+  /** Motion / transition tokens (optional — falls back to library defaults) */
+  motion?: BrandMotion;
+  /** Focus ring tokens (optional — falls back to 2px/2px solid ring) */
+  focusRing?: BrandFocusRing;
 }
+
+/**
+ * Library-wide defaults for the optional token groups. Brands can override any
+ * subset; missing fields fall back here.
+ */
+export const defaultSpacing: BrandSpacing = {
+  xs: '0.25rem',
+  sm: '0.5rem',
+  md: '0.75rem',
+  lg: '1rem',
+  xl: '1.5rem',
+  '2xl': '2rem',
+};
+
+export const defaultDensity: BrandDensity = {
+  default: 'comfortable',
+  compactScale: 0.75,
+};
+
+export const defaultMotion: BrandMotion = {
+  durations: {
+    fast: '120ms',
+    base: '200ms',
+    slow: '320ms',
+  },
+  easings: {
+    standard: 'cubic-bezier(0.2, 0, 0, 1)',
+    emphasized: 'cubic-bezier(0.3, 0, 0, 1)',
+    decelerate: 'cubic-bezier(0, 0, 0.2, 1)',
+  },
+};
+
+export const defaultFocusRing: BrandFocusRing = {
+  width: '2px',
+  offset: '2px',
+  color: 'ring',
+  style: 'solid',
+};
+
+/**
+ * Default elevation ramp; used for any brand that doesn't override `boxShadow.1`–`6`/`inner`.
+ */
+export const defaultElevation = {
+  1: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+  2: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+  3: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  4: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+  5: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+  6: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+  inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+} as const;
 
 // ============================================================================
 // CSS Generation
@@ -236,6 +356,54 @@ ${scaleBlocks}
   --mieweb-shadow-card: ${boxShadow.card};
   --mieweb-shadow-dropdown: ${boxShadow.dropdown};
   --mieweb-shadow-modal: ${boxShadow.modal};
+
+  /* Elevation Ramp */
+  --mieweb-shadow-1: ${boxShadow[1] ?? defaultElevation[1]};
+  --mieweb-shadow-2: ${boxShadow[2] ?? defaultElevation[2]};
+  --mieweb-shadow-3: ${boxShadow[3] ?? defaultElevation[3]};
+  --mieweb-shadow-4: ${boxShadow[4] ?? defaultElevation[4]};
+  --mieweb-shadow-5: ${boxShadow[5] ?? defaultElevation[5]};
+  --mieweb-shadow-6: ${boxShadow[6] ?? defaultElevation[6]};
+  --mieweb-shadow-inner: ${boxShadow.inner ?? defaultElevation.inner};
+
+  /* Spacing Scale */
+  --mieweb-spacing-xs: ${(brand.spacing ?? defaultSpacing).xs};
+  --mieweb-spacing-sm: ${(brand.spacing ?? defaultSpacing).sm};
+  --mieweb-spacing-md: ${(brand.spacing ?? defaultSpacing).md};
+  --mieweb-spacing-lg: ${(brand.spacing ?? defaultSpacing).lg};
+  --mieweb-spacing-xl: ${(brand.spacing ?? defaultSpacing).xl};
+  --mieweb-spacing-2xl: ${(brand.spacing ?? defaultSpacing)['2xl']};
+
+  /* Density */
+  --mieweb-density-scale: 1;
+
+  /* Motion */
+  --mieweb-duration-fast: ${(brand.motion ?? defaultMotion).durations.fast};
+  --mieweb-duration-base: ${(brand.motion ?? defaultMotion).durations.base};
+  --mieweb-duration-slow: ${(brand.motion ?? defaultMotion).durations.slow};
+  --mieweb-ease-standard: ${(brand.motion ?? defaultMotion).easings.standard};
+  --mieweb-ease-emphasized: ${(brand.motion ?? defaultMotion).easings.emphasized};
+  --mieweb-ease-decelerate: ${(brand.motion ?? defaultMotion).easings.decelerate};
+
+  /* Focus Ring */
+  --mieweb-focus-ring-width: ${(brand.focusRing ?? defaultFocusRing).width};
+  --mieweb-focus-ring-offset: ${(brand.focusRing ?? defaultFocusRing).offset};
+  --mieweb-focus-ring-style: ${(brand.focusRing ?? defaultFocusRing).style ?? 'solid'};
+}
+
+/* Compact density — scales spacing tokens. Applies to both data-density and legacy .condensed. */
+[data-density='compact'],
+body.condensed {
+  --mieweb-density-scale: ${(brand.density ?? defaultDensity).compactScale};
+}
+
+/* Honor reduced-motion preference at the token level */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mieweb-duration-fast: 0ms;
+    --mieweb-duration-base: 0ms;
+    --mieweb-duration-slow: 0ms;
+  }
 }
 
 /* Dark Mode */
@@ -270,6 +438,9 @@ ${scaleBlocks}
  */
 export function generateTailwindTheme(brand: BrandConfig) {
   const { colors, typography, borderRadius, boxShadow } = brand;
+  const spacing = brand.spacing ?? defaultSpacing;
+  const motion = brand.motion ?? defaultMotion;
+  const focusRing = brand.focusRing ?? defaultFocusRing;
 
   // Build color config including all provided optional scales
   const colorConfig: Record<string, ColorScale> = {
@@ -314,6 +485,37 @@ export function generateTailwindTheme(brand: BrandConfig) {
       card: boxShadow.card,
       dropdown: boxShadow.dropdown,
       modal: boxShadow.modal,
+      'elevation-1': boxShadow[1] ?? defaultElevation[1],
+      'elevation-2': boxShadow[2] ?? defaultElevation[2],
+      'elevation-3': boxShadow[3] ?? defaultElevation[3],
+      'elevation-4': boxShadow[4] ?? defaultElevation[4],
+      'elevation-5': boxShadow[5] ?? defaultElevation[5],
+      'elevation-6': boxShadow[6] ?? defaultElevation[6],
+      'elevation-inner': boxShadow.inner ?? defaultElevation.inner,
+    },
+    spacing: {
+      'brand-xs': spacing.xs,
+      'brand-sm': spacing.sm,
+      'brand-md': spacing.md,
+      'brand-lg': spacing.lg,
+      'brand-xl': spacing.xl,
+      'brand-2xl': spacing['2xl'],
+    },
+    transitionDuration: {
+      fast: motion.durations.fast,
+      base: motion.durations.base,
+      slow: motion.durations.slow,
+    },
+    transitionTimingFunction: {
+      standard: motion.easings.standard,
+      emphasized: motion.easings.emphasized,
+      decelerate: motion.easings.decelerate,
+    },
+    ringWidth: {
+      focus: focusRing.width,
+    },
+    ringOffsetWidth: {
+      focus: focusRing.offset,
     },
   };
 }

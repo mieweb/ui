@@ -79,7 +79,7 @@ const sendButtonVariants = cva(
     'inline-flex items-center justify-center',
     'rounded-full p-3 self-start',
     'transition-all duration-200',
-    'focus:outline-none focus:ring-2 focus:ring-primary-500',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
     'disabled:opacity-50 disabled:cursor-not-allowed',
   ],
   {
@@ -457,7 +457,7 @@ const MessageComposer = React.forwardRef<
                   'shrink-0 rounded p-1',
                   'text-neutral-500 hover:text-neutral-700',
                   'dark:text-neutral-400 dark:hover:text-neutral-200',
-                  'focus:ring-primary-500 focus:ring-2 focus:outline-none'
+                  'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
                 )}
                 aria-label="Cancel reply"
               >
@@ -543,7 +543,7 @@ const MessageComposer = React.forwardRef<
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
-                  'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+                  'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                   'transition-colors',
                   'max-h-[150px]'

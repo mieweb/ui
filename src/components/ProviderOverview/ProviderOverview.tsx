@@ -185,8 +185,8 @@ export function ProviderOverview({
           data-slot="provider-overview-header"
           className="flex animate-pulse items-center gap-4"
         >
-          <div className="h-12 w-12 rounded-lg bg-gray-200 dark:bg-gray-700" />
-          <div className="h-6 w-48 rounded bg-gray-200 dark:bg-gray-700" />
+          <div className="bg-muted h-12 w-12 rounded-lg" />
+          <div className="bg-muted h-6 w-48 rounded" />
         </div>
         {/* Stats skeleton */}
         <div
@@ -194,10 +194,7 @@ export function ProviderOverview({
           className="grid grid-cols-2 gap-4 lg:grid-cols-4"
         >
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-24 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"
-            />
+            <div key={i} className="bg-muted h-24 animate-pulse rounded-lg" />
           ))}
         </div>
       </div>

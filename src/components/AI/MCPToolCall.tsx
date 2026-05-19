@@ -410,8 +410,8 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
         'bg-primary-50 text-primary-900 hover:bg-primary-100',
         'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
         'text-sm font-medium transition-colors',
-        'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
-        'dark:focus:ring-offset-neutral-900',
+        'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        'dark:focus-visible:ring-offset-neutral-900',
         className
       )}
     >

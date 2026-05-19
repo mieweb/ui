@@ -75,7 +75,58 @@
     0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --mieweb-shadow-modal:
     0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Elevation Ramp */
+  --mieweb-shadow-1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --mieweb-shadow-2:
+    0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-3:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-4:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-5:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-6: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --mieweb-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* Spacing Scale (brand-owned; multiplied by --mieweb-density-scale) */
+  --mieweb-spacing-xs: 0.25rem;
+  --mieweb-spacing-sm: 0.5rem;
+  --mieweb-spacing-md: 0.75rem;
+  --mieweb-spacing-lg: 1rem;
+  --mieweb-spacing-xl: 1.5rem;
+  --mieweb-spacing-2xl: 2rem;
+
+  /* Density (1 = comfortable, 0.75 = compact) */
+  --mieweb-density-scale: 1;
+
+  /* Motion */
+  --mieweb-duration-fast: 120ms;
+  --mieweb-duration-base: 200ms;
+  --mieweb-duration-slow: 320ms;
+  --mieweb-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --mieweb-ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --mieweb-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Focus Ring */
+  --mieweb-focus-ring-width: 2px;
+  --mieweb-focus-ring-offset: 2px;
+  --mieweb-focus-ring-style: solid;
 }
+
+/* Compact density — preferred selector, plus legacy .condensed alias */
+[data-density='compact'],
+body.condensed {
+  --mieweb-density-scale: 0.75;
+}
+
+/* Honor reduced-motion preference at the token level */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mieweb-duration-fast: 0ms;
+    --mieweb-duration-base: 0ms;
+    --mieweb-duration-slow: 0ms;
+  }
 
 /* Dark Mode */
 [data-theme='dark'],
@@ -152,5 +203,7 @@ kbd {
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid var(--mieweb-ring);
+  outline: var(--mieweb-focus-ring-width, 2px) var(--mieweb-focus-ring-style, solid)
+    var(--mieweb-ring);
+  outline-offset: var(--mieweb-focus-ring-offset, 2px);
 }

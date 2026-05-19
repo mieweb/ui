@@ -181,7 +181,7 @@ export function RejectionModal({
                     value={reason.id}
                     checked={selectedReasonId === reason.id}
                     onChange={(e) => setSelectedReasonId(e.target.value)}
-                    className="text-primary focus:ring-primary border-border h-4 w-4"
+                    className="text-primary focus-visible:ring-primary border-border h-4 w-4"
                   />
                   <span className="text-foreground text-sm">
                     {reason.label}
@@ -206,7 +206,7 @@ export function RejectionModal({
                 )}
               </label>
               <textarea
-                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+                className="bg-background text-foreground border-input focus-visible:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus-visible:ring-2"
                 rows={3}
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
