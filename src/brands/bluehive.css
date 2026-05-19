@@ -112,6 +112,7 @@
   --mieweb-focus-ring-width: 2px;
   --mieweb-focus-ring-offset: 2px;
   --mieweb-focus-ring-style: solid;
+  --mieweb-focus-ring-color: var(--mieweb-ring);
 }
 
 /* Compact density — preferred selector, plus legacy .condensed alias */
@@ -204,6 +205,6 @@ kbd {
 
 .focus-ring:focus-visible {
   outline: var(--mieweb-focus-ring-width, 2px) var(--mieweb-focus-ring-style, solid)
-    var(--mieweb-ring);
+    var(--mieweb-focus-ring-color, var(--mieweb-ring));
   outline-offset: var(--mieweb-focus-ring-offset, 2px);
 }

@@ -176,6 +176,10 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
       --mieweb-focus-ring-width: ${focusRing.width} !important;
       --mieweb-focus-ring-offset: ${focusRing.offset} !important;
       --mieweb-focus-ring-style: ${focusRing.style ?? 'solid'} !important;
+      --mieweb-focus-ring-color: var(--mieweb-${focusRing.color ?? 'ring'}) !important;
+    }
+    [data-density='comfortable'] {
+      --mieweb-density-scale: 1 !important;
     }
     [data-density='compact'], body.condensed {
       --mieweb-density-scale: ${density.compactScale} !important;

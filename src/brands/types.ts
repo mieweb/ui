@@ -374,8 +374,12 @@ ${scaleBlocks}
   --mieweb-spacing-xl: ${(brand.spacing ?? defaultSpacing).xl};
   --mieweb-spacing-2xl: ${(brand.spacing ?? defaultSpacing)['2xl']};
 
-  /* Density */
-  --mieweb-density-scale: 1;
+  /* Density — initial scale follows brand default; runtime [data-density] overrides below */
+  --mieweb-density-scale: ${
+    (brand.density ?? defaultDensity).default === 'compact'
+      ? (brand.density ?? defaultDensity).compactScale
+      : 1
+  };
 
   /* Motion */
   --mieweb-duration-fast: ${(brand.motion ?? defaultMotion).durations.fast};
@@ -389,6 +393,12 @@ ${scaleBlocks}
   --mieweb-focus-ring-width: ${(brand.focusRing ?? defaultFocusRing).width};
   --mieweb-focus-ring-offset: ${(brand.focusRing ?? defaultFocusRing).offset};
   --mieweb-focus-ring-style: ${(brand.focusRing ?? defaultFocusRing).style ?? 'solid'};
+  --mieweb-focus-ring-color: var(--mieweb-${(brand.focusRing ?? defaultFocusRing).color ?? 'ring'});
+}
+
+/* Comfortable density override — explicit reset when brand default is compact */
+[data-density='comfortable'] {
+  --mieweb-density-scale: 1;
 }
 
 /* Compact density — scales spacing tokens. Applies to both data-density and legacy .condensed. */
