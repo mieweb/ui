@@ -17,10 +17,11 @@ const badgeVariants = cva(
         secondary:
           'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100',
         success:
-          'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100',
+          'bg-success-100 text-success-900 dark:bg-success-900 dark:text-success-100',
         warning:
-          'bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100',
-        danger: 'bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-100',
+          'bg-warning-100 text-warning-900 dark:bg-warning-900 dark:text-warning-100',
+        danger:
+          'bg-destructive-100 text-destructive-900 dark:bg-destructive-900 dark:text-destructive-100',
         outline: 'border border-current bg-transparent',
       },
       size: {

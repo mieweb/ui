@@ -259,10 +259,10 @@ function PhoneInputGroup({
               className={cn(
                 'h-10 w-full rounded-md border px-3 py-2 text-sm',
                 'border-gray-300 bg-white text-gray-900',
-                'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none',
+                'focus:border-brand-500 focus-visible:ring-brand-500/20 focus:outline-none focus-visible:ring-2',
                 'disabled:text-muted-foreground disabled:cursor-not-allowed disabled:bg-gray-50',
                 'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100',
-                'dark:focus:border-brand-400 dark:focus:ring-brand-400/20',
+                'dark:focus:border-brand-400 dark:focus-visible:ring-brand-400/20',
                 index === 0 && label ? 'mt-[26px]' : ''
               )}
             >

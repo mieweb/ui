@@ -173,7 +173,7 @@ export function Toast({
           <button
             onClick={action.onClick}
             data-slot="toast-action"
-            className="mt-2 rounded text-sm font-medium underline hover:no-underline focus:ring-2 focus:ring-current focus:ring-offset-2 focus:outline-none"
+            className="mt-2 rounded text-sm font-medium underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2"
           >
             {action.label}
           </button>
@@ -185,7 +185,7 @@ export function Toast({
         <button
           onClick={onClose}
           data-slot="toast-dismiss"
-          className="flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10"
+          className="flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-current dark:hover:bg-white/10"
           aria-label="Dismiss notification"
         >
           <XIcon />

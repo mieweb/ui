@@ -649,7 +649,7 @@ export function DateRangePicker({
                 }}
                 className={cn(
                   'relative h-9 w-10 text-center text-sm',
-                  'focus:ring-ring focus:z-10 focus:ring-2 focus:outline-none',
+                  'focus-visible:ring-ring focus:z-10 focus:outline-none focus-visible:ring-2',
                   'transition-colors',
                   // Not current month — dimmed
                   !cell.isCurrentMonth && 'text-muted-foreground/50',
@@ -696,7 +696,7 @@ export function DateRangePicker({
         className={cn(
           'border-input bg-background hover:bg-muted',
           'inline-flex w-[300px] items-center gap-2 rounded-md border px-4 py-2 text-left text-sm font-normal',
-          'focus:ring-ring focus:ring-2 focus:outline-none',
+          'focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
           'transition-colors',
           !displayValue && 'text-muted-foreground'
         )}

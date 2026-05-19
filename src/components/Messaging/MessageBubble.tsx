@@ -229,7 +229,7 @@ function AttachmentPreview({
         onClick={onClick}
         className={cn(
           'relative block overflow-hidden rounded-lg',
-          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+          'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
           'transition-transform hover:scale-[1.02]',
           className
         )}
@@ -317,7 +317,7 @@ function AttachmentPreview({
         'flex items-center gap-3 rounded-lg p-3',
         'bg-white/10 hover:bg-white/20',
         'transition-colors',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
         className
       )}
     >
@@ -636,7 +636,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
                   'flex items-center gap-1 rounded px-2 py-0.5',
                   'text-xs font-medium text-red-700 dark:text-red-400',
                   'hover:bg-red-50 dark:hover:bg-red-900/20',
-                  'focus:ring-2 focus:ring-red-500 focus:outline-none'
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
                 )}
                 aria-label="Retry sending message"
               >

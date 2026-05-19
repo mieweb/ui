@@ -29,6 +29,7 @@ export * from './components/CountryCodeDropdown';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
 export * from './components/DashboardWidget';
+export * from './components/Dashboard';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';

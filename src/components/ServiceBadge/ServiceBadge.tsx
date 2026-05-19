@@ -34,7 +34,7 @@ const serviceBadgeVariants = cva(
         xl: 'text-base px-4 py-2.5 rounded-lg',
       },
       interactive: {
-        true: 'cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-1',
+        true: 'cursor-pointer hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
         false: '',
       },
     },
@@ -43,43 +43,43 @@ const serviceBadgeVariants = cva(
         variant: 'default',
         interactive: true,
         className:
-          'hover:bg-primary-200 dark:hover:bg-primary-900/50 focus:ring-primary-500',
+          'hover:bg-primary-200 dark:hover:bg-primary-900/50 focus-visible:ring-primary-500',
       },
       {
         variant: 'secondary',
         interactive: true,
         className:
-          'hover:bg-gray-200 dark:hover:bg-gray-700 focus:ring-gray-500',
+          'hover:bg-gray-200 dark:hover:bg-gray-700 focus-visible:ring-gray-500',
       },
       {
         variant: 'success',
         interactive: true,
         className:
-          'hover:bg-green-200 dark:hover:bg-green-900/50 focus:ring-green-500',
+          'hover:bg-green-200 dark:hover:bg-green-900/50 focus-visible:ring-green-500',
       },
       {
         variant: 'warning',
         interactive: true,
         className:
-          'hover:bg-yellow-200 dark:hover:bg-yellow-900/50 focus:ring-yellow-500',
+          'hover:bg-yellow-200 dark:hover:bg-yellow-900/50 focus-visible:ring-yellow-500',
       },
       {
         variant: 'danger',
         interactive: true,
         className:
-          'hover:bg-red-200 dark:hover:bg-red-900/50 focus:ring-red-500',
+          'hover:bg-red-200 dark:hover:bg-red-900/50 focus-visible:ring-red-500',
       },
       {
         variant: 'info',
         interactive: true,
         className:
-          'hover:bg-blue-200 dark:hover:bg-blue-900/50 focus:ring-blue-500',
+          'hover:bg-blue-200 dark:hover:bg-blue-900/50 focus-visible:ring-blue-500',
       },
       {
         variant: 'outline',
         interactive: true,
         className:
-          'hover:bg-gray-50 dark:hover:bg-gray-800 focus:ring-gray-500',
+          'hover:bg-gray-50 dark:hover:bg-gray-800 focus-visible:ring-gray-500',
       },
     ],
     defaultVariants: {

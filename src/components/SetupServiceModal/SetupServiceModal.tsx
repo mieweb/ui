@@ -172,7 +172,7 @@ export function SetupServiceModal({
             </label>
             <textarea
               id="setup-service-description"
-              className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+              className="bg-background text-foreground border-input focus-visible:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus-visible:ring-2"
               rows={3}
               value={formData.description}
               onChange={(e) =>
@@ -218,7 +218,7 @@ export function SetupServiceModal({
                 type="number"
                 min="0"
                 step="0.01"
-                className="bg-background text-foreground border-input focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
+                className="bg-background text-foreground border-input focus-visible:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:outline-none focus-visible:ring-2"
                 value={formData.price}
                 onChange={(e) =>
                   setFormData((prev) => ({

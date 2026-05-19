@@ -278,7 +278,7 @@ function ServiceTag({ service, onRemove }: ServiceTagProps) {
         onClick={onRemove}
         className={cn(
           'hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5',
-          'focus:ring-primary-500 focus:ring-2 focus:outline-none'
+          'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
         )}
         aria-label={`Remove ${service.label}`}
       >
@@ -757,7 +757,7 @@ export function CompactFilterBar({
             disabled={loading}
             className={cn(
               'h-9 w-full rounded-md border border-neutral-200 pr-3 pl-9 text-sm',
-              'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+              'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
               'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
             )}
           />
@@ -780,7 +780,7 @@ export function CompactFilterBar({
           disabled={loading}
           className={cn(
             'h-9 w-20 rounded-l-md border border-neutral-200 px-3 text-sm',
-            'focus:ring-primary-500 focus:z-10 focus:ring-2 focus:outline-none',
+            'focus-visible:ring-primary-500 focus:z-10 focus:outline-none focus-visible:ring-2',
             'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
           )}
         />
@@ -791,7 +791,7 @@ export function CompactFilterBar({
           aria-label="Search radius"
           className={cn(
             'h-9 rounded-r-md border border-l-0 border-neutral-200 px-2 text-sm',
-            'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+            'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
             'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white'
           )}
         >
@@ -816,7 +816,7 @@ export function CompactFilterBar({
             aria-label="Service filter"
             className={cn(
               'h-9 w-full rounded-md border border-neutral-200 px-3 text-sm',
-              'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+              'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
               'dark:border-neutral-600 dark:bg-neutral-700 dark:text-white',
               !filters.services.length && 'text-neutral-500'
             )}
@@ -840,7 +840,7 @@ export function CompactFilterBar({
           className={cn(
             'h-9 rounded-md px-4 text-sm font-medium',
             'bg-primary-800 hover:bg-primary-900 text-white',
-            'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
+            'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50'
           )}
         >

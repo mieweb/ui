@@ -558,7 +558,7 @@ export function SidebarToggle({
       className={cn(
         'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
         className
       )}
       aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -604,7 +604,7 @@ export function SidebarMobileToggle({
       className={cn(
         'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
         className
       )}
       aria-label="Open navigation"
@@ -693,7 +693,7 @@ export function SidebarSearch({
             'w-full rounded-lg py-2 pr-4 pl-10 text-sm',
             'border-transparent bg-neutral-100 dark:bg-neutral-800',
             'text-neutral-900 placeholder-neutral-400 dark:text-white dark:placeholder-neutral-500',
-            'focus:ring-primary-500 focus:bg-white focus:ring-2 focus:outline-none dark:focus:bg-neutral-700',
+            'focus-visible:ring-primary-500 focus:bg-white focus:outline-none focus-visible:ring-2 dark:focus:bg-neutral-700',
             'transition-colors'
           )}
         />

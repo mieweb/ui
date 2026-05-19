@@ -215,7 +215,7 @@ export function PaymentMethodCard({
               checked={selected}
               onChange={handleSelect}
               disabled={disabled}
-              className="text-brand-600 focus:ring-brand-500"
+              className="text-brand-600 focus-visible:ring-brand-500"
             />
             <span className="text-muted-foreground text-xs">
               Set as default
@@ -411,7 +411,7 @@ export function PaymentMethodBank({
               checked={selected}
               onChange={handleSelect}
               disabled={disabled}
-              className="text-brand-600 focus:ring-brand-500"
+              className="text-brand-600 focus-visible:ring-brand-500"
             />
             <span className="text-muted-foreground text-xs">
               Set as default

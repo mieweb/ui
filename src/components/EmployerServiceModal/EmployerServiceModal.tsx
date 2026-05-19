@@ -199,7 +199,7 @@ export function EmployerServiceModal({
                     min="0"
                     step="0.01"
                     data-slot="employer-service-price-input"
-                    className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
+                    className="border-input bg-background text-foreground focus-visible:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:outline-none focus-visible:ring-2"
                     value={config.customPrice ?? ''}
                     onChange={(e) =>
                       setConfig((prev) => ({
@@ -333,7 +333,7 @@ export function EmployerServiceModal({
             <textarea
               id="employer-service-notes"
               data-slot="employer-service-textarea"
-              className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+              className="border-input bg-background text-foreground focus-visible:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus-visible:ring-2"
               rows={3}
               value={config.notes || ''}
               onChange={(e) =>

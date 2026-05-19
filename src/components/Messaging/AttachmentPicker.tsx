@@ -235,7 +235,7 @@ function AttachmentPreviewItem({
           'rounded-full p-1',
           'bg-neutral-900 text-white',
           'opacity-0 group-hover:opacity-100',
-          'focus:ring-primary-500 focus:opacity-100 focus:ring-2 focus:outline-none',
+          'focus-visible:ring-primary-500 focus:opacity-100 focus:outline-none focus-visible:ring-2',
           'transition-opacity'
         )}
         aria-label={`Remove ${file.name}`}
@@ -376,7 +376,7 @@ const AttachmentPicker = React.forwardRef<
             'text-neutral-500 hover:text-neutral-700',
             'dark:text-neutral-400 dark:hover:text-neutral-200',
             'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-            'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+            'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'transition-colors',
             className
@@ -610,7 +610,7 @@ function CameraButton({
           'text-neutral-500 hover:text-neutral-700',
           'dark:text-neutral-400 dark:hover:text-neutral-200',
           'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+          'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'transition-colors',
           className
