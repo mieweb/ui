@@ -146,6 +146,47 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
+// Appends a "View source on GitHub" link below each story, derived from the
+// story file's absolute path on disk (context.parameters.fileName).
+const withGitHubSource: Decorator = (Story, context) => {
+  const rawFileName = context.parameters?.fileName as string | undefined;
+  // Normalize Windows backslashes to forward slashes before any path operations
+  const fileName = rawFileName ? rawFileName.replace(/\\/g, '/') : undefined;
+  const srcIndex = fileName ? fileName.indexOf('/src/') : -1;
+
+  const githubUrl = (() => {
+    if (srcIndex < 0 || !fileName) return null;
+    const relPath = fileName.slice(srcIndex + 1);
+    const basename = relPath.split('/').pop() ?? '';
+    // Only strip `.stories` when the basename is strictly `Name.stories.(ts|tsx|js|jsx)`
+    // (no extra dot-segments before `.stories`). Otherwise link to the stories file itself.
+    const stripped = /^[^.]+\.stories\.(tsx?|jsx?)$/.test(basename)
+      ? relPath.replace(/\.stories(\.[^.]+)$/, '$1')
+      : relPath;
+    return `https://github.com/mieweb/ui/blob/main/${stripped}`;
+  })();
+
+  return (
+    <>
+      <Story />
+      {githubUrl && (
+        <div
+          style={{
+            marginTop: '12px',
+            fontSize: '11px',
+            textAlign: 'right',
+            opacity: 0.5,
+          }}
+        >
+          <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+            View source on GitHub ↗
+          </a>
+        </div>
+      )}
+    </>
+  );
+};
+
 // Brand switcher decorator
 const withBrand: Decorator = (Story, context) => {
   const brandName = context.globals.brand || 'bluehive';
@@ -300,7 +341,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withBrand],
+  decorators: [withGitHubSource, withBrand],
 };
 
 export default preview;
