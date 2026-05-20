@@ -146,6 +146,40 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
+// Appends a "View source on GitHub" link below each story, derived from the
+// story file's absolute path on disk (context.parameters.fileName).
+const withGitHubSource: Decorator = (Story, context) => {
+  const fileName = context.parameters?.fileName as string | undefined;
+  const srcIndex = fileName ? fileName.indexOf('/src/') : -1;
+
+  const githubUrl =
+    srcIndex >= 0
+      ? `https://github.com/mieweb/ui/blob/main/${fileName!
+          .slice(srcIndex + 1)
+          .replace(/\.stories(\.[^.]+)$/, '$1')}`
+      : null;
+
+  return (
+    <>
+      <Story />
+      {githubUrl && (
+        <div
+          style={{
+            marginTop: '12px',
+            fontSize: '11px',
+            textAlign: 'right',
+            opacity: 0.5,
+          }}
+        >
+          <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+            View source on GitHub ↗
+          </a>
+        </div>
+      )}
+    </>
+  );
+};
+
 // Brand switcher decorator
 const withBrand: Decorator = (Story, context) => {
   const brandName = context.globals.brand || 'bluehive';
@@ -300,7 +334,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withBrand],
+  decorators: [withGitHubSource, withBrand],
 };
 
 export default preview;
