@@ -33,6 +33,12 @@ const meta: Meta<typeof Table> = {
   component: Table,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component:
+          '> 💡 **Prefer [DataVis NITRO](?path=/docs/components-text-data-display-datavis-nitro--docs) in most cases.** NITRO is designed to be simple out of the box while exposing power-user features for the click-curious — use `Table` only in lightweight situations where that overhead is genuinely unneeded.',
+      },
+    },
   },
   tags: ['autodocs'],
   argTypes: {
