@@ -64,6 +64,7 @@ export * from './components/InvoicePaymentPage';
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
 export * from './components/LoadingPage';
+export * from './components/Markdown';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NotificationCenter';
