@@ -142,7 +142,10 @@ test.describe('Visual Regression Tests - Core Components', () => {
   });
 
   test('AudioPlayer - Podcast Player', async ({ page }) => {
-    await gotoStory(page, 'components-images-media-audioplayer--podcast-player');
+    await gotoStory(
+      page,
+      'components-images-media-audioplayer--podcast-player'
+    );
     await expect(page).toHaveScreenshot('audioplayer-podcast-player.png');
   });
 

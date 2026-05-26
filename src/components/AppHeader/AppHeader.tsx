@@ -226,7 +226,7 @@ export function AppHeaderIconButton({
         'relative rounded-lg p-2 transition-colors',
         'text-muted-foreground',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
         isActive &&
           'text-primary-800 dark:text-primary-400 bg-gray-100 dark:bg-gray-800',
         className
@@ -379,7 +379,7 @@ export function AppHeaderUserMenu({
       className={cn(
         'flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+        'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
         isOpen && 'bg-gray-100 dark:bg-gray-800',
         className
       )}

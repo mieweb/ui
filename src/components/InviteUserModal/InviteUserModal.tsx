@@ -230,7 +230,7 @@ export function InviteUserModal({
             <textarea
               id="invite-message"
               data-slot="invite-user-textarea"
-              className="border-input bg-background text-foreground focus:ring-primary w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
+              className="border-input bg-background text-foreground focus-visible:ring-primary w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus-visible:ring-2"
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}

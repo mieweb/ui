@@ -235,12 +235,13 @@
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.3",
-    "@esheet/builder": "link:./packages/esheet/packages/builder",
-    "@esheet/renderer": "link:./packages/esheet/packages/renderer",
+    "@axe-core/playwright": "^4.11.3",
     "@esheet/adapters": "link:./packages/esheet/packages/adapters",
+    "@esheet/builder": "link:./packages/esheet/packages/builder",
     "@esheet/core": "link:./packages/esheet/packages/core",
     "@esheet/fields": "link:./packages/esheet/packages/fields",
+    "@esheet/renderer": "link:./packages/esheet/packages/renderer",
+    "@eslint/js": "^9.39.3",
     "@ozwell/react": "file:./packages/ozwell/packages/react",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",

@@ -243,7 +243,7 @@ export function OrderConfirmationWizard({
                     type="checkbox"
                     checked={employeeVerified}
                     onChange={(e) => setEmployeeVerified(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus-visible:ring-blue-500"
                     data-slot="ocw-checkbox"
                   />
                   <span
@@ -266,7 +266,7 @@ export function OrderConfirmationWizard({
                   <textarea
                     id="verification-notes"
                     data-slot="ocw-textarea"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     rows={2}
                     value={verificationNotes}
                     onChange={(e) => setVerificationNotes(e.target.value)}
@@ -301,7 +301,7 @@ export function OrderConfirmationWizard({
                     type="checkbox"
                     checked={consentObtained}
                     onChange={(e) => setConsentObtained(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus-visible:ring-blue-500"
                     data-slot="ocw-checkbox"
                   />
                   <div>
@@ -329,7 +329,7 @@ export function OrderConfirmationWizard({
                     type="checkbox"
                     checked={idVerified}
                     onChange={(e) => setIdVerified(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus-visible:ring-blue-500"
                     data-slot="ocw-checkbox"
                   />
                   <div className="flex-1">
@@ -480,7 +480,7 @@ export function OrderConfirmationWizard({
                   <textarea
                     id="confirmation-notes"
                     data-slot="ocw-textarea"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     rows={3}
                     value={confirmationNotes}
                     onChange={(e) => setConfirmationNotes(e.target.value)}

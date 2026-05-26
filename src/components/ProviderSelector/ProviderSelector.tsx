@@ -156,7 +156,7 @@ export function ProviderSelector({
           'bg-background text-foreground',
           'border-input',
           'hover:border-muted-foreground/50',
-          'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
+          'focus-visible:ring-ring focus:border-transparent focus:outline-none focus-visible:ring-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           sizeStyles[size]
         )}
@@ -275,7 +275,7 @@ export function ProviderSelector({
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-1 focus:outline-none"
+                  className="border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:outline-none focus-visible:ring-1"
                   // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                 />

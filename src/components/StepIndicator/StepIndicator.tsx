@@ -137,14 +137,14 @@ export function StepIndicator({
       onClick={() => handleStepClick(index)}
       disabled={!clickable}
       aria-label={`Step ${index + 1}: ${step.label}`}
-      className={`${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
+      className={`${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
         step.hasError
-          ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
+          ? 'bg-red-100 text-red-600 focus-visible:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
           : status === 'completed'
-            ? 'bg-primary-800 focus:ring-primary-500 dark:bg-primary-800 text-white'
+            ? 'bg-primary-800 focus-visible:ring-primary-500 dark:bg-primary-800 text-white'
             : status === 'current'
-              ? 'bg-primary-800 ring-primary-600 focus:ring-primary-500 dark:bg-primary-800 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
-              : 'bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
+              ? 'bg-primary-800 ring-primary-600 focus-visible:ring-primary-500 dark:bg-primary-800 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
+              : 'bg-neutral-200 text-neutral-500 focus-visible:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
       }`.trim()}
       aria-current={status === 'current' ? 'step' : undefined}
     >

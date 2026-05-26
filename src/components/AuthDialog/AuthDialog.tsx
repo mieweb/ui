@@ -435,7 +435,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="focus-visible:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           placeholder="you@example.com"
         />
       </div>
@@ -454,7 +454,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus-visible:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
@@ -475,7 +475,7 @@ function LoginForm({ onSubmit, isLoading, onForgotPassword }: LoginFormProps) {
         <label className="flex items-center">
           <input
             type="checkbox"
-            className="text-primary-800 focus:ring-primary-500 rounded border-gray-300"
+            className="text-primary-800 focus-visible:ring-primary-500 rounded border-gray-300"
           />
           <span className="text-muted-foreground ml-2 text-sm">
             Remember me
@@ -543,7 +543,7 @@ function SignupForm({
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="focus-visible:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           placeholder="you@example.com"
         />
       </div>
@@ -563,7 +563,7 @@ function SignupForm({
             required
             autoComplete="new-password"
             minLength={8}
-            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus-visible:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
@@ -595,7 +595,7 @@ function SignupForm({
           required
           autoComplete="new-password"
           className={cn(
-            'focus:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:bg-gray-700 dark:text-white',
+            'focus-visible:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:bg-gray-700 dark:text-white',
             confirmPassword && !passwordsMatch
               ? 'border-red-500'
               : 'border-gray-300 dark:border-gray-600'
@@ -612,7 +612,7 @@ function SignupForm({
           checked={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
           required
-          className="text-primary-800 focus:ring-primary-500 mt-0.5 rounded border-gray-300"
+          className="text-primary-800 focus-visible:ring-primary-500 mt-0.5 rounded border-gray-300"
         />
         <span className="text-muted-foreground ml-2 text-sm">
           I agree to the{' '}
@@ -684,7 +684,7 @@ function ForgotPasswordForm({
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          className="focus-visible:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           placeholder="you@example.com"
         />
       </div>
@@ -746,7 +746,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
             required
             autoComplete="new-password"
             minLength={8}
-            className="focus:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="focus-visible:ring-primary-500 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="••••••••"
           />
           <button
@@ -778,7 +778,7 @@ function ResetPasswordForm({ onSubmit, isLoading }: ResetPasswordFormProps) {
           required
           autoComplete="new-password"
           className={cn(
-            'focus:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 dark:bg-gray-700 dark:text-white',
+            'focus-visible:ring-primary-500 w-full rounded-lg border bg-white px-3 py-2 text-gray-900 focus:border-transparent focus-visible:ring-2 dark:bg-gray-700 dark:text-white',
             confirmPassword && !passwordsMatch
               ? 'border-red-500'
               : 'border-gray-300 dark:border-gray-600'

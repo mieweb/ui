@@ -36,7 +36,7 @@ const selectTriggerVariants = cva(
     'border border-input rounded-lg',
     'bg-background text-foreground',
     'transition-colors duration-200',
-    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus:border-transparent',
     'disabled:cursor-not-allowed disabled:opacity-50',
   ],
   {
@@ -47,7 +47,7 @@ const selectTriggerVariants = cva(
         lg: 'h-12 px-4 text-lg',
       },
       hasError: {
-        true: 'border-destructive focus:ring-destructive',
+        true: 'border-destructive focus-visible:ring-destructive',
         false: '',
       },
     },
@@ -449,7 +449,7 @@ function Select({
                     className={cn(
                       'border-input bg-background w-full rounded-md border px-3 py-2 text-sm',
                       'placeholder:text-muted-foreground',
-                      'focus:ring-ring focus:ring-2 focus:outline-none'
+                      'focus-visible:ring-ring focus:outline-none focus-visible:ring-2'
                     )}
                     aria-label="Search options"
                   />

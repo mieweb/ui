@@ -428,7 +428,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 onClick={() => day && handleDateSelect(day)}
                 className={cn(
                   'h-8 w-8 rounded-md text-sm transition-colors',
-                  'focus:ring-ring focus:ring-2 focus:outline-none',
+                  'focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
                   day === null && 'invisible',
                   day !== null && 'hover:bg-muted',
                   isSelectedDay(day!) &&
@@ -520,11 +520,11 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 'bg-background text-foreground',
                 'placeholder:text-muted-foreground',
                 'transition-colors duration-200',
-                'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
+                'focus-visible:ring-ring focus:border-transparent focus:outline-none focus-visible:ring-2',
                 'disabled:cursor-not-allowed disabled:opacity-50',
                 sizeClasses[resolvedSize],
                 showError
-                  ? 'border-destructive focus:ring-destructive'
+                  ? 'border-destructive focus-visible:ring-destructive'
                   : 'border-input',
                 'pr-10',
                 className

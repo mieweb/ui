@@ -272,7 +272,7 @@ export function Address({
         className={cn(
           baseStyles,
           'hover:text-primary-800 dark:hover:text-primary-400 hover:underline',
-          'focus:ring-primary-500 rounded focus:ring-2 focus:ring-offset-2 focus:outline-none'
+          'focus-visible:ring-primary-500 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
         )}
         {...props}
       >

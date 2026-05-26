@@ -12,7 +12,7 @@ const themeToggleVariants = cva(
   [
     'inline-flex items-center justify-center',
     'rounded-md border transition-colors',
-    'focus:outline-none focus:ring-2 focus:ring-primary-500/40',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40',
   ],
   {
     variants: {

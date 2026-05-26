@@ -316,7 +316,7 @@ function CountryCodeDropdown({
           'border-input bg-background text-foreground',
           'transition-colors duration-200',
           'hover:bg-neutral-50 dark:hover:bg-neutral-700',
-          'focus:ring-ring focus:ring-2 focus:outline-none',
+          'focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           className
         )}
@@ -381,7 +381,7 @@ function CountryCodeDropdown({
               className={cn(
                 'w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm',
                 'text-foreground placeholder:text-muted-foreground bg-white',
-                'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
+                'focus-visible:ring-ring focus:border-transparent focus:outline-none focus-visible:ring-2',
                 'dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100'
               )}
             />

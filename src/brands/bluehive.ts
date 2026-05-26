@@ -93,6 +93,47 @@ export const bluehiveBrand: BrandConfig = {
     dropdown:
       '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
     modal: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+    1: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    2: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    3: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+    4: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+    5: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+    6: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+    inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+  },
+
+  spacing: {
+    xs: '0.25rem',
+    sm: '0.5rem',
+    md: '0.75rem',
+    lg: '1rem',
+    xl: '1.5rem',
+    '2xl': '2rem',
+  },
+
+  density: {
+    default: 'comfortable',
+    compactScale: 0.75,
+  },
+
+  motion: {
+    durations: {
+      fast: '120ms',
+      base: '200ms',
+      slow: '320ms',
+    },
+    easings: {
+      standard: 'cubic-bezier(0.2, 0, 0, 1)',
+      emphasized: 'cubic-bezier(0.3, 0, 0, 1)',
+      decelerate: 'cubic-bezier(0, 0, 0.2, 1)',
+    },
+  },
+
+  focusRing: {
+    width: '2px',
+    offset: '2px',
+    color: 'ring',
+    style: 'solid',
   },
 };
 

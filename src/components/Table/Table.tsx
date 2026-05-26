@@ -182,6 +182,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
       <th
         ref={ref}
         data-slot="table-head"
+        scope="col"
         aria-sort={
           sortable
             ? sortDirection === 'asc'

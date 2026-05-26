@@ -588,7 +588,7 @@ export function ReportLink({ slug, href, className }: ReportLinkProps) {
 // =============================================================================
 
 const bookButtonVariants = cva(
-  'inline-flex items-center gap-2 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+  'inline-flex items-center gap-2 font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
   {
     variants: {
       size: {
@@ -598,9 +598,9 @@ const bookButtonVariants = cva(
       },
       variant: {
         primary:
-          'bg-primary-800 text-white hover:bg-primary-900 focus:ring-primary-500',
+          'bg-primary-800 text-white hover:bg-primary-900 focus-visible:ring-primary-500',
         outline:
-          'border-2 border-primary-800 text-primary-800 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-300 dark:text-primary-300 dark:hover:bg-primary-900/20',
+          'border-2 border-primary-800 text-primary-800 hover:bg-primary-50 focus-visible:ring-primary-500 dark:border-primary-300 dark:text-primary-300 dark:hover:bg-primary-900/20',
       },
     },
     defaultVariants: {

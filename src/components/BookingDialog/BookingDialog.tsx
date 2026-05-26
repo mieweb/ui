@@ -53,15 +53,16 @@ export interface BookingDialogProps {
 // =============================================================================
 
 const inputVariants = cva(
-  'w-full rounded-lg border bg-background px-4 py-3 text-foreground transition-colors focus:outline-none focus:ring-2',
+  'w-full rounded-lg border bg-background px-4 py-3 text-foreground transition-colors focus:outline-none focus-visible:ring-2',
   {
     variants: {
       state: {
         default:
-          'border-input focus:border-primary-500 focus:ring-primary-500/20',
+          'border-input focus:border-primary-500 focus-visible:ring-primary-500/20',
         error:
-          'border-destructive focus:border-destructive focus:ring-destructive/20',
-        success: 'border-success focus:border-success focus:ring-success/20',
+          'border-destructive focus:border-destructive focus-visible:ring-destructive/20',
+        success:
+          'border-success focus:border-success focus-visible:ring-success/20',
       },
     },
     defaultVariants: {
@@ -189,10 +190,10 @@ export function ServiceSelect({
         className={cn(
           'w-full rounded-lg border px-4 py-3 text-left transition-colors',
           'bg-background',
-          'focus:ring-2 focus:outline-none',
+          'focus:outline-none focus-visible:ring-2',
           error
-            ? 'border-destructive focus:ring-destructive/20'
-            : 'border-input focus:border-primary-500 focus:ring-primary-500/20'
+            ? 'border-destructive focus-visible:ring-destructive/20'
+            : 'border-input focus:border-primary-500 focus-visible:ring-primary-500/20'
         )}
       >
         {selectedServiceNames.length > 0 ? (
@@ -233,7 +234,7 @@ export function ServiceSelect({
                 type="checkbox"
                 checked={selectedServices.includes(service.slug)}
                 onChange={() => toggleService(service.slug)}
-                className="text-primary-800 focus:ring-primary-500 border-input h-4 w-4 rounded"
+                className="text-primary-800 focus-visible:ring-primary-500 border-input h-4 w-4 rounded"
               />
               <span className="text-foreground">{service.name}</span>
             </label>
@@ -295,7 +296,7 @@ export function ConsentSwitch({
         onClick={() => onChange(!checked)}
         data-slot="consent-switch-toggle"
         className={cn(
-          'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
+          'focus-visible:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           checked ? 'bg-primary-800' : 'bg-muted'
         )}
       >

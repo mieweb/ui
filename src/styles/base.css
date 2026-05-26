@@ -160,6 +160,46 @@
   /* ── Typography ────────────────────────────────────────────────────── */
   --font-sans: var(--mieweb-font-sans, ui-sans-serif);
   --font-mono: var(--mieweb-font-mono, ui-monospace);
+
+  /* ── Elevation Ramp ───────────────────────────────────────────────── */
+  --shadow-elevation-1: var(--mieweb-shadow-1);
+  --shadow-elevation-2: var(--mieweb-shadow-2);
+  --shadow-elevation-3: var(--mieweb-shadow-3);
+  --shadow-elevation-4: var(--mieweb-shadow-4);
+  --shadow-elevation-5: var(--mieweb-shadow-5);
+  --shadow-elevation-6: var(--mieweb-shadow-6);
+  --shadow-elevation-inner: var(--mieweb-shadow-inner);
+  --shadow-card: var(--mieweb-shadow-card);
+  --shadow-dropdown: var(--mieweb-shadow-dropdown);
+  --shadow-modal: var(--mieweb-shadow-modal);
+
+  /* ── Brand Spacing (density-aware) ─────────────────────────────────── */
+  --spacing-brand-xs: calc(
+    var(--mieweb-spacing-xs) * var(--mieweb-density-scale)
+  );
+  --spacing-brand-sm: calc(
+    var(--mieweb-spacing-sm) * var(--mieweb-density-scale)
+  );
+  --spacing-brand-md: calc(
+    var(--mieweb-spacing-md) * var(--mieweb-density-scale)
+  );
+  --spacing-brand-lg: calc(
+    var(--mieweb-spacing-lg) * var(--mieweb-density-scale)
+  );
+  --spacing-brand-xl: calc(
+    var(--mieweb-spacing-xl) * var(--mieweb-density-scale)
+  );
+  --spacing-brand-2xl: calc(
+    var(--mieweb-spacing-2xl) * var(--mieweb-density-scale)
+  );
+
+  /* ── Motion ────────────────────────────────────────────────────────── */
+  --duration-fast: var(--mieweb-duration-fast);
+  --duration-base: var(--mieweb-duration-base);
+  --duration-slow: var(--mieweb-duration-slow);
+  --ease-standard: var(--mieweb-ease-standard);
+  --ease-emphasized: var(--mieweb-ease-emphasized);
+  --ease-decelerate: var(--mieweb-ease-decelerate);
 }
 
 /* ============================================
@@ -301,6 +341,50 @@
     0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --mieweb-shadow-modal:
     0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Elevation Ramp — 6-level depth scale + inner */
+  --mieweb-shadow-1: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --mieweb-shadow-2:
+    0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-3:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-4:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-5:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --mieweb-shadow-6: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --mieweb-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* Spacing Scale (brand-owned; multiplied by --mieweb-density-scale) */
+  --mieweb-spacing-xs: 0.25rem;
+  --mieweb-spacing-sm: 0.5rem;
+  --mieweb-spacing-md: 0.75rem;
+  --mieweb-spacing-lg: 1rem;
+  --mieweb-spacing-xl: 1.5rem;
+  --mieweb-spacing-2xl: 2rem;
+
+  /* Density (1 = comfortable, 0.75 = compact) */
+  --mieweb-density-scale: 1;
+
+  /* Motion */
+  --mieweb-duration-fast: 120ms;
+  --mieweb-duration-base: 200ms;
+  --mieweb-duration-slow: 320ms;
+  --mieweb-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --mieweb-ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --mieweb-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Focus Ring */
+  --mieweb-focus-ring-width: 2px;
+  --mieweb-focus-ring-offset: 2px;
+  --mieweb-focus-ring-style: solid;
+  --mieweb-focus-ring-color: var(--mieweb-ring);
+}
+
+/* Compact density — preferred selector + legacy .condensed alias */
+[data-density='compact'],
+body.condensed {
+  --mieweb-density-scale: 0.75;
 }
 
 /* Dark Mode */
@@ -351,8 +435,10 @@ kbd {
 
 /* Focus visible styles for accessibility */
 :focus-visible {
-  outline: 2px solid var(--mieweb-ring);
-  outline-offset: 2px;
+  outline: var(--mieweb-focus-ring-width, 2px)
+    var(--mieweb-focus-ring-style, solid)
+    var(--mieweb-focus-ring-color, var(--mieweb-ring));
+  outline-offset: var(--mieweb-focus-ring-offset, 2px);
 }
 
 /* Reduce motion for users who prefer it */

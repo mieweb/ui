@@ -333,7 +333,7 @@ function LoadMoreButton({
           'rounded-full px-4 py-2 text-sm font-medium',
           'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
           'hover:bg-neutral-200 dark:hover:bg-neutral-700',
-          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+          'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'transition-colors'
         )}
@@ -624,7 +624,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
               'bg-white dark:bg-neutral-800',
               'border border-neutral-200 dark:border-neutral-700',
               'hover:bg-neutral-50 dark:hover:bg-neutral-700',
-              'focus:ring-primary-500 focus:ring-2 focus:outline-none',
+              'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
               'transition-all'
             )}
             aria-label="Scroll to bottom"

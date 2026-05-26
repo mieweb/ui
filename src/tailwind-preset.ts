@@ -302,6 +302,86 @@ export const miewebUISafelist = [
   'overflow-hidden',
   // Select component
   'truncate',
+  // Brand tokens (Phase 1)
+  'shadow-card',
+  'shadow-dropdown',
+  'shadow-modal',
+  'shadow-elevation-1',
+  'shadow-elevation-2',
+  'shadow-elevation-3',
+  'shadow-elevation-4',
+  'shadow-elevation-5',
+  'shadow-elevation-6',
+  'shadow-elevation-inner',
+  'p-brand-xs',
+  'p-brand-sm',
+  'p-brand-md',
+  'p-brand-lg',
+  'p-brand-xl',
+  'p-brand-2xl',
+  'px-brand-sm',
+  'px-brand-md',
+  'px-brand-lg',
+  'py-brand-sm',
+  'py-brand-md',
+  'py-brand-lg',
+  'gap-brand-xs',
+  'gap-brand-sm',
+  'gap-brand-md',
+  'gap-brand-lg',
+  'gap-brand-xl',
+  'duration-fast',
+  'duration-base',
+  'duration-slow',
+  'ease-standard',
+  'ease-emphasized',
+  'ease-decelerate',
+  'ring-focus',
+  'ring-offset-focus',
+  'focus-visible:ring-focus',
+  'focus-visible:ring-offset-focus',
+  'focus-visible:ring-ring',
+  'focus-visible:outline-none',
+  // Badge variant tokens (Phase 2a)
+  'dark:text-success-100',
+  'dark:text-warning-100',
+  'dark:text-destructive-100',
+  'dark:bg-destructive-900',
+  'dark:bg-success-900',
+  'dark:bg-warning-900',
+  // Dashboard layout (Phase 3) — responsive grid + col-span variants
+  'col-span-full',
+  'sm:col-span-1',
+  'sm:col-span-2',
+  'sm:col-span-3',
+  'sm:col-span-4',
+  'sm:col-span-5',
+  'sm:col-span-6',
+  'lg:col-span-1',
+  'lg:col-span-2',
+  'lg:col-span-3',
+  'lg:col-span-4',
+  'lg:col-span-5',
+  'lg:col-span-6',
+  'lg:col-span-7',
+  'lg:col-span-8',
+  'lg:col-span-9',
+  'lg:col-span-10',
+  'lg:col-span-11',
+  'lg:col-span-12',
+  'lg:grid-cols-12',
+  'sm:gap-brand-lg',
+  'md:p-brand-xl',
+  // Focus-visible ring utilities (Phase 2c sweep) — variant-prefixed
+  // versions of common ring classes used across components
+  'focus-visible:ring-2',
+  'focus-visible:ring-offset-2',
+  'focus-visible:ring-primary',
+  'focus-visible:ring-destructive',
+  'focus-visible:ring-success',
+  'focus-visible:ring-success/20',
+  'focus-visible:ring-destructive/20',
+  'focus-visible:border-transparent',
 ];
 
 export interface MiewebUIPreset {
@@ -470,6 +550,56 @@ export const miewebUIPreset: MiewebUIPreset = {
       },
       boxShadow: {
         card: 'var(--mieweb-shadow-card, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1))',
+        dropdown:
+          'var(--mieweb-shadow-dropdown, 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1))',
+        modal:
+          'var(--mieweb-shadow-modal, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1))',
+        // Elevation ramp — use `shadow-elevation-1`..`6` for consistent depth.
+        'elevation-1': 'var(--mieweb-shadow-1, 0 1px 2px 0 rgb(0 0 0 / 0.05))',
+        'elevation-2':
+          'var(--mieweb-shadow-2, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1))',
+        'elevation-3':
+          'var(--mieweb-shadow-3, 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1))',
+        'elevation-4':
+          'var(--mieweb-shadow-4, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1))',
+        'elevation-5':
+          'var(--mieweb-shadow-5, 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1))',
+        'elevation-6':
+          'var(--mieweb-shadow-6, 0 25px 50px -12px rgb(0 0 0 / 0.25))',
+        'elevation-inner':
+          'var(--mieweb-shadow-inner, inset 0 2px 4px 0 rgb(0 0 0 / 0.05))',
+      },
+      // Brand spacing tokens — `p-brand-md`, `gap-brand-lg`, etc. Multiplied by
+      // `--mieweb-density-scale` so compact density shrinks them automatically.
+      spacing: {
+        'brand-xs':
+          'calc(var(--mieweb-spacing-xs, 0.25rem) * var(--mieweb-density-scale, 1))',
+        'brand-sm':
+          'calc(var(--mieweb-spacing-sm, 0.5rem) * var(--mieweb-density-scale, 1))',
+        'brand-md':
+          'calc(var(--mieweb-spacing-md, 0.75rem) * var(--mieweb-density-scale, 1))',
+        'brand-lg':
+          'calc(var(--mieweb-spacing-lg, 1rem) * var(--mieweb-density-scale, 1))',
+        'brand-xl':
+          'calc(var(--mieweb-spacing-xl, 1.5rem) * var(--mieweb-density-scale, 1))',
+        'brand-2xl':
+          'calc(var(--mieweb-spacing-2xl, 2rem) * var(--mieweb-density-scale, 1))',
+      },
+      transitionDuration: {
+        fast: 'var(--mieweb-duration-fast, 120ms)',
+        base: 'var(--mieweb-duration-base, 200ms)',
+        slow: 'var(--mieweb-duration-slow, 320ms)',
+      },
+      transitionTimingFunction: {
+        standard: 'var(--mieweb-ease-standard, cubic-bezier(0.2, 0, 0, 1))',
+        emphasized: 'var(--mieweb-ease-emphasized, cubic-bezier(0.3, 0, 0, 1))',
+        decelerate: 'var(--mieweb-ease-decelerate, cubic-bezier(0, 0, 0.2, 1))',
+      },
+      ringWidth: {
+        focus: 'var(--mieweb-focus-ring-width, 2px)',
+      },
+      ringOffsetWidth: {
+        focus: 'var(--mieweb-focus-ring-offset, 2px)',
       },
       keyframes: {
         'fade-in': {

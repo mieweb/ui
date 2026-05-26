@@ -503,7 +503,7 @@ export function RecurringServiceSetupModal({
                 onChange={(e) =>
                   setFormData({ ...formData, providerId: e.target.value })
                 }
-                className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
+                className="bg-card border-input focus-visible:ring-primary w-full rounded-lg border p-2 focus:outline-none focus-visible:ring-2"
                 required={showProviderSelector}
               >
                 <option value="">Select provider...</option>
@@ -530,7 +530,7 @@ export function RecurringServiceSetupModal({
               onChange={(e) =>
                 setFormData({ ...formData, serviceId: e.target.value })
               }
-              className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
+              className="bg-card border-input focus-visible:ring-primary w-full rounded-lg border p-2 focus:outline-none focus-visible:ring-2"
               required
             >
               <option value="">Select service...</option>
@@ -556,7 +556,7 @@ export function RecurringServiceSetupModal({
               onChange={(e) =>
                 setFormData({ ...formData, occurrence: e.target.value })
               }
-              className="bg-card border-input focus:ring-primary w-full rounded-lg border p-2 focus:ring-2 focus:outline-none"
+              className="bg-card border-input focus-visible:ring-primary w-full rounded-lg border p-2 focus:outline-none focus-visible:ring-2"
               required
             >
               <option value="monthly">Monthly</option>
