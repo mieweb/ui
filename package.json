@@ -129,16 +129,6 @@
         "default": "./dist/datavis.cjs"
       }
     },
-    "./ozwell": {
-      "import": {
-        "types": "./dist/ozwell.d.ts",
-        "default": "./dist/ozwell.js"
-      },
-      "require": {
-        "types": "./dist/ozwell.d.cts",
-        "default": "./dist/ozwell.cjs"
-      }
-    },
     "./esheet": {
       "import": {
         "types": "./dist/esheet.d.ts",
@@ -188,7 +178,6 @@
   "peerDependencies": {
     "@esheet/builder": ">=0.0.2",
     "@esheet/renderer": ">=0.0.2",
-    "@ozwell/react": ">=0.1.0",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.2",
@@ -201,9 +190,6 @@
       "optional": true
     },
     "@esheet/renderer": {
-      "optional": true
-    },
-    "@ozwell/react": {
       "optional": true
     },
     "ag-grid-community": {
@@ -241,7 +227,6 @@
     "@esheet/adapters": "link:./packages/esheet/packages/adapters",
     "@esheet/core": "link:./packages/esheet/packages/core",
     "@esheet/fields": "link:./packages/esheet/packages/fields",
-    "@ozwell/react": "file:./packages/ozwell/packages/react",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
     "@storybook/addon-docs": "^10.2.11",
