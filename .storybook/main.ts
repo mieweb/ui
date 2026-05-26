@@ -46,11 +46,6 @@ const datavisDependencyAliases = missingRootDependencies
     replacement: `${path.join(pnpmVirtualNodeModulesDir, dependencyName)}$1`,
   }));
 
-const ozwellReactEntry = path.join(
-  workspaceRoot,
-  'packages/ozwell/packages/react/src/index.ts',
-);
-
 const esheetPackagesDir = path.join(workspaceRoot, 'packages/esheet/packages');
 const esheetSourceAliases = ['core', 'fields', 'adapters', 'builder', 'renderer'].map(
   (pkg) => ({
@@ -60,14 +55,6 @@ const esheetSourceAliases = ['core', 'fields', 'adapters', 'builder', 'renderer'
 );
 
 const localUiAliases = [
-  ...(existsSync(ozwellReactEntry)
-    ? [
-        {
-          find: /^@ozwell\/react$/,
-          replacement: ozwellReactEntry,
-        },
-      ]
-    : []),
   {
     find: /^@mieweb\/ui\/components\/(.+)$/,
     replacement: `${path.join(workspaceRoot, 'src/components')}/$1`,

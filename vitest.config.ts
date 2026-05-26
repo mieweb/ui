@@ -9,7 +9,6 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       'dist/**',
-      'packages/ozwell/**',
       'packages/esheet/**',
       'tests/visual/**',
       '**/*.spec.ts'

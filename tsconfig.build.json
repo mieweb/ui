@@ -3,8 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "datavis/src/*": ["./packages/datavis/src/*"],
-      "@ozwell/react": ["./packages/ozwell/packages/react/src/index.ts"]
+      "datavis/src/*": ["./packages/datavis/src/*"]
     }
   }
 }
