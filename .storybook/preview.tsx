@@ -177,10 +177,9 @@ const withGitHubSource: Decorator = (Story, context) => {
             marginTop: '12px',
             fontSize: '11px',
             textAlign: 'right',
-            opacity: 0.5,
           }}
         >
-          <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+          <a href={githubUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--mieweb-muted-foreground, #636363)', textDecoration: 'none' }}>
             View source on GitHub ↗
           </a>
         </div>
