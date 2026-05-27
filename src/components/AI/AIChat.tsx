@@ -272,6 +272,8 @@ export interface AIChatProps
   composerProps?: Partial<MessageComposerProps>;
   /** Enable talk-to-text microphone button inside the input */
   talkToText?: boolean;
+  /** Callback when recording starts */
+  onRecordingStart?: () => void;
   /** Callback when recording completes (receives audio blob and duration) */
   onRecordingComplete?: (blob: Blob, duration: number) => void;
   /** Callback when close button is clicked (shows close button when provided) */
@@ -304,6 +306,7 @@ export function AIChat({
   height,
   composerProps,
   talkToText = false,
+  onRecordingStart,
   onRecordingComplete,
   className,
   onSendMessage,
@@ -477,6 +480,7 @@ export function AIChat({
                 showPulse={false}
                 showWaveform
                 disabled={isGenerating}
+                onRecordingStart={onRecordingStart}
                 onRecordingComplete={onRecordingComplete}
               />
             ) : undefined
