@@ -184,6 +184,10 @@ export interface MessageComposerProps {
   onTypingStart?: () => void;
   /** Called when the user stops typing */
   onTypingStop?: () => void;
+  /** Controlled value for the textarea */
+  value?: string;
+  /** Callback when value changes (for controlled mode) */
+  onValueChange?: (value: string) => void;
   /** Placeholder text */
   placeholder?: string;
   /** Maximum message length */
@@ -246,6 +250,8 @@ const MessageComposer = React.forwardRef<
       onSend,
       onTypingStart,
       onTypingStop,
+      value: controlledValue,
+      onValueChange,
       placeholder = 'Type a message...',
       maxLength = 1600,
       showCharacterCount = false,
@@ -267,7 +273,20 @@ const MessageComposer = React.forwardRef<
     ref
   ) => {
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-    const [content, setContent] = React.useState('');
+    const [internalContent, setInternalContent] = React.useState('');
+    const isControlled = controlledValue !== undefined;
+    const content = isControlled ? controlledValue : internalContent;
+    const setContent = React.useCallback(
+      (val: string | ((prev: string) => string)) => {
+        if (isControlled) {
+          const newVal = typeof val === 'function' ? val(controlledValue) : val;
+          onValueChange?.(newVal);
+        } else {
+          setInternalContent(val);
+        }
+      },
+      [isControlled, controlledValue, onValueChange]
+    );
     const [attachments, setAttachments] = React.useState<PendingAttachment[]>(
       []
     );
