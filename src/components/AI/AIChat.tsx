@@ -28,6 +28,7 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
+import { RecordButton } from '../RecordButton';
 import { SparklesIcon, CloseIcon, RefreshIcon } from './icons';
 
 // ============================================================================
@@ -269,6 +270,10 @@ export interface AIChatProps
   height?: string | number;
   /** Props to pass to the MessageComposer */
   composerProps?: Partial<MessageComposerProps>;
+  /** Enable talk-to-text microphone button inside the input */
+  talkToText?: boolean;
+  /** Callback when recording completes (receives audio blob and duration) */
+  onRecordingComplete?: (blob: Blob, duration: number) => void;
   /** Callback when close button is clicked (shows close button when provided) */
   onClose?: () => void;
   /**
@@ -298,6 +303,8 @@ export function AIChat({
   size,
   height,
   composerProps,
+  talkToText = false,
+  onRecordingComplete,
   className,
   onSendMessage,
   onToolCall: _onToolCall,
@@ -462,6 +469,18 @@ export function AIChat({
           showCameraButton={false}
           showCharacterCount={false}
           variant="minimal"
+          inputTrailing={
+            talkToText ? (
+              <RecordButton
+                variant="ghost"
+                size="sm"
+                showPulse={false}
+                showWaveform
+                disabled={isGenerating}
+                onRecordingComplete={onRecordingComplete}
+              />
+            ) : undefined
+          }
           {...composerProps}
         />
       </div>

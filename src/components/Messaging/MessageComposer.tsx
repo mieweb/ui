@@ -218,6 +218,8 @@ export interface MessageComposerProps {
   onCancelReply?: () => void;
   /** Visual variant - 'default' shows border-t, 'minimal' has no border */
   variant?: 'default' | 'minimal';
+  /** Content to render inside the input wrapper (e.g. a mic button) */
+  inputTrailing?: React.ReactNode;
   /** Additional class name */
   className?: string;
 }
@@ -259,6 +261,7 @@ const MessageComposer = React.forwardRef<
       replyTo = null,
       onCancelReply,
       variant = 'default',
+      inputTrailing,
       className,
     },
     ref
@@ -539,7 +542,8 @@ const MessageComposer = React.forwardRef<
                 disabled={disabled || isSending}
                 rows={1}
                 className={cn(
-                  'w-full resize-none rounded-2xl px-4 py-2.5',
+                  'w-full resize-none rounded-2xl py-2.5',
+                  inputTrailing ? 'pr-10 pl-4' : 'px-4',
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
@@ -551,6 +555,16 @@ const MessageComposer = React.forwardRef<
                 aria-label="Message"
                 aria-describedby={showCharacterCount ? 'char-count' : undefined}
               />
+
+              {/* Trailing content (e.g. record button) */}
+              {inputTrailing && (
+                <div
+                  data-slot="composer-input-trailing"
+                  className="pointer-events-none absolute top-0 right-1 flex h-[44px] items-center [&>*]:pointer-events-auto"
+                >
+                  {inputTrailing}
+                </div>
+              )}
 
               {/* Character count */}
               {showCharacterCount && (

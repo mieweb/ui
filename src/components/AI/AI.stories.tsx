@@ -401,6 +401,23 @@ export const GeneratingResponse: StoryObj<typeof AIChat> = {
   },
 };
 
+export const TalkToText: StoryObj<typeof AIChat> = {
+  render: () => (
+    <div className="h-[600px]">
+      <AIChat
+        messages={[]}
+        suggestions={suggestedActions}
+        height="100%"
+        talkToText
+        onSendMessage={(msg) => console.log('Send:', msg)}
+        onRecordingComplete={(blob, duration) =>
+          console.log('Recording complete:', { size: blob.size, duration })
+        }
+      />
+    </div>
+  ),
+};
+
 // ============================================================================
 // Floating Chat Stories
 // ============================================================================
