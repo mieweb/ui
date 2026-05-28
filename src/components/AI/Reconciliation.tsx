@@ -176,10 +176,27 @@ function normalizeString(value: string): string {
   return value.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+  const keys = Object.keys(value as Record<string, unknown>).sort();
+  return (
+    '{' +
+    keys
+      .map(
+        (k) =>
+          JSON.stringify(k) + ':' + stableStringify((value as Record<string, unknown>)[k])
+      )
+      .join(',') +
+    '}'
+  );
+}
+
 /**
  * Default equality used to filter out cosmetic-only diffs. Treats null,
  * undefined, and `''` as equivalent; ignores case and whitespace for strings;
- * compares Dates by epoch; falls back to JSON for plain objects / arrays.
+ * compares Dates by epoch; compares plain objects / arrays via a key-sorted
+ * stringify so insertion order doesn't matter.
  */
 export function defaultReconciliationIsEqual(
   current: unknown,
@@ -196,7 +213,7 @@ export function defaultReconciliationIsEqual(
   }
   if (typeof a === 'object' && typeof b === 'object' && a && b) {
     try {
-      return JSON.stringify(a) === JSON.stringify(b);
+      return stableStringify(a) === stableStringify(b);
     } catch {
       return false;
     }
@@ -309,7 +326,7 @@ function ConfidenceBadge({
 
 interface ReconciliationProposalRowProps {
   proposal: ReconciliationProposal;
-  state: RowState;
+  state: RowState | undefined;
   onAcceptedChange: (accepted: boolean) => void;
   onValueChange: (value: unknown) => void;
   onToggleEditing: () => void;
@@ -322,6 +339,14 @@ function ReconciliationProposalRow({
   onValueChange,
   onToggleEditing,
 }: ReconciliationProposalRowProps) {
+  // `state` can briefly be undefined immediately after `proposals` changes
+  // and before the reset effect runs. Fall back to the proposal's defaults
+  // rather than throwing on `state.accepted`.
+  const safeState: RowState = state ?? {
+    accepted: defaultAcceptedFor(proposal),
+    editing: false,
+    value: proposal.proposed,
+  };
   const rowId = React.useId();
   const checkboxId = `${rowId}-accept`;
   const level = resolveConfidenceLevel(proposal);
@@ -331,17 +356,17 @@ function ReconciliationProposalRow({
   return (
     <li
       data-slot="reconciliation-row"
-      data-accepted={state.accepted}
+      data-accepted={safeState.accepted}
       className={cn(
         'flex gap-3 px-4 py-3 transition-colors',
-        state.accepted ? 'bg-background' : 'bg-muted/40',
+        safeState.accepted ? 'bg-background' : 'bg-muted/40',
         'border-border border-b last:border-b-0'
       )}
     >
       <div className="pt-0.5">
         <Checkbox
           id={checkboxId}
-          checked={state.accepted}
+          checked={safeState.accepted}
           onChange={(e) => onAcceptedChange(e.target.checked)}
           disabled={proposal.required}
           aria-label={`Apply update for ${proposal.label}`}
@@ -378,10 +403,10 @@ function ReconciliationProposalRow({
                   'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none',
                   'hover:underline'
                 )}
-                aria-expanded={state.editing}
+                aria-expanded={safeState.editing}
                 aria-controls={`${rowId}-editor`}
               >
-                {state.editing ? 'Done' : 'Edit'}
+                {safeState.editing ? 'Done' : 'Edit'}
               </button>
             )}
           </div>
@@ -405,7 +430,7 @@ function ReconciliationProposalRow({
           <div
             className={cn(
               'rounded-md border px-3 py-2',
-              state.accepted
+              safeState.accepted
                 ? 'border-primary-300 bg-primary-50/60 dark:border-primary-700 dark:bg-primary-950/30'
                 : 'border-border bg-background'
             )}
@@ -422,9 +447,9 @@ function ReconciliationProposalRow({
               id={`${rowId}-editor`}
               className="text-foreground mt-0.5 break-words"
             >
-              {state.editing && proposal.renderEditor
-                ? proposal.renderEditor(state.value, onValueChange)
-                : render(state.value)}
+              {safeState.editing && proposal.renderEditor
+                ? proposal.renderEditor(safeState.value, onValueChange)
+                : render(safeState.value)}
             </dd>
           </div>
         </dl>
@@ -534,7 +559,24 @@ function AIReconciliationPanel({
     [proposals, isEqual]
   );
 
-  const idsKey = effective.map((p) => p.id).join('|');
+  // A signature that changes whenever any field we use for initial state
+  // changes — id, proposed value, defaultAccepted, required, or confidence.
+  // Without this, an updated `proposed` value on an existing id would leave
+  // stale state in place and `handleApply` could submit the old value.
+  const stateSignature = React.useMemo(
+    () =>
+      effective
+        .map(
+          (p) =>
+            `${p.id}\u241F${stableStringify(p.proposed)}\u241F${
+              p.defaultAccepted ?? ''
+            }\u241F${p.required ?? ''}\u241F${p.confidence ?? ''}\u241F${
+              p.confidenceLevel ?? ''
+            }`
+        )
+        .join('|'),
+    [effective]
+  );
 
   const [rowStates, setRowStates] = React.useState<Record<string, RowState>>(
     () =>
@@ -565,7 +607,7 @@ function AIReconciliationPanel({
       )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idsKey]);
+  }, [stateSignature]);
 
   // Empty-state callback ----------------------------------------------------
   const reportedEmpty = React.useRef(false);
@@ -589,7 +631,12 @@ function AIReconciliationPanel({
         const next: Record<string, RowState> = { ...prev };
         for (const p of effective) {
           if (p.required && !accepted) continue;
-          next[p.id] = { ...prev[p.id], accepted };
+          const base: RowState = prev[p.id] ?? {
+            accepted: defaultAcceptedFor(p),
+            editing: false,
+            value: p.proposed,
+          };
+          next[p.id] = { ...base, accepted };
         }
         return next;
       });
@@ -597,25 +644,58 @@ function AIReconciliationPanel({
     [effective]
   );
 
-  const setRowAccepted = React.useCallback((id: string, accepted: boolean) => {
-    setRowStates((prev) => ({ ...prev, [id]: { ...prev[id], accepted } }));
-  }, []);
+  const setRowAccepted = React.useCallback(
+    (id: string, accepted: boolean) => {
+      const proposal = effective.find((p) => p.id === id);
+      setRowStates((prev) => {
+        const base: RowState = prev[id] ?? {
+          accepted: proposal ? defaultAcceptedFor(proposal) : false,
+          editing: false,
+          value: proposal?.proposed,
+        };
+        return { ...prev, [id]: { ...base, accepted } };
+      });
+    },
+    [effective]
+  );
 
-  const setRowValue = React.useCallback((id: string, value: unknown) => {
-    setRowStates((prev) => ({ ...prev, [id]: { ...prev[id], value } }));
-  }, []);
+  const setRowValue = React.useCallback(
+    (id: string, value: unknown) => {
+      const proposal = effective.find((p) => p.id === id);
+      setRowStates((prev) => {
+        const base: RowState = prev[id] ?? {
+          accepted: proposal ? defaultAcceptedFor(proposal) : false,
+          editing: false,
+          value: proposal?.proposed,
+        };
+        return { ...prev, [id]: { ...base, value } };
+      });
+    },
+    [effective]
+  );
 
-  const toggleRowEditing = React.useCallback((id: string) => {
-    setRowStates((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], editing: !prev[id].editing },
-    }));
-  }, []);
+  const toggleRowEditing = React.useCallback(
+    (id: string) => {
+      const proposal = effective.find((p) => p.id === id);
+      setRowStates((prev) => {
+        const base: RowState = prev[id] ?? {
+          accepted: proposal ? defaultAcceptedFor(proposal) : false,
+          editing: false,
+          value: proposal?.proposed,
+        };
+        return { ...prev, [id]: { ...base, editing: !base.editing } };
+      });
+    },
+    [effective]
+  );
 
   const handleApply = React.useCallback(async () => {
     const accepted: ReconciliationAcceptedChange[] = effective
       .filter((p) => rowStates[p.id]?.accepted)
-      .map((p) => ({ id: p.id, value: rowStates[p.id].value }));
+      .map((p) => ({
+        id: p.id,
+        value: rowStates[p.id]?.value ?? p.proposed,
+      }));
     if (accepted.length === 0) return;
     try {
       setSubmitting(true);
@@ -625,12 +705,20 @@ function AIReconciliationPanel({
     }
   }, [effective, rowStates, onApply]);
 
-  // Keyboard shortcut: `A` toggles accept-all when focus is inside ----------
+  // Keyboard shortcuts:
+  //  - `A` toggles accept-all when focus is inside
+  //  - `Cmd/Ctrl+Enter` submits (Apply)
   const containerRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     const el = containerRef.current;
     if (!el) return undefined;
     const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        if (acceptedCount === 0 || submitting) return;
+        e.preventDefault();
+        void handleApply();
+        return;
+      }
       if (e.key !== 'a' && e.key !== 'A') return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const target = e.target as HTMLElement | null;
@@ -643,7 +731,7 @@ function AIReconciliationPanel({
     };
     el.addEventListener('keydown', handler);
     return () => el.removeEventListener('keydown', handler);
-  }, [acceptedCount, effective.length, setAllAccepted]);
+  }, [acceptedCount, effective.length, setAllAccepted, handleApply, submitting]);
 
   const allAccepted =
     effective.length > 0 && acceptedCount === effective.length;
