@@ -123,7 +123,7 @@ export interface ReconciliationAcceptedChange {
   value: unknown;
 }
 
-export interface AIReconciliationPanelProps extends VariantProps<
+export interface AIReconciliationPanelBaseProps extends VariantProps<
   typeof panelVariants
 > {
   /** Headline, e.g. `Update your profile from your license?` */
@@ -142,12 +142,6 @@ export interface AIReconciliationPanelProps extends VariantProps<
   onApply: (accepted: ReconciliationAcceptedChange[]) => Promise<void> | void;
   /** Called when the user dismisses without applying. */
   onSkip?: () => void;
-  /** Render mode. Defaults to `panel`. */
-  variant?: 'panel' | 'modal';
-  /** Required when `variant="modal"`. */
-  open?: boolean;
-  /** Required when `variant="modal"`. */
-  onOpenChange?: (open: boolean) => void;
   /** Override button labels. */
   applyLabel?: string;
   skipLabel?: string;
@@ -167,6 +161,25 @@ export interface AIReconciliationPanelProps extends VariantProps<
   className?: string;
 }
 
+export interface AIReconciliationPanelVariantProps extends AIReconciliationPanelBaseProps {
+  /** Render mode. Defaults to `panel`. */
+  variant?: 'panel';
+  open?: never;
+  onOpenChange?: never;
+}
+
+export interface AIReconciliationModalProps extends AIReconciliationPanelBaseProps {
+  variant: 'modal';
+  /** Controls modal visibility. */
+  open: boolean;
+  /** Modal open-state change handler. */
+  onOpenChange: (open: boolean) => void;
+}
+
+export type AIReconciliationPanelProps =
+  | AIReconciliationPanelVariantProps
+  | AIReconciliationModalProps;
+
 // ============================================================================
 // Equality helpers
 // ============================================================================
@@ -175,10 +188,15 @@ function normalizeString(value: string): string {
   return value.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
-function stableStringify(value: unknown): string {
+function stableStringify(
+  value: unknown,
+  seen: WeakSet<object> = new WeakSet()
+): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (seen.has(value as object)) return '"[Circular]"';
+  seen.add(value as object);
   if (Array.isArray(value))
-    return '[' + value.map(stableStringify).join(',') + ']';
+    return '[' + value.map((v) => stableStringify(v, seen)).join(',') + ']';
   const keys = Object.keys(value as Record<string, unknown>).sort();
   return (
     '{' +
@@ -187,11 +205,21 @@ function stableStringify(value: unknown): string {
         (k) =>
           JSON.stringify(k) +
           ':' +
-          stableStringify((value as Record<string, unknown>)[k])
+          stableStringify((value as Record<string, unknown>)[k], seen)
       )
       .join(',') +
     '}'
   );
+}
+
+function safeStableStringify(value: unknown): string {
+  try {
+    return stableStringify(value);
+  } catch {
+    // e.g. a getter that throws; fall back to a value-independent sentinel
+    // that still differs from `undefined` / `null`.
+    return '"[Unserializable]"';
+  }
 }
 
 /**
@@ -563,7 +591,7 @@ function AIReconciliationPanel({
       effective
         .map(
           (p) =>
-            `${p.id}\u241F${stableStringify(p.proposed)}\u241F${
+            `${p.id}\u241F${safeStableStringify(p.proposed)}\u241F${
               p.defaultAccepted ?? ''
             }\u241F${p.required ?? ''}\u241F${p.confidence ?? ''}\u241F${
               p.confidenceLevel ?? ''
@@ -773,7 +801,11 @@ function AIReconciliationPanel({
           aria-label={allAccepted ? rejectAllLabel : acceptAllLabel}
           label={allAccepted ? rejectAllLabel : acceptAllLabel}
         />
-        <p className="text-muted-foreground text-xs" aria-live="polite">
+        <p
+          className="text-muted-foreground text-xs"
+          role="status"
+          aria-live="polite"
+        >
           {acceptedCount} of {effective.length} selected
         </p>
       </div>

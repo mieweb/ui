@@ -328,6 +328,10 @@ export const miewebUISafelist = [
   'dark:bg-amber-900/40',
   'dark:text-amber-200',
   'dark:text-amber-300',
+  'ring-1',
+  'last:border-b-0',
+  'border-dashed',
+  'text-[11px]',
 ];
 
 export interface MiewebUIPreset {

@@ -121,6 +121,7 @@ export const NothingToReconcile: Story = {
     ],
     onApply: handleApply,
     onSkip: () => undefined,
+    onNothingToReconcile: () => undefined,
   },
   parameters: {
     docs: {
