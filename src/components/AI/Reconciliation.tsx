@@ -123,8 +123,9 @@ export interface ReconciliationAcceptedChange {
   value: unknown;
 }
 
-export interface AIReconciliationPanelProps
-  extends VariantProps<typeof panelVariants> {
+export interface AIReconciliationPanelProps extends VariantProps<
+  typeof panelVariants
+> {
   /** Headline, e.g. `Update your profile from your license?` */
   title: string;
   /** Optional explainer rendered under the title. */
@@ -138,9 +139,7 @@ export interface AIReconciliationPanelProps
    * (with their possibly-edited value). Async — the button shows a spinner
    * while the promise is pending.
    */
-  onApply: (
-    accepted: ReconciliationAcceptedChange[]
-  ) => Promise<void> | void;
+  onApply: (accepted: ReconciliationAcceptedChange[]) => Promise<void> | void;
   /** Called when the user dismisses without applying. */
   onSkip?: () => void;
   /** Render mode. Defaults to `panel`. */
@@ -178,14 +177,17 @@ function normalizeString(value: string): string {
 
 function stableStringify(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+  if (Array.isArray(value))
+    return '[' + value.map(stableStringify).join(',') + ']';
   const keys = Object.keys(value as Record<string, unknown>).sort();
   return (
     '{' +
     keys
       .map(
         (k) =>
-          JSON.stringify(k) + ':' + stableStringify((value as Record<string, unknown>)[k])
+          JSON.stringify(k) +
+          ':' +
+          stableStringify((value as Record<string, unknown>)[k])
       )
       .join(',') +
     '}'
@@ -304,11 +306,7 @@ function formatValueDefault(value: unknown): React.ReactNode {
   return String(value);
 }
 
-function ConfidenceBadge({
-  level,
-}: {
-  level: ReconciliationConfidenceLevel;
-}) {
+function ConfidenceBadge({ level }: { level: ReconciliationConfidenceLevel }) {
   const labels: Record<ReconciliationConfidenceLevel, string> = {
     high: 'High confidence',
     medium: 'Medium confidence',
@@ -476,10 +474,7 @@ function ReconciliationProposalRow({
 // ============================================================================
 
 function relativeTimeLabel(date: Date): string {
-  const seconds = Math.max(
-    0,
-    Math.round((Date.now() - date.getTime()) / 1000)
-  );
+  const seconds = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
   if (seconds < 45) return 'just now';
   if (seconds < 90) return '1 minute ago';
   if (seconds < 3600) return `${Math.round(seconds / 60)} minutes ago`;
@@ -731,7 +726,13 @@ function AIReconciliationPanel({
     };
     el.addEventListener('keydown', handler);
     return () => el.removeEventListener('keydown', handler);
-  }, [acceptedCount, effective.length, setAllAccepted, handleApply, submitting]);
+  }, [
+    acceptedCount,
+    effective.length,
+    setAllAccepted,
+    handleApply,
+    submitting,
+  ]);
 
   const allAccepted =
     effective.length > 0 && acceptedCount === effective.length;
@@ -907,9 +908,7 @@ function AIReconciliationPanel({
       <div className="border-border border-b px-4 pt-4 pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h2 className="text-foreground text-base font-semibold">
-              {title}
-            </h2>
+            <h2 className="text-foreground text-base font-semibold">{title}</h2>
             {description && (
               <p className="text-muted-foreground mt-1 text-sm">
                 {description}
@@ -936,7 +935,4 @@ function AIReconciliationPanel({
 
 AIReconciliationPanel.displayName = 'AIReconciliationPanel';
 
-export {
-  AIReconciliationPanel,
-  panelVariants as reconciliationPanelVariants,
-};
+export { AIReconciliationPanel, panelVariants as reconciliationPanelVariants };

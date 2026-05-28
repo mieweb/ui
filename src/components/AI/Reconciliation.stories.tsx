@@ -49,9 +49,7 @@ const licenseProposals: ReconciliationProposal[] = [
   },
 ];
 
-const handleApply = async (
-  accepted: Array<{ id: string; value: unknown }>
-) => {
+const handleApply = async (accepted: Array<{ id: string; value: unknown }>) => {
   // Stories swallow the result; the panel awaits this promise to drive its
   // loading state.
   void accepted;
@@ -61,8 +59,7 @@ const handleApply = async (
 export const Default: Story = {
   args: {
     title: 'Update your profile from your license?',
-    description:
-      'Review the suggested changes and choose which ones to apply.',
+    description: 'Review the suggested changes and choose which ones to apply.',
     source: {
       label: "Driver's License",
       generatedAt: new Date(Date.now() - 1000 * 60 * 2),
