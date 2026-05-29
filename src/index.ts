@@ -6,12 +6,15 @@ export * from './components/Address';
 // This avoids forcing ag-grid-community/ag-grid-react on all consumers.
 // See: src/ag-grid.ts
 // Same with DataVis (src/datavis.ts)
+export * from './components/AdminPanel';
 export * from './components/AI';
 export * from './components/Alert';
+export * from './components/AlertDialog';
 export * from './components/AppHeader';
 export * from './components/AudioPlayer';
 export * from './components/AudioRecorder';
 export * from './components/AuthDialog';
+export * from './components/Autocomplete';
 export * from './components/Avatar';
 export * from './components/Badge';
 export * from './components/BookingDialog';
@@ -20,14 +23,33 @@ export * from './components/BusinessHours';
 export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/Card';
+export * from './components/CaseAbsenceRestrictionsTab';
+export * from './components/CaseAbsenceTab';
+export * from './components/CaseActivityTab';
+export * from './components/CaseContactTab';
+export * from './components/CaseDetailsTab';
+export * from './components/CaseDiagnosisTab';
+export * from './components/CaseDocumentsTab';
+export * from './components/CaseLettersTab';
+export * from './components/CaseManager';
+export * from './components/CaseNotesTab';
+export * from './components/CasePayInformationTab';
+export * from './components/CaseQuestionnairesTab';
+export * from './components/CaseRestrictionsTab';
+export * from './components/CaseTodosTab';
+export * from './components/CaseTypeManager';
+export * from './components/CasesDashboard';
 export * from './components/Checkbox';
 export * from './components/CheckrIntegration';
+export * from './components/CodeTableManager';
+export * from './components/Collapsible';
 export * from './components/CommandPalette';
 export * from './components/ConnectionStatus';
 export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
+export * from './components/CreateCaseWizard';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
@@ -53,10 +75,12 @@ export * from './components/EmployerView';
 export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
+export * from './components/FloatingWindow';
 export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
 export * from './components/Input';
 export * from './components/InventoryManager';
+export * from './components/Label';
 export * from './components/InviteUserModal';
 export * from './components/InvoiceList';
 export * from './components/InvoicePaymentPage';
@@ -111,8 +135,10 @@ export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
+export * from './components/RichTextEditor';
 export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
+export * from './components/ScrollArea';
 export * from './components/Select';
 export * from './components/ServiceAccordion';
 export * from './components/ServiceBadge';
@@ -122,6 +148,8 @@ export * from './components/ServiceGrid';
 export * from './components/ServicePicker';
 export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
+export * from './components/Separator';
+export * from './components/Sheet';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,
@@ -141,12 +169,17 @@ export * from './components/Switch';
 export * from './components/Table';
 export * from './components/TableOfContents';
 export * from './components/Tabs';
+export * from './components/TemplateManager';
 export * from './components/Text';
 export * from './components/Textarea';
 export * from './components/ThemeProvider';
 export * from './components/Timeline';
 export * from './components/Toast';
+export * from './components/TodoBacklog';
+export * from './components/TodoTemplateBuilder';
+export * from './components/Toggle';
 export * from './components/Tooltip';
+export * from './components/UserManager';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
@@ -160,6 +193,7 @@ export {
   type ReportDatePickerProps,
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
+export * from './components/WorkStatusReport';
 
 // Hooks
 export * from './hooks';
