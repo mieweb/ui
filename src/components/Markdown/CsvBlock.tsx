@@ -1,10 +1,6 @@
-/**
- * CsvBlock — Renders CSV data as an interactive sortable table.
- * Requires `papaparse` to be installed by the consumer (optional peer dependency).
- */
+/** CSV data rendered as a sortable table. Requires `papaparse`. */
 import { Download } from 'lucide-react';
-import Papa from 'papaparse';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '../Button';
 import { FenceBlock } from './FenceBlock';
@@ -19,25 +15,83 @@ interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
+type CsvRow = Record<string, unknown>;
+type PapaParseFn = (input: string, config: unknown) => {
+  meta: { fields?: string[] };
+  data: CsvRow[];
+  errors: Array<{ message: string }>;
+};
+type PapaUnparseFn = (data: unknown) => string;
+type PapaModule = { default?: { parse: PapaParseFn; unparse: PapaUnparseFn } } & {
+  parse?: PapaParseFn;
+  unparse?: PapaUnparseFn;
+};
+
+let papaPromise: Promise<{ parse: PapaParseFn; unparse: PapaUnparseFn }> | null = null;
+function loadPapa() {
+  if (!papaPromise) {
+    papaPromise = import(/* @vite-ignore */ 'papaparse')
+      .then((mod: PapaModule) => {
+        const api = (mod.default ?? mod) as { parse: PapaParseFn; unparse: PapaUnparseFn };
+        if (!api?.parse) throw new Error('papaparse export not found');
+        return api;
+      })
+      .catch((err) => {
+        papaPromise = null;
+        throw err;
+      });
+  }
+  return papaPromise;
+}
+
+interface ParsedCsv {
+  headers: string[];
+  rows: CsvRow[];
+  error: string | null;
+}
+
 export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [papa, setPapa] = useState<{ parse: PapaParseFn; unparse: PapaUnparseFn } | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const parsed = useMemo(() => {
+  useEffect(() => {
+    let cancelled = false;
+    loadPapa()
+      .then((api) => {
+        if (!cancelled) setPapa(api);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setLoadError(
+            'CSV preview requires the `papaparse` package. Install it with `npm install papaparse`.',
+          );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const parsed = useMemo<ParsedCsv>(() => {
+    if (!papa) return { headers: [], rows: [], error: null };
     try {
-      const result = Papa.parse(code, {
+      const result = papa.parse(code, {
         header: true,
         dynamicTyping: true,
-        skipEmptyLines: 'greedy' as const,
-      }) as Papa.ParseResult<Record<string, string>>;
+        skipEmptyLines: 'greedy',
+      });
+      if (result.errors?.length) {
+        return {
+          headers: result.meta.fields ?? [],
+          rows: result.data,
+          error: result.errors.map((e) => e.message).join('; '),
+        };
+      }
       return { headers: result.meta.fields ?? [], rows: result.data, error: null };
     } catch (err) {
-      return {
-        headers: [] as string[],
-        rows: [] as Record<string, string>[],
-        error: (err as Error).message,
-      };
+      return { headers: [], rows: [], error: (err as Error).message };
     }
-  }, [code]);
+  }, [code, papa]);
 
   const sortedRows = useMemo(() => {
     if (!sortConfig || parsed.error) return parsed.rows;
@@ -65,7 +119,8 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
   }, []);
 
   const handleExportCsv = useCallback(() => {
-    const csvContent = Papa.unparse(sortedRows);
+    if (!papa) return;
+    const csvContent = papa.unparse(sortedRows);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -73,7 +128,25 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
     link.download = `data-${id}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-  }, [sortedRows, id]);
+  }, [sortedRows, id, papa]);
+
+  if (loadError) {
+    return (
+      <FenceBlock code={code} language="csv" error={loadError}>
+        <div />
+      </FenceBlock>
+    );
+  }
+
+  if (!papa) {
+    return (
+      <FenceBlock code={code} language="csv" supportsRawView>
+        <div className="flex items-center justify-center p-6 text-sm text-neutral-500">
+          Loading CSV parser…
+        </div>
+      </FenceBlock>
+    );
+  }
 
   if (parsed.error) {
     return (

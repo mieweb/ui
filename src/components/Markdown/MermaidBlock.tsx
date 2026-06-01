@@ -2,6 +2,7 @@
  * MermaidBlock — Renders Mermaid diagrams.
  * Requires `mermaid` to be installed by the consumer (optional peer dependency).
  */
+import DOMPurify from 'dompurify';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { FenceBlock } from './FenceBlock';
@@ -28,13 +29,22 @@ async function getMermaid(): Promise<MermaidApi> {
       m.initialize({
         startOnLoad: false,
         theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-        securityLevel: 'loose',
+        securityLevel: 'strict',
       });
       mermaidInstance = m;
       return m;
     });
   }
   return mermaidReady;
+}
+
+function sanitiseSvg(svg: string): string {
+  return DOMPurify.sanitize(svg, {
+    USE_PROFILES: { svg: true, svgFilters: true },
+    ADD_ATTR: ['target'],
+    FORBID_TAGS: ['script', 'foreignObject'],
+    FORBID_ATTR: ['onload', 'onerror', 'onclick'],
+  }) as string;
 }
 
 export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
@@ -49,7 +59,7 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
       const mermaid = await getMermaid();
       await mermaid.parse(code);
       const { svg: rendered } = await mermaid.render(`mermaid-${id}`, code);
-      setSvg(rendered);
+      setSvg(sanitiseSvg(rendered));
     } catch (err) {
       setError((err as Error).message ?? 'Failed to render diagram');
     } finally {

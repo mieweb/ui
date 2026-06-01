@@ -1,8 +1,6 @@
-/**
- * HtmlPreviewBlock — Sandboxed iframe preview for HTML code blocks.
- */
+/** Sandboxed iframe preview for HTML code blocks. */
 import { Code, Eye, Maximize2 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../Button';
 import { FenceBlock } from './FenceBlock';
@@ -27,12 +25,16 @@ function wrapFragment(html: string): string {
 export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeHeight, setIframeHeight] = useState(200);
 
   const srcdoc = isFullDocument(code) ? code : wrapFragment(code);
 
   useEffect(() => {
-    function handleMessage(event: MessageEvent) {
+    function handleMessage(event: globalThis.MessageEvent) {
+      // Sandboxed srcDoc iframes report origin "null"; validate source to prevent spoofing.
+      if (event.origin !== 'null' && event.origin !== window.location.origin) return;
+      if (event.source !== iframeRef.current?.contentWindow) return;
       if (event.data?.type === 'HTML_PREVIEW_RESIZE' && event.data?.id === id) {
         setIframeHeight(Math.min(Math.max(event.data.height, 200), 4000));
       }
@@ -40,10 +42,6 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [id]);
-
-  const handleCloseExpanded = useCallback(() => {
-    setExpanded(false);
-  }, []);
 
   useEffect(() => {
     if (!expanded) return;
@@ -83,6 +81,7 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
 
           {showPreview ? (
             <iframe
+              ref={iframeRef}
               srcDoc={srcdoc}
               sandbox="allow-scripts allow-forms"
               referrerPolicy="no-referrer"
@@ -101,14 +100,17 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
       {expanded && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={handleCloseExpanded}
           role="dialog"
           aria-modal="true"
+          aria-label="HTML Preview"
         >
-          <div
-            className="h-[90vh] w-[90vw] overflow-hidden rounded-lg bg-white shadow-xl dark:bg-neutral-900"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <button
+            type="button"
+            aria-label="Close preview"
+            className="absolute inset-0 h-full w-full cursor-default border-0 bg-transparent p-0"
+            onClick={() => setExpanded(false)}
+          />
+          <div className="relative h-[90vh] w-[90vw] overflow-hidden rounded-lg bg-white shadow-xl dark:bg-neutral-900">
             <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-2 dark:border-neutral-700">
               <span className="text-sm font-medium">HTML Preview</span>
               <Button variant="ghost" size="sm" onClick={() => setExpanded(false)}>

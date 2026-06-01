@@ -1,9 +1,5 @@
-/**
- * SurveyBlock — Renders survey/questionnaire forms from JSON/YAML data.
- * Requires `js-yaml` to be installed by the consumer (optional peer dependency).
- */
-import yaml from 'js-yaml';
-import React, { useMemo } from 'react';
+/** Survey/questionnaire preview from JSON or YAML. Requires `js-yaml` for YAML input. */
+import React, { useEffect, useState } from 'react';
 
 import { FenceBlock } from './FenceBlock';
 
@@ -26,23 +22,37 @@ interface ParsedSurvey {
   error: string | null;
 }
 
-function parseSurveyData(code: string): ParsedSurvey {
-  let data: unknown;
-
-  try {
-    data = JSON.parse(code);
-  } catch {
-    try {
-      data = yaml.load(code);
-    } catch (err) {
-      return { fields: [], error: `Failed to parse survey data: ${(err as Error).message}` };
-    }
+type YamlLoadFn = (input: string) => unknown;
+let yamlPromise: Promise<YamlLoadFn> | null = null;
+function loadYaml(): Promise<YamlLoadFn> {
+  if (!yamlPromise) {
+    yamlPromise = import(/* @vite-ignore */ 'js-yaml')
+      .then((mod) => {
+        const api = (mod as { default?: { load?: YamlLoadFn }; load?: YamlLoadFn }).default ?? mod;
+        const load = (api as { load?: YamlLoadFn }).load;
+        if (typeof load !== 'function') throw new Error('js-yaml load not found');
+        return load;
+      })
+      .catch((err) => {
+        yamlPromise = null;
+        throw err;
+      });
   }
+  return yamlPromise;
+}
 
+function tryParseJson(code: string): { ok: true; data: unknown } | { ok: false } {
+  try {
+    return { ok: true, data: JSON.parse(code) };
+  } catch {
+    return { ok: false };
+  }
+}
+
+function elementsToParsed(data: unknown): ParsedSurvey {
   if (!data || typeof data !== 'object') {
     return { fields: [], error: 'Invalid survey data format' };
   }
-
   const obj = data as Record<string, unknown>;
 
   let elements: unknown[] = [];
@@ -66,7 +76,54 @@ function parseSurveyData(code: string): ParsedSurvey {
 }
 
 export const SurveyBlock: React.FC<SurveyBlockProps> = ({ code, id }) => {
-  const { fields, error } = useMemo(() => parseSurveyData(code), [code]);
+  const [parsed, setParsed] = useState<ParsedSurvey | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const jsonResult = tryParseJson(code);
+    if (jsonResult.ok) {
+      setParsed(elementsToParsed(jsonResult.data));
+      return;
+    }
+
+    loadYaml()
+      .then((load) => {
+        try {
+          const data = load(code);
+          if (!cancelled) setParsed(elementsToParsed(data));
+        } catch (err) {
+          if (!cancelled)
+            setParsed({
+              fields: [],
+              error: `Failed to parse survey data: ${(err as Error).message}`,
+            });
+        }
+      })
+      .catch(() => {
+        if (!cancelled)
+          setParsed({
+            fields: [],
+            error:
+              'Survey preview requires the `js-yaml` package for YAML input. Install it with `npm install js-yaml`.',
+          });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
+
+  if (!parsed) {
+    return (
+      <FenceBlock code={code} language="survey" supportsRawView>
+        <div className="flex items-center justify-center p-6 text-sm text-neutral-500">
+          Loading survey…
+        </div>
+      </FenceBlock>
+    );
+  }
+
+  const { fields, error } = parsed;
 
   return (
     <FenceBlock code={code} language="survey" supportsRawView error={error ?? undefined}>

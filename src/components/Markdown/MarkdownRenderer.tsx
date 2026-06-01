@@ -1,18 +1,24 @@
 /**
- * MarkdownRenderer — Renders markdown text with special block handling.
- *
- * Converts markdown to HTML via useMarkdown hook, then mounts React components
- * for special fence blocks (mermaid, csv, survey, html-preview) via portals.
+ * MarkdownRenderer — renders markdown with React components for special fence blocks.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 
-import { CodeBlock } from './CodeBlock';
-import { CsvBlock } from './CsvBlock';
-import { HtmlPreviewBlock } from './HtmlPreviewBlock';
-import { MermaidBlock } from './MermaidBlock';
-import { SurveyBlock } from './SurveyBlock';
 import { useMarkdown } from './useMarkdown';
+
+// Block components are lazy-loaded so optional peer deps (papaparse, js-yaml, mermaid)
+// aren't bundled unless actually rendered.
+const CsvBlock = lazy(() => import('./CsvBlock').then((m) => ({ default: m.CsvBlock })));
+const HtmlPreviewBlock = lazy(() =>
+  import('./HtmlPreviewBlock').then((m) => ({ default: m.HtmlPreviewBlock })),
+);
+const MermaidBlock = lazy(() =>
+  import('./MermaidBlock').then((m) => ({ default: m.MermaidBlock })),
+);
+const SurveyBlock = lazy(() => import('./SurveyBlock').then((m) => ({ default: m.SurveyBlock })));
+
+const BlockFallback: React.FC = () => (
+  <div className="flex items-center justify-center p-4 text-sm text-neutral-500">Loading…</div>
+);
 
 export interface MarkdownRendererProps {
   /** Raw markdown text */
@@ -25,12 +31,50 @@ export interface MarkdownRendererProps {
   streaming?: boolean;
 }
 
-interface BlockPortal {
-  id: string;
+// Matches <div data-block-type="X" data-block-id="Y" data-code="Z"></div>
+const BLOCK_RE =
+  /<div data-block-type="([^"]+)" data-block-id="([^"]+)" data-code="([^"]*)"[^>]*><\/div>/g;
+
+interface HtmlSegment {
+  html: string;
+}
+interface BlockSegment {
   type: string;
+  id: string;
   code: string;
-  language?: string;
-  container: Element;
+}
+type Segment = HtmlSegment | BlockSegment;
+
+function splitHtml(html: string): Segment[] {
+  const segments: Segment[] = [];
+  let last = 0;
+  for (const m of html.matchAll(BLOCK_RE)) {
+    if (m.index > last) segments.push({ html: html.slice(last, m.index) });
+    segments.push({ type: m[1], id: m[2], code: decodeURIComponent(m[3]) });
+    last = m.index + m[0].length;
+  }
+  if (last < html.length) segments.push({ html: html.slice(last) });
+  return segments;
+}
+
+function renderBlock(seg: BlockSegment): React.ReactNode {
+  const wrap = (node: React.ReactNode) => (
+    <Suspense key={seg.id} fallback={<BlockFallback />}>
+      {node}
+    </Suspense>
+  );
+  switch (seg.type) {
+    case 'mermaid':
+      return wrap(<MermaidBlock code={seg.code} id={seg.id} />);
+    case 'csv':
+      return wrap(<CsvBlock code={seg.code} id={seg.id} />);
+    case 'survey':
+      return wrap(<SurveyBlock code={seg.code} id={seg.id} />);
+    case 'html-preview':
+      return wrap(<HtmlPreviewBlock code={seg.code} id={seg.id} />);
+    default:
+      return null;
+  }
 }
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
@@ -40,9 +84,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   streaming = false,
 }) => {
   const { render, renderAsync } = useMarkdown();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [html, setHtml] = useState('');
-  const [portals, setPortals] = useState<BlockPortal[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,9 +99,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
     async function doRender() {
       const rendered = await renderAsync(text, effectiveKey);
-      if (!cancelled) {
-        setHtml(rendered);
-      }
+      if (!cancelled) setHtml(rendered);
     }
 
     if (streaming) {
@@ -73,72 +113,18 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     };
   }, [text, cacheKey, streaming, render, renderAsync]);
 
-  useEffect(() => {
-    if (!containerRef.current || !html) return;
-
-    const blocks: BlockPortal[] = [];
-    const placeholders = containerRef.current.querySelectorAll('[data-block-type]');
-
-    for (const el of placeholders) {
-      const type = el.getAttribute('data-block-type');
-      const id = el.getAttribute('data-block-id');
-      const encodedCode = el.getAttribute('data-code');
-
-      if (!type || !id || !encodedCode) continue;
-
-      const code = decodeURIComponent(encodedCode);
-      const language = el.getAttribute('data-lang') ?? undefined;
-      blocks.push({ id, type, code, language, container: el });
-    }
-
-    setPortals(blocks);
-  }, [html]);
-
-  const renderPortal = useCallback((portal: BlockPortal) => {
-    switch (portal.type) {
-      case 'code':
-        return createPortal(
-          <CodeBlock code={portal.code} language={portal.language} />,
-          portal.container,
-          portal.id,
-        );
-      case 'mermaid':
-        return createPortal(
-          <MermaidBlock code={portal.code} id={portal.id} />,
-          portal.container,
-          portal.id,
-        );
-      case 'csv':
-        return createPortal(
-          <CsvBlock code={portal.code} id={portal.id} />,
-          portal.container,
-          portal.id,
-        );
-      case 'survey':
-        return createPortal(
-          <SurveyBlock code={portal.code} id={portal.id} />,
-          portal.container,
-          portal.id,
-        );
-      case 'html-preview':
-        return createPortal(
-          <HtmlPreviewBlock code={portal.code} id={portal.id} />,
-          portal.container,
-          portal.id,
-        );
-      default:
-        return null;
-    }
-  }, []);
+  const segments = splitHtml(html);
+  const proseClass = `prose prose-sm dark:prose-invert max-w-none ${className}`.trim();
 
   return (
-    <>
-      <div
-        ref={containerRef}
-        className={`prose prose-sm dark:prose-invert max-w-none ${className}`.trim()}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-      {portals.map(renderPortal)}
-    </>
+    <div className={proseClass}>
+      {segments.map((seg, i) =>
+        'html' in seg ? (
+            <div key={i} dangerouslySetInnerHTML={{ __html: seg.html }} />
+        ) : (
+          renderBlock(seg)
+        ),
+      )}
+    </div>
   );
 };
