@@ -18,8 +18,14 @@ interface SortConfig {
 type CsvRow = Record<string, unknown>;
 // Minimal surface of papaparse we actually use, avoiding overload conflicts.
 interface PapaApi {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parse(input: string, config?: any): { meta: { fields?: string[] }; data: CsvRow[]; errors: Array<{ message: string }> };
+  parse(
+    input: string,
+    config?: Record<string, unknown>
+  ): {
+    meta: { fields?: string[] };
+    data: CsvRow[];
+    errors: Array<{ message: string }>;
+  };
   unparse(data: unknown): string;
 }
 
@@ -27,9 +33,8 @@ let papaPromise: Promise<PapaApi> | null = null;
 function loadPapa() {
   if (!papaPromise) {
     papaPromise = import(/* @vite-ignore */ 'papaparse')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((mod: any) => {
-        const api: PapaApi = mod.default ?? mod;
+      .then((mod: { default?: PapaApi } & Partial<PapaApi>) => {
+        const api: PapaApi = (mod.default ?? mod) as PapaApi;
         if (!api?.parse) throw new Error('papaparse export not found');
         return api;
       })
@@ -61,7 +66,7 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
       .catch(() => {
         if (!cancelled)
           setLoadError(
-            'CSV preview requires the `papaparse` package. Install it with `npm install papaparse`.',
+            'CSV preview requires the `papaparse` package. Install it with `npm install papaparse`.'
           );
       });
     return () => {
@@ -84,7 +89,11 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
           error: result.errors.map((e) => e.message).join('; '),
         };
       }
-      return { headers: result.meta.fields ?? [], rows: result.data, error: null };
+      return {
+        headers: result.meta.fields ?? [],
+        rows: result.data,
+        error: null,
+      };
     } catch (err) {
       return { headers: [], rows: [], error: (err as Error).message };
     }
@@ -158,8 +167,9 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
       <div className="relative">
         <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-1.5 dark:border-neutral-700">
           <span className="text-xs text-neutral-500 dark:text-neutral-400">
-            {sortedRows.length} row{sortedRows.length !== 1 ? 's' : ''} × {parsed.headers.length}{' '}
-            column{parsed.headers.length !== 1 ? 's' : ''}
+            {sortedRows.length} row{sortedRows.length !== 1 ? 's' : ''} ×{' '}
+            {parsed.headers.length} column
+            {parsed.headers.length !== 1 ? 's' : ''}
           </span>
           <Button
             variant="ghost"
@@ -181,11 +191,13 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
                   <th
                     key={header}
                     onClick={() => handleSort(header)}
-                    className="cursor-pointer select-none whitespace-nowrap px-3 py-2 text-left text-xs font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
+                    className="cursor-pointer px-3 py-2 text-left text-xs font-medium whitespace-nowrap text-neutral-600 select-none hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
                   >
                     {header}
                     {sortConfig?.column === header && (
-                      <span className="ml-1">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                      <span className="ml-1">
+                        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                      </span>
                     )}
                   </th>
                 ))}
@@ -193,11 +205,14 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700">
               {sortedRows.map((row, i) => (
-                <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+                <tr
+                  key={i}
+                  className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                >
                   {parsed.headers.map((header) => (
                     <td
                       key={header}
-                      className="whitespace-nowrap px-3 py-1.5 text-neutral-700 dark:text-neutral-300"
+                      className="px-3 py-1.5 whitespace-nowrap text-neutral-700 dark:text-neutral-300"
                     >
                       {row[header] != null ? String(row[header]) : ''}
                     </td>

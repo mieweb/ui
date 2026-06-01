@@ -3,21 +3,28 @@
  */
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 
+import { CodeBlock } from './CodeBlock';
 import { useMarkdown } from './useMarkdown';
 
 // Block components are lazy-loaded so optional peer deps (papaparse, js-yaml, mermaid)
 // aren't bundled unless actually rendered.
-const CsvBlock = lazy(() => import('./CsvBlock').then((m) => ({ default: m.CsvBlock })));
+const CsvBlock = lazy(() =>
+  import('./CsvBlock').then((m) => ({ default: m.CsvBlock }))
+);
 const HtmlPreviewBlock = lazy(() =>
-  import('./HtmlPreviewBlock').then((m) => ({ default: m.HtmlPreviewBlock })),
+  import('./HtmlPreviewBlock').then((m) => ({ default: m.HtmlPreviewBlock }))
 );
 const MermaidBlock = lazy(() =>
-  import('./MermaidBlock').then((m) => ({ default: m.MermaidBlock })),
+  import('./MermaidBlock').then((m) => ({ default: m.MermaidBlock }))
 );
-const SurveyBlock = lazy(() => import('./SurveyBlock').then((m) => ({ default: m.SurveyBlock })));
+const SurveyBlock = lazy(() =>
+  import('./SurveyBlock').then((m) => ({ default: m.SurveyBlock }))
+);
 
 const BlockFallback: React.FC = () => (
-  <div className="flex items-center justify-center p-4 text-sm text-neutral-500">Loading…</div>
+  <div className="flex items-center justify-center p-4 text-sm text-neutral-500">
+    Loading…
+  </div>
 );
 
 export interface MarkdownRendererProps {
@@ -31,9 +38,9 @@ export interface MarkdownRendererProps {
   streaming?: boolean;
 }
 
-// Matches <div data-block-type="X" data-block-id="Y" data-code="Z"></div>
+// Matches <div data-block-type="X" data-block-id="Y" data-code="Z" ...></div>
 const BLOCK_RE =
-  /<div data-block-type="([^"]+)" data-block-id="([^"]+)" data-code="([^"]*)"[^>]*><\/div>/g;
+  /<div data-block-type="([^"]+)" data-block-id="([^"]+)" data-code="([^"]*)"([^>]*)><\/div>/g;
 
 interface HtmlSegment {
   html: string;
@@ -42,6 +49,7 @@ interface BlockSegment {
   type: string;
   id: string;
   code: string;
+  lang?: string;
 }
 type Segment = HtmlSegment | BlockSegment;
 
@@ -50,7 +58,13 @@ function splitHtml(html: string): Segment[] {
   let last = 0;
   for (const m of html.matchAll(BLOCK_RE)) {
     if (m.index > last) segments.push({ html: html.slice(last, m.index) });
-    segments.push({ type: m[1], id: m[2], code: decodeURIComponent(m[3]) });
+    const langMatch = m[4]?.match(/data-lang="([^"]*)"/)?.[1];
+    segments.push({
+      type: m[1],
+      id: m[2],
+      code: decodeURIComponent(m[3]),
+      lang: langMatch ?? undefined,
+    });
     last = m.index + m[0].length;
   }
   if (last < html.length) segments.push({ html: html.slice(last) });
@@ -72,6 +86,10 @@ function renderBlock(seg: BlockSegment): React.ReactNode {
       return wrap(<SurveyBlock code={seg.code} id={seg.id} />);
     case 'html-preview':
       return wrap(<HtmlPreviewBlock code={seg.code} id={seg.id} />);
+    case 'code':
+      return wrap(
+        <CodeBlock code={seg.code} language={seg.lang || undefined} />
+      );
     default:
       return null;
   }
@@ -114,16 +132,17 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }, [text, cacheKey, streaming, render, renderAsync]);
 
   const segments = splitHtml(html);
-  const proseClass = `prose prose-sm dark:prose-invert max-w-none ${className}`.trim();
+  const proseClass =
+    `prose prose-sm dark:prose-invert max-w-none ${className}`.trim();
 
   return (
     <div className={proseClass}>
       {segments.map((seg, i) =>
         'html' in seg ? (
-            <div key={i} dangerouslySetInnerHTML={{ __html: seg.html }} />
+          <div key={i} dangerouslySetInnerHTML={{ __html: seg.html }} />
         ) : (
           renderBlock(seg)
-        ),
+        )
       )}
     </div>
   );

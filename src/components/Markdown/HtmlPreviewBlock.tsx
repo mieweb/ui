@@ -22,7 +22,10 @@ function wrapFragment(html: string): string {
 </html>`;
 }
 
-export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) => {
+export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({
+  code,
+  id,
+}) => {
   const [showPreview, setShowPreview] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -33,7 +36,8 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
   useEffect(() => {
     function handleMessage(event: globalThis.MessageEvent) {
       // Sandboxed srcDoc iframes report origin "null"; validate source to prevent spoofing.
-      if (event.origin !== 'null' && event.origin !== window.location.origin) return;
+      if (event.origin !== 'null' && event.origin !== window.location.origin)
+        return;
       if (event.source !== iframeRef.current?.contentWindow) return;
       if (event.data?.type === 'HTML_PREVIEW_RESIZE' && event.data?.id === id) {
         setIframeHeight(Math.min(Math.max(event.data.height, 200), 4000));
@@ -63,7 +67,11 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
               onClick={() => setShowPreview((v) => !v)}
               className="h-7 gap-1 px-2 text-xs"
             >
-              {showPreview ? <Code className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              {showPreview ? (
+                <Code className="h-3 w-3" />
+              ) : (
+                <Eye className="h-3 w-3" />
+              )}
               {showPreview ? 'Code' : 'Preview'}
             </Button>
             {showPreview && (
@@ -113,7 +121,11 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({ code, id }) 
           <div className="relative h-[90vh] w-[90vw] overflow-hidden rounded-lg bg-white shadow-xl dark:bg-neutral-900">
             <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-2 dark:border-neutral-700">
               <span className="text-sm font-medium">HTML Preview</span>
-              <Button variant="ghost" size="sm" onClick={() => setExpanded(false)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpanded(false)}
+              >
                 Close
               </Button>
             </div>

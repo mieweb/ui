@@ -72,7 +72,11 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
               aria-label={showRaw ? 'Show rendered view' : 'Show raw code'}
               className="h-7 w-7 p-0"
             >
-              {showRaw ? <Eye className="h-3.5 w-3.5" /> : <Code className="h-3.5 w-3.5" />}
+              {showRaw ? (
+                <Eye className="h-3.5 w-3.5" />
+              ) : (
+                <Code className="h-3.5 w-3.5" />
+              )}
             </Button>
           )}
           <Button
@@ -96,7 +100,7 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
           <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-300">
             {error}
           </div>
-          <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-neutral-600 dark:text-neutral-400">
+          <pre className="mt-2 overflow-x-auto text-xs whitespace-pre-wrap text-neutral-600 dark:text-neutral-400">
             <code>{code}</code>
           </pre>
         </div>

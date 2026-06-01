@@ -78,7 +78,10 @@ async function ensureLanguage(lang: string): Promise<boolean> {
   if (!loader) return false;
   try {
     const mod = (await loader()) as { default: unknown };
-    hljs.registerLanguage(key, mod.default as Parameters<typeof hljs.registerLanguage>[1]);
+    hljs.registerLanguage(
+      key,
+      mod.default as Parameters<typeof hljs.registerLanguage>[1]
+    );
     loadedLanguages.add(key);
     return true;
   } catch {
@@ -106,7 +109,14 @@ export function highlightCode(code: string, lang?: string): string {
 function sanitise(html: string): string {
   // Iframes are intentionally excluded — html fences use HtmlPreviewBlock instead.
   return DOMPurify.sanitize(html, {
-    ADD_ATTR: ['target', 'rel', 'data-block-type', 'data-block-id', 'data-code', 'data-lang'],
+    ADD_ATTR: [
+      'target',
+      'rel',
+      'data-block-type',
+      'data-block-id',
+      'data-code',
+      'data-lang',
+    ],
   }) as string;
 }
 
@@ -117,7 +127,8 @@ if (!_g.__markdownAnchorHookInstalled) {
   _g.__markdownAnchorHookInstalled = true;
   DOMPurify.addHook('afterSanitizeAttributes', (node: Element) => {
     const isAnchor =
-      (typeof HTMLAnchorElement !== 'undefined' && node instanceof HTMLAnchorElement) ||
+      (typeof HTMLAnchorElement !== 'undefined' &&
+        node instanceof HTMLAnchorElement) ||
       node.nodeName === 'A';
     if (isAnchor) {
       node.setAttribute('target', '_blank');
@@ -126,62 +137,8 @@ if (!_g.__markdownAnchorHookInstalled) {
   });
 }
 
-const COPY_BTN_HTML =
-  '<button type="button" class="fence-copy-btn" aria-label="Copy code">' +
-  '<svg class="fence-copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-  '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>' +
-  '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>' +
-  '</svg>' +
-  '<svg class="fence-check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-  '<polyline points="20 6 9 17 4 12"></polyline>' +
-  '</svg>' +
-  '<span class="fence-copy-label">Copy</span>' +
-  '<span class="fence-copied-label">Copied</span>' +
-  '</button>';
-
-// Use a marker on document to prevent duplicate listeners across HMR reloads.
-if (typeof document !== 'undefined' && !_g.__markdownCopyListenerInstalled) {
-  _g.__markdownCopyListenerInstalled = true;
-  document.addEventListener('click', (event) => {
-    const btn =
-      event.target instanceof Element
-        ? event.target.closest<HTMLButtonElement>('.fence-copy-btn')
-        : null;
-    if (!btn) return;
-    const encoded = btn.closest('.fence-block')?.getAttribute('data-code');
-    if (!encoded) return;
-    const code = decodeURIComponent(encoded);
-    const markCopied = () => {
-      btn.classList.add('is-copied');
-      btn.setAttribute('aria-label', 'Copied');
-      setTimeout(() => {
-        btn.classList.remove('is-copied');
-        btn.setAttribute('aria-label', 'Copy code');
-      }, 1500);
-    };
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(code).then(markCopied).catch(() => fallbackCopy(code, markCopied));
-    } else {
-      fallbackCopy(code, markCopied);
-    }
-  });
-}
-
-function fallbackCopy(text: string, onSuccess: () => void): void {
-  try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    if (document.execCommand('copy')) onSuccess();
-    document.body.removeChild(ta);
-  } catch {
-    /* copy unavailable */
-  }
-}
+// Use a marker on globalThis to prevent duplicate listeners across HMR reloads.
+// Copy for code blocks is handled by FenceBlock (React component).
 
 let blockCounter = 0;
 
@@ -203,11 +160,8 @@ function createRenderer() {
         return `<div data-block-type="survey" data-block-id="${blockId}" data-code="${encodedCode}"></div>`;
       case 'html':
         return `<div data-block-type="html-preview" data-block-id="${blockId}" data-code="${encodedCode}"></div>`;
-      default: {
-        const highlighted = highlightCode(code, normalised || undefined);
-        const header = `<div class="fence-block-header"><span class="fence-lang">${escapeHtml(normalised || 'code')}</span>${COPY_BTN_HTML}</div>`;
-        return `<div data-block-type="code" data-block-id="${blockId}" data-code="${encodedCode}" data-lang="${escapeHtml(normalised)}" class="fence-block">${header}<pre><code class="hljs">${highlighted}</code></pre></div>`;
-      }
+      default:
+        return `<div data-block-type="code" data-block-id="${blockId}" data-code="${encodedCode}" data-lang="${escapeHtml(normalised)}"></div>`;
     }
   };
 
@@ -216,7 +170,9 @@ function createRenderer() {
     const text =
       this && typeof (this as Record<string, unknown>).parser === 'object'
         ? (
-            this as { parser: { parseInline: (t: Tokens.Link['tokens']) => string } }
+            this as {
+              parser: { parseInline: (t: Tokens.Link['tokens']) => string };
+            }
           ).parser.parseInline(tokens)
         : token.text;
     const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
@@ -229,7 +185,11 @@ function createRenderer() {
         const content =
           this && typeof (this as Record<string, unknown>).parser === 'object'
             ? (
-                this as { parser: { parseInline: (t: Tokens.TableCell['tokens']) => string } }
+                this as {
+                  parser: {
+                    parseInline: (t: Tokens.TableCell['tokens']) => string;
+                  };
+                }
               ).parser.parseInline(cell.tokens)
             : cell.text;
         return `<th>${content}</th>`;
@@ -241,9 +201,14 @@ function createRenderer() {
         const cells = row
           .map((cell) => {
             const content =
-              this && typeof (this as Record<string, unknown>).parser === 'object'
+              this &&
+              typeof (this as Record<string, unknown>).parser === 'object'
                 ? (
-                    this as { parser: { parseInline: (t: Tokens.TableCell['tokens']) => string } }
+                    this as {
+                      parser: {
+                        parseInline: (t: Tokens.TableCell['tokens']) => string;
+                      };
+                    }
                   ).parser.parseInline(cell.tokens)
                 : cell.text;
             return `<td>${content}</td>`;
@@ -283,36 +248,45 @@ export function useMarkdown(): UseMarkdownResult {
     const cached = cacheRef.current.get(key);
     if (cached) return cached;
 
-    const raw = marked.parse(text, { ...makeMarkedOptions(), async: false }) as string;
+    const raw = marked.parse(text, {
+      ...makeMarkedOptions(),
+      async: false,
+    }) as string;
     const clean = sanitise(raw);
     cacheRef.current.set(key, clean);
     return clean;
   }, []);
 
-  const renderAsync = useCallback(async (text: string, cacheKey?: string): Promise<string> => {
-    if (!text) return '';
-    const key = cacheKey ?? text;
-    const cached = cacheRef.current.get(key);
-    if (cached) return cached;
+  const renderAsync = useCallback(
+    async (text: string, cacheKey?: string): Promise<string> => {
+      if (!text) return '';
+      const key = cacheKey ?? text;
+      const cached = cacheRef.current.get(key);
+      if (cached) return cached;
 
-    // Allow `+`, `-`, `.` in language identifiers (c++, objective-c, bash-session, etc.)
-    const fenceRegex = /^```([\w+\-.]+)\s*$/gm;
-    let match: RegExpExecArray | null;
-    const langs: string[] = [];
-    while ((match = fenceRegex.exec(text)) !== null) {
-      langs.push(match[1]);
-    }
-    await Promise.all(langs.map((l) => ensureLanguage(l)));
+      // Allow `+`, `-`, `.` in language identifiers (c++, objective-c, bash-session, etc.)
+      const fenceRegex = /^```([\w+\-.]+)\s*$/gm;
+      let match: RegExpExecArray | null;
+      const langs: string[] = [];
+      while ((match = fenceRegex.exec(text)) !== null) {
+        langs.push(match[1]);
+      }
+      await Promise.all(langs.map((l) => ensureLanguage(l)));
 
-    const raw = await marked.parse(text, makeMarkedOptions());
-    const clean = sanitise(raw);
-    cacheRef.current.set(key, clean);
-    return clean;
-  }, []);
+      const raw = await marked.parse(text, makeMarkedOptions());
+      const clean = sanitise(raw);
+      cacheRef.current.set(key, clean);
+      return clean;
+    },
+    []
+  );
 
   const clearCache = useCallback(() => {
     cacheRef.current.clear();
   }, []);
 
-  return useMemo(() => ({ render, renderAsync, clearCache }), [render, renderAsync, clearCache]);
+  return useMemo(
+    () => ({ render, renderAsync, clearCache }),
+    [render, renderAsync, clearCache]
+  );
 }

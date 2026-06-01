@@ -120,7 +120,9 @@ export const MermaidDiagram: Story = {
 
 export const AllBlocks: Story = {
   args: {
-    text: [CODE_BLOCKS_MD, CSV_MD, SURVEY_MD, HTML_MD, MERMAID_MD].join('\n---\n'),
+    text: [CODE_BLOCKS_MD, CSV_MD, SURVEY_MD, HTML_MD, MERMAID_MD].join(
+      '\n---\n'
+    ),
   },
 };
 

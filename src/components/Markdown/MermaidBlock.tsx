@@ -75,10 +75,15 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
   }, [render]);
 
   return (
-    <FenceBlock code={code} language="mermaid" supportsRawView error={error || undefined}>
+    <FenceBlock
+      code={code}
+      language="mermaid"
+      supportsRawView
+      error={error || undefined}
+    >
       {loading ? (
         <div className="flex items-center justify-center p-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
+          <div className="border-primary-500 h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
         </div>
       ) : (
         <div

@@ -28,9 +28,12 @@ function loadYaml(): Promise<YamlLoadFn> {
   if (!yamlPromise) {
     yamlPromise = import(/* @vite-ignore */ 'js-yaml')
       .then((mod) => {
-        const api = (mod as { default?: { load?: YamlLoadFn }; load?: YamlLoadFn }).default ?? mod;
+        const api =
+          (mod as { default?: { load?: YamlLoadFn }; load?: YamlLoadFn })
+            .default ?? mod;
         const load = (api as { load?: YamlLoadFn }).load;
-        if (typeof load !== 'function') throw new Error('js-yaml load not found');
+        if (typeof load !== 'function')
+          throw new Error('js-yaml load not found');
         return load;
       })
       .catch((err) => {
@@ -41,7 +44,9 @@ function loadYaml(): Promise<YamlLoadFn> {
   return yamlPromise;
 }
 
-function tryParseJson(code: string): { ok: true; data: unknown } | { ok: false } {
+function tryParseJson(
+  code: string
+): { ok: true; data: unknown } | { ok: false } {
   try {
     return { ok: true, data: JSON.parse(code) };
   } catch {
@@ -126,7 +131,12 @@ export const SurveyBlock: React.FC<SurveyBlockProps> = ({ code, id }) => {
   const { fields, error } = parsed;
 
   return (
-    <FenceBlock code={code} language="survey" supportsRawView error={error ?? undefined}>
+    <FenceBlock
+      code={code}
+      language="survey"
+      supportsRawView
+      error={error ?? undefined}
+    >
       <div className="space-y-4 p-4">
         <h4 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
           Survey Preview
@@ -138,29 +148,32 @@ export const SurveyBlock: React.FC<SurveyBlockProps> = ({ code, id }) => {
               {field.isRequired && <span className="ml-1 text-red-500">*</span>}
             </label>
 
-            {(field.type === 'radiogroup' || field.type === 'radio') && field.choices && (
-              <div className="space-y-1">
-                {field.choices.map((choice, ci) => {
-                  const value = typeof choice === 'string' ? choice : choice.value;
-                  const text = typeof choice === 'string' ? choice : choice.text;
-                  return (
-                    <label
-                      key={ci}
-                      className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400"
-                    >
-                      <input
-                        type="radio"
-                        name={`${id}-${field.name}`}
-                        value={value}
-                        disabled
-                        className="accent-primary-500"
-                      />
-                      {text}
-                    </label>
-                  );
-                })}
-              </div>
-            )}
+            {(field.type === 'radiogroup' || field.type === 'radio') &&
+              field.choices && (
+                <div className="space-y-1">
+                  {field.choices.map((choice, ci) => {
+                    const value =
+                      typeof choice === 'string' ? choice : choice.value;
+                    const text =
+                      typeof choice === 'string' ? choice : choice.text;
+                    return (
+                      <label
+                        key={ci}
+                        className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400"
+                      >
+                        <input
+                          type="radio"
+                          name={`${id}-${field.name}`}
+                          value={value}
+                          disabled
+                          className="accent-primary-500"
+                        />
+                        {text}
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
 
             {(field.type === 'checkbox' || field.type === 'boolean') && (
               <input type="checkbox" disabled className="accent-primary-500" />
@@ -178,7 +191,10 @@ export const SurveyBlock: React.FC<SurveyBlockProps> = ({ code, id }) => {
             {field.type === 'rating' && (
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <span key={n} className="text-lg text-neutral-300 dark:text-neutral-600">
+                  <span
+                    key={n}
+                    className="text-lg text-neutral-300 dark:text-neutral-600"
+                  >
                     ★
                   </span>
                 ))}
@@ -191,8 +207,10 @@ export const SurveyBlock: React.FC<SurveyBlockProps> = ({ code, id }) => {
                 className="w-full rounded-md border border-neutral-300 bg-neutral-100 px-3 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
               >
                 {field.choices.map((choice, ci) => {
-                  const value = typeof choice === 'string' ? choice : choice.value;
-                  const text = typeof choice === 'string' ? choice : choice.text;
+                  const value =
+                    typeof choice === 'string' ? choice : choice.value;
+                  const text =
+                    typeof choice === 'string' ? choice : choice.text;
                   return (
                     <option key={ci} value={value}>
                       {text}
