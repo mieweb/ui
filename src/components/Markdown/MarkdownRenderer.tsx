@@ -3,6 +3,7 @@
  */
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 
+import './styles.css';
 import { CodeBlock } from './CodeBlock';
 import { useMarkdown } from './useMarkdown';
 
