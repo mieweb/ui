@@ -26,9 +26,12 @@ async function getMermaid(): Promise<MermaidApi> {
   if (!mermaidReady) {
     mermaidReady = import(/* @vite-ignore */ 'mermaid').then((mod) => {
       const m = (mod as { default: MermaidApi }).default;
+      const isDark =
+        document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark';
       m.initialize({
         startOnLoad: false,
-        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+        theme: isDark ? 'dark' : 'default',
         securityLevel: 'strict',
       });
       mermaidInstance = m;

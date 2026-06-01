@@ -16,29 +16,26 @@ interface SortConfig {
 }
 
 type CsvRow = Record<string, unknown>;
-type PapaParseFn = (input: string, config: unknown) => {
-  meta: { fields?: string[] };
-  data: CsvRow[];
-  errors: Array<{ message: string }>;
-};
-type PapaUnparseFn = (data: unknown) => string;
-type PapaModule = { default?: { parse: PapaParseFn; unparse: PapaUnparseFn } } & {
-  parse?: PapaParseFn;
-  unparse?: PapaUnparseFn;
-};
+// Minimal surface of papaparse we actually use, avoiding overload conflicts.
+interface PapaApi {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parse(input: string, config?: any): { meta: { fields?: string[] }; data: CsvRow[]; errors: Array<{ message: string }> };
+  unparse(data: unknown): string;
+}
 
-let papaPromise: Promise<{ parse: PapaParseFn; unparse: PapaUnparseFn }> | null = null;
+let papaPromise: Promise<PapaApi> | null = null;
 function loadPapa() {
   if (!papaPromise) {
     papaPromise = import(/* @vite-ignore */ 'papaparse')
-      .then((mod: PapaModule) => {
-        const api = (mod.default ?? mod) as { parse: PapaParseFn; unparse: PapaUnparseFn };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((mod: any) => {
+        const api: PapaApi = mod.default ?? mod;
         if (!api?.parse) throw new Error('papaparse export not found');
         return api;
       })
       .catch((err) => {
         papaPromise = null;
-        throw err;
+        throw err as Error;
       });
   }
   return papaPromise;
@@ -52,7 +49,7 @@ interface ParsedCsv {
 
 export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-  const [papa, setPapa] = useState<{ parse: PapaParseFn; unparse: PapaUnparseFn } | null>(null);
+  const [papa, setPapa] = useState<PapaApi | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {

@@ -86,7 +86,7 @@ async function ensureLanguage(lang: string): Promise<boolean> {
   }
 }
 
-function highlightCode(code: string, lang?: string): string {
+export function highlightCode(code: string, lang?: string): string {
   if (lang && loadedLanguages.has(lang.toLowerCase())) {
     try {
       return hljs.highlight(code, { language: lang.toLowerCase() }).value;
@@ -110,9 +110,11 @@ function sanitise(html: string): string {
   }) as string;
 }
 
-// Guard against duplicate hook registration (HMR / multiple bundle copies).
-let anchorHookInstalled = false;
-if (!anchorHookInstalled) {
+// Guard against duplicate hook registration across HMR / multiple bundle copies
+// by storing the flag on globalThis so it persists within the same JS realm.
+const _g = globalThis as unknown as Record<string, boolean>;
+if (!_g.__markdownAnchorHookInstalled) {
+  _g.__markdownAnchorHookInstalled = true;
   DOMPurify.addHook('afterSanitizeAttributes', (node: Element) => {
     const isAnchor =
       (typeof HTMLAnchorElement !== 'undefined' && node instanceof HTMLAnchorElement) ||
@@ -122,7 +124,6 @@ if (!anchorHookInstalled) {
       node.setAttribute('rel', 'noopener noreferrer');
     }
   });
-  anchorHookInstalled = true;
 }
 
 const COPY_BTN_HTML =
@@ -138,9 +139,9 @@ const COPY_BTN_HTML =
   '<span class="fence-copied-label">Copied</span>' +
   '</button>';
 
-let copyListenerInstalled = false;
-if (typeof document !== 'undefined' && !copyListenerInstalled) {
-  copyListenerInstalled = true;
+// Use a marker on document to prevent duplicate listeners across HMR reloads.
+if (typeof document !== 'undefined' && !_g.__markdownCopyListenerInstalled) {
+  _g.__markdownCopyListenerInstalled = true;
   document.addEventListener('click', (event) => {
     const btn =
       event.target instanceof Element
@@ -159,12 +160,27 @@ if (typeof document !== 'undefined' && !copyListenerInstalled) {
       }, 1500);
     };
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard
-        .writeText(code)
-        .then(markCopied)
-        .catch(() => {});
+      navigator.clipboard.writeText(code).then(markCopied).catch(() => fallbackCopy(code, markCopied));
+    } else {
+      fallbackCopy(code, markCopied);
     }
   });
+}
+
+function fallbackCopy(text: string, onSuccess: () => void): void {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    if (document.execCommand('copy')) onSuccess();
+    document.body.removeChild(ta);
+  } catch {
+    /* copy unavailable */
+  }
 }
 
 let blockCounter = 0;
@@ -243,13 +259,9 @@ function createRenderer() {
   return renderer;
 }
 
-const markedOptions: MarkedOptions = {
-  gfm: true,
-  breaks: true,
-  renderer: createRenderer(),
-};
-
-marked.setOptions(markedOptions);
+function makeMarkedOptions(): MarkedOptions {
+  return { gfm: true, breaks: true, renderer: createRenderer() };
+}
 
 const renderCache = new Map<string, string>();
 
@@ -271,7 +283,7 @@ export function useMarkdown(): UseMarkdownResult {
     const cached = cacheRef.current.get(key);
     if (cached) return cached;
 
-    const raw = marked.parse(text, { async: false }) as string;
+    const raw = marked.parse(text, { ...makeMarkedOptions(), async: false }) as string;
     const clean = sanitise(raw);
     cacheRef.current.set(key, clean);
     return clean;
@@ -292,7 +304,7 @@ export function useMarkdown(): UseMarkdownResult {
     }
     await Promise.all(langs.map((l) => ensureLanguage(l)));
 
-    const raw = await marked.parse(text);
+    const raw = await marked.parse(text, makeMarkedOptions());
     const clean = sanitise(raw);
     cacheRef.current.set(key, clean);
     return clean;
