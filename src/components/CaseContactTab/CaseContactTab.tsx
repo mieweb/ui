@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Plus, Trash2, Mail, Phone, History, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
 import { Label } from '../Label';
@@ -204,7 +205,7 @@ export const CaseContactTab = React.forwardRef<
               ]}
             />
           </div>
-          <div className="ml-auto text-sm text-muted-foreground">
+          <div className="ml-auto text-sm text-foreground">
             Showing {filteredContacts.length} of {contacts.length} contacts
           </div>
         </div>
@@ -237,12 +238,9 @@ export const CaseContactTab = React.forwardRef<
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {contact.type.map((t) => (
-                          <span
-                            key={t}
-                            className="inline-flex items-center rounded-full bg-muted px-2 py-1 text-xs"
-                          >
+                          <Badge key={t} variant="secondary">
                             {t}
-                          </span>
+                          </Badge>
                         ))}
                       </div>
                     </TableCell>
@@ -261,9 +259,7 @@ export const CaseContactTab = React.forwardRef<
                     </TableCell>
                     <TableCell>
                       {contact.isPrimary && (
-                        <span className="inline-flex items-center rounded-full bg-primary-100 px-2 py-1 text-xs font-medium text-primary-800">
-                          Primary
-                        </span>
+                        <Badge variant="default">Primary</Badge>
                       )}
                     </TableCell>
                     <TableCell>
@@ -466,9 +462,7 @@ export const CaseContactTab = React.forwardRef<
                                 </span>
                               )}
                               {contact.isPrimary && !alreadyAdded && (
-                                <span className="rounded bg-primary-100 px-2 py-1 text-xs text-primary-800">
-                                  Primary
-                                </span>
+                                <Badge variant="default">Primary</Badge>
                               )}
                             </div>
                           );
