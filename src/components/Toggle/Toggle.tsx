@@ -10,7 +10,7 @@ const toggleVariants = cva(
     'hover:bg-muted hover:text-muted-foreground',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
-    'data-[state=on]:bg-primary-800 data-[state=on]:text-white',
+    'data-[state=on]:bg-primary-800 data-[state=on]:text-primary-foreground',
   ],
   {
     variants: {
