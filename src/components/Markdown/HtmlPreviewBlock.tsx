@@ -1,6 +1,6 @@
 /** Sandboxed iframe preview for HTML code blocks. */
 import { Code, Eye, Maximize2 } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '../Button';
 import { FenceBlock } from './FenceBlock';
@@ -56,37 +56,41 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({
     return () => document.removeEventListener('keydown', handleKey);
   }, [expanded]);
 
+  const togglePreview = useCallback(() => setShowPreview((v) => !v), []);
+
+  const headerActions = (
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={togglePreview}
+        className="h-7 gap-1 px-2 text-xs"
+      >
+        {showPreview ? (
+          <Code className="h-3 w-3" />
+        ) : (
+          <Eye className="h-3 w-3" />
+        )}
+        {showPreview ? 'Code' : 'Preview'}
+      </Button>
+      {showPreview && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setExpanded(true)}
+          className="h-7 w-7 p-0"
+          aria-label="Expand preview"
+        >
+          <Maximize2 className="h-3 w-3" />
+        </Button>
+      )}
+    </>
+  );
+
   return (
     <>
-      <FenceBlock code={code} language="html">
+      <FenceBlock code={code} language="html" headerActions={headerActions}>
         <div className="relative">
-          <div className="flex items-center gap-1 border-b border-neutral-200 px-3 py-1 dark:border-neutral-700">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPreview((v) => !v)}
-              className="h-7 gap-1 px-2 text-xs"
-            >
-              {showPreview ? (
-                <Code className="h-3 w-3" />
-              ) : (
-                <Eye className="h-3 w-3" />
-              )}
-              {showPreview ? 'Code' : 'Preview'}
-            </Button>
-            {showPreview && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setExpanded(true)}
-                className="h-7 w-7 p-0"
-                aria-label="Expand preview"
-              >
-                <Maximize2 className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-
           {showPreview ? (
             <iframe
               ref={iframeRef}

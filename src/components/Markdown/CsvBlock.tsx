@@ -132,8 +132,10 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
     const link = document.createElement('a');
     link.href = url;
     link.download = `data-${id}.csv`;
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   }, [sortedRows, id, papa]);
 
   if (loadError) {

@@ -107,7 +107,6 @@ export function highlightCode(code: string, lang?: string): string {
 }
 
 function sanitise(html: string): string {
-  // Iframes are intentionally excluded — html fences use HtmlPreviewBlock instead.
   return DOMPurify.sanitize(html, {
     ADD_ATTR: [
       'target',
@@ -116,12 +115,12 @@ function sanitise(html: string): string {
       'data-block-id',
       'data-code',
       'data-lang',
+      'data-md-fence',
     ],
   }) as string;
 }
 
-// Guard against duplicate hook registration across HMR / multiple bundle copies
-// by storing the flag on globalThis so it persists within the same JS realm.
+// Use globalThis to prevent duplicate DOMPurify hook registration across HMR reloads.
 const _g = globalThis as unknown as Record<string, boolean>;
 if (!_g.__markdownAnchorHookInstalled) {
   _g.__markdownAnchorHookInstalled = true;
@@ -137,9 +136,6 @@ if (!_g.__markdownAnchorHookInstalled) {
   });
 }
 
-// Use a marker on globalThis to prevent duplicate listeners across HMR reloads.
-// Copy for code blocks is handled by FenceBlock (React component).
-
 let blockCounter = 0;
 
 function createRenderer() {
@@ -150,18 +146,19 @@ function createRenderer() {
     const normalised = lang.toLowerCase().trim();
     const blockId = `block-${++blockCounter}`;
     const encodedCode = encodeURIComponent(code);
+    const sentinel = 'data-md-fence="1"';
 
     switch (normalised) {
       case 'mermaid':
-        return `<div data-block-type="mermaid" data-block-id="${blockId}" data-code="${encodedCode}"></div>`;
+        return `<div data-block-type="mermaid" data-block-id="${blockId}" data-code="${encodedCode}" ${sentinel}></div>`;
       case 'csv':
-        return `<div data-block-type="csv" data-block-id="${blockId}" data-code="${encodedCode}"></div>`;
+        return `<div data-block-type="csv" data-block-id="${blockId}" data-code="${encodedCode}" ${sentinel}></div>`;
       case 'survey':
-        return `<div data-block-type="survey" data-block-id="${blockId}" data-code="${encodedCode}"></div>`;
+        return `<div data-block-type="survey" data-block-id="${blockId}" data-code="${encodedCode}" ${sentinel}></div>`;
       case 'html':
-        return `<div data-block-type="html-preview" data-block-id="${blockId}" data-code="${encodedCode}"></div>`;
+        return `<div data-block-type="html-preview" data-block-id="${blockId}" data-code="${encodedCode}" ${sentinel}></div>`;
       default:
-        return `<div data-block-type="code" data-block-id="${blockId}" data-code="${encodedCode}" data-lang="${escapeHtml(normalised)}"></div>`;
+        return `<div data-block-type="code" data-block-id="${blockId}" data-code="${encodedCode}" data-lang="${escapeHtml(normalised)}" ${sentinel}></div>`;
     }
   };
 
@@ -228,7 +225,14 @@ function makeMarkedOptions(): MarkedOptions {
   return { gfm: true, breaks: true, renderer: createRenderer() };
 }
 
+const CACHE_MAX = 100;
 const renderCache = new Map<string, string>();
+function cacheSet(key: string, value: string) {
+  if (renderCache.size >= CACHE_MAX) {
+    renderCache.delete(renderCache.keys().next().value as string);
+  }
+  renderCache.set(key, value);
+}
 
 export interface UseMarkdownResult {
   /** Render markdown text to sanitised HTML string */
@@ -253,7 +257,7 @@ export function useMarkdown(): UseMarkdownResult {
       async: false,
     }) as string;
     const clean = sanitise(raw);
-    cacheRef.current.set(key, clean);
+    cacheSet(key, clean);
     return clean;
   }, []);
 
@@ -275,7 +279,7 @@ export function useMarkdown(): UseMarkdownResult {
 
       const raw = await marked.parse(text, makeMarkedOptions());
       const clean = sanitise(raw);
-      cacheRef.current.set(key, clean);
+      cacheSet(key, clean);
       return clean;
     },
     []

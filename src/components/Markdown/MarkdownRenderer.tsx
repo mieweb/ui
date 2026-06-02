@@ -39,9 +39,9 @@ export interface MarkdownRendererProps {
   streaming?: boolean;
 }
 
-// Matches <div data-block-type="X" data-block-id="Y" data-code="Z" ...></div>
+// Matches fence block markers emitted by useMarkdown (sentinel data-md-fence prevents raw-HTML injection)
 const BLOCK_RE =
-  /<div data-block-type="([^"]+)" data-block-id="([^"]+)" data-code="([^"]*)"([^>]*)><\/div>/g;
+  /<div data-block-type="([^"]+)" data-block-id="([^"]+)" data-code="([^"]*)"([^>]*\bdata-md-fence="1"[^>]*)><\/div>/g;
 
 interface HtmlSegment {
   html: string;
@@ -63,7 +63,13 @@ function splitHtml(html: string): Segment[] {
     segments.push({
       type: m[1],
       id: m[2],
-      code: decodeURIComponent(m[3]),
+      code: (() => {
+        try {
+          return decodeURIComponent(m[3]);
+        } catch {
+          return m[3];
+        }
+      })(),
       lang: langMatch ?? undefined,
     });
     last = m.index + m[0].length;

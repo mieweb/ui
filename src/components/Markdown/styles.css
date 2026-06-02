@@ -13,6 +13,8 @@ pre code.hljs {
   display: block;
   overflow-x: auto;
   padding: 1em;
+  /* Transparent so the parent container's background is the single source of truth */
+  background: transparent;
 }
 code.hljs {
   padding: 3px 5px;

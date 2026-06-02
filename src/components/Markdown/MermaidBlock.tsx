@@ -20,18 +20,35 @@ type MermaidApi = {
 
 let mermaidInstance: MermaidApi | null = null;
 let mermaidReady: Promise<MermaidApi> | null = null;
+let mermaidTheme: 'dark' | 'default' = 'default';
+
+function currentTheme(): 'dark' | 'default' {
+  return document.documentElement.classList.contains('dark') ||
+    document.documentElement.getAttribute('data-theme') === 'dark'
+    ? 'dark'
+    : 'default';
+}
 
 async function getMermaid(): Promise<MermaidApi> {
-  if (mermaidInstance) return mermaidInstance;
+  const theme = currentTheme();
+  if (mermaidInstance) {
+    if (theme !== mermaidTheme) {
+      mermaidTheme = theme;
+      mermaidInstance.initialize({
+        startOnLoad: false,
+        theme,
+        securityLevel: 'strict',
+      });
+    }
+    return mermaidInstance;
+  }
   if (!mermaidReady) {
     mermaidReady = import(/* @vite-ignore */ 'mermaid').then((mod) => {
       const m = (mod as { default: MermaidApi }).default;
-      const isDark =
-        document.documentElement.classList.contains('dark') ||
-        document.documentElement.getAttribute('data-theme') === 'dark';
+      mermaidTheme = currentTheme();
       m.initialize({
         startOnLoad: false,
-        theme: isDark ? 'dark' : 'default',
+        theme: mermaidTheme,
         securityLevel: 'strict',
       });
       mermaidInstance = m;
@@ -87,6 +104,16 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
 
   useEffect(() => {
     void render();
+  }, [render]);
+
+  // Re-render when the page theme changes (dark ↔ light)
+  useEffect(() => {
+    const observer = new MutationObserver(() => void render());
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    });
+    return () => observer.disconnect();
   }, [render]);
 
   return (

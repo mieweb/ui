@@ -2,21 +2,18 @@
  * FenceBlock — Base wrapper for code blocks with copy, raw view toggle, and errors.
  */
 import { Check, ClipboardCopy, Code, Eye } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '../Button';
 
 export interface FenceBlockProps {
-  /** Raw source code */
   code: string;
-  /** Language identifier */
   language?: string;
-  /** Whether to show raw view toggle */
   supportsRawView?: boolean;
-  /** Error message, if failed rendering */
   error?: string;
-  /** Rendered content (children) */
   children: React.ReactNode;
+  /** Extra buttons rendered in the header before the copy button */
+  headerActions?: React.ReactNode;
 }
 
 type CopyState = 'idle' | 'copying' | 'success' | 'error';
@@ -27,9 +24,23 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
   supportsRawView = false,
   error,
   children,
+  headerActions,
 }) => {
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const [showRaw, setShowRaw] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    []
+  );
+
+  const scheduleReset = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setCopyState('idle'), 2000);
+  }, []);
 
   const handleCopy = useCallback(async () => {
     if (copyState === 'copying') return;
@@ -37,7 +48,7 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
     try {
       await navigator.clipboard.writeText(code);
       setCopyState('success');
-      setTimeout(() => setCopyState('idle'), 2000);
+      scheduleReset();
     } catch {
       try {
         const textarea = document.createElement('textarea');
@@ -49,13 +60,12 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
         document.execCommand('copy');
         document.body.removeChild(textarea);
         setCopyState('success');
-        setTimeout(() => setCopyState('idle'), 2000);
       } catch {
         setCopyState('error');
-        setTimeout(() => setCopyState('idle'), 2000);
       }
+      scheduleReset();
     }
-  }, [code, copyState]);
+  }, [code, copyState, scheduleReset]);
 
   return (
     <div className="group relative my-3 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
@@ -64,6 +74,7 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
           {language || 'text'}
         </span>
         <div className="flex items-center gap-1">
+          {headerActions}
           {supportsRawView && (
             <Button
               variant="ghost"

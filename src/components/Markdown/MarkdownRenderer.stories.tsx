@@ -14,7 +14,7 @@ type Story = StoryObj<typeof MarkdownRenderer>;
 const CODE_BLOCKS_MD = `
 # Markdown Renderer
 
-Inline \`code\` and **bold**, _italic_, ~~strikethrough~~, and a [link](https://mieweb.com).
+Inline \`code\` and **bold**, _italic_, ~~strikethrough~~, and a [link](https://github.com/mieweb/ui).
 
 ## Code Block
 
@@ -123,33 +123,5 @@ export const AllBlocks: Story = {
     text: [CODE_BLOCKS_MD, CSV_MD, SURVEY_MD, HTML_MD, MERMAID_MD].join(
       '\n---\n'
     ),
-  },
-};
-
-/**
- * The `streaming` prop enables synchronous (non-async) rendering so each
- * incremental text delta is displayed immediately — no waiting for lazy
- * language imports. Useful when markdown arrives token-by-token from an AI
- * stream. Fenced code blocks with rare languages may not be highlighted on
- * the first pass but will update once `renderAsync` is called on the
- * completed text.
- */
-export const Streaming: Story = {
-  args: {
-    streaming: true,
-    text: [
-      '# Streaming Mode',
-      '',
-      'The `streaming` prop switches to **synchronous** rendering so partial',
-      'content updates immediately as each token arrives from an AI stream.',
-      '',
-      '```typescript',
-      '// Rendered synchronously — no async language loading.',
-      'const msg = await streamChat(prompt);',
-      '```',
-      '',
-      '> Once the stream completes, pass `streaming={false}` to trigger',
-      '> a final async render with full syntax highlighting.',
-    ].join('\n'),
   },
 };
