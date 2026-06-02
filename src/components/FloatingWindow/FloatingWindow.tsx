@@ -250,7 +250,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
         <div
           data-slot="floating-window-header"
           className={cn(
-            'flex items-center justify-between rounded-t-lg bg-primary-800 px-4 py-3 text-white',
+            'flex items-center justify-between rounded-t-lg bg-primary-800 px-4 py-3 text-primary-foreground',
             draggable && 'cursor-move'
           )}
           onMouseDown={handleDragStart}
@@ -267,7 +267,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
                 onClick={onMinimize}
                 aria-label="Minimize"
                 title="Minimize"
@@ -280,7 +280,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
                 onClick={onPopOut}
                 aria-label="Open in new window"
                 title="Open in new window"
@@ -292,7 +292,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-white hover:bg-white/20"
+              className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
               onClick={onClose}
               aria-label="Close"
               title="Close"
@@ -305,6 +305,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
         <div
           data-slot="floating-window-content"
           className="flex-1 overflow-y-auto"
+          tabIndex={0}
         >
           {children}
         </div>
