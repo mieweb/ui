@@ -372,7 +372,7 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
               ]}
             />
           </div>
-          <div className="ml-auto text-sm text-muted-foreground">
+          <div className="ml-auto text-sm text-foreground">
             Showing {filtered.length} of {todos.length} todos
           </div>
         </div>
