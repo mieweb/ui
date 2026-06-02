@@ -43,6 +43,7 @@ export default [
         HTMLTableCaptionElement: 'readonly',
         HTMLTextAreaElement: 'readonly',
         HTMLUListElement: 'readonly',
+        HTMLLabelElement: 'readonly',
         HTMLHeadingElement: 'readonly',
         HTMLCanvasElement: 'readonly',
         HTMLImageElement: 'readonly',
