@@ -111,7 +111,7 @@ function Sheet({
       <div className="fixed inset-0 z-50">
         <div
           className={cn(sheetOverlayVariants())}
-          data-state={open ? 'open' : 'closed'}
+          data-state="open"
           aria-hidden="true"
           onClick={handleOverlayClick}
         />
@@ -124,7 +124,7 @@ function Sheet({
           aria-describedby={ariaDescribedBy}
           id={sheetId}
           tabIndex={-1}
-          data-state={open ? 'open' : 'closed'}
+          data-state="open"
           data-slot="sheet"
           className={cn(sheetContentVariants({ side }), className)}
         >
