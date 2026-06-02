@@ -21,6 +21,7 @@ import { Input } from '../Input';
 import { Label } from '../Label';
 import { Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../Modal';
 import { Select, type SelectOption } from '../Select';
+import { Textarea } from '../Textarea';
 
 /** A selectable option; adjusters may carry contact details for auto-fill. */
 export interface CaseSelectOption {
@@ -364,12 +365,12 @@ function TextareaField({
       <Label htmlFor={id} className="text-sm text-muted-foreground">
         {label}
       </Label>
-      <textarea
+      <Textarea
         id={id}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="min-h-[80px]"
       />
     </div>
   );
@@ -397,7 +398,7 @@ function Section({ title, icon, defaultOpen = false, children }: SectionProps) {
           {icon}
           {title}
         </span>
-        <span className="text-sm text-muted-foreground">{open ? '−' : '+'}</span>
+        <span className="text-sm text-foreground">{open ? '−' : '+'}</span>
       </button>
       {open && <div className="space-y-4 p-4">{children}</div>}
     </div>
