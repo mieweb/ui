@@ -9,6 +9,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { Alert, AlertDescription } from '../Alert';
 import { Button } from '../Button';
 import { Input } from '../Input';
 import { Label } from '../Label';
@@ -591,7 +592,7 @@ export const CasePayInformationTab = React.forwardRef<
             </div>
 
             {stdCoverage ? (
-              <div className="rounded-lg border border-border bg-muted p-4">
+              <div className="rounded-lg border border-border p-4">
                 <h4 className="mb-3 font-medium">Eligible STD Coverage</h4>
                 <Table>
                   <TableHeader>
@@ -623,11 +624,11 @@ export const CasePayInformationTab = React.forwardRef<
                 </Table>
               </div>
             ) : stdLookupDate ? (
-              <div className="rounded-lg border border-warning-300 bg-warning-50 p-4 text-warning-800">
-                <p className="text-sm">
+              <Alert variant="warning">
+                <AlertDescription>
                   No STD coverage found for this location and date combination.
-                </p>
-              </div>
+                </AlertDescription>
+              </Alert>
             ) : null}
           </CardContent>
         </Card>
