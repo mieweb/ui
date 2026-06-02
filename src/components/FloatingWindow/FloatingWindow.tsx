@@ -302,13 +302,16 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
           </div>
         </div>
 
+        {/* eslint-disable jsx-a11y/no-noninteractive-tabindex */}
         <div
           data-slot="floating-window-content"
+          role="region"
           className="flex-1 overflow-y-auto"
           tabIndex={0}
         >
           {children}
         </div>
+        {/* eslint-enable jsx-a11y/no-noninteractive-tabindex */}
 
         {footer && (
           <div

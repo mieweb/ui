@@ -43,11 +43,13 @@ export interface ScrollAreaProps
  * </ScrollArea>
  * ```
  */
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaProps>(
   ({ className, orientation, children, ...props }, ref) => (
     <div
       ref={ref}
       data-slot="scroll-area"
+      role="region"
       tabIndex={0}
       className={cn(scrollAreaVariants({ orientation }), className)}
       {...props}
@@ -56,6 +58,7 @@ const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaProps>(
     </div>
   )
 );
+/* eslint-enable jsx-a11y/no-noninteractive-tabindex */
 
 ScrollArea.displayName = 'ScrollArea';
 
