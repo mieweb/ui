@@ -7,6 +7,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { Alert, AlertDescription, AlertTitle } from '../Alert';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { Input } from '../Input';
@@ -227,60 +228,60 @@ export function CreateCaseWizard({
               </div>
 
               {openCases.length > 0 && (
-                <div className="space-y-3 rounded-md border border-warning-300 bg-warning-50 p-4 text-warning-800">
-                  <div className="flex items-center gap-2 font-semibold">
-                    <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-                    Open Cases Found
-                  </div>
-                  <p className="text-sm">
-                    This employee has {openCases.length} open/active case
-                    {openCases.length !== 1 ? 's' : ''}. If this is related to an
-                    existing injury or absence, please continue documenting on
-                    the existing case instead of creating a new one.
-                  </p>
-                  <div className="space-y-2">
-                    {openCases.map((c) => (
-                      <div
-                        key={c.caseNumber}
-                        className="flex items-center justify-between rounded-md border border-border bg-background p-3 text-foreground"
-                      >
-                        <div className="flex items-center gap-3">
-                          <FileText
-                            className="h-4 w-4 text-muted-foreground"
-                            aria-hidden="true"
-                          />
-                          <div>
-                            <p className="font-medium">{c.caseNumber}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {c.caseType}
-                              {c.dateOpened ? ` - Opened ${c.dateOpened}` : ''}
-                            </p>
+                <Alert variant="warning" className="space-y-3">
+                  <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                  <AlertTitle>Open Cases Found</AlertTitle>
+                  <AlertDescription className="space-y-3">
+                    <p className="text-sm">
+                      This employee has {openCases.length} open/active case
+                      {openCases.length !== 1 ? 's' : ''}. If this is related to an
+                      existing injury or absence, please continue documenting on
+                      the existing case instead of creating a new one.
+                    </p>
+                    <div className="space-y-2">
+                      {openCases.map((c) => (
+                        <div
+                          key={c.caseNumber}
+                          className="flex items-center justify-between rounded-md border border-border bg-background p-3 text-foreground"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText
+                              className="h-4 w-4 text-muted-foreground"
+                              aria-hidden="true"
+                            />
+                            <div>
+                              <p className="font-medium">{c.caseNumber}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {c.caseType}
+                                {c.dateOpened ? ` - Opened ${c.dateOpened}` : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={c.status === 'Open' ? 'default' : 'secondary'}>
+                              {c.status}
+                            </Badge>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                onOpenExistingCase?.(c.caseNumber);
+                                onComplete();
+                              }}
+                            >
+                              Open Case
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={c.status === 'Open' ? 'default' : 'secondary'}>
-                            {c.status}
-                          </Badge>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              onOpenExistingCase?.(c.caseNumber);
-                              onComplete();
-                            }}
-                          >
-                            Open Case
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-sm">
-                    If this is a <strong>new absence</strong>, continue to create
-                    a new case.
-                  </p>
-                </div>
+                      ))}
+                    </div>
+                    <p className="text-sm">
+                      If this is a <strong>new absence</strong>, continue to create
+                      a new case.
+                    </p>
+                  </AlertDescription>
+                </Alert>
               )}
             </div>
           </div>
