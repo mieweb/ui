@@ -48,6 +48,7 @@ const ScrollArea = React.forwardRef<HTMLDivElement, ScrollAreaProps>(
     <div
       ref={ref}
       data-slot="scroll-area"
+      tabIndex={0}
       className={cn(scrollAreaVariants({ orientation }), className)}
       {...props}
     >
