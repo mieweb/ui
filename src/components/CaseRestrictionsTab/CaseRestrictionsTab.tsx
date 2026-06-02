@@ -239,7 +239,7 @@ export const CaseRestrictionsTab = React.forwardRef<
               ]}
             />
           </div>
-          <div className="ml-auto text-sm text-muted-foreground">
+          <div className="ml-auto text-sm text-foreground">
             Showing {filtered.length} of {restrictions.length} restrictions
           </div>
         </div>
@@ -348,7 +348,7 @@ export const CaseRestrictionsTab = React.forwardRef<
                         variant="ghost"
                         size="sm"
                         aria-label="Save and add new"
-                        className="h-8 w-8 p-0 text-green-600"
+                        className="h-8 w-8 p-0 text-primary"
                         disabled={
                           !quickEntry.restriction || !quickEntry.startDate
                         }
@@ -367,7 +367,7 @@ export const CaseRestrictionsTab = React.forwardRef<
                         onClick={() => submitQuickEntry(false)}
                       >
                         <Check
-                          className="h-4 w-4 text-green-600"
+                          className="h-4 w-4 text-primary"
                           aria-hidden="true"
                         />
                       </Button>
