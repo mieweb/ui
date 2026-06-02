@@ -360,14 +360,13 @@ export function CaseManager({
           )}
         </div>
 
-        <Tabs value={currentTab} onValueChange={setTab} className="w-full">
+        <Tabs value={currentTab} onValueChange={setTab} variant="pills" className="w-full">
           <div className="sticky top-14 z-40 bg-background shadow-sm sm:top-16">
-            <TabsList className="h-auto w-full flex-wrap justify-start rounded-none border-b border-border bg-background p-0">
+            <TabsList className="w-full flex-wrap justify-start">
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="rounded-b-none rounded-t-lg px-4 py-2.5 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   {tab.label}
                 </TabsTrigger>
