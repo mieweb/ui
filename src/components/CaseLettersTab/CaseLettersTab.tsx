@@ -220,7 +220,7 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
       const selected = templates.find((t) => t.code === code);
       if (selected?.content) {
         const evaluated = evaluateTemplate(selected.content);
-        const isHtml = /<[a-z][\s\S]*>/i.test(evaluated);
+        const isHtml = /<[a-z][^>]*>/i.test(evaluated);
         setContent(isHtml ? evaluated : textToHtml(evaluated));
       }
     };

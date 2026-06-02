@@ -51,6 +51,11 @@ export interface CaseNoteItem {
   noteDate: string;
   activity: string;
   caseManager: string;
+  /**
+   * Rich HTML content of the note. Rendered via `dangerouslySetInnerHTML`.
+   * **Consumers must sanitize this value** (e.g. with DOMPurify) before
+   * passing it in — this component does not perform XSS sanitization.
+   */
   notes: string;
   createdBy?: string;
   dateEntered: string;
@@ -486,7 +491,7 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                             note.lineout && 'line-through'
                           )}
                         >
-                          {note.notes.replace(/<[^>]+>/g, '').slice(0, 100)}
+                          {note.notes.replace(/<[^>]*>/g, '').slice(0, 100)}
                         </span>
                       </TableCell>
                       <TableCell className={note.lineout ? 'line-through' : undefined}>

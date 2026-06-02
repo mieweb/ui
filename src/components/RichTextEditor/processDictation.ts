@@ -81,11 +81,16 @@ export function processDictation(text: string): string {
  */
 export function convertAngleBracketsToMustache(html: string): string {
   return html
-    .replace(/&lt;&lt;\s*(.*?)\s*&gt;&gt;/g, '{{$1}}')
-    .replace(/<<\s*(.*?)\s*>>/g, '{{$1}}');
+    .replace(/&lt;&lt;([^&]*)&gt;&gt;/g, (_m, field: string) => `{{${field.trim()}}}`)
+    .replace(/<<([^>]*)>>/g, (_m, field: string) => `{{${field.trim()}}}`);
 }
 
-/** Returns true when an HTML string has no visible text content. */
+/**
+ * Returns true when an HTML string has no visible text content.
+ * Note: This is a visibility check, not a sanitizer. It strips tags to inspect
+ * remaining text — do NOT use this for XSS prevention.
+ */
 export function isHtmlEmpty(html: string): boolean {
-  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().length === 0;
+  const text = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  return text.length === 0;
 }
