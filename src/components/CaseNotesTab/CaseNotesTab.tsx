@@ -202,7 +202,9 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
     const [noteDate, setNoteDate] = useState(todayIso());
     const [activity, setActivity] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState('');
-    const [noteCaseManager, setNoteCaseManager] = useState(defaultCaseManager ?? '');
+    const [noteCaseManager, setNoteCaseManager] = useState(
+      defaultCaseManager ?? ''
+    );
     const [content, setContent] = useState('');
 
     // Version history.
@@ -351,14 +353,18 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
         status: absenceStatus,
         otherName: absenceStatus === 'OTH' ? absenceOtherName : undefined,
       });
-      setAddedAbsences((prev) => [...prev, `${absenceDate} - ${absenceStatus}`]);
+      setAddedAbsences((prev) => [
+        ...prev,
+        `${absenceDate} - ${absenceStatus}`,
+      ]);
       setAbsenceDate('');
       setAbsenceStatus('');
       setAbsenceOtherName('');
     };
 
     const submitQuickRestriction = () => {
-      if (!onQuickAddRestriction || !restrictionType || !restrictionStart) return;
+      if (!onQuickAddRestriction || !restrictionType || !restrictionStart)
+        return;
       onQuickAddRestriction({
         restriction: restrictionType,
         startDate: restrictionStart,
@@ -394,12 +400,12 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium">Case Notes</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {notes.length} note{notes.length !== 1 ? 's' : ''} for this case
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex overflow-hidden rounded-md border border-border">
+            <div className="border-border flex overflow-hidden rounded-md border">
               <Button
                 variant={viewMode === 'list' ? 'primary' : 'ghost'}
                 size="sm"
@@ -434,7 +440,7 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
         )}
 
         {viewMode === 'list' ? (
-          <div className="rounded-lg border border-border">
+          <div className="border-border rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -451,7 +457,7 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="py-8 text-center text-muted-foreground"
+                      className="text-muted-foreground py-8 text-center"
                     >
                       No case notes yet. Click &quot;Add Case Note&quot; to get
                       started.
@@ -464,7 +470,10 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                       className={note.lineout ? 'opacity-60' : undefined}
                     >
                       <TableCell
-                        className={cn('font-medium', note.lineout && 'line-through')}
+                        className={cn(
+                          'font-medium',
+                          note.lineout && 'line-through'
+                        )}
                       >
                         {formatDate(note.noteDate)}
                       </TableCell>
@@ -473,7 +482,7 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                           <Badge variant="outline">{note.activity}</Badge>
                           {note.isLocked && (
                             <Lock
-                              className="h-3 w-3 text-muted-foreground"
+                              className="text-muted-foreground h-3 w-3"
                               aria-label="Locked"
                             />
                           )}
@@ -487,14 +496,16 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                       <TableCell className="max-w-md">
                         <span
                           className={cn(
-                            'block truncate text-sm text-muted-foreground',
+                            'text-muted-foreground block truncate text-sm',
                             note.lineout && 'line-through'
                           )}
                         >
                           {note.notes.replace(/<[^>]*>/g, '').slice(0, 100)}
                         </span>
                       </TableCell>
-                      <TableCell className={note.lineout ? 'line-through' : undefined}>
+                      <TableCell
+                        className={note.lineout ? 'line-through' : undefined}
+                      >
                         {note.caseManager}
                       </TableCell>
                       <TableCell>
@@ -530,7 +541,10 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                               {note.isLocked ? (
                                 <Lock className="h-4 w-4" aria-hidden="true" />
                               ) : (
-                                <Unlock className="h-4 w-4" aria-hidden="true" />
+                                <Unlock
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
                               )}
                             </Button>
                           )}
@@ -565,30 +579,36 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
         ) : (
           <div className="space-y-4">
             {notes.length === 0 ? (
-              <div className="rounded-lg border border-border p-8 text-center text-muted-foreground">
-                No case notes yet. Click &quot;Add Case Note&quot; to get started.
+              <div className="border-border text-muted-foreground rounded-lg border p-8 text-center">
+                No case notes yet. Click &quot;Add Case Note&quot; to get
+                started.
               </div>
             ) : (
               notes.map((note) => (
                 <div
                   key={note.id}
                   className={cn(
-                    'overflow-hidden rounded-lg border border-border',
+                    'border-border overflow-hidden rounded-lg border',
                     note.lineout && 'opacity-60'
                   )}
                 >
-                  <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
+                  <div className="border-border bg-muted/30 flex items-center justify-between border-b p-4">
                     <div className="flex flex-wrap items-center gap-6">
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">Date</div>
+                        <div className="text-muted-foreground mb-1 text-xs">
+                          Date
+                        </div>
                         <div
-                          className={cn('font-medium', note.lineout && 'line-through')}
+                          className={cn(
+                            'font-medium',
+                            note.lineout && 'line-through'
+                          )}
                         >
                           {formatDate(note.noteDate)}
                         </div>
                       </div>
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">
+                        <div className="text-muted-foreground mb-1 text-xs">
                           Activity
                         </div>
                         <div className="flex items-center gap-2">
@@ -598,19 +618,23 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                               Locked
                             </Badge>
                           )}
-                          {note.lineout && <Badge variant="danger">Deleted</Badge>}
+                          {note.lineout && (
+                            <Badge variant="danger">Deleted</Badge>
+                          )}
                         </div>
                       </div>
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">
+                        <div className="text-muted-foreground mb-1 text-xs">
                           Case Manager
                         </div>
-                        <div className={note.lineout ? 'line-through' : undefined}>
+                        <div
+                          className={note.lineout ? 'line-through' : undefined}
+                        >
                           {note.caseManager}
                         </div>
                       </div>
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">
+                        <div className="text-muted-foreground mb-1 text-xs">
                           Version
                         </div>
                         <Badge variant="secondary" size="sm">
@@ -625,7 +649,10 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                           size="sm"
                           onClick={() => openHistory(note)}
                         >
-                          <History className="mr-1 h-4 w-4" aria-hidden="true" />
+                          <History
+                            className="mr-1 h-4 w-4"
+                            aria-hidden="true"
+                          />
                           History
                         </Button>
                       )}
@@ -639,7 +666,10 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                           {note.isLocked ? (
                             <Lock className="mr-1 h-4 w-4" aria-hidden="true" />
                           ) : (
-                            <Unlock className="mr-1 h-4 w-4" aria-hidden="true" />
+                            <Unlock
+                              className="mr-1 h-4 w-4"
+                              aria-hidden="true"
+                            />
                           )}
                           {note.isLocked ? 'Unlock' : 'Lock'}
                         </Button>
@@ -665,7 +695,7 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                     </div>
                   </div>
                   <div className="bg-background p-6">
-                    <div className="mb-2 text-xs font-medium text-muted-foreground">
+                    <div className="text-muted-foreground mb-2 text-xs font-medium">
                       NOTE CONTENT
                     </div>
                     <div
@@ -698,11 +728,11 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
             <ModalTitle>Version History</ModalTitle>
           </ModalHeader>
           <ModalBody className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Current version: v{historyNote?.currentVersion}
             </p>
             {renderDiff && (
-              <div className="flex flex-wrap items-center gap-3 border-b border-border pb-4">
+              <div className="border-border flex flex-wrap items-center gap-3 border-b pb-4">
                 <Button
                   variant={!diffMode ? 'primary' : 'outline'}
                   size="sm"
@@ -720,43 +750,53 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                 >
                   Show Differences
                 </Button>
-                {diffMode && historyNote && (historyNote.versions?.length ?? 0) > 0 && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCompareIndex((i) => i + 1)}
-                      disabled={
-                        compareIndex >= (historyNote.versions?.length ?? 0)
-                      }
-                    >
-                      <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" />
-                      Older
-                    </Button>
-                    <span className="whitespace-nowrap text-sm text-muted-foreground">
-                      Comparing v{diffContent?.oldNumber} → v
-                      {diffContent?.newNumber}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCompareIndex((i) => Math.max(0, i - 1))}
-                      disabled={compareIndex === 0}
-                    >
-                      Newer
-                      <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />
-                    </Button>
-                  </div>
-                )}
+                {diffMode &&
+                  historyNote &&
+                  (historyNote.versions?.length ?? 0) > 0 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCompareIndex((i) => i + 1)}
+                        disabled={
+                          compareIndex >= (historyNote.versions?.length ?? 0)
+                        }
+                      >
+                        <ChevronLeft
+                          className="mr-1 h-4 w-4"
+                          aria-hidden="true"
+                        />
+                        Older
+                      </Button>
+                      <span className="text-muted-foreground text-sm whitespace-nowrap">
+                        Comparing v{diffContent?.oldNumber} → v
+                        {diffContent?.newNumber}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setCompareIndex((i) => Math.max(0, i - 1))
+                        }
+                        disabled={compareIndex === 0}
+                      >
+                        Newer
+                        <ChevronRight
+                          className="ml-1 h-4 w-4"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </div>
+                  )}
               </div>
             )}
 
             {diffMode && diffContent ? (
-              <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <div className="border-border bg-muted/30 rounded-lg border p-4">
                 <div className="mb-4 flex items-center gap-4 text-sm">
                   <div>
                     <Badge variant="outline">v{diffContent.oldNumber}</Badge>
-                    <div className="mt-1 text-muted-foreground">
+                    <div className="text-muted-foreground mt-1">
                       {formatDateTime(diffContent.oldDate)}
                     </div>
                     <div className="text-xs">{diffContent.oldEditor}</div>
@@ -764,28 +804,30 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                   <div className="text-muted-foreground">→</div>
                   <div>
                     <Badge>v{diffContent.newNumber}</Badge>
-                    <div className="mt-1 text-muted-foreground">
+                    <div className="text-muted-foreground mt-1">
                       {formatDateTime(diffContent.newDate)}
                     </div>
                     <div className="text-xs">{diffContent.newEditor}</div>
                   </div>
                 </div>
                 <div
-                  className="prose prose-sm max-w-none break-words rounded border border-border bg-background p-4"
+                  className="prose prose-sm border-border bg-background max-w-none rounded border p-4 break-words"
                   dangerouslySetInnerHTML={{ __html: diffContent.html }}
                 />
               </div>
             ) : (
               <div className="space-y-4">
                 {historyNote && (
-                  <div className="rounded-lg border border-border bg-primary-50 p-4">
+                  <div className="border-border bg-primary-50 rounded-lg border p-4">
                     <div className="mb-3 flex items-center gap-3">
                       <Badge>v{historyNote.currentVersion}</Badge>
                       <Badge variant="secondary">Current</Badge>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-muted-foreground text-sm">
                         {formatDateTime(historyNote.dateEntered)}
                       </span>
-                      <span className="text-sm">by {historyNote.caseManager}</span>
+                      <span className="text-sm">
+                        by {historyNote.caseManager}
+                      </span>
                     </div>
                     <div
                       className="prose prose-sm max-w-none"
@@ -802,11 +844,11 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                     return (
                       <div
                         key={version.id}
-                        className="rounded-lg border border-border p-4"
+                        className="border-border rounded-lg border p-4"
                       >
                         <div className="mb-3 flex items-center gap-3">
                           <Badge variant="outline">v{versionNumber}</Badge>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-muted-foreground text-sm">
                             {formatDateTime(version.editedAt)}
                           </span>
                           <span className="text-sm">by {version.editedBy}</span>
@@ -1126,10 +1168,10 @@ function QuickPanel({
   children,
 }: QuickPanelProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
+    <div className="border-border overflow-hidden rounded-lg border">
       <button
         type="button"
-        className="flex w-full items-center justify-between bg-muted/40 px-4 py-2 text-sm font-medium transition-colors hover:bg-muted/60"
+        className="bg-muted/40 hover:bg-muted/60 flex w-full items-center justify-between px-4 py-2 text-sm font-medium transition-colors"
         onClick={onToggle}
         aria-expanded={open}
       >
@@ -1144,10 +1186,10 @@ function QuickPanel({
         )}
       </button>
       {open && (
-        <div className="space-y-3 border-t border-border p-4">
+        <div className="border-border space-y-3 border-t p-4">
           {children}
           {added.length > 0 && (
-            <div className="space-x-1 text-xs text-muted-foreground">
+            <div className="text-muted-foreground space-x-1 text-xs">
               <span className="font-medium">Added this session:</span>
               {added.map((item, i) => (
                 <Badge key={`${item}-${i}`} variant="secondary" size="sm">

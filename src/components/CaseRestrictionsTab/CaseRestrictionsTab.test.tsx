@@ -67,9 +67,7 @@ describe('CaseRestrictionsTab', () => {
 
   it('toggles quick entry mode', () => {
     setup();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Quick Entry Mode' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Quick Entry Mode' }));
     expect(
       screen.getByRole('button', { name: 'Exit Quick Entry' })
     ).toBeInTheDocument();
@@ -78,9 +76,7 @@ describe('CaseRestrictionsTab', () => {
 
   it('confirms deletion', () => {
     const { onDeleteRestriction } = setup();
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Delete restriction' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Delete restriction' }));
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(onDeleteRestriction).toHaveBeenCalledWith('r1');
   });

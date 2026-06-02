@@ -19,7 +19,13 @@ import { Button } from '../Button';
 import { Checkbox } from '../Checkbox';
 import { Input } from '../Input';
 import { Label } from '../Label';
-import { Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../Modal';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal';
 import { Select, type SelectOption } from '../Select';
 import { Textarea } from '../Textarea';
 
@@ -160,7 +166,10 @@ export interface CloseCasePayload {
   actualReturnDate?: string;
   stdEndDate?: string;
   todoIdsToClose: string[];
-  restrictionUpdates: Record<string, { endDate?: string; isPermanent?: boolean }>;
+  restrictionUpdates: Record<
+    string,
+    { endDate?: string; isPermanent?: boolean }
+  >;
   absenceUpdates: Record<string, { status: string; otherStatus?: string }>;
 }
 
@@ -306,7 +315,7 @@ function TextField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id} className="text-sm text-muted-foreground">
+      <Label htmlFor={id} className="text-muted-foreground text-sm">
         {label}
       </Label>
       <Input
@@ -335,7 +344,7 @@ function SelectField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id} className="text-sm text-muted-foreground">
+      <Label htmlFor={id} className="text-muted-foreground text-sm">
         {label}
       </Label>
       <Select
@@ -362,7 +371,7 @@ function TextareaField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id} className="text-sm text-muted-foreground">
+      <Label htmlFor={id} className="text-muted-foreground text-sm">
         {label}
       </Label>
       <Textarea
@@ -387,10 +396,10 @@ interface SectionProps {
 function Section({ title, icon, defaultOpen = false, children }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
+    <div className="border-border overflow-hidden rounded-lg border">
       <button
         type="button"
-        className="flex w-full items-center justify-between bg-muted/40 px-4 py-3 text-left font-medium transition-colors hover:bg-muted/60"
+        className="bg-muted/40 hover:bg-muted/60 flex w-full items-center justify-between px-4 py-3 text-left font-medium transition-colors"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
@@ -398,7 +407,7 @@ function Section({ title, icon, defaultOpen = false, children }: SectionProps) {
           {icon}
           {title}
         </span>
-        <span className="text-sm text-foreground">{open ? '−' : '+'}</span>
+        <span className="text-foreground text-sm">{open ? '−' : '+'}</span>
       </button>
       {open && <div className="space-y-4 p-4">{children}</div>}
     </div>
@@ -439,7 +448,8 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
     const set = (patch: Partial<CaseDetailsValue>) => onChange(patch);
     const v = (key: keyof CaseDetailsValue) => (value[key] as string) ?? '';
 
-    const [showConfidentialWarning, setShowConfidentialWarning] = useState(false);
+    const [showConfidentialWarning, setShowConfidentialWarning] =
+      useState(false);
     const [showCloseDialog, setShowCloseDialog] = useState(false);
 
     // Close-case dialog local state.
@@ -469,7 +479,9 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
       const info = adjusterOptions.find((a) => a.value === val);
       set({
         adjuster: val,
-        ...(info ? { adjusterPhone: info.phone, adjusterEmail: info.email } : {}),
+        ...(info
+          ? { adjusterPhone: info.phone, adjusterEmail: info.email }
+          : {}),
       });
     };
 
@@ -521,21 +533,25 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
         restrictionUpdates,
         absenceUpdates,
       });
-      set({ status: 'Closed', dateClosed: closeDate, closureReason: closeReason });
+      set({
+        status: 'Closed',
+        dateClosed: closeDate,
+        closureReason: closeReason,
+      });
       setShowCloseDialog(false);
     };
 
     const occupationalOpen = Boolean(
       v('siteCaseNumber') ||
-        v('injuryDate') ||
-        v('injuryShift') ||
-        v('ppiRating')
+      v('injuryDate') ||
+      v('injuryShift') ||
+      v('ppiRating')
     );
     const workRelatedOpen = Boolean(
       v('isCaseWorkRelated') ||
-        v('typeOfInjuryOrIllness') ||
-        v('workersCompClaim') ||
-        v('oshaRecordable')
+      v('typeOfInjuryOrIllness') ||
+      v('workersCompClaim') ||
+      v('oshaRecordable')
     );
     const locationOpen = Boolean(
       v('incidentOnsiteOffsite') || v('locationAddress') || v('locationCity')
@@ -552,7 +568,11 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
     const workCompOpen = Boolean(v('wcClaimNumber') || v('adjusterContact'));
 
     return (
-      <div ref={ref} data-slot="case-details-tab" className={cn('space-y-4', className)}>
+      <div
+        ref={ref}
+        data-slot="case-details-tab"
+        className={cn('space-y-4', className)}
+      >
         {/* Case Information */}
         <Section
           title="Case Information"
@@ -734,15 +754,23 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                 onChange={(val) => set({ ddgDays: val })}
               />
               {ddgDaysError && (
-                <p className="text-xs text-destructive">{ddgDaysError}</p>
+                <p className="text-destructive text-xs">{ddgDaysError}</p>
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ddg-return" className="text-sm text-muted-foreground">
+              <Label
+                htmlFor="ddg-return"
+                className="text-muted-foreground text-sm"
+              >
                 DDG return date{' '}
                 <span className="text-xs italic">(auto-calculated)</span>
               </Label>
-              <Input id="ddg-return" type="date" value={ddgReturnDate} readOnly />
+              <Input
+                id="ddg-return"
+                type="date"
+                value={ddgReturnDate}
+                readOnly
+              />
             </div>
           </div>
         </Section>
@@ -1395,7 +1423,7 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
           onAction={() => set({ confidential: true })}
         >
           <div className="space-y-2 text-sm">
-            <p className="font-semibold text-destructive">
+            <p className="text-destructive font-semibold">
               Warning: You will lose access to this case!
             </p>
             <p>
@@ -1418,13 +1446,13 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
             <ModalTitle>Close Case - Review Open Items</ModalTitle>
           </ModalHeader>
           <ModalBody className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Complete the closure details and review open items before closing
               the case. All open to-dos must be completed before the case can be
               closed.
             </p>
 
-            <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
+            <div className="border-border bg-muted/30 space-y-2 rounded-md border p-3">
               <h4 className="text-sm font-semibold">Closure Details</h4>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <TextField
@@ -1464,19 +1492,19 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                 <h4 className="text-sm font-semibold">
                   Open Absences ({openAbsences.length})
                 </h4>
-                <div className="divide-y divide-border rounded-md border border-border">
+                <div className="divide-border border-border divide-y rounded-md border">
                   {openAbsences.map((absence) => (
                     <div key={absence.id} className="space-y-2 p-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">
                           {absence.customOthName || absence.statusType}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                           Started: {absence.effectiveDate}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Label className="whitespace-nowrap text-xs">
+                        <Label className="text-xs whitespace-nowrap">
                           Move to Status:
                         </Label>
                         <Select
@@ -1487,7 +1515,10 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                           onValueChange={(val) =>
                             setAbsenceUpdates((prev) => ({
                               ...prev,
-                              [absence.id]: { ...prev[absence.id], status: val },
+                              [absence.id]: {
+                                ...prev[absence.id],
+                                status: val,
+                              },
                             }))
                           }
                           placeholder="Select status..."
@@ -1495,7 +1526,10 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                             { value: 'FD', label: 'Full Duty' },
                             { value: 'LWD', label: 'Lost Work Days' },
                             { value: 'RWD', label: 'Restricted Work Days' },
-                            { value: 'RWDREGULARJOB', label: 'RWD Regular Job' },
+                            {
+                              value: 'RWDREGULARJOB',
+                              label: 'RWD Regular Job',
+                            },
                             { value: 'OTH', label: 'Other' },
                           ]}
                         />
@@ -1503,7 +1537,9 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                           absenceStatusOptions.length > 0 && (
                             <Select
                               aria-label={`Other absence status: ${absence.id}`}
-                              value={absenceUpdates[absence.id]?.otherStatus ?? ''}
+                              value={
+                                absenceUpdates[absence.id]?.otherStatus ?? ''
+                              }
                               onValueChange={(val) =>
                                 setAbsenceUpdates((prev) => ({
                                   ...prev,
@@ -1529,26 +1565,28 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                 <h4 className="text-sm font-semibold">
                   Active Restrictions ({openRestrictions.length})
                 </h4>
-                <div className="divide-y divide-border rounded-md border border-border">
+                <div className="divide-border border-border divide-y rounded-md border">
                   {openRestrictions.map((restriction) => (
                     <div key={restriction.id} className="space-y-2 p-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">
                           {restriction.restriction}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                           Started: {restriction.startDate}
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
-                          <Label className="whitespace-nowrap text-xs">
+                          <Label className="text-xs whitespace-nowrap">
                             End Date:
                           </Label>
                           <Input
                             type="date"
                             aria-label={`End date for restriction: ${restriction.restriction}`}
-                            value={restrictionUpdates[restriction.id]?.endDate ?? ''}
+                            value={
+                              restrictionUpdates[restriction.id]?.endDate ?? ''
+                            }
                             disabled={
                               restrictionUpdates[restriction.id]?.isPermanent
                             }
@@ -1567,7 +1605,8 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                         <Checkbox
                           label="Permanent"
                           checked={
-                            restrictionUpdates[restriction.id]?.isPermanent ?? false
+                            restrictionUpdates[restriction.id]?.isPermanent ??
+                            false
                           }
                           onChange={(e) =>
                             setRestrictionUpdates((prev) => ({
@@ -1616,12 +1655,14 @@ export const CaseDetailsTab = forwardRef<HTMLDivElement, CaseDetailsTabProps>(
                     </Button>
                   </div>
                 </div>
-                <div className="divide-y divide-border rounded-md border border-border">
+                <div className="divide-border border-border divide-y rounded-md border">
                   {openTodos.map((todo) => (
                     <div key={todo.id} className="p-2">
                       <Checkbox
                         label={`${todo.activity}${
-                          todo.dateScheduled ? ` (Due: ${todo.dateScheduled})` : ''
+                          todo.dateScheduled
+                            ? ` (Due: ${todo.dateScheduled})`
+                            : ''
                         }`}
                         checked={todosToClose.includes(todo.id)}
                         onChange={(e) =>
@@ -1674,11 +1715,16 @@ interface CheckboxGroupProps {
 }
 
 /** A labeled grid of checkboxes backed by a string-array value. */
-function CheckboxGroup({ label, options, selected, onChange }: CheckboxGroupProps) {
+function CheckboxGroup({
+  label,
+  options,
+  selected,
+  onChange,
+}: CheckboxGroupProps) {
   return (
     <div className="space-y-3">
-      <Label className="text-sm text-muted-foreground">{label}</Label>
-      <div className="grid grid-cols-1 gap-2 rounded-md border border-border bg-muted/20 p-4 md:grid-cols-2">
+      <Label className="text-muted-foreground text-sm">{label}</Label>
+      <div className="border-border bg-muted/20 grid grid-cols-1 gap-2 rounded-md border p-4 md:grid-cols-2">
         {options.map((option) => (
           <Checkbox
             key={option}

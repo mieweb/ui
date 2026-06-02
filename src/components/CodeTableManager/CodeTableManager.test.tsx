@@ -107,11 +107,7 @@ describe('CodeTableManager', () => {
         onDelete={vi.fn()}
       />
     );
-    expect(
-      screen.getByRole('heading', { name: 'US' })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: 'Canada' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'US' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Canada' })).toBeInTheDocument();
   });
 });

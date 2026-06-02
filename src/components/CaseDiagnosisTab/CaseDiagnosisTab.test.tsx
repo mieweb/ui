@@ -70,9 +70,7 @@ describe('CaseDiagnosisTab', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     await waitFor(() =>
       expect(onDiagnosesChange).toHaveBeenCalledWith(
-        expect.not.arrayContaining([
-          expect.objectContaining({ id: '1' }),
-        ])
+        expect.not.arrayContaining([expect.objectContaining({ id: '1' })])
       )
     );
   });

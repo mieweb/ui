@@ -35,7 +35,9 @@ function Example() {
   return (
     <UserManager
       users={users}
-      onAdd={(u) => setUsers((prev) => [...prev, { ...u, id: String(nextId++) }])}
+      onAdd={(u) =>
+        setUsers((prev) => [...prev, { ...u, id: String(nextId++) }])
+      }
       onUpdate={(id, changes) =>
         setUsers((prev) =>
           prev.map((u) => (u.id === id ? { ...u, ...changes } : u))

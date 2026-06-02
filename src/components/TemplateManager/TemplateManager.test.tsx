@@ -55,14 +55,18 @@ describe('TemplateManager', () => {
 
   it('opens the create dialog', async () => {
     renderWithTheme(<Harness />);
-    fireEvent.click(screen.getByRole('button', { name: 'Create Letter Template' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Create Letter Template' })
+    );
     expect(await screen.findByLabelText('Template Name *')).toBeInTheDocument();
   });
 
   it('adds a new template', async () => {
     const onAdd = vi.fn();
     renderWithTheme(<Harness onAdd={onAdd} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Create Letter Template' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Create Letter Template' })
+    );
     fireEvent.change(await screen.findByLabelText('Template Name *'), {
       target: { value: 'RTW Notice' },
     });
@@ -79,7 +83,9 @@ describe('TemplateManager', () => {
 
   it('disables save until name and code are provided', async () => {
     renderWithTheme(<Harness />);
-    fireEvent.click(screen.getByRole('button', { name: 'Create Letter Template' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Create Letter Template' })
+    );
     expect(
       await screen.findByRole('button', { name: 'Create Template' })
     ).toBeDisabled();
@@ -88,7 +94,9 @@ describe('TemplateManager', () => {
   it('confirms before deleting a template', async () => {
     const onDelete = vi.fn();
     renderWithTheme(<Harness onDelete={onDelete} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Delete Initial Contact' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Delete Initial Contact' })
+    );
     fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(onDelete).toHaveBeenCalledWith('1'));
   });

@@ -59,7 +59,9 @@ function Example() {
       onBulkEdit={(items, changes) =>
         setTodos((prev) =>
           prev.map((t) =>
-            items.some((i) => i.caseNumber === t.caseNumber && i.todoId === t.id)
+            items.some(
+              (i) => i.caseNumber === t.caseNumber && i.todoId === t.id
+            )
               ? { ...t, ...changes }
               : t
           )

@@ -95,7 +95,8 @@ export function CodeTableManager({
     label: c,
   }));
 
-  const canAdd = Boolean(newCode.trim()) && (!hasCategory || Boolean(newCategory));
+  const canAdd =
+    Boolean(newCode.trim()) && (!hasCategory || Boolean(newCategory));
 
   const handleAdd = () => {
     if (!canAdd) return;
@@ -139,7 +140,7 @@ export function CodeTableManager({
   };
 
   const renderRow = (item: CodeTableItem) => (
-    <div key={item.id} className="rounded-lg border border-border p-3">
+    <div key={item.id} className="border-border rounded-lg border p-3">
       {editingId === item.id ? (
         <div className="space-y-3">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -200,7 +201,7 @@ export function CodeTableManager({
               )}
             </div>
             {hasDescription && item.description && (
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 {item.description}
               </p>
             )}
@@ -233,7 +234,7 @@ export function CodeTableManager({
   const renderList = () => {
     if (items.length === 0) {
       return (
-        <p className="py-8 text-center text-muted-foreground">
+        <p className="text-muted-foreground py-8 text-center">
           No entries defined yet. Add your first one above.
         </p>
       );
@@ -249,7 +250,7 @@ export function CodeTableManager({
           .filter((cat) => items.some((i) => i.category === cat))
           .map((cat) => (
             <div key={cat} className="space-y-2">
-              <h3 className="border-b border-border pb-2 text-lg font-semibold">
+              <h3 className="border-border border-b pb-2 text-lg font-semibold">
                 {cat}
               </h3>
               <div className="space-y-2 pl-2">

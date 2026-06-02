@@ -21,8 +21,7 @@ function useCollapsibleContext(component: string): CollapsibleContextValue {
   return ctx;
 }
 
-export interface CollapsibleProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CollapsibleProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Controlled open state */
   open?: boolean;
   /** Default open state (uncontrolled) */
@@ -57,8 +56,7 @@ const Collapsible = React.forwardRef<HTMLDivElement, CollapsibleProps>(
     },
     ref
   ) => {
-    const [uncontrolledOpen, setUncontrolledOpen] =
-      React.useState(defaultOpen);
+    const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
     const generatedId = React.useId();
 
     const isControlled = controlledOpen !== undefined;
@@ -134,8 +132,7 @@ const CollapsibleTrigger = React.forwardRef<
 
 CollapsibleTrigger.displayName = 'CollapsibleTrigger';
 
-export interface CollapsibleContentProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CollapsibleContentProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Keep content mounted when collapsed (hidden via CSS) */
   forceMount?: boolean;
 }

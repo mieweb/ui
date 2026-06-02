@@ -17,7 +17,12 @@ const letters: CaseLetter[] = [
 ];
 
 const templates = [
-  { code: 'welcome-letter', name: 'Welcome Letter', content: '<p>Hi</p>', active: true },
+  {
+    code: 'welcome-letter',
+    name: 'Welcome Letter',
+    content: '<p>Hi</p>',
+    active: true,
+  },
 ];
 
 const caseManagers = [{ value: 'Jane Doe', label: 'Jane Doe' }];

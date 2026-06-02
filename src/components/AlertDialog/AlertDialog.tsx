@@ -1,15 +1,12 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  type ModalProps,
-} from '../Modal';
+import { Modal, ModalBody, ModalFooter, type ModalProps } from '../Modal';
 import { Button } from '../Button';
 
-export interface AlertDialogProps
-  extends Pick<ModalProps, 'open' | 'onOpenChange'> {
+export interface AlertDialogProps extends Pick<
+  ModalProps,
+  'open' | 'onOpenChange'
+> {
   /** Dialog title */
   title: React.ReactNode;
   /** Optional descriptive body text */

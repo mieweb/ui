@@ -144,7 +144,9 @@ export function WorkStatusReport({
         });
       }
     }
-    return entries.sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate));
+    return entries.sort((a, b) =>
+      a.effectiveDate.localeCompare(b.effectiveDate)
+    );
   }, [cases]);
 
   const filteredEntries = useMemo(
@@ -153,7 +155,8 @@ export function WorkStatusReport({
         const inRange =
           entry.effectiveDate >= startDate && entry.effectiveDate <= endDate;
         const matchesStatus =
-          statusFilter === 'all' || getStatusCode(entry.status) === statusFilter;
+          statusFilter === 'all' ||
+          getStatusCode(entry.status) === statusFilter;
         return inRange && matchesStatus;
       }),
     [allEntries, startDate, endDate, statusFilter]
@@ -237,7 +240,14 @@ export function WorkStatusReport({
   }, [allEntries, absenceStatusCodes]);
 
   const summary = useMemo(() => {
-    const counts = { FD: 0, LWD: 0, RWD: 0, RWDREGULARJOB: 0, OTH: 0, total: 0 };
+    const counts = {
+      FD: 0,
+      LWD: 0,
+      RWD: 0,
+      RWDREGULARJOB: 0,
+      OTH: 0,
+      total: 0,
+    };
     const uniqueEmployees = new Set<string>();
     const uniqueCases = new Set<string>();
     for (const entry of filteredEntries) {
@@ -287,9 +297,12 @@ export function WorkStatusReport({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex flex-wrap items-end gap-4 rounded-lg bg-muted/50 p-4">
+        <div className="bg-muted/50 flex flex-wrap items-end gap-4 rounded-lg p-4">
           <div className="space-y-2">
-            <Label htmlFor="wsr-start" className="flex items-center gap-1 text-sm">
+            <Label
+              htmlFor="wsr-start"
+              className="flex items-center gap-1 text-sm"
+            >
               <Calendar className="h-3.5 w-3.5" aria-hidden="true" /> Start Date
             </Label>
             <Input
@@ -301,7 +314,10 @@ export function WorkStatusReport({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="wsr-end" className="flex items-center gap-1 text-sm">
+            <Label
+              htmlFor="wsr-end"
+              className="flex items-center gap-1 text-sm"
+            >
               <Calendar className="h-3.5 w-3.5" aria-hidden="true" /> End Date
             </Label>
             <Input
@@ -357,7 +373,7 @@ export function WorkStatusReport({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium">
               <AlertTriangle
-                className="h-4 w-4 text-warning-500"
+                className="text-warning-500 h-4 w-4"
                 aria-hidden="true"
               />
               Audit Issues ({auditIssues.length} issue
@@ -378,15 +394,18 @@ export function WorkStatusReport({
                   key={`warning-${idx}`}
                   className="border-warning-300 bg-warning-50 py-2"
                 >
-                  <Info className="h-4 w-4 text-warning-600" aria-hidden="true" />
-                  <AlertDescription className="text-sm text-warning-800">
+                  <Info
+                    className="text-warning-600 h-4 w-4"
+                    aria-hidden="true"
+                  />
+                  <AlertDescription className="text-warning-800 text-sm">
                     <span className="font-medium">{issue.employeeName}</span> (
                     {issue.caseNumber}): {issue.message}
                   </AlertDescription>
                 </Alert>
               ))}
               {auditIssues.length > 15 && (
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-center text-sm">
                   ... and {auditIssues.length - 15} more issues
                 </p>
               )}
@@ -394,7 +413,7 @@ export function WorkStatusReport({
           </div>
         )}
 
-        <div className="overflow-hidden rounded-lg border border-border">
+        <div className="border-border overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
@@ -412,7 +431,7 @@ export function WorkStatusReport({
                 <TableRow>
                   <TableCell
                     colSpan={7}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
                     No entries found for the selected date range and filters.
                   </TableCell>
@@ -422,7 +441,9 @@ export function WorkStatusReport({
                   const entryIssues = auditIssues.filter((i) =>
                     i.entryIds.includes(entry.id)
                   );
-                  const hasError = entryIssues.some((i) => i.severity === 'error');
+                  const hasError = entryIssues.some(
+                    (i) => i.severity === 'error'
+                  );
                   const hasWarning = entryIssues.some(
                     (i) => i.severity === 'warning'
                   );
@@ -440,7 +461,7 @@ export function WorkStatusReport({
                       </TableCell>
                       <TableCell>
                         <div className="font-medium">{entry.employeeName}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                           {entry.employeeNumber}
                         </div>
                       </TableCell>
@@ -452,20 +473,22 @@ export function WorkStatusReport({
                         <Badge variant={statusBadgeVariant(code)}>{code}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={caseStatusBadgeVariant(entry.caseStatus)}>
+                        <Badge
+                          variant={caseStatusBadgeVariant(entry.caseStatus)}
+                        >
                           {entry.caseStatus}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
                         {hasError && (
                           <AlertTriangle
-                            className="inline h-4 w-4 text-destructive"
+                            className="text-destructive inline h-4 w-4"
                             aria-label="Has errors"
                           />
                         )}
                         {!hasError && hasWarning && (
                           <Info
-                            className="inline h-4 w-4 text-warning-500"
+                            className="text-warning-500 inline h-4 w-4"
                             aria-label="Has warnings"
                           />
                         )}
@@ -479,7 +502,7 @@ export function WorkStatusReport({
         </div>
 
         {displayEntries.length > 0 && (
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-center text-sm">
             Showing {displayEntries.length} entries
           </p>
         )}
@@ -498,9 +521,11 @@ function ReportStat({
   valueClassName?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-background p-4">
-      <div className={cn('text-2xl font-semibold', valueClassName)}>{value}</div>
-      <div className="text-sm text-muted-foreground">{label}</div>
+    <div className="border-border bg-background rounded-lg border p-4">
+      <div className={cn('text-2xl font-semibold', valueClassName)}>
+        {value}
+      </div>
+      <div className="text-muted-foreground text-sm">{label}</div>
     </div>
   );
 }

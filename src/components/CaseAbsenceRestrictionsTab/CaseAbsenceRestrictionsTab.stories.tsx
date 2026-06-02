@@ -35,8 +35,20 @@ const restrictionOptions = [
 ];
 
 const initialAbsences: AbsenceTrackingEntry[] = [
-  { id: 'a1', effectiveDate: '2025-08-01', status: 'LWD', createdSeq: 1, caseNumber: 'C-1' },
-  { id: 'a2', effectiveDate: '2025-08-10', status: 'RWD', createdSeq: 2, caseNumber: 'C-1' },
+  {
+    id: 'a1',
+    effectiveDate: '2025-08-01',
+    status: 'LWD',
+    createdSeq: 1,
+    caseNumber: 'C-1',
+  },
+  {
+    id: 'a2',
+    effectiveDate: '2025-08-10',
+    status: 'RWD',
+    createdSeq: 2,
+    caseNumber: 'C-1',
+  },
 ];
 const initialRestrictions: WorkRestrictionEntry[] = [
   {
@@ -65,7 +77,9 @@ function Example() {
     ]);
 
   const updateAbsence = (id: string, draft: AbsenceTrackingDraft) =>
-    setAbsences((prev) => prev.map((e) => (e.id === id ? { ...e, ...draft } : e)));
+    setAbsences((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, ...draft } : e))
+    );
 
   const addRestriction = (draft: WorkRestrictionDraft) =>
     setRestrictions((prev) => [
@@ -74,7 +88,9 @@ function Example() {
     ]);
 
   const updateRestriction = (id: string, draft: WorkRestrictionDraft) =>
-    setRestrictions((prev) => prev.map((r) => (r.id === id ? { ...r, ...draft } : r)));
+    setRestrictions((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...draft } : r))
+    );
 
   return (
     <CaseAbsenceRestrictionsTab

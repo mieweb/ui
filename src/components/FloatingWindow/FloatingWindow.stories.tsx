@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 function SampleBody() {
   return (
     <div className="space-y-3 p-6">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Drag the edges or corners to resize the window. The body scrolls when
         content overflows.
       </p>
@@ -97,7 +97,11 @@ function DraggableExample() {
               Save as Template
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setOpen(false)}
+              >
                 Cancel
               </Button>
               <Button size="sm" onClick={() => setOpen(false)}>

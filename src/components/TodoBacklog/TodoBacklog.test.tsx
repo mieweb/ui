@@ -34,7 +34,9 @@ describe('TodoBacklog', () => {
       <TodoBacklog todos={todos} onBack={vi.fn()} onViewCase={vi.fn()} />
     );
     expect(screen.getByText('Follow-up call')).toBeInTheDocument();
-    expect(screen.getByText('Complete draft letter to physician')).toBeInTheDocument();
+    expect(
+      screen.getByText('Complete draft letter to physician')
+    ).toBeInTheDocument();
   });
 
   it('filters by search term', () => {
@@ -81,7 +83,9 @@ describe('TodoBacklog', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /Draft Letters/ }));
     expect(screen.getByText('(filtered)')).toBeInTheDocument();
-    expect(screen.getByText('Complete draft letter to physician')).toBeInTheDocument();
+    expect(
+      screen.getByText('Complete draft letter to physician')
+    ).toBeInTheDocument();
     expect(screen.queryByText('Follow-up call')).not.toBeInTheDocument();
   });
 });

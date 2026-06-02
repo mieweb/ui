@@ -14,7 +14,12 @@ const caseTypeOptions = [{ value: 'STD', label: 'Short Term Disability' }];
 const caseManagerOptions = [{ value: 'Jane Smith', label: 'Jane Smith' }];
 const closureReasonOptions = [{ value: 'RTW', label: 'Returned to Work' }];
 const adjusterOptions: CaseSelectOption[] = [
-  { value: 'a1', label: 'Sarah Johnson', phone: '(555) 111-2222', email: 's@x.com' },
+  {
+    value: 'a1',
+    label: 'Sarah Johnson',
+    phone: '(555) 111-2222',
+    email: 's@x.com',
+  },
 ];
 
 function Harness({
@@ -61,9 +66,9 @@ describe('CaseDetailsTab', () => {
     fireEvent.click(screen.getByRole('combobox', { name: 'Adjuster' }));
     fireEvent.click(screen.getByRole('option', { name: 'Sarah Johnson' }));
     await waitFor(() => {
-      expect((screen.getByLabelText('Adjuster Phone') as HTMLInputElement).value).toBe(
-        '(555) 111-2222'
-      );
+      expect(
+        (screen.getByLabelText('Adjuster Phone') as HTMLInputElement).value
+      ).toBe('(555) 111-2222');
     });
   });
 

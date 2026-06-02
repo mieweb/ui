@@ -16,10 +16,7 @@ import { Button } from '../Button';
 import { FloatingWindow, MinimizedWindow } from '../FloatingWindow';
 import { Input } from '../Input';
 import { Label } from '../Label';
-import {
-  RichTextEditor,
-  type RichTextVariableGroup,
-} from '../RichTextEditor';
+import { RichTextEditor, type RichTextVariableGroup } from '../RichTextEditor';
 import { Select, type SelectOption } from '../Select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../Tabs';
 
@@ -201,16 +198,25 @@ export function CaseManager({
     { label: 'Employee Number', value: summary.employeeNumber },
     { label: 'Employee Class', value: summary.employeeClass },
     { label: 'Date of Birth', value: formatDate(summary.dateOfBirth) },
-    { label: 'Age', value: summary.age != null ? String(summary.age) : undefined },
+    {
+      label: 'Age',
+      value: summary.age != null ? String(summary.age) : undefined,
+    },
     { label: 'Gender', value: summary.gender },
     { label: 'Address', value: summary.address, colSpan: true },
     { label: 'Location', value: summary.employeeLocation },
     { label: 'Call Center', value: summary.callCenter },
     { label: 'Hourly/Salaried', value: summary.employmentType },
     { label: 'Position', value: summary.position },
-    { label: 'Original Hire Date', value: formatDate(summary.originalHireDate) },
+    {
+      label: 'Original Hire Date',
+      value: formatDate(summary.originalHireDate),
+    },
     { label: 'Entry Date', value: formatDate(summary.entryDate) },
-    { label: 'Adjusted Service Date', value: formatDate(summary.adjustedServiceDate) },
+    {
+      label: 'Adjusted Service Date',
+      value: formatDate(summary.adjustedServiceDate),
+    },
     { label: 'Termination Date', value: formatDate(summary.terminationDate) },
     { label: 'Cell Phone', value: summary.cellPhone },
     { label: 'Home Phone', value: summary.homePhone },
@@ -221,31 +227,49 @@ export function CaseManager({
     { label: 'Emergency Work Phone', value: summary.emergencyWorkPhone },
   ];
 
-  const summaryFields: { label: string; value?: string; className?: string }[] = [
-    { label: 'Employee', value: summary.employeeName, className: 'flex-1 min-w-[180px]' },
-    { label: 'Case #', value: summary.caseNumber, className: 'w-[130px]' },
-    { label: 'Status', value: summary.status, className: 'w-[100px] capitalize' },
-    { label: 'Case type', value: summary.caseTypeLabel, className: 'w-[160px]' },
-    {
-      label: 'Case manager',
-      value: summary.caseManager || 'Unassigned',
-      className: 'w-[140px]',
-    },
-    {
-      label: 'Date of Disability',
-      value: formatDate(summary.dateOfDisability),
-      className: 'w-[120px]',
-    },
-  ];
+  const summaryFields: { label: string; value?: string; className?: string }[] =
+    [
+      {
+        label: 'Employee',
+        value: summary.employeeName,
+        className: 'flex-1 min-w-[180px]',
+      },
+      { label: 'Case #', value: summary.caseNumber, className: 'w-[130px]' },
+      {
+        label: 'Status',
+        value: summary.status,
+        className: 'w-[100px] capitalize',
+      },
+      {
+        label: 'Case type',
+        value: summary.caseTypeLabel,
+        className: 'w-[160px]',
+      },
+      {
+        label: 'Case manager',
+        value: summary.caseManager || 'Unassigned',
+        className: 'w-[140px]',
+      },
+      {
+        label: 'Date of Disability',
+        value: formatDate(summary.dateOfDisability),
+        className: 'w-[120px]',
+      },
+    ];
 
   return (
-    <div className={cn('min-h-screen bg-muted/30', className)} data-slot="case-manager">
+    <div
+      className={cn('bg-muted/30 min-h-screen', className)}
+      data-slot="case-manager"
+    >
       <div className="container mx-auto max-w-[1400px]">
-        <div className="mb-4 rounded-lg border border-border bg-card p-3 shadow-sm transition-all duration-200 hover:shadow-md">
-          <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-border pb-3">
+        <div className="border-border bg-card mb-4 rounded-lg border p-3 shadow-sm transition-all duration-200 hover:shadow-md">
+          <div className="border-border mb-3 flex flex-wrap items-center gap-3 border-b pb-3">
             {summaryFields.map((field) => (
               <div key={field.label} className={field.className}>
-                <div className="mb-1 text-xs text-muted-foreground">{field.label}</div>
+                <div className="text-muted-foreground mb-1 text-xs">
+                  {field.label}
+                </div>
                 <div className="text-sm font-medium">{field.value || '—'}</div>
               </div>
             ))}
@@ -266,7 +290,9 @@ export function CaseManager({
               type="button"
               onClick={() => setIsHeaderExpanded((v) => !v)}
               aria-expanded={isHeaderExpanded}
-              aria-label={isHeaderExpanded ? 'Collapse details' : 'Expand details'}
+              aria-label={
+                isHeaderExpanded ? 'Collapse details' : 'Expand details'
+              }
               className="flex items-center"
             >
               <div
@@ -279,7 +305,7 @@ export function CaseManager({
                   className={cn(
                     'h-5 w-5 transition-all duration-200',
                     isHeaderExpanded
-                      ? 'rotate-180 text-primary'
+                      ? 'text-primary rotate-180'
                       : 'text-muted-foreground'
                   )}
                   aria-hidden="true"
@@ -291,44 +317,51 @@ export function CaseManager({
           {isHeaderExpanded && (
             <div className="grid origin-top grid-cols-2 gap-x-4 gap-y-3 text-xs md:grid-cols-4 lg:grid-cols-5">
               {detailFields.map((field) => (
-                <div key={field.label} className={field.colSpan ? 'col-span-2' : undefined}>
-                  <div className="mb-0.5 text-muted-foreground">{field.label}</div>
+                <div
+                  key={field.label}
+                  className={field.colSpan ? 'col-span-2' : undefined}
+                >
+                  <div className="text-muted-foreground mb-0.5">
+                    {field.label}
+                  </div>
                   <div className="font-medium">{field.value || '—'}</div>
                 </div>
               ))}
 
-              <div className="col-span-full mt-2 border-t border-border pt-3">
+              <div className="border-border col-span-full mt-2 border-t pt-3">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <div className="mb-2 flex items-center gap-2 text-muted-foreground">
+                    <div className="text-muted-foreground mb-2 flex items-center gap-2">
                       <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span className="font-medium">Current Absence Status</span>
+                      <span className="font-medium">
+                        Current Absence Status
+                      </span>
                     </div>
                     {currentAbsence ? (
-                      <div className="rounded-md bg-muted/50 p-2">
+                      <div className="bg-muted/50 rounded-md p-2">
                         <div className="flex items-center justify-between">
                           <Badge variant={currentAbsence.tone || 'secondary'}>
                             {currentAbsence.statusLabel}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             Since {currentAbsence.effectiveDate}
                           </span>
                         </div>
                         {currentAbsence.reason && (
-                          <div className="mt-1 text-xs text-muted-foreground">
+                          <div className="text-muted-foreground mt-1 text-xs">
                             Reason: {currentAbsence.reason}
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="text-sm italic text-muted-foreground">
+                      <div className="text-muted-foreground text-sm italic">
                         No absence records
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <div className="mb-2 flex items-center gap-2 text-muted-foreground">
+                    <div className="text-muted-foreground mb-2 flex items-center gap-2">
                       <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
                       <span className="font-medium">
                         Active Restrictions ({activeRestrictions.length})
@@ -349,7 +382,7 @@ export function CaseManager({
                         )}
                       </div>
                     ) : (
-                      <div className="text-sm italic text-muted-foreground">
+                      <div className="text-muted-foreground text-sm italic">
                         No active restrictions
                       </div>
                     )}
@@ -360,29 +393,38 @@ export function CaseManager({
           )}
         </div>
 
-        <Tabs value={currentTab} onValueChange={setTab} variant="pills" className="w-full">
-          <div className="sticky top-14 z-40 bg-background shadow-sm sm:top-16">
+        <Tabs
+          value={currentTab}
+          onValueChange={setTab}
+          variant="pills"
+          className="w-full"
+        >
+          <div className="bg-background sticky top-14 z-40 shadow-sm sm:top-16">
             <TabsList className="w-full flex-wrap justify-start">
               {tabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                >
+                <TabsTrigger key={tab.value} value={tab.value}>
                   {tab.label}
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
 
-          <div className="mt-0 rounded-lg rounded-tl-none border border-border bg-card p-6 shadow-sm">
+          <div className="border-border bg-card mt-0 rounded-lg rounded-tl-none border p-6 shadow-sm">
             {tabs.map((tab) => (
               <TabsContent key={tab.value} value={tab.value} className="m-0">
                 {tab.content}
-                <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
+                <div className="border-border mt-6 flex items-center justify-between border-t pt-6">
                   <div>
                     {prevTab && (
-                      <Button variant="outline" size="sm" onClick={() => setTab(prevTab.value)}>
-                        <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setTab(prevTab.value)}
+                      >
+                        <ChevronLeft
+                          className="mr-1 h-4 w-4"
+                          aria-hidden="true"
+                        />
                         {prevTab.label}
                       </Button>
                     )}
@@ -390,16 +432,25 @@ export function CaseManager({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    onClick={() =>
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
                   >
                     <ArrowUp className="mr-1 h-4 w-4" aria-hidden="true" />
                     Back to Top
                   </Button>
                   <div>
                     {nextTab && (
-                      <Button variant="outline" size="sm" onClick={() => setTab(nextTab.value)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setTab(nextTab.value)}
+                      >
                         {nextTab.label}
-                        <ChevronRight className="ml-1 h-4 w-4" aria-hidden="true" />
+                        <ChevronRight
+                          className="ml-1 h-4 w-4"
+                          aria-hidden="true"
+                        />
                       </Button>
                     )}
                   </div>
@@ -464,7 +515,7 @@ export function CaseManager({
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Case Manager</Label>
-              <div className="flex h-8 items-center rounded-md bg-muted/50 px-3 py-1.5 text-sm">
+              <div className="bg-muted/50 flex h-8 items-center rounded-md px-3 py-1.5 text-sm">
                 {summary.caseManager || 'Auto-assigned'}
               </div>
             </div>

@@ -93,8 +93,7 @@ export interface CaseSTDCoverage {
   rule: { effectiveDate: string };
 }
 
-export interface CasePayInformationTabProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CasePayInformationTabProps extends React.HTMLAttributes<HTMLDivElement> {
   jobHistory: CaseJobAssignment[];
   compensationHistory: CaseCompensationRate[];
   currentJob?: CaseJobAssignment;
@@ -232,8 +231,7 @@ export const CasePayInformationTab = React.forwardRef<
       dateOfDisability ?? ''
     );
 
-    const lookupLocation =
-      currentJob?.locationName || employeeLocation || '';
+    const lookupLocation = currentJob?.locationName || employeeLocation || '';
 
     const stdCoverage =
       lookupStdCoverage && stdLookupDate && lookupLocation
@@ -341,7 +339,9 @@ export const CasePayInformationTab = React.forwardRef<
                   </div>
                   <div>
                     <p className="text-muted-foreground">Manager</p>
-                    <p className="font-medium">{currentJob.managerName || '—'}</p>
+                    <p className="font-medium">
+                      {currentJob.managerName || '—'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Effective Date</p>
@@ -349,7 +349,7 @@ export const CasePayInformationTab = React.forwardRef<
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   No job assignment found. Add one below.
                 </p>
               )}
@@ -388,7 +388,7 @@ export const CasePayInformationTab = React.forwardRef<
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   No compensation found. Add one below.
                 </p>
               )}
@@ -415,8 +415,9 @@ export const CasePayInformationTab = React.forwardRef<
           </CardHeader>
           <CardContent>
             {sortedJobs.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground">
-                No job history entries. Click &quot;Add Entry&quot; to create one.
+              <p className="text-muted-foreground py-8 text-center">
+                No job history entries. Click &quot;Add Entry&quot; to create
+                one.
               </p>
             ) : (
               <Table>
@@ -459,7 +460,7 @@ export const CasePayInformationTab = React.forwardRef<
                             onClick={() => onDeleteJob(job.id)}
                           >
                             <Trash2
-                              className="h-4 w-4 text-destructive"
+                              className="text-destructive h-4 w-4"
                               aria-hidden="true"
                             />
                           </Button>
@@ -492,8 +493,9 @@ export const CasePayInformationTab = React.forwardRef<
           </CardHeader>
           <CardContent>
             {sortedPay.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground">
-                No pay history entries. Click &quot;Add Entry&quot; to create one.
+              <p className="text-muted-foreground py-8 text-center">
+                No pay history entries. Click &quot;Add Entry&quot; to create
+                one.
               </p>
             ) : (
               <Table>
@@ -536,7 +538,7 @@ export const CasePayInformationTab = React.forwardRef<
                             onClick={() => onDeletePay(pay.id)}
                           >
                             <Trash2
-                              className="h-4 w-4 text-destructive"
+                              className="text-destructive h-4 w-4"
                               aria-hidden="true"
                             />
                           </Button>
@@ -567,7 +569,7 @@ export const CasePayInformationTab = React.forwardRef<
                 <Label htmlFor="std-lookup-date">As-of Date</Label>
                 <div className="flex items-center gap-2">
                   <Calendar
-                    className="h-4 w-4 text-muted-foreground"
+                    className="text-muted-foreground h-4 w-4"
                     aria-hidden="true"
                   />
                   <Input
@@ -579,20 +581,20 @@ export const CasePayInformationTab = React.forwardRef<
                     onChange={(e) => setStdLookupDate(e.target.value)}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Defaults to Date of Disability
                 </p>
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 Location:{' '}
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   {lookupLocation || 'Unknown'}
                 </span>
               </div>
             </div>
 
             {stdCoverage ? (
-              <div className="rounded-lg border border-border p-4">
+              <div className="border-border rounded-lg border p-4">
                 <h4 className="mb-3 font-medium">Eligible STD Coverage</h4>
                 <Table>
                   <TableHeader>
@@ -641,7 +643,7 @@ export const CasePayInformationTab = React.forwardRef<
             </ModalTitle>
           </ModalHeader>
           <ModalBody className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Enter job assignment details with effective dates.
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -739,7 +741,7 @@ export const CasePayInformationTab = React.forwardRef<
             </ModalTitle>
           </ModalHeader>
           <ModalBody className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Enter compensation details with effective dates.
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -770,7 +772,7 @@ export const CasePayInformationTab = React.forwardRef<
               <div className="space-y-2">
                 <Label htmlFor="pay-rate">Rate Amount *</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                     $
                   </span>
                   <Input

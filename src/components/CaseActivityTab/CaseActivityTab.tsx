@@ -33,21 +33,22 @@ export interface CaseActivityADAEntry {
   status: string;
 }
 
-export interface CaseActivityTabProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CaseActivityTabProps extends React.HTMLAttributes<HTMLDivElement> {
   /** The activity log entries to display. Rendered newest-first. */
   entries: CaseActivityEntry[];
   /** Optional ADA tracking history used to show the ADA status in effect at each entry's time. */
   adaTracking?: CaseActivityADAEntry[];
 }
 
-const actionVariant: Record<CaseActivityEntry['action'], BadgeProps['variant']> =
-  {
-    created: 'success',
-    added: 'success',
-    updated: 'default',
-    removed: 'danger',
-  };
+const actionVariant: Record<
+  CaseActivityEntry['action'],
+  BadgeProps['variant']
+> = {
+  created: 'success',
+  added: 'success',
+  updated: 'default',
+  removed: 'danger',
+};
 
 function actionIcon(action: CaseActivityEntry['action']) {
   switch (action) {
@@ -138,24 +139,27 @@ export const CaseActivityTab = React.forwardRef<
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium">Activity Log</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Chronological record of all case actions
           </p>
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-muted-foreground text-sm">
           {entries.length} total entries
         </div>
       </div>
 
       {sortedLog.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">
-          <Clock className="mx-auto mb-4 h-12 w-12 opacity-20" aria-hidden="true" />
+        <div className="text-muted-foreground py-12 text-center">
+          <Clock
+            className="mx-auto mb-4 h-12 w-12 opacity-20"
+            aria-hidden="true"
+          />
           <p>No activity recorded yet</p>
         </div>
       ) : (
-        <ScrollArea className="h-[600px] rounded-md border border-border">
+        <ScrollArea className="border-border h-[600px] rounded-md border">
           <Table>
-            <TableHeader className="sticky top-0 z-10 bg-background">
+            <TableHeader className="bg-background sticky top-0 z-10">
               <TableRow>
                 <TableHead className="w-[180px]">Date &amp; Time</TableHead>
                 <TableHead className="w-[100px]">Action</TableHead>
@@ -187,12 +191,14 @@ export const CaseActivityTab = React.forwardRef<
                         <Badge
                           variant={adaStatusVariant(adaStatus)}
                           size="sm"
-                          icon={<Shield className="h-3 w-3" aria-hidden="true" />}
+                          icon={
+                            <Shield className="h-3 w-3" aria-hidden="true" />
+                          }
                         >
                           {adaStatus}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
+                        <span className="text-muted-foreground text-xs">-</span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm">{entry.userName}</TableCell>

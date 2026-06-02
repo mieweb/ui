@@ -1,11 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
-import {
-  CaseTodosTab,
-  cascadeTodoDate,
-  type CaseTodo,
-} from './CaseTodosTab';
+import { CaseTodosTab, cascadeTodoDate, type CaseTodo } from './CaseTodosTab';
 
 const todos: CaseTodo[] = [
   {
@@ -71,17 +67,13 @@ describe('CaseTodosTab', () => {
 
   it('opens the completion dialog when completing a todo', () => {
     setup();
-    fireEvent.click(
-      screen.getByLabelText('Mark complete: Initial contact')
-    );
+    fireEvent.click(screen.getByLabelText('Mark complete: Initial contact'));
     expect(screen.getByText('Complete To-Do')).toBeInTheDocument();
   });
 
   it('confirms completion with a note', () => {
     const { onCompleteTodo } = setup();
-    fireEvent.click(
-      screen.getByLabelText('Mark complete: Initial contact')
-    );
+    fireEvent.click(screen.getByLabelText('Mark complete: Initial contact'));
     fireEvent.change(screen.getByLabelText('Case Note (optional)'), {
       target: { value: 'Done' },
     });

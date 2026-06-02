@@ -61,7 +61,10 @@ export interface CreateCaseWizardProps {
     onSelect: (employee: WizardEmployee) => void
   ) => React.ReactNode;
   /** Look up open/active cases for the selected employee. */
-  findOpenCases?: (employeeNumber: string, employeeName: string) => OpenCaseSummary[];
+  findOpenCases?: (
+    employeeNumber: string,
+    employeeName: string
+  ) => OpenCaseSummary[];
   /** Open an existing case instead of creating a new one. */
   onOpenExistingCase?: (caseNumber: string) => void;
   /** Default case type. */
@@ -70,10 +73,26 @@ export interface CreateCaseWizardProps {
 }
 
 const STEPS = [
-  { number: 1, title: 'Employee Information', description: 'Select the employee for this case' },
-  { number: 2, title: 'Case Details', description: 'Enter case type and basic information' },
-  { number: 3, title: 'Absence Information', description: 'Add absence dates and details' },
-  { number: 4, title: 'Review & Create', description: 'Review and confirm case creation' },
+  {
+    number: 1,
+    title: 'Employee Information',
+    description: 'Select the employee for this case',
+  },
+  {
+    number: 2,
+    title: 'Case Details',
+    description: 'Enter case type and basic information',
+  },
+  {
+    number: 3,
+    title: 'Absence Information',
+    description: 'Add absence dates and details',
+  },
+  {
+    number: 4,
+    title: 'Review & Create',
+    description: 'Review and confirm case creation',
+  },
 ];
 
 const EMPTY_FORM: NewCaseData = {
@@ -120,7 +139,8 @@ export function CreateCaseWizard({
     setForm((prev) => ({ ...prev, ...patch }));
 
   const openCases = useMemo(() => {
-    if (!findOpenCases || (!form.employeeNumber && !form.employeeName)) return [];
+    if (!findOpenCases || (!form.employeeNumber && !form.employeeName))
+      return [];
     return findOpenCases(form.employeeNumber, form.employeeName);
   }, [findOpenCases, form.employeeNumber, form.employeeName]);
 
@@ -136,7 +156,10 @@ export function CreateCaseWizard({
   const handleBack = () => step > 1 && setStep(step - 1);
 
   return (
-    <div className={cn('container mx-auto max-w-[900px] p-6', className)} data-slot="create-case-wizard">
+    <div
+      className={cn('container mx-auto max-w-[900px] p-6', className)}
+      data-slot="create-case-wizard"
+    >
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold">Create New Case</h1>
         <p className="text-muted-foreground">
@@ -144,7 +167,7 @@ export function CreateCaseWizard({
         </p>
       </div>
 
-      <div className="mb-6 rounded-lg border border-border bg-card p-6 shadow-sm">
+      <div className="border-border bg-card mb-6 rounded-lg border p-6 shadow-sm">
         <ol className="flex items-center justify-between">
           {STEPS.map((s, index) => (
             <li key={s.number} className="flex flex-1 items-center">
@@ -166,12 +189,14 @@ export function CreateCaseWizard({
                 <p
                   className={cn(
                     'text-center text-sm font-medium',
-                    step >= s.number ? 'text-foreground' : 'text-muted-foreground'
+                    step >= s.number
+                      ? 'text-foreground'
+                      : 'text-muted-foreground'
                   )}
                 >
                   {s.title}
                 </p>
-                <p className="mt-1 hidden text-center text-xs text-muted-foreground md:block">
+                <p className="text-muted-foreground mt-1 hidden text-center text-xs md:block">
                   {s.description}
                 </p>
               </div>
@@ -189,7 +214,7 @@ export function CreateCaseWizard({
         </ol>
       </div>
 
-      <div className="min-h-[400px] rounded-lg border border-border bg-card p-6 shadow-sm">
+      <div className="border-border bg-card min-h-[400px] rounded-lg border p-6 shadow-sm">
         {step === 1 && (
           <div className="space-y-6">
             <h2 className="text-xl font-semibold">Employee Information</h2>
@@ -203,7 +228,7 @@ export function CreateCaseWizard({
                     employeeLocation: employee.location,
                   })
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Search by name, employee number, date of birth, or last 4
                   digits of SSN
                 </p>
@@ -234,31 +259,37 @@ export function CreateCaseWizard({
                   <AlertDescription className="space-y-3">
                     <p className="text-sm">
                       This employee has {openCases.length} open/active case
-                      {openCases.length !== 1 ? 's' : ''}. If this is related to an
-                      existing injury or absence, please continue documenting on
-                      the existing case instead of creating a new one.
+                      {openCases.length !== 1 ? 's' : ''}. If this is related to
+                      an existing injury or absence, please continue documenting
+                      on the existing case instead of creating a new one.
                     </p>
                     <div className="space-y-2">
                       {openCases.map((c) => (
                         <div
                           key={c.caseNumber}
-                          className="flex items-center justify-between rounded-md border border-border bg-background p-3 text-foreground"
+                          className="border-border bg-background text-foreground flex items-center justify-between rounded-md border p-3"
                         >
                           <div className="flex items-center gap-3">
                             <FileText
-                              className="h-4 w-4 text-muted-foreground"
+                              className="text-muted-foreground h-4 w-4"
                               aria-hidden="true"
                             />
                             <div>
                               <p className="font-medium">{c.caseNumber}</p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-muted-foreground text-sm">
                                 {c.caseType}
-                                {c.dateOpened ? ` - Opened ${c.dateOpened}` : ''}
+                                {c.dateOpened
+                                  ? ` - Opened ${c.dateOpened}`
+                                  : ''}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge variant={c.status === 'Open' ? 'default' : 'secondary'}>
+                            <Badge
+                              variant={
+                                c.status === 'Open' ? 'default' : 'secondary'
+                              }
+                            >
                               {c.status}
                             </Badge>
                             <Button
@@ -277,8 +308,8 @@ export function CreateCaseWizard({
                       ))}
                     </div>
                     <p className="text-sm">
-                      If this is a <strong>new absence</strong>, continue to create
-                      a new case.
+                      If this is a <strong>new absence</strong>, continue to
+                      create a new case.
                     </p>
                   </AlertDescription>
                 </Alert>
@@ -320,7 +351,7 @@ export function CreateCaseWizard({
                   onChange={(e) => setField({ initialNotes: e.target.value })}
                   rows={4}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   This note will be added to the Case Notes section of the case.
                 </p>
               </div>
@@ -339,36 +370,50 @@ export function CreateCaseWizard({
                     id="disability-date"
                     type="date"
                     value={form.dateOfDisability}
-                    onChange={(e) => setField({ dateOfDisability: e.target.value })}
+                    onChange={(e) =>
+                      setField({ dateOfDisability: e.target.value })
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="wizard-initial-contact">Initial Contact Date</Label>
+                  <Label htmlFor="wizard-initial-contact">
+                    Initial Contact Date
+                  </Label>
                   <Input
                     id="wizard-initial-contact"
                     type="date"
                     value={form.initialContactDate}
-                    onChange={(e) => setField({ initialContactDate: e.target.value })}
+                    onChange={(e) =>
+                      setField({ initialContactDate: e.target.value })
+                    }
                   />
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="wizard-actual-return">Actual Return Date</Label>
+                  <Label htmlFor="wizard-actual-return">
+                    Actual Return Date
+                  </Label>
                   <Input
                     id="wizard-actual-return"
                     type="date"
                     value={form.actualReturnDate}
-                    onChange={(e) => setField({ actualReturnDate: e.target.value })}
+                    onChange={(e) =>
+                      setField({ actualReturnDate: e.target.value })
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="wizard-expected-return">Expected Return Date</Label>
+                  <Label htmlFor="wizard-expected-return">
+                    Expected Return Date
+                  </Label>
                   <Input
                     id="wizard-expected-return"
                     type="date"
                     value={form.expectedReturnDate}
-                    onChange={(e) => setField({ expectedReturnDate: e.target.value })}
+                    onChange={(e) =>
+                      setField({ expectedReturnDate: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -424,7 +469,10 @@ export function CreateCaseWizard({
                 )}
               </ReviewBlock>
               <ReviewBlock title="Absence Information">
-                <ReviewRow label="Date of Disability" value={form.dateOfDisability} />
+                <ReviewRow
+                  label="Date of Disability"
+                  value={form.dateOfDisability}
+                />
                 <ReviewRow
                   label="Initial Contact Date"
                   value={form.initialContactDate}
@@ -433,25 +481,31 @@ export function CreateCaseWizard({
                   label="Expected Return Date"
                   value={form.expectedReturnDate}
                 />
-                <ReviewRow label="Actual Return Date" value={form.actualReturnDate} />
+                <ReviewRow
+                  label="Actual Return Date"
+                  value={form.actualReturnDate}
+                />
                 <ReviewRow label="STD Plan" value={form.stdPlan} />
-                <ReviewRow label="STD (Pay) Start Date" value={form.stdStartDate} />
+                <ReviewRow
+                  label="STD (Pay) Start Date"
+                  value={form.stdStartDate}
+                />
                 {form.absenceNotes && (
                   <ReviewRow label="Notes" value={form.absenceNotes} />
                 )}
               </ReviewBlock>
-              <div className="mt-6 rounded-lg border border-primary-500/20 bg-primary-50 p-4">
+              <div className="border-primary-500/20 bg-primary-50 mt-6 rounded-lg border p-4">
                 <p className="text-sm">
                   Please review all information above. Click &quot;Create
-                  Case&quot; to finalize the case creation. A case number will be
-                  automatically generated.
+                  Case&quot; to finalize the case creation. A case number will
+                  be automatically generated.
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        <div className="mt-8 flex justify-between border-t border-border pt-6">
+        <div className="border-border mt-8 flex justify-between border-t pt-6">
           <Button
             variant="outline"
             onClick={handleBack}
@@ -488,7 +542,7 @@ function ReviewBlock({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg bg-muted/50 p-4">
+    <div className="bg-muted/50 rounded-lg p-4">
       <h3 className="mb-3 font-semibold">{title}</h3>
       <div className="space-y-1 text-sm">{children}</div>
     </div>

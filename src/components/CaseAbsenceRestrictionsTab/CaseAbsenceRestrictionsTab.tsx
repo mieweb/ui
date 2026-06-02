@@ -19,12 +19,7 @@ import { Label } from '../Label';
 import { Select } from '../Select';
 import { Textarea } from '../Textarea';
 import { AlertDialog } from '../AlertDialog';
-import {
-  Modal,
-  ModalBody,
-  ModalHeader,
-  ModalTitle,
-} from '../Modal';
+import { Modal, ModalBody, ModalHeader, ModalTitle } from '../Modal';
 import {
   Table,
   TableBody,
@@ -225,7 +220,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedReason, setSelectedReason] = useState('');
   const [otherName, setOtherName] = useState('');
-  const [countThrough, setCountThrough] = useState(defaultCountThrough ?? today());
+  const [countThrough, setCountThrough] = useState(
+    defaultCountThrough ?? today()
+  );
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<AbsenceTrackingDraft>({
     effectiveDate: '',
@@ -234,15 +231,21 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
     reason: '',
     otherName: '',
   });
-  const [absenceFilterActive, setAbsenceFilterActive] = useState<StatusFilter>('active');
+  const [absenceFilterActive, setAbsenceFilterActive] =
+    useState<StatusFilter>('active');
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // ===== Restriction state =====
-  const [restrictionFilterActive, setRestrictionFilterActive] = useState<StatusFilter>('active');
-  const [restrictionFilterCase, setRestrictionFilterCase] = useState<CaseFilter>('current');
+  const [restrictionFilterActive, setRestrictionFilterActive] =
+    useState<StatusFilter>('active');
+  const [restrictionFilterCase, setRestrictionFilterCase] =
+    useState<CaseFilter>('current');
   const [showDialog, setShowDialog] = useState(false);
-  const [restrictionEditingId, setRestrictionEditingId] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<WorkRestrictionEntry | null>(null);
+  const [restrictionEditingId, setRestrictionEditingId] = useState<
+    string | null
+  >(null);
+  const [pendingDelete, setPendingDelete] =
+    useState<WorkRestrictionEntry | null>(null);
   const emptyRestriction: WorkRestrictionDraft = {
     restriction: '',
     startDate: '',
@@ -256,13 +259,16 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
     ...emptyRestriction,
     startDate: today(),
   });
-  const [formData, setFormData] = useState<WorkRestrictionDraft>(emptyRestriction);
+  const [formData, setFormData] =
+    useState<WorkRestrictionDraft>(emptyRestriction);
 
   const statusLabelOf = (entry: AbsenceTrackingEntry): string => {
     if (statusCodeOf(entry.status) === 'OTH' && entry.otherName) {
       return `OTH — ${entry.otherName}`;
     }
-    return statusOptions.find((o) => o.value === entry.status)?.label || entry.status;
+    return (
+      statusOptions.find((o) => o.value === entry.status)?.label || entry.status
+    );
   };
 
   const restrictionDisplayName = (code: string): string =>
@@ -270,7 +276,8 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
 
   // Active restrictions for the current case (gate for RWD statuses).
   const currentCaseRestrictions = restrictions.filter(
-    (r) => r.isActive && (!currentCaseNumber || r.caseNumber === currentCaseNumber)
+    (r) =>
+      r.isActive && (!currentCaseNumber || r.caseNumber === currentCaseNumber)
   );
 
   // ===== Absence derived data =====
@@ -407,7 +414,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
   const filteredRestrictions = restrictions.filter((r) => {
     if (restrictionFilterActive === 'active' && !r.isActive) return false;
     if (restrictionFilterActive === 'inactive' && r.isActive) return false;
-    if (restrictionFilterCase === 'current' && r.caseNumber !== currentCaseNumber)
+    if (
+      restrictionFilterCase === 'current' &&
+      r.caseNumber !== currentCaseNumber
+    )
       return false;
     return true;
   });
@@ -469,17 +479,21 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
   ];
 
   return (
-    <div ref={ref} data-slot="case-absence-restrictions-tab" className={cn('space-y-8', className)}>
+    <div
+      ref={ref}
+      data-slot="case-absence-restrictions-tab"
+      className={cn('space-y-8', className)}
+    >
       {/* ===== Absence section ===== */}
       <section className="space-y-6">
-        <div className="flex items-center gap-3 border-b border-border pb-3">
-          <Calendar className="h-5 w-5 text-primary-600" aria-hidden="true" />
+        <div className="border-border flex items-center gap-3 border-b pb-3">
+          <Calendar className="text-primary-600 h-5 w-5" aria-hidden="true" />
           <h3 className="text-lg font-semibold">Absence Tracking</h3>
         </div>
 
-        <div className="grid grid-cols-1 items-center gap-4 rounded-lg bg-muted px-4 py-3 md:grid-cols-3">
+        <div className="bg-muted grid grid-cols-1 items-center gap-4 rounded-lg px-4 py-3 md:grid-cols-3">
           <div className="flex items-center gap-2">
-            <Label className="whitespace-nowrap text-sm">Status:</Label>
+            <Label className="text-sm whitespace-nowrap">Status:</Label>
             <Select
               aria-label="Filter absences by status"
               className="flex-1"
@@ -489,7 +503,7 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
             />
           </div>
           <div />
-          <div className="text-right text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-right text-sm">
             Showing {filteredAbsences.length} of {absences.length} entries
           </div>
         </div>
@@ -504,7 +518,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
 
         <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-6">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-eff`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-eff`}
+              className="text-muted-foreground text-sm"
+            >
               Effective date:
             </Label>
             <Input
@@ -515,7 +532,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-end`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-end`}
+              className="text-muted-foreground text-sm"
+            >
               End date:
             </Label>
             <Input
@@ -526,7 +546,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-status`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-status`}
+              className="text-muted-foreground text-sm"
+            >
               Status:
             </Label>
             <Select
@@ -537,14 +560,19 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
               options={statusOptions}
             />
             {rwdNeedsRestriction && (
-              <p className="text-xs text-destructive">Restriction required for this status</p>
+              <p className="text-destructive text-xs">
+                Restriction required for this status
+              </p>
             )}
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-reason`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-reason`}
+              className="text-muted-foreground text-sm"
+            >
               Reason:
               {selectedStatus.startsWith('OTH') && (
-                <span className="ml-1 text-destructive">*</span>
+                <span className="text-destructive ml-1">*</span>
               )}
             </Label>
             <Select
@@ -558,7 +586,7 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
           <div className="flex flex-col gap-1.5">
             <Label
               htmlFor={`${baseId}-count`}
-              className="whitespace-nowrap text-sm text-muted-foreground"
+              className="text-muted-foreground text-sm whitespace-nowrap"
             >
               Count last status through:
             </Label>
@@ -583,13 +611,13 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
           </Button>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          Days are counted from each effective date up to (but excluding) the next
-          effective date. The last row counts through the date on the right
+        <p className="text-muted-foreground text-sm">
+          Days are counted from each effective date up to (but excluding) the
+          next effective date. The last row counts through the date on the right
           (defaults to today).
         </p>
 
-        <div className="rounded-lg border border-border">
+        <div className="border-border rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -612,7 +640,8 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                   (i) => i.severity === 'error' && i.entryIds.includes(entry.id)
                 );
                 const hasWarning = auditIssues.some(
-                  (i) => i.severity === 'warning' && i.entryIds.includes(entry.id)
+                  (i) =>
+                    i.severity === 'warning' && i.entryIds.includes(entry.id)
                 );
                 const isEditing = editingId === entry.id;
                 return (
@@ -632,7 +661,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                           className="h-8"
                           value={editData.effectiveDate}
                           onChange={(e) =>
-                            setEditData({ ...editData, effectiveDate: e.target.value })
+                            setEditData({
+                              ...editData,
+                              effectiveDate: e.target.value,
+                            })
                           }
                         />
                       ) : (
@@ -647,7 +679,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                           className="h-8"
                           value={editData.endDate || ''}
                           onChange={(e) =>
-                            setEditData({ ...editData, endDate: e.target.value })
+                            setEditData({
+                              ...editData,
+                              endDate: e.target.value,
+                            })
                           }
                         />
                       ) : (
@@ -660,7 +695,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                           <Select
                             aria-label="Edit status"
                             value={editData.status}
-                            onValueChange={(v) => setEditData({ ...editData, status: v })}
+                            onValueChange={(v) =>
+                              setEditData({ ...editData, status: v })
+                            }
                             options={statusOptions}
                           />
                           {editData.status.startsWith('OTH') && (
@@ -669,7 +706,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                               className="h-8"
                               value={editData.otherName || ''}
                               onChange={(e) =>
-                                setEditData({ ...editData, otherName: e.target.value })
+                                setEditData({
+                                  ...editData,
+                                  otherName: e.target.value,
+                                })
                               }
                               placeholder="Other name..."
                             />
@@ -684,7 +724,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                         <Select
                           aria-label="Edit reason"
                           value={editData.reason || ''}
-                          onValueChange={(v) => setEditData({ ...editData, reason: v })}
+                          onValueChange={(v) =>
+                            setEditData({ ...editData, reason: v })
+                          }
                           placeholder="Select..."
                           options={reasonOptions}
                         />
@@ -754,32 +796,37 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
       <section
         className={cn(
           'space-y-6 rounded-lg p-4',
-          rwdNeedsRestriction && 'border-2 border-destructive'
+          rwdNeedsRestriction && 'border-destructive border-2'
         )}
       >
-        <div className="flex items-center gap-3 border-b border-border pb-3">
-          <ShieldAlert className="h-5 w-5 text-primary-600" aria-hidden="true" />
+        <div className="border-border flex items-center gap-3 border-b pb-3">
+          <ShieldAlert
+            className="text-primary-600 h-5 w-5"
+            aria-hidden="true"
+          />
           <h3 className="text-lg font-semibold">Work Restrictions</h3>
           {rwdNeedsRestriction && (
-            <span className="ml-auto text-sm text-destructive">
+            <span className="text-destructive ml-auto text-sm">
               Restriction required for selected status
             </span>
           )}
         </div>
 
-        <div className="grid grid-cols-1 items-center gap-4 rounded-lg bg-muted px-4 py-3 md:grid-cols-3">
+        <div className="bg-muted grid grid-cols-1 items-center gap-4 rounded-lg px-4 py-3 md:grid-cols-3">
           <div className="flex items-center gap-2">
-            <Label className="whitespace-nowrap text-sm">Status:</Label>
+            <Label className="text-sm whitespace-nowrap">Status:</Label>
             <Select
               aria-label="Filter restrictions by status"
               className="flex-1"
               value={restrictionFilterActive}
-              onValueChange={(v) => setRestrictionFilterActive(v as StatusFilter)}
+              onValueChange={(v) =>
+                setRestrictionFilterActive(v as StatusFilter)
+              }
               options={statusFilterOptions}
             />
           </div>
           <div className="flex items-center gap-2">
-            <Label className="whitespace-nowrap text-sm">Case:</Label>
+            <Label className="text-sm whitespace-nowrap">Case:</Label>
             <Select
               aria-label="Filter restrictions by case"
               className="w-[180px]"
@@ -788,56 +835,77 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
               options={caseFilterOptions}
             />
           </div>
-          <div className="text-right text-sm text-muted-foreground">
-            Showing {filteredRestrictions.length} of {restrictions.length} restrictions
+          <div className="text-muted-foreground text-right text-sm">
+            Showing {filteredRestrictions.length} of {restrictions.length}{' '}
+            restrictions
           </div>
         </div>
 
         {/* Quick add restriction */}
         <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-5">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-r-type`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-r-type`}
+              className="text-muted-foreground text-sm"
+            >
               Restriction:
             </Label>
             <Select
               aria-label="Restriction type"
               value={quickEntry.restriction}
-              onValueChange={(v) => setQuickEntry({ ...quickEntry, restriction: v })}
+              onValueChange={(v) =>
+                setQuickEntry({ ...quickEntry, restriction: v })
+              }
               placeholder="Select restriction..."
               options={restrictionOptions}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-r-start`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-r-start`}
+              className="text-muted-foreground text-sm"
+            >
               Start date:
             </Label>
             <Input
               id={`${baseId}-r-start`}
               type="date"
               value={quickEntry.startDate}
-              onChange={(e) => setQuickEntry({ ...quickEntry, startDate: e.target.value })}
+              onChange={(e) =>
+                setQuickEntry({ ...quickEntry, startDate: e.target.value })
+              }
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-r-end`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-r-end`}
+              className="text-muted-foreground text-sm"
+            >
               End date:
             </Label>
             <Input
               id={`${baseId}-r-end`}
               type="date"
               value={quickEntry.endDate || ''}
-              onChange={(e) => setQuickEntry({ ...quickEntry, endDate: e.target.value })}
+              onChange={(e) =>
+                setQuickEntry({ ...quickEntry, endDate: e.target.value })
+              }
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={`${baseId}-r-review`} className="text-sm text-muted-foreground">
+            <Label
+              htmlFor={`${baseId}-r-review`}
+              className="text-muted-foreground text-sm"
+            >
               Review date:
             </Label>
             <Input
               id={`${baseId}-r-review`}
               type="date"
               value={quickEntry.reviewDate || ''}
-              onChange={(e) => setQuickEntry({ ...quickEntry, reviewDate: e.target.value })}
+              onChange={(e) =>
+                setQuickEntry({ ...quickEntry, reviewDate: e.target.value })
+              }
             />
           </div>
           <Button
@@ -849,7 +917,7 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
           </Button>
         </div>
 
-        <div className="rounded-lg border border-border">
+        <div className="border-border rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -865,7 +933,10 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
             <TableBody>
               {filteredRestrictions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={7}
+                    className="text-muted-foreground py-8 text-center"
+                  >
                     No restrictions found
                   </TableCell>
                 </TableRow>
@@ -958,7 +1029,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
             <Select
               aria-label="Restriction type (modal)"
               value={formData.restriction}
-              onValueChange={(v) => setFormData({ ...formData, restriction: v })}
+              onValueChange={(v) =>
+                setFormData({ ...formData, restriction: v })
+              }
               placeholder="Select restriction..."
               options={restrictionOptions}
             />
@@ -966,7 +1039,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
           <Checkbox
             label="Currently Active"
             checked={formData.isActive}
-            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+            onChange={(e) =>
+              setFormData({ ...formData, isActive: e.target.checked })
+            }
           />
           <div className="grid grid-cols-3 gap-4">
             <div className="flex flex-col gap-1.5">
@@ -975,7 +1050,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                 id={`${baseId}-f-start`}
                 type="date"
                 value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -984,7 +1061,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                 id={`${baseId}-f-end`}
                 type="date"
                 value={formData.endDate || ''}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, endDate: e.target.value })
+                }
                 disabled={formData.isPermanent}
               />
             </div>
@@ -994,7 +1073,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
                 id={`${baseId}-f-review`}
                 type="date"
                 value={formData.reviewDate || ''}
-                onChange={(e) => setFormData({ ...formData, reviewDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, reviewDate: e.target.value })
+                }
               />
             </div>
           </div>
@@ -1015,7 +1096,9 @@ export const CaseAbsenceRestrictionsTab = forwardRef<
               id={`${baseId}-f-notes`}
               placeholder="Additional notes about this restriction..."
               value={formData.notes || ''}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, notes: e.target.value })
+              }
               rows={3}
             />
           </div>

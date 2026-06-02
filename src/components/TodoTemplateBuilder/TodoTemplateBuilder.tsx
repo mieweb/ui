@@ -14,7 +14,10 @@ import {
   ModalFooter,
 } from '../Modal';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../Tabs';
-import { buildTodoTemplate, type TodoTemplateConfig } from './buildTodoTemplate';
+import {
+  buildTodoTemplate,
+  type TodoTemplateConfig,
+} from './buildTodoTemplate';
 
 /** A selectable option for the document type and anchor dropdowns. */
 export interface TodoTemplateOption {
@@ -62,9 +65,9 @@ const FREQUENCIES: TodoTemplateOption[] = [
   { value: 'YEARLY', label: 'Yearly' },
 ];
 
-const INITIAL_CONFIG: Required<
-  Omit<TodoTemplateConfig, 'title'>
-> & { title: string } = {
+const INITIAL_CONFIG: Required<Omit<TodoTemplateConfig, 'title'>> & {
+  title: string;
+} = {
   title: '',
   offsetValue: '1',
   offsetUnit: 'Week',
@@ -126,7 +129,7 @@ function TodoTemplateBuilder({
     >
       <ModalHeader>
         <ModalTitle>Todo Template Builder</ModalTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Build a todo template with offsets, anchors, and recurrence rules
         </p>
       </ModalHeader>
@@ -150,7 +153,7 @@ function TodoTemplateBuilder({
             placeholder="None - no document required"
             aria-label="Document type"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             If selected, completing this todo will require uploading a document
             or creating a letter of this type
           </p>
@@ -184,7 +187,7 @@ function TodoTemplateBuilder({
             placeholder="Select anchor date..."
             aria-label="Anchor date"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Leave as case creation to use the case creation date
           </p>
         </div>
@@ -197,7 +200,7 @@ function TodoTemplateBuilder({
           />
 
           {config.hasRecurrence && (
-            <div className="space-y-3 border-l-2 border-border pl-6">
+            <div className="border-border space-y-3 border-l-2 pl-6">
               <div className="space-y-2">
                 <Label>Frequency</Label>
                 <Select
@@ -240,14 +243,14 @@ function TodoTemplateBuilder({
         <div className="space-y-2">
           <Label>Template Preview</Label>
           <div className="relative">
-            <pre className="overflow-x-auto rounded-md bg-muted p-3 text-sm">
+            <pre className="bg-muted overflow-x-auto rounded-md p-3 text-sm">
               {template}
             </pre>
             <Button
               type="button"
               size="sm"
               variant="ghost"
-              className="absolute right-2 top-2"
+              className="absolute top-2 right-2"
               onClick={handleCopy}
               aria-label="Copy template to clipboard"
             >
@@ -283,9 +286,9 @@ export interface TodoTemplateHelpProps {
 
 function Example({ code, description }: { code: string; description: string }) {
   return (
-    <div className="border-l-4 border-primary-500 pl-3">
+    <div className="border-primary-500 border-l-4 pl-3">
       <code className="text-sm">{code}</code>
-      <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+      <p className="text-muted-foreground mt-1 text-xs">{description}</p>
     </div>
   );
 }
@@ -308,7 +311,7 @@ function TodoTemplateHelp({
     >
       <ModalHeader>
         <ModalTitle>Todo Template Format Guide</ModalTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Learn how to write todo templates with offsets, anchors, and
           recurrence rules
         </p>
@@ -325,12 +328,13 @@ function TodoTemplateHelp({
           <TabsContent value="basics" className="space-y-4">
             <div>
               <h3 className="mb-2 font-semibold">Basic Format</h3>
-              <p className="mb-3 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mb-3 text-sm">
                 Todo templates are written one per line with the following
                 format:
               </p>
-              <pre className="rounded-md bg-muted p-3 text-sm">
-                &quot;Todo Title&quot;; offset=VALUE UNIT; anchor=DATE; rrule=RULE
+              <pre className="bg-muted rounded-md p-3 text-sm">
+                &quot;Todo Title&quot;; offset=VALUE UNIT; anchor=DATE;
+                rrule=RULE
               </pre>
             </div>
             <div className="space-y-2">
@@ -355,17 +359,17 @@ function TodoTemplateHelp({
           <TabsContent value="offset" className="space-y-4">
             <div>
               <h3 className="mb-2 font-semibold">Offset Parameter</h3>
-              <p className="mb-3 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mb-3 text-sm">
                 The offset determines when the todo is due, calculated from the
                 anchor date.
               </p>
             </div>
             <div>
               <h4 className="mb-2 font-medium">Syntax</h4>
-              <pre className="mb-2 rounded-md bg-muted p-3 text-sm">
+              <pre className="bg-muted mb-2 rounded-md p-3 text-sm">
                 offset=VALUE UNIT
               </pre>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 VALUE: A positive number (e.g., 1, 7, 30)
                 <br />
                 UNIT: Day, Week, or Month
@@ -376,29 +380,29 @@ function TodoTemplateHelp({
           <TabsContent value="anchor" className="space-y-4">
             <div>
               <h3 className="mb-2 font-semibold">Anchor Parameter</h3>
-              <p className="mb-3 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mb-3 text-sm">
                 The anchor is the starting date from which the offset is
                 calculated.
               </p>
             </div>
             <div className="space-y-2">
-              <div className="rounded border border-border p-3">
+              <div className="border-border rounded border p-3">
                 <code className="text-sm font-semibold">caseCreation</code>{' '}
                 (default)
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   The date the case was created. Used when no anchor is
                   specified.
                 </p>
               </div>
-              <div className="rounded border border-border p-3">
+              <div className="border-border rounded border p-3">
                 <code className="text-sm font-semibold">surgeryDate</code>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   A specific surgery date. Useful for post-operative follow-ups.
                 </p>
               </div>
-              <div className="rounded border border-border p-3">
+              <div className="border-border rounded border p-3">
                 <code className="text-sm font-semibold">deliveryDate</code>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   A specific delivery date for maternity cases. Used for
                   postpartum follow-ups.
                 </p>
@@ -409,20 +413,22 @@ function TodoTemplateHelp({
           <TabsContent value="rrule" className="space-y-4">
             <div>
               <h3 className="mb-2 font-semibold">Recurrence Rules (RRULE)</h3>
-              <p className="mb-3 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mb-3 text-sm">
                 Recurrence rules create repeating todos based on the iCalendar
                 RRULE standard.
               </p>
             </div>
             <div>
               <h4 className="mb-2 font-medium">Basic Syntax</h4>
-              <pre className="mb-2 rounded-md bg-muted p-3 text-sm">
+              <pre className="bg-muted mb-2 rounded-md p-3 text-sm">
                 rrule=FREQ=frequency;INTERVAL=n;COUNT=total
               </pre>
             </div>
             <div className="space-y-2">
               <Example
-                code={'"Weekly Check"; offset=1 Week; rrule=FREQ=WEEKLY;INTERVAL=1'}
+                code={
+                  '"Weekly Check"; offset=1 Week; rrule=FREQ=WEEKLY;INTERVAL=1'
+                }
                 description="Every week starting 1 week after case creation"
               />
               <Example

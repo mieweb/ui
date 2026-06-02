@@ -60,6 +60,8 @@ describe('CasesDashboard', () => {
   it('reveals advanced filters', () => {
     renderWithTheme(<CasesDashboard cases={cases} onViewCase={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /More Filters/ }));
-    expect(screen.getByRole('button', { name: 'Show Less' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Show Less' })
+    ).toBeInTheDocument();
   });
 });

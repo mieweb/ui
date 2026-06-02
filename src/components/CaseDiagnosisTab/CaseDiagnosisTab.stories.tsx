@@ -20,8 +20,14 @@ type Story = StoryObj<typeof meta>;
 
 const ICD10: CaseIcdCode[] = [
   { code: 'M54.5', description: 'Low back pain' },
-  { code: 'S83.511A', description: 'Sprain of ACL of right knee, initial encounter' },
-  { code: 'G56.00', description: 'Carpal tunnel syndrome, unspecified upper limb' },
+  {
+    code: 'S83.511A',
+    description: 'Sprain of ACL of right knee, initial encounter',
+  },
+  {
+    code: 'G56.00',
+    description: 'Carpal tunnel syndrome, unspecified upper limb',
+  },
 ];
 
 const ICD11: CaseIcd11Code[] = [

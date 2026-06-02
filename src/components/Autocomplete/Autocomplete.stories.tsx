@@ -10,11 +10,36 @@ interface Employee {
 }
 
 const employees: Employee[] = [
-  { id: 'EMP001', name: 'Sarah Johnson', number: '100234', location: 'Toledo, OH' },
-  { id: 'EMP002', name: 'Michael Chen', number: '100567', location: 'Newark, OH' },
-  { id: 'EMP003', name: 'Jennifer Smith', number: '100891', location: 'Granville, OH' },
-  { id: 'EMP004', name: 'David Martinez', number: '101024', location: 'Toledo, OH' },
-  { id: 'EMP005', name: 'Emily Rodriguez', number: '101256', location: 'Kansas City, KS' },
+  {
+    id: 'EMP001',
+    name: 'Sarah Johnson',
+    number: '100234',
+    location: 'Toledo, OH',
+  },
+  {
+    id: 'EMP002',
+    name: 'Michael Chen',
+    number: '100567',
+    location: 'Newark, OH',
+  },
+  {
+    id: 'EMP003',
+    name: 'Jennifer Smith',
+    number: '100891',
+    location: 'Granville, OH',
+  },
+  {
+    id: 'EMP004',
+    name: 'David Martinez',
+    number: '101024',
+    location: 'Toledo, OH',
+  },
+  {
+    id: 'EMP005',
+    name: 'Emily Rodriguez',
+    number: '101256',
+    location: 'Kansas City, KS',
+  },
 ];
 
 const meta: Meta<typeof Autocomplete<Employee>> = {
@@ -37,13 +62,12 @@ function BasicExample() {
         items={employees}
         getItemKey={(e) => e.id}
         filter={(e, q) =>
-          e.name.toLowerCase().includes(q.toLowerCase()) ||
-          e.number.includes(q)
+          e.name.toLowerCase().includes(q.toLowerCase()) || e.number.includes(q)
         }
         renderItem={(e) => (
           <div className="flex flex-col">
             <span className="font-medium">{e.name}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {e.number} • {e.location}
             </span>
           </div>
@@ -54,7 +78,7 @@ function BasicExample() {
         aria-label="Search employees"
       />
       {selected && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Selected: <span className="text-foreground">{selected.name}</span>
         </p>
       )}
@@ -93,7 +117,7 @@ function CreatableExample() {
         aria-label="Search or create contacts"
       />
       {selected && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Selected: <span className="text-foreground">{selected.name}</span>
         </p>
       )}

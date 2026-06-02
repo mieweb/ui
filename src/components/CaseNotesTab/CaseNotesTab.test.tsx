@@ -59,7 +59,9 @@ describe('CaseNotesTab', () => {
     setup();
     fireEvent.click(screen.getByRole('button', { name: /Add Case Note/ }));
     await waitFor(() =>
-      expect(screen.getByRole('dialog', { name: /Create Note/ })).toBeInTheDocument()
+      expect(
+        screen.getByRole('dialog', { name: /Create Note/ })
+      ).toBeInTheDocument()
     );
     fireEvent.click(screen.getByRole('button', { name: 'Save Note' }));
     expect(
@@ -71,7 +73,9 @@ describe('CaseNotesTab', () => {
     const { onSaveNote } = setup();
     fireEvent.click(screen.getByRole('button', { name: /Add Case Note/ }));
     await waitFor(() =>
-      expect(screen.getByRole('dialog', { name: /Create Note/ })).toBeInTheDocument()
+      expect(
+        screen.getByRole('dialog', { name: /Create Note/ })
+      ).toBeInTheDocument()
     );
     fireEvent.click(screen.getByRole('combobox', { name: 'Note activity' }));
     fireEvent.click(screen.getByRole('option', { name: 'Phone Call' }));

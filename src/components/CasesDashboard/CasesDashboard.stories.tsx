@@ -24,7 +24,11 @@ const sampleCases: DashboardCase[] = [
     dateOfDisability: '2024-01-10',
     created: '2024-01-15',
     todos: [
-      { completed: false, dateScheduled: '2024-02-01', activity: 'Follow-up call' },
+      {
+        completed: false,
+        dateScheduled: '2024-02-01',
+        activity: 'Follow-up call',
+      },
     ],
   },
   {
@@ -45,7 +49,9 @@ function Example() {
   return (
     <div>
       {opened && (
-        <p className="p-4 text-sm text-muted-foreground">Opened case: {opened}</p>
+        <p className="text-muted-foreground p-4 text-sm">
+          Opened case: {opened}
+        </p>
       )}
       <CasesDashboard cases={sampleCases} onViewCase={setOpened} />
     </div>

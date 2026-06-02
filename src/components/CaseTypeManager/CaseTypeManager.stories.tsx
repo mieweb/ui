@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import {
-  CaseTypeManager,
-  type CaseTypeDefinition,
-} from './CaseTypeManager';
+import { CaseTypeManager, type CaseTypeDefinition } from './CaseTypeManager';
 
 const meta: Meta<typeof CaseTypeManager> = {
   title: 'Components/Case Management/CaseTypeManager',

@@ -31,8 +31,10 @@ const ACTION_LABELS: { key: keyof DARActions; label: string }[] = [
   { key: 'ltdSubmission', label: 'LTD App Submission' },
 ];
 
-export interface CaseQuestionnairesTabProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+export interface CaseQuestionnairesTabProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'onChange'
+> {
   /** Display value for the response date. Defaults to "Auto-generated". */
   responseDate?: string;
   /** Controlled DAR action toggle state. */
@@ -103,12 +105,15 @@ export const CaseQuestionnairesTab = React.forwardRef<
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="response-date" className="text-sm text-muted-foreground">
+            <Label
+              htmlFor="response-date"
+              className="text-muted-foreground text-sm"
+            >
               Date of Response
             </Label>
             <div
               id="response-date"
-              className="rounded-md bg-muted px-3 py-2 text-sm"
+              className="bg-muted rounded-md px-3 py-2 text-sm"
             >
               {responseDate}
             </div>
@@ -130,7 +135,7 @@ export const CaseQuestionnairesTab = React.forwardRef<
         </fieldset>
 
         <div className="space-y-2">
-          <Label htmlFor="dar-notes" className="text-sm text-muted-foreground">
+          <Label htmlFor="dar-notes" className="text-muted-foreground text-sm">
             Notes
           </Label>
           <Input

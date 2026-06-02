@@ -13,11 +13,14 @@ import {
 } from '../Card';
 import { Input } from '../Input';
 import { Label } from '../Label';
-import { Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../Modal';
 import {
-  RichTextEditor,
-  type RichTextVariableGroup,
-} from '../RichTextEditor';
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal';
+import { RichTextEditor, type RichTextVariableGroup } from '../RichTextEditor';
 import { Select } from '../Select';
 
 /** A stored template (e.g. a letter or case-note template). */
@@ -140,7 +143,9 @@ export function TemplateManager({
       <Card>
         <CardHeader>
           <CardTitle>Add New {entityLabel}</CardTitle>
-          {addDescription && <CardDescription>{addDescription}</CardDescription>}
+          {addDescription && (
+            <CardDescription>{addDescription}</CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <Button onClick={() => openDialog()}>
@@ -153,34 +158,38 @@ export function TemplateManager({
       <Card>
         <CardHeader>
           <CardTitle>Existing {entityLabel}s</CardTitle>
-          {listDescription && <CardDescription>{listDescription}</CardDescription>}
+          {listDescription && (
+            <CardDescription>{listDescription}</CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {templates.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground">
-                No {entityLabel.toLowerCase()}s defined yet. Create your first one
-                above.
+              <p className="text-muted-foreground py-8 text-center">
+                No {entityLabel.toLowerCase()}s defined yet. Create your first
+                one above.
               </p>
             ) : (
               templates.map((template) => (
                 <div
                   key={template.id}
-                  className="space-y-3 rounded-lg border border-border p-4"
+                  className="border-border space-y-3 rounded-lg border p-4"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-medium">{template.name}</h3>
-                        <Badge variant={template.active ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={template.active ? 'default' : 'secondary'}
+                        >
                           {template.active ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Code: {template.code}
                       </p>
                       {template.description && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           {template.description}
                         </p>
                       )}
@@ -207,10 +216,12 @@ export function TemplateManager({
                     </div>
                   </div>
                   {template.content && (
-                    <div className="mt-3 border-t border-border pt-3">
-                      <p className="mb-2 text-sm font-medium">Template Preview:</p>
+                    <div className="border-border mt-3 border-t pt-3">
+                      <p className="mb-2 text-sm font-medium">
+                        Template Preview:
+                      </p>
                       <div
-                        className="prose prose-sm max-h-32 max-w-none overflow-y-auto rounded bg-muted/30 p-3 text-sm text-muted-foreground"
+                        className="prose prose-sm bg-muted/30 text-muted-foreground max-h-32 max-w-none overflow-y-auto rounded p-3 text-sm"
                         dangerouslySetInnerHTML={{
                           __html:
                             template.content.length > 500
@@ -227,7 +238,11 @@ export function TemplateManager({
         </CardContent>
       </Card>
 
-      <Modal open={open} onOpenChange={(o) => (o ? setOpen(true) : closeDialog())} size={size}>
+      <Modal
+        open={open}
+        onOpenChange={(o) => (o ? setOpen(true) : closeDialog())}
+        size={size}
+      >
         <ModalHeader>
           <ModalTitle>
             {editing ? `Edit ${entityLabel}` : `Create ${entityLabel}`}
@@ -280,7 +295,9 @@ export function TemplateManager({
           <div className="flex flex-col gap-1.5">
             <Label>Template Content</Label>
             {contentHint && (
-              <p className="mb-2 text-sm text-muted-foreground">{contentHint}</p>
+              <p className="text-muted-foreground mb-2 text-sm">
+                {contentHint}
+              </p>
             )}
             <RichTextEditor
               value={draft.content}

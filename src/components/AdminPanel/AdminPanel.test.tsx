@@ -14,8 +14,12 @@ describe('AdminPanel', () => {
     expect(
       screen.getByRole('heading', { name: 'Admin Panel' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Section One' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Section Two' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: 'Section One' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: 'Section Two' })
+    ).toBeInTheDocument();
   });
 
   it('shows the first section content by default', () => {

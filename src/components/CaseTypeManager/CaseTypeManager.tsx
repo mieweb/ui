@@ -20,12 +20,7 @@ import {
 } from '../Card';
 import { Input } from '../Input';
 import { Label } from '../Label';
-import {
-  Modal,
-  ModalBody,
-  ModalHeader,
-  ModalTitle,
-} from '../Modal';
+import { Modal, ModalBody, ModalHeader, ModalTitle } from '../Modal';
 import { Textarea } from '../Textarea';
 import {
   TodoTemplateBuilder,
@@ -251,19 +246,21 @@ export function CaseTypeManager({
       <Card>
         <CardHeader>
           <CardTitle>Existing Case Types</CardTitle>
-          <CardDescription>Manage and edit your case type templates</CardDescription>
+          <CardDescription>
+            Manage and edit your case type templates
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {caseTypes.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground">
+              <p className="text-muted-foreground py-8 text-center">
                 No case types defined yet. Add your first case type above.
               </p>
             ) : (
               caseTypes.map((caseType) => (
                 <div
                   key={caseType.id}
-                  className="space-y-3 rounded-lg border border-border p-4"
+                  className="border-border space-y-3 rounded-lg border p-4"
                 >
                   {editingId === caseType.id ? (
                     <>
@@ -302,8 +299,10 @@ export function CaseTypeManager({
                     <>
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
-                          <h3 className="text-lg font-medium">{caseType.name}</h3>
-                          <p className="text-sm text-muted-foreground">
+                          <h3 className="text-lg font-medium">
+                            {caseType.name}
+                          </h3>
+                          <p className="text-muted-foreground text-sm">
                             {caseType.defaultTodos.length} default todo
                             {caseType.defaultTodos.length !== 1 ? 's' : ''}
                           </p>
@@ -345,7 +344,7 @@ export function CaseTypeManager({
                       {caseType.defaultTodos.length > 0 && (
                         <div className="space-y-1">
                           <p className="text-sm font-medium">Default Todos:</p>
-                          <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                          <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
                             {caseType.defaultTodos.map((todo, index) => (
                               <li key={index}>{todo}</li>
                             ))}
@@ -381,7 +380,7 @@ export function CaseTypeManager({
           <ModalTitle>
             Test Todo Logic{previewCaseType ? `: ${previewCaseType.name}` : ''}
           </ModalTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Set anchor dates to preview the generated todo list
           </p>
         </ModalHeader>
@@ -408,7 +407,7 @@ export function CaseTypeManager({
           </div>
           <Button onClick={handleGeneratePreview}>Generate Todo Preview</Button>
           {previewTodos.length > 0 && (
-            <div className="rounded-lg border border-border p-4">
+            <div className="border-border rounded-lg border p-4">
               <h4 className="mb-3 font-medium">
                 Generated Todos ({previewTodos.length})
               </h4>
@@ -416,13 +415,13 @@ export function CaseTypeManager({
                 {previewTodos.map((todo, index) => (
                   <div
                     key={index}
-                    className="border-b border-border pb-2 last:border-b-0"
+                    className="border-border border-b pb-2 last:border-b-0"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="font-medium">{todo.title}</p>
                         {todo.description && (
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {todo.description}
                           </p>
                         )}

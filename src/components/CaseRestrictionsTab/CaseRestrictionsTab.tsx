@@ -53,8 +53,7 @@ export interface CaseRestrictionDraft {
 type StatusFilter = 'all' | 'active' | 'inactive';
 type CaseFilter = 'all' | 'current';
 
-export interface CaseRestrictionsTabProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CaseRestrictionsTabProps extends React.HTMLAttributes<HTMLDivElement> {
   employeeName: string;
   currentCaseNumber: string;
   /** All restrictions for the employee (across cases). */
@@ -108,15 +107,16 @@ export const CaseRestrictionsTab = React.forwardRef<
   ) => {
     const [showDialog, setShowDialog] = React.useState(false);
     const [editingId, setEditingId] = React.useState<string | null>(null);
-    const [formData, setFormData] = React.useState<CaseRestrictionDraft>(EMPTY_DRAFT);
+    const [formData, setFormData] =
+      React.useState<CaseRestrictionDraft>(EMPTY_DRAFT);
 
-    const [filterActive, setFilterActive] = React.useState<StatusFilter>('active');
+    const [filterActive, setFilterActive] =
+      React.useState<StatusFilter>('active');
     const [filterCase, setFilterCase] = React.useState<CaseFilter>('all');
 
     const [quickEntryMode, setQuickEntryMode] = React.useState(false);
-    const [quickEntry, setQuickEntry] = React.useState<CaseRestrictionDraft>(
-      newQuickEntry
-    );
+    const [quickEntry, setQuickEntry] =
+      React.useState<CaseRestrictionDraft>(newQuickEntry);
 
     const [toDelete, setToDelete] = React.useState<string | null>(null);
 
@@ -211,7 +211,7 @@ export const CaseRestrictionsTab = React.forwardRef<
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+        <div className="bg-muted flex items-center gap-4 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <Label className="text-sm">Status:</Label>
             <Select
@@ -239,13 +239,13 @@ export const CaseRestrictionsTab = React.forwardRef<
               ]}
             />
           </div>
-          <div className="ml-auto text-sm text-foreground">
+          <div className="text-foreground ml-auto text-sm">
             Showing {filtered.length} of {restrictions.length} restrictions
           </div>
         </div>
 
         {/* Table */}
-        <div className="rounded-lg border border-border">
+        <div className="border-border rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -285,7 +285,7 @@ export const CaseRestrictionsTab = React.forwardRef<
                       options={restrictionOptions}
                     />
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     {currentCaseNumber}
                   </TableCell>
                   <TableCell>
@@ -348,7 +348,7 @@ export const CaseRestrictionsTab = React.forwardRef<
                         variant="ghost"
                         size="sm"
                         aria-label="Save and add new"
-                        className="h-8 w-8 p-0 text-primary"
+                        className="text-primary h-8 w-8 p-0"
                         disabled={
                           !quickEntry.restriction || !quickEntry.startDate
                         }
@@ -367,7 +367,7 @@ export const CaseRestrictionsTab = React.forwardRef<
                         onClick={() => submitQuickEntry(false)}
                       >
                         <Check
-                          className="h-4 w-4 text-primary"
+                          className="text-primary h-4 w-4"
                           aria-hidden="true"
                         />
                       </Button>
@@ -388,7 +388,7 @@ export const CaseRestrictionsTab = React.forwardRef<
                 <TableRow>
                   <TableCell
                     colSpan={8}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
                     No restrictions found
                   </TableCell>

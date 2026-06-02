@@ -34,8 +34,7 @@ const sheetContentVariants = cva(
   }
 );
 
-export interface SheetProps
-  extends VariantProps<typeof sheetContentVariants> {
+export interface SheetProps extends VariantProps<typeof sheetContentVariants> {
   /** Whether the sheet is open */
   open: boolean;
   /** Callback when the sheet should close */
@@ -197,8 +196,7 @@ const SheetTitle = React.forwardRef<HTMLHeadingElement, SheetTitleProps>(
 
 SheetTitle.displayName = 'SheetTitle';
 
-export type SheetDescriptionProps =
-  React.HTMLAttributes<HTMLParagraphElement>;
+export type SheetDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>;
 
 const SheetDescription = React.forwardRef<
   HTMLParagraphElement,
@@ -265,7 +263,7 @@ const SheetClose = React.forwardRef<HTMLButtonElement, SheetCloseProps>(
         }}
         className={cn(
           'text-muted-foreground hover:text-foreground rounded-md',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
           'transition-colors',
           className
         )}

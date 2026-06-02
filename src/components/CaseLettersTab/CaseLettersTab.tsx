@@ -80,23 +80,36 @@ export interface LetterCaseManagerOption {
 }
 
 /** Default attachment item types (alphabetized) used when none are supplied. */
-export const DEFAULT_LETTER_ATTACHMENT_ITEM_TYPES: LetterAttachmentItemType[] = [
-  { id: 'a2k-informational', label: 'A2K Informational Process Pamphlet' },
-  { id: 'ada-accommodation-request', label: 'ADA Accommodation Request' },
-  { id: 'aetna-maternity', label: 'Aetna Enhanced Maternity Fact Sheet' },
-  { id: 'disability-guidelines', label: 'Disability Process Guidelines' },
-  { id: 'eap-flyer', label: 'EAP Flyer' },
-  { id: 'maternity-pay-example', label: 'Maternity Pay Example (Salaried only)' },
-  { id: 'maven-flyer', label: 'Maven Flyer' },
-  { id: 'nj-forms', label: 'New Jersey Forms' },
-  { id: 'rejuvenate-flyer', label: 'Rejuvenate Flyer (Kidney Disease/Transplants)' },
-  { id: 'sal-hrly-responsibilities', label: 'Sal/Hrly Responsibilities Letter' },
-  { id: 'std-application-full', label: 'STD Application - Full, case to already be opened' },
-  { id: 'std-application-partial', label: 'STD Application - Partial' },
-  { id: 'std-reimbursement', label: 'STD Reimbursement Agreement' },
-  { id: 'usw-responsibilities', label: 'USW Responsibilities Letter' },
-  { id: 'other', label: 'Other' },
-];
+export const DEFAULT_LETTER_ATTACHMENT_ITEM_TYPES: LetterAttachmentItemType[] =
+  [
+    { id: 'a2k-informational', label: 'A2K Informational Process Pamphlet' },
+    { id: 'ada-accommodation-request', label: 'ADA Accommodation Request' },
+    { id: 'aetna-maternity', label: 'Aetna Enhanced Maternity Fact Sheet' },
+    { id: 'disability-guidelines', label: 'Disability Process Guidelines' },
+    { id: 'eap-flyer', label: 'EAP Flyer' },
+    {
+      id: 'maternity-pay-example',
+      label: 'Maternity Pay Example (Salaried only)',
+    },
+    { id: 'maven-flyer', label: 'Maven Flyer' },
+    { id: 'nj-forms', label: 'New Jersey Forms' },
+    {
+      id: 'rejuvenate-flyer',
+      label: 'Rejuvenate Flyer (Kidney Disease/Transplants)',
+    },
+    {
+      id: 'sal-hrly-responsibilities',
+      label: 'Sal/Hrly Responsibilities Letter',
+    },
+    {
+      id: 'std-application-full',
+      label: 'STD Application - Full, case to already be opened',
+    },
+    { id: 'std-application-partial', label: 'STD Application - Partial' },
+    { id: 'std-reimbursement', label: 'STD Reimbursement Agreement' },
+    { id: 'usw-responsibilities', label: 'USW Responsibilities Letter' },
+    { id: 'other', label: 'Other' },
+  ];
 
 export interface CaseLettersTabProps {
   /** Letters to display. */
@@ -281,16 +294,21 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
     const editorTitle = editing ? 'Edit Letter' : 'Create Letter';
 
     return (
-      <div ref={ref} data-slot="case-letters-tab" className={cn('space-y-6', className)}>
+      <div
+        ref={ref}
+        data-slot="case-letters-tab"
+        className={cn('space-y-6', className)}
+      >
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium">Letters</h3>
-            <p className="text-sm text-muted-foreground">
-              {letters.length} letter{letters.length !== 1 ? 's' : ''} for this case
+            <p className="text-muted-foreground text-sm">
+              {letters.length} letter{letters.length !== 1 ? 's' : ''} for this
+              case
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex rounded-md border border-border">
+            <div className="border-border flex rounded-md border">
               <Button
                 variant={viewMode === 'list' ? 'primary' : 'ghost'}
                 size="sm"
@@ -318,7 +336,7 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
         </div>
 
         {viewMode === 'list' ? (
-          <div className="rounded-lg border border-border">
+          <div className="border-border rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -333,8 +351,12 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
               <TableBody>
                 {letters.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      No letters created yet. Click &quot;Create Letter&quot; to get started.
+                    <TableCell
+                      colSpan={6}
+                      className="text-muted-foreground py-8 text-center"
+                    >
+                      No letters created yet. Click &quot;Create Letter&quot; to
+                      get started.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -344,19 +366,28 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
                       <TableCell>{letter.template || '—'}</TableCell>
                       <TableCell>{letter.sentFrom}</TableCell>
                       <TableCell>
-                        {letter.attachmentItemTypes && letter.attachmentItemTypes.length > 0 ? (
+                        {letter.attachmentItemTypes &&
+                        letter.attachmentItemTypes.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {letter.attachmentItemTypes.slice(0, 2).map((typeId) => {
-                              const typeLabel =
-                                attachmentItemTypes.find((t) => t.id === typeId)?.label || typeId;
-                              return (
-                                <Badge key={typeId} variant="warning" size="sm">
-                                  {typeLabel}
-                                </Badge>
-                              );
-                            })}
+                            {letter.attachmentItemTypes
+                              .slice(0, 2)
+                              .map((typeId) => {
+                                const typeLabel =
+                                  attachmentItemTypes.find(
+                                    (t) => t.id === typeId
+                                  )?.label || typeId;
+                                return (
+                                  <Badge
+                                    key={typeId}
+                                    variant="warning"
+                                    size="sm"
+                                  >
+                                    {typeLabel}
+                                  </Badge>
+                                );
+                              })}
                             {letter.attachmentItemTypes.length > 2 && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs">
                                 +{letter.attachmentItemTypes.length - 2} more
                               </span>
                             )}
@@ -366,7 +397,11 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={letter.status === 'Sent' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={
+                            letter.status === 'Sent' ? 'default' : 'secondary'
+                          }
+                        >
                           {letter.status}
                         </Badge>
                       </TableCell>
@@ -401,32 +436,47 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
         ) : (
           <div className="space-y-4">
             {letters.length === 0 ? (
-              <div className="rounded-lg border border-border p-8 text-center text-muted-foreground">
-                No letters created yet. Click &quot;Create Letter&quot; to get started.
+              <div className="border-border text-muted-foreground rounded-lg border p-8 text-center">
+                No letters created yet. Click &quot;Create Letter&quot; to get
+                started.
               </div>
             ) : (
               letters.map((letter) => (
                 <div
                   key={letter.id}
-                  className="overflow-hidden rounded-lg border border-border"
+                  className="border-border overflow-hidden rounded-lg border"
                 >
-                  <div className="flex items-center justify-between border-b border-border bg-muted p-4">
+                  <div className="border-border bg-muted flex items-center justify-between border-b p-4">
                     <div className="flex items-center gap-6">
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">Date</div>
-                        <div className="font-medium">{formatDate(letter.createdDate)}</div>
+                        <div className="text-muted-foreground mb-1 text-xs">
+                          Date
+                        </div>
+                        <div className="font-medium">
+                          {formatDate(letter.createdDate)}
+                        </div>
                       </div>
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">Template</div>
+                        <div className="text-muted-foreground mb-1 text-xs">
+                          Template
+                        </div>
                         <div>{letter.template || '—'}</div>
                       </div>
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">From</div>
+                        <div className="text-muted-foreground mb-1 text-xs">
+                          From
+                        </div>
                         <div>{letter.sentFrom}</div>
                       </div>
                       <div>
-                        <div className="mb-1 text-xs text-muted-foreground">Status</div>
-                        <Badge variant={letter.status === 'Sent' ? 'default' : 'secondary'}>
+                        <div className="text-muted-foreground mb-1 text-xs">
+                          Status
+                        </div>
+                        <Badge
+                          variant={
+                            letter.status === 'Sent' ? 'default' : 'secondary'
+                          }
+                        >
                           {letter.status}
                         </Badge>
                       </div>
@@ -451,7 +501,7 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
                     </div>
                   </div>
                   <div className="bg-card p-6">
-                    <div className="mb-2 text-xs font-medium text-muted-foreground">
+                    <div className="text-muted-foreground mb-2 text-xs font-medium">
                       LETTER CONTENT
                     </div>
                     <div
@@ -547,7 +597,7 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
               <Label className="text-xs">
                 Items that need to be attached to the letter
               </Label>
-              <div className="max-h-[180px] space-y-2 overflow-y-auto rounded-md border border-border bg-muted p-3">
+              <div className="border-border bg-muted max-h-[180px] space-y-2 overflow-y-auto rounded-md border p-3">
                 {attachmentItemTypes.map((type) => {
                   const isSelected = selectedTypes.includes(type.id);
                   return (
@@ -573,11 +623,15 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
                             aria-label="Other attachment description"
                             placeholder="Please specify what 'Other' means (required)"
                             value={otherDescription}
-                            onChange={(e) => setOtherDescription(e.target.value)}
-                            className={cn(!otherDescription && 'border-destructive')}
+                            onChange={(e) =>
+                              setOtherDescription(e.target.value)
+                            }
+                            className={cn(
+                              !otherDescription && 'border-destructive'
+                            )}
                           />
                           {!otherDescription && (
-                            <p className="mt-1 text-xs text-destructive">
+                            <p className="text-destructive mt-1 text-xs">
                               This field is required when Other is selected
                             </p>
                           )}
@@ -597,7 +651,7 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
               <ModalTitle>Save as Template</ModalTitle>
             </ModalHeader>
             <ModalBody className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Save this letter as a reusable template. Use Mustache tags like{' '}
                 {'{{employeeName}}'} in your content.
               </p>
@@ -620,7 +674,9 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor={`${baseId}-tpl-desc`}>Description (Optional)</Label>
+                <Label htmlFor={`${baseId}-tpl-desc`}>
+                  Description (Optional)
+                </Label>
                 <Input
                   id={`${baseId}-tpl-desc`}
                   value={newTemplateDescription}
@@ -630,7 +686,10 @@ export const CaseLettersTab = forwardRef<HTMLDivElement, CaseLettersTabProps>(
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button variant="outline" onClick={() => setTemplateDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setTemplateDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button

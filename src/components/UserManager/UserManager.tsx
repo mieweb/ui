@@ -145,7 +145,12 @@ export function UserManager({
   };
 
   const handleSaveEdit = () => {
-    if (!editingId || !editName.trim() || !editNumber.trim() || !editLocation.trim())
+    if (
+      !editingId ||
+      !editName.trim() ||
+      !editNumber.trim() ||
+      !editLocation.trim()
+    )
       return;
     onUpdate(editingId, {
       name: editName.trim(),
@@ -233,14 +238,14 @@ export function UserManager({
         <CardContent>
           <div className="space-y-2">
             {users.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground">
+              <p className="text-muted-foreground py-8 text-center">
                 No employees defined yet.
               </p>
             ) : (
               users.map((user) => (
                 <div
                   key={user.id}
-                  className="rounded-lg border border-border p-3"
+                  className="border-border rounded-lg border p-3"
                 >
                   {editingId === user.id ? (
                     <div className="space-y-3">
@@ -309,7 +314,7 @@ export function UserManager({
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{user.name}</span>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-muted-foreground text-sm">
                             ({user.number})
                           </span>
                           {user.role ? (
@@ -323,7 +328,7 @@ export function UserManager({
                             <Badge variant="secondary">Inactive</Badge>
                           )}
                         </div>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
                           {user.email && <span>{user.email}</span>}
                           {user.email && <span>•</span>}
                           <span>{user.location}</span>

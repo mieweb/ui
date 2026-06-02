@@ -1,13 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
-import {
-  Sheet,
-  SheetHeader,
-  SheetTitle,
-  SheetBody,
-  SheetClose,
-} from './Sheet';
+import { Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose } from './Sheet';
 
 function renderSheet(props: Partial<React.ComponentProps<typeof Sheet>> = {}) {
   const onOpenChange = props.onOpenChange ?? vi.fn();

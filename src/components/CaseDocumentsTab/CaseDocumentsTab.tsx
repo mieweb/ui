@@ -44,8 +44,7 @@ export interface CaseDocumentEdit {
   description: string;
 }
 
-export interface CaseDocumentsTabProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CaseDocumentsTabProps extends React.HTMLAttributes<HTMLDivElement> {
   documents: CaseDocument[];
   /** Options for the document-type selector. */
   documentTypeOptions: { value: string; label: string }[];
@@ -103,9 +102,7 @@ export const CaseDocumentsTab = React.forwardRef<
 
     const sortedTypeOptions = React.useMemo(
       () =>
-        [...documentTypeOptions].sort((a, b) =>
-          a.label.localeCompare(b.label)
-        ),
+        [...documentTypeOptions].sort((a, b) => a.label.localeCompare(b.label)),
       [documentTypeOptions]
     );
 
@@ -147,14 +144,14 @@ export const CaseDocumentsTab = React.forwardRef<
       >
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Documents</h3>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             {documents.length} document{documents.length !== 1 ? 's' : ''} for
             this case
           </div>
         </div>
 
         {/* Upload form */}
-        <div className="rounded-lg border border-border bg-muted p-4">
+        <div className="border-border bg-muted rounded-lg border p-4">
           <div className="mb-4 flex items-center gap-2">
             <Upload className="h-4 w-4" aria-hidden="true" />
             <span className="font-medium">Upload New Document</span>
@@ -162,7 +159,10 @@ export const CaseDocumentsTab = React.forwardRef<
 
           <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="doc-type" className="text-sm text-muted-foreground">
+              <Label
+                htmlFor="doc-type"
+                className="text-muted-foreground text-sm"
+              >
                 Document Type *
               </Label>
               <Select
@@ -173,7 +173,10 @@ export const CaseDocumentsTab = React.forwardRef<
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="received-from" className="text-sm text-muted-foreground">
+              <Label
+                htmlFor="received-from"
+                className="text-muted-foreground text-sm"
+              >
                 Received From
               </Label>
               <Input
@@ -186,7 +189,7 @@ export const CaseDocumentsTab = React.forwardRef<
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">File</Label>
+              <Label className="text-muted-foreground text-sm">File</Label>
               <div className="flex items-center gap-3">
                 <Button
                   type="button"
@@ -196,7 +199,7 @@ export const CaseDocumentsTab = React.forwardRef<
                   <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
                   Choose File
                 </Button>
-                <span className="max-w-[200px] truncate text-sm text-muted-foreground">
+                <span className="text-muted-foreground max-w-[200px] truncate text-sm">
                   {draft.file ? draft.file.name : 'No file chosen'}
                 </span>
                 <input
@@ -214,7 +217,10 @@ export const CaseDocumentsTab = React.forwardRef<
 
           <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-[1fr_auto]">
             <div className="space-y-2">
-              <Label htmlFor="doc-description" className="text-sm text-muted-foreground">
+              <Label
+                htmlFor="doc-description"
+                className="text-muted-foreground text-sm"
+              >
                 Description
               </Label>
               <Input
@@ -234,7 +240,7 @@ export const CaseDocumentsTab = React.forwardRef<
         </div>
 
         {/* Documents table */}
-        <div className="rounded-md border border-border">
+        <div className="border-border rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -251,7 +257,7 @@ export const CaseDocumentsTab = React.forwardRef<
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
                     No documents uploaded
                   </TableCell>
@@ -312,7 +318,7 @@ export const CaseDocumentsTab = React.forwardRef<
                       {doc.fileName ? (
                         <div className="flex items-center gap-1 text-sm">
                           <FileText
-                            className="h-4 w-4 text-muted-foreground"
+                            className="text-muted-foreground h-4 w-4"
                             aria-hidden="true"
                           />
                           <span
@@ -349,27 +355,28 @@ export const CaseDocumentsTab = React.forwardRef<
                             onClick={() => setEditingId(null)}
                           >
                             <X
-                              className="h-4 w-4 text-destructive"
+                              className="text-destructive h-4 w-4"
                               aria-hidden="true"
                             />
                           </Button>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
-                          {onViewDocument && (doc.fileDataUrl || doc.fileName) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              aria-label="View document"
-                              className="h-8 w-8 p-0"
-                              onClick={() => onViewDocument(doc)}
-                            >
-                              <Eye
-                                className="h-4 w-4 text-primary-700"
-                                aria-hidden="true"
-                              />
-                            </Button>
-                          )}
+                          {onViewDocument &&
+                            (doc.fileDataUrl || doc.fileName) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                aria-label="View document"
+                                className="h-8 w-8 p-0"
+                                onClick={() => onViewDocument(doc)}
+                              >
+                                <Eye
+                                  className="text-primary-700 h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                              </Button>
+                            )}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -387,7 +394,7 @@ export const CaseDocumentsTab = React.forwardRef<
                             onClick={() => setToDelete(doc)}
                           >
                             <Trash2
-                              className="h-4 w-4 text-destructive"
+                              className="text-destructive h-4 w-4"
                               aria-hidden="true"
                             />
                           </Button>
@@ -416,9 +423,11 @@ export const CaseDocumentsTab = React.forwardRef<
           }}
         >
           {toDelete && (
-            <div className="rounded-md bg-muted p-3">
-              <div className="font-medium">{typeName(toDelete.documentType)}</div>
-              <div className="text-sm text-muted-foreground">
+            <div className="bg-muted rounded-md p-3">
+              <div className="font-medium">
+                {typeName(toDelete.documentType)}
+              </div>
+              <div className="text-muted-foreground text-sm">
                 {toDelete.description || 'No description'}
               </div>
             </div>

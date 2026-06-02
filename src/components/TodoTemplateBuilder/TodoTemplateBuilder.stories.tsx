@@ -35,7 +35,7 @@ function BuilderExample() {
         ]}
       />
       {inserted && (
-        <pre className="rounded-md bg-muted p-3 text-sm">{inserted}</pre>
+        <pre className="bg-muted rounded-md p-3 text-sm">{inserted}</pre>
       )}
     </div>
   );

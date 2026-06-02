@@ -17,7 +17,13 @@ import { cn } from '../../utils/cn';
 import { AlertDialog } from '../AlertDialog';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../Card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../Card';
 import { Checkbox } from '../Checkbox';
 import { Input } from '../Input';
 import { Label } from '../Label';
@@ -159,7 +165,9 @@ export function TodoBacklog({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [savedSearches, setSavedSearches] =
     useState<SavedBacklogSearch[]>(initialSavedSearches);
-  const [activeSavedSearch, setActiveSavedSearch] = useState<string | null>(null);
+  const [activeSavedSearch, setActiveSavedSearch] = useState<string | null>(
+    null
+  );
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [newSearchName, setNewSearchName] = useState('');
 
@@ -250,9 +258,7 @@ export function TodoBacklog({
       active: todos.filter((t) => !t.completed).length,
       overdue: todos.filter(
         (t) =>
-          !t.completed &&
-          !!t.dateScheduled &&
-          new Date(t.dateScheduled) < today
+          !t.completed && !!t.dateScheduled && new Date(t.dateScheduled) < today
       ).length,
       draftLetters: todos.filter(
         (t) =>
@@ -281,10 +287,11 @@ export function TodoBacklog({
 
   const allSelected =
     filteredTodos.length > 0 &&
-    filteredTodos.every((t) => selectedTodos.has(getTodoKey(t.caseNumber, t.id)));
+    filteredTodos.every((t) =>
+      selectedTodos.has(getTodoKey(t.caseNumber, t.id))
+    );
   const someSelected = selectedTodos.size > 0;
-  const selectionItems = () =>
-    Array.from(selectedTodos).map(parseTodoKey);
+  const selectionItems = () => Array.from(selectedTodos).map(parseTodoKey);
 
   const resetBulk = () => {
     setSelectedTodos(new Set());
@@ -387,7 +394,10 @@ export function TodoBacklog({
   };
 
   return (
-    <div className={cn('container mx-auto space-y-6 px-4 py-6', className)} data-slot="todo-backlog">
+    <div
+      className={cn('container mx-auto space-y-6 px-4 py-6', className)}
+      data-slot="todo-backlog"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={onBack}>
@@ -417,7 +427,11 @@ export function TodoBacklog({
 
       <div className="flex flex-wrap gap-4">
         <StatCard label="Total" value={stats.total} />
-        <StatCard label="Active" value={stats.active} valueClassName="text-primary" />
+        <StatCard
+          label="Active"
+          value={stats.active}
+          valueClassName="text-primary"
+        />
         <StatCard label="Completed" value={stats.completed} />
         <StatCard
           label="Overdue"
@@ -444,10 +458,10 @@ export function TodoBacklog({
             <CardDescription className="flex items-center justify-between">
               Draft Letters
               {filterDraftLetters && (
-                <span className="text-xs text-warning-600">(filtered)</span>
+                <span className="text-warning-600 text-xs">(filtered)</span>
               )}
             </CardDescription>
-            <CardTitle className="text-2xl text-warning-600">
+            <CardTitle className="text-warning-600 text-2xl">
               {stats.draftLetters}
             </CardTitle>
           </CardHeader>
@@ -458,19 +472,26 @@ export function TodoBacklog({
         <Card className="bg-muted/40">
           <CardContent className="px-4 py-2">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-2">
                 <Bookmark className="h-4 w-4" aria-hidden="true" />
-                <span className="text-sm font-medium">Bookmarked Searches:</span>
+                <span className="text-sm font-medium">
+                  Bookmarked Searches:
+                </span>
               </div>
               {savedSearches.map((search) => (
                 <div key={search.id} className="flex items-center">
                   <Button
-                    variant={activeSavedSearch === search.id ? 'primary' : 'outline'}
+                    variant={
+                      activeSavedSearch === search.id ? 'primary' : 'outline'
+                    }
                     size="sm"
                     className="h-8"
                     onClick={() => applySavedSearch(search)}
                   >
-                    <BookmarkCheck className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                    <BookmarkCheck
+                      className="mr-1.5 h-3.5 w-3.5"
+                      aria-hidden="true"
+                    />
                     {search.name}
                     <Badge variant="secondary" className="ml-2">
                       {getSearchResultCount(search)}
@@ -483,7 +504,7 @@ export function TodoBacklog({
                     variant="ghost"
                     size="sm"
                     aria-label={`Delete ${search.name}`}
-                    className="ml-1 h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive ml-1 h-8 w-8 p-0"
                     onClick={() => deleteSavedSearch(search.id)}
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -500,14 +521,23 @@ export function TodoBacklog({
           <CardContent className="py-4">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
-                <CheckSquare className="h-5 w-5 text-primary" aria-hidden="true" />
-                <span className="font-medium">{selectedTodos.size} selected</span>
+                <CheckSquare
+                  className="text-primary h-5 w-5"
+                  aria-hidden="true"
+                />
+                <span className="font-medium">
+                  {selectedTodos.size} selected
+                </span>
               </div>
-              <div className="h-6 w-px bg-border" />
+              <div className="bg-border h-6 w-px" />
               {!bulkEditMode ? (
                 <>
                   {onBulkEdit && (
-                    <Button size="sm" variant="outline" onClick={() => setBulkEditMode(true)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setBulkEditMode(true)}
+                    >
                       <Edit2 className="mr-2 h-4 w-4" aria-hidden="true" />
                       Edit Selected
                     </Button>
@@ -523,7 +553,11 @@ export function TodoBacklog({
                       Delete Selected
                     </Button>
                   )}
-                  <Button size="sm" variant="ghost" onClick={() => setSelectedTodos(new Set())}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setSelectedTodos(new Set())}
+                  >
                     <X className="mr-2 h-4 w-4" aria-hidden="true" />
                     Clear Selection
                   </Button>
@@ -670,7 +704,7 @@ export function TodoBacklog({
                 </Button>
               </div>
             )}
-            <div className="ml-auto text-sm text-muted-foreground">
+            <div className="text-muted-foreground ml-auto text-sm">
               Showing {filteredTodos.length} of {todos.length} To-Dos
             </div>
           </div>
@@ -679,7 +713,7 @@ export function TodoBacklog({
 
       <Card>
         <CardContent className="p-0">
-          <div className="rounded-md border border-border">
+          <div className="border-border rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -715,7 +749,10 @@ export function TodoBacklog({
               <TableBody>
                 {filteredTodos.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={9}
+                      className="text-muted-foreground py-8 text-center"
+                    >
                       No To-Dos found matching filters.
                     </TableCell>
                   </TableRow>
@@ -793,7 +830,9 @@ function StatCard({
     <Card className="min-w-[120px]">
       <CardHeader className="py-3">
         <CardDescription>{label}</CardDescription>
-        <CardTitle className={cn('text-2xl', valueClassName)}>{value}</CardTitle>
+        <CardTitle className={cn('text-2xl', valueClassName)}>
+          {value}
+        </CardTitle>
       </CardHeader>
     </Card>
   );

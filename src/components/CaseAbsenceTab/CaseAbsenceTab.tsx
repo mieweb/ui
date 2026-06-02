@@ -37,8 +37,7 @@ export interface CaseAbsenceDraft {
   otherName?: string;
 }
 
-export interface CaseAbsenceTabProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CaseAbsenceTabProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Absence entries for the case. */
   entries: CaseAbsenceEntry[];
   /** Reason options for the reason selector. */
@@ -73,7 +72,9 @@ function statusLabel(entry: Pick<CaseAbsenceEntry, 'status' | 'otherName'>) {
   if (entry.status === 'OTH' && entry.otherName) {
     return `OTH — ${entry.otherName}`;
   }
-  return STATUS_OPTIONS.find((o) => o.value === entry.status)?.label ?? entry.status;
+  return (
+    STATUS_OPTIONS.find((o) => o.value === entry.status)?.label ?? entry.status
+  );
 }
 
 const EMPTY_DRAFT: CaseAbsenceDraft = {
@@ -193,7 +194,10 @@ export const CaseAbsenceTab = React.forwardRef<
         {/* Add entry form */}
         <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-5">
           <div className="space-y-2">
-            <Label htmlFor="absence-effective-date" className="text-sm text-muted-foreground">
+            <Label
+              htmlFor="absence-effective-date"
+              className="text-muted-foreground text-sm"
+            >
               Effective date:
             </Label>
             <Input
@@ -206,7 +210,10 @@ export const CaseAbsenceTab = React.forwardRef<
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="absence-status" className="text-sm text-muted-foreground">
+            <Label
+              htmlFor="absence-status"
+              className="text-muted-foreground text-sm"
+            >
               Status:
             </Label>
             <Select
@@ -219,7 +226,10 @@ export const CaseAbsenceTab = React.forwardRef<
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="absence-reason" className="text-sm text-muted-foreground">
+            <Label
+              htmlFor="absence-reason"
+              className="text-muted-foreground text-sm"
+            >
               Reason:
             </Label>
             <Select
@@ -231,7 +241,10 @@ export const CaseAbsenceTab = React.forwardRef<
           </div>
           {draft.status === 'OTH' && (
             <div className="space-y-2">
-              <Label htmlFor="absence-other" className="text-sm text-muted-foreground">
+              <Label
+                htmlFor="absence-other"
+                className="text-muted-foreground text-sm"
+              >
                 Other name:
               </Label>
               <Input
@@ -249,7 +262,10 @@ export const CaseAbsenceTab = React.forwardRef<
               Add Entry
             </Button>
             <div className="flex-1 space-y-2">
-              <Label htmlFor="absence-count-through" className="whitespace-nowrap text-sm text-muted-foreground">
+              <Label
+                htmlFor="absence-count-through"
+                className="text-muted-foreground text-sm whitespace-nowrap"
+              >
                 Count last status through:
               </Label>
               <Input
@@ -262,13 +278,13 @@ export const CaseAbsenceTab = React.forwardRef<
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Days are counted from each effective date up to (but excluding) the
           next effective date. The last row counts through the date on the right
           (defaults to today).
         </p>
 
-        <div className="rounded-lg border border-border">
+        <div className="border-border rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -355,12 +371,18 @@ export const CaseAbsenceTab = React.forwardRef<
                     )}
                   </TableCell>
                   <TableCell className="text-center">{entry.days.FD}</TableCell>
-                  <TableCell className="text-center">{entry.days.LWD}</TableCell>
-                  <TableCell className="text-center">{entry.days.RWD}</TableCell>
+                  <TableCell className="text-center">
+                    {entry.days.LWD}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {entry.days.RWD}
+                  </TableCell>
                   <TableCell className="text-center">
                     {entry.days.RWDREGULARJOB}
                   </TableCell>
-                  <TableCell className="text-center">{entry.days.OTH}</TableCell>
+                  <TableCell className="text-center">
+                    {entry.days.OTH}
+                  </TableCell>
                   <TableCell>
                     {editingId === entry.id ? (
                       <div className="flex gap-1">

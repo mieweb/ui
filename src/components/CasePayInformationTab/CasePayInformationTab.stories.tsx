@@ -70,14 +70,18 @@ function Example() {
         setJobs((prev) => [...prev, { id: Date.now().toString(), ...draft }])
       }
       onUpdateJob={(id, draft) =>
-        setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...draft } : j)))
+        setJobs((prev) =>
+          prev.map((j) => (j.id === id ? { ...j, ...draft } : j))
+        )
       }
       onDeleteJob={(id) => setJobs((prev) => prev.filter((j) => j.id !== id))}
       onAddPay={(draft) =>
         setPay((prev) => [...prev, { id: Date.now().toString(), ...draft }])
       }
       onUpdatePay={(id, draft) =>
-        setPay((prev) => prev.map((p) => (p.id === id ? { ...p, ...draft } : p)))
+        setPay((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, ...draft } : p))
+        )
       }
       onDeletePay={(id) => setPay((prev) => prev.filter((p) => p.id !== id))}
     />

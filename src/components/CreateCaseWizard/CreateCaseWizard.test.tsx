@@ -9,7 +9,10 @@ import {
 import { Input } from '../Input';
 
 const caseTypeOptions = [
-  { value: 'Occupational injury / illness', label: 'Occupational injury / illness' },
+  {
+    value: 'Occupational injury / illness',
+    label: 'Occupational injury / illness',
+  },
   {
     value: 'Non-occupational injury / illness',
     label: 'Non-occupational injury / illness',
@@ -62,15 +65,19 @@ describe('CreateCaseWizard', () => {
 
   it('populates employee fields from the search slot', () => {
     renderWizard();
-    fireEvent.keyDown(screen.getByLabelText('Employee search'), { key: 'Enter' });
-    expect((screen.getByLabelText('Employee Number') as HTMLInputElement).value).toBe(
-      'E-1001'
-    );
+    fireEvent.keyDown(screen.getByLabelText('Employee search'), {
+      key: 'Enter',
+    });
+    expect(
+      (screen.getByLabelText('Employee Number') as HTMLInputElement).value
+    ).toBe('E-1001');
   });
 
   it('warns about open cases for the selected employee', () => {
     renderWizard({ findOpenCases: () => openCases });
-    fireEvent.keyDown(screen.getByLabelText('Employee search'), { key: 'Enter' });
+    fireEvent.keyDown(screen.getByLabelText('Employee search'), {
+      key: 'Enter',
+    });
     expect(screen.getByText('Open Cases Found')).toBeInTheDocument();
   });
 

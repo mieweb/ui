@@ -32,9 +32,9 @@ describe('buildTodoTemplate', () => {
   });
 
   it('treats a documentType of "none" as no document', () => {
-    expect(
-      buildTodoTemplate({ title: 'Task', documentType: 'none' })
-    ).toBe('"Task"');
+    expect(buildTodoTemplate({ title: 'Task', documentType: 'none' })).toBe(
+      '"Task"'
+    );
   });
 
   it('builds a recurrence rule with interval and count', () => {
@@ -93,19 +93,17 @@ describe('TodoTemplateBuilder', () => {
       target: { value: 'My Task' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Insert Template' }));
-    expect(onInsert).toHaveBeenCalledWith('"My Task"; offset=1 Week; anchor=caseCreation');
+    expect(onInsert).toHaveBeenCalledWith(
+      '"My Task"; offset=1 Week; anchor=caseCreation'
+    );
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 });
 
 describe('TodoTemplateHelp', () => {
   it('renders the format guide when open', () => {
-    renderWithTheme(
-      <TodoTemplateHelp open onOpenChange={vi.fn()} />
-    );
-    expect(
-      screen.getByText('Todo Template Format Guide')
-    ).toBeInTheDocument();
+    renderWithTheme(<TodoTemplateHelp open onOpenChange={vi.fn()} />);
+    expect(screen.getByText('Todo Template Format Guide')).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Basics' })).toBeInTheDocument();
   });
 });

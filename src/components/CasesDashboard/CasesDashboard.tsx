@@ -141,7 +141,9 @@ export function CasesDashboard({
 }: CasesDashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [activeFilterId, setActiveFilterId] = useState<string | null>('my-cases');
+  const [activeFilterId, setActiveFilterId] = useState<string | null>(
+    'my-cases'
+  );
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
@@ -270,13 +272,20 @@ export function CasesDashboard({
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) {
       return (
-        <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <ArrowUpDown
+          className="text-muted-foreground ml-2 h-4 w-4"
+          aria-hidden="true"
+        />
       );
     }
     if (sortDirection === 'asc') {
-      return <ArrowUp className="ml-2 h-4 w-4 text-primary" aria-hidden="true" />;
+      return (
+        <ArrowUp className="text-primary ml-2 h-4 w-4" aria-hidden="true" />
+      );
     }
-    return <ArrowDown className="ml-2 h-4 w-4 text-primary" aria-hidden="true" />;
+    return (
+      <ArrowDown className="text-primary ml-2 h-4 w-4" aria-hidden="true" />
+    );
   };
 
   const getNextTodoLabel = (caseItem: DashboardCase) => {
@@ -337,7 +346,11 @@ export function CasesDashboard({
     if (!filterName.trim()) return;
     setSavedFilters((prev) => [
       ...prev,
-      { id: `filter-${prev.length + 1}`, name: filterName, criteria: { ...advancedFilters } },
+      {
+        id: `filter-${prev.length + 1}`,
+        name: filterName,
+        criteria: { ...advancedFilters },
+      },
     ]);
     setFilterName('');
     setShowSaveFilterDialog(false);
@@ -393,14 +406,14 @@ export function CasesDashboard({
         </p>
       </div>
 
-      <div className="mb-6 rounded-lg border border-border bg-card p-4 shadow-sm md:p-6">
+      <div className="border-border bg-card mb-6 rounded-lg border p-4 shadow-sm md:p-6">
         {!showMoreFilters ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="dashboard-search">Search Cases</Label>
               <div className="relative">
                 <Search
-                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                   aria-hidden="true"
                 />
                 <Input
@@ -428,27 +441,34 @@ export function CasesDashboard({
                 placement="bottom-end"
                 width={224}
                 trigger={
-                  <Button variant="outline" className="justify-start gap-2 sm:justify-center">
+                  <Button
+                    variant="outline"
+                    className="justify-start gap-2 sm:justify-center"
+                  >
                     <Save className="h-4 w-4" aria-hidden="true" />
                     <span>
-                      {savedFilters.find((f) => f.id === activeFilterId)?.name ||
-                        'Saved Filters'}
+                      {savedFilters.find((f) => f.id === activeFilterId)
+                        ?.name || 'Saved Filters'}
                     </span>
-                    <ChevronDown className="ml-auto h-4 w-4 sm:ml-0" aria-hidden="true" />
+                    <ChevronDown
+                      className="ml-auto h-4 w-4 sm:ml-0"
+                      aria-hidden="true"
+                    />
                   </Button>
                 }
               >
                 {savedFilters.map((filter) => (
                   <div
                     key={filter.id}
-                    className="flex items-center justify-between rounded-sm px-2 py-1.5 hover:bg-muted/50"
+                    className="hover:bg-muted/50 flex items-center justify-between rounded-sm px-2 py-1.5"
                   >
                     <button
                       type="button"
                       onClick={() => handleLoadFilter(filter)}
                       className={cn(
                         'flex-1 text-left text-sm',
-                        activeFilterId === filter.id && 'font-semibold text-primary'
+                        activeFilterId === filter.id &&
+                          'text-primary font-semibold'
                       )}
                     >
                       {filter.name}
@@ -464,7 +484,10 @@ export function CasesDashboard({
                         }}
                         className="h-6 w-6 p-0"
                       >
-                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        <Trash2
+                          className="text-destructive h-3 w-3"
+                          aria-hidden="true"
+                        />
                       </Button>
                     )}
                   </div>
@@ -488,7 +511,7 @@ export function CasesDashboard({
                 <Label htmlFor="adv-search">Search Cases</Label>
                 <div className="relative">
                   <Search
-                    className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                     aria-hidden="true"
                   />
                   <Input
@@ -496,7 +519,10 @@ export function CasesDashboard({
                     placeholder="Search by name, case number, or employee number..."
                     value={advancedFilters.search}
                     onChange={(e) =>
-                      setAdvancedFilters({ ...advancedFilters, search: e.target.value })
+                      setAdvancedFilters({
+                        ...advancedFilters,
+                        search: e.target.value,
+                      })
                     }
                     className="w-full pl-10"
                   />
@@ -533,7 +559,10 @@ export function CasesDashboard({
                   aria-label="Case Manager"
                   value={advancedFilters.caseManager}
                   onValueChange={(value) =>
-                    setAdvancedFilters({ ...advancedFilters, caseManager: value })
+                    setAdvancedFilters({
+                      ...advancedFilters,
+                      caseManager: value,
+                    })
                   }
                   options={managerOptions}
                 />
@@ -546,7 +575,10 @@ export function CasesDashboard({
                     aria-label="Location"
                     value={advancedFilters.location}
                     onValueChange={(value) =>
-                      setAdvancedFilters({ ...advancedFilters, location: value })
+                      setAdvancedFilters({
+                        ...advancedFilters,
+                        location: value,
+                      })
                     }
                     options={locOptions}
                   />
@@ -555,12 +587,17 @@ export function CasesDashboard({
             </div>
 
             <div className="flex flex-col items-stretch justify-between gap-2 pt-2 sm:flex-row sm:items-center">
-              <Button onClick={() => setShowMoreFilters(false)}>Show Less</Button>
+              <Button onClick={() => setShowMoreFilters(false)}>
+                Show Less
+              </Button>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleClearFilters}>
                   Clear All
                 </Button>
-                <Button onClick={() => setShowSaveFilterDialog(true)} className="gap-2">
+                <Button
+                  onClick={() => setShowSaveFilterDialog(true)}
+                  className="gap-2"
+                >
                   <Save className="h-4 w-4" aria-hidden="true" />
                   Save Filter
                 </Button>
@@ -570,7 +607,7 @@ export function CasesDashboard({
         )}
       </div>
 
-      <div className="rounded-lg border border-border bg-card shadow-sm">
+      <div className="border-border bg-card rounded-lg border shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -579,7 +616,7 @@ export function CasesDashboard({
                   <button
                     type="button"
                     onClick={() => handleSort(col.field)}
-                    className="flex items-center transition-colors hover:text-foreground"
+                    className="hover:text-foreground flex items-center transition-colors"
                   >
                     {col.label}
                     {renderSortIcon(col.field)}
@@ -592,7 +629,10 @@ export function CasesDashboard({
           <TableBody>
             {sortedCases.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={10}
+                  className="text-muted-foreground py-8 text-center"
+                >
                   No cases found
                 </TableCell>
               </TableRow>
@@ -600,10 +640,12 @@ export function CasesDashboard({
               sortedCases.map((caseItem) => (
                 <TableRow
                   key={caseItem.caseNumber}
-                  className="cursor-pointer hover:bg-muted/50"
+                  className="hover:bg-muted/50 cursor-pointer"
                   onClick={() => onViewCase(caseItem.caseNumber)}
                 >
-                  <TableCell className="font-medium">{caseItem.caseNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    {caseItem.caseNumber}
+                  </TableCell>
                   <TableCell>{caseItem.employeeName}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {caseItem.employeeNumber}
@@ -619,7 +661,7 @@ export function CasesDashboard({
                   <TableCell className="text-muted-foreground">
                     {caseItem.dateOfDisability || '—'}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     {getNextTodoLabel(caseItem)}
                   </TableCell>
                   <TableCell className="text-right">
@@ -653,13 +695,18 @@ export function CasesDashboard({
         />
       </div>
 
-      <Modal open={showSaveFilterDialog} onOpenChange={setShowSaveFilterDialog} size="md">
+      <Modal
+        open={showSaveFilterDialog}
+        onOpenChange={setShowSaveFilterDialog}
+        size="md"
+      >
         <ModalHeader>
           <ModalTitle>Save Filter</ModalTitle>
         </ModalHeader>
         <ModalBody>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Give your filter configuration a name so you can quickly apply it later.
+          <p className="text-muted-foreground mb-4 text-sm">
+            Give your filter configuration a name so you can quickly apply it
+            later.
           </p>
           <div className="space-y-2">
             <Label htmlFor="filter-name">Filter Name</Label>
@@ -672,7 +719,10 @@ export function CasesDashboard({
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button variant="outline" onClick={() => setShowSaveFilterDialog(false)}>
+          <Button
+            variant="outline"
+            onClick={() => setShowSaveFilterDialog(false)}
+          >
             Cancel
           </Button>
           <Button onClick={handleSaveFilter} disabled={!filterName.trim()}>
@@ -686,8 +736,8 @@ export function CasesDashboard({
 
 function DashboardStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex-1 rounded-lg border border-border bg-card p-6 shadow-sm">
-      <p className="mb-1 text-sm text-muted-foreground">{label}</p>
+    <div className="border-border bg-card flex-1 rounded-lg border p-6 shadow-sm">
+      <p className="text-muted-foreground mb-1 text-sm">{label}</p>
       <p className="text-2xl font-bold">{value}</p>
     </div>
   );

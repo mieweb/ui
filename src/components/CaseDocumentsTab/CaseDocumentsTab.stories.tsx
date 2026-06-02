@@ -58,7 +58,9 @@ function Example() {
       onDeleteDocument={(id) =>
         setDocuments((prev) => prev.filter((d) => d.id !== id))
       }
-      onViewDocument={(doc) => window.alert(`View ${doc.fileName ?? doc.description}`)}
+      onViewDocument={(doc) =>
+        window.alert(`View ${doc.fileName ?? doc.description}`)
+      }
     />
   );
 }

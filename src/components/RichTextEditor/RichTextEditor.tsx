@@ -333,13 +333,13 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       <div
         data-slot="rich-text-editor"
         className={cn(
-          'flex flex-col overflow-hidden rounded-lg border border-border bg-background',
+          'border-border bg-background flex flex-col overflow-hidden rounded-lg border',
           className
         )}
       >
         <div
           data-slot="rich-text-editor-toolbar"
-          className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b border-border bg-muted/30 p-2"
+          className="border-border bg-muted/30 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2"
         >
           <Button
             type="button"
@@ -535,7 +535,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
           {isEmpty && placeholder && (
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute left-0 top-0 p-4 text-muted-foreground"
+              className="text-muted-foreground pointer-events-none absolute top-0 left-0 p-4"
             >
               {placeholder}
             </div>

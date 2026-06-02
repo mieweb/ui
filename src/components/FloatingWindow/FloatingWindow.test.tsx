@@ -63,11 +63,7 @@ describe('FloatingWindow', () => {
     ).not.toBeInTheDocument();
 
     rerender(
-      <FloatingWindow
-        {...baseProps}
-        onMinimize={vi.fn()}
-        onPopOut={vi.fn()}
-      >
+      <FloatingWindow {...baseProps} onMinimize={vi.fn()} onPopOut={vi.fn()}>
         <p>Body</p>
       </FloatingWindow>
     );

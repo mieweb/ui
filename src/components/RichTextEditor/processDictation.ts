@@ -35,7 +35,10 @@ export function processDictation(text: string): string {
   result = result.replace(/\s+colon\b/gi, ':');
 
   // "dash"
-  result = result.replace(/\b(yard|meter|hundred|mad|quick|wild)\s+dash\b/gi, '$1 dash');
+  result = result.replace(
+    /\b(yard|meter|hundred|mad|quick|wild)\s+dash\b/gi,
+    '$1 dash'
+  );
   result = result.replace(/\bdash\s+(to|for|of)\b/gi, 'dash $1');
   result = result.replace(/\s+dash\b/gi, ' -');
 
@@ -69,7 +72,8 @@ export function processDictation(text: string): string {
   // Capitalize after sentence-ending punctuation.
   result = result.replace(
     /([.!?])\s+([a-z])/g,
-    (_match, punct: string, letter: string) => `${punct} ${letter.toUpperCase()}`
+    (_match, punct: string, letter: string) =>
+      `${punct} ${letter.toUpperCase()}`
   );
 
   return result;
@@ -81,7 +85,10 @@ export function processDictation(text: string): string {
  */
 export function convertAngleBracketsToMustache(html: string): string {
   return html
-    .replace(/&lt;&lt;([^&]*)&gt;&gt;/g, (_m, field: string) => `{{${field.trim()}}}`)
+    .replace(
+      /&lt;&lt;([^&]*)&gt;&gt;/g,
+      (_m, field: string) => `{{${field.trim()}}}`
+    )
     .replace(/<<([^>]*)>>/g, (_m, field: string) => `{{${field.trim()}}}`);
 }
 
@@ -91,6 +98,9 @@ export function convertAngleBracketsToMustache(html: string): string {
  * remaining text — do NOT use this for XSS prevention.
  */
 export function isHtmlEmpty(html: string): boolean {
-  const text = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  const text = html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
   return text.length === 0;
 }

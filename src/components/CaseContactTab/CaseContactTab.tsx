@@ -59,8 +59,7 @@ export interface PreviousCaseContacts {
   contacts: CaseContactRow[];
 }
 
-export interface CaseContactTabProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CaseContactTabProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Contacts currently attached to the case. */
   contacts: CaseContactRow[];
   /** Contacts available to search and attach. */
@@ -115,8 +114,7 @@ export const CaseContactTab = React.forwardRef<
     );
 
     const [isImporting, setIsImporting] = React.useState(false);
-    const [selectedPreviousCase, setSelectedPreviousCase] =
-      React.useState('');
+    const [selectedPreviousCase, setSelectedPreviousCase] = React.useState('');
     const [toImport, setToImport] = React.useState<string[]>([]);
 
     const currentCaseNumber = contacts[0]?.caseNumber;
@@ -191,7 +189,7 @@ export const CaseContactTab = React.forwardRef<
         </div>
 
         {/* Filter bar */}
-        <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+        <div className="bg-muted flex items-center gap-4 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <Label className="text-sm">Case:</Label>
             <Select
@@ -205,17 +203,17 @@ export const CaseContactTab = React.forwardRef<
               ]}
             />
           </div>
-          <div className="ml-auto text-sm text-foreground">
+          <div className="text-foreground ml-auto text-sm">
             Showing {filteredContacts.length} of {contacts.length} contacts
           </div>
         </div>
 
         {filteredContacts.length === 0 ? (
-          <div className="py-12 text-center text-muted-foreground">
+          <div className="text-muted-foreground py-12 text-center">
             No contacts added to this case yet.
           </div>
         ) : (
-          <div className="rounded-lg border border-border">
+          <div className="border-border rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -247,11 +245,11 @@ export const CaseContactTab = React.forwardRef<
                     <TableCell>{contact.relationship}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1 text-sm">
-                        <div className="flex items-center gap-1 text-muted-foreground">
+                        <div className="text-muted-foreground flex items-center gap-1">
                           <Mail className="h-3 w-3" aria-hidden="true" />
                           {contact.email}
                         </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
+                        <div className="text-muted-foreground flex items-center gap-1">
                           <Phone className="h-3 w-3" aria-hidden="true" />
                           {contact.phone}
                         </div>
@@ -271,7 +269,7 @@ export const CaseContactTab = React.forwardRef<
                         className="h-8 w-8 p-0"
                       >
                         <Trash2
-                          className="h-4 w-4 text-destructive"
+                          className="text-destructive h-4 w-4"
                           aria-hidden="true"
                         />
                       </Button>
@@ -296,7 +294,7 @@ export const CaseContactTab = React.forwardRef<
             <ModalTitle>Add Contact to Case</ModalTitle>
           </ModalHeader>
           <ModalBody className="space-y-6">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Search for a contact and specify their relationship to this case.
             </p>
             <div className="space-y-2">
@@ -311,7 +309,7 @@ export const CaseContactTab = React.forwardRef<
                 renderItem={(c) => (
                   <div>
                     <div className="font-medium">{c.name}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-muted-foreground text-xs">
                       {c.email}
                     </div>
                   </div>
@@ -321,12 +319,12 @@ export const CaseContactTab = React.forwardRef<
                 aria-label="Search contacts"
               />
               {selectedContact && (
-                <div className="mt-2 rounded-md bg-muted p-3">
+                <div className="bg-muted mt-2 rounded-md p-3">
                   <div className="font-medium">{selectedContact.name}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-muted-foreground text-sm">
                     {selectedContact.type.join(', ')}
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground mt-1 text-xs">
                     {selectedContact.email} • {selectedContact.phone}
                   </div>
                 </div>
@@ -379,12 +377,12 @@ export const CaseContactTab = React.forwardRef<
               <ModalTitle>Import Contacts from Previous Cases</ModalTitle>
             </ModalHeader>
             <ModalBody className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Select a previous case to import contacts from. These contacts
                 will be added to the current case.
               </p>
               {previousCases.length === 0 ? (
-                <div className="py-8 text-center text-muted-foreground">
+                <div className="text-muted-foreground py-8 text-center">
                   No previous cases found for this employee.
                 </div>
               ) : (
@@ -425,7 +423,7 @@ export const CaseContactTab = React.forwardRef<
                             : 'Select All'}
                         </Button>
                       </div>
-                      <div className="max-h-64 overflow-y-auto rounded-md border border-border">
+                      <div className="border-border max-h-64 overflow-y-auto rounded-md border">
                         {previousCaseContacts.map((contact) => {
                           const alreadyAdded = contacts.some(
                             (c) =>
@@ -436,7 +434,7 @@ export const CaseContactTab = React.forwardRef<
                             <div
                               key={contact.id}
                               className={cn(
-                                'flex items-center gap-3 border-b border-border p-3 last:border-b-0',
+                                'border-border flex items-center gap-3 border-b p-3 last:border-b-0',
                                 alreadyAdded
                                   ? 'bg-muted opacity-50'
                                   : 'hover:bg-muted'
@@ -452,12 +450,12 @@ export const CaseContactTab = React.forwardRef<
                                 <div className="font-medium">
                                   {contact.name}
                                 </div>
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-muted-foreground text-sm">
                                   {contact.relationship} • {contact.email}
                                 </div>
                               </div>
                               {alreadyAdded && (
-                                <span className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                                <span className="bg-muted text-muted-foreground rounded px-2 py-1 text-xs">
                                   Already added
                                 </span>
                               )}
@@ -473,7 +471,7 @@ export const CaseContactTab = React.forwardRef<
 
                   {selectedPreviousCase &&
                     previousCaseContacts.length === 0 && (
-                      <div className="py-8 text-center text-muted-foreground">
+                      <div className="text-muted-foreground py-8 text-center">
                         No contacts found in the selected case.
                       </div>
                     )}

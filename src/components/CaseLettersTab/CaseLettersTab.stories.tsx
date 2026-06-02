@@ -23,7 +23,12 @@ const templates = [
     content: '<p>Dear {{employeeName}},</p><p>Welcome to your case.</p>',
     active: true,
   },
-  { code: 'std-approval', name: 'STD Approval', content: '<p>Your STD claim is approved.</p>', active: true },
+  {
+    code: 'std-approval',
+    name: 'STD Approval',
+    content: '<p>Your STD claim is approved.</p>',
+    active: true,
+  },
 ];
 
 const caseManagers = [
@@ -53,7 +58,13 @@ function Example() {
       if (input.id) {
         return prev.map((l) =>
           l.id === input.id
-            ? { ...l, ...input, status, sentDate: status === 'Sent' ? new Date().toISOString() : l.sentDate }
+            ? {
+                ...l,
+                ...input,
+                status,
+                sentDate:
+                  status === 'Sent' ? new Date().toISOString() : l.sentDate,
+              }
             : l
         );
       }
@@ -82,7 +93,9 @@ function Example() {
       defaultSentFrom="Jane Doe"
       onSaveDraft={(input) => upsert(input, 'Draft')}
       onSendLetter={(input) => upsert(input, 'Sent')}
-      onDeleteLetter={(id) => setLetters((prev) => prev.filter((l) => l.id !== id))}
+      onDeleteLetter={(id) =>
+        setLetters((prev) => prev.filter((l) => l.id !== id))
+      }
       onSaveAsTemplate={(t) => window.alert(`Saved template ${t.code}`)}
     />
   );

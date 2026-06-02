@@ -78,9 +78,7 @@ describe('CasePayInformationTab', () => {
 
   it('opens the add job dialog', () => {
     setup();
-    fireEvent.click(
-      screen.getAllByRole('button', { name: 'Add Entry' })[0]
-    );
+    fireEvent.click(screen.getAllByRole('button', { name: 'Add Entry' })[0]);
     expect(screen.getByText('Add Job Assignment')).toBeInTheDocument();
   });
 

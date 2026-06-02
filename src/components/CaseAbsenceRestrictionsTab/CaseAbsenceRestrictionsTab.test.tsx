@@ -14,11 +14,25 @@ const statusOptions = [
   { value: 'OTH', label: 'Other' },
 ];
 const reasonOptions = [{ value: 'VACATION', label: 'Vacation' }];
-const restrictionOptions = [{ value: 'no-lifting-25', label: 'No lifting over 25 lbs' }];
+const restrictionOptions = [
+  { value: 'no-lifting-25', label: 'No lifting over 25 lbs' },
+];
 
 const absences: AbsenceTrackingEntry[] = [
-  { id: 'a1', effectiveDate: '2025-08-01', status: 'LWD', createdSeq: 1, caseNumber: 'C-1' },
-  { id: 'a2', effectiveDate: '2025-08-10', status: 'RWD', createdSeq: 2, caseNumber: 'C-1' },
+  {
+    id: 'a1',
+    effectiveDate: '2025-08-01',
+    status: 'LWD',
+    createdSeq: 1,
+    caseNumber: 'C-1',
+  },
+  {
+    id: 'a2',
+    effectiveDate: '2025-08-10',
+    status: 'RWD',
+    createdSeq: 2,
+    caseNumber: 'C-1',
+  },
 ];
 const restrictions: WorkRestrictionEntry[] = [
   {
@@ -97,13 +111,18 @@ describe('CaseAbsenceRestrictionsTab', () => {
   it('quick-adds a restriction', () => {
     const { onAddRestriction } = setup();
     fireEvent.click(screen.getByRole('combobox', { name: 'Restriction type' }));
-    fireEvent.click(screen.getByRole('option', { name: 'No lifting over 25 lbs' }));
+    fireEvent.click(
+      screen.getByRole('option', { name: 'No lifting over 25 lbs' })
+    );
     fireEvent.change(screen.getByLabelText('Start date:'), {
       target: { value: '2025-08-15' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Add Restriction' }));
     expect(onAddRestriction).toHaveBeenCalledWith(
-      expect.objectContaining({ restriction: 'no-lifting-25', startDate: '2025-08-15' })
+      expect.objectContaining({
+        restriction: 'no-lifting-25',
+        startDate: '2025-08-15',
+      })
     );
   });
 

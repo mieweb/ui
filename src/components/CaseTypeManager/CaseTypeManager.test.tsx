@@ -1,10 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
-import {
-  CaseTypeManager,
-  type CaseTypeDefinition,
-} from './CaseTypeManager';
+import { CaseTypeManager, type CaseTypeDefinition } from './CaseTypeManager';
 
 const caseTypes: CaseTypeDefinition[] = [
   {
@@ -25,7 +22,9 @@ describe('CaseTypeManager', () => {
       />
     );
     expect(screen.getByText('Short-term Disability')).toBeInTheDocument();
-    expect(screen.getByText('Request medical documentation')).toBeInTheDocument();
+    expect(
+      screen.getByText('Request medical documentation')
+    ).toBeInTheDocument();
     expect(screen.getByText('2 default todos')).toBeInTheDocument();
   });
 

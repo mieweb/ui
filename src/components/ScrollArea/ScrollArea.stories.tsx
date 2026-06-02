@@ -39,10 +39,7 @@ export const Vertical: Story = {
 
 export const Horizontal: Story = {
   render: (args) => (
-    <ScrollArea
-      {...args}
-      className="border-border w-64 rounded-md border p-4"
-    >
+    <ScrollArea {...args} className="border-border w-64 rounded-md border p-4">
       <div className="flex gap-3">
         {Array.from({ length: 20 }).map((_, i) => (
           <div

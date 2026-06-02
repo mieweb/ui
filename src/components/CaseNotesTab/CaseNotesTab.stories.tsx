@@ -27,7 +27,8 @@ const templateOptions = [
   {
     value: 'intro',
     label: 'Initial Contact',
-    content: 'Made initial contact with the employee.\n\nDiscussed return-to-work plan.',
+    content:
+      'Made initial contact with the employee.\n\nDiscussed return-to-work plan.',
   },
 ];
 

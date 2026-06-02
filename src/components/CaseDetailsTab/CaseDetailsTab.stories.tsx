@@ -79,7 +79,11 @@ function Example() {
         { id: 't1', activity: 'Verify RTW date', dateScheduled: '2024-02-01' },
       ]}
       openRestrictions={[
-        { id: 'r1', restriction: 'No lifting over 10 lbs', startDate: '2024-01-10' },
+        {
+          id: 'r1',
+          restriction: 'No lifting over 10 lbs',
+          startDate: '2024-01-10',
+        },
       ]}
       openAbsences={[
         { id: 'ab1', statusType: 'LWD', effectiveDate: '2024-01-05' },

@@ -44,8 +44,7 @@ export interface CaseTodo {
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
-export interface CaseTodosTabProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface CaseTodosTabProps extends React.HTMLAttributes<HTMLDivElement> {
   todos: CaseTodo[];
   /** Case-manager options for bulk reassignment. */
   caseManagerOptions: { value: string; label: string }[];
@@ -81,14 +80,18 @@ export function cascadeTodoDate(
   if (index === -1) return todos;
   const oldDate = todos[index].dateScheduled;
   if (!oldDate || !newDate) {
-    return todos.map((t) => (t.id === id ? { ...t, dateScheduled: newDate } : t));
+    return todos.map((t) =>
+      t.id === id ? { ...t, dateScheduled: newDate } : t
+    );
   }
   const delta = Math.round(
     (new Date(newDate).getTime() - new Date(oldDate).getTime()) /
       (1000 * 60 * 60 * 24)
   );
   if (delta === 0) {
-    return todos.map((t) => (t.id === id ? { ...t, dateScheduled: newDate } : t));
+    return todos.map((t) =>
+      t.id === id ? { ...t, dateScheduled: newDate } : t
+    );
   }
   return todos.map((todo, i) => {
     if (i < index) return todo;
@@ -148,9 +151,7 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
     const someSelected = selected.size > 0;
 
     const updateTodo = (id: string, updates: Partial<CaseTodo>) =>
-      onTodosChange(
-        todos.map((t) => (t.id === id ? { ...t, ...updates } : t))
-      );
+      onTodosChange(todos.map((t) => (t.id === id ? { ...t, ...updates } : t)));
 
     const addTodo = () =>
       onTodosChange([
@@ -258,16 +259,16 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
 
         {/* Bulk edit toolbar */}
         {someSelected && (
-          <div className="rounded-lg border border-primary-500 bg-muted p-4">
+          <div className="border-primary-500 bg-muted rounded-lg border p-4">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <CheckSquare
-                  className="h-5 w-5 text-primary-600"
+                  className="text-primary-600 h-5 w-5"
                   aria-hidden="true"
                 />
                 <span className="font-medium">{selected.size} selected</span>
               </div>
-              <div className="h-6 w-px bg-border" />
+              <div className="bg-border h-6 w-px" />
               {!bulkEditMode ? (
                 <>
                   <Button
@@ -357,7 +358,7 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
         )}
 
         {/* Filters */}
-        <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+        <div className="bg-muted flex items-center gap-4 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <Label className="text-sm">Status:</Label>
             <Select
@@ -372,13 +373,13 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
               ]}
             />
           </div>
-          <div className="ml-auto text-sm text-foreground">
+          <div className="text-foreground ml-auto text-sm">
             Showing {filtered.length} of {todos.length} todos
           </div>
         </div>
 
         {/* Table */}
-        <div className="rounded-md border border-border">
+        <div className="border-border rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -410,7 +411,7 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
                 <TableRow>
                   <TableCell
                     colSpan={8}
-                    className="py-8 text-center text-muted-foreground"
+                    className="text-muted-foreground py-8 text-center"
                   >
                     No to-do items found matching filters.
                   </TableCell>
@@ -508,16 +509,12 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
         </div>
 
         {/* Generate dialog */}
-        <Modal
-          open={showGenerate}
-          onOpenChange={setShowGenerate}
-          size="lg"
-        >
+        <Modal open={showGenerate} onOpenChange={setShowGenerate} size="lg">
           <ModalHeader>
             <ModalTitle>Generate Todos from Template</ModalTitle>
           </ModalHeader>
           <ModalBody className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Set anchor dates to calculate due dates for todo items.
               Auto-populated from Case Dates if available.
             </p>
@@ -564,19 +561,19 @@ export const CaseTodosTab = React.forwardRef<HTMLDivElement, CaseTodosTabProps>(
             </ModalTitle>
           </ModalHeader>
           <ModalBody className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               A case note will be added when completing this to-do. You can add
               additional details below.
             </p>
-            <div className="rounded-md bg-muted p-3">
-              <div className="mb-1 text-sm text-muted-foreground">
+            <div className="bg-muted rounded-md p-3">
+              <div className="text-muted-foreground mb-1 text-sm">
                 To-Do Activity
               </div>
               <div className="font-medium">
                 {pendingComplete?.activity || 'Untitled'}
               </div>
               {pendingComplete?.dateScheduled && (
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="text-muted-foreground mt-1 text-sm">
                   Scheduled: {pendingComplete.dateScheduled}
                 </div>
               )}

@@ -26,9 +26,7 @@ describe('Toggle', () => {
 
   it('calls onPressedChange with the next state', () => {
     const onPressedChange = vi.fn();
-    renderWithTheme(
-      <Toggle onPressedChange={onPressedChange}>Bold</Toggle>
-    );
+    renderWithTheme(<Toggle onPressedChange={onPressedChange}>Bold</Toggle>);
     fireEvent.click(screen.getByRole('button'));
     expect(onPressedChange).toHaveBeenCalledWith(true);
   });

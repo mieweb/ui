@@ -101,10 +101,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
 
     const titleId = React.useId();
 
-    const handleResizeStart = (
-      e: React.MouseEvent,
-      dir: ResizeDirection
-    ) => {
+    const handleResizeStart = (e: React.MouseEvent, dir: ResizeDirection) => {
       e.preventDefault();
       e.stopPropagation();
       resizeRef.current = {
@@ -198,8 +195,8 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
         aria-labelledby={typeof title === 'string' ? titleId : undefined}
         aria-label={typeof title === 'string' ? undefined : ariaLabel}
         className={cn(
-          'relative flex flex-col overflow-hidden rounded-lg bg-card text-card-foreground shadow-2xl',
-          draggable && 'fixed border-2 border-primary-800',
+          'bg-card text-card-foreground relative flex flex-col overflow-hidden rounded-lg shadow-2xl',
+          draggable && 'border-primary-800 fixed border-2',
           className
         )}
         style={
@@ -233,11 +230,11 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
         {resizable && (
           <div
             aria-hidden="true"
-            className="absolute bottom-0 right-0 z-10 h-4 w-4 cursor-se-resize rounded-tl hover:bg-muted/50"
+            className="hover:bg-muted/50 absolute right-0 bottom-0 z-10 h-4 w-4 cursor-se-resize rounded-tl"
             onMouseDown={(e) => handleResizeStart(e, 'se')}
           >
             <svg
-              className="h-4 w-4 text-muted-foreground/50"
+              className="text-muted-foreground/50 h-4 w-4"
               viewBox="0 0 24 24"
               fill="currentColor"
             >
@@ -250,7 +247,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
         <div
           data-slot="floating-window-header"
           className={cn(
-            'flex items-center justify-between rounded-t-lg bg-primary-800 px-4 py-3 text-primary-foreground',
+            'bg-primary-800 text-primary-foreground flex items-center justify-between rounded-t-lg px-4 py-3',
             draggable && 'cursor-move'
           )}
           onMouseDown={handleDragStart}
@@ -267,7 +264,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
+                className="text-primary-foreground hover:bg-primary-foreground/20 h-8 w-8 p-0"
                 onClick={onMinimize}
                 aria-label="Minimize"
                 title="Minimize"
@@ -280,7 +277,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
+                className="text-primary-foreground hover:bg-primary-foreground/20 h-8 w-8 p-0"
                 onClick={onPopOut}
                 aria-label="Open in new window"
                 title="Open in new window"
@@ -292,7 +289,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
+              className="text-primary-foreground hover:bg-primary-foreground/20 h-8 w-8 p-0"
               onClick={onClose}
               aria-label="Close"
               title="Close"
@@ -316,7 +313,7 @@ const FloatingWindow = React.forwardRef<HTMLDivElement, FloatingWindowProps>(
         {footer && (
           <div
             data-slot="floating-window-footer"
-            className="flex items-center justify-end gap-3 rounded-b-lg border-t border-border bg-card px-6 py-4"
+            className="border-border bg-card flex items-center justify-end gap-3 rounded-b-lg border-t px-6 py-4"
           >
             {footer}
           </div>
@@ -360,7 +357,7 @@ const MinimizedWindow = React.forwardRef<HTMLDivElement, MinimizedWindowProps>(
       ref={ref}
       data-slot="minimized-window"
       className={cn(
-        'flex min-w-[200px] items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 shadow-md',
+        'border-border bg-card flex min-w-[200px] items-center gap-2 rounded-lg border px-3 py-2 shadow-md',
         className
       )}
     >

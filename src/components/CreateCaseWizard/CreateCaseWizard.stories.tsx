@@ -18,7 +18,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const caseTypeOptions = [
-  { value: 'Occupational injury / illness', label: 'Occupational injury / illness' },
+  {
+    value: 'Occupational injury / illness',
+    label: 'Occupational injury / illness',
+  },
   {
     value: 'Non-occupational injury / illness',
     label: 'Non-occupational injury / illness',
@@ -45,7 +48,7 @@ function Example() {
     return (
       <div className="p-6">
         <h2 className="text-xl font-semibold">Case created</h2>
-        <pre className="mt-4 rounded bg-muted p-4 text-xs">
+        <pre className="bg-muted mt-4 rounded p-4 text-xs">
           {JSON.stringify(created, null, 2)}
         </pre>
       </div>
