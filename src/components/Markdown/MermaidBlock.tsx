@@ -44,9 +44,24 @@ async function getMermaid(): Promise<MermaidApi> {
 function sanitiseSvg(svg: string): string {
   return DOMPurify.sanitize(svg, {
     USE_PROFILES: { svg: true, svgFilters: true },
-    ADD_ATTR: ['target'],
-    FORBID_TAGS: ['script', 'foreignObject'],
-    FORBID_ATTR: ['onload', 'onerror', 'onclick'],
+    // Allow <style> so mermaid's embedded CSS applies, and <foreignObject>
+    // so node label text renders (mermaid escapes its content in strict mode).
+    ADD_TAGS: ['style', 'foreignObject'],
+    ADD_ATTR: [
+      'style',
+      'class',
+      'dominant-baseline',
+      'text-anchor',
+      'font-size',
+      'font-family',
+      'marker-end',
+      'marker-start',
+      'marker-mid',
+      'stroke-dasharray',
+      'stroke-width',
+    ],
+    FORBID_TAGS: ['script'],
+    FORBID_ATTR: ['onload', 'onerror', 'onclick', 'onmouseover'],
   }) as string;
 }
 
@@ -87,7 +102,7 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
         </div>
       ) : (
         <div
-          className="flex justify-center p-4"
+          className="mermaid-svg flex justify-center p-4"
           dangerouslySetInnerHTML={{ __html: svg }}
         />
       )}

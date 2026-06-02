@@ -133,8 +133,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }, [text, cacheKey, streaming, render, renderAsync]);
 
   const segments = splitHtml(html);
-  const proseClass =
-    `prose prose-sm dark:prose-invert max-w-none ${className}`.trim();
+  const proseClass = `md-prose ${className}`.trim();
 
   return (
     <div className={proseClass}>

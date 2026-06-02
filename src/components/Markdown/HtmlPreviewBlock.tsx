@@ -58,7 +58,7 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({
 
   return (
     <>
-      <FenceBlock code={code} language="html" supportsRawView>
+      <FenceBlock code={code} language="html">
         <div className="relative">
           <div className="flex items-center gap-1 border-b border-neutral-200 px-3 py-1 dark:border-neutral-700">
             <Button

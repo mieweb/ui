@@ -126,9 +126,30 @@ export const AllBlocks: Story = {
   },
 };
 
+/**
+ * The `streaming` prop enables synchronous (non-async) rendering so each
+ * incremental text delta is displayed immediately — no waiting for lazy
+ * language imports. Useful when markdown arrives token-by-token from an AI
+ * stream. Fenced code blocks with rare languages may not be highlighted on
+ * the first pass but will update once `renderAsync` is called on the
+ * completed text.
+ */
 export const Streaming: Story = {
   args: {
-    text: '# Streaming\n\nThis simulates a **partial** markdown render while content is still being generated...',
     streaming: true,
+    text: [
+      '# Streaming Mode',
+      '',
+      'The `streaming` prop switches to **synchronous** rendering so partial',
+      'content updates immediately as each token arrives from an AI stream.',
+      '',
+      '```typescript',
+      '// Rendered synchronously — no async language loading.',
+      'const msg = await streamChat(prompt);',
+      '```',
+      '',
+      '> Once the stream completes, pass `streaming={false}` to trigger',
+      '> a final async render with full syntax highlighting.',
+    ].join('\n'),
   },
 };
