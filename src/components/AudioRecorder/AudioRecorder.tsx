@@ -315,8 +315,12 @@ function TimeDisplay({
   return (
     <div className="flex items-center gap-1 font-mono text-sm text-neutral-600 dark:text-neutral-400">
       <span>{formatTime(currentTime)}</span>
-      <span>/</span>
-      <span>{formatTime(showMax && maxDuration ? maxDuration : duration)}</span>
+      {!showMax && (
+        <>
+          <span>/</span>
+          <span>{formatTime(duration)}</span>
+        </>
+      )}
     </div>
   );
 }
@@ -823,7 +827,7 @@ function AudioRecorder({
       aria-label={ariaLabel}
     >
       {/* Waveform / Visualizer */}
-      {showWaveform && (
+      {showWaveform && state !== 'idle' && (
         <div
           className={cn(waveformContainerVariants({ state }))}
           style={{ height: waveformHeight }}
@@ -842,7 +846,7 @@ function AudioRecorder({
       )}
 
       {/* Status and Time */}
-      {showTime && (
+      {showTime && state !== 'idle' && (
         <div className="flex items-center justify-between">
           <RecordingIndicator isRecording={isRecording} isPaused={isPaused} />
           <TimeDisplay
