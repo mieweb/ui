@@ -18,6 +18,7 @@ import {
   Unlock,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { stripHtmlTags } from '../../utils/html';
 import { Alert, AlertDescription } from '../Alert';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
@@ -500,7 +501,7 @@ export const CaseNotesTab = forwardRef<HTMLDivElement, CaseNotesTabProps>(
                             note.lineout && 'line-through'
                           )}
                         >
-                          {note.notes.replace(/<[^>]*>/g, '').slice(0, 100)}
+                          {stripHtmlTags(note.notes).slice(0, 100)}
                         </span>
                       </TableCell>
                       <TableCell

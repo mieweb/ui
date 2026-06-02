@@ -97,10 +97,4 @@ export function convertAngleBracketsToMustache(html: string): string {
  * Note: This is a visibility check, not a sanitizer. It strips tags to inspect
  * remaining text — do NOT use this for XSS prevention.
  */
-export function isHtmlEmpty(html: string): boolean {
-  const text = html
-    .replace(/<[^>]*>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .trim();
-  return text.length === 0;
-}
+export { isHtmlEmpty } from '../../utils/html';
