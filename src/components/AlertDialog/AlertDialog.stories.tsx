@@ -4,7 +4,7 @@ import { AlertDialog } from './AlertDialog';
 import { Button } from '../Button';
 
 const meta: Meta<typeof AlertDialog> = {
-  title: 'Components/Overlays/AlertDialog',
+  title: 'Components/Overlays & Layering/AlertDialog',
   component: AlertDialog,
   parameters: {
     layout: 'centered',

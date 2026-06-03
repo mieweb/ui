@@ -4,7 +4,7 @@ import { FloatingWindow, MinimizedWindow } from './FloatingWindow';
 import { Button } from '../Button';
 
 const meta: Meta<typeof FloatingWindow> = {
-  title: 'Components/Overlays/FloatingWindow',
+  title: 'Components/Overlays & Layering/FloatingWindow',
   component: FloatingWindow,
   parameters: {
     layout: 'fullscreen',
