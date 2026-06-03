@@ -6,7 +6,6 @@ export * from './components/Address';
 // This avoids forcing ag-grid-community/ag-grid-react on all consumers.
 // See: src/ag-grid.ts
 // Same with DataVis (src/datavis.ts)
-export * from './components/AdminPanel';
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AlertDialog';
@@ -23,25 +22,8 @@ export * from './components/BusinessHours';
 export * from './components/BusinessHoursEditor';
 export * from './components/Button';
 export * from './components/Card';
-export * from './components/CaseAbsenceRestrictionsTab';
-export * from './components/CaseAbsenceTab';
-export * from './components/CaseActivityTab';
-export * from './components/CaseContactTab';
-export * from './components/CaseDetailsTab';
-export * from './components/CaseDiagnosisTab';
-export * from './components/CaseDocumentsTab';
-export * from './components/CaseLettersTab';
-export * from './components/CaseManager';
-export * from './components/CaseNotesTab';
-export * from './components/CasePayInformationTab';
-export * from './components/CaseQuestionnairesTab';
-export * from './components/CaseRestrictionsTab';
-export * from './components/CaseTodosTab';
-export * from './components/CaseTypeManager';
-export * from './components/CasesDashboard';
 export * from './components/Checkbox';
 export * from './components/CheckrIntegration';
-export * from './components/CodeTableManager';
 export * from './components/Collapsible';
 export * from './components/CommandPalette';
 export * from './components/ConnectionStatus';
@@ -49,7 +31,6 @@ export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
 export * from './components/CookieConsent';
 export * from './components/CSVColumnMapper';
-export * from './components/CreateCaseWizard';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
 export * from './components/DateRangePicker';
@@ -169,17 +150,13 @@ export * from './components/Switch';
 export * from './components/Table';
 export * from './components/TableOfContents';
 export * from './components/Tabs';
-export * from './components/TemplateManager';
 export * from './components/Text';
 export * from './components/Textarea';
 export * from './components/ThemeProvider';
 export * from './components/Timeline';
 export * from './components/Toast';
-export * from './components/TodoBacklog';
-export * from './components/TodoTemplateBuilder';
 export * from './components/Toggle';
 export * from './components/Tooltip';
-export * from './components/UserManager';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
@@ -193,7 +170,6 @@ export {
   type ReportDatePickerProps,
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
-export * from './components/WorkStatusReport';
 
 // Hooks
 export * from './hooks';
