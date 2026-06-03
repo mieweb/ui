@@ -32,9 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Pinned to 20 to match ci.yml. Node 24's tsup DTS worker OOMs
-          # (ERR_WORKER_OUT_OF_MEMORY) even with NODE_OPTIONS=--max-old-space-size=8192,
-          # because the worker thread does not reliably inherit the heap limit.
+          # Pinned to 20 to match ci.yml.
           node-version: '20'
           check-latest: true
           cache: 'pnpm'

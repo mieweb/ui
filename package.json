@@ -153,7 +153,7 @@
     "postinstall": "if [ -z \"$_DATAVIS_RELINK\" ] && [ ! -f node_modules/datavis/package.json ] && [ -f packages/datavis/package.json ]; then echo '⚠️  Stale datavis link detected — re-linking submodule...'; _DATAVIS_RELINK=1 pnpm install; fi",
     "dev": "tsup --watch",
     "prebuild": "npm run build:esheet",
-    "build": "tsup && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
+    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
     "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ]; then cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel; fi",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
