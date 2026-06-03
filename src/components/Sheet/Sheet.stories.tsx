@@ -12,7 +12,7 @@ import {
 import { Button } from '../Button';
 
 const meta: Meta<typeof Sheet> = {
-  title: 'Components/Overlays/Sheet',
+  title: 'Components/Overlays & Layering/Sheet',
   component: Sheet,
   parameters: {
     layout: 'centered',
