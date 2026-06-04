@@ -440,14 +440,36 @@ export function SidebarNavItem({
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
 
-  const handleClick = useCallback(() => {
-    if (disabled) return;
-    onClick?.();
-    // Close mobile sidebar on navigation
-    if (isMobileViewport) {
-      closeMobile();
-    }
-  }, [disabled, onClick, isMobileViewport, closeMobile]);
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (disabled) {
+        event.preventDefault();
+        return;
+      }
+      // When an `onClick` handler is supplied for an anchor item (e.g. SPA
+      // navigation via react-router), intercept plain left-clicks so the
+      // browser doesn't ALSO follow the href and trigger a full page reload.
+      // Modifier-clicks (cmd/ctrl/shift/alt) and non-primary buttons keep
+      // their native behavior so users can still open links in a new tab.
+      if (href && onClick) {
+        const isPlainLeftClick =
+          event.button === 0 &&
+          !event.metaKey &&
+          !event.ctrlKey &&
+          !event.shiftKey &&
+          !event.altKey;
+        if (isPlainLeftClick) {
+          event.preventDefault();
+        }
+      }
+      onClick?.();
+      // Close mobile sidebar on navigation
+      if (isMobileViewport) {
+        closeMobile();
+      }
+    },
+    [disabled, href, onClick, isMobileViewport, closeMobile]
+  );
 
   const content = (
     <>
