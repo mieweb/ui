@@ -301,6 +301,7 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
       container.querySelectorAll('button svg, [role="button"] svg').forEach((svg) => {
         svg.setAttribute('aria-hidden', 'true');
         svg.setAttribute('focusable', 'false');
+        svg.removeAttribute('role');
       });
 
       container.querySelectorAll<HTMLButtonElement>('button').forEach((button) => {
@@ -337,6 +338,7 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
       codeMirrorContent?.setAttribute('aria-label', 'YAML source editor');
 
       const codeMirrorScroller = container.querySelector<HTMLElement>('.cm-scroller');
+      codeMirrorScroller?.setAttribute('role', 'region');
       codeMirrorScroller?.setAttribute('tabindex', '0');
       codeMirrorScroller?.setAttribute('aria-label', 'Scrollable YAML editor');
     };
