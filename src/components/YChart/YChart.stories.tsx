@@ -21,7 +21,13 @@ interface YChartProps {
   /** Storybook color mode */
   storyTheme?: 'dark' | 'light';
   /** Toolbar position */
-  toolbarPosition?: 'topleft' | 'topright' | 'bottomleft' | 'bottomright' | 'topcenter' | 'bottomcenter';
+  toolbarPosition?:
+    | 'topleft'
+    | 'topright'
+    | 'bottomleft'
+    | 'bottomright'
+    | 'topcenter'
+    | 'bottomcenter';
 }
 
 interface YChartEditorInstance {
@@ -29,7 +35,9 @@ interface YChartEditorInstance {
   destroy?: () => void;
 }
 
-type YChartEditorConstructor = new (options: Omit<YChartProps, 'yamlData' | 'width' | 'height' | 'storyTheme'>) => YChartEditorInstance;
+type YChartEditorConstructor = new (
+  options: Omit<YChartProps, 'yamlData' | 'width' | 'height' | 'storyTheme'>
+) => YChartEditorInstance;
 
 const storyLayoutStyles = `
   html,
@@ -264,25 +272,35 @@ card:
  * React wrapper around the vanilla YChartEditor class.
  * Loads the module dynamically and mounts into a container div.
  */
-function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600px', storyTheme = 'light', ...options }: YChartProps) {
+function YChartWrapper({
+  yamlData = DEFAULT_YAML,
+  width = '100%',
+  height = '600px',
+  storyTheme = 'light',
+  ...options
+}: YChartProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const editorRef = React.useRef<YChartEditorInstance | null>(null);
   const effectiveEditorTheme = options.editorTheme ?? storyTheme;
 
   React.useEffect(() => {
     let cancelled = false;
-    let resizeObserver: InstanceType<typeof window.ResizeObserver> | null = null;
+    let resizeObserver: InstanceType<typeof window.ResizeObserver> | null =
+      null;
     let resizeFrame = 0;
 
     const syncRendererHeight = () => {
       const container = containerRef.current;
       if (!container) return;
 
-      const editorPanel = container.querySelector<HTMLElement>('.ychart-editor-panel');
+      const editorPanel = container.querySelector<HTMLElement>(
+        '.ychart-editor-panel'
+      );
       const editorPanelRect = editorPanel?.getBoundingClientRect();
-      const targetHeight = editorPanelRect && editorPanelRect.width > 0
-        ? editorPanelRect.height
-        : container.getBoundingClientRect().height;
+      const targetHeight =
+        editorPanelRect && editorPanelRect.width > 0
+          ? editorPanelRect.height
+          : container.getBoundingClientRect().height;
       if (!targetHeight) return;
 
       const chartElements = [
@@ -294,11 +312,31 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
       chartElements.forEach((element) => {
         if (!element) return;
         element.style.setProperty('height', `${targetHeight}px`, 'important');
-        element.style.setProperty('min-height', `${targetHeight}px`, 'important');
-        element.style.setProperty('max-height', `${targetHeight}px`, 'important');
-        element.style.setProperty('block-size', `${targetHeight}px`, 'important');
-        element.style.setProperty('min-block-size', `${targetHeight}px`, 'important');
-        element.style.setProperty('max-block-size', `${targetHeight}px`, 'important');
+        element.style.setProperty(
+          'min-height',
+          `${targetHeight}px`,
+          'important'
+        );
+        element.style.setProperty(
+          'max-height',
+          `${targetHeight}px`,
+          'important'
+        );
+        element.style.setProperty(
+          'block-size',
+          `${targetHeight}px`,
+          'important'
+        );
+        element.style.setProperty(
+          'min-block-size',
+          `${targetHeight}px`,
+          'important'
+        );
+        element.style.setProperty(
+          'max-block-size',
+          `${targetHeight}px`,
+          'important'
+        );
 
         if (element instanceof SVGSVGElement) {
           element.setAttribute('height', String(targetHeight));
@@ -315,46 +353,65 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
       const container = containerRef.current;
       if (!container) return;
 
-      container.querySelectorAll('button svg, [role="button"] svg').forEach((svg) => {
-        svg.setAttribute('aria-hidden', 'true');
-        svg.setAttribute('focusable', 'false');
-        svg.removeAttribute('role');
-      });
+      container
+        .querySelectorAll('button svg, [role="button"] svg')
+        .forEach((svg) => {
+          svg.setAttribute('aria-hidden', 'true');
+          svg.setAttribute('focusable', 'false');
+          svg.removeAttribute('role');
+        });
 
-      container.querySelectorAll<HTMLButtonElement>('button').forEach((button) => {
-        const label = button.getAttribute('aria-label')
-          || button.getAttribute('data-tooltip')
-          || button.getAttribute('title')
-          || button.textContent?.trim();
+      container
+        .querySelectorAll<HTMLButtonElement>('button')
+        .forEach((button) => {
+          const label =
+            button.getAttribute('aria-label') ||
+            button.getAttribute('data-tooltip') ||
+            button.getAttribute('title') ||
+            button.textContent?.trim();
 
-        if (label && !button.getAttribute('aria-label')) {
-          button.setAttribute('aria-label', label);
-        }
-      });
+          if (label && !button.getAttribute('aria-label')) {
+            button.setAttribute('aria-label', label);
+          }
+        });
 
-      container.querySelectorAll<HTMLElement>('[role="button"]').forEach((buttonLike) => {
-        const label = buttonLike.getAttribute('aria-label')
-          || buttonLike.getAttribute('title')
-          || buttonLike.textContent?.trim();
+      container
+        .querySelectorAll<HTMLElement>('[role="button"]')
+        .forEach((buttonLike) => {
+          const label =
+            buttonLike.getAttribute('aria-label') ||
+            buttonLike.getAttribute('title') ||
+            buttonLike.textContent?.trim();
 
-        if (label && !buttonLike.getAttribute('aria-label')) {
-          buttonLike.setAttribute('aria-label', label);
-        }
-      });
+          if (label && !buttonLike.getAttribute('aria-label')) {
+            buttonLike.setAttribute('aria-label', label);
+          }
+        });
 
-      container.querySelectorAll<HTMLElement>('.ychart-tooltip').forEach((tooltip) => {
-        tooltip.setAttribute('aria-hidden', 'true');
-      });
+      container
+        .querySelectorAll<HTMLElement>('.ychart-tooltip')
+        .forEach((tooltip) => {
+          tooltip.setAttribute('aria-hidden', 'true');
+        });
 
-      const collapseButton = container.querySelector<HTMLButtonElement>('[data-id^="ychart-collapse-editor"]');
+      const collapseButton = container.querySelector<HTMLButtonElement>(
+        '[data-id^="ychart-collapse-editor"]'
+      );
       if (collapseButton) {
-        collapseButton.setAttribute('aria-label', collapseButton.textContent?.includes('▶') ? 'Show YAML editor' : 'Hide YAML editor');
+        collapseButton.setAttribute(
+          'aria-label',
+          collapseButton.textContent?.includes('▶')
+            ? 'Show YAML editor'
+            : 'Hide YAML editor'
+        );
       }
 
-      const codeMirrorContent = container.querySelector<HTMLElement>('.cm-content');
+      const codeMirrorContent =
+        container.querySelector<HTMLElement>('.cm-content');
       codeMirrorContent?.setAttribute('aria-label', 'YAML source editor');
 
-      const codeMirrorScroller = container.querySelector<HTMLElement>('.cm-scroller');
+      const codeMirrorScroller =
+        container.querySelector<HTMLElement>('.cm-scroller');
       codeMirrorScroller?.setAttribute('role', 'region');
       codeMirrorScroller?.setAttribute('tabindex', '0');
       codeMirrorScroller?.setAttribute('aria-label', 'Scrollable YAML editor');
@@ -366,7 +423,10 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
 
     async function mount() {
       // Dynamic import to avoid bundling issues in storybook
-      const mod = await import('../../../packages/ychart/src/ychartEditor') as { default: YChartEditorConstructor };
+      const mod =
+        (await import('../../../packages/ychart/src/ychartEditor')) as {
+          default: YChartEditorConstructor;
+        };
       if (cancelled || !containerRef.current) return;
 
       const mountContainer = containerRef.current;
@@ -386,7 +446,9 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
       if ('ResizeObserver' in window) {
         resizeObserver = new window.ResizeObserver(scheduleRendererHeightSync);
         resizeObserver.observe(mountContainer);
-        const editorPanel = mountContainer.querySelector<HTMLElement>('.ychart-editor-panel');
+        const editorPanel = mountContainer.querySelector<HTMLElement>(
+          '.ychart-editor-panel'
+        );
         if (editorPanel) {
           resizeObserver.observe(editorPanel);
         }
@@ -398,7 +460,10 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
         normalizeGeneratedAccessibility();
       });
 
-      mountContainer.addEventListener('click', scheduleAccessibilityNormalization);
+      mountContainer.addEventListener(
+        'click',
+        scheduleAccessibilityNormalization
+      );
     }
 
     const mountContainer = containerRef.current;
@@ -410,17 +475,32 @@ function YChartWrapper({ yamlData = DEFAULT_YAML, width = '100%', height = '600p
       if (editorRef.current?.destroy) {
         editorRef.current.destroy();
       }
-      mountContainer?.removeEventListener('click', scheduleAccessibilityNormalization);
+      mountContainer?.removeEventListener(
+        'click',
+        scheduleAccessibilityNormalization
+      );
       resizeObserver?.disconnect();
       cancelAnimationFrame(resizeFrame);
       editorRef.current = null;
     };
-  }, [yamlData, options.nodeWidth, options.nodeHeight, options.collapsible, effectiveEditorTheme, options.toolbarPosition]);
+  }, [
+    yamlData,
+    options.nodeWidth,
+    options.nodeHeight,
+    options.collapsible,
+    effectiveEditorTheme,
+    options.toolbarPosition,
+  ]);
 
   return (
     <>
       <style>{storyLayoutStyles}</style>
-      <div ref={containerRef} data-ychart-story-root data-yc-theme={storyTheme} style={{ width, height, position: 'relative' }} />
+      <div
+        ref={containerRef}
+        data-ychart-story-root
+        data-yc-theme={storyTheme}
+        style={{ width, height, position: 'relative' }}
+      />
     </>
   );
 }
@@ -448,17 +528,32 @@ const meta: Meta<typeof YChartWrapper> = {
     },
   },
   argTypes: {
-    yamlData: { control: 'text', description: 'YAML data defining the org chart' },
+    yamlData: {
+      control: 'text',
+      description: 'YAML data defining the org chart',
+    },
     width: { control: 'text' },
     height: { control: 'text' },
     nodeWidth: { control: { type: 'number', min: 100, max: 400 } },
     nodeHeight: { control: { type: 'number', min: 60, max: 300 } },
     collapsible: { control: 'boolean' },
-    editorTheme: { control: 'select', options: ['dark', 'light'], description: 'Optional override. Defaults to the Storybook theme toolbar.' },
+    editorTheme: {
+      control: 'select',
+      options: ['dark', 'light'],
+      description:
+        'Optional override. Defaults to the Storybook theme toolbar.',
+    },
     storyTheme: { table: { disable: true } },
     toolbarPosition: {
       control: 'select',
-      options: ['topleft', 'topright', 'bottomleft', 'bottomright', 'topcenter', 'bottomcenter'],
+      options: [
+        'topleft',
+        'topright',
+        'bottomleft',
+        'bottomright',
+        'topcenter',
+        'bottomcenter',
+      ],
     },
   },
 };
