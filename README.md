@@ -136,13 +136,19 @@ npm install
 
 Use one package manager consistently per clone. The commands below use npm.
 
-3. **Build eSheet packages** (required before first Storybook run, and after eSheet submodule updates):
+3. **Build eSheet packages** (required before first Storybook run):
 
 ```bash
 npm run build:esheet
 ```
 
 This installs eSheet's own dependencies and compiles all `@esheet/*` packages.
+
+If `packages/esheet` is updated later (submodule update, branch switch, or pull), force a fresh rebuild:
+
+```bash
+npm run rebuild:esheet
+```
 
 4. **Start Storybook:**
 
@@ -167,7 +173,8 @@ This watches for source changes and rebuilds automatically. It does **not** star
 | Script                    | Description                                               |
 | ------------------------- | --------------------------------------------------------- |
 | `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
-| `npm run build:esheet`    | Build eSheet submodule packages (run after clone and whenever `packages/esheet` changes) |
+| `npm run build:esheet`    | Build eSheet submodule packages for first-time setup (skips when already built) |
+| `npm run rebuild:esheet`  | Force a full eSheet rebuild after `packages/esheet` changes |
 | `npm run build`           | Build the library for production                          |
 | `npm run storybook`       | Start Storybook development server                        |
 | `npm run build-storybook` | Build Storybook for static hosting                        |
