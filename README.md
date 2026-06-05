@@ -113,11 +113,19 @@ import { Button } from '@mieweb/ui';
 
 ### Getting Started
 
-1. **Clone the repository:**
+1. **Clone the repository (including submodules):**
 
 ```bash
-git clone https://github.com/mieweb/ui.git
+git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
+```
+
+> `--recurse-submodules` is strongly recommended for first clone so `packages/esheet`, `packages/datavis`, and `packages/ychart` are populated immediately. Without these submodules, eSheet, DataVis, and YChart stories will not work.
+
+If you already cloned without submodules, run:
+
+```bash
+git submodule update --init --recursive
 ```
 
 2. **Install dependencies:**
@@ -126,22 +134,50 @@ cd ui
 npm install
 ```
 
-3. **Start development mode:**
+Use one package manager consistently per clone. The commands below use npm.
+
+3. **Build eSheet packages** (required before first Storybook run):
+
+```bash
+npm run build:esheet
+```
+
+This installs eSheet's own dependencies and compiles all `@esheet/*` packages.
+
+If `packages/esheet` is updated later (submodule update, branch switch, or pull), force a fresh rebuild:
+
+```bash
+npm run rebuild:esheet
+```
+
+4. **Start Storybook:**
+
+```bash
+npm run storybook
+```
+
+This starts the Storybook development server at [http://localhost:6006](http://localhost:6006) with all components, including eSheet, DataVis, and YChart.
+
+### Library Development (watch mode)
+
+To rebuild the library on file changes (for consumers that link this repo locally):
 
 ```bash
 npm run dev
 ```
 
-This will watch for changes and rebuild the library automatically.
+This watches for source changes and rebuilds automatically. It does **not** start Storybook.
 
 ### Available Scripts
 
-| Script                    | Description                         |
-| ------------------------- | ----------------------------------- |
-| `npm run dev`             | Start development mode with watch   |
-| `npm run build`           | Build the library for production    |
-| `npm run storybook`       | Start Storybook development server  |
-| `npm run build-storybook` | Build Storybook for static hosting  |
+| Script                    | Description                                               |
+| ------------------------- | --------------------------------------------------------- |
+| `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
+| `npm run build:esheet`    | Build eSheet submodule packages for first-time setup (skips when already built) |
+| `npm run rebuild:esheet`  | Force a full eSheet rebuild after `packages/esheet` changes |
+| `npm run build`           | Build the library for production                          |
+| `npm run storybook`       | Start Storybook development server                        |
+| `npm run build-storybook` | Build Storybook for static hosting                        |
 | `npm run typecheck`       | Run TypeScript type checking        |
 | `npm run lint`            | Run ESLint                          |
 | `npm run lint:fix`        | Run ESLint with auto-fix            |
