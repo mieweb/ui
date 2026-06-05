@@ -120,7 +120,7 @@ git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
 ```
 
-> `--recurse-submodules` is required to populate `packages/esheet`, `packages/datavis`, and `packages/ychart`, which are git submodules. Without it, eSheet, DataVis, and YChart stories will not work.
+> `--recurse-submodules` is strongly recommended for first clone so `packages/esheet`, `packages/datavis`, and `packages/ychart` are populated immediately. Without these submodules, eSheet, DataVis, and YChart stories will not work.
 
 If you already cloned without submodules, run:
 
@@ -136,7 +136,7 @@ npm install
 
 Use one package manager consistently per clone. The commands below use npm.
 
-3. **Build eSheet packages** (required before running Storybook or building the library):
+3. **Build eSheet packages** (required before first Storybook run, and after eSheet submodule updates):
 
 ```bash
 npm run build:esheet
@@ -167,7 +167,7 @@ This watches for source changes and rebuilds automatically. It does **not** star
 | Script                    | Description                                               |
 | ------------------------- | --------------------------------------------------------- |
 | `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
-| `npm run build:esheet`    | Build eSheet submodule packages (run once after cloning)  |
+| `npm run build:esheet`    | Build eSheet submodule packages (run after clone and whenever `packages/esheet` changes) |
 | `npm run build`           | Build the library for production                          |
 | `npm run storybook`       | Start Storybook development server                        |
 | `npm run build-storybook` | Build Storybook for static hosting                        |
