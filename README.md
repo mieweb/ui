@@ -113,12 +113,14 @@ import { Button } from '@mieweb/ui';
 
 ### Getting Started
 
-1. **Clone the repository:**
+1. **Clone the repository (including submodules):**
 
 ```bash
-git clone https://github.com/mieweb/ui.git
+git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
 ```
+
+> `--recurse-submodules` is required to populate `packages/esheet` and `packages/datavis`, which are git submodules. Without it, eSheet and DataVis stories will not work.
 
 2. **Install dependencies:**
 
@@ -126,22 +128,41 @@ cd ui
 npm install
 ```
 
-3. **Start development mode:**
+3. **Build eSheet packages** (required before running Storybook or building the library):
+
+```bash
+npm run build:esheet
+```
+
+This installs eSheet's own dependencies and compiles all `@esheet/*` packages.
+
+4. **Start Storybook:**
+
+```bash
+npm run storybook
+```
+
+This starts the Storybook development server at [http://localhost:6006](http://localhost:6006) with all components, including eSheet and DataVis.
+
+### Library Development (watch mode)
+
+To rebuild the library on file changes (for consumers that link this repo locally):
 
 ```bash
 npm run dev
 ```
 
-This will watch for changes and rebuild the library automatically.
+This watches for source changes and rebuilds automatically. It does **not** start Storybook.
 
 ### Available Scripts
 
-| Script                    | Description                         |
-| ------------------------- | ----------------------------------- |
-| `npm run dev`             | Start development mode with watch   |
-| `npm run build`           | Build the library for production    |
-| `npm run storybook`       | Start Storybook development server  |
-| `npm run build-storybook` | Build Storybook for static hosting  |
+| Script                    | Description                                               |
+| ------------------------- | --------------------------------------------------------- |
+| `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
+| `npm run build:esheet`    | Build eSheet submodule packages (run once after cloning)  |
+| `npm run build`           | Build the library for production                          |
+| `npm run storybook`       | Start Storybook development server                        |
+| `npm run build-storybook` | Build Storybook for static hosting                        |
 | `npm run typecheck`       | Run TypeScript type checking        |
 | `npm run lint`            | Run ESLint                          |
 | `npm run lint:fix`        | Run ESLint with auto-fix            |
