@@ -38,6 +38,18 @@
  *   );
  * }
  * ```
+ *
+ * @remarks
+ * **Tip:** When the scan returns structured fields that you'd like the user
+ * to confirm before writing to a profile or record, pair `DocumentScanner`
+ * with `AIReconciliationPanel` (also in `@mieweb/ui`). The reconciliation
+ * panel is the recommended "human-in-the-loop" review surface for any
+ * AI-extracted data — it diffs the proposed values against what's on file,
+ * surfaces per-field confidence, and lets the user accept, edit, or reject
+ * each change.
+ *
+ * `DocumentScanner` does not depend on `AIReconciliationPanel`; consumers
+ * compose them as needed.
  */
 
 export { DocumentScanner } from './DocumentScanner';
