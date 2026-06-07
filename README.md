@@ -729,40 +729,27 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ## Contributing
 
-We welcome contributions! Here's how to get started:
+We welcome contributions! This README and the [Storybook](https://ui.mieweb.org)
+are the **consumer** docs (how to *use* the library). If you want to *build or
+change* the library itself, the **provider / maintainer** guide is
+**[CONTRIBUTING.md](CONTRIBUTING.md)** — it covers repo layout, the component
+anatomy and conventions, the autodocs story pattern, exports & tree-shaking,
+build, testing (unit + visual baselines), submodules, brands, and the release
+process.
 
-### Development Workflow
+Quick start for contributors:
 
-1. **Fork and clone the repository**
-2. **Install dependencies:** `npm install`
-3. **Create a branch:** `git checkout -b feature/your-feature`
-4. **Start Storybook:** `npm run storybook`
-5. **Make your changes**
-6. **Run checks:**
-   ```bash
-   npm run typecheck  # TypeScript
-   npm run lint       # ESLint
-   npm run format     # Prettier
-   npm run test       # Tests
-   ```
-7. **Commit your changes** following [Conventional Commits](https://www.conventionalcommits.org/)
-8. **Push and create a Pull Request**
+```bash
+git clone --recurse-submodules https://github.com/mieweb/ui.git
+cd ui && pnpm install
+pnpm storybook            # http://localhost:6006
+# before opening a PR:
+pnpm typecheck && pnpm lint && pnpm format && pnpm test
+```
 
-### Adding a New Component
-
-1. Create a new directory in `src/components/YourComponent/`
-2. Add the component file: `YourComponent.tsx`
-3. Add the index export: `index.ts`
-4. Add Storybook stories: `YourComponent.stories.tsx`
-5. Export from `src/components/index.ts`
-6. Add to the README components list
-
-### Adding a New Brand
-
-1. Create `src/brands/your-brand.ts` with the `BrandConfig`
-2. Create `src/brands/your-brand.css` with CSS variables
-3. Export from `src/brands/index.ts`
-4. Add to the README brands table
+Non-trivial modules also carry a `MAINTAINERS.md` next to the code with internals,
+invariants, and gotchas for that module — see the table in
+[CONTRIBUTING.md](CONTRIBUTING.md#per-component-maintainer-notes).
 
 ## License
 
