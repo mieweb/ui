@@ -104,7 +104,7 @@ Coding conventions (the full standard lives in
   focus. Modal/overlay components trap focus and close on `Escape`.
 - **Icons** from `lucide-react`; dates via `luxon`.
 
-After adding a component, export it from [src/components/index.ts](src/components/index.ts)
+After adding a component, export it from [src/index.ts](src/index.ts)
 and (if it should be individually importable) add a `tsup` entry — see
 [Exports & tree-shaking](#exports-entry-points--tree-shaking).
 
@@ -238,7 +238,7 @@ Current notes:
 2. Follow the [anatomy](#anatomy-of-a-component) conventions (CVA, `cn`,
    `forwardRef`, theme tokens, a11y).
 3. Autodocs story (one component per file, `argTypes`, component description).
-4. Export from [src/components/index.ts](src/components/index.ts); add a
+4. Export from [src/index.ts](src/index.ts); add a
    `tsup` entry if it should be individually importable.
 5. Add a unit test; add a visual story baseline if it has notable rendering.
 6. Add a `MAINTAINERS.md` if it's non-trivial (see criteria above).

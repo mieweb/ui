@@ -19,7 +19,10 @@ so it's individually tree-shakeable (`@mieweb/ui/components/FloatingWindow`).
 - **Two modes via `draggable`:**
   - `false` (default) → centered, modal-style over a dimmed overlay.
   - `true` → freely positioned, draggable by the header.
-- **`minimized` renders nothing** — the collapsed/taskbar UI is the host's job.
+- **`minimized` renders nothing** — `FloatingWindow` returns `null` when
+  minimized. The folder also exports **`MinimizedWindow`** (a taskbar-style
+  restore chip) that hosts can render for the collapsed state; wiring the two
+  together is the host's job.
 - `forwardRef<HTMLDivElement>`; forwards an accessible dialog role. Pass
   `aria-label` when `title` isn't plain text.
 
