@@ -29,16 +29,32 @@ function currentTheme(): 'dark' | 'default' {
     : 'default';
 }
 
+function buildConfig(theme: 'dark' | 'default'): Record<string, unknown> {
+  const base: Record<string, unknown> = {
+    startOnLoad: false,
+    theme,
+    securityLevel: 'strict',
+  };
+  if (theme === 'dark') {
+    base.themeVariables = {
+      nodeBorder: '#6b7280',
+      mainBkg: '#4a4a4a',
+      nodeTextColor: '#ffffff',
+      clusterBkg: '#374151',
+      titleColor: '#ffffff',
+      edgeLabelBackground: '#374151',
+      lineColor: '#9ca3af',
+    };
+  }
+  return base;
+}
+
 async function getMermaid(): Promise<MermaidApi> {
   const theme = currentTheme();
   if (mermaidInstance) {
     if (theme !== mermaidTheme) {
       mermaidTheme = theme;
-      mermaidInstance.initialize({
-        startOnLoad: false,
-        theme,
-        securityLevel: 'strict',
-      });
+      mermaidInstance.initialize(buildConfig(theme));
     }
     return mermaidInstance;
   }
@@ -46,11 +62,7 @@ async function getMermaid(): Promise<MermaidApi> {
     mermaidReady = import(/* @vite-ignore */ 'mermaid').then((mod) => {
       const m = (mod as { default: MermaidApi }).default;
       mermaidTheme = currentTheme();
-      m.initialize({
-        startOnLoad: false,
-        theme: mermaidTheme,
-        securityLevel: 'strict',
-      });
+      m.initialize(buildConfig(mermaidTheme));
       mermaidInstance = m;
       return m;
     });
