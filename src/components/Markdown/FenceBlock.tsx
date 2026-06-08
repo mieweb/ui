@@ -71,7 +71,9 @@ export const FenceBlock: React.FC<FenceBlockProps> = ({
     <div className="group relative my-3 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-[#1a1d24]">
       <div className="flex items-center justify-between border-b border-neutral-200 px-3 py-1.5 dark:border-white/[0.08]">
         <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-          {(language ? language.charAt(0).toUpperCase() + language.slice(1) : 'Text')}
+          {language
+            ? language.charAt(0).toUpperCase() + language.slice(1)
+            : 'Text'}
         </span>
         <div className="flex items-center gap-1">
           {headerActions}
