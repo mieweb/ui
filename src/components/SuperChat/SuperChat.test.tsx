@@ -84,6 +84,18 @@ describe('GenUI plugin', () => {
     );
     expect(container.querySelector('[data-slot="superchat-genui-fallback"]')).not.toBeNull();
   });
+
+  it('falls back to an inert block for malformed JSON once streaming is complete', () => {
+    const r = createMarkdownRenderer({ plugins: [createGenUIPlugin(registry)] });
+    const { container } = renderText(
+      r('```genui\n{ "widget": "kpi_card", "props": { "label": "Risk" \n```', {
+        messageId: 'm6',
+        streaming: false,
+        role: 'assistant',
+      })
+    );
+    expect(container.querySelector('[data-slot="superchat-genui-fallback"]')).not.toBeNull();
+  });
 });
 
 describe('mermaid plugin', () => {
@@ -97,6 +109,18 @@ describe('mermaid plugin', () => {
       })
     );
     expect(container.querySelector('[data-slot="superchat-mermaid-pending"]')).not.toBeNull();
+  });
+
+  it('falls back for an empty mermaid block once streaming is complete', () => {
+    const r = createMarkdownRenderer({ plugins: [createMermaidPlugin()] });
+    const { container } = renderText(
+      r('```mermaid\n\n```', {
+        messageId: 'mm2',
+        streaming: false,
+        role: 'assistant',
+      })
+    );
+    expect(container.querySelector('[data-slot="superchat-mermaid-fallback"]')).not.toBeNull();
   });
 });
 
@@ -167,6 +191,24 @@ describe('SuperChat', () => {
     expect(onMessageSent).toHaveBeenCalledWith('ping @Triage', expect.objectContaining({ mentions: ['a1'] }));
   });
 
+  it('does not detect mentions for system participants', async () => {
+    const onMessageSent = vi.fn();
+    const withSystem: SuperChatConversation = {
+      ...conversation,
+      participants: [
+        ...conversation.participants,
+        { id: 's1', kind: 'system', name: 'System' },
+      ],
+    };
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(<SuperChat conversations={[withSystem]} currentParticipantId="u1" onMessageSent={onMessageSent} />);
+    const input = screen.getByLabelText('Message');
+    await user.type(input, 'ping @System');
+    await user.click(screen.getByLabelText('Send message'));
+    expect(onMessageSent).toHaveBeenCalledWith('ping @System', expect.objectContaining({ mentions: [] }));
+  });
+
   it('disables the composer when readOnly', () => {
     render(<SuperChat conversations={[conversation]} currentParticipantId="u1" readOnly />);
     expect(screen.getByLabelText('Message')).toBeDisabled();
@@ -183,5 +225,26 @@ describe('SuperChat', () => {
     await user.click(screen.getByRole('option', { name: /Triage Agent/ }));
     expect(input.value).toBe('hello @Triage ');
     expect(screen.queryByRole('listbox')).toBeNull();
+  });
+
+  it('renders AI content blocks of type code', () => {
+    const withCode: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        ...conversation.thread,
+        {
+          id: 'm3',
+          participantId: 'a1',
+          time: '2026-06-07T09:01:00Z',
+          content: [{ type: 'code', text: 'const x = 1;', language: 'ts' }],
+        },
+      ],
+    };
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversations={[withCode]} currentParticipantId="u1" />
+      </div>
+    );
+    expect(container.querySelector('code')).toHaveTextContent('const x = 1;');
   });
 });

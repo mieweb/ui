@@ -54,7 +54,7 @@ export function createCodePlugin(): SuperChatRenderPlugin {
   return {
     name: 'code',
     // `detect: false` + ignoreMissing keeps it predictable for streamed output.
-    rehypePlugins: [[rehypeHighlight, { detect: true, ignoreMissing: true }]],
+    rehypePlugins: [[rehypeHighlight, { detect: false, ignoreMissing: true }]],
     components: {
       pre: CopyablePre as React.ComponentType<Record<string, unknown>>,
     },

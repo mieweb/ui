@@ -60,7 +60,7 @@ export function createMathPlugin(): SuperChatRenderPlugin {
     sanitizeSchema: {
       tagNames: KATEX_TAGS,
       attributes: {
-        '*': ['className', 'style'],
+        '*': ['className'],
         span: ['className', 'style', 'ariaHidden'],
         svg: ['xmlns', 'width', 'height', 'viewBox', 'preserveAspectRatio', 'style'],
         path: ['d'],

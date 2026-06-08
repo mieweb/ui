@@ -62,8 +62,8 @@ The composer:
 ## GenUI widgets
 
 - Wire format is a **fenced ```genui JSON block**, not inline. A small rehype
-  transformer rewrites `<pre><code class="language-genui">` → `<genui-widget
-  data-genui="…">` *before* sanitize (the tag/attr are allow-listed), which
+  transformer rewrites `<pre><code class="language-genui">` → `<genui-widget>…</genui-widget>`
+  (payload as a text child) *before* sanitize (the tag is allow-listed), which
   avoids `pre`/`code` component-override conflicts with the code plugin.
 - Widgets are **host-registered, lazy, schema-validated**. Unknown widget →
   inert code-block fallback (never arbitrary HTML).

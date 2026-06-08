@@ -112,18 +112,23 @@ function InertFallback({ raw }: { raw: string }) {
 // ---------------------------------------------------------------------------
 
 let mermaidReady: Promise<typeof import('mermaid').default> | null = null;
+let mermaidTheme: 'dark' | 'default' | null = null;
 
 /** Load + initialize mermaid once, shared across all diagrams. */
 function loadMermaid(dark: boolean) {
-  if (!mermaidReady) {
-    mermaidReady = import('mermaid').then(({ default: mermaid }) => {
-      mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: 'strict',
-        theme: dark ? 'dark' : 'default',
-      });
-      return mermaid;
-    });
+  const theme: 'dark' | 'default' = dark ? 'dark' : 'default';
+  if (!mermaidReady || mermaidTheme !== theme) {
+    mermaidReady = (mermaidReady ?? import('mermaid').then(({ default: mermaid }) => mermaid)).then(
+      (mermaid) => {
+        mermaidTheme = theme;
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'strict',
+          theme,
+        });
+        return mermaid;
+      }
+    );
   }
   return mermaidReady;
 }
@@ -142,6 +147,7 @@ function MermaidDiagram({ code }: { code: string }) {
     // Don't try to render an incomplete diagram while the message streams.
     if (streaming || !source) return;
     let active = true;
+    setSvg(null);
     setFailed(false);
     const dark =
       typeof document !== 'undefined' &&
@@ -159,6 +165,8 @@ function MermaidDiagram({ code }: { code: string }) {
     };
   }, [source, streaming]);
 
+  if (!source && !streaming) return <InertFallback raw={code} />;
+
   if (failed) return <InertFallback raw={code} />;
 
   if (streaming || svg === null) {
@@ -175,10 +183,6 @@ function MermaidDiagram({ code }: { code: string }) {
     />
   );
 }
-
-// ---------------------------------------------------------------------------
-// Plugin factory
-// ---------------------------------------------------------------------------
 
 /** Create the Mermaid diagram render plugin. */
 export function createMermaidPlugin(): SuperChatRenderPlugin {
@@ -200,5 +204,4 @@ export function createMermaidPlugin(): SuperChatRenderPlugin {
     },
   };
 }
-
 export { MERMAID_TAG };

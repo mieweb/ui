@@ -41,7 +41,6 @@ export default function NitroTableGrid({ headers, rows }: NitroTableGridProps) {
       <DataVisNitroSource type="http" url={url}>
         <DataVisNitroGrid
           columns={headers}
-          features={{ sortable: true, filterable: true, resizable: true }}
           style={{ height: 320 }}
         />
       </DataVisNitroSource>

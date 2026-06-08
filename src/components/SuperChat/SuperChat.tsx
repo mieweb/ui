@@ -62,10 +62,26 @@ function lastActivityOf(c: SuperChatConversation): number {
 function detectMentions(text: string, participants: Participant[]): string[] {
   const ids: string[] = [];
   for (const p of participants) {
+    if (p.kind === 'system') continue;
     const token = '@' + p.name.split(' ')[0];
     if (text.toLowerCase().includes(token.toLowerCase())) ids.push(p.id);
   }
   return ids;
+}
+
+function lastMessageByTime(
+  thread: SuperChatMessage[]
+): SuperChatMessage | undefined {
+  let latest: SuperChatMessage | undefined;
+  let latestTime = -Infinity;
+  for (const message of thread) {
+    const t = new Date(message.time).getTime();
+    if (t >= latestTime) {
+      latest = message;
+      latestTime = t;
+    }
+  }
+  return latest;
 }
 
 // ============================================================================
@@ -236,6 +252,21 @@ function MessageRow({
                   className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
                 >
                   {renderText(block.text, {
+                    messageId: message.id,
+                    streaming,
+                    role: participant?.kind === 'human' ? 'user' : 'assistant',
+                  })}
+                </div>
+              );
+            }
+            if (block.type === 'code' && block.text) {
+              const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+              return (
+                <div
+                  key={i}
+                  className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                >
+                  {renderText(fenced, {
                     messageId: message.id,
                     streaming,
                     role: participant?.kind === 'human' ? 'user' : 'assistant',
@@ -594,7 +625,7 @@ export function SuperChat({
           </div>
           <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
             {sortedConversations.map((c) => {
-              const last = [...c.thread].sort(byTime).at(-1);
+              const last = lastMessageByTime(c.thread);
               return (
                 <button
                   key={c.id}

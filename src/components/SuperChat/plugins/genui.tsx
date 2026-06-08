@@ -174,14 +174,28 @@ function usePrefetchTrigger(
   React.useEffect(() => {
     if (ready) return;
     if (policy === 'idle') {
-      const ric =
-        (window as unknown as { requestIdleCallback?: (cb: () => void) => number })
-          .requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
-      const id = ric(() => setReady(true));
+      const requestIdle = (
+        window as unknown as {
+          requestIdleCallback?: (cb: () => void) => number;
+          cancelIdleCallback?: (id: number) => void;
+        }
+      ).requestIdleCallback;
+      const cancelIdle = (
+        window as unknown as {
+          requestIdleCallback?: (cb: () => void) => number;
+          cancelIdleCallback?: (id: number) => void;
+        }
+      ).cancelIdleCallback;
+      let idleId: number | null = null;
+      let timeoutId: number | null = null;
+      if (requestIdle) {
+        idleId = requestIdle(() => setReady(true));
+      } else {
+        timeoutId = window.setTimeout(() => setReady(true), 200);
+      }
       return () => {
-        const cic = (window as unknown as { cancelIdleCallback?: (id: number) => void })
-          .cancelIdleCallback;
-        if (cic) cic(id as number);
+        if (idleId !== null && cancelIdle) cancelIdle(idleId);
+        if (timeoutId !== null) window.clearTimeout(timeoutId);
       };
     }
     // 'visible'
@@ -269,11 +283,22 @@ function GenUIBlock({ raw, registry }: GenUIBlockProps) {
   }, [entry, parsed, streaming]);
 
   // Unknown widget or unparseable-yet-complete payload → inert fallback.
+  if (!parsed.ok) {
+    if (streaming) {
+      return (
+        <div ref={placeholderRef}>
+          <PendingCard label="Preparing widget…" />
+        </div>
+      );
+    }
+    return <InertFallback raw={raw} />;
+  }
+
   if (parsed.ok && !entry) return <InertFallback raw={raw} />;
 
   // Still streaming or payload incomplete → pending card (keep ref mounted so
   // the visible/idle prefetch trigger can fire).
-  if (!parsed.ok || streaming || !Loaded || !validated) {
+  if (streaming || !Loaded || !validated) {
     return (
       <div ref={placeholderRef}>
         <PendingCard label="Preparing widget…" />
