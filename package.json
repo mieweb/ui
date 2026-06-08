@@ -185,10 +185,17 @@
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.2",
     "js-yaml": ">=4.0.0",
+    "katex": ">=0.16.0",
     "mermaid": ">=10.0.0",
     "papaparse": ">=5.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
+    "react-markdown": ">=9.0.0",
+    "rehype-highlight": ">=7.0.0",
+    "rehype-katex": ">=7.0.0",
+    "rehype-sanitize": ">=6.0.0",
+    "remark-gfm": ">=4.0.0",
+    "remark-math": ">=6.0.0",
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
@@ -217,6 +224,27 @@
       "optional": true
     },
     "papaparse": {
+      "optional": true
+    },
+    "react-markdown": {
+      "optional": true
+    },
+    "remark-gfm": {
+      "optional": true
+    },
+    "remark-math": {
+      "optional": true
+    },
+    "rehype-katex": {
+      "optional": true
+    },
+    "katex": {
+      "optional": true
+    },
+    "rehype-sanitize": {
+      "optional": true
+    },
+    "rehype-highlight": {
       "optional": true
     },
     "react": {
@@ -298,6 +326,7 @@
     "eslint-plugin-storybook": "^10.2.11",
     "js-yaml": "^4.1.1",
     "jsdom": "^26.1.0",
+    "katex": "^0.17.0",
     "mermaid": "^11.12.3",
     "papaparse": "^5.5.3",
     "postcss": "^8.5.6",
@@ -305,6 +334,12 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-katex": "^7.0.1",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "sass": "1.100.0",
     "sortablejs": "^1.15.7",
     "storybook": "^10.2.11",
