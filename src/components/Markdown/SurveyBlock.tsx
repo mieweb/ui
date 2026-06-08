@@ -202,7 +202,11 @@ export const SurveyBlock: React.FC<SurveyBlockProps> = ({ code, id }) => {
               )}
 
               {field.type === 'rating' && (
-                <div className="flex gap-1" aria-label="Rating: 0 out of 5">
+                <div
+                  role="img"
+                  className="flex gap-1"
+                  aria-label="Rating: 0 out of 5"
+                >
                   {[1, 2, 3, 4, 5].map((n) => (
                     <span
                       key={n}
