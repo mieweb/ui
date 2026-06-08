@@ -142,7 +142,7 @@ const config: StorybookConfig = {
   typescript: {
     reactDocgen: 'react-docgen-typescript',
   },
-  staticDirs: ['./public'],
+  staticDirs: ['./public', { from: '../node_modules/@kerebron/wasm/assets', to: '/kerebron-wasm' }],
   async viteFinal(config) {
     config.resolve ??= {};
     config.resolve.alias = [
