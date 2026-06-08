@@ -1,0 +1,351 @@
+/*
+ * highlight.js theme — atom-one-light (default) + atom-one-dark (scoped).
+ *
+ * Bundled in-tree (rather than via `@import 'highlight.js/styles/...'`) so we
+ * can scope the dark variant under `[data-theme="dark"]` and keep theme
+ * switching synchronous — no FOUC on streamed code blocks.
+ *
+ * Source: highlight.js v11 atom-one-light / atom-one-dark themes.
+ */
+
+/* Layout (theme-agnostic) */
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+  /* Transparent so the parent container's background is the single source of truth */
+  background: transparent;
+}
+code.hljs {
+  padding: 3px 5px;
+}
+
+/* atom-one-light (default) */
+.hljs {
+  color: #383a42;
+  background: #fafafa;
+}
+.hljs-comment,
+.hljs-quote {
+  color: #707179;
+  font-style: italic;
+}
+.hljs-doctag,
+.hljs-formula,
+.hljs-keyword {
+  color: #a626a4;
+}
+.hljs-deletion,
+.hljs-name,
+.hljs-section,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #d72f20;
+}
+.hljs-literal {
+  color: #0179ac;
+}
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string,
+.hljs-regexp,
+.hljs-string {
+  color: #3f7f3e;
+}
+.hljs-attr,
+.hljs-number,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-pseudo,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable {
+  color: #986801;
+}
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-symbol,
+.hljs-title {
+  color: #2867f0;
+}
+.hljs-built_in,
+.hljs-class .hljs-title,
+.hljs-title.class_ {
+  color: #986801;
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}
+.hljs-link {
+  text-decoration: underline;
+}
+
+/* atom-one-dark (scoped under data-theme="dark") */
+[data-theme='dark'] .hljs,
+.dark .hljs {
+  color: #abb2bf;
+  background: #1a1d24;
+}
+[data-theme='dark'] .hljs-comment,
+.dark .hljs-comment,
+[data-theme='dark'] .hljs-quote,
+.dark .hljs-quote {
+  color: #8e95a2;
+}
+[data-theme='dark'] .hljs-doctag,
+.dark .hljs-doctag,
+[data-theme='dark'] .hljs-formula,
+.dark .hljs-formula,
+[data-theme='dark'] .hljs-keyword,
+.dark .hljs-keyword {
+  color: #c678dd;
+}
+[data-theme='dark'] .hljs-deletion,
+.dark .hljs-deletion,
+[data-theme='dark'] .hljs-name,
+.dark .hljs-name,
+[data-theme='dark'] .hljs-section,
+.dark .hljs-section,
+[data-theme='dark'] .hljs-selector-tag,
+.dark .hljs-selector-tag,
+[data-theme='dark'] .hljs-subst,
+.dark .hljs-subst {
+  color: #e2747d;
+}
+[data-theme='dark'] .hljs-literal,
+.dark .hljs-literal {
+  color: #56b6c2;
+}
+[data-theme='dark'] .hljs-addition,
+.dark .hljs-addition,
+[data-theme='dark'] .hljs-attribute,
+.dark .hljs-attribute,
+[data-theme='dark'] .hljs-meta .hljs-string,
+.dark .hljs-meta .hljs-string,
+[data-theme='dark'] .hljs-regexp,
+.dark .hljs-regexp,
+[data-theme='dark'] .hljs-string,
+.dark .hljs-string {
+  color: #98c379;
+}
+[data-theme='dark'] .hljs-attr,
+.dark .hljs-attr,
+[data-theme='dark'] .hljs-number,
+.dark .hljs-number,
+[data-theme='dark'] .hljs-selector-attr,
+.dark .hljs-selector-attr,
+[data-theme='dark'] .hljs-selector-class,
+.dark .hljs-selector-class,
+[data-theme='dark'] .hljs-selector-pseudo,
+.dark .hljs-selector-pseudo,
+[data-theme='dark'] .hljs-template-variable,
+.dark .hljs-template-variable,
+[data-theme='dark'] .hljs-type,
+.dark .hljs-type,
+[data-theme='dark'] .hljs-variable,
+.dark .hljs-variable {
+  color: #d19a66;
+}
+[data-theme='dark'] .hljs-bullet,
+.dark .hljs-bullet,
+[data-theme='dark'] .hljs-link,
+.dark .hljs-link,
+[data-theme='dark'] .hljs-meta,
+.dark .hljs-meta,
+[data-theme='dark'] .hljs-selector-id,
+.dark .hljs-selector-id,
+[data-theme='dark'] .hljs-symbol,
+.dark .hljs-symbol,
+[data-theme='dark'] .hljs-title,
+.dark .hljs-title {
+  color: #61aeee;
+}
+[data-theme='dark'] .hljs-built_in,
+.dark .hljs-built_in,
+[data-theme='dark'] .hljs-class .hljs-title,
+.dark .hljs-class .hljs-title,
+[data-theme='dark'] .hljs-title.class_,
+.dark .hljs-title.class_ {
+  color: #e6c07b;
+}
+
+/* ============================================================
+ * Markdown prose typography — scoped to .md-prose.
+ * @tailwindcss/typography is not a dependency; these styles
+ * replicate the essential subset used by MarkdownRenderer.
+ * ============================================================ */
+.md-prose {
+  color: #374151;
+  line-height: 1.7;
+  font-size: 0.9375rem;
+}
+.md-prose h1,
+.md-prose h2,
+.md-prose h3,
+.md-prose h4,
+.md-prose h5,
+.md-prose h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: #111827;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+.md-prose h1 {
+  font-size: 1.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.25em;
+}
+.md-prose h2 {
+  font-size: 1.375rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.2em;
+}
+.md-prose h3 {
+  font-size: 1.125rem;
+}
+.md-prose h4 {
+  font-size: 1rem;
+}
+.md-prose p {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+}
+.md-prose a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.md-prose a:hover {
+  color: #1d4ed8;
+}
+.md-prose strong {
+  font-weight: 600;
+}
+.md-prose em {
+  font-style: italic;
+}
+.md-prose del {
+  text-decoration: line-through;
+}
+/* Inline code — avoid overriding code inside pre (hljs blocks) */
+.md-prose :not(pre) > code {
+  font-size: 0.875em;
+  background: #f3f4f6;
+  border-radius: 0.25rem;
+  padding: 0.125em 0.375em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #be185d;
+}
+.md-prose ul,
+.md-prose ol {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+  padding-left: 1.75em;
+}
+.md-prose ul {
+  list-style-type: disc;
+}
+.md-prose ol {
+  list-style-type: decimal;
+}
+.md-prose li {
+  margin-bottom: 0.25em;
+}
+.md-prose hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5em 0;
+}
+.md-prose blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #6b7280;
+  font-style: italic;
+}
+/* Tables — full borders with vertical separators */
+.md-prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875rem;
+  margin-bottom: 0.75em;
+}
+.md-prose th,
+.md-prose td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+.md-prose th {
+  font-weight: 600;
+  background: #f9fafb;
+}
+
+/* Dark overrides */
+[data-theme='dark'] .md-prose,
+.dark .md-prose {
+  color: #d1d5db;
+}
+[data-theme='dark'] .md-prose h1,
+.dark .md-prose h1,
+[data-theme='dark'] .md-prose h2,
+.dark .md-prose h2,
+[data-theme='dark'] .md-prose h3,
+.dark .md-prose h3,
+[data-theme='dark'] .md-prose h4,
+.dark .md-prose h4 {
+  color: #f9fafb;
+  border-color: #374151;
+}
+[data-theme='dark'] .md-prose a,
+.dark .md-prose a {
+  color: #60a5fa;
+}
+[data-theme='dark'] .md-prose a:hover,
+.dark .md-prose a:hover {
+  color: #93c5fd;
+}
+[data-theme='dark'] .md-prose :not(pre) > code,
+.dark .md-prose :not(pre) > code {
+  background: #1f2937;
+  color: #f9a8d4;
+}
+[data-theme='dark'] .md-prose hr,
+.dark .md-prose hr {
+  border-color: #374151;
+}
+[data-theme='dark'] .md-prose blockquote,
+.dark .md-prose blockquote {
+  border-color: #4b5563;
+  color: #9ca3af;
+}
+[data-theme='dark'] .md-prose th,
+.dark .md-prose th,
+[data-theme='dark'] .md-prose td,
+.dark .md-prose td {
+  border-color: #374151;
+}
+[data-theme='dark'] .md-prose th,
+.dark .md-prose th {
+  background: #1f2937;
+}
+
+/* Mermaid — improve edge / arrowhead visibility in dark mode */
+[data-theme='dark'] .mermaid-svg svg .edgePath path,
+.dark .mermaid-svg svg .edgePath path,
+[data-theme='dark'] .mermaid-svg svg .flowchart-link,
+.dark .mermaid-svg svg .flowchart-link {
+  stroke: #9ca3af;
+  stroke-width: 1.5px;
+}
+[data-theme='dark'] .mermaid-svg svg marker path,
+.dark .mermaid-svg svg marker path {
+  fill: #9ca3af;
+  stroke: #9ca3af;
+}

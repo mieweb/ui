@@ -80,6 +80,8 @@ export const miewebUISafelist = [
   'opacity-0',
   'group-hover:opacity-100',
   'focus:opacity-100',
+  // Markdown SurveyBlock
+  'accent-primary-500',
   // Opacity-modifier variants for semantic colors used by components
   'bg-background/60',
   'bg-background/80',
