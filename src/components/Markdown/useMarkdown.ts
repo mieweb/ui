@@ -122,7 +122,8 @@ function sanitise(html: string): string {
 
 // Use globalThis to prevent duplicate DOMPurify hook registration across HMR reloads.
 const _g = globalThis as unknown as Record<string, boolean>;
-if (!_g.__markdownAnchorHookInstalled) {
+// Guard against SSR: DOMPurify hooks operate on the DOM, so only register in the browser.
+if (typeof document !== 'undefined' && !_g.__markdownAnchorHookInstalled) {
   _g.__markdownAnchorHookInstalled = true;
   DOMPurify.addHook('afterSanitizeAttributes', (node: Element) => {
     const isAnchor =

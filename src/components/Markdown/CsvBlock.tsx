@@ -189,20 +189,35 @@ export const CsvBlock: React.FC<CsvBlockProps> = ({ code, id }) => {
           <table className="min-w-full text-sm">
             <thead className="sticky top-0 bg-neutral-100 dark:bg-neutral-800">
               <tr>
-                {parsed.headers.map((header) => (
-                  <th
-                    key={header}
-                    onClick={() => handleSort(header)}
-                    className="cursor-pointer px-3 py-2 text-left text-xs font-medium whitespace-nowrap text-neutral-600 select-none hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  >
-                    {header}
-                    {sortConfig?.column === header && (
-                      <span className="ml-1">
-                        {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </th>
-                ))}
+                {parsed.headers.map((header) => {
+                  const isSorted = sortConfig?.column === header;
+                  const ariaSort = isSorted
+                    ? sortConfig.direction === 'asc'
+                      ? 'ascending'
+                      : 'descending'
+                    : 'none';
+                  return (
+                    <th
+                      key={header}
+                      scope="col"
+                      aria-sort={ariaSort}
+                      className="px-3 py-2 text-left text-xs font-medium whitespace-nowrap text-neutral-600 dark:text-neutral-400"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleSort(header)}
+                        className="flex w-full cursor-pointer items-center gap-1 text-left font-medium select-none hover:text-neutral-900 dark:hover:text-neutral-200"
+                      >
+                        {header}
+                        {isSorted && (
+                          <span aria-hidden="true">
+                            {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </button>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700">

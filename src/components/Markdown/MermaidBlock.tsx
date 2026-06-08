@@ -3,7 +3,7 @@
  * Requires `mermaid` to be installed by the consumer (optional peer dependency).
  */
 import DOMPurify from 'dompurify';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { FenceBlock } from './FenceBlock';
 
@@ -87,6 +87,32 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
+  // Derive an accessible label from the diagram's declared type (first keyword).
+  const diagramLabel = useMemo(() => {
+    const firstWord =
+      code
+        .trim()
+        .split(/[\s\n]/)[0]
+        ?.toLowerCase() ?? '';
+    const typeMap: Record<string, string> = {
+      graph: 'Flowchart',
+      flowchart: 'Flowchart',
+      sequencediagram: 'Sequence diagram',
+      classdiagram: 'Class diagram',
+      statediagram: 'State diagram',
+      'statediagram-v2': 'State diagram',
+      erdiagram: 'Entity relationship diagram',
+      gantt: 'Gantt chart',
+      pie: 'Pie chart',
+      journey: 'User journey diagram',
+      gitgraph: 'Git graph',
+      mindmap: 'Mind map',
+      timeline: 'Timeline',
+      quadrantchart: 'Quadrant chart',
+    };
+    return `${typeMap[firstWord] ?? 'Mermaid'} diagram`;
+  }, [code]);
+
   const render = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -130,6 +156,8 @@ export const MermaidBlock: React.FC<MermaidBlockProps> = ({ code, id }) => {
       ) : (
         <div
           className="mermaid-svg flex justify-center p-4"
+          role="img"
+          aria-label={diagramLabel}
           dangerouslySetInnerHTML={{ __html: svg }}
         />
       )}

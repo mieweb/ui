@@ -95,6 +95,10 @@ export const HtmlPreviewBlock: React.FC<HtmlPreviewBlockProps> = ({
             <iframe
               ref={iframeRef}
               srcDoc={srcdoc}
+              // `allow-scripts` lets previewed HTML run its own JS (charts, demos,
+              // and the optional resize-postMessage handshake). It is intentionally
+              // NOT paired with `allow-same-origin`, so the content runs in an
+              // opaque (null) origin with no access to this page, cookies, or storage.
               sandbox="allow-scripts allow-forms"
               referrerPolicy="no-referrer"
               className="w-full border-0"
