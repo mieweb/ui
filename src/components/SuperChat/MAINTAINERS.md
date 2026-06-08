@@ -13,7 +13,7 @@
 | `SuperChat` | [SuperChat.tsx](SuperChat.tsx) | Native shell: sidebar + thread + composer (controlled props) |
 | `createMarkdownRenderer` | [render/createMarkdownRenderer.tsx](render/createMarkdownRenderer.tsx) | Composes render plugins → one `renderTextContent` (Markdown core) |
 | render context | [render/renderContext.ts](render/renderContext.ts) | Threads `messageId`/`streaming` into custom nodes (GenUI) |
-| code / math / genui plugins | [plugins/](plugins) | Opt-in rich plugins (subpath entry) |
+| code / math / genui / mermaid / image / nitro-table plugins | [plugins/](plugins) | Opt-in rich plugins (subpath entry) |
 | types | [types.ts](types.ts) | Participant model + chat-component-compatible data model + plugin/GenUI contracts |
 
 ## Architecture (3 decisions from the plan)
@@ -33,8 +33,9 @@
 
 - `@mieweb/ui/components/SuperChat` ships the shell **+ Markdown core** only
   (`react-markdown` + `remark-gfm` + `rehype-sanitize`).
-- `@mieweb/ui/components/SuperChat/plugins` ships `code` / `math` / `genui`. Each
-  rich dependency (`rehype-highlight`, `rehype-katex`/`katex`) is an **optional
+- `@mieweb/ui/components/SuperChat/plugins` ships `code` / `math` / `genui` /
+  `mermaid` / `image` / `nitro-table`. Each rich dependency (`rehype-highlight`,
+  `rehype-katex`/`katex`, `mermaid`, `datavis`/`datavis-ace`) is an **optional
   peer dependency** — not in the base bundle. tsup entries:
   `components/SuperChat/index` and `components/SuperChat/plugins/index`.
 - SuperChat is intentionally **not** re-exported from the top-level `src/index.ts`
@@ -73,14 +74,35 @@ The composer:
 - Versioning: key the registry by base name; resolve `version` explicitly (do not
   bake the version into the lookup key).
 
+## Mermaid / image / NITRO-table plugins
+
+- **Mermaid** ([plugins/mermaid.tsx](plugins/mermaid.tsx)) — a rehype transformer
+  rewrites `<pre><code class="language-mermaid">` → `<mermaid-diagram>` (source as
+  a text child, like GenUI). `mermaid` is **lazy-loaded once** and initialized
+  with `securityLevel: 'strict'`; the rendered SVG is injected via
+  `dangerouslySetInnerHTML`, so it **bypasses `rehype-sanitize`** — strict mode is
+  the trust boundary. Rendering is gated on `streaming` (partial source shows a
+  pending card). Render failure → inert code-block fallback.
+- **Image** ([plugins/image.tsx](plugins/image.tsx)) — overrides the `img` node
+  with a click-to-zoom button that opens Messaging's `LightboxModal`. Because
+  Markdown images live inside a `<p>`, the lightbox is **portaled to
+  `document.body`** (don't nest the fixed overlay in the paragraph). `src`/`alt`
+  are already protocol-restricted by `rehype-sanitize`.
+- **NITRO table** ([plugins/nitroTable.tsx](plugins/nitroTable.tsx)) — overrides
+  the `table` node, parses the GFM table out of the hast `node` into
+  `{ headers, rows }`, and `React.lazy`-loads the actual grid
+  ([plugins/nitroTableGrid.tsx](plugins/nitroTableGrid.tsx)) so `datavis` stays
+  out of the base/test path. Data is handed to `DataVisNitroSource type="http"`
+  via a short-lived **object-URL** carrying the `{ typeInfo, data }` shape the
+  engine expects. A `GridErrorBoundary` + `Suspense` **degrades to the themed HTML
+  table** if the grid can't load. **Note:** the `datavis` submodule must be
+  checked out (`git submodule update --init`) to render the real grid — without it
+  the fallback HTML table is shown (the case in CI/dev when the submodule is
+  absent).
+
 ## Not yet implemented (tracked against the plan)
 
-- **NITRO tables** plugin (GFM table → `DataVisNITRO` grid) — reuse the
-  `@mieweb/ui/datavis` entry; see [../DataVisNITRO/MAINTAINERS.md](../DataVisNITRO/MAINTAINERS.md).
-- **Mermaid** plugin (lazy `mermaid` on ` ```mermaid ` fences).
-- **Image lightbox** reuse from Messaging.
-- Composer `@`-mention **autocomplete** (mentions are currently detected on send;
-  see `detectMentions`).
+- `shiki` upgrade path for the code plugin (currently `rehype-highlight`).
 
 ## Testing
 

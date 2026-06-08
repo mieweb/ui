@@ -1,7 +1,14 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChat } from './index';
-import { createCodePlugin, createMathPlugin, createGenUIPlugin } from './plugins';
+import {
+  createCodePlugin,
+  createMathPlugin,
+  createGenUIPlugin,
+  createMermaidPlugin,
+  createImagePlugin,
+  createNitroTablePlugin,
+} from './plugins';
 import type {
   GenUIRegistry,
   GenUIWidgetProps,
@@ -110,6 +117,57 @@ const conversation: SuperChatConversation = {
   ],
 };
 
+// A richer thread that also exercises the mermaid, NITRO-table, and image
+// plugins (used by the WithRichPlugins / ReadOnly stories).
+const richConversation: SuperChatConversation = {
+  ...conversation,
+  id: 'c1-rich',
+  thread: [
+    ...conversation.thread,
+    {
+      id: 'm8',
+      participantId: 'a1',
+      text: [
+        'Proposed triage flow:',
+        '',
+        '```mermaid',
+        'graph TD',
+        '  A[Intake] --> B{Chest pain?}',
+        '  B -- Yes --> C[Order ECG]',
+        '  B -- No --> D[Routine review]',
+        '  C --> E[Provider review]',
+        '```',
+      ].join('\n'),
+      time: '2026-06-07T09:05:00Z',
+    },
+    {
+      id: 'm9',
+      participantId: 'a2',
+      text: [
+        'Candidate codes:',
+        '',
+        '| Code | Description | Modifier |',
+        '| --- | --- | --- |',
+        '| 93000 | ECG, complete | — |',
+        '| 93005 | ECG, tracing only | TC |',
+        '| 93010 | ECG, interpretation | 26 |',
+      ].join('\n'),
+      time: '2026-06-07T09:05:30Z',
+    },
+    {
+      id: 'm10',
+      participantId: 'u2',
+      text: [
+        'Here is the rhythm strip — click to enlarge:',
+        '',
+        '![12-lead ECG rhythm strip](https://placehold.co/640x320/png?text=ECG+rhythm+strip)',
+      ].join('\n'),
+      time: '2026-06-07T09:06:00Z',
+    },
+  ],
+};
+
+
 // ---------------------------------------------------------------------------
 // Sample host-registered GenUI widget (lazy, inline for the story).
 // ---------------------------------------------------------------------------
@@ -151,8 +209,9 @@ const meta: Meta<typeof SuperChat> = {
           '',
           '### Rich Markdown',
           'Message text renders through a pluggable Markdown pipeline (`createMarkdownRenderer`). The base',
-          'ships Markdown core (GFM) with sanitization of untrusted output. Opt into `code`, `math`, and',
-          '`genui` plugins from `@mieweb/ui/components/SuperChat/plugins`.',
+          'ships Markdown core (GFM) with sanitization of untrusted output. Opt into `code`, `math`,',
+          '`genui`, `mermaid`, `image` (click-to-zoom lightbox), and `nitro-table` plugins from',
+          '`@mieweb/ui/components/SuperChat/plugins`.',
           '',
           '### Participant cues',
           'Concurrent / interleaved agent replies stay legible via per-participant `color`, avatar, and name.',
@@ -244,12 +303,15 @@ export const WithRichPlugins: Story = {
   render: () => (
     <div style={{ height: '90vh' }}>
       <InteractiveSuperChat
-        initial={[conversation]}
+        initial={[richConversation]}
         currentParticipantId="u1"
         renderPlugins={[
           createCodePlugin(),
           createMathPlugin(),
           createGenUIPlugin(registry),
+          createMermaidPlugin(),
+          createImagePlugin(),
+          createNitroTablePlugin(),
         ]}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
       />
@@ -261,10 +323,17 @@ export const ReadOnly: Story = {
   render: () => (
     <div style={{ height: '90vh' }}>
       <SuperChat
-        conversations={[conversation]}
+        conversations={[richConversation]}
         currentParticipantId="u1"
         readOnly
-        renderPlugins={[createCodePlugin(), createMathPlugin(), createGenUIPlugin(registry)]}
+        renderPlugins={[
+          createCodePlugin(),
+          createMathPlugin(),
+          createGenUIPlugin(registry),
+          createMermaidPlugin(),
+          createImagePlugin(),
+          createNitroTablePlugin(),
+        ]}
       />
     </div>
   ),

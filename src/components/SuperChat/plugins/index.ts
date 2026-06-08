@@ -16,6 +16,9 @@
 export { createCodePlugin } from './code';
 export { createMathPlugin } from './math';
 export { createGenUIPlugin, GENUI_TAG } from './genui';
+export { createMermaidPlugin, MERMAID_TAG } from './mermaid';
+export { createImagePlugin } from './image';
+export { createNitroTablePlugin } from './nitroTable';
 export type {
   GenUIRegistry,
   GenUIWidgetEntry,

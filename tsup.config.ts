@@ -87,6 +87,7 @@ export default defineConfig({
     'katex',
     'rehype-sanitize',
     'rehype-highlight',
+    'mermaid',
     /^@mieweb\/ui\//,
     /^datavis\//,
     /^@esheet\//,

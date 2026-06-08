@@ -4,6 +4,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import { createCodePlugin } from './plugins/code';
 import { createGenUIPlugin } from './plugins/genui';
+import { createMermaidPlugin } from './plugins/mermaid';
+import { createImagePlugin } from './plugins/image';
+import { createNitroTablePlugin } from './plugins/nitroTable';
 import { SuperChat } from './SuperChat';
 import type {
   GenUIRegistry,
@@ -82,6 +85,54 @@ describe('GenUI plugin', () => {
     expect(container.querySelector('[data-slot="superchat-genui-fallback"]')).not.toBeNull();
   });
 });
+
+describe('mermaid plugin', () => {
+  it('shows a pending card while the message is still streaming', () => {
+    const r = createMarkdownRenderer({ plugins: [createMermaidPlugin()] });
+    const { container } = renderText(
+      r('```mermaid\ngraph TD; A-->B;\n```', {
+        messageId: 'mm1',
+        streaming: true,
+        role: 'assistant',
+      })
+    );
+    expect(container.querySelector('[data-slot="superchat-mermaid-pending"]')).not.toBeNull();
+  });
+});
+
+describe('image plugin', () => {
+  it('makes images click-to-zoom and opens a lightbox', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const r = createMarkdownRenderer({ plugins: [createImagePlugin()] });
+    renderText(
+      r('![ECG strip](https://example.com/ecg.png)', {
+        messageId: 'img1',
+        streaming: false,
+        role: 'assistant',
+      })
+    );
+    const trigger = screen.getByRole('button', { name: 'View image: ECG strip' });
+    await user.click(trigger);
+    expect(screen.getByRole('dialog', { name: /ECG strip/ })).toBeInTheDocument();
+  });
+});
+
+describe('nitro-table plugin', () => {
+  it('renders table data (degrading to an HTML table when datavis is absent)', async () => {
+    const r = createMarkdownRenderer({ plugins: [createNitroTablePlugin()] });
+    renderText(
+      r('| Code | Description |\n| --- | --- |\n| 93000 | ECG, complete |', {
+        messageId: 'tbl1',
+        streaming: false,
+        role: 'assistant',
+      })
+    );
+    await waitFor(() => expect(screen.getByText('93000')).toBeInTheDocument());
+    expect(screen.getByText('Description')).toBeInTheDocument();
+  });
+});
+
 
 describe('SuperChat', () => {
   const conversation: SuperChatConversation = {

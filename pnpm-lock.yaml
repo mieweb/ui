@@ -220,7 +220,7 @@ importers:
         specifier: ^0.17.0
         version: 0.17.0
       mermaid:
-        specifier: ^11.12.3
+        specifier: ^11.15.0
         version: 11.15.0
       papaparse:
         specifier: ^5.5.3
