@@ -89,7 +89,7 @@ code.hljs {
 [data-theme='dark'] .hljs,
 .dark .hljs {
   color: #abb2bf;
-  background: #282c34;
+  background: #1a1d24;
 }
 [data-theme='dark'] .hljs-comment,
 .dark .hljs-comment,
@@ -241,12 +241,12 @@ code.hljs {
 [data-theme='dark'] .fence-block,
 .dark .fence-block {
   border-color: rgb(255 255 255 / 0.08);
-  background: #282c34;
+  background: #1a1d24;
 }
 [data-theme='dark'] .fence-block-header,
 .dark .fence-block-header {
-  background: rgb(255 255 255 / 0.04);
-  border-bottom-color: rgb(255 255 255 / 0.06);
+  background: transparent;
+  border-bottom-color: rgb(255 255 255 / 0.08);
 }
 [data-theme='dark'] .fence-lang,
 .dark .fence-lang {

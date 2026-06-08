@@ -21,7 +21,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language }) => {
 
   return (
     <FenceBlock code={code} language={language}>
-      <pre className="m-0 overflow-x-auto bg-transparent p-3 text-sm">
+      <pre className="m-0 overflow-x-auto !bg-transparent p-3 text-sm">
         <code
           className="hljs bg-transparent p-0"
           dangerouslySetInnerHTML={{ __html: html }}
