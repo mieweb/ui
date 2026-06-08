@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SuperChat } from './index';
+import { SuperChat, createMarkdownRenderer } from './index';
 import {
   createCodePlugin,
   createMathPlugin,
@@ -337,4 +337,163 @@ export const ReadOnly: Story = {
       />
     </div>
   ),
+};
+
+// ============================================================================
+// Sources & Guards
+// ============================================================================
+// Documents, per visual, the exact Markdown *source* that produces it and the
+// *guard* (trust boundary) that keeps untrusted model/agent output safe. The
+// rendered column uses the real production renderer (`createMarkdownRenderer`)
+// with every plugin enabled, so source → guard → output stays in sync with the
+// code.
+
+interface FeatureDemo {
+  /** Plugin / feature name. */
+  name: string;
+  /** Raw Markdown exactly as it arrives in a message. */
+  source: string;
+  /** Where the guard lives + what it enforces. */
+  guard: string;
+}
+
+const FEATURES: FeatureDemo[] = [
+  {
+    name: 'Markdown core (GFM)',
+    source: [
+      '**Chief complaint:** chest tightness on exertion',
+      '',
+      '- Duration: 3 days',
+      '- Risk: family history of CAD',
+      '',
+      '> Recommend prioritizing an ECG.',
+      '',
+      '[ECG protocol](https://example.org/ecg)',
+    ].join('\n'),
+    guard:
+      'rehype-sanitize allow-list (createMarkdownRenderer.tsx) strips scripts/unknown tags from untrusted output; links are forced to target="_blank" rel="noopener noreferrer".',
+  },
+  {
+    name: 'code',
+    source: ['```javascript', "const code = '93000';", 'console.log(code);', '```'].join('\n'),
+    guard:
+      'rehype-highlight emits .hljs-* token classes that the base schema explicitly allow-lists on code/pre/span; sanitize runs AFTER highlight so only those classes survive. Copy uses navigator.clipboard.',
+  },
+  {
+    name: 'math (KaTeX)',
+    source: ['$$ risk = \\beta_0 + \\beta_1 x + \\beta_2 x^2 $$', '', 'Inline: $x > 0.7$.'].join('\n'),
+    guard:
+      "math.tsx allow-lists KaTeX's HTML+MathML tags/attributes so its output survives sanitize; rehype-katex runs with throwOnError:false (malformed math degrades, never throws).",
+  },
+  {
+    name: 'genui',
+    source: [
+      '```genui',
+      '{ "widget": "kpi_card", "version": 1, "props": { "label": "Risk", "value": "High", "trend": "+12%" } }',
+      '```',
+    ].join('\n'),
+    guard:
+      'Widgets are host-registered, lazy, and schema-validated; the rehype transform allow-lists only the <genui-widget> tag. Unknown/invalid widgets degrade to an inert code block; mount + data fetch are gated on streaming.',
+  },
+  {
+    name: 'mermaid',
+    source: [
+      '```mermaid',
+      'graph TD',
+      '  A[Intake] --> B{Chest pain?}',
+      '  B -- Yes --> C[Order ECG]',
+      '  B -- No --> D[Routine review]',
+      '```',
+    ].join('\n'),
+    guard:
+      "mermaid.tsx loads mermaid lazily and renders with securityLevel:'strict' (labels sanitized, scripts stripped). The SVG bypasses rehype-sanitize, so strict mode IS the trust boundary; rendering is gated on streaming.",
+  },
+  {
+    name: 'image (lightbox)',
+    source: '![12-lead ECG rhythm strip](https://placehold.co/640x320/png?text=ECG+rhythm+strip)',
+    guard:
+      'The image src/alt are already protocol-restricted by rehype-sanitize; image.tsx only adds the zoom affordance and portals the LightboxModal to document.body.',
+  },
+  {
+    name: 'nitro-table',
+    source: [
+      '| Code | Description | Modifier |',
+      '| --- | --- | --- |',
+      '| 93000 | ECG, complete | — |',
+      '| 93005 | ECG, tracing only | TC |',
+    ].join('\n'),
+    guard:
+      'nitroTable.tsx lazy-loads the DataVis grid only when a table appears; a GridErrorBoundary degrades to the themed HTML table if datavis is unavailable or the grid throws.',
+  },
+];
+
+const sourcesAndGuardsRenderer = createMarkdownRenderer({
+  plugins: [
+    createCodePlugin(),
+    createMathPlugin(),
+    createGenUIPlugin(registry),
+    createMermaidPlugin(),
+    createImagePlugin(),
+    createNitroTablePlugin(),
+  ],
+});
+
+function SourcesAndGuardsDemo() {
+  return (
+    <div className="space-y-6 p-6 text-neutral-900 dark:text-neutral-100">
+      <header className="space-y-1">
+        <h2 className="text-lg font-semibold">SuperChat — Sources &amp; Guards</h2>
+        <p className="max-w-prose text-sm text-neutral-600 dark:text-neutral-400">
+          Each visual below is produced from the raw Markdown <strong>source</strong> and protected
+          by the <strong>guard</strong> noted underneath. The rendered column uses the production
+          <code> createMarkdownRenderer</code> with every plugin enabled.
+        </p>
+      </header>
+
+      {FEATURES.map((f) => (
+        <section
+          key={f.name}
+          className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700"
+        >
+          <h3 className="mb-3 text-sm font-semibold tracking-wide text-primary-700 dark:text-primary-300">
+            {f.name}
+          </h3>
+
+          <div className="mb-1 text-xs font-medium uppercase text-neutral-500">Source</div>
+          <pre className="mb-3 overflow-x-auto rounded-lg bg-neutral-900 p-3 text-xs whitespace-pre-wrap text-neutral-100 **:wrap-break-word dark:bg-neutral-950">
+            <code>{f.source}</code>
+          </pre>
+
+          <div className="mb-1 text-xs font-medium uppercase text-neutral-500">Rendered</div>
+          <div className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
+            {sourcesAndGuardsRenderer(f.source, {
+              messageId: `sg-${f.name}`,
+              streaming: false,
+              role: 'assistant',
+            })}
+          </div>
+
+          <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+            <strong>Guard:</strong> {f.guard}
+          </p>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+export const SourcesAndGuards: Story = {
+  name: 'Sources & Guards',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Per-feature documentation of the Markdown **source** that generates each visual and the ' +
+          '**guard** (trust boundary) that sanitizes untrusted model/agent output. Useful for ' +
+          'security review: it shows exactly where each plugin opens the allow-list and how it ' +
+          'degrades.',
+      },
+    },
+  },
+  render: () => <SourcesAndGuardsDemo />,
 };
