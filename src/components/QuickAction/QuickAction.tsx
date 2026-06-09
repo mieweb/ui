@@ -4,7 +4,7 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 
 const quickActionIconVariants = cva(
-  ['flex items-center justify-center rounded-xl', 'h-10 w-10'],
+  ['flex shrink-0 items-center justify-center rounded-xl', 'h-10 w-10'],
   {
     variants: {
       color: {
@@ -32,7 +32,7 @@ const quickActionIconVariants = cva(
 
 const quickActionVariants = cva(
   [
-    'flex items-center gap-3 rounded-xl border p-4 text-left',
+    'flex h-full items-start gap-3.5 rounded-xl border p-4 text-left',
     'transition-colors duration-200',
     'border-neutral-200 bg-white',
     'hover:border-primary-300 hover:bg-primary-50',
@@ -127,7 +127,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
         >
           {icon}
         </div>
-        <div data-slot="quick-action-content">
+        <div data-slot="quick-action-content" className="min-w-0">
           <div
             data-slot="quick-action-title"
             className="font-medium text-neutral-900 dark:text-white"
@@ -136,7 +136,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
           </div>
           <div
             data-slot="quick-action-subtitle"
-            className="text-xs text-neutral-500 dark:text-neutral-400"
+            className="mt-0.5 text-xs leading-snug text-neutral-500 dark:text-neutral-400"
           >
             {subtitle}
           </div>
