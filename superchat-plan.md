@@ -1,7 +1,8 @@
 # SuperChat — Plan
 
-> **Status:** Decisions resolved; ready to start the spike. Architecture below is
-> agreed; implementation not started.
+> **Status:** Implemented. The architecture below is the agreed design and is
+> shipped in this module (`src/components/SuperChat/`); this doc is retained as
+> the design rationale / entry point for maintainers.
 
 ## Goal
 

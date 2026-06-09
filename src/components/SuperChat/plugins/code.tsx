@@ -21,10 +21,20 @@ function CopyablePre({
   const onCopy = React.useCallback(() => {
     const text = ref.current?.innerText ?? '';
     if (!text) return;
-    void navigator.clipboard?.writeText(text).then(() => {
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
-    });
+    // `navigator.clipboard` is undefined in non-secure contexts; guard the
+    // optional-chained call (which would be `undefined`, not a promise) and
+    // swallow rejection so copy stays best-effort and never breaks render.
+    const copy = navigator.clipboard?.writeText(text);
+    if (!copy) return;
+    void copy.then(
+      () => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1500);
+      },
+      () => {
+        /* clipboard write rejected (permissions / non-secure context) */
+      }
+    );
   }, []);
 
   return (
