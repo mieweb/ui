@@ -9,10 +9,7 @@
 
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import {
-  LightboxModal,
-  type MessageAttachment,
-} from '../../Messaging';
+import { LightboxModal, type MessageAttachment } from '../../Messaging';
 import { cn } from '../../../utils/cn';
 import type { SuperChatRenderPlugin } from '../types';
 
@@ -57,7 +54,7 @@ function ZoomableImage({
         type="button"
         onClick={() => setOpen(true)}
         aria-label={alt ? `View image: ${alt}` : 'View image'}
-        className="my-2 inline-block cursor-zoom-in rounded-lg focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
+        className="focus-visible:ring-primary-500 my-2 inline-block cursor-zoom-in rounded-lg focus-visible:ring-2 focus-visible:outline-none"
       >
         <img
           {...props}

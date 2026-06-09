@@ -21,10 +21,32 @@ import 'katex/dist/katex.min.css';
 // ============================================================================
 
 const participants = {
-  me: { id: 'u1', kind: 'human' as const, name: 'Dr. Alice Reyes', role: 'Provider', color: '#0e7490' },
-  nurse: { id: 'u2', kind: 'human' as const, name: 'Sam Carter', role: 'Nurse', color: '#9333ea' },
-  triage: { id: 'a1', kind: 'agent' as const, name: 'Triage Agent', color: '#2563eb' },
-  coder: { id: 'a2', kind: 'agent' as const, name: 'Coding Agent', color: '#16a34a' },
+  me: {
+    id: 'u1',
+    kind: 'human' as const,
+    name: 'Dr. Alice Reyes',
+    role: 'Provider',
+    color: '#0e7490',
+  },
+  nurse: {
+    id: 'u2',
+    kind: 'human' as const,
+    name: 'Sam Carter',
+    role: 'Nurse',
+    color: '#9333ea',
+  },
+  triage: {
+    id: 'a1',
+    kind: 'agent' as const,
+    name: 'Triage Agent',
+    color: '#2563eb',
+  },
+  coder: {
+    id: 'a2',
+    kind: 'agent' as const,
+    name: 'Coding Agent',
+    color: '#16a34a',
+  },
   system: { id: 's1', kind: 'system' as const, name: 'System' },
 };
 
@@ -78,7 +100,7 @@ const conversation: SuperChatConversation = {
         '',
         '```javascript',
         "const code = '93000';",
-        "console.log(`CPT ${code}: ECG, complete`);",
+        'console.log(`CPT ${code}: ECG, complete`);',
         '```',
       ].join('\n'),
       time: '2026-06-07T09:02:30Z',
@@ -167,24 +189,32 @@ const richConversation: SuperChatConversation = {
   ],
 };
 
-
 // ---------------------------------------------------------------------------
 // Sample host-registered GenUI widget (lazy, inline for the story).
 // ---------------------------------------------------------------------------
 
-function KpiCard({ data }: GenUIWidgetProps<{ label: string; value: string; trend?: string }>) {
+function KpiCard({
+  data,
+}: GenUIWidgetProps<{ label: string; value: string; trend?: string }>) {
   return (
     <div className="my-1 inline-flex flex-col rounded-lg border border-neutral-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800">
       <span className="text-xs text-neutral-500">{data.label}</span>
-      <span className="text-xl font-semibold text-neutral-900 dark:text-white">{data.value}</span>
-      {data.trend && <span className="text-xs text-green-600">{data.trend}</span>}
+      <span className="text-xl font-semibold text-neutral-900 dark:text-white">
+        {data.value}
+      </span>
+      {data.trend && (
+        <span className="text-xs text-green-600">{data.trend}</span>
+      )}
     </div>
   );
 }
 
 const registry: GenUIRegistry = {
   kpi_card: {
-    component: () => Promise.resolve({ default: KpiCard as React.ComponentType<GenUIWidgetProps> }),
+    component: () =>
+      Promise.resolve({
+        default: KpiCard as React.ComponentType<GenUIWidgetProps>,
+      }),
     prefetch: 'eager',
   },
 };
@@ -239,7 +269,10 @@ function InteractiveSuperChat(
   const { initial, ...rest } = props;
   const [conversations, setConversations] = React.useState(initial);
 
-  const appendMessage = (conversationId: string, message: SuperChatConversation['thread'][number]) => {
+  const appendMessage = (
+    conversationId: string,
+    message: SuperChatConversation['thread'][number]
+  ) => {
     setConversations((prev) =>
       prev.map((c) =>
         c.id === conversationId
@@ -375,13 +408,22 @@ const FEATURES: FeatureDemo[] = [
   },
   {
     name: 'code',
-    source: ['```javascript', "const code = '93000';", 'console.log(code);', '```'].join('\n'),
+    source: [
+      '```javascript',
+      "const code = '93000';",
+      'console.log(code);',
+      '```',
+    ].join('\n'),
     guard:
       'rehype-highlight emits .hljs-* token classes that the base schema explicitly allow-lists on code/pre/span; sanitize runs AFTER highlight so only those classes survive. Copy uses navigator.clipboard.',
   },
   {
     name: 'math (KaTeX)',
-    source: ['$$ risk = \\beta_0 + \\beta_1 x + \\beta_2 x^2 $$', '', 'Inline: $x > 0.7$.'].join('\n'),
+    source: [
+      '$$ risk = \\beta_0 + \\beta_1 x + \\beta_2 x^2 $$',
+      '',
+      'Inline: $x > 0.7$.',
+    ].join('\n'),
     guard:
       "math.tsx allow-lists KaTeX's HTML+MathML tags/attributes so its output survives sanitize; rehype-katex runs with throwOnError:false (malformed math degrades, never throws).",
   },
@@ -410,7 +452,8 @@ const FEATURES: FeatureDemo[] = [
   },
   {
     name: 'image (lightbox)',
-    source: '![12-lead ECG rhythm strip](https://placehold.co/640x320/png?text=ECG+rhythm+strip)',
+    source:
+      '![12-lead ECG rhythm strip](https://placehold.co/640x320/png?text=ECG+rhythm+strip)',
     guard:
       'The image src/alt are already protocol-restricted by rehype-sanitize; image.tsx only adds the zoom affordance and portals the LightboxModal to document.body.',
   },
@@ -442,10 +485,13 @@ function SourcesAndGuardsDemo() {
   return (
     <div className="space-y-6 p-6 text-neutral-900 dark:text-neutral-100">
       <header className="space-y-1">
-        <h2 className="text-lg font-semibold">SuperChat — Sources &amp; Guards</h2>
+        <h2 className="text-lg font-semibold">
+          SuperChat — Sources &amp; Guards
+        </h2>
         <p className="max-w-prose text-sm text-neutral-600 dark:text-neutral-400">
-          Each visual below is produced from the raw Markdown <strong>source</strong> and protected
-          by the <strong>guard</strong> noted underneath. The rendered column uses the production
+          Each visual below is produced from the raw Markdown{' '}
+          <strong>source</strong> and protected by the <strong>guard</strong>{' '}
+          noted underneath. The rendered column uses the production
           <code> createMarkdownRenderer</code> with every plugin enabled.
         </p>
       </header>
@@ -455,16 +501,20 @@ function SourcesAndGuardsDemo() {
           key={f.name}
           className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700"
         >
-          <h3 className="mb-3 text-sm font-semibold tracking-wide text-primary-700 dark:text-primary-300">
+          <h3 className="text-primary-700 dark:text-primary-300 mb-3 text-sm font-semibold tracking-wide">
             {f.name}
           </h3>
 
-          <div className="mb-1 text-xs font-medium uppercase text-neutral-500">Source</div>
+          <div className="mb-1 text-xs font-medium text-neutral-500 uppercase">
+            Source
+          </div>
           <pre className="mb-3 overflow-x-auto rounded-lg bg-neutral-900 p-3 text-xs whitespace-pre-wrap text-neutral-100 **:wrap-break-word dark:bg-neutral-950">
             <code>{f.source}</code>
           </pre>
 
-          <div className="mb-1 text-xs font-medium uppercase text-neutral-500">Rendered</div>
+          <div className="mb-1 text-xs font-medium text-neutral-500 uppercase">
+            Rendered
+          </div>
           <div className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
             {sourcesAndGuardsRenderer(f.source, {
               messageId: `sg-${f.name}`,

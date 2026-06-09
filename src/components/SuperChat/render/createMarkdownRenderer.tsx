@@ -69,7 +69,9 @@ function mergeSanitizeSchema(
 
   // attributes: per-tag concat
   if (extra.attributes && typeof extra.attributes === 'object') {
-    const baseAttrs = { ...((base.attributes as Record<string, unknown[]>) ?? {}) };
+    const baseAttrs = {
+      ...((base.attributes as Record<string, unknown[]>) ?? {}),
+    };
     for (const [tag, attrs] of Object.entries(
       extra.attributes as Record<string, unknown[]>
     )) {
@@ -93,7 +95,7 @@ function baseComponents(): Components {
       <a
         {...props}
         className={cn(
-          'text-primary-700 underline underline-offset-2 hover:text-primary-800 dark:text-primary-300',
+          'text-primary-700 hover:text-primary-800 dark:text-primary-300 underline underline-offset-2',
           props.className
         )}
         // External model output: open links safely.
@@ -113,7 +115,8 @@ function baseComponents(): Components {
       />
     ),
     code: ({ node: _node, ...props }) => {
-      const isBlock = typeof props.className === 'string' &&
+      const isBlock =
+        typeof props.className === 'string' &&
         props.className.includes('language-');
       return (
         <code
@@ -131,7 +134,7 @@ function baseComponents(): Components {
         <table
           {...props}
           className={cn(
-            'w-full border-collapse text-sm [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left dark:[&_td]:border-neutral-700 dark:[&_th]:border-neutral-700',
+            'w-full border-collapse text-sm [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1 dark:[&_td]:border-neutral-700 [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left dark:[&_th]:border-neutral-700',
             props.className
           )}
         />

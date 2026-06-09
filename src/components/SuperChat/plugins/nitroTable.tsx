@@ -92,7 +92,7 @@ function HtmlTable({
       <table
         {...props}
         className={cn(
-          'w-full border-collapse text-sm [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left dark:[&_td]:border-neutral-700 dark:[&_th]:border-neutral-700',
+          'w-full border-collapse text-sm [&_td]:border [&_td]:border-neutral-200 [&_td]:px-2 [&_td]:py-1 dark:[&_td]:border-neutral-700 [&_th]:border [&_th]:border-neutral-200 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left dark:[&_th]:border-neutral-700',
           props.className
         )}
       />
@@ -129,7 +129,9 @@ export function createNitroTablePlugin(): SuperChatRenderPlugin {
   const NitroTable = (props: Record<string, unknown>) => {
     const node = props.node as HastNode | undefined;
     const fallback = (
-      <HtmlTable {...(props as React.ComponentProps<'table'> & { node?: unknown })} />
+      <HtmlTable
+        {...(props as React.ComponentProps<'table'> & { node?: unknown })}
+      />
     );
 
     const parsed = React.useMemo(() => parseTable(node), [node]);

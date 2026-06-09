@@ -155,7 +155,9 @@ async function validate<T>(
   if ('issues' in result && result.issues) {
     return {
       ok: false,
-      message: result.issues.map((i) => i.message).join('; ') || 'Invalid widget payload',
+      message:
+        result.issues.map((i) => i.message).join('; ') ||
+        'Invalid widget payload',
     };
   }
   return { ok: true, value: (result as { value: T }).value };
@@ -233,7 +235,9 @@ function GenUIBlock({ raw, registry }: GenUIBlockProps) {
 
   // Registry policy overrides the wire hint; default to 'visible'.
   const policy: GenUIPrefetchPolicy =
-    entry?.prefetch ?? (parsed.ok ? parsed.value.prefetch : undefined) ?? 'visible';
+    entry?.prefetch ??
+    (parsed.ok ? parsed.value.prefetch : undefined) ??
+    'visible';
 
   const codeReady = usePrefetchTrigger(policy, placeholderRef);
 
@@ -253,7 +257,8 @@ function GenUIBlock({ raw, registry }: GenUIBlockProps) {
         if (active) setLoaded(() => m.default);
       })
       .catch(() => {
-        if (active) setValidated({ ok: false, message: 'Failed to load widget' });
+        if (active)
+          setValidated({ ok: false, message: 'Failed to load widget' });
       });
     return () => {
       active = false;

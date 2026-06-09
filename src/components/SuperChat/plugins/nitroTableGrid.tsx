@@ -10,10 +10,7 @@
  */
 
 import * as React from 'react';
-import {
-  DataVisNitroGrid,
-  DataVisNitroSource,
-} from '../../DataVisNITRO';
+import { DataVisNitroGrid, DataVisNitroSource } from '../../DataVisNITRO';
 
 export interface NitroTableGridProps {
   /** Column headers, in order. */
@@ -39,10 +36,7 @@ export default function NitroTableGrid({ headers, rows }: NitroTableGridProps) {
   return (
     <div data-slot="superchat-nitro-table" className="my-2">
       <DataVisNitroSource type="http" url={url}>
-        <DataVisNitroGrid
-          columns={headers}
-          style={{ height: 320 }}
-        />
+        <DataVisNitroGrid columns={headers} style={{ height: 320 }} />
       </DataVisNitroSource>
     </div>
   );

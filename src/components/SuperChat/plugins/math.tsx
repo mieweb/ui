@@ -62,7 +62,14 @@ export function createMathPlugin(): SuperChatRenderPlugin {
       attributes: {
         '*': ['className'],
         span: ['className', 'style', 'ariaHidden'],
-        svg: ['xmlns', 'width', 'height', 'viewBox', 'preserveAspectRatio', 'style'],
+        svg: [
+          'xmlns',
+          'width',
+          'height',
+          'viewBox',
+          'preserveAspectRatio',
+          'style',
+        ],
         path: ['d'],
         line: ['x1', 'y1', 'x2', 'y2', 'stroke', 'strokeWidth'],
         math: ['xmlns', 'display'],

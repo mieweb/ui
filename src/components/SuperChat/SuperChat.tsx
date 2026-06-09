@@ -114,11 +114,16 @@ function ParticipantAvatar({
       )}
       style={{
         backgroundColor:
-          participant?.color ?? (isAgent ? 'var(--mieweb-primary-700, #1f2937)' : '#64748b'),
+          participant?.color ??
+          (isAgent ? 'var(--mieweb-primary-700, #1f2937)' : '#64748b'),
       }}
       aria-hidden="true"
     >
-      {isAgent ? <SparklesIcon size="sm" /> : initials(participant?.name ?? '?')}
+      {isAgent ? (
+        <SparklesIcon size="sm" />
+      ) : (
+        initials(participant?.name ?? '?')
+      )}
     </div>
   );
 }
@@ -139,7 +144,7 @@ function ReferenceChip({
   const href = linkBuilder?.(reference);
   const content = (
     <>
-      <span className="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary-800 uppercase dark:bg-primary-900/40 dark:text-primary-200">
+      <span className="bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200 rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
         {reference.refType}
       </span>
       <span className="truncate">{reference.title}</span>
@@ -149,13 +154,21 @@ function ReferenceChip({
     'inline-flex max-w-full items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700 hover:border-primary-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200';
   if (href) {
     return (
-      <a href={href} className={className} onClick={() => onReferenceClick?.(reference)}>
+      <a
+        href={href}
+        className={className}
+        onClick={() => onReferenceClick?.(reference)}
+      >
         {content}
       </a>
     );
   }
   return (
-    <button type="button" className={className} onClick={() => onReferenceClick?.(reference)}>
+    <button
+      type="button"
+      className={className}
+      onClick={() => onReferenceClick?.(reference)}
+    >
       {content}
     </button>
   );
@@ -221,9 +234,13 @@ function MessageRow({
             {participant?.name ?? 'Unknown'}
           </span>
           {participant?.role && (
-            <span className="text-[10px] text-neutral-400">{participant.role}</span>
+            <span className="text-[10px] text-neutral-400">
+              {participant.role}
+            </span>
           )}
-          <span className="text-[10px] text-neutral-400">{formatTime(message.time)}</span>
+          <span className="text-[10px] text-neutral-400">
+            {formatTime(message.time)}
+          </span>
         </div>
 
         <div
@@ -232,7 +249,8 @@ function MessageRow({
             isSelf
               ? 'bg-primary-800 text-white'
               : 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
-            message.status === 'error' && 'border border-red-300 dark:border-red-700'
+            message.status === 'error' &&
+              'border border-red-300 dark:border-red-700'
           )}
           style={
             !isSelf && accent
@@ -245,7 +263,10 @@ function MessageRow({
             if (block.type === 'tool_use' && block.toolCall) {
               return <MCPToolCallDisplay key={i} toolCall={block.toolCall} />;
             }
-            if ((block.type === 'text' || block.type === 'thinking') && block.text) {
+            if (
+              (block.type === 'text' || block.type === 'thinking') &&
+              block.text
+            ) {
               return (
                 <div
                   key={i}
@@ -319,9 +340,10 @@ function Composer({
   onSend: (text: string, mentions: string[]) => void;
 }) {
   const [draft, setDraft] = React.useState('');
-  const [mention, setMention] = React.useState<{ query: string; start: number } | null>(
-    null
-  );
+  const [mention, setMention] = React.useState<{
+    query: string;
+    start: number;
+  } | null>(null);
   const [highlight, setHighlight] = React.useState(0);
   const textareaRef = React.useRef<React.ComponentRef<'textarea'>>(null);
 
@@ -404,7 +426,9 @@ function Composer({
                 <span className="min-w-0 flex-1 truncate">
                   <span className="font-medium">{p.name}</span>
                   {p.role && (
-                    <span className="ml-1 text-xs text-neutral-400">{p.role}</span>
+                    <span className="ml-1 text-xs text-neutral-400">
+                      {p.role}
+                    </span>
                   )}
                 </span>
                 <span className="text-[10px] text-neutral-400">{p.kind}</span>
@@ -418,7 +442,10 @@ function Composer({
         value={draft}
         onChange={(e) => {
           setDraft(e.target.value);
-          syncMention(e.target.value, e.target.selectionStart ?? e.target.value.length);
+          syncMention(
+            e.target.value,
+            e.target.selectionStart ?? e.target.value.length
+          );
         }}
         onClick={(e) => {
           const el = e.currentTarget;
@@ -433,7 +460,9 @@ function Composer({
             }
             if (e.key === 'ArrowUp') {
               e.preventDefault();
-              setHighlight((h) => (h - 1 + suggestions.length) % suggestions.length);
+              setHighlight(
+                (h) => (h - 1 + suggestions.length) % suggestions.length
+              );
               return;
             }
             if (e.key === 'Enter' || e.key === 'Tab') {
@@ -454,7 +483,11 @@ function Composer({
         }}
         disabled={disabled}
         rows={1}
-        placeholder={disabled ? 'Read-only conversation' : 'Type a message… use @ to address an agent'}
+        placeholder={
+          disabled
+            ? 'Read-only conversation'
+            : 'Type a message… use @ to address an agent'
+        }
         aria-label="Message"
         name="superchat-message"
         autoComplete="off"
@@ -464,14 +497,14 @@ function Composer({
         data-1p-ignore
         data-lpignore="true"
         data-form-type="other"
-        className="max-h-32 min-h-10 flex-1 resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
+        className="focus:border-primary-500 focus:ring-primary-500 max-h-32 min-h-10 flex-1 resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:ring-1 focus:outline-none disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
       />
       <button
         type="button"
         onClick={submit}
         disabled={disabled || !draft.trim()}
         aria-label="Send message"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-800 text-white hover:bg-primary-700 disabled:opacity-40"
+        className="bg-primary-800 hover:bg-primary-700 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white disabled:opacity-40"
       >
         <SendIcon />
       </button>
@@ -562,17 +595,22 @@ export function SuperChat({
     defaultActiveConversationId ?? conversations[0]?.id
   );
   const activeId = activeConversationId ?? internalActive;
-  const active = conversations.find((c) => c.id === activeId) ?? conversations[0];
+  const active =
+    conversations.find((c) => c.id === activeId) ?? conversations[0];
 
   const renderText = React.useMemo<AIRenderTextContent>(
     () =>
       renderTextContent ??
-      createMarkdownRenderer({ plugins: renderPlugins, trusted: trustedContent }),
+      createMarkdownRenderer({
+        plugins: renderPlugins,
+        trusted: trustedContent,
+      }),
     [renderTextContent, renderPlugins, trustedContent]
   );
 
   const sortedConversations = React.useMemo(
-    () => [...conversations].sort((a, b) => lastActivityOf(b) - lastActivityOf(a)),
+    () =>
+      [...conversations].sort((a, b) => lastActivityOf(b) - lastActivityOf(a)),
     [conversations]
   );
 
@@ -634,7 +672,9 @@ export function SuperChat({
                   className={sidebarItem({ active: c.id === active?.id })}
                 >
                   <span className="flex-1 truncate">
-                    <span className="block truncate font-medium">{c.title}</span>
+                    <span className="block truncate font-medium">
+                      {c.title}
+                    </span>
                     {last?.text && (
                       <span className="block truncate text-xs text-neutral-400">
                         {last.text}
@@ -642,7 +682,7 @@ export function SuperChat({
                     )}
                   </span>
                   {!!c.unread && (
-                    <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 text-[10px] font-semibold text-white">
+                    <span className="bg-primary-600 ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white">
                       {c.unread}
                     </span>
                   )}
@@ -681,13 +721,19 @@ export function SuperChat({
               )}
             </header>
 
-            <div ref={threadRef} className="flex-1 space-y-4 overflow-y-auto p-4">
+            <div
+              ref={threadRef}
+              className="flex-1 space-y-4 overflow-y-auto p-4"
+            >
               {orderedThread.map((m) => (
                 <MessageRow
                   key={m.id}
                   message={m}
                   participant={participantById.get(m.participantId)}
-                  isSelf={!!currentParticipantId && m.participantId === currentParticipantId}
+                  isSelf={
+                    !!currentParticipantId &&
+                    m.participantId === currentParticipantId
+                  }
                   renderText={renderText}
                   linkBuilder={linkBuilder}
                   onReferenceClick={onReferenceClick}

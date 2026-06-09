@@ -50,7 +50,8 @@ function isMermaidPre(node: HastNode): boolean {
   const className = code?.properties?.className;
   const classes = Array.isArray(className) ? className : [className];
   return classes.some(
-    (c) => typeof c === 'string' && (c === 'language-mermaid' || c === 'mermaid')
+    (c) =>
+      typeof c === 'string' && (c === 'language-mermaid' || c === 'mermaid')
   );
 }
 
@@ -118,17 +119,17 @@ let mermaidTheme: 'dark' | 'default' | null = null;
 function loadMermaid(dark: boolean) {
   const theme: 'dark' | 'default' = dark ? 'dark' : 'default';
   if (!mermaidReady || mermaidTheme !== theme) {
-    mermaidReady = (mermaidReady ?? import('mermaid').then(({ default: mermaid }) => mermaid)).then(
-      (mermaid) => {
-        mermaidTheme = theme;
-        mermaid.initialize({
-          startOnLoad: false,
-          securityLevel: 'strict',
-          theme,
-        });
-        return mermaid;
-      }
-    );
+    mermaidReady = (
+      mermaidReady ?? import('mermaid').then(({ default: mermaid }) => mermaid)
+    ).then((mermaid) => {
+      mermaidTheme = theme;
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme,
+      });
+      return mermaid;
+    });
   }
   return mermaidReady;
 }

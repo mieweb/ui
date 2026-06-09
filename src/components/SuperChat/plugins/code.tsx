@@ -33,7 +33,7 @@ function CopyablePre({
         type="button"
         onClick={onCopy}
         aria-label={copied ? 'Copied' : 'Copy code'}
-        className="absolute top-2 right-2 rounded-md bg-neutral-700/80 px-2 py-1 text-xs text-neutral-100 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 hover:bg-neutral-600"
+        className="absolute top-2 right-2 rounded-md bg-neutral-700/80 px-2 py-1 text-xs text-neutral-100 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-600 focus-visible:opacity-100"
       >
         {copied ? 'Copied' : 'Copy'}
       </button>

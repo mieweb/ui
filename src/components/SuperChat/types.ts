@@ -59,7 +59,12 @@ export interface Participant {
 // ============================================================================
 
 /** Channel a message arrived/was sent on (healthcare-messaging compatible). */
-export type SuperChatChannel = 'portal' | 'sms' | 'voicemail' | 'auto' | (string & {});
+export type SuperChatChannel =
+  | 'portal'
+  | 'sms'
+  | 'voicemail'
+  | 'auto'
+  | (string & {});
 
 /** Reference attachment carried by a `ref` thread item. */
 export interface SuperChatRef {
@@ -187,7 +192,9 @@ export interface StandardSchemaV1<Output = unknown, Input = Output> {
   readonly '~standard': {
     readonly version: 1;
     readonly vendor: string;
-    readonly validate: (value: unknown) =>
+    readonly validate: (
+      value: unknown
+    ) =>
       | { readonly value: Output }
       | { readonly issues: ReadonlyArray<{ readonly message: string }> }
       | Promise<
