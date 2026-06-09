@@ -163,7 +163,7 @@ export function EmployerView({
                   data-slot="employer-view-logo"
                   className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"
                 >
-                  <span className="text-2xl font-bold text-gray-500 dark:text-gray-400">
+                  <span className="text-muted-foreground text-2xl font-bold">
                     {employer.name.charAt(0)}
                   </span>
                 </div>
@@ -177,11 +177,11 @@ export function EmployerView({
                     {employer.status}
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground text-sm">
                   Linked since {formatDate(employer.linkedDate)}
                 </p>
                 {employer.address && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-muted-foreground text-sm">
                     {employer.address.city}, {employer.address.state}
                   </p>
                 )}
@@ -208,41 +208,31 @@ export function EmployerView({
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {employer.stats.totalOrders}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Total Orders
-                </p>
+                <p className="text-muted-foreground text-sm">Total Orders</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {employer.stats.completedOrders}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Completed
-                </p>
+                <p className="text-muted-foreground text-sm">Completed</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                   {employer.stats.pendingOrders}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Pending
-                </p>
+                <p className="text-muted-foreground text-sm">Pending</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {formatCurrency(employer.stats.totalRevenue)}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Total Revenue
-                </p>
+                <p className="text-muted-foreground text-sm">Total Revenue</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                   {formatCurrency(employer.stats.outstandingBalance)}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Outstanding
-                </p>
+                <p className="text-muted-foreground text-sm">Outstanding</p>
               </div>
             </div>
           )}
@@ -303,11 +293,11 @@ export function EmployerView({
                             {primary.name}
                           </p>
                           {primary.role && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-muted-foreground text-sm">
                               {primary.role}
                             </p>
                           )}
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <p className="text-muted-foreground text-sm">
                             {primary.email}
                           </p>
                         </div>
@@ -342,7 +332,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.recentOrders.length === 0 ? (
-                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground py-8 text-center">
                   No orders yet
                 </p>
               ) : (
@@ -357,10 +347,10 @@ export function EmployerView({
                         <p className="font-medium text-gray-900 dark:text-white">
                           {order.orderNumber}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           {order.patientName}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground text-xs">
                           {order.services.join(', ')}
                         </p>
                       </div>
@@ -368,7 +358,7 @@ export function EmployerView({
                         <Badge variant={getStatusVariant(order.status)}>
                           {order.status}
                         </Badge>
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground mt-1 text-xs">
                           {formatDate(order.createdDate)}
                         </p>
                       </div>
@@ -402,7 +392,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.recentInvoices.length === 0 ? (
-                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground py-8 text-center">
                   No invoices yet
                 </p>
               ) : (
@@ -417,7 +407,7 @@ export function EmployerView({
                         <p className="font-medium text-gray-900 dark:text-white">
                           {invoice.invoiceNumber}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           Due: {formatDate(invoice.dueDate)}
                         </p>
                       </div>
@@ -454,7 +444,7 @@ export function EmployerView({
             </CardHeader>
             <CardContent>
               {employer.contacts.length === 0 ? (
-                <p className="py-8 text-center text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground py-8 text-center">
                   No contacts added
                 </p>
               ) : (
@@ -477,15 +467,15 @@ export function EmployerView({
                             )}
                           </div>
                           {contact.role && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-muted-foreground text-sm">
                               {contact.role}
                             </p>
                           )}
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                          <p className="text-muted-foreground text-sm">
                             {contact.email}
                           </p>
                           {contact.phone && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-muted-foreground text-sm">
                               {contact.phone}
                             </p>
                           )}

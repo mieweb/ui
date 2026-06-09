@@ -503,7 +503,7 @@ function ColorsPage() {
                 </h3>
                 <pre className="bg-muted text-foreground overflow-x-auto rounded-lg p-4 font-mono">
                   {`<!-- Semantic tokens -->
-<div className="bg-primary-500 text-foreground border border-border">
+<div className="bg-primary-800 text-foreground border border-border">
 
 <!-- Full status scales for subtle backgrounds -->
 <div className="bg-destructive-50 text-destructive-700 border border-destructive-200">

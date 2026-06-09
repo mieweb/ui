@@ -1,12 +1,11 @@
 'use client';
 
 import * as React from 'react';
-
+import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
 import { Button } from '../Button/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
-import { Checkbox } from '../Checkbox/Checkbox';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
+import { Checkbox } from '../Checkbox/Checkbox';
 
 export interface ClaimProviderFormProps {
   /** Provider name being claimed */
@@ -148,7 +147,7 @@ export function ClaimProviderForm({
             >
               <p
                 data-slot="claim-form-error-text"
-                className="text-sm text-red-600 dark:text-red-400"
+                className="text-sm text-red-700 dark:text-red-400"
               >
                 {errorMessage}
               </p>
@@ -283,7 +282,7 @@ export function ClaimProviderForm({
               />
               <span
                 data-slot="claim-form-terms-text"
-                className="text-sm text-gray-600 dark:text-gray-400"
+                className="text-muted-foreground text-sm"
               >
                 I agree to the{' '}
                 <a
@@ -319,7 +318,8 @@ export function ClaimProviderForm({
               {isSubmitting ? (
                 <>
                   <svg
-                    className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >

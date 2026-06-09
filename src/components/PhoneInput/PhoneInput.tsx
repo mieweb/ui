@@ -1,15 +1,16 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 import {
   formatPhoneNumber,
-  isValidPhoneNumber,
   unformatPhoneNumber,
+  isValidPhoneNumber,
 } from '../../utils/phone';
 import { Input, type InputProps } from '../Input';
 
-export interface PhoneInputProps
-  extends Omit<InputProps, 'type' | 'onChange' | 'value'> {
+export interface PhoneInputProps extends Omit<
+  InputProps,
+  'type' | 'onChange' | 'value'
+> {
   /** The phone number value (can be formatted or unformatted) */
   value?: string;
   /** Callback fired when the value changes, receives the unformatted value */
@@ -258,8 +259,8 @@ function PhoneInputGroup({
               className={cn(
                 'h-10 w-full rounded-md border px-3 py-2 text-sm',
                 'border-gray-300 bg-white text-gray-900',
-                'focus:border-brand-500 focus:ring-brand-500/20 focus:outline-none focus:ring-2',
-                'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500',
+                'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none',
+                'disabled:text-muted-foreground disabled:cursor-not-allowed disabled:bg-gray-50',
                 'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100',
                 'dark:focus:border-brand-400 dark:focus:ring-brand-400/20',
                 index === 0 && label ? 'mt-[26px]' : ''
@@ -292,11 +293,12 @@ function PhoneInputGroup({
                   'text-brand-600 hover:bg-brand-50',
                   'disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent',
                   'dark:text-brand-400 dark:hover:bg-brand-900/20',
-                  'dark:disabled:text-gray-600'
+                  'dark:disabled:text-muted-foreground'
                 )}
                 aria-label="Add phone number"
               >
                 <svg
+                  aria-hidden="true"
                   data-slot="phone-add-icon"
                   className="h-5 w-5"
                   fill="none"
@@ -322,11 +324,12 @@ function PhoneInputGroup({
                   'text-red-600 hover:bg-red-50',
                   'disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent',
                   'dark:text-red-400 dark:hover:bg-red-900/20',
-                  'dark:disabled:text-gray-600'
+                  'dark:disabled:text-muted-foreground'
                 )}
                 aria-label="Remove phone number"
               >
                 <svg
+                  aria-hidden="true"
                   data-slot="phone-remove-icon"
                   className="h-5 w-5"
                   fill="none"

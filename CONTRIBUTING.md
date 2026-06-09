@@ -1,0 +1,253 @@
+# Contributing to `@mieweb/ui`
+
+> **This is the provider (maintainer) guide** — for people who *build and change* the
+> library. If you only *consume* `@mieweb/ui` in an app, you want the
+> [README](README.md), the [Storybook](https://ui.mieweb.org), and the
+> [`lessons/`](lessons/README.md) adoption guides instead.
+
+## Who is this for?
+
+This repository serves two distinct developer audiences. Keep the distinction in
+mind whenever you write docs or code comments.
+
+| Audience | "I want to…" | Read |
+|----------|--------------|------|
+| **Consumer** (app developer) | Use a component, theme it, migrate an app | [README.md](README.md), [Storybook](https://ui.mieweb.org), [lessons/](lessons/README.md) |
+| **Provider / Maintainer** (you) | Add/change a component, fix a bug, cut a release | **This file** + per-component [`MAINTAINERS.md`](#per-component-maintainer-notes) |
+
+Rule of thumb: **consumer docs answer "how do I use it"; provider docs answer "how
+do I change it."** Don't mix the two — keep usage in Storybook autodocs and the
+README, keep internals/invariants/gotchas in `CONTRIBUTING.md` and `MAINTAINERS.md`.
+
+## Repository layout
+
+```
+src/
+  index.ts              # Public barrel — the main entry point
+  ag-grid.ts            # Separate entry: @mieweb/ui/ag-grid (optional ag-grid deps)
+  datavis.ts            # Separate entry: @mieweb/ui/datavis (optional datavis-ace dep)
+  esheet.ts             # Separate entry: @mieweb/ui/esheet (optional @esheet/* deps)
+  tailwind-preset.ts    # Tailwind preset consumers extend
+  brands/               # BrandConfig (*.ts) + CSS variable themes (*.css)
+  components/<Name>/     # One folder per component (see "Anatomy" below)
+  hooks/  utils/  styles/  types/
+  test/setup.ts         # Vitest setup
+packages/               # Git submodules with heavy/optional implementations
+  datavis/  esheet/  ychart/
+.storybook/             # Storybook (react-vite) config
+tests/visual/           # Playwright visual-regression specs + snapshots
+lessons/                # Consumer-facing adoption + policy docs
+```
+
+## Prerequisites & setup
+
+This repo uses **pnpm** (`packageManager: pnpm@10.29.1`) and **git submodules**.
+
+```bash
+git clone --recurse-submodules https://github.com/mieweb/ui.git
+cd ui
+pnpm install          # preinstall runs `git submodule update --init --recursive`
+pnpm storybook        # http://localhost:6006
+```
+
+If you cloned without `--recurse-submodules`, run
+`git submodule update --init --recursive` and re-run `pnpm install`. A stale
+`datavis` link is auto-repaired by the `postinstall` script.
+
+## Everyday commands
+
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | `tsup --watch` — rebuild the library on change |
+| `pnpm storybook` | Storybook dev server on `:6006` (primary dev surface) |
+| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm lint` / `pnpm lint:fix` | ESLint over `src/**/*.{ts,tsx}` |
+| `pnpm format` / `pnpm format:fix` | Prettier check / write |
+| `pnpm test` / `pnpm test:watch` | Vitest unit tests |
+| `pnpm test:coverage` | Vitest with coverage (80% thresholds) |
+| `pnpm test:visual` | Playwright visual regression (serves `storybook-static`; run `pnpm build-storybook` first) |
+| `pnpm build` | Full library build (tsup + CSS + brand CSS) |
+
+## Quality gates (must pass before opening a PR)
+
+```bash
+pnpm typecheck && pnpm lint && pnpm format && pnpm test
+```
+
+Visual tests (`pnpm test:visual`) are required when you change anything that
+affects rendering. See [Testing](#testing).
+
+## Anatomy of a component
+
+Each component lives in `src/components/<Name>/` and follows this shape:
+
+```
+src/components/MyWidget/
+├── index.ts              # Re-exports the component + its public types
+├── MyWidget.tsx          # Implementation
+├── MyWidget.stories.tsx  # Storybook story (autodocs)
+├── MyWidget.test.tsx     # Vitest unit test (optional but encouraged)
+└── MAINTAINERS.md        # Provider notes — only for non-trivial modules
+```
+
+Coding conventions (the full standard lives in
+[lessons/component-policy.md](lessons/component-policy.md) → *Tier 2*):
+
+- **Variants** via `class-variance-authority` (CVA); merge classes with the
+  `cn()` helper (`clsx` + `tailwind-merge`) from [src/utils](src/utils).
+- **`forwardRef`** on anything that wraps a DOM node; forward `className` and
+  `...rest`.
+- **Theme tokens only** — colors come from `--mieweb-*` CSS variables / Tailwind
+  theme utilities (`bg-primary-500`, `text-foreground`, `border-border`). **Never
+  hardcode hex colors.** Support dark mode and brand switching.
+- **Accessibility** — semantic roles, `aria-*`, keyboard operability, visible
+  focus. Modal/overlay components trap focus and close on `Escape`.
+- **Icons** from `lucide-react`; dates via `luxon`.
+
+After adding a component, export it from [src/index.ts](src/index.ts)
+and (if it should be individually importable) add a `tsup` entry — see
+[Exports & tree-shaking](#exports-entry-points--tree-shaking).
+
+## Stories & documentation (autodocs convention)
+
+Consumer-facing component docs are generated by Storybook **autodocs**. A story
+file should:
+
+- Export **one** `Meta` default export per component (one component per CSF
+  file — a file can't drive two autodocs pages).
+- Set `tags: ['autodocs']`.
+- Provide `argTypes` with a `description` for every meaningful prop.
+- Provide the component overview via
+  `parameters.docs.description.component` (Markdown).
+- Put **shared fixtures in a non-story file** (e.g. `storyData.ts`) so Storybook
+  doesn't try to load it as stories. See
+  [src/components/AI/storyData.ts](src/components/AI/storyData.ts) and the AI
+  story files for the reference pattern.
+
+## Exports, entry points & tree-shaking
+
+- The public API is the barrel [src/index.ts](src/index.ts). Everything a
+  consumer can `import { X } from '@mieweb/ui'` must be re-exported there.
+- **Heavy/optional integrations get their own subpath entry** so they stay out
+  of the default bundle: `@mieweb/ui/ag-grid`, `@mieweb/ui/datavis`,
+  `@mieweb/ui/esheet`. These map to `src/ag-grid.ts`, `src/datavis.ts`,
+  `src/esheet.ts` and to dedicated `tsup` entries.
+- Individually tree-shakeable components are listed explicitly in the `entry`
+  map in [tsup.config.ts](tsup.config.ts). Add yours there if it should be
+  importable as `@mieweb/ui/components/<Name>`.
+- `package.json` `sideEffects` is `["**/*.css"]` — CSS is intentionally
+  side-effectful so it isn't tree-shaken away. Keep JS/TS modules side-effect
+  free (the AGGrid `ModuleRegistry` call is a deliberate, documented exception).
+
+## Build & bundle
+
+- **Bundler:** [tsup](tsup.config.ts) → dual **ESM + CJS**, `target: es2022`,
+  `.d.ts` emitted, sourcemaps, `treeshake` + `splitting` on. JSX is `automatic`.
+  Types build against [tsconfig.build.json](tsconfig.build.json).
+- **External:** `react`, `react-dom`, `ag-grid-*`, `datavis-ace`, `@esheet/*`
+  are never bundled (they're peers).
+- **CSS:** `pnpm build:css` compiles `src/styles/base.css` → `dist/styles.css`
+  via the Tailwind CLI; brand CSS is copied into `dist/brands/`.
+- **Submodule builds:** `prebuild` runs `build:esheet`, which builds the
+  `@esheet/*` packages (nx) before the main build. The full build runs with
+  `--max-old-space-size=8192` because the type graph is large.
+
+## Testing
+
+- **Unit (Vitest, jsdom):** setup in [src/test/setup.ts](src/test/setup.ts),
+  alias `@ → src`. Coverage thresholds are **80%** (branches/functions/lines/
+  statements). `packages/esheet`, `tests/visual`, and `*.spec.ts` are excluded.
+- **Visual regression (Playwright):** specs in [tests/visual](tests/visual).
+  Run `pnpm build-storybook` to generate `storybook-static`, then `pnpm test:visual`
+  to serve it on `:6006` and compare Chromium screenshots (tolerance `maxDiffPixelRatio: 0.05`).
+  - **Updating baselines is a deliberate act.** Only run
+    `pnpm test:visual --update-snapshots` when you intentionally changed
+    rendering, and review the image diffs in the PR. Never blanket-update to make
+    a failing test pass.
+- **Storybook a11y:** `pnpm test:storybook` runs the test-runner against a
+  running Storybook.
+
+## Brands & theming
+
+- A brand is a `BrandConfig` in `src/brands/<brand>.ts` plus a CSS variable
+  theme in `src/brands/<brand>.css`, re-exported from
+  [src/brands/index.ts](src/brands/index.ts).
+- Components must look correct under **at least two brands** and in **dark mode**.
+  Test brand switching via `ThemeProvider`.
+- Deep reference: [lessons/tailwind4-integration.md](lessons/tailwind4-integration.md).
+
+## Submodules (datavis, esheet, ychart)
+
+Three heavy capabilities live in **git submodules** under `packages/`, not in
+`src/`. This is the most common source of "it builds on CI but not locally"
+confusion, so know which is which:
+
+| Submodule | Backs | Exposed as | Notes |
+|-----------|-------|-----------|-------|
+| `packages/datavis` | `DataVisNITRO` | `@mieweb/ui/datavis` | Linked into `node_modules/datavis`; `postinstall` repairs a stale link. Also needs the `datavis-ace` peer. |
+| `packages/esheet` | `EsheetBuilder` / `EsheetRenderer` | `@mieweb/ui/esheet` | nx monorepo (`core/fields/adapters/builder/renderer`); built by `build:esheet` before the main build. |
+| `packages/ychart` | `YChart` (Storybook only) | *not exported* | A vanilla editor class dynamically imported by the story only. |
+
+If a submodule-backed component fails to resolve, run
+`git submodule update --init --recursive` then `pnpm install`.
+
+## Optional peer dependencies
+
+`react` / `react-dom` are required peers. Everything else heavy is **optional**:
+`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@esheet/builder`,
+`@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
+subpath entry (not the main barrel) so consumers who don't use them aren't forced
+to install them.
+
+> **Grids: prefer NITRO DataVis over AGGrid.** `ag-grid-*` is heavy. Use
+> [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) by default and reach
+> for [AGGrid](src/components/AGGrid/MAINTAINERS.md) only when NITRO lacks the
+> needed functionality. See those notes for details.
+
+## Per-component maintainer notes
+
+Non-trivial modules carry a `MAINTAINERS.md` next to the code with the internals a
+maintainer needs: invariants, extension points, gotchas, and test/baseline notes.
+**Consumers never need these; they document how to *change* the module, not how to
+use it.** Add one when a component has hidden coupling, an optional peer dep, a
+submodule, a module-level side effect, or a non-obvious extension point.
+
+Current notes:
+
+| Module | Why it has notes |
+|--------|------------------|
+| [AI](src/components/AI/MAINTAINERS.md) | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer |
+| [AGGrid](src/components/AGGrid/MAINTAINERS.md) | Registers AG Grid modules at import; optional peers; brand theming; base vs. enhanced split |
+| [ESheet](src/components/ESheet/MAINTAINERS.md) | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src` |
+| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) | Wraps `datavis-ace` + the `datavis` submodule; context/source/grid wiring |
+| [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled |
+| [YChart](src/components/YChart/MAINTAINERS.md) | Vanilla editor in a submodule, dynamically imported; not in the public API |
+
+## Commits, versioning & releases
+
+- Follow [Conventional Commits](https://www.conventionalcommits.org/)
+  (`feat:`, `fix:`, `docs:`, `chore:`, …).
+- Semantic versioning: **major** = breaking API, **minor** = backwards-compatible
+  features, **patch** = backwards-compatible fixes.
+- `prepublishOnly` runs a full build. Never publish from a dirty/un-built tree.
+- **Never publish without explicit confirmation.**
+
+## Adding a new component (checklist)
+
+1. `src/components/<Name>/` with `index.ts`, `<Name>.tsx`, `<Name>.stories.tsx`.
+2. Follow the [anatomy](#anatomy-of-a-component) conventions (CVA, `cn`,
+   `forwardRef`, theme tokens, a11y).
+3. Autodocs story (one component per file, `argTypes`, component description).
+4. Export from [src/index.ts](src/index.ts); add a
+   `tsup` entry if it should be individually importable.
+5. Add a unit test; add a visual story baseline if it has notable rendering.
+6. Add a `MAINTAINERS.md` if it's non-trivial (see criteria above).
+7. Run the [quality gates](#quality-gates-must-pass-before-opening-a-pr).
+
+## Adding a new brand (checklist)
+
+1. `src/brands/<brand>.ts` (`BrandConfig`) and `src/brands/<brand>.css`
+   (CSS variables).
+2. Export from [src/brands/index.ts](src/brands/index.ts).
+3. Add a `tsup` entry if the brand should be individually importable.
+4. Verify representative components in the new brand, light **and** dark.

@@ -298,8 +298,19 @@ export const Toolbar: Story = {
       </Tooltip>
       <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700" />
       <Tooltip content="Align left">
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          aria-label="Align left"
+        >
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <rect x="3" y="5" width="18" height="2" rx="1" />
             <rect x="3" y="11" width="12" height="2" rx="1" />
             <rect x="3" y="17" width="18" height="2" rx="1" />
@@ -307,8 +318,19 @@ export const Toolbar: Story = {
         </Button>
       </Tooltip>
       <Tooltip content="Align center">
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          aria-label="Align center"
+        >
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <rect x="3" y="5" width="18" height="2" rx="1" />
             <rect x="6" y="11" width="12" height="2" rx="1" />
             <rect x="3" y="17" width="18" height="2" rx="1" />
@@ -316,8 +338,19 @@ export const Toolbar: Story = {
         </Button>
       </Tooltip>
       <Tooltip content="Align right">
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          aria-label="Align right"
+        >
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <rect x="3" y="5" width="18" height="2" rx="1" />
             <rect x="9" y="11" width="12" height="2" rx="1" />
             <rect x="3" y="17" width="18" height="2" rx="1" />

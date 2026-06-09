@@ -58,7 +58,7 @@ export const wagglelineBrand: BrandConfig = {
       border: '#e5e7eb',
       input: '#e5e7eb',
       ring: '#17AEED',
-      destructive: '#ef4444',
+      destructive: '#dc2626',
       destructiveForeground: '#ffffff',
       success: '#009C4E', // Brand green
       successForeground: '#ffffff',

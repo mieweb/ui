@@ -131,6 +131,7 @@ const DistanceBadge: React.FC<{ distance?: number }> = ({ distance }) => {
   return (
     <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
       <svg
+        aria-hidden="true"
         className="h-3 w-3"
         fill="none"
         viewBox="0 0 24 24"
@@ -159,7 +160,12 @@ const SafeFromWildfiresNotice: React.FC = () => (
       data-slot="provider-card-safe-notice"
       className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-300"
     >
-      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+      <svg
+        aria-hidden="true"
+        className="h-4 w-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
         <path
           fillRule="evenodd"
           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -177,7 +183,12 @@ const VerifiedBadge: React.FC = () => (
       data-slot="provider-card-verified"
       className="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300"
     >
-      <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+      <svg
+        aria-hidden="true"
+        className="h-3.5 w-3.5"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
         <path
           fillRule="evenodd"
           d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -518,6 +529,7 @@ export const ProviderCardGrid: React.FC<ProviderCardGridProps> = ({
         {emptyState || (
           <div className="text-muted-foreground">
             <svg
+              aria-hidden="true"
               className="mx-auto mb-4 h-12 w-12 opacity-50"
               fill="none"
               viewBox="0 0 24 24"

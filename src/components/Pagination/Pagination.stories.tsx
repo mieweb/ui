@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
-
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Pagination, SimplePagination } from './Pagination';
 
 // Wrapper component that manages state while passing through all props
@@ -226,16 +225,31 @@ export const AllVariants: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">Default</p>
-        <PaginationWithState page={5} totalPages={10} variant="default" />
+        <p className="text-muted-foreground mb-2 text-sm">Default</p>
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          variant="default"
+          label="Default pagination"
+        />
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">Outline</p>
-        <PaginationWithState page={5} totalPages={10} variant="outline" />
+        <p className="text-muted-foreground mb-2 text-sm">Outline</p>
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          variant="outline"
+          label="Outline pagination"
+        />
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">Ghost</p>
-        <PaginationWithState page={5} totalPages={10} variant="ghost" />
+        <p className="text-muted-foreground mb-2 text-sm">Ghost</p>
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          variant="ghost"
+          label="Ghost pagination"
+        />
       </div>
     </div>
   ),
@@ -248,16 +262,31 @@ export const AllSizes: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">Small</p>
-        <PaginationWithState page={5} totalPages={10} size="sm" />
+        <p className="text-muted-foreground mb-2 text-sm">Small</p>
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          size="sm"
+          label="Small pagination"
+        />
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">Medium</p>
-        <PaginationWithState page={5} totalPages={10} size="md" />
+        <p className="text-muted-foreground mb-2 text-sm">Medium</p>
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          size="md"
+          label="Medium pagination"
+        />
       </div>
       <div>
-        <p className="mb-2 text-sm text-muted-foreground">Large</p>
-        <PaginationWithState page={5} totalPages={10} size="lg" />
+        <p className="text-muted-foreground mb-2 text-sm">Large</p>
+        <PaginationWithState
+          page={5}
+          totalPages={10}
+          size="lg"
+          label="Large pagination"
+        />
       </div>
     </div>
   ),

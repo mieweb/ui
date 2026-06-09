@@ -1,11 +1,10 @@
 'use client';
 
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 import {
-  AddServiceCard,
   ServiceCard,
+  AddServiceCard,
   ServiceCardProps,
 } from '../ServiceCard/ServiceCard';
 
@@ -38,18 +37,18 @@ export interface ServiceGridProps {
 
 function ServiceSkeleton() {
   return (
-    <div className="animate-pulse rounded-lg border border-border p-4">
+    <div className="border-border animate-pulse rounded-lg border p-4">
       <div className="mb-3 flex items-start justify-between">
-        <div className="h-5 w-32 rounded bg-muted" />
-        <div className="h-5 w-16 rounded bg-muted" />
+        <div className="bg-muted h-5 w-32 rounded" />
+        <div className="bg-muted h-5 w-16 rounded" />
       </div>
       <div className="mb-4 space-y-2">
-        <div className="h-4 w-full rounded bg-muted" />
-        <div className="h-4 w-3/4 rounded bg-muted" />
+        <div className="bg-muted h-4 w-full rounded" />
+        <div className="bg-muted h-4 w-3/4 rounded" />
       </div>
       <div className="flex gap-2">
-        <div className="h-6 w-20 rounded-full bg-muted" />
-        <div className="h-6 w-20 rounded-full bg-muted" />
+        <div className="bg-muted h-6 w-20 rounded-full" />
+        <div className="bg-muted h-6 w-20 rounded-full" />
       </div>
     </div>
   );
@@ -106,7 +105,8 @@ export function ServiceGrid({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <svg
-          className="mb-4 h-12 w-12 text-muted-foreground"
+          aria-hidden="true"
+          className="text-muted-foreground mb-4 h-12 w-12"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

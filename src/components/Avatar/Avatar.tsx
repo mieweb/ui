@@ -96,7 +96,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {showImage ? (
           <img
             src={src}
-            alt={alt || name || 'Avatar'}
+            alt={alt !== undefined ? alt : name || 'Avatar'}
             className="h-full w-full object-cover"
             onError={() => setImageError(true)}
           />
@@ -106,6 +106,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           initials
         ) : (
           <svg
+            aria-hidden="true"
             className="h-[60%] w-[60%] text-white/80"
             fill="currentColor"
             viewBox="0 0 24 24"

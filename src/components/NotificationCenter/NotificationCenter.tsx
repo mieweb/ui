@@ -1,10 +1,9 @@
 'use client';
 
 import * as React from 'react';
-
-import { Avatar } from '../Avatar/Avatar';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button/Button';
+import { Avatar } from '../Avatar/Avatar';
 
 export interface Notification {
   id: string;
@@ -82,6 +81,7 @@ export function NotificationCenter({
       case 'order':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -98,6 +98,7 @@ export function NotificationCenter({
       case 'invoice':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -114,6 +115,7 @@ export function NotificationCenter({
       case 'claim':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -130,6 +132,7 @@ export function NotificationCenter({
       case 'message':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -146,6 +149,7 @@ export function NotificationCenter({
       case 'alert':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -162,6 +166,7 @@ export function NotificationCenter({
       default:
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -199,7 +204,7 @@ export function NotificationCenter({
       case 'alert':
         return 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900/30';
       default:
-        return 'text-gray-500 bg-gray-100 dark:bg-gray-800';
+        return 'text-muted-foreground bg-gray-100 dark:bg-gray-800';
     }
   };
 
@@ -259,7 +264,8 @@ export function NotificationCenter({
           className="py-12 text-center"
         >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+            aria-hidden="true"
+            className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -271,7 +277,7 @@ export function NotificationCenter({
               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
             />
           </svg>
-          <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+          <p className="text-muted-foreground">{emptyMessage}</p>
         </div>
       ) : (
         <div
@@ -284,7 +290,7 @@ export function NotificationCenter({
               role="button"
               tabIndex={0}
               data-slot="notification-center-item"
-              className={`cursor-pointer px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+              className={`group cursor-pointer px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
                 !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
               }`}
               onClick={() => {
@@ -356,14 +362,14 @@ export function NotificationCenter({
                       )}
                     </div>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground mt-0.5 line-clamp-2 text-sm">
                     {notification.message}
                   </p>
                   <div
                     data-slot="notification-center-meta"
                     className="mt-2 flex items-center justify-between"
                   >
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-muted-foreground text-xs">
                       {formatTimestamp(notification.timestamp)}
                     </span>
                     <div className="flex items-center gap-2">
@@ -386,7 +392,8 @@ export function NotificationCenter({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100"
+                          className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          aria-label="Dismiss notification"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDismiss(notification.id);

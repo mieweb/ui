@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -104,7 +103,7 @@ export function ProductVersion({
           data-slot="product-version-minimal"
         >
           {name} {versionDisplay}
-          {build && <span className="ml-1 opacity-60">({build})</span>}
+          {build && <span className="ml-1">({build})</span>}
         </span>
       );
     }
@@ -131,9 +130,7 @@ export function ProductVersion({
             )}
           </div>
           {build && (
-            <span className="text-muted-foreground opacity-60">
-              Build: {build}
-            </span>
+            <span className="text-muted-foreground">Build: {build}</span>
           )}
           {(author || copyright) && (
             <span className="text-muted-foreground">{copyrightText}</span>
@@ -150,9 +147,7 @@ export function ProductVersion({
       >
         <span className="font-medium">{name}</span>
         <span className="text-muted-foreground">{versionDisplay}</span>
-        {build && (
-          <span className="text-muted-foreground opacity-60">({build})</span>
-        )}
+        {build && <span className="text-muted-foreground">({build})</span>}
         {environment && (
           <span
             className={cn(
@@ -166,7 +161,7 @@ export function ProductVersion({
         )}
         {(author || copyright) && (
           <>
-            <span className="text-muted-foreground/50">•</span>
+            <span className="text-muted-foreground">•</span>
             <span className="text-muted-foreground">{copyrightText}</span>
           </>
         )}
@@ -273,12 +268,12 @@ export function ProductVersionBadge({
     >
       <span className="font-mono font-medium">{versionDisplay}</span>
       {build && (
-        <span className="font-mono text-muted-foreground opacity-70">
+        <span className="text-muted-foreground font-mono">
           {build.substring(0, 7)}
         </span>
       )}
       {environment && (
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
           {environment.substring(0, 3)}
         </span>
       )}

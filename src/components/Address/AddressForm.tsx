@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 import { Input } from '../Input';
 import type { AddressData } from './Address';
@@ -308,6 +307,7 @@ export function AddressForm({
         googleMaps.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only re-init when enabled flag changes; other deps are stable refs
   }, [googlePlaces?.enabled]);
 
   return (

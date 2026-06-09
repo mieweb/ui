@@ -56,7 +56,7 @@ const cardVariants = cva(
 const cardAccentVariants = cva('absolute left-0 top-0 bottom-0 w-1', {
   variants: {
     color: {
-      primary: 'bg-primary-500',
+      primary: 'bg-primary-800',
       success: 'bg-success',
       warning: 'bg-warning',
       destructive: 'bg-destructive',
@@ -135,9 +135,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {loading && (
           <div className="bg-card/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
             <div className="flex gap-1">
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full" />
             </div>
           </div>
         )}
@@ -169,11 +169,16 @@ CardHeader.displayName = 'CardHeader';
 /**
  * Title for a Card
  */
+export interface CardTitleProps extends React.HTMLAttributes<globalThis.HTMLHeadingElement> {
+  /** Heading level — defaults to `h3` */
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+}
+
 const CardTitle = React.forwardRef<
   globalThis.HTMLHeadingElement,
-  React.HTMLAttributes<globalThis.HTMLHeadingElement>
->(({ className, children, ...props }, ref) => (
-  <h3
+  CardTitleProps
+>(({ className, children, as: Comp = 'h3', ...props }, ref) => (
+  <Comp
     ref={ref}
     data-slot="card-title"
     className={cn(
@@ -183,7 +188,7 @@ const CardTitle = React.forwardRef<
     {...props}
   >
     {children}
-  </h3>
+  </Comp>
 ));
 
 CardTitle.displayName = 'CardTitle';
@@ -308,9 +313,9 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
   ) => {
     const variantClasses = {
       default: 'bg-muted text-muted-foreground',
-      primary: 'bg-primary-500 text-white',
-      success: 'bg-success text-success-foreground',
-      warning: 'bg-warning text-warning-foreground',
+      primary: 'bg-primary-800 text-white',
+      success: 'bg-success-700 text-success-foreground',
+      warning: 'bg-warning-700 text-warning-foreground',
       destructive: 'bg-destructive text-destructive-foreground',
     };
 
@@ -441,13 +446,14 @@ const CardCollapsible = React.forwardRef<HTMLDivElement, CardCollapsibleProps>(
         <button
           type="button"
           onClick={handleToggle}
-          className="text-primary-600 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="text-primary-800 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           aria-expanded={expanded}
         >
           {typeof trigger === 'string' ? (
             <>
               {expanded ? 'Show less' : trigger}
               <svg
+                aria-hidden="true"
                 className={cn(
                   'h-4 w-4 transition-transform',
                   expanded && 'rotate-180'
@@ -509,7 +515,7 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
         {...props}
       >
         {icon && (
-          <div className="bg-primary-500/10 text-primary-600 rounded-lg p-2">
+          <div className="bg-primary-500/10 text-primary-800 rounded-lg p-2">
             {icon}
           </div>
         )}
@@ -520,10 +526,13 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
             <div
               className={cn(
                 'mt-1 flex items-center gap-1 text-sm',
-                trend.value >= 0 ? 'text-success' : 'text-destructive'
+                trend.value >= 0
+                  ? 'text-success-700 dark:text-success-300'
+                  : 'text-destructive-700 dark:text-destructive-400'
               )}
             >
               <svg
+                aria-hidden="true"
                 className={cn('h-4 w-4', trend.value < 0 && 'rotate-180')}
                 fill="none"
                 stroke="currentColor"

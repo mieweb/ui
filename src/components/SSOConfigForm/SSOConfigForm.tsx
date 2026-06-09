@@ -1,9 +1,8 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
-import { Button } from '../Button';
 import { Input } from '../Input';
 import { Switch } from '../Switch';
+import { Button } from '../Button';
 
 // ============================================================================
 // Types
@@ -254,24 +253,24 @@ export function SSOConfigForm({
               'transition-colors duration-200',
               'hover:border-primary hover:bg-primary/5',
               errors.certificate
-                ? 'bg-destructive/5 border-destructive'
-                : 'bg-muted/30 border-border'
+                ? 'border-destructive bg-destructive/5'
+                : 'border-border bg-muted/30'
             )}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
             {certificateFile ? (
               <div className="text-center">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {certificateSelected}
                 </span>
-                <p className="mt-1 font-medium text-foreground">
+                <p className="text-foreground mt-1 font-medium">
                   {certificateFile.name}
                 </p>
               </div>
             ) : (
               <div className="text-center">
-                <p className="mb-3 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mb-3 text-sm">
                   {selectCertificate}
                 </p>
                 <Button type="button" variant="primary" size="sm">
@@ -289,7 +288,12 @@ export function SSOConfigForm({
             />
           </label>
           {errors.certificate && (
-            <p className="text-sm text-destructive">{errors.certificate}</p>
+            <p
+              className="text-destructive-700 dark:text-destructive-400 text-sm"
+              role="alert"
+            >
+              {errors.certificate}
+            </p>
           )}
         </div>
 

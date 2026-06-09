@@ -61,3 +61,15 @@ export {
   FloatingAIChat,
   type FloatingAIChatProps,
 } from './AIChatModal';
+
+// AI Reconciliation Panel
+export {
+  AIReconciliationPanel,
+  defaultReconciliationIsEqual,
+  reconciliationPanelVariants,
+  type AIReconciliationPanelProps,
+  type ReconciliationProposal,
+  type ReconciliationSource,
+  type ReconciliationAcceptedChange,
+  type ReconciliationConfidenceLevel,
+} from './Reconciliation';

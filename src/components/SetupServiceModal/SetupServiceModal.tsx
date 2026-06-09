@@ -130,7 +130,7 @@ export function SetupServiceModal({
               data-slot="setup-service-error"
               className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
             >
-              <p className="text-sm text-red-600 dark:text-red-400">
+              <p className="text-sm text-red-700 dark:text-red-400">
                 {errorMessage}
               </p>
             </div>
@@ -247,6 +247,7 @@ export function SetupServiceModal({
                 </p>
               </div>
               <Switch
+                aria-label="Currently Offered"
                 className="flex-shrink-0"
                 checked={formData.currentlyOffered}
                 onCheckedChange={(checked) =>
@@ -271,6 +272,7 @@ export function SetupServiceModal({
                 </p>
               </div>
               <Switch
+                aria-label="Limited Inventory"
                 className="flex-shrink-0"
                 checked={formData.limitedInventory}
                 onCheckedChange={(checked) =>
@@ -316,6 +318,7 @@ export function SetupServiceModal({
                 </p>
               </div>
               <Switch
+                aria-label="Auto-Accept Referrals"
                 className="flex-shrink-0"
                 checked={formData.autoAcceptReferrals}
                 onCheckedChange={(checked) =>
@@ -342,6 +345,7 @@ export function SetupServiceModal({
             {isSubmitting ? (
               <>
                 <svg
+                  aria-hidden="true"
                   className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"

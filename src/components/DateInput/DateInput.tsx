@@ -1,15 +1,14 @@
-import { Calendar } from 'lucide-react';
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
 import {
-  calculateAge,
   formatDateValue,
-  isDateInFuture,
-  isDateInPast,
   isValidDate,
+  isDateInPast,
+  isDateInFuture,
+  calculateAge,
 } from '../../utils/date';
 import { Input, type InputProps } from '../Input';
+import { Calendar } from 'lucide-react';
 
 export type DateInputMode =
   | 'default'
@@ -32,8 +31,10 @@ const sizeClasses = {
   lg: 'h-12 text-lg',
 } as const;
 
-export interface DateInputProps
-  extends Omit<InputProps, 'type' | 'onChange' | 'value'> {
+export interface DateInputProps extends Omit<
+  InputProps,
+  'type' | 'onChange' | 'value'
+> {
   /** The date value in MM/DD/YYYY format */
   value?: string;
   /** Callback fired when the value changes */
@@ -335,8 +336,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         <div
           ref={calendarRef}
           className={cn(
-            'absolute left-0 top-full z-50 mt-1',
-            'rounded-lg border border-border bg-background shadow-lg',
+            'absolute top-full left-0 z-50 mt-1',
+            'bg-background border-border rounded-lg border shadow-lg',
             'w-72 p-3'
           )}
           role="dialog"
@@ -354,7 +355,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   setCalendarMonth(calendarMonth - 1);
                 }
               }}
-              className="rounded-md p-1 transition-colors hover:bg-muted"
+              className="hover:bg-muted rounded-md p-1 transition-colors"
               aria-label="Previous month"
             >
               <ChevronLeftIcon />
@@ -363,7 +364,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               <select
                 value={calendarMonth}
                 onChange={(e) => setCalendarMonth(Number(e.target.value))}
-                className="rounded border border-border bg-background px-2 py-1 text-sm"
+                className="bg-background border-border rounded border px-2 py-1 text-sm"
                 aria-label="Select month"
               >
                 {monthNames.map((name, i) => (
@@ -375,7 +376,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               <select
                 value={calendarYear}
                 onChange={(e) => setCalendarYear(Number(e.target.value))}
-                className="rounded border border-border bg-background px-2 py-1 text-sm"
+                className="bg-background border-border rounded border px-2 py-1 text-sm"
                 aria-label="Select year"
               >
                 {Array.from(
@@ -398,7 +399,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   setCalendarMonth(calendarMonth + 1);
                 }
               }}
-              className="rounded-md p-1 transition-colors hover:bg-muted"
+              className="hover:bg-muted rounded-md p-1 transition-colors"
               aria-label="Next month"
             >
               <ChevronRightIcon />
@@ -410,7 +411,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
               <div
                 key={day}
-                className="py-1 text-center text-xs font-medium text-muted-foreground"
+                className="text-muted-foreground py-1 text-center text-xs font-medium"
               >
                 {day}
               </div>
@@ -427,14 +428,14 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 onClick={() => day && handleDateSelect(day)}
                 className={cn(
                   'h-8 w-8 rounded-md text-sm transition-colors',
-                  'focus:outline-none focus:ring-2 focus:ring-ring',
+                  'focus:ring-ring focus:ring-2 focus:outline-none',
                   day === null && 'invisible',
                   day !== null && 'hover:bg-muted',
                   isSelectedDay(day!) &&
-                    'bg-primary-800 text-white hover:bg-primary-700',
+                    'bg-primary-800 hover:bg-primary-900 text-white',
                   isToday(day!) &&
                     !isSelectedDay(day!) &&
-                    'border border-primary-800 text-primary-800'
+                    'border-primary-800 text-primary-800 border'
                 )}
               >
                 {day}
@@ -443,7 +444,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           </div>
 
           {/* Today button */}
-          <div className="mt-3 border-t border-border pt-3">
+          <div className="border-border mt-3 border-t pt-3">
             <button
               type="button"
               onClick={() => {
@@ -452,7 +453,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 setCalendarYear(today.getFullYear());
                 handleDateSelect(today.getDate());
               }}
-              className="w-full text-sm text-primary-800 hover:underline"
+              className="text-primary-800 w-full text-sm hover:underline"
             >
               Today
             </button>
@@ -480,7 +481,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             <label
               htmlFor={inputId}
               className={cn(
-                'text-sm font-medium text-foreground',
+                'text-foreground text-sm font-medium',
                 hideLabel && 'sr-only'
               )}
             >
@@ -519,7 +520,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                 'bg-background text-foreground',
                 'placeholder:text-muted-foreground',
                 'transition-colors duration-200',
-                'focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring',
+                'focus:ring-ring focus:border-transparent focus:ring-2 focus:outline-none',
                 'disabled:cursor-not-allowed disabled:opacity-50',
                 sizeClasses[resolvedSize],
                 showError
@@ -535,7 +536,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               type="button"
               onClick={() => setIsCalendarOpen(!isCalendarOpen)}
               className={cn(
-                'absolute right-3 top-1/2 -translate-y-1/2',
+                'absolute top-1/2 right-3 -translate-y-1/2',
                 'text-muted-foreground hover:text-foreground',
                 'focus:text-foreground focus:outline-none',
                 'transition-colors'
@@ -559,7 +560,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             </p>
           )}
           {helperText && !errorMessage && (
-            <p id={helperId} className="text-sm text-muted-foreground">
+            <p id={helperId} className="text-muted-foreground text-sm">
               {helperText}
             </p>
           )}
@@ -592,6 +593,7 @@ DateInput.displayName = 'DateInput';
 function ChevronLeftIcon() {
   return (
     <svg
+      aria-hidden="true"
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -609,6 +611,7 @@ function ChevronLeftIcon() {
 function ChevronRightIcon() {
   return (
     <svg
+      aria-hidden="true"
       width="16"
       height="16"
       viewBox="0 0 24 24"

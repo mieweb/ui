@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useEffect } from 'react';
-
 import {
   CommandPalette,
-  type CommandPaletteCategory,
-  type CommandPaletteItem,
-  CommandPaletteProvider,
   CommandPaletteTrigger,
+  CommandPaletteProvider,
   useCommandPalette,
+  type CommandPaletteItem,
+  type CommandPaletteCategory,
 } from './index';
 
 // =============================================================================
@@ -19,7 +18,7 @@ const sampleCategories: CommandPaletteCategory[] = [
     id: 'pages',
     label: 'Pages',
     icon: <span>📄</span>,
-    colorClass: 'text-primary-500',
+    colorClass: 'text-primary-800',
   },
   {
     id: 'users',
@@ -131,7 +130,7 @@ function CommandPaletteDemo() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-muted-foreground text-sm">
         Press{' '}
         <kbd className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
           ⌘K
@@ -167,7 +166,7 @@ function CustomTriggerDemo() {
   return (
     <button
       onClick={open}
-      className="rounded-lg bg-primary-500 px-4 py-2 text-white transition-colors hover:bg-primary-600"
+      className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-white transition-colors"
     >
       Open Search
     </button>
@@ -293,7 +292,7 @@ function PlaygroundDemo(props: React.ComponentProps<typeof CommandPalette>) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-muted-foreground text-sm">
         Press{' '}
         <kbd className="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
           ⌘K
@@ -379,6 +378,86 @@ export const Empty: Story = {
     docs: {
       description: {
         story: 'Shows a custom empty state when no items match the search.',
+      },
+    },
+  },
+};
+
+// =============================================================================
+// Async Search Story
+// =============================================================================
+
+function AsyncSearchDemo(): React.JSX.Element {
+  const { setItems } = useCommandPalette();
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  // Simulate a debounced server search by sleeping briefly on each query.
+  const handleQueryChange = React.useCallback(
+    async (q: string) => {
+      if (!q.trim()) {
+        setItems([]);
+        return;
+      }
+      setIsLoading(true);
+      await new Promise((r) => setTimeout(r, 250));
+      setItems([
+        {
+          id: `call-${q}`,
+          label: `Call about "${q}"`,
+          subtitle: 'Yesterday • 4 min',
+          category: 'Calls',
+        },
+        {
+          id: `vm-${q}`,
+          label: `Voicemail mentioning "${q}"`,
+          subtitle: '2 days ago',
+          category: 'Voicemails',
+        },
+        {
+          id: `contact-${q}`,
+          label: q,
+          subtitle: '+1 (555) 010-2024',
+          category: 'Contacts',
+        },
+      ]);
+      setIsLoading(false);
+    },
+    [setItems]
+  );
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <CommandPaletteTrigger placeholder="Search anything…" />
+      <CommandPalette
+        placeholder="Search anything…"
+        isLoading={isLoading}
+        onQueryChange={(q) => {
+          void handleQueryChange(q);
+        }}
+        pinnedItems={[
+          {
+            id: 'ai-answer',
+            label: 'Ask AI to answer',
+            subtitle: 'Run semantic search across summaries',
+          },
+        ]}
+        pinnedCategoryLabel="Smart actions"
+        recentItems={[
+          { id: 'r1', label: 'Acme Corp', subtitle: '+1 (555) 010-2024' },
+          { id: 'r2', label: 'Billing call recap', subtitle: '12 min ago' },
+        ]}
+      />
+    </div>
+  );
+}
+
+export const AsyncSearch: Story = {
+  render: () => <AsyncSearchDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Hooks `onQueryChange` to a (mock) server, surfaces results grouped by category, pins a smart-action row, and falls back to recents on empty query.',
       },
     },
   },

@@ -1,17 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import {
   AlertCircle,
   AlertTriangle,
-  Bell,
   CheckCircle,
   Info as InfoIcon,
-  Lightbulb,
+  Bell,
   ShieldAlert,
+  Lightbulb,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
-
-import { Alert, AlertDescription, AlertTitle } from './Alert';
+import { Alert, AlertTitle, AlertDescription } from './Alert';
 
 // Icon registry for Storybook controls
 const iconRegistry: Record<string, React.ReactElement | null> = {
@@ -179,7 +178,7 @@ function DismissibleExample() {
     return (
       <button
         onClick={() => setVisible(true)}
-        className="text-sm text-primary-500 underline"
+        className="text-primary-800 text-sm underline"
       >
         Show alert again
       </button>

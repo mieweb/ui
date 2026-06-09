@@ -505,6 +505,7 @@ export function ReportTimeRange({
       className={cn('flex flex-wrap items-center gap-3', className)}
     >
       <Select
+        aria-label="Time range"
         value={preset}
         onValueChange={(value) => handlePresetChange(value)}
         options={selectOptions}

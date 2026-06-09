@@ -473,7 +473,7 @@ export const ResultsEntryForm = React.forwardRef<
             </p>
             <button
               type="button"
-              className="text-primary mt-2 inline-block text-sm hover:underline"
+              className="text-primary-800 dark:text-primary-400 mt-2 inline-block text-sm hover:underline"
             >
               {addProviderContact}
             </button>
@@ -484,8 +484,9 @@ export const ResultsEntryForm = React.forwardRef<
       {/* Error Message */}
       {showError && (
         <p
-          className="text-destructive text-sm font-medium"
+          className="text-destructive-700 dark:text-destructive-400 text-sm font-medium"
           data-slot="ref-error"
+          role="alert"
         >
           {pleaseSelectResult}
         </p>
@@ -588,6 +589,7 @@ export function ResultsEntryModal({
           {isSubmitting ? (
             <>
               <svg
+                aria-hidden="true"
                 className="mr-2 -ml-1 h-4 w-4 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"

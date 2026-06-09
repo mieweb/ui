@@ -1,12 +1,11 @@
 'use client';
 
 import * as React from 'react';
-
-import { Button } from '../Button/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
 import { Switch } from '../Switch/Switch';
+import { Button } from '../Button/Button';
 
 export interface ShippingAddress {
   name?: string;
@@ -158,10 +157,11 @@ export function ServiceShippingSettings({
           <Switch
             checked={shippingEnabled}
             onCheckedChange={onShippingEnabledChange}
+            aria-label="Enable shipping"
           />
         </div>
         <p
-          className="text-sm text-gray-500 dark:text-gray-400"
+          className="text-muted-foreground text-sm"
           data-slot="shipping-settings-description"
         >
           Configure how kits and materials are shipped
@@ -196,13 +196,14 @@ export function ServiceShippingSettings({
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Use Kit Shipping
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground text-xs">
                 Send collection kits to patients
               </p>
             </div>
             <Switch
               checked={useKitShipping}
               onCheckedChange={onUseKitShippingChange}
+              aria-label="Use kit shipping"
             />
           </div>
 
@@ -296,7 +297,7 @@ export function ServiceShippingSettings({
             </label>
             <textarea
               id="shipping-instructions"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               rows={3}
               value={instructions || ''}
               onChange={(e) => onInstructionsChange?.(e.target.value)}

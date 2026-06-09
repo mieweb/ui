@@ -1,7 +1,6 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
-import type { AttachmentState, AttachmentType } from './types';
+import type { AttachmentType, AttachmentState } from './types';
 
 // ============================================================================
 // Utility Functions
@@ -134,6 +133,7 @@ function AttachmentPreviewItem({
           {isVideo && (
             <div className="absolute inset-0 flex items-center justify-center">
               <svg
+                aria-hidden="true"
                 className="h-6 w-6 text-white drop-shadow"
                 fill="currentColor"
                 viewBox="0 0 24 24"
@@ -147,6 +147,7 @@ function AttachmentPreviewItem({
         /* File preview */
         <div className="flex h-20 w-20 flex-col items-center justify-center p-2">
           <svg
+            aria-hidden="true"
             className="h-8 w-8 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
@@ -170,6 +171,7 @@ function AttachmentPreviewItem({
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <div className="text-center text-white">
             <svg
+              aria-hidden="true"
               className="mx-auto h-6 w-6 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -198,6 +200,7 @@ function AttachmentPreviewItem({
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <div className="text-center">
             <svg
+              aria-hidden="true"
               className="mx-auto h-6 w-6 text-red-400"
               fill="none"
               viewBox="0 0 24 24"
@@ -228,16 +231,17 @@ function AttachmentPreviewItem({
         type="button"
         onClick={onRemove}
         className={cn(
-          'absolute -right-1 -top-1 z-10',
+          'absolute -top-1 -right-1 z-10',
           'rounded-full p-1',
           'bg-neutral-900 text-white',
           'opacity-0 group-hover:opacity-100',
-          'focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500',
+          'focus:ring-primary-500 focus:opacity-100 focus:ring-2 focus:outline-none',
           'transition-opacity'
         )}
         aria-label={`Remove ${file.name}`}
       >
         <svg
+          aria-hidden="true"
           className="h-3 w-3"
           fill="none"
           viewBox="0 0 24 24"
@@ -255,7 +259,7 @@ function AttachmentPreviewItem({
       {/* File name tooltip on hover */}
       <div
         className={cn(
-          'absolute bottom-0 left-0 right-0',
+          'absolute right-0 bottom-0 left-0',
           'bg-black/70 px-1 py-0.5',
           'opacity-0 group-hover:opacity-100',
           'transition-opacity'
@@ -372,7 +376,7 @@ const AttachmentPicker = React.forwardRef<
             'text-neutral-500 hover:text-neutral-700',
             'dark:text-neutral-400 dark:hover:text-neutral-200',
             'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-            'focus:outline-none focus:ring-2 focus:ring-primary-500',
+            'focus:ring-primary-500 focus:ring-2 focus:outline-none',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'transition-colors',
             className
@@ -381,6 +385,7 @@ const AttachmentPicker = React.forwardRef<
         >
           {children || (
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
@@ -515,13 +520,14 @@ function DragDropZone({
             'absolute inset-0 z-50',
             'flex items-center justify-center',
             'bg-primary-50/90 dark:bg-primary-900/90',
-            'border-2 border-dashed border-primary-500',
+            'border-primary-500 border-2 border-dashed',
             'rounded-lg'
           )}
         >
           <div className="text-center">
             <svg
-              className="mx-auto h-12 w-12 text-primary-500"
+              aria-hidden="true"
+              className="text-primary-800 mx-auto h-12 w-12"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -533,7 +539,7 @@ function DragDropZone({
                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
-            <p className="mt-2 text-sm font-medium text-primary-700 dark:text-primary-300">
+            <p className="text-primary-700 dark:text-primary-300 mt-2 text-sm font-medium">
               Drop files here
             </p>
           </div>
@@ -604,7 +610,7 @@ function CameraButton({
           'text-neutral-500 hover:text-neutral-700',
           'dark:text-neutral-400 dark:hover:text-neutral-200',
           'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-          'focus:outline-none focus:ring-2 focus:ring-primary-500',
+          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'transition-colors',
           className
@@ -612,6 +618,7 @@ function CameraButton({
         aria-label="Take a photo"
       >
         <svg
+          aria-hidden="true"
           className="h-5 w-5"
           fill="none"
           viewBox="0 0 24 24"
@@ -640,10 +647,10 @@ CameraButton.displayName = 'CameraButton';
 export {
   AttachmentPicker,
   AttachmentPreviewItem,
-  CameraButton,
   DragDropZone,
-  formatFileSize,
-  generateAttachmentId,
+  CameraButton,
   getFileType,
+  formatFileSize,
   validateFile,
+  generateAttachmentId,
 };

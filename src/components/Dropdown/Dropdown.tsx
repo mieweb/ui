@@ -523,7 +523,7 @@ function Dropdown({
                   filteredChildren
                 ) : (
                   <div
-                    className="px-3 py-4 text-center text-sm text-neutral-500 dark:text-neutral-400"
+                    className="text-muted-foreground px-3 py-4 text-center text-sm"
                     data-slot="dropdown-empty"
                   >
                     {searchEmptyState}
@@ -596,7 +596,7 @@ const DropdownHeader = React.forwardRef<HTMLDivElement, DropdownHeaderProps>(
             </p>
             {subtitle && (
               <p
-                className="truncate text-xs text-neutral-500 dark:text-neutral-400"
+                className="text-muted-foreground truncate text-xs"
                 data-slot="dropdown-header-subtitle"
               >
                 {subtitle}
@@ -669,12 +669,13 @@ function DropdownItemCheckbox({
       className={cn(
         'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors duration-150',
         checked || indeterminate
-          ? 'border-primary-500 bg-primary-500 text-white'
+          ? 'border-primary-500 bg-primary-800 text-white'
           : 'border-input bg-background text-transparent'
       )}
     >
       {indeterminate ? (
         <svg
+          aria-hidden="true"
           className="h-3 w-3"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 16 16"
@@ -689,6 +690,7 @@ function DropdownItemCheckbox({
         </svg>
       ) : (
         <svg
+          aria-hidden="true"
           className="h-3 w-3"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 16 16"
@@ -858,7 +860,7 @@ function DropdownLabel({
       data-slot="dropdown-label"
       className={cn(
         'px-3 py-1.5 text-xs font-semibold tracking-wider uppercase',
-        'text-neutral-500 dark:text-neutral-400',
+        'text-muted-foreground',
         className
       )}
     >

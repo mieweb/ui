@@ -264,7 +264,7 @@ export function ServicePicker({
         {error && (
           <div
             data-slot="service-picker-error"
-            className="bg-destructive/10 text-destructive mb-4 rounded-lg p-4"
+            className="bg-destructive/10 text-destructive-700 mb-4 rounded-lg p-4 dark:text-red-400"
           >
             <strong>{error}</strong>
           </div>
@@ -481,7 +481,7 @@ function ServiceItem({
                 'cursor-pointer transition-all duration-150',
                 'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                 'disabled:cursor-not-allowed disabled:opacity-50',
-                'checked:bg-primary-500 checked:border-primary-500'
+                'checked:bg-primary-800 checked:border-primary-500'
               )}
             />
             <CheckIcon className="pointer-events-none absolute h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
@@ -507,7 +507,7 @@ function ServiceItem({
             />
             <span
               data-slot="service-picker-radio-dot"
-              className="bg-primary-500 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100"
+              className="bg-primary-800 pointer-events-none absolute h-2 w-2 scale-0 rounded-full transition-transform peer-checked:scale-100"
             />
           </span>
         )}
@@ -557,6 +557,7 @@ function ServiceItem({
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -571,6 +572,7 @@ function CheckIcon({ className }: { className?: string }) {
 function SearchIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -588,7 +590,12 @@ function SearchIcon({ className }: { className?: string }) {
 
 function SpinnerIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24">
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
       <circle
         className="opacity-25"
         cx="12"
@@ -609,6 +616,7 @@ function SpinnerIcon({ className }: { className?: string }) {
 function ChevronIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

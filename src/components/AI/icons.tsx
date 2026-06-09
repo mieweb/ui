@@ -31,6 +31,7 @@ const sizeClasses = {
 export function SparklesIcon({ className, size = 'md' }: SparklesIconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={cn(sizeClasses[size], className)}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -71,6 +72,7 @@ export interface AILogoIconProps {
 export function AILogoIcon({ className, size = 'md' }: AILogoIconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={cn(sizeClasses[size], className)}
       viewBox="0 0 24 24"
       fill="none"
@@ -113,6 +115,7 @@ export interface CloseIconProps {
 export function CloseIcon({ className }: CloseIconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={cn('h-5 w-5', className)}
       fill="none"
       viewBox="0 0 24 24"
@@ -139,6 +142,7 @@ export interface RefreshIconProps {
 export function RefreshIcon({ className }: RefreshIconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={cn('h-5 w-5', className)}
       fill="none"
       viewBox="0 0 24 24"
@@ -176,6 +180,7 @@ export function ChevronIcon({
 }: ChevronIconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={cn('h-4 w-4', chevronRotation[direction], className)}
       fill="none"
       viewBox="0 0 24 24"
@@ -198,6 +203,7 @@ export interface SendIconProps {
 export function SendIcon({ className }: SendIconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={cn('h-5 w-5', className)}
       fill="none"
       viewBox="0 0 24 24"
@@ -224,6 +230,7 @@ export interface SpinnerIconProps {
 export function SpinnerIcon({ className }: SpinnerIconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={cn('h-5 w-5 animate-spin', className)}
       fill="none"
       viewBox="0 0 24 24"

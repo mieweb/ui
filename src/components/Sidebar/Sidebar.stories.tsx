@@ -1,18 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
-
 import {
   Sidebar,
-  SidebarContent,
-  SidebarFooter,
   SidebarHeader,
-  SidebarMobileToggle,
+  SidebarFooter,
+  SidebarContent,
   SidebarNav,
   SidebarNavGroup,
   SidebarNavItem,
-  SidebarProvider,
-  SidebarSearch,
   SidebarToggle,
+  SidebarMobileToggle,
+  SidebarSearch,
+  SidebarProvider,
   useSidebar,
 } from './index';
 
@@ -116,7 +115,7 @@ function AppLogo() {
 
   if (showCollapsed) {
     return (
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 font-bold text-white">
+      <div className="bg-primary-800 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
         M
       </div>
     );
@@ -124,7 +123,7 @@ function AppLogo() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 font-bold text-white">
+      <div className="bg-primary-800 flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
         M
       </div>
       <div className="font-semibold text-neutral-900 dark:text-white">
@@ -143,8 +142,8 @@ function UserFooter() {
     return (
       <button
         onClick={toggleCollapsed}
-        className="rounded-full p-0.5 transition-colors hover:ring-2 hover:ring-primary-500"
-        title="Expand sidebar"
+        className="hover:ring-primary-500 rounded-full p-0.5 transition-colors hover:ring-2"
+        aria-label="Expand sidebar"
       >
         <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700" />
       </button>
@@ -173,7 +172,7 @@ function CollapseToggle() {
     <button
       onClick={toggleCollapsed}
       className="w-full rounded-lg py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
-      title={showCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      aria-label={showCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
     >
       {showCollapsed ? '→' : '← Collapse'}
     </button>
@@ -225,10 +224,10 @@ function CollapsibleDemo() {
       </Sidebar>
 
       <div className="flex-1 p-6">
-        <h1 className="mb-4 text-xl font-semibold capitalize text-neutral-900 dark:text-white">
+        <h1 className="mb-4 text-xl font-semibold text-neutral-900 capitalize dark:text-white">
           {activePage}
         </h1>
-        <p className="text-neutral-600 dark:text-neutral-400">
+        <p className="text-muted-foreground">
           Try clicking the collapse button in the sidebar footer to see the
           collapsed state.
         </p>
@@ -358,12 +357,12 @@ function ConfigurableSidebarDemo({
       <div className="flex-1 p-6">
         <div className="mb-6 flex items-center gap-4">
           <SidebarMobileToggle />
-          <h1 className="text-xl font-semibold capitalize text-neutral-900 dark:text-white">
+          <h1 className="text-xl font-semibold text-neutral-900 capitalize dark:text-white">
             {activePage}
           </h1>
         </div>
         <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-          <p className="text-neutral-600 dark:text-neutral-400">
+          <p className="text-muted-foreground">
             Content for the {activePage} page goes here. Click navigation items
             to change pages.
           </p>

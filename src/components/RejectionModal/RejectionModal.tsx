@@ -119,7 +119,9 @@ export function RejectionModal({
               data-slot="rejection-modal-info"
             >
               {description && (
-                <p className="text-muted-foreground text-sm">{description}</p>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  {description}
+                </p>
               )}
               {itemDescription && (
                 <p className="text-foreground mt-1 text-sm font-medium">
@@ -136,6 +138,7 @@ export function RejectionModal({
               data-slot="rejection-modal-warning"
             >
               <svg
+                aria-hidden="true"
                 className="text-destructive-700 dark:text-destructive-300 mt-0.5 h-5 w-5 flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -236,6 +239,7 @@ export function RejectionModal({
             {isSubmitting ? (
               <>
                 <svg
+                  aria-hidden="true"
                   className="mr-2 -ml-1 h-4 w-4 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"

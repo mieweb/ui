@@ -310,7 +310,9 @@ export function ServiceTagCloudBadges({
         >
           {service.name}
           {showCounts && service.count !== undefined && (
-            <span className="ml-1 opacity-70">({service.count})</span>
+            <span className="text-muted-foreground ml-1">
+              ({service.count})
+            </span>
           )}
         </ServiceBadge>
       ))}
@@ -372,7 +374,7 @@ export function SelectedServicesBadges({
         <button
           type="button"
           onClick={onClearAll}
-          className="ml-1 text-xs text-gray-500 underline hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="text-muted-foreground ml-1 text-xs underline hover:text-gray-700 dark:hover:text-gray-200"
         >
           Clear all
         </button>
@@ -470,6 +472,7 @@ export function DOTBadge({
 function CloseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -490,6 +493,7 @@ function CloseIcon({ className }: { className?: string }) {
 function TestTubeIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -504,6 +508,7 @@ function TestTubeIcon({ className }: { className?: string }) {
 function MedicalIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -518,6 +523,7 @@ function MedicalIcon({ className }: { className?: string }) {
 function BriefcaseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -532,6 +538,7 @@ function BriefcaseIcon({ className }: { className?: string }) {
 function HeartIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -546,6 +553,7 @@ function HeartIcon({ className }: { className?: string }) {
 function LabIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -560,6 +568,7 @@ function LabIcon({ className }: { className?: string }) {
 function TagIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -574,6 +583,7 @@ function TagIcon({ className }: { className?: string }) {
 function DOTIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"

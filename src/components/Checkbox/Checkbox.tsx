@@ -11,8 +11,8 @@ const checkboxVariants = cva(
     'cursor-pointer',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
-    'checked:bg-primary-500 checked:border-primary-500',
-    'indeterminate:bg-primary-500 indeterminate:border-primary-500',
+    'checked:bg-primary-800 checked:border-primary-500',
+    'indeterminate:bg-primary-800 indeterminate:border-primary-500',
   ],
   {
     variants: {
@@ -161,7 +161,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           <p
             id={errorId}
             data-slot="checkbox-error"
-            className="text-destructive text-sm"
+            className="text-destructive-700 dark:text-destructive-400 text-sm"
             role="alert"
           >
             {error}

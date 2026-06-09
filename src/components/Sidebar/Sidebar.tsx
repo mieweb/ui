@@ -14,6 +14,7 @@ import { useSidebar } from './SidebarProvider';
 
 const ChevronLeftIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -26,6 +27,7 @@ const ChevronLeftIcon = () => (
 
 const ChevronRightIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -38,6 +40,7 @@ const ChevronRightIcon = () => (
 
 const ChevronDownIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-3 w-3"
     fill="none"
     viewBox="0 0 24 24"
@@ -50,6 +53,7 @@ const ChevronDownIcon = () => (
 
 const XIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -66,6 +70,7 @@ const XIcon = () => (
 
 const MenuIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -82,6 +87,7 @@ const MenuIcon = () => (
 
 const SearchIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -293,9 +299,9 @@ export function SidebarNav({
   className,
 }: SidebarNavProps): React.JSX.Element {
   return (
-    <nav data-slot="sidebar-nav" className={cn('space-y-1 px-2', className)}>
+    <div data-slot="sidebar-nav" className={cn('space-y-1 px-2', className)}>
       {children}
-    </nav>
+    </div>
   );
 }
 
@@ -358,11 +364,12 @@ export function SidebarNavGroup({
           showCollapsed && 'justify-center'
         )}
         title={showCollapsed ? label : undefined}
+        aria-label={showCollapsed ? label : undefined}
       >
         {icon && (
           <span
             className={cn(
-              'h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400',
+              'text-muted-foreground h-5 w-5 flex-shrink-0',
               !showCollapsed && 'mr-3'
             )}
           >
@@ -440,36 +447,14 @@ export function SidebarNavItem({
   const { isCollapsed, isMobileViewport, closeMobile } = useSidebar();
   const showCollapsed = !isMobileViewport && isCollapsed;
 
-  const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      if (disabled) {
-        event.preventDefault();
-        return;
-      }
-      // When an `onClick` handler is supplied for an anchor item (e.g. SPA
-      // navigation via react-router), intercept plain left-clicks so the
-      // browser doesn't ALSO follow the href and trigger a full page reload.
-      // Modifier-clicks (cmd/ctrl/shift/alt) and non-primary buttons keep
-      // their native behavior so users can still open links in a new tab.
-      if (href && onClick) {
-        const isPlainLeftClick =
-          event.button === 0 &&
-          !event.metaKey &&
-          !event.ctrlKey &&
-          !event.shiftKey &&
-          !event.altKey;
-        if (isPlainLeftClick) {
-          event.preventDefault();
-        }
-      }
-      onClick?.();
-      // Close mobile sidebar on navigation
-      if (isMobileViewport) {
-        closeMobile();
-      }
-    },
-    [disabled, href, onClick, isMobileViewport, closeMobile]
-  );
+  const handleClick = useCallback(() => {
+    if (disabled) return;
+    onClick?.();
+    // Close mobile sidebar on navigation
+    if (isMobileViewport) {
+      closeMobile();
+    }
+  }, [disabled, onClick, isMobileViewport, closeMobile]);
 
   const content = (
     <>
@@ -478,8 +463,8 @@ export function SidebarNavItem({
           className={cn(
             'h-5 w-5 flex-shrink-0',
             isActive
-              ? 'text-primary-600 dark:text-primary-400'
-              : 'text-neutral-500 dark:text-neutral-400',
+              ? 'text-primary-800 dark:text-primary-400'
+              : 'text-muted-foreground',
             !showCollapsed && 'mr-3'
           )}
         >
@@ -525,6 +510,7 @@ export function SidebarNavItem({
         data-testid={testId}
         className={baseClasses}
         title={showCollapsed ? label : undefined}
+        aria-label={showCollapsed ? label : undefined}
       >
         {content}
       </a>
@@ -539,6 +525,7 @@ export function SidebarNavItem({
       data-testid={testId}
       className={baseClasses}
       title={showCollapsed ? label : undefined}
+      aria-label={showCollapsed ? label : undefined}
     >
       {content}
     </button>
@@ -569,7 +556,7 @@ export function SidebarToggle({
     <button
       onClick={toggleCollapsed}
       className={cn(
-        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
@@ -615,7 +602,7 @@ export function SidebarMobileToggle({
     <button
       onClick={openMobile}
       className={cn(
-        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className

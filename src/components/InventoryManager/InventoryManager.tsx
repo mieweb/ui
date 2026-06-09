@@ -1,16 +1,15 @@
 'use client';
 
 import * as React from 'react';
-
 import { Button } from '../Button/Button';
-import { Input } from '../Input/Input';
 import {
   Modal,
-  ModalBody,
-  ModalFooter,
   ModalHeader,
   ModalTitle,
+  ModalBody,
+  ModalFooter,
 } from '../Modal/Modal';
+import { Input } from '../Input/Input';
 import { Textarea } from '../Textarea/Textarea';
 
 export interface InventoryLogEntry {
@@ -124,33 +123,34 @@ export function InventoryManager({
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">
+          <h3 className="text-foreground text-lg font-semibold">
             Remaining Inventory
           </h3>
         </div>
-        <div className="text-2xl font-bold text-foreground">
+        <div className="text-foreground text-2xl font-bold">
           {currentInventory}{' '}
-          <span className="text-sm font-normal text-muted-foreground">
+          <span className="text-muted-foreground text-sm font-normal">
             units
           </span>
         </div>
       </div>
 
-      <hr className="mb-4 border-border" />
+      <hr className="border-border mb-4" />
 
       {/* Log Section Header */}
       <div className="mb-4 flex items-center justify-between">
-        <h4 className="text-base font-semibold text-foreground">
+        <h4 className="text-foreground text-base font-semibold">
           Inventory Log
         </h4>
         {onUpdateClick && (
           <button
             type="button"
             onClick={onUpdateClick}
-            className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
+            className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 flex items-center gap-1 text-sm font-medium"
           >
             Update Inventory
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -167,24 +167,24 @@ export function InventoryManager({
         )}
       </div>
 
-      <hr className="mb-4 border-border" />
+      <hr className="border-border mb-4" />
 
       {/* Log Table */}
       {logEntries.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border">
-                <th className="py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <tr className="border-border border-b">
+                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
                   Date
                 </th>
-                <th className="py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
                   User
                 </th>
-                <th className="py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="text-muted-foreground py-2 text-left text-xs font-medium tracking-wider uppercase">
                   Change
                 </th>
-                <th className="py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="text-muted-foreground py-2 text-right text-xs font-medium tracking-wider uppercase">
                   Quantity
                 </th>
               </tr>
@@ -194,27 +194,28 @@ export function InventoryManager({
                 <React.Fragment key={entry.id}>
                   <tr>
                     <td
-                      className="py-2 text-sm text-muted-foreground"
+                      className="text-muted-foreground py-2 text-sm"
                       title={formatDate(entry.createdAt)}
                     >
                       {formatRelativeTime(entry.createdAt)}
                     </td>
-                    <td className="py-2 text-sm text-muted-foreground">
+                    <td className="text-muted-foreground py-2 text-sm">
                       {entry.createdBy.name}
                     </td>
-                    <td className="py-2 text-sm text-muted-foreground">
+                    <td className="text-muted-foreground py-2 text-sm">
                       {entry.type === 'credit' ? 'Added' : 'Removed'}
                     </td>
                     <td className="py-2 text-right text-sm">
                       <span
                         className={`inline-flex items-center gap-1 ${
                           entry.type === 'credit'
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-red-600 dark:text-red-400'
+                            ? 'text-green-700 dark:text-green-400'
+                            : 'text-red-700 dark:text-red-400'
                         }`}
                       >
                         {entry.type === 'credit' ? (
                           <svg
+                            aria-hidden="true"
                             className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -229,6 +230,7 @@ export function InventoryManager({
                           </svg>
                         ) : (
                           <svg
+                            aria-hidden="true"
                             className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -249,7 +251,7 @@ export function InventoryManager({
                   {entry.memo && (
                     <tr className="bg-muted/50">
                       <td colSpan={4} className="px-2 py-1 text-right">
-                        <span className="text-xs italic text-muted-foreground">
+                        <span className="text-muted-foreground text-xs italic">
                           Memo: {entry.memo}
                         </span>
                       </td>
@@ -261,8 +263,9 @@ export function InventoryManager({
           </table>
         </div>
       ) : (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="text-muted-foreground py-8 text-center">
           <svg
+            aria-hidden="true"
             className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12"
             fill="none"
             viewBox="0 0 24 24"
@@ -294,15 +297,15 @@ export function InventoryManager({
         </ModalHeader>
         <ModalBody className="space-y-4">
           <div>
-            <h4 className="text-lg font-semibold text-foreground">
+            <h3 className="text-foreground text-lg font-semibold">
               {serviceName}
-            </h4>
+            </h3>
           </div>
 
           <div>
-            <h5 className="mb-2 text-sm font-medium text-muted-foreground">
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
               Update Inventory
-            </h5>
+            </h4>
           </div>
 
           {/* Add/Remove Toggle */}
@@ -312,11 +315,12 @@ export function InventoryManager({
               onClick={() => setUpdateType('debit')}
               className={`rounded-l-md border px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'debit'
-                  ? 'border-primary bg-primary text-primary-foreground'
+                  ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -334,13 +338,14 @@ export function InventoryManager({
             <button
               type="button"
               onClick={() => setUpdateType('credit')}
-              className={`rounded-r-md border-b border-r border-t px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'credit'
-                  ? 'border-primary bg-primary text-primary-foreground'
+                  ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"

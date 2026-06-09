@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // =============================================================================
@@ -68,9 +67,9 @@ const buttonVariants = cva(
         default:
           'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700',
         ghost:
-          'border-transparent bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800',
+          'border-transparent bg-transparent text-muted-foreground hover:bg-gray-100  dark:hover:bg-gray-800',
         minimal:
-          'border-transparent bg-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+          'border-transparent bg-transparent text-muted-foreground hover:text-gray-700  dark:hover:text-gray-200',
       },
     },
     defaultVariants: {
@@ -85,7 +84,8 @@ const buttonVariants = cva(
 // =============================================================================
 
 export interface LanguageSelectorProps
-  extends VariantProps<typeof selectorVariants>,
+  extends
+    VariantProps<typeof selectorVariants>,
     VariantProps<typeof buttonVariants> {
   /** Currently selected language code */
   value?: string;
@@ -235,7 +235,7 @@ export function LanguageSelector({
                 className={cn(
                   'flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors',
                   language.code === value
-                    ? 'dark:bg-primary-900/20 bg-primary-50 text-primary-700 dark:text-primary-400'
+                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
                 )}
               >
@@ -244,7 +244,7 @@ export function LanguageSelector({
                 )}
                 <span className="flex-1">{language.name}</span>
                 {language.code === value && (
-                  <CheckIcon className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                  <CheckIcon className="text-primary-800 dark:text-primary-400 h-4 w-4" />
                 )}
               </li>
             ))}
@@ -317,7 +317,7 @@ export function LanguageSelectorNative({
         aria-label={label}
         className={cn(
           'w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 pr-8 text-sm',
-          'text-gray-700 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500',
+          'focus:border-primary-500 focus:ring-primary-500 text-gray-700 focus:ring-2 focus:outline-none',
           'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200',
           disabled && 'cursor-not-allowed opacity-50',
           className
@@ -333,7 +333,7 @@ export function LanguageSelectorNative({
           </option>
         ))}
       </select>
-      <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+      <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 text-gray-400" />
     </div>
   );
 }
@@ -404,7 +404,7 @@ export function LanguageSelectorInline({
             index === languages.length - 1 && 'rounded-r-lg',
             index > 0 && 'border-l border-gray-200 dark:border-gray-700',
             language.code === value
-              ? 'bg-primary-600 text-white'
+              ? 'bg-primary-800 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
           )}
         >

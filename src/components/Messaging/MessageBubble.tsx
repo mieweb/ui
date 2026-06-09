@@ -1,11 +1,10 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import type {
   Message,
-  MessageAttachment,
   MessageStatus,
+  MessageAttachment,
   ReadReceipt,
 } from './types';
 
@@ -20,7 +19,7 @@ const statusIconVariants = cva(
       status: {
         sending: 'text-neutral-500',
         sent: 'text-neutral-500',
-        delivered: 'text-neutral-600 dark:text-neutral-400',
+        delivered: 'text-muted-foreground',
         read: 'text-primary-800 dark:text-primary-300',
         failed: 'text-red-500',
       },
@@ -48,6 +47,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
     >
       {status === 'sending' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5 animate-spin"
           fill="none"
           viewBox="0 0 24 24"
@@ -69,6 +69,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {status === 'sent' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5"
           fill="none"
           viewBox="0 0 24 24"
@@ -84,6 +85,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {(status === 'delivered' || status === 'read') && (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -105,6 +107,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {status === 'failed' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5"
           fill="none"
           viewBox="0 0 24 24"
@@ -226,7 +229,7 @@ function AttachmentPreview({
         onClick={onClick}
         className={cn(
           'relative block overflow-hidden rounded-lg',
-          'focus:outline-none focus:ring-2 focus:ring-primary-500',
+          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
           'transition-transform hover:scale-[1.02]',
           className
         )}
@@ -242,6 +245,7 @@ function AttachmentPreview({
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
             <div className="rounded-full bg-white/90 p-3">
               <svg
+                aria-hidden="true"
                 className="h-6 w-6 text-neutral-900"
                 fill="currentColor"
                 viewBox="0 0 24 24"
@@ -256,6 +260,7 @@ function AttachmentPreview({
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <div className="text-center text-white">
                 <svg
+                  aria-hidden="true"
                   className="mx-auto h-8 w-8 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -282,6 +287,7 @@ function AttachmentPreview({
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <div className="text-center text-white">
               <svg
+                aria-hidden="true"
                 className="mx-auto h-8 w-8 text-red-400"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -311,12 +317,13 @@ function AttachmentPreview({
         'flex items-center gap-3 rounded-lg p-3',
         'bg-white/10 hover:bg-white/20',
         'transition-colors',
-        'focus:outline-none focus:ring-2 focus:ring-primary-500',
+        'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
       )}
     >
       <div className="rounded-lg bg-white/20 p-2">
         <svg
+          aria-hidden="true"
           className="h-6 w-6"
           fill="none"
           viewBox="0 0 24 24"
@@ -369,13 +376,13 @@ const bubbleVariants = cva(
         ],
         system: [
           'mx-auto max-w-none',
-          'bg-transparent text-neutral-500 dark:text-neutral-400',
+          'bg-transparent text-muted-foreground',
           'text-center text-sm',
           'py-1 px-2',
         ],
       },
       status: {
-        sending: 'opacity-70',
+        sending: '',
         sent: '',
         delivered: '',
         read: '',
@@ -390,7 +397,8 @@ const bubbleVariants = cva(
 );
 
 export interface MessageBubbleProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'id'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'id'>,
     VariantProps<typeof bubbleVariants> {
   /** The message to display */
   message: Message;
@@ -513,10 +521,19 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           </div>
         )}
 
-        {/* Message content container */}
+        {/* Message content container.
+         *
+         * `flex-1 min-w-0` lets this column expand to fill the row so the
+         * bubble's `max-w-[85%]` resolves against the row width instead of
+         * collapsing to the bubble's own min-content. Without this, short
+         * words like "Yes!" get squeezed into a vertical stack because the
+         * column shrink-wraps the bubble and the bubble's max-width then
+         * shrinks the bubble further — a feedback loop that bottoms out at
+         * `overflow-wrap: break-word` breaking every character.
+         */}
         <div
           className={cn(
-            'flex flex-col',
+            'flex min-w-0 flex-1 flex-col',
             isOutgoing ? 'items-end' : 'items-start'
           )}
         >
@@ -524,7 +541,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {showSenderName && !isOutgoing && (
             <span
               data-slot="message-sender-name"
-              className="mb-1 px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400"
+              className="text-muted-foreground mb-1 px-1 text-xs font-medium"
             >
               {message.sender.name}
             </span>
@@ -568,7 +585,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 
             {/* Text content */}
             {hasText && (
-              <p className="whitespace-pre-wrap break-words">
+              <p className="break-words whitespace-pre-wrap">
                 {message.isDeleted ? (
                   <span className="italic opacity-60">
                     This message was deleted
@@ -594,7 +611,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
             )}
           >
             {showTimestamp && (
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="text-muted-foreground text-xs">
                 {formatTimestamp(message.timestamp)}
               </span>
             )}
@@ -617,13 +634,14 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
                 onClick={onRetry}
                 className={cn(
                   'flex items-center gap-1 rounded px-2 py-0.5',
-                  'text-xs font-medium text-red-500',
+                  'text-xs font-medium text-red-700 dark:text-red-400',
                   'hover:bg-red-50 dark:hover:bg-red-900/20',
-                  'focus:outline-none focus:ring-2 focus:ring-red-500'
+                  'focus:ring-2 focus:ring-red-500 focus:outline-none'
                 )}
                 aria-label="Retry sending message"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-3 w-3"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -680,10 +698,10 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 MessageBubble.displayName = 'MessageBubble';
 
 export {
-  AttachmentPreview,
-  bubbleVariants,
-  formatFileSize,
   MessageBubble,
   MessageStatusIcon,
   ReadReceiptIndicator,
+  AttachmentPreview,
+  bubbleVariants,
+  formatFileSize,
 };

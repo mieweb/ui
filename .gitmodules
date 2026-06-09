@@ -1,3 +1,9 @@
 [submodule "packages/datavis"]
 	path = packages/datavis
 	url = https://github.com/mieweb/datavis.git
+[submodule "packages/esheet"]
+	path = packages/esheet
+	url = https://github.com/mieweb/eSheet.git
+[submodule "packages/ychart"]
+	path = packages/ychart
+	url = https://github.com/mieweb/ychart.git

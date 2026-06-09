@@ -1,4 +1,5 @@
 export { cn } from './cn';
+export * from './html';
+export * from './phone';
 export * from './date';
 export * from './environment';
-export * from './phone';

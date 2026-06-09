@@ -10,10 +10,12 @@ export * from './components/Address';
 // Same with DataVis (src/datavis.ts)
 export * from './components/AI';
 export * from './components/Alert';
+export * from './components/AlertDialog';
 export * from './components/AppHeader';
 export * from './components/AudioPlayer';
 export * from './components/AudioRecorder';
 export * from './components/AuthDialog';
+export * from './components/Autocomplete';
 export * from './components/Avatar';
 export * from './components/Badge';
 export * from './components/BookingDialog';
@@ -24,14 +26,13 @@ export * from './components/Button';
 export * from './components/Card';
 export * from './components/Checkbox';
 export * from './components/CheckrIntegration';
-export * from './components/ClaimProviderForm';
+export * from './components/Collapsible';
 export * from './components/CommandPalette';
 export * from './components/ConfirmDialog';
 export * from './components/ConnectionStatus';
 export * from './components/CountBadge';
 export * from './components/CountryCodeDropdown';
 export * from './components/CookieConsent';
-export * from './components/CreateInvoiceModal';
 export * from './components/CSVColumnMapper';
 export * from './components/DashboardWidget';
 export * from './components/DateInput';
@@ -39,6 +40,8 @@ export * from './components/DateRangePicker';
 export * from './components/DocumentScanner';
 export * from './components/Dropdown';
 export * from './components/DropzoneOverlay';
+export * from './components/ClaimProviderForm';
+export * from './components/CreateInvoiceModal';
 // CreateReferralModal exports ServiceOption which conflicts with ProviderSearchFilters
 export {
   CreateReferralModal,
@@ -52,10 +55,11 @@ export * from './components/EmployeeProfile';
 export * from './components/EmployerContactCard';
 export * from './components/EmployerList';
 export * from './components/EmployerPricingCard';
-export * from './components/EmployerServiceModal';
 export * from './components/EmployerView';
+export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
+export * from './components/FloatingWindow';
 // HelpSupportPanel exports FAQItem which conflicts with Accordion
 export {
   type FAQItem as HelpFAQItem,
@@ -67,6 +71,7 @@ export * from './components/HeroActionCard';
 export * from './components/HRISProviderSelector';
 export * from './components/Input';
 export * from './components/InventoryManager';
+export * from './components/Label';
 export * from './components/InviteUserModal';
 export * from './components/InvoiceList';
 export * from './components/InvoicePaymentPage';
@@ -75,6 +80,7 @@ export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
 export * from './components/LiveOrderTracker';
 export * from './components/LoadingPage';
+export * from './components/Markdown';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NearbyProviderCard';
@@ -84,8 +90,8 @@ export * from './components/OrderCard';
 export * from './components/OrderConfirmationWizard';
 // OrderList exports OrderStatus which conflicts with OrderCard
 export {
-  defaultOrderTabs,
   OrderList,
+  defaultOrderTabs,
   type OrderListProps,
   type OrderListTab,
 } from './components/OrderList';
@@ -126,8 +132,10 @@ export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
+export * from './components/RichTextEditor';
 export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
+export * from './components/ScrollArea';
 export * from './components/Select';
 export * from './components/ServiceAccordion';
 export * from './components/ServiceBadge';
@@ -137,11 +145,13 @@ export * from './components/ServiceGrid';
 export * from './components/ServicePicker';
 export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
+export * from './components/Separator';
+export * from './components/Sheet';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
-  type ServiceFormData,
   SetupServiceModal,
   type SetupServiceModalProps,
+  type ServiceFormData,
 } from './components/SetupServiceModal';
 export * from './components/Sidebar';
 export * from './components/SiteFooter';
@@ -162,19 +172,20 @@ export * from './components/Textarea';
 export * from './components/ThemeProvider';
 export * from './components/Timeline';
 export * from './components/Toast';
+export * from './components/Toggle';
 export * from './components/Tooltip';
 export * from './components/UserAvatar';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {
-  ReportDatePicker,
-  type ReportDatePickerProps,
-  type ReportResult,
-  ReportTimeRange,
-  type ReportTimeRangeProps,
-  type SystemReport,
   WebChartReportViewer,
+  ReportTimeRange,
+  ReportDatePicker,
   type WebChartReportViewerProps,
+  type SystemReport,
+  type ReportResult,
+  type ReportTimeRangeProps,
+  type ReportDatePickerProps,
 } from './components/WebChartReportViewer';
 export * from './components/WebsiteInput';
 export * from './components/WorkspaceSwitcher';

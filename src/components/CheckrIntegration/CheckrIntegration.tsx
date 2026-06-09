@@ -299,6 +299,7 @@ export function CheckrIntegration({
             className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-lg"
           >
             <svg
+              aria-hidden="true"
               className="text-success-700 dark:text-success-300 h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
@@ -332,6 +333,7 @@ export function CheckrIntegration({
         ) : (
           <Button variant="primary" onClick={onConnect}>
             <svg
+              aria-hidden="true"
               className="mr-2 h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -356,6 +358,7 @@ export function CheckrIntegration({
           className="bg-destructive/10 border-destructive/20 text-destructive-700 dark:text-destructive-300 mb-4 rounded-lg border p-4"
         >
           <svg
+            aria-hidden="true"
             className="mr-2 inline-block h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
@@ -403,6 +406,7 @@ export function CheckrIntegration({
           <div data-slot="checkr-actions" className="mb-6 flex flex-wrap gap-3">
             <Button variant="primary" onClick={() => setShowInviteModal(true)}>
               <svg
+                aria-hidden="true"
                 className="mr-2 h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -419,6 +423,7 @@ export function CheckrIntegration({
             </Button>
             <Button variant="outline" onClick={onRefresh}>
               <svg
+                aria-hidden="true"
                 className="mr-2 h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -479,6 +484,7 @@ export function CheckrIntegration({
                         >
                           {selectedReports.has(report.id) && (
                             <svg
+                              aria-hidden="true"
                               className="text-primary-foreground h-3 w-3"
                               fill="none"
                               viewBox="0 0 24 24"
@@ -574,6 +580,7 @@ export function CheckrIntegration({
                 className="text-muted-foreground py-8 text-center"
               >
                 <svg
+                  aria-hidden="true"
                   className="text-muted-foreground/30 mx-auto mb-2 h-12 w-12"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -600,6 +607,7 @@ export function CheckrIntegration({
           className="border-border rounded-lg border border-dashed p-8 text-center"
         >
           <svg
+            aria-hidden="true"
             className="text-muted-foreground/30 mx-auto mb-4 h-12 w-12"
             fill="none"
             viewBox="0 0 24 24"
@@ -617,6 +625,7 @@ export function CheckrIntegration({
           </p>
           <Button variant="primary" onClick={onConnect}>
             <svg
+              aria-hidden="true"
               className="mr-2 h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"

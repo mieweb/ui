@@ -54,10 +54,10 @@ function CharacterCounter({
       className={cn(
         'text-xs tabular-nums',
         isOver
-          ? 'font-medium text-red-500'
+          ? 'font-medium text-red-700 dark:text-red-400'
           : isWarning
-            ? 'text-amber-500'
-            : 'text-neutral-500',
+            ? 'text-amber-700 dark:text-amber-400'
+            : 'text-neutral-600 dark:text-neutral-400',
         className
       )}
       aria-live="polite"
@@ -87,11 +87,11 @@ const sendButtonVariants = cva(
       variant: {
         primary: [
           'bg-primary-800 text-white',
-          'hover:bg-primary-700',
+          'hover:bg-primary-900',
           'active:scale-95',
         ],
         subtle: [
-          'bg-transparent text-primary-600',
+          'bg-transparent text-primary-800',
           'hover:bg-primary-50 dark:hover:bg-primary-900/20',
         ],
       },
@@ -130,7 +130,12 @@ const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
         {...props}
       >
         {isLoading ? (
-          <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+          <svg
+            aria-hidden="true"
+            className="h-5 w-5 animate-spin"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
             <circle
               className="opacity-25"
               cx="12"
@@ -147,6 +152,7 @@ const SendButton = React.forwardRef<HTMLButtonElement, SendButtonProps>(
           </svg>
         ) : (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             viewBox="0 0 24 24"
@@ -178,6 +184,10 @@ export interface MessageComposerProps {
   onTypingStart?: () => void;
   /** Called when the user stops typing */
   onTypingStop?: () => void;
+  /** Controlled value for the textarea */
+  value?: string;
+  /** Callback when value changes (for controlled mode) */
+  onValueChange?: (value: string) => void;
   /** Placeholder text */
   placeholder?: string;
   /** Maximum message length */
@@ -212,6 +222,8 @@ export interface MessageComposerProps {
   onCancelReply?: () => void;
   /** Visual variant - 'default' shows border-t, 'minimal' has no border */
   variant?: 'default' | 'minimal';
+  /** Content to render inside the input wrapper (e.g. a mic button) */
+  inputTrailing?: React.ReactNode;
   /** Additional class name */
   className?: string;
 }
@@ -238,6 +250,8 @@ const MessageComposer = React.forwardRef<
       onSend,
       onTypingStart,
       onTypingStop,
+      value: controlledValue,
+      onValueChange,
       placeholder = 'Type a message...',
       maxLength = 1600,
       showCharacterCount = false,
@@ -253,12 +267,26 @@ const MessageComposer = React.forwardRef<
       replyTo = null,
       onCancelReply,
       variant = 'default',
+      inputTrailing,
       className,
     },
     ref
   ) => {
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-    const [content, setContent] = React.useState('');
+    const [internalContent, setInternalContent] = React.useState('');
+    const isControlled = controlledValue !== undefined;
+    const content = isControlled ? controlledValue : internalContent;
+    const setContent = React.useCallback(
+      (val: string | ((prev: string) => string)) => {
+        if (isControlled) {
+          const newVal = typeof val === 'function' ? val(controlledValue) : val;
+          onValueChange?.(newVal);
+        } else {
+          setInternalContent(val);
+        }
+      },
+      [isControlled, controlledValue, onValueChange]
+    );
     const [attachments, setAttachments] = React.useState<PendingAttachment[]>(
       []
     );
@@ -437,7 +465,7 @@ const MessageComposer = React.forwardRef<
               )}
             >
               <div className="min-w-0 flex-1">
-                <span className="text-primary-600 dark:text-primary-400 text-xs font-medium">
+                <span className="text-primary-800 dark:text-primary-400 text-xs font-medium">
                   Replying to {replyTo.senderName}
                 </span>
                 <p className="truncate text-sm text-neutral-600 dark:text-neutral-300">
@@ -456,6 +484,7 @@ const MessageComposer = React.forwardRef<
                 aria-label="Cancel reply"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -532,7 +561,8 @@ const MessageComposer = React.forwardRef<
                 disabled={disabled || isSending}
                 rows={1}
                 className={cn(
-                  'w-full resize-none rounded-2xl px-4 py-2.5',
+                  'w-full resize-none rounded-2xl py-2.5',
+                  inputTrailing ? 'pr-10 pl-4' : 'px-4',
                   'bg-neutral-100 dark:bg-neutral-800',
                   'text-neutral-900 dark:text-neutral-100',
                   'placeholder:text-neutral-400 dark:placeholder:text-neutral-500',
@@ -544,6 +574,16 @@ const MessageComposer = React.forwardRef<
                 aria-label="Message"
                 aria-describedby={showCharacterCount ? 'char-count' : undefined}
               />
+
+              {/* Trailing content (e.g. record button) */}
+              {inputTrailing && (
+                <div
+                  data-slot="composer-input-trailing"
+                  className="pointer-events-none absolute top-0 right-1 flex h-[44px] items-center [&>*]:pointer-events-auto"
+                >
+                  {inputTrailing}
+                </div>
+              )}
 
               {/* Character count */}
               {showCharacterCount && (

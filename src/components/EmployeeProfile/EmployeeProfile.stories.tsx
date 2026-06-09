@@ -181,16 +181,26 @@ export const TabsHorizontal: StoryObj<typeof OrderSidebarTabs> = {
   render: function Render() {
     const [activeTab, setActiveTab] = useState('timeline');
     return (
-      <OrderSidebarTabs
-        tabs={[
-          { id: 'timeline', label: 'Timeline' },
-          { id: 'services', label: 'Services' },
-          { id: 'attachments', label: 'Attachments' },
-        ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        orientation="horizontal"
-      />
+      <>
+        <OrderSidebarTabs
+          tabs={[
+            { id: 'timeline', label: 'Timeline' },
+            { id: 'services', label: 'Services' },
+            { id: 'attachments', label: 'Attachments' },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          orientation="horizontal"
+        />
+        <div
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+          className="text-muted-foreground p-4 text-sm"
+        >
+          Content for {activeTab}
+        </div>
+      </>
     );
   },
   parameters: {
@@ -206,16 +216,26 @@ export const TabsVertical: StoryObj<typeof OrderSidebarTabs> = {
   render: function Render() {
     const [activeTab, setActiveTab] = useState('timeline');
     return (
-      <OrderSidebarTabs
-        tabs={[
-          { id: 'timeline', label: 'Timeline' },
-          { id: 'services', label: 'Services' },
-          { id: 'attachments', label: 'Attachments' },
-        ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        orientation="vertical"
-      />
+      <div className="flex">
+        <OrderSidebarTabs
+          tabs={[
+            { id: 'timeline', label: 'Timeline' },
+            { id: 'services', label: 'Services' },
+            { id: 'attachments', label: 'Attachments' },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          orientation="vertical"
+        />
+        <div
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+          className="text-muted-foreground flex-1 p-4 text-sm"
+        >
+          Content for {activeTab}
+        </div>
+      </div>
     );
   },
   parameters: {

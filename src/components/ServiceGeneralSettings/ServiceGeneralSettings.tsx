@@ -1,12 +1,11 @@
 'use client';
 
 import * as React from 'react';
-
-import { Button } from '../Button/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../Card/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
 import { Input } from '../Input/Input';
 import { Select } from '../Select/Select';
 import { Switch } from '../Switch/Switch';
+import { Button } from '../Button/Button';
 
 export interface ServiceGeneralSettingsProps {
   /** Service name */
@@ -92,7 +91,7 @@ export function ServiceGeneralSettings({
           General Settings
         </CardTitle>
         <p
-          className="text-sm text-gray-500 dark:text-gray-400"
+          className="text-muted-foreground text-sm"
           data-slot="service-settings-description"
         >
           Basic service information and configuration
@@ -106,7 +105,7 @@ export function ServiceGeneralSettings({
             className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
             data-slot="service-settings-error"
           >
-            <p className="text-sm text-red-600 dark:text-red-400">
+            <p className="text-sm text-red-700 dark:text-red-400">
               {errorMessage}
             </p>
           </div>
@@ -118,24 +117,32 @@ export function ServiceGeneralSettings({
           data-slot="service-settings-toggles"
         >
           <div className="flex items-center gap-3">
-            <Switch checked={isActive} onCheckedChange={onIsActiveChange} />
+            <Switch
+              aria-label="Active"
+              checked={isActive}
+              onCheckedChange={onIsActiveChange}
+            />
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Active
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground text-xs">
                 Service is available for orders
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Switch checked={isFeatured} onCheckedChange={onIsFeaturedChange} />
+            <Switch
+              aria-label="Featured"
+              checked={isFeatured}
+              onCheckedChange={onIsFeaturedChange}
+            />
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Featured
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground text-xs">
                 Show prominently in listings
               </p>
             </div>
@@ -161,7 +168,7 @@ export function ServiceGeneralSettings({
             </label>
             <textarea
               id="service-description"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               rows={3}
               value={description}
               onChange={(e) => onDescriptionChange?.(e.target.value)}
@@ -210,7 +217,7 @@ export function ServiceGeneralSettings({
                 Base Price
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                   $
                 </span>
                 <input
@@ -218,7 +225,7 @@ export function ServiceGeneralSettings({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="w-full rounded-md border border-gray-300 py-2 pl-7 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={basePrice}
                   onChange={(e) =>
                     onBasePriceChange?.(parseFloat(e.target.value) || 0)
@@ -240,14 +247,14 @@ export function ServiceGeneralSettings({
                   id="turnaround-days"
                   type="number"
                   min="0"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 pr-16 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 pr-16 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                   value={turnaroundDays ?? ''}
                   onChange={(e) =>
                     onTurnaroundDaysChange?.(parseInt(e.target.value) || 0)
                   }
                   placeholder="0"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
                   days
                 </span>
               </div>

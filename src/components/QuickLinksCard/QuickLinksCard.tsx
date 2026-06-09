@@ -99,13 +99,14 @@ export function QuickLinksCard({
               {link.badge != null && (
                 <span
                   data-slot="quick-links-badge"
-                  className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-[var(--mieweb-primary-700)] dark:text-[var(--mieweb-primary-400)]"
+                  className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-[var(--mieweb-primary-900)] dark:text-[var(--mieweb-primary-400)]"
                 >
                   {link.badge}
                 </span>
               )}
               {link.badge == null && layout !== 'grid' && (
                 <svg
+                  aria-hidden="true"
                   data-slot="quick-links-chevron"
                   className="text-muted-foreground h-4 w-4"
                   fill="none"

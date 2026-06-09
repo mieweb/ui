@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Breadcrumb, BreadcrumbProps, BreadcrumbSlash } from './Breadcrumb';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
-
-import { Breadcrumb, BreadcrumbProps, BreadcrumbSlash } from './Breadcrumb';
 
 // Map of separator names to React elements
 const separatorMap: Record<string, React.ReactNode> = {
@@ -171,7 +170,7 @@ export const CustomSeparator: Story = {
         { label: 'Category', href: '/category' },
         { label: 'Subcategory' },
       ]}
-      separator={<span className="mx-2 text-muted-foreground">→</span>}
+      separator={<span className="text-muted-foreground mx-2">→</span>}
     />
   ),
 };
@@ -187,7 +186,7 @@ export const WithCustomLink: Story = {
       renderLink={(item) => (
         <a
           href={item.href}
-          className="text-sm text-primary-500 underline hover:text-primary-600"
+          className="text-primary-800 hover:text-primary-800 text-sm underline"
         >
           {item.label}
         </a>

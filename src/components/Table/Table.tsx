@@ -13,6 +13,10 @@ export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> 
 /**
  * An accessible table component.
  *
+ * Prefer DataVis NITRO in most cases -- it is designed to be simple out of the box while
+ * exposing power-user features for click-curious users. Use `Table` only in lightweight
+ * situations where that overhead is genuinely unneeded.
+ *
  * @example
  * ```tsx
  * <Table>

@@ -50,7 +50,7 @@ const countBadgeVariants = cva(
           'dark:border-border/40 dark:hover:border-border dark:hover:bg-muted/30',
         ],
         info: [
-          'border-primary-200 text-primary-700',
+          'border-primary-200 text-primary-800',
           'hover:border-primary-300 hover:bg-primary-50',
           'dark:border-primary-800 dark:text-primary-300',
           'dark:hover:border-primary-700 dark:hover:bg-primary-950/50',
@@ -380,13 +380,13 @@ function HoverMenu({
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-neutral-700">
-              <th className="px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-400">
+              <th className="text-muted-foreground px-3 py-1.5 font-medium">
                 #
               </th>
-              <th className="px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-400">
+              <th className="text-muted-foreground px-3 py-1.5 font-medium">
                 Label
               </th>
-              <th className="px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-400">
+              <th className="text-muted-foreground px-3 py-1.5 font-medium">
                 Status
               </th>
               <th className="w-8 px-1 py-1.5">
@@ -414,7 +414,7 @@ function HoverMenu({
                         statusDotColor[item.status]
                       )}
                     />
-                    <span className="text-neutral-600 dark:text-neutral-400">
+                    <span className="text-muted-foreground">
                       {statusLabel[item.status]}
                     </span>
                   </span>

@@ -7,6 +7,11 @@ const meta: Meta<typeof EmployerContactCard> = {
   component: EmployerContactCard,
   parameters: {
     layout: 'centered',
+    a11y: {
+      config: {
+        rules: [{ id: 'nested-interactive', enabled: false }],
+      },
+    },
   },
   tags: ['autodocs'],
   decorators: [

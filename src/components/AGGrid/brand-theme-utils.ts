@@ -6,15 +6,15 @@
  */
 
 import * as React from 'react';
-
+import type { BrandConfig } from '../../brands/types';
 import {
-  bluehiveBrand,
-  enterpriseHealthBrand,
   miewebBrand,
+  bluehiveBrand,
+  ccmeBrand,
   wagglelineBrand,
   webchartBrand,
+  enterpriseHealthBrand,
 } from '../../brands';
-import type { BrandConfig } from '../../brands/types';
 
 // =============================================================================
 // Brand Theme Types
@@ -23,6 +23,7 @@ import type { BrandConfig } from '../../brands/types';
 export type AGGridBrandName =
   | 'mieweb'
   | 'bluehive'
+  | 'ccme'
   | 'waggleline'
   | 'webchart'
   | 'enterprise-health';
@@ -47,6 +48,11 @@ export const agGridBrandThemes: Record<AGGridBrandName, AGGridBrandTheme> = {
     name: 'bluehive',
     config: bluehiveBrand,
     cssClass: 'ag-brand-bluehive',
+  },
+  ccme: {
+    name: 'ccme',
+    config: ccmeBrand,
+    cssClass: 'ag-brand-ccme',
   },
   waggleline: {
     name: 'waggleline',

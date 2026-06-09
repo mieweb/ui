@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-
 import {
-  AuthButtons,
-  type NavLink,
-  NavLinks,
   SiteHeader,
   SiteLogo,
+  NavLinks,
+  AuthButtons,
   UserMenu,
+  type NavLink,
   type UserProfile,
 } from './SiteHeader';
 
@@ -62,7 +61,7 @@ const meta: Meta<typeof SiteHeader> = {
       <div className="min-h-[300px] bg-gray-100 dark:bg-gray-950">
         <Story />
         <div className="p-8">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Page content below header
           </p>
         </div>
@@ -98,7 +97,7 @@ export const GlassVariant: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="min-h-[300px] bg-gradient-to-br from-primary-500 to-purple-600">
+      <div className="from-primary-500 min-h-[300px] bg-gradient-to-br to-purple-600">
         <Story />
         <div className="p-8 pt-24">
           <p className="text-white">Glass variant with backdrop blur effect</p>
@@ -112,7 +111,7 @@ export const GlassVariant: Story = {
 export const LogoVariants: StoryObj<typeof SiteLogo> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="rounded-lg bg-primary-600 p-4">
+      <div className="bg-primary-800 rounded-lg p-4">
         <SiteLogo name="BlueHive" variant="light" />
       </div>
       <div className="rounded-lg border bg-white p-4">
@@ -125,11 +124,19 @@ export const LogoVariants: StoryObj<typeof SiteLogo> = {
 export const NavLinksDemo: StoryObj<typeof NavLinks> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="rounded-lg bg-primary-600 p-4">
-        <NavLinks links={defaultLinks} variant="light" />
+      <div className="bg-primary-800 rounded-lg p-4">
+        <NavLinks
+          links={defaultLinks}
+          variant="light"
+          aria-label="Light variant navigation"
+        />
       </div>
-      <div className="rounded-lg border bg-white p-4">
-        <NavLinks links={defaultLinks} variant="dark" />
+      <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+        <NavLinks
+          links={defaultLinks}
+          variant="dark"
+          aria-label="Dark variant navigation"
+        />
       </div>
     </div>
   ),
@@ -138,10 +145,10 @@ export const NavLinksDemo: StoryObj<typeof NavLinks> = {
 export const AuthButtonsDemo: StoryObj<typeof AuthButtons> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="rounded-lg bg-primary-600 p-4">
+      <div className="bg-primary-800 rounded-lg p-4">
         <AuthButtons variant="light" onLogin={() => {}} onSignUp={() => {}} />
       </div>
-      <div className="rounded-lg border bg-white p-4">
+      <div className="rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <AuthButtons variant="dark" onLogin={() => {}} onSignUp={() => {}} />
       </div>
     </div>
@@ -151,13 +158,13 @@ export const AuthButtonsDemo: StoryObj<typeof AuthButtons> = {
 export const UserMenuDemo: StoryObj<typeof UserMenu> = {
   render: () => (
     <div className="space-y-4 p-4">
-      <div className="flex justify-end rounded-lg bg-primary-600 p-4">
+      <div className="bg-primary-800 flex justify-end rounded-lg p-4">
         <UserMenu user={sampleUser} variant="light" onLogout={() => {}} />
       </div>
-      <div className="flex justify-end rounded-lg border bg-white p-4">
+      <div className="flex justify-end rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <UserMenu user={sampleUser} variant="dark" onLogout={() => {}} />
       </div>
-      <div className="flex justify-end rounded-lg border bg-white p-4">
+      <div className="flex justify-end rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <UserMenu
           user={{ ...sampleUser, avatarUrl: undefined }}
           variant="dark"

@@ -275,7 +275,7 @@ export function BusinessHoursEditor({
             {hours.length === 0 ? (
               <p
                 data-slot="business-hours-closed"
-                className="text-sm text-gray-500 italic dark:text-gray-400"
+                className="text-muted-foreground text-sm italic"
               >
                 Closed
               </p>

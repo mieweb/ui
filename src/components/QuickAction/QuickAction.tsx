@@ -1,15 +1,14 @@
-import { cva } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const quickActionIconVariants = cva(
-  ['flex shrink-0 items-center justify-center rounded-xl', 'h-10 w-10'],
+  ['flex items-center justify-center rounded-xl', 'h-10 w-10'],
   {
     variants: {
       color: {
         primary:
-          'bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400',
+          'bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-400',
         green:
           'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400',
         purple:
@@ -32,7 +31,7 @@ const quickActionIconVariants = cva(
 
 const quickActionVariants = cva(
   [
-    'flex h-full items-start gap-3.5 rounded-xl border p-4 text-left',
+    'flex items-center gap-3 rounded-xl border p-4 text-left',
     'transition-colors duration-200',
     'border-neutral-200 bg-white',
     'hover:border-primary-300 hover:bg-primary-50',
@@ -68,11 +67,10 @@ export type QuickActionColor =
   | 'amber'
   | 'neutral';
 
-export interface QuickActionProps
-  extends Omit<
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    'color' | 'disabled'
-  > {
+export interface QuickActionProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  'color' | 'disabled'
+> {
   /** The main title text */
   title: string;
   /** The subtitle/description text */
@@ -127,7 +125,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
         >
           {icon}
         </div>
-        <div data-slot="quick-action-content" className="min-w-0">
+        <div data-slot="quick-action-content">
           <div
             data-slot="quick-action-title"
             className="font-medium text-neutral-900 dark:text-white"
@@ -136,7 +134,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
           </div>
           <div
             data-slot="quick-action-subtitle"
-            className="mt-0.5 text-xs leading-snug text-neutral-500 dark:text-neutral-400"
+            className="text-muted-foreground text-xs"
           >
             {subtitle}
           </div>
@@ -179,6 +177,7 @@ QuickAction.displayName = 'QuickAction';
 export const QuickActionIcons = {
   Calendar: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -196,6 +195,7 @@ export const QuickActionIcons = {
   ),
   Clipboard: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -213,6 +213,7 @@ export const QuickActionIcons = {
   ),
   User: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -230,6 +231,7 @@ export const QuickActionIcons = {
   ),
   Document: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -247,6 +249,7 @@ export const QuickActionIcons = {
   ),
   Settings: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -270,6 +273,7 @@ export const QuickActionIcons = {
   ),
   Help: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -287,6 +291,7 @@ export const QuickActionIcons = {
   ),
   Search: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -304,6 +309,7 @@ export const QuickActionIcons = {
   ),
   Bell: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -332,8 +338,7 @@ export const QuickActionIcons = {
  * </QuickActionGroup>
  * ```
  */
-export interface QuickActionGroupProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface QuickActionGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Optional title to display above the quick actions */
   title?: string;
   /** Number of columns on different screen sizes */
@@ -409,6 +414,6 @@ QuickActionGroup.displayName = 'QuickActionGroup';
 export {
   QuickAction,
   QuickActionGroup,
-  quickActionIconVariants,
   quickActionVariants,
+  quickActionIconVariants,
 };

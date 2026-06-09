@@ -167,6 +167,9 @@ const meta: Meta<typeof AGGrid> = {
   component: AGGrid,
   parameters: {
     layout: 'padded',
+    // AG Grid is a third-party component whose internal DOM renders elements
+    // with ARIA and contrast issues we cannot control.
+    a11y: { test: 'off' },
     docs: {
       description: {
         component: `

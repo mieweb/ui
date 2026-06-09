@@ -1,14 +1,13 @@
 import * as React from 'react';
-
 import { cn } from '../../utils/cn';
-import { MessageBubble } from './MessageBubble';
 import type {
   Message,
-  MessageAttachment,
   MessageGroup,
   MessageParticipant,
+  MessageAttachment,
   TypingState,
 } from './types';
+import { MessageBubble } from './MessageBubble';
 
 // ============================================================================
 // Utility Functions
@@ -191,9 +190,7 @@ function TypingIndicator({ typingState, className }: TypingIndicatorProps) {
           style={{ animationDelay: '300ms' }}
         />
       </div>
-      <span className="text-xs text-neutral-500 dark:text-neutral-400">
-        {typingText}
-      </span>
+      <span className="text-muted-foreground text-xs">{typingText}</span>
     </div>
   );
 }
@@ -277,6 +274,7 @@ function EmptyState({
           className="mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800"
         >
           <svg
+            aria-hidden="true"
             className="h-12 w-12 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
@@ -294,7 +292,7 @@ function EmptyState({
       <h3 className="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
         {title}
       </h3>
-      <p className="mb-4 max-w-sm text-sm text-neutral-500 dark:text-neutral-400">
+      <p className="text-muted-foreground mb-4 max-w-sm text-sm">
         {description}
       </p>
       {action}
@@ -335,7 +333,7 @@ function LoadMoreButton({
           'rounded-full px-4 py-2 text-sm font-medium',
           'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
           'hover:bg-neutral-200 dark:hover:bg-neutral-700',
-          'focus:outline-none focus:ring-2 focus:ring-primary-500',
+          'focus:ring-primary-500 focus:ring-2 focus:outline-none',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'transition-colors'
         )}
@@ -344,6 +342,7 @@ function LoadMoreButton({
         {isLoading ? (
           <span className="flex items-center gap-2">
             <svg
+              aria-hidden="true"
               className="h-4 w-4 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -509,6 +508,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
     if (isLoading) {
       return (
         <div
+          role="status"
           className={cn(
             'flex flex-1 flex-col gap-3 overflow-y-auto p-4',
             className
@@ -619,17 +619,18 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
               bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
             }}
             className={cn(
-              'fixed bottom-24 right-4 z-10',
+              'fixed right-4 bottom-24 z-10',
               'rounded-full p-3 shadow-lg',
               'bg-white dark:bg-neutral-800',
               'border border-neutral-200 dark:border-neutral-700',
               'hover:bg-neutral-50 dark:hover:bg-neutral-700',
-              'focus:outline-none focus:ring-2 focus:ring-primary-500',
+              'focus:ring-primary-500 focus:ring-2 focus:outline-none',
               'transition-all'
             )}
             aria-label="Scroll to bottom"
           >
             <svg
+              aria-hidden="true"
               className="h-5 w-5 text-neutral-600 dark:text-neutral-300"
               fill="none"
               viewBox="0 0 24 24"
@@ -652,13 +653,13 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
 MessageList.displayName = 'MessageList';
 
 export {
-  DateSeparator,
-  EmptyState,
-  formatDateLabel,
-  groupMessagesByDate,
-  isSameSenderGroup,
-  LoadMoreButton,
   MessageList,
   SkeletonMessage,
   TypingIndicator,
+  DateSeparator,
+  EmptyState,
+  LoadMoreButton,
+  groupMessagesByDate,
+  formatDateLabel,
+  isSameSenderGroup,
 };

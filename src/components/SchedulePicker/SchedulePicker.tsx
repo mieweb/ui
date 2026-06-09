@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -28,7 +27,8 @@ const dateButtonVariants = cva(
 );
 
 export interface DateButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof dateButtonVariants> {
   /** The date to display */
   date: Date;
@@ -49,7 +49,7 @@ const DateButton = React.forwardRef<HTMLButtonElement, DateButtonProps>(
       >
         <div
           data-slot="schedule-date-weekday"
-          className="text-xs text-neutral-500 dark:text-neutral-400"
+          className="text-muted-foreground text-xs"
         >
           {date.toLocaleDateString('en-US', { weekday: 'short' })}
         </div>
@@ -61,7 +61,7 @@ const DateButton = React.forwardRef<HTMLButtonElement, DateButtonProps>(
         </div>
         <div
           data-slot="schedule-date-month"
-          className="text-xs text-neutral-500 dark:text-neutral-400"
+          className="text-muted-foreground text-xs"
         >
           {date.toLocaleDateString('en-US', { month: 'short' })}
         </div>
@@ -97,7 +97,8 @@ const timeButtonVariants = cva(
 );
 
 export interface TimeButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof timeButtonVariants> {
   /** The time string to display (e.g., "8:00 AM") */
   time: string;
@@ -147,7 +148,8 @@ const radioOptionVariants = cva(
 );
 
 export interface RadioOptionProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
     VariantProps<typeof radioOptionVariants> {
   /** Title text for the option */
   title: React.ReactNode;
@@ -187,7 +189,7 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
             className={cn(
               'flex h-5 w-5 items-center justify-center rounded-full border-2',
               selected
-                ? 'border-primary-500 bg-primary-500'
+                ? 'border-primary-500 bg-primary-800'
                 : 'border-neutral-300'
             )}
           >
@@ -208,7 +210,7 @@ const RadioOption = React.forwardRef<HTMLDivElement, RadioOptionProps>(
             {description && (
               <div
                 data-slot="schedule-radio-desc"
-                className="text-sm text-neutral-500 dark:text-neutral-400"
+                className="text-muted-foreground text-sm"
               >
                 {description}
               </div>
@@ -367,8 +369,7 @@ TimePicker.displayName = 'TimePicker';
 // Schedule Picker Component (Composite)
 // ============================================================================
 
-export interface SchedulePickerProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface SchedulePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Array of available dates to display */
   dates: Date[];
   /** Array of available time strings */
@@ -459,12 +460,12 @@ SchedulePicker.displayName = 'SchedulePicker';
 
 export {
   DateButton,
-  dateButtonVariants,
-  DatePicker,
-  RadioOption,
-  radioOptionVariants,
-  SchedulePicker,
   TimeButton,
-  timeButtonVariants,
+  RadioOption,
+  DatePicker,
   TimePicker,
+  SchedulePicker,
+  dateButtonVariants,
+  timeButtonVariants,
+  radioOptionVariants,
 };

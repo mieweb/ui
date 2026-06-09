@@ -176,7 +176,7 @@ export function DropZone({
               'pointer-events-none'
             )}
           >
-            <span className="text-primary-600 dark:text-primary-400 text-lg font-medium">
+            <span className="text-primary-800 dark:text-primary-400 text-lg font-medium">
               Drop files here
             </span>
           </div>

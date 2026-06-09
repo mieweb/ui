@@ -98,7 +98,7 @@ module.exports = {
           foreground: 'var(--mieweb-muted-foreground, hsl(215.4 16.3% 46.9%))',
         },
         destructive: {
-          DEFAULT: 'var(--mieweb-destructive, hsl(0 84.2% 60.2%))',
+          DEFAULT: 'var(--mieweb-destructive, var(--mieweb-destructive-500, hsl(0 72.2% 50.6%)))',
           foreground: 'var(--mieweb-destructive-foreground, hsl(210 40% 98%))',
         },
         success: {

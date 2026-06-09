@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-
 import { Avatar } from '../Avatar/Avatar';
 import { Badge } from '../Badge/Badge';
 import { Card } from '../Card/Card';
@@ -182,13 +181,13 @@ export function OrderCard({
         <div className="mb-3 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground">
+              <span className="text-foreground font-semibold">
                 #{orderNumber}
               </span>
               <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
             </div>
             <p
-              className="mt-1 text-sm text-muted-foreground"
+              className="text-muted-foreground mt-1 text-sm"
               title={formatDate(createdAt)}
             >
               {formatRelativeTime(createdAt)}
@@ -196,7 +195,7 @@ export function OrderCard({
           </div>
           {totalAmount !== undefined && (
             <div className="flex-shrink-0 text-right">
-              <p className="font-semibold text-foreground">
+              <p className="text-foreground font-semibold">
                 {formatCurrency(totalAmount, currency)}
               </p>
             </div>
@@ -211,11 +210,11 @@ export function OrderCard({
               size="sm"
             />
             <div className="min-w-0">
-              <p className="truncate font-medium text-foreground">
+              <p className="text-foreground truncate font-medium">
                 {employee.firstName} {employee.lastName}
               </p>
               {employer && (
-                <p className="truncate text-sm text-muted-foreground">
+                <p className="text-muted-foreground truncate text-sm">
                   {employer.name}
                 </p>
               )}
@@ -225,20 +224,20 @@ export function OrderCard({
 
         {/* Services */}
         <div className="mb-3">
-          <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wider uppercase">
             Services ({services.length})
           </p>
           <div className="flex flex-wrap gap-1">
             {services.slice(0, 3).map((service) => (
               <span
                 key={service.id}
-                className="inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
+                className="bg-muted text-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium"
               >
                 {service.name}
               </span>
             ))}
             {services.length > 3 && (
-              <span className="inline-flex items-center rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              <span className="bg-muted text-muted-foreground inline-flex items-center rounded px-2 py-0.5 text-xs font-medium">
                 +{services.length - 3} more
               </span>
             )}
@@ -247,8 +246,9 @@ export function OrderCard({
 
         {/* Scheduled Date */}
         {scheduledDate && (
-          <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground mb-3 flex items-center gap-2 text-sm">
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -267,18 +267,18 @@ export function OrderCard({
 
         {/* Rejection Reason */}
         {status === 'rejected' && rejectionReason && (
-          <div className="bg-destructive/10 mb-3 rounded p-2 text-sm text-destructive">
+          <div className="bg-destructive/10 text-destructive-700 dark:text-destructive-400 mb-3 rounded p-2 text-sm">
             <span className="font-medium">Reason:</span> {rejectionReason}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between border-t border-border pt-3">
+        <div className="border-border flex items-center justify-between border-t pt-3">
           {onView && (
             <button
               type="button"
               onClick={handleViewClick}
-              className="text-primary hover:text-primary/80 text-sm font-medium"
+              className="text-primary-800 hover:text-primary-800/80 dark:text-primary-400 text-sm font-medium"
             >
               View Details
             </button>
@@ -289,7 +289,7 @@ export function OrderCard({
                 <button
                   type="button"
                   onClick={handleRejectClick}
-                  className="hover:bg-destructive/10 rounded-md px-3 py-1.5 text-sm font-medium text-destructive transition-colors"
+                  className="text-destructive hover:bg-destructive/10 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
                 >
                   Reject
                 </button>
@@ -298,7 +298,7 @@ export function OrderCard({
                 <button
                   type="button"
                   onClick={handleAcceptClick}
-                  className="bg-primary hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors"
+                  className="bg-primary-800 hover:bg-primary-900 rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors"
                 >
                   Accept
                 </button>

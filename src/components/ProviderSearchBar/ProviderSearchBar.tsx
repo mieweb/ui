@@ -54,6 +54,7 @@ const searchBarVariants = cva('', {
 
 const CrosshairsIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
+    aria-hidden="true"
     className={className}
     fill="none"
     viewBox="0 0 24 24"
@@ -71,6 +72,7 @@ const CrosshairsIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const SearchIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
+    aria-hidden="true"
     className={className}
     fill="none"
     viewBox="0 0 24 24"
@@ -87,6 +89,7 @@ const SearchIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const SpinnerIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
+    aria-hidden="true"
     className={cn('animate-spin', className)}
     fill="none"
     viewBox="0 0 24 24"
@@ -109,6 +112,7 @@ const SpinnerIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
+    aria-hidden="true"
     className={className}
     fill="none"
     viewBox="0 0 24 24"
@@ -121,6 +125,7 @@ const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const WarningIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
+    aria-hidden="true"
     className={className}
     fill="none"
     viewBox="0 0 24 24"
@@ -491,7 +496,7 @@ export const ProviderSearchBar = React.forwardRef<
           {displayError && (
             <p
               id="search-error"
-              className="text-destructive mt-2 text-sm"
+              className="text-destructive-700 dark:text-destructive-400 mt-2 text-sm"
               role="alert"
             >
               {displayError}

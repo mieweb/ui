@@ -64,6 +64,7 @@ export const AllVariants: Story = {
           <div className="text-sm font-medium text-gray-500">{variant}</div>
           <ProviderSearchBar
             variant={variant}
+            aria-label={`Provider search (${variant})`}
             onSearch={() => {}}
             providerCount={17500}
           />

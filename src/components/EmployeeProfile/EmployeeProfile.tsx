@@ -204,7 +204,7 @@ export function EmployeeProfileCard({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-0 bottom-0 rounded-full p-1.5 shadow-md transition-colors"
+                className="bg-primary-800 hover:bg-primary-900 absolute right-0 bottom-0 rounded-full p-1.5 text-white shadow-md transition-colors"
                 aria-label="Edit photo"
                 data-slot="employee-card-photo-edit"
               >
@@ -350,8 +350,10 @@ export function EmployeeProfileCard({
             >
               {employee.isPaid ? (
                 <>
-                  <Check className="text-success h-4 w-4" />
-                  <span className="text-success">{paid}</span>
+                  <Check className="text-success-700 dark:text-success-400 h-4 w-4" />
+                  <span className="text-success-700 dark:text-success-400">
+                    {paid}
+                  </span>
                 </>
               ) : (
                 <>
@@ -463,6 +465,7 @@ export function OrderSidebarTabs({
           key={tab.id}
           type="button"
           role="tab"
+          id={`tab-${tab.id}`}
           aria-selected={activeTab === tab.id}
           aria-controls={`panel-${tab.id}`}
           onClick={() => onTabChange(tab.id)}
@@ -472,7 +475,7 @@ export function OrderSidebarTabs({
             'px-4 py-2 text-sm font-medium transition-colors',
             'focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
             activeTab === tab.id
-              ? 'bg-primary text-primary-foreground'
+              ? 'bg-primary-800 text-white'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
           )}
         >
@@ -588,6 +591,9 @@ export function OrderDetailSidebar({
       {/* Tab Content */}
       {children && (
         <div
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
           className="flex-1 overflow-auto p-3"
           data-slot="order-sidebar-content"
         >

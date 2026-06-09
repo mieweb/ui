@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import type { Conversation, MessageParticipant } from './types';
 
@@ -29,7 +28,8 @@ const headerVariants = cva(
 );
 
 export interface ConversationHeaderProps
-  extends React.HTMLAttributes<HTMLElement>,
+  extends
+    React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof headerVariants> {
   /** The conversation to display */
   conversation?: Conversation;
@@ -180,12 +180,13 @@ const ConversationHeader = React.forwardRef<
                 'text-neutral-500 hover:text-neutral-700',
                 'dark:text-neutral-400 dark:hover:text-neutral-200',
                 'hover:bg-neutral-100 dark:hover:bg-neutral-800',
-                'focus:outline-none focus:ring-2 focus:ring-primary-500',
+                'focus:ring-primary-500 focus:ring-2 focus:outline-none',
                 'transition-colors'
               )}
               aria-label="Go back"
             >
               <svg
+                aria-hidden="true"
                 className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -226,10 +227,11 @@ const ConversationHeader = React.forwardRef<
           {showOnlineStatus && isOnline && (
             <span
               className={cn(
-                'absolute bottom-0 right-0',
+                'absolute right-0 bottom-0',
                 'h-3 w-3 rounded-full',
                 'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
               )}
+              role="status"
               aria-label="Online"
             />
           )}
@@ -245,8 +247,8 @@ const ConversationHeader = React.forwardRef<
               className={cn(
                 'truncate text-sm',
                 isOnline
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-neutral-500 dark:text-neutral-400'
+                  ? 'text-green-700 dark:text-green-400'
+                  : 'text-muted-foreground'
               )}
             >
               {displaySubtitle}
@@ -270,8 +272,10 @@ ConversationHeader.displayName = 'ConversationHeader';
 // Conversation List Item Component
 // ============================================================================
 
-export interface ConversationListItemProps
-  extends Omit<React.HTMLAttributes<HTMLButtonElement>, 'onSelect'> {
+export interface ConversationListItemProps extends Omit<
+  React.HTMLAttributes<HTMLButtonElement>,
+  'onSelect'
+> {
   /** The conversation to display */
   conversation: Conversation;
   /** Whether this item is selected */
@@ -332,7 +336,7 @@ const ConversationListItem = React.forwardRef<
         'flex w-full items-center gap-3 px-4 py-3',
         'text-left transition-colors',
         isSelected
-          ? 'dark:bg-primary-900/20 bg-primary-50'
+          ? 'bg-primary-50 dark:bg-primary-900/20'
           : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50',
         'focus:bg-neutral-50 focus:outline-none dark:focus:bg-neutral-800/50',
         className
@@ -364,7 +368,7 @@ const ConversationListItem = React.forwardRef<
         {participant?.isOnline && (
           <span
             className={cn(
-              'absolute bottom-0 right-0',
+              'absolute right-0 bottom-0',
               'h-3 w-3 rounded-full',
               'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
             )}
@@ -389,7 +393,7 @@ const ConversationListItem = React.forwardRef<
             {title}
           </h3>
           {lastMessage && (
-            <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+            <span className="shrink-0 text-xs text-neutral-600 dark:text-neutral-400">
               {formatTime(lastMessage.timestamp)}
             </span>
           )}
@@ -400,7 +404,7 @@ const ConversationListItem = React.forwardRef<
               'truncate text-sm',
               isUnread
                 ? 'text-neutral-700 dark:text-neutral-300'
-                : 'text-neutral-500 dark:text-neutral-400'
+                : 'text-neutral-600 dark:text-neutral-400'
             )}
           >
             {lastMessage?.content || 'No messages yet'}
@@ -411,7 +415,7 @@ const ConversationListItem = React.forwardRef<
               className={cn(
                 'flex shrink-0 items-center justify-center',
                 'h-5 min-w-[20px] rounded-full px-1.5',
-                'bg-primary-600 text-xs font-medium text-white'
+                'bg-primary-800 text-xs font-medium text-white'
               )}
             >
               {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
@@ -424,7 +428,8 @@ const ConversationListItem = React.forwardRef<
       <div className="flex shrink-0 flex-col items-center gap-1">
         {conversation.isPinned && (
           <svg
-            className="h-4 w-4 text-primary-500"
+            aria-hidden="true"
+            className="text-primary-800 h-4 w-4"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -433,6 +438,7 @@ const ConversationListItem = React.forwardRef<
         )}
         {conversation.isMuted && (
           <svg
+            aria-hidden="true"
             className="h-4 w-4 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
@@ -505,8 +511,8 @@ export {
   ConversationHeader,
   ConversationListItem,
   ConversationListSkeleton,
-  formatLastSeen,
-  getConversationSubtitle,
-  getConversationTitle,
   headerVariants,
+  getConversationTitle,
+  getConversationSubtitle,
+  formatLastSeen,
 };

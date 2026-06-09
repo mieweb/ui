@@ -4,13 +4,17 @@
  * Renders AI chat messages with support for text, tool calls, and streaming.
  */
 
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import { ChevronIcon, SparklesIcon } from './icons';
+import type {
+  AIMessage,
+  AIMessageContent,
+  AIRenderTextContent,
+  MCPResourceLink,
+} from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
-import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
+import { SparklesIcon, ChevronIcon } from './icons';
 
 // ============================================================================
 // Avatar Component
@@ -21,8 +25,8 @@ const avatarVariants = cva(
   {
     variants: {
       role: {
-        user: 'bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300',
-        assistant: 'bg-primary-500 text-white dark:bg-primary-600',
+        user: 'bg-primary-100 text-primary-900 dark:bg-primary-900/50 dark:text-primary-300',
+        assistant: 'bg-primary-800 text-white dark:bg-primary-800',
         system:
           'bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400',
         tool: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
@@ -72,6 +76,7 @@ function MessageAvatar({
         <span className="font-medium">{getInitials(userName)}</span>
       ) : role === 'system' ? (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -86,6 +91,7 @@ function MessageAvatar({
         </svg>
       ) : (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -161,14 +167,32 @@ function AITypingIndicator({ className }: { className?: string }) {
 interface ContentBlockProps {
   content: AIMessageContent;
   onLinkClick?: (link: MCPResourceLink) => void;
+  messageId: string;
+  streaming: boolean;
+  role: AIMessage['role'];
+  renderTextContent?: AIRenderTextContent;
 }
 
-function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
+function ContentBlock({
+  content,
+  onLinkClick,
+  messageId,
+  streaming,
+  role,
+  renderTextContent,
+}: ContentBlockProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(
     content.collapsed ?? false
   );
 
   if (content.type === 'text' && content.text) {
+    if (renderTextContent) {
+      return (
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          {renderTextContent(content.text, { messageId, streaming, role })}
+        </div>
+      );
+    }
     return (
       <div className="prose prose-sm dark:prose-invert max-w-none">
         <p className="whitespace-pre-wrap">{content.text}</p>
@@ -196,8 +220,9 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="flex w-full items-center justify-between px-3 py-2 text-left"
         >
-          <span className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+          <span className="text-muted-foreground flex items-center gap-2 text-sm">
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -219,7 +244,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
         </button>
         {!isCollapsed && (
           <div className="border-t border-neutral-200 px-3 py-2 dark:border-neutral-700">
-            <p className="text-sm italic text-neutral-600 dark:text-neutral-400">
+            <p className="text-sm text-neutral-600 italic dark:text-neutral-400">
               {content.text}
             </p>
           </div>
@@ -267,7 +292,7 @@ const messageVariants = cva('flex gap-3', {
 const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
   variants: {
     role: {
-      user: 'bg-primary-600 text-white dark:bg-primary-500',
+      user: 'bg-primary-800 text-white dark:bg-primary-800',
       assistant:
         'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
       system:
@@ -291,6 +316,11 @@ export interface AIMessageDisplayProps {
   showTimestamp?: boolean;
   /** Callback when a resource link is clicked */
   onLinkClick?: (link: MCPResourceLink) => void;
+  /**
+   * Optional renderer for `text` content blocks (e.g. Markdown). Called per
+   * text block with `{ messageId, streaming, role }`. Host must sanitize.
+   */
+  renderTextContent?: AIRenderTextContent;
   /** Additional class name */
   className?: string;
 }
@@ -304,6 +334,7 @@ export function AIMessageDisplay({
   showAvatar = true,
   showTimestamp = false,
   onLinkClick,
+  renderTextContent,
   className,
 }: AIMessageDisplayProps) {
   const isStreaming = message.status === 'streaming';
@@ -331,6 +362,10 @@ export function AIMessageDisplay({
               key={index}
               content={content}
               onLinkClick={onLinkClick}
+              messageId={message.id}
+              streaming={isStreaming}
+              role={message.role}
+              renderTextContent={renderTextContent}
             />
           ))}
         </div>
@@ -368,6 +403,10 @@ export function AIMessageDisplay({
                   key={index}
                   content={content}
                   onLinkClick={onLinkClick}
+                  messageId={message.id}
+                  streaming={isStreaming}
+                  role={message.role}
+                  renderTextContent={renderTextContent}
                 />
               ))}
             </div>
@@ -397,4 +436,4 @@ export function AIMessageDisplay({
   );
 }
 
-export { AITypingIndicator, MessageAvatar };
+export { MessageAvatar, AITypingIndicator };

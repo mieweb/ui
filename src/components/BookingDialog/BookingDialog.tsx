@@ -116,8 +116,9 @@ export function FloatingInput({
       </label>
       {error && (
         <p
-          className="text-destructive mt-1 text-sm"
+          className="text-destructive-700 dark:text-destructive-400 mt-1 text-sm"
           data-slot="floating-input-error"
+          role="alert"
         >
           {error}
         </p>
@@ -232,7 +233,7 @@ export function ServiceSelect({
                 type="checkbox"
                 checked={selectedServices.includes(service.slug)}
                 onChange={() => toggleService(service.slug)}
-                className="text-primary-600 focus:ring-primary-500 border-input h-4 w-4 rounded"
+                className="text-primary-800 focus:ring-primary-500 border-input h-4 w-4 rounded"
               />
               <span className="text-foreground">{service.name}</span>
             </label>
@@ -245,7 +246,14 @@ export function ServiceSelect({
         </div>
       )}
 
-      {error && <p className="text-destructive mt-1 text-sm">{error}</p>}
+      {error && (
+        <p
+          className="text-destructive-700 dark:text-destructive-400 mt-1 text-sm"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -288,7 +296,7 @@ export function ConsentSwitch({
         data-slot="consent-switch-toggle"
         className={cn(
           'focus:ring-primary-500 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none',
-          checked ? 'bg-primary-600' : 'bg-muted'
+          checked ? 'bg-primary-800' : 'bg-muted'
         )}
       >
         <span
@@ -516,7 +524,7 @@ export function BookingDialog({
               href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-primary-600 text-muted-foreground text-sm"
+              className="hover:text-primary-800 text-muted-foreground text-sm"
               data-slot="booking-dialog-provider-address"
             >
               {provider.address.street1}
@@ -653,7 +661,7 @@ export function BookingDialog({
               disabled={isLoading}
               data-slot="booking-dialog-footer-btn"
               className={cn(
-                'bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
+                'bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors',
                 isLoading && 'cursor-not-allowed opacity-50'
               )}
             >
@@ -785,7 +793,7 @@ export function InlineBookingForm({
         disabled={isLoading}
         data-slot="inline-booking-form-submit"
         className={cn(
-          'bg-primary-700 hover:bg-primary-800 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
+          'bg-primary-800 hover:bg-primary-900 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition-colors',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -847,7 +855,7 @@ export function QuickBookCard({
         <button
           type="button"
           onClick={onBook}
-          className="bg-primary-700 hover:bg-primary-800 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+          className="bg-primary-800 hover:bg-primary-900 inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
           data-slot="quick-book-card-btn"
         >
           <CalendarIcon className="h-4 w-4" />
@@ -865,6 +873,7 @@ export function QuickBookCard({
 function CloseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -885,6 +894,7 @@ function CloseIcon({ className }: { className?: string }) {
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -905,6 +915,7 @@ function ChevronDownIcon({ className }: { className?: string }) {
 function PhoneIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -919,6 +930,7 @@ function PhoneIcon({ className }: { className?: string }) {
 function CalendarIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -933,6 +945,7 @@ function CalendarIcon({ className }: { className?: string }) {
 function LoadingSpinner({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={cn('animate-spin', className)}
       fill="none"
       viewBox="0 0 24 24"

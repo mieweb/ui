@@ -6,6 +6,12 @@ const meta: Meta<typeof DataVisNitroGrid> = {
   component: DataVisNitroGrid,
   parameters: {
     layout: 'fullscreen',
+    // DataVis NITRO is a third-party charting/grid library (datavis/wcdatavis-lib)
+    // whose internal DOM renders invalid ARIA attributes, nested interactive elements,
+    // and non-conforming contrast ratios that we cannot fix without upstream changes.
+    a11y: {
+      disable: true,
+    },
     docs: {
       description: {
         component:

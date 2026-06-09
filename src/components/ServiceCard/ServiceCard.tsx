@@ -116,7 +116,7 @@ export function ServiceCard({
           'h-full transition-all duration-200',
           onClick && 'cursor-pointer hover:shadow-md',
           selected && 'ring-primary ring-2',
-          !currentlyOffered && 'opacity-60',
+          !currentlyOffered && 'grayscale',
           className
         )}
         onClick={onClick ? handleCardClick : undefined}
@@ -213,6 +213,7 @@ export function ServiceCard({
                     onClick={handleDeleteClick}
                     className="text-muted-foreground hover:text-destructive p-1.5 transition-colors"
                     title="Delete service"
+                    aria-label="Delete service"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -223,6 +224,7 @@ export function ServiceCard({
                     onClick={handleEditClick}
                     className="text-muted-foreground hover:text-primary p-1.5 transition-colors"
                     title="Edit service"
+                    aria-label="Edit service"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>

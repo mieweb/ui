@@ -176,7 +176,7 @@ function SetupModalWrapper() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="bg-primary rounded-lg px-4 py-2 text-white"
+        className="bg-primary-800 text-primary-foreground rounded-lg px-4 py-2"
       >
         Open Modal
       </button>
@@ -205,7 +205,7 @@ function SetupModalBrandedPortalWrapper() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="bg-primary rounded-lg px-4 py-2 text-white"
+        className="bg-primary-800 text-primary-foreground rounded-lg px-4 py-2"
       >
         Open Modal
       </button>

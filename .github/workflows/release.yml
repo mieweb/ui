@@ -32,7 +32,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          # Pinned to 20 to match ci.yml.
+          node-version: '20'
           check-latest: true
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
@@ -51,6 +52,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build eSheet submodule
+        run: cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel
 
       - name: Lint
         run: pnpm lint

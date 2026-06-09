@@ -351,9 +351,9 @@ export function AddContactModal({
           {/* Address Section */}
           {showAddress && (
             <div className="space-y-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Address
-              </h4>
+              </h3>
 
               <div>
                 <Input
@@ -418,9 +418,9 @@ export function AddContactModal({
           {showCustomFields && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Custom Fields
-                </h4>
+                </h3>
                 <Button
                   type="button"
                   variant="ghost"
@@ -455,6 +455,7 @@ export function AddContactModal({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRemoveCustomField(index)}
+                    aria-label={`Remove ${field.name || 'custom field'}`}
                     className="text-red-500 hover:text-red-600"
                   >
                     <TrashIcon className="h-4 w-4" />
@@ -464,7 +465,7 @@ export function AddContactModal({
 
               {(!formData.customFields ||
                 formData.customFields.length === 0) && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-muted-foreground text-sm">
                   No custom fields added. Click &quot;Add Field&quot; to add
                   custom information.
                 </p>

@@ -62,7 +62,7 @@ export function SiteLogo({
             'flex h-8 w-8 items-center justify-center rounded-lg text-lg font-bold',
             variant === 'light'
               ? 'bg-white/20 text-white'
-              : 'bg-primary-600 text-white'
+              : 'bg-primary-800 text-white'
           )}
         >
           {name?.[0] || 'B'}
@@ -106,16 +106,19 @@ export interface NavLinksProps {
   links: NavLink[];
   variant?: 'light' | 'dark';
   className?: string;
+  'aria-label'?: string;
 }
 
 export function NavLinks({
   links,
   variant = 'light',
   className,
+  'aria-label': ariaLabel = 'Main navigation',
 }: NavLinksProps) {
   return (
     <nav
       data-slot="site-header-nav"
+      aria-label={ariaLabel}
       className={cn('hidden items-center gap-1 md:flex', className)}
     >
       {links.map((link) => (
@@ -187,8 +190,8 @@ export function AuthButtons({
       className={cn(
         'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
         variant === 'light'
-          ? 'text-primary-600 bg-white hover:bg-white/90'
-          : 'bg-primary-700 hover:bg-primary-800 text-white'
+          ? 'text-primary-800 bg-white hover:bg-white/90'
+          : 'bg-primary-800 hover:bg-primary-900 text-white'
       )}
     >
       Sign Up
@@ -222,8 +225,8 @@ export function AuthButtons({
             className={cn(
               'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               variant === 'light'
-                ? 'text-primary-600 bg-white hover:bg-white/90'
-                : 'bg-primary-700 hover:bg-primary-800 text-white'
+                ? 'text-primary-800 bg-white hover:bg-white/90'
+                : 'bg-primary-800 hover:bg-primary-900 text-white'
             )}
           >
             Sign Up
@@ -364,7 +367,7 @@ export function UserMenu({
               'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
               variant === 'light'
                 ? 'bg-white/20 text-white'
-                : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                : 'bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-400'
             )}
           >
             {initials}
@@ -373,9 +376,7 @@ export function UserMenu({
         <ChevronDownIcon
           className={cn(
             'h-4 w-4 transition-transform',
-            variant === 'light'
-              ? 'text-white/70'
-              : 'text-gray-500 dark:text-gray-400',
+            variant === 'light' ? 'text-white/70' : 'text-muted-foreground',
             isOpen && 'rotate-180'
           )}
         />
@@ -392,7 +393,7 @@ export function UserMenu({
               {user.name}
             </p>
             {user.email && (
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground truncate text-xs">
                 {user.email}
               </p>
             )}
@@ -529,7 +530,7 @@ export function MobileMenuPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="text-muted-foreground rounded-lg p-2 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             aria-label="Close menu"
           >
             <CloseIcon className="h-5 w-5" />
@@ -558,7 +559,7 @@ export function MobileMenuPanel({
           {user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3 px-2">
-                <div className="bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium">
+                <div className="bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full font-medium">
                   {user.name
                     .split(' ')
                     .map((w) => w[0])
@@ -570,7 +571,7 @@ export function MobileMenuPanel({
                     {user.name}
                   </p>
                   {user.email && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground text-xs">
                       {user.email}
                     </p>
                   )}
@@ -605,7 +606,7 @@ export function MobileMenuPanel({
                   onSignUp?.();
                   onClose();
                 }}
-                className="bg-primary-700 hover:bg-primary-800 rounded-lg px-4 py-2 text-sm font-medium text-white"
+                className="bg-primary-800 hover:bg-primary-900 rounded-lg px-4 py-2 text-sm font-medium text-white"
               >
                 Sign Up
               </button>
@@ -626,7 +627,7 @@ const headerVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-primary-600',
+        primary: 'bg-primary-800',
         white:
           'bg-white shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800',
         transparent: 'bg-transparent',
@@ -837,6 +838,7 @@ export function CompactHeader({
 function MenuIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -857,6 +859,7 @@ function MenuIcon({ className }: { className?: string }) {
 function CloseIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -877,6 +880,7 @@ function CloseIcon({ className }: { className?: string }) {
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -897,6 +901,7 @@ function ChevronDownIcon({ className }: { className?: string }) {
 function ChevronLeftIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -917,6 +922,7 @@ function ChevronLeftIcon({ className }: { className?: string }) {
 function ExternalLinkIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -937,6 +943,7 @@ function ExternalLinkIcon({ className }: { className?: string }) {
 function UserIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -957,6 +964,7 @@ function UserIcon({ className }: { className?: string }) {
 function SettingsIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"
@@ -983,6 +991,7 @@ function SettingsIcon({ className }: { className?: string }) {
 function LogoutIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"

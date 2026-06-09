@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
 
@@ -80,7 +79,12 @@ export function OrderLookupForm({
           />
         ) : (
           <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20">
-            <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
+            <svg
+              aria-hidden="true"
+              className="h-10 w-10"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
             </svg>
           </div>
@@ -94,12 +98,12 @@ export function OrderLookupForm({
       </div>
 
       {/* Right side - Lookup form */}
-      <div className="flex items-center justify-center bg-white p-8 dark:bg-gray-900 md:w-1/2">
+      <div className="flex items-center justify-center bg-white p-8 md:w-1/2 dark:bg-gray-900">
         <div className="w-full max-w-md">
           <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
             Order Lookup
           </h2>
-          <p className="mb-6 text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground mb-6">
             Enter your order details to view your information.
           </p>
 
@@ -107,7 +111,7 @@ export function OrderLookupForm({
             {/* Error message */}
             {(errorMessage || notFound) && (
               <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <p className="text-sm text-red-700 dark:text-red-400">
                   {errorMessage ||
                     'Order not found. Please check your information and try again.'}
                 </p>
@@ -160,7 +164,8 @@ export function OrderLookupForm({
               {isSubmitting ? (
                 <>
                   <svg
-                    className="-ml-1 mr-2 h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                    className="mr-2 -ml-1 h-4 w-4 animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -186,7 +191,7 @@ export function OrderLookupForm({
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground mt-6 text-center text-xs">
             Need help?{' '}
             <button
               type="button"

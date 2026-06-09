@@ -431,6 +431,7 @@ export function EmployeeForm({
               <div className="w-32">
                 <Select
                   label={index === 0 ? 'Type' : undefined}
+                  aria-label={index > 0 ? 'Phone type' : undefined}
                   value={phone.type}
                   onValueChange={(value) =>
                     updatePhone(index, 'type', value as EmployeePhone['type'])
@@ -533,7 +534,7 @@ export function EmployeeForm({
           )}
           <button
             type="submit"
-            className="bg-primary-700 hover:bg-primary-800 rounded-md px-4 py-2 text-sm text-white"
+            className="bg-primary-800 hover:bg-primary-900 rounded-md px-4 py-2 text-sm text-white"
             data-slot="employee-form-submit"
           >
             {mode === 'order' ? startOrder : save}

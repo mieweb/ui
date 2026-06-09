@@ -130,7 +130,7 @@ export function OnboardingWizard({
       {/* Header */}
       {showHeader && (
         <nav
-          className="bg-primary flex items-center px-4 py-3"
+          className="bg-primary-800 flex items-center px-4 py-3"
           data-slot="onboarding-header"
         >
           <div className="flex items-center">
@@ -149,7 +149,7 @@ export function OnboardingWizard({
               >
                 <span className="text-lg font-semibold">{brandName}</span>
                 {brandSubname && (
-                  <span className="text-sm opacity-90">{brandSubname}</span>
+                  <span className="text-sm">{brandSubname}</span>
                 )}
               </div>
             </span>
@@ -221,6 +221,7 @@ export function OnboardingWizard({
                 variant="outline"
                 onClick={handleBack}
                 disabled={!backEnabled || isFirstStep}
+                aria-label={back}
               >
                 <span className="hidden sm:inline">{back}</span>
                 <i className="fas fa-chevron-left sm:hidden" />
@@ -243,6 +244,7 @@ export function OnboardingWizard({
                 variant="primary"
                 onClick={handleNext}
                 disabled={!nextEnabled && !isLastStep}
+                aria-label={isLastStep ? finish : next}
               >
                 <span className="hidden sm:inline">
                   {isLastStep ? finish : next}
@@ -312,7 +314,7 @@ export function OnboardingStepQuestion({
           </h3>
           {description && (
             <p
-              className="text-muted-foreground"
+              className="text-neutral-600 dark:text-neutral-400"
               data-slot="onboarding-step-description"
             >
               {description}

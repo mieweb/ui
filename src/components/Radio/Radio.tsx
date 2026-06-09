@@ -1,6 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -40,7 +39,7 @@ const radioVariants = cva(
     'cursor-pointer',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
-    'checked:border-primary-500',
+    'checked:border-primary-500 dark:checked:border-primary-800',
   ],
   {
     variants: {
@@ -152,7 +151,7 @@ function RadioGroup({
           <legend
             data-slot="radio-group-legend"
             className={cn(
-              'font-medium text-foreground',
+              'text-foreground font-medium',
               size === 'sm' && 'text-xs',
               size === 'md' && 'text-sm',
               size === 'lg' && 'text-base'
@@ -211,7 +210,8 @@ RadioGroup.displayName = 'RadioGroup';
 // ============================================================================
 
 export interface RadioProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
     VariantProps<typeof radioVariants> {
   /** Value for this radio option */
   value: string;
@@ -285,7 +285,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         <span
           data-slot="radio-dot"
           className={cn(
-            'pointer-events-none absolute rounded-full bg-primary-500 transition-transform',
+            'bg-primary-800 dark:bg-primary-500 pointer-events-none absolute rounded-full transition-transform',
             size === 'sm' && 'h-2 w-2',
             size === 'md' && 'h-2.5 w-2.5',
             size === 'lg' && 'h-3 w-3',
@@ -301,7 +301,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
           htmlFor={radioId}
           data-slot="radio-label"
           className={cn(
-            'cursor-pointer select-none font-medium text-foreground',
+            'text-foreground cursor-pointer font-medium select-none',
             size === 'sm' && 'text-xs',
             size === 'md' && 'text-sm',
             size === 'lg' && 'text-base',
@@ -344,4 +344,4 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
 
 Radio.displayName = 'Radio';
 
-export { Radio, RadioGroup, radioVariants };
+export { RadioGroup, Radio, radioVariants };

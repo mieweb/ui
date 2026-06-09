@@ -14,12 +14,20 @@ import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export type DateRangePresetKey =
   | 'today'
+  | 'yesterday'
   | 'this-week'
+  | 'last-week'
   | 'this-month'
   | 'last-month'
+  | 'this-quarter'
+  | 'last-quarter'
+  | 'this-year'
+  | 'last-year'
   | 'last-24-hours'
   | 'last-7-days'
-  | 'last-30-days';
+  | 'last-30-days'
+  | 'last-90-days'
+  | 'last-365-days';
 
 export interface DateRangePreset {
   key: DateRangePresetKey | string;
@@ -44,6 +52,15 @@ export interface DateRangePickerProps {
   placeholder?: string;
   /** Custom className */
   className?: string;
+  /**
+   * Horizontal alignment of the desktop popup relative to the trigger.
+   * - `'start'` (default historical behavior): popup left edge aligns with trigger left edge.
+   * - `'end'`: popup right edge aligns with trigger right edge.
+   * - `'auto'`: starts as `'start'`, then automatically flips to `'end'` if the popup
+   *   would overflow the right edge of the viewport. Recommended for triggers placed
+   *   in the right side of a layout (e.g. page header action slots).
+   */
+  align?: 'start' | 'end' | 'auto';
   /** Whether to show the preset sidebar in the calendar popup (default: true) */
   showPresets?: boolean;
   /** Display variant: desktop (default), mobile (bottom sheet), or responsive (auto-adapts at md breakpoint) */
@@ -51,12 +68,20 @@ export interface DateRangePickerProps {
   /** Labels for i18n */
   labels?: {
     today?: string;
+    yesterday?: string;
     thisWeek?: string;
+    lastWeek?: string;
     thisMonth?: string;
     lastMonth?: string;
+    thisQuarter?: string;
+    lastQuarter?: string;
+    thisYear?: string;
+    lastYear?: string;
     last24Hours?: string;
     last7Days?: string;
     last30Days?: string;
+    last90Days?: string;
+    last365Days?: string;
     filter?: string;
     done?: string;
   };
@@ -66,7 +91,13 @@ export interface DateRangePickerProps {
 // Helper Functions
 // ============================================================================
 
-function getDefaultPresets(
+/**
+ * Returns the default set of presets shown in the picker. Stable across
+ * releases — adding a new preset key to the {@link DateRangePresetKey} union
+ * does NOT add it to this default list. Use {@link getExtendedPresets} or
+ * compose your own list to surface additional ranges.
+ */
+export function getDefaultPresets(
   labels: DateRangePickerProps['labels'] = {}
 ): DateRangePreset[] {
   const {
@@ -90,16 +121,76 @@ function getDefaultPresets(
   ];
 }
 
-function calculateDateRange(presetKey: string): DateRange {
+/**
+ * Returns an extended set of presets including yesterday, last week, quarters,
+ * years, and longer trailing windows. Suitable for analytics dashboards that
+ * need deeper historical drill-down.
+ */
+export function getExtendedPresets(
+  labels: DateRangePickerProps['labels'] = {}
+): DateRangePreset[] {
+  const {
+    today = 'Today',
+    yesterday = 'Yesterday',
+    thisWeek = 'This Week',
+    lastWeek = 'Last Week',
+    thisMonth = 'This Month',
+    lastMonth = 'Last Month',
+    thisQuarter = 'This Quarter',
+    lastQuarter = 'Last Quarter',
+    thisYear = 'This Year',
+    lastYear = 'Last Year',
+    last24Hours = 'Last 24 Hours',
+    last7Days = 'Last 7 Days',
+    last30Days = 'Last 30 Days',
+    last90Days = 'Last 90 Days',
+    last365Days = 'Last 365 Days',
+  } = labels;
+
+  return [
+    { key: 'today', label: today },
+    { key: 'yesterday', label: yesterday },
+    { key: 'last-24-hours', label: last24Hours },
+    { key: 'this-week', label: thisWeek },
+    { key: 'last-week', label: lastWeek },
+    { key: 'last-7-days', label: last7Days },
+    { key: 'this-month', label: thisMonth },
+    { key: 'last-month', label: lastMonth },
+    { key: 'last-30-days', label: last30Days },
+    { key: 'this-quarter', label: thisQuarter },
+    { key: 'last-quarter', label: lastQuarter },
+    { key: 'last-90-days', label: last90Days },
+    { key: 'this-year', label: thisYear },
+    { key: 'last-year', label: lastYear },
+    { key: 'last-365-days', label: last365Days },
+  ];
+}
+
+/** Last millisecond of the given calendar day (local time). */
+function endOfDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+}
+
+/**
+ * Resolve a preset key into a concrete {@link DateRange}. Exported so consumers
+ * can build their own preset menus, recompute on demand (e.g. when "today"
+ * rolls over), or implement custom keys by composing with their own switch.
+ *
+ * Unknown keys return `{ start: null, end: null }`.
+ */
+export function calculateDateRange(presetKey: string): DateRange {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   switch (presetKey) {
     case 'today':
-      return {
-        start: today,
-        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1),
-      };
+      return { start: today, end: endOfDay(today) };
+
+    case 'yesterday': {
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      return { start: yesterday, end: endOfDay(yesterday) };
+    }
 
     case 'this-week': {
       const dayOfWeek = today.getDay();
@@ -107,19 +198,54 @@ function calculateDateRange(presetKey: string): DateRange {
       sunday.setDate(today.getDate() - dayOfWeek);
       const saturday = new Date(sunday);
       saturday.setDate(sunday.getDate() + 6);
-      return { start: sunday, end: saturday };
+      return { start: sunday, end: endOfDay(saturday) };
+    }
+
+    case 'last-week': {
+      const dayOfWeek = today.getDay();
+      const lastSunday = new Date(today);
+      lastSunday.setDate(today.getDate() - dayOfWeek - 7);
+      const lastSaturday = new Date(lastSunday);
+      lastSaturday.setDate(lastSunday.getDate() + 6);
+      return { start: lastSunday, end: endOfDay(lastSaturday) };
     }
 
     case 'this-month': {
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      return { start: firstDay, end: lastDay };
+      return { start: firstDay, end: endOfDay(lastDay) };
     }
 
     case 'last-month': {
       const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-      return { start: firstDay, end: lastDay };
+      return { start: firstDay, end: endOfDay(lastDay) };
+    }
+
+    case 'this-quarter': {
+      const quarter = Math.floor(now.getMonth() / 3);
+      const firstDay = new Date(now.getFullYear(), quarter * 3, 1);
+      const lastDay = new Date(now.getFullYear(), quarter * 3 + 3, 0);
+      return { start: firstDay, end: endOfDay(lastDay) };
+    }
+
+    case 'last-quarter': {
+      const quarter = Math.floor(now.getMonth() / 3);
+      const firstDay = new Date(now.getFullYear(), (quarter - 1) * 3, 1);
+      const lastDay = new Date(now.getFullYear(), quarter * 3, 0);
+      return { start: firstDay, end: endOfDay(lastDay) };
+    }
+
+    case 'this-year': {
+      const firstDay = new Date(now.getFullYear(), 0, 1);
+      const lastDay = new Date(now.getFullYear(), 11, 31);
+      return { start: firstDay, end: endOfDay(lastDay) };
+    }
+
+    case 'last-year': {
+      const firstDay = new Date(now.getFullYear() - 1, 0, 1);
+      const lastDay = new Date(now.getFullYear() - 1, 11, 31);
+      return { start: firstDay, end: endOfDay(lastDay) };
     }
 
     case 'last-24-hours':
@@ -137,6 +263,18 @@ function calculateDateRange(presetKey: string): DateRange {
     case 'last-30-days':
       return {
         start: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+        end: now,
+      };
+
+    case 'last-90-days':
+      return {
+        start: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
+        end: now,
+      };
+
+    case 'last-365-days':
+      return {
+        start: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000),
         end: now,
       };
 
@@ -187,6 +325,7 @@ export function DateRangePicker({
   activePreset,
   placeholder = 'Pick a date range',
   className,
+  align = 'auto',
   showPresets = true,
   variant = 'desktop',
   labels = {},
@@ -212,6 +351,13 @@ export function DateRangePicker({
 
   const calendarRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  // Resolved horizontal alignment for the desktop popup. Starts at the
+  // requested value and may flip to 'end' under 'auto' when the popup
+  // would overflow the viewport on the right.
+  const [resolvedAlign, setResolvedAlign] = React.useState<'start' | 'end'>(
+    align === 'end' ? 'end' : 'start'
+  );
 
   const isMobileVariant = variant === 'mobile';
   const isResponsive = variant === 'responsive';
@@ -262,6 +408,32 @@ export function DateRangePicker({
       };
     }
   }, [isMobileVariant, isCalendarOpen]);
+
+  // Resolve popup horizontal alignment. For explicit 'start' or 'end' we
+  // honor the consumer's choice. For 'auto' we measure the trigger and pick
+  // 'end' when right-aligning would keep more of the popup on-screen — this
+  // prevents the calendar from spilling past the right edge of the viewport
+  // when the trigger sits in a right-aligned header slot.
+  React.useLayoutEffect(() => {
+    if (isMobileVariant || !isCalendarOpen) return;
+    if (align === 'start' || align === 'end') {
+      setResolvedAlign(align);
+      return;
+    }
+    if (typeof window === 'undefined') return;
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    // Approximate popup width: preset sidebar (200px) + dual calendar panel
+    // (~640px including padding). Slight overestimate is fine — we just want
+    // to flip when 'start' alignment would clearly overflow.
+    const estimatedPopupWidth = showPresets ? 840 : 640;
+    const margin = 8;
+    const overflowsRight =
+      rect.left + estimatedPopupWidth > window.innerWidth - margin;
+    const fitsLeftAligned = rect.right - estimatedPopupWidth >= margin;
+    setResolvedAlign(overflowsRight && fitsLeftAligned ? 'end' : 'start');
+  }, [align, isCalendarOpen, isMobileVariant, showPresets]);
 
   const handlePresetSelect = (presetKey: string) => {
     const range = calculateDateRange(presetKey);
@@ -640,7 +812,8 @@ export function DateRangePicker({
         <div
           ref={calendarRef}
           className={cn(
-            'absolute top-full left-0 z-50 mt-1',
+            'absolute top-full z-50 mt-1',
+            resolvedAlign === 'end' ? 'right-0' : 'left-0',
             'bg-background border-border rounded-lg border shadow-lg'
           )}
           role="dialog"
@@ -666,8 +839,7 @@ export function DateRangePicker({
                     className={cn(
                       'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
                       'hover:bg-muted',
-                      activePreset === preset.key &&
-                        'bg-primary text-primary-foreground'
+                      activePreset === preset.key && 'bg-primary-800 text-white'
                     )}
                   >
                     {preset.label}

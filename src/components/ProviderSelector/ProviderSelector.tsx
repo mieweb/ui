@@ -164,6 +164,7 @@ export function ProviderSelector({
         {isLoading ? (
           <div className="flex flex-1 items-center gap-2">
             <svg
+              aria-hidden="true"
               className="text-muted-foreground h-5 w-5 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -197,7 +198,7 @@ export function ProviderSelector({
             ) : (
               <div
                 data-slot="provider-selector-trigger-avatar"
-                className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium"
+                className="bg-primary/10 text-primary-800 dark:text-primary-400 flex h-6 w-6 items-center justify-center rounded text-xs font-medium"
               >
                 {getInitials(selectedProvider.name)}
               </div>
@@ -225,6 +226,7 @@ export function ProviderSelector({
 
         {/* Dropdown arrow */}
         <svg
+          aria-hidden="true"
           data-slot="provider-selector-arrow"
           className={cn(
             'text-muted-foreground h-4 w-4 flex-shrink-0 transition-transform',
@@ -254,6 +256,7 @@ export function ProviderSelector({
             <div className="border-border border-b p-2">
               <div className="relative">
                 <svg
+                  aria-hidden="true"
                   className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -327,7 +330,7 @@ export function ProviderSelector({
                       {provider.code && (
                         <span
                           data-slot="provider-selector-option-code"
-                          className="text-muted-foreground text-xs"
+                          className="text-xs text-neutral-600 dark:text-neutral-400"
                         >
                           ({provider.code})
                         </span>
@@ -335,7 +338,7 @@ export function ProviderSelector({
                       {provider.isActive === false && (
                         <span
                           data-slot="provider-selector-option-badge"
-                          className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium"
+                          className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400"
                         >
                           Inactive
                         </span>
@@ -356,7 +359,8 @@ export function ProviderSelector({
                   {/* Selected checkmark */}
                   {selectedProvider?.id === provider.id && (
                     <svg
-                      className="text-primary h-5 w-5 flex-shrink-0"
+                      aria-hidden="true"
+                      className="text-primary-800 dark:text-primary-400 h-5 w-5 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

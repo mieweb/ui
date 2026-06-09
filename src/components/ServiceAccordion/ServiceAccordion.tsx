@@ -1,8 +1,7 @@
 'use client';
 
-import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 // ============================================================================
@@ -115,7 +114,7 @@ const serviceLinkVariants = cva(
   [
     'flex items-center gap-2 py-2 px-3 rounded-md',
     'text-neutral-700 dark:text-neutral-300',
-    'hover:bg-neutral-100 dark:hover:bg-neutral-700/50 hover:text-primary-600 dark:hover:text-primary-400',
+    'hover:bg-neutral-100 dark:hover:bg-neutral-700/50 hover:text-primary-800 dark:hover:text-primary-400',
     'transition-colors',
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
   ],
@@ -205,7 +204,7 @@ export function ServiceLink({
       <LinkIcon className="flex-shrink-0 text-neutral-400" />
       <span className="flex-grow">{service.name}</span>
       {service.providerCount !== undefined && (
-        <span className="ml-2 text-xs text-neutral-400 dark:text-neutral-500">
+        <span className="text-muted-foreground ml-2 text-xs">
           ({service.providerCount})
         </span>
       )}
@@ -239,8 +238,8 @@ function SubCategoryAccordion({
         className={cn(
           'flex w-full items-center justify-between px-3 py-2',
           'text-left font-medium text-neutral-700 dark:text-neutral-200',
-          'hover:text-primary-600 dark:hover:text-primary-400',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500'
+          'hover:text-primary-800 dark:hover:text-primary-400',
+          'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
         )}
         aria-expanded={isExpanded}
         aria-controls={contentId}
@@ -261,7 +260,7 @@ function SubCategoryAccordion({
           'overflow-hidden transition-all duration-200 ease-in-out',
           isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
         )}
-        aria-hidden={!isExpanded}
+        inert={!isExpanded || undefined}
       >
         <div className="space-y-1 pb-2 pl-4">
           {subCategory.services.map((service, serviceIdx) => (
@@ -342,7 +341,7 @@ function CategoryAccordionItem({
       >
         <div className="flex items-center gap-3">
           {category.icon && (
-            <span className="text-primary-500 dark:text-primary-400">
+            <span className="text-primary-800 dark:text-primary-400">
               {typeof category.icon === 'string' ? (
                 <span className="text-xl">{category.icon}</span>
               ) : (
@@ -374,7 +373,7 @@ function CategoryAccordionItem({
             variant === 'cards' &&
               'rounded-b-lg border border-t-0 border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'
           )}
-          aria-hidden={!isExpanded}
+          inert={!isExpanded || undefined}
         >
           <div className="space-y-2 p-4">
             {/* Direct services */}
@@ -416,8 +415,9 @@ function CategoryAccordionItem({
 // Main ServiceAccordion Component
 // ============================================================================
 
-export interface ServiceAccordionProps
-  extends VariantProps<typeof accordionVariants> {
+export interface ServiceAccordionProps extends VariantProps<
+  typeof accordionVariants
+> {
   /** Array of service categories */
   categories: ServiceCategory[];
   /** Base path for service links */
@@ -432,6 +432,8 @@ export interface ServiceAccordionProps
   onExpandedChange?: (expanded: string[]) => void;
   /** Additional CSS classes */
   className?: string;
+  /** Accessible label for the region */
+  'aria-label'?: string;
 }
 
 export function ServiceAccordion({
@@ -443,6 +445,7 @@ export function ServiceAccordion({
   expandedCategories: controlledExpanded,
   onExpandedChange,
   className,
+  'aria-label': ariaLabel = 'Service categories',
 }: ServiceAccordionProps) {
   const [internalExpanded, setInternalExpanded] = React.useState<string[]>([]);
 
@@ -474,7 +477,7 @@ export function ServiceAccordion({
       data-slot="service-accordion"
       className={cn(accordionVariants({ variant }), className)}
       role="region"
-      aria-label="Service categories"
+      aria-label={ariaLabel}
     >
       {categories.map((category, index) => (
         <CategoryAccordionItem
@@ -541,23 +544,23 @@ export function ServiceTagCloud({
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5',
             'text-sm font-medium',
-            'bg-primary-100 text-primary-800 hover:bg-primary-200',
-            'dark:bg-primary-900/30 dark:hover:bg-primary-900/50 dark:text-primary-300',
+            'bg-primary-100 text-primary-900 hover:bg-primary-200',
+            'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
             'transition-colors',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500'
+            'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2'
           )}
           data-cy={`service-tag-${service.slug}`}
         >
           {service.name}
           {showCounts && service.providerCount !== undefined && (
-            <span className="text-xs opacity-70">
+            <span className="text-primary-900 dark:text-primary-300 text-xs">
               ({service.providerCount})
             </span>
           )}
         </a>
       ))}
       {hasMore && (
-        <span className="inline-flex items-center px-3 py-1.5 text-sm text-neutral-500 dark:text-neutral-400">
+        <span className="text-muted-foreground inline-flex items-center px-3 py-1.5 text-sm">
           +{services.length - (maxItems || 0)} more
         </span>
       )}
@@ -617,7 +620,7 @@ export function ServiceList({
             className={cn(
               'flex items-center gap-2 py-1.5',
               'text-neutral-700 dark:text-neutral-300',
-              'hover:text-primary-600 dark:hover:text-primary-400',
+              'hover:text-primary-800 dark:hover:text-primary-400',
               'transition-colors'
             )}
           >

@@ -1,13 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
-
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
-  ActiveFilters,
-  CompactFilterBar,
-  type ProviderFilters,
   ProviderSearchFilters,
   ServiceMultiSelect,
+  ActiveFilters,
+  CompactFilterBar,
   type ServiceOption,
+  type ProviderFilters,
 } from './ProviderSearchFilters';
 
 const mockServices: ServiceOption[] = [
@@ -117,7 +116,7 @@ function FiltersDemo(
         services={mockServices}
         {...props}
       />
-      <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="text-muted-foreground text-sm">
         <strong>Current filters:</strong>
         <pre className="mt-1">{JSON.stringify(filters, null, 2)}</pre>
       </div>
@@ -138,36 +137,6 @@ export const Vertical: Story = {
 // Compact layout
 export const Compact: Story = {
   render: () => <FiltersDemo layout="compact" />,
-};
-
-// With location autocomplete (requires Mapbox token)
-export const WithLocationAutocomplete: Story = {
-  render: () => (
-    <FiltersDemo
-      mapboxToken="YOUR_MAPBOX_TOKEN"
-      onGeolocate={() => alert('Geolocation requested')}
-    />
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Pass a `mapboxToken` prop to enable city/place name autocomplete alongside ZIP code input. Pass `onGeolocate` to show a "Use my location" button.',
-      },
-    },
-  },
-};
-
-// Compact with location autocomplete
-export const CompactWithLocation: Story = {
-  render: () => (
-    <FiltersDemo
-      layout="compact"
-      showLabels={false}
-      mapboxToken="YOUR_MAPBOX_TOKEN"
-      onGeolocate={() => alert('Geolocation requested')}
-    />
-  ),
 };
 
 // Sub-component: Service Multi-Select
