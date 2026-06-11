@@ -2,7 +2,7 @@
 export default {
   content: [
     './src/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@mieweb/datavis/dist/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@mieweb/datavis/dist/datavis-react.js',
     './.storybook/**/*.{js,ts,jsx,tsx}',
   ],
   presets: [require('./src/tailwind-preset.cjs')],
