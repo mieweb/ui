@@ -35,7 +35,7 @@ function readDependencyNames(packageDirName: string): string[] {
 }
 
 const datavisDependencyNames = Array.from(
-  new Set(readDependencyNames('datavis')),
+  new Set(readDependencyNames('@mieweb/datavis')),
 );
 
 const missingRootDependencies = datavisDependencyNames.filter(

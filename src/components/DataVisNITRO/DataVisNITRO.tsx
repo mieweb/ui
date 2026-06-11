@@ -3,24 +3,21 @@ import { ComputedView, Source } from 'datavis-ace';
 
 import {
   DataGrid,
+  determineColumns,
+  getBuiltinGroupFunctions,
+  buildAggregateFunctions,
+  useView,
+  TableRenderer,
   type DataGridProps,
   type GridTableDef,
-} from 'datavis/src/components/DataGrid';
-import { determineColumns } from 'datavis/src/adapters/colconfig-adapter';
-import { getBuiltinGroupFunctions } from 'datavis/src/adapters/group-adapter';
-import { buildAggregateFunctions } from 'datavis/src/adapters/wcdatavis-interop';
-import { useView, type ViewInstance } from 'datavis/src/adapters/use-data';
-import {
-  TableRenderer,
+  type ViewInstance,
   type TableRendererProps,
-} from 'datavis/src/components/table/TableRenderer';
-import type {
-  TableColumn,
-  TableFeatures,
-} from 'datavis/src/components/table/types';
-import type { ColumnFilterConfig } from 'datavis/src/components/filters/types';
-import type { AggregateFunction } from 'datavis/src/components/controls/AggregateSection';
-import type { GroupFunction as GroupFunctionDef } from 'datavis/src/components/dialogs/GroupFunctionDialog';
+  type TableColumn,
+  type TableFeatures,
+  type ColumnFilterConfig,
+  type AggregateFunction,
+  type GroupFunctionDef,
+} from '@mieweb/datavis';
 
 type TranslateFn = (key: string, ...args: unknown[]) => string;
 
