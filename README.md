@@ -120,7 +120,7 @@ git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
 ```
 
-> `--recurse-submodules` is strongly recommended for first clone so `packages/esheet`, `packages/datavis`, and `packages/ychart` are populated immediately. Without these submodules, eSheet, DataVis, and YChart stories will not work.
+> `--recurse-submodules` is strongly recommended for first clone so the `packages/esheet` and `packages/ychart` submodules are populated immediately. Without them, the eSheet and YChart stories will not work. (DataVis NITRO now ships as the published `@mieweb/datavis` npm package, so it no longer needs a submodule build.)
 
 If you already cloned without submodules, run:
 
@@ -136,18 +136,13 @@ npm install
 
 Use one package manager consistently per clone. The commands below use npm.
 
-3. **Build eSheet packages** (required before first Storybook run):
+3. **eSheet packages build automatically.** A `prestorybook` hook runs `npm run build:esheet` before Storybook starts, so the `@esheet/*` packages are compiled on first run with no manual step. It's a near-instant no-op on later runs once the artifacts exist.
+
+If `packages/esheet` is updated later (submodule update, branch switch, or pull) and you need to force a fresh rebuild, remove the built artifacts and run the build again:
 
 ```bash
+rm -f packages/esheet/packages/core/dist/index.d.ts packages/esheet/packages/renderer/src/index.output.css
 npm run build:esheet
-```
-
-This installs eSheet's own dependencies and compiles all `@esheet/*` packages.
-
-If `packages/esheet` is updated later (submodule update, branch switch, or pull), force a fresh rebuild:
-
-```bash
-npm run rebuild:esheet
 ```
 
 4. **Start Storybook:**
@@ -156,7 +151,15 @@ npm run rebuild:esheet
 npm run storybook
 ```
 
-This starts the Storybook development server at [http://localhost:6006](http://localhost:6006) with all components, including eSheet, DataVis, and YChart.
+This starts the Storybook development server at [http://localhost:6006](http://localhost:6006) with all components, including eSheet, DataVis NITRO, and YChart.
+
+### How the Sub-Packages Are Wired
+
+Storybook integrates three sibling MIE projects, each sourced differently:
+
+- **DataVis NITRO** — npm package `@mieweb/datavis`. No build step; consumed as a published package (no submodule build needed).
+- **eSheet** — git submodule `packages/esheet`. Built automatically by the `prestorybook` hook; rebuilds only when its artifacts are missing.
+- **YChart** — git submodule `packages/ychart`. No build step; linked from source and aliased into Storybook's Vite config.
 
 ### Library Development (watch mode)
 
@@ -173,8 +176,7 @@ This watches for source changes and rebuilds automatically. It does **not** star
 | Script                    | Description                                               |
 | ------------------------- | --------------------------------------------------------- |
 | `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
-| `npm run build:esheet`    | Build eSheet submodule packages for first-time setup (skips when already built) |
-| `npm run rebuild:esheet`  | Force a full eSheet rebuild after `packages/esheet` changes |
+| `npm run build:esheet`    | Build eSheet submodule packages (auto-run by `prestorybook`/`prebuild`; skips when already built) |
 | `npm run build`           | Build the library for production                          |
 | `npm run storybook`       | Start Storybook development server                        |
 | `npm run build-storybook` | Build Storybook for static hosting                        |

@@ -641,6 +641,79 @@ For advanced usage — custom field types, conditional logic, standalone/Blaze r
 
 ---
 
+## 🛠️ Running Storybook Locally
+
+Want to develop components, browse the full library on your machine, or contribute? Getting this Storybook running locally is a two-command flow.
+
+### Prerequisites
+
+- **Node.js** ≥ 20
+- **pnpm** 10.29.1 — pinned via the repo's `packageManager` field. Enable it with `corepack enable`.
+- **Git** with submodule support
+
+### Setup
+
+```bash
+# 1. Clone with submodules (eSheet and YChart are git submodules)
+git clone --recurse-submodules https://github.com/mieweb/ui.git
+cd ui
+
+# 2. Install dependencies
+#    A preinstall hook auto-inits/updates submodules — so even if you
+#    forgot --recurse-submodules above, this step pulls them in.
+pnpm install
+
+# 3. Start Storybook on http://localhost:6006
+pnpm storybook
+```
+
+That's the whole flow — `pnpm install && pnpm storybook`. A `prestorybook` hook builds the eSheet packages automatically on first run, so the eSheet stories work out of the box with no manual build step (it's a near-instant no-op on later runs once the artifacts exist).
+
+<div
+  style={{
+    marginTop: '16px',
+    padding: '12px 16px',
+    borderRadius: '8px',
+    border: '1px solid var(--mieweb-border, #e5e7eb)',
+    backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+  }}
+>
+  <strong>Already cloned without submodules?</strong>
+  <span
+    style={{
+      fontSize: '14px',
+      color: 'var(--mieweb-muted-foreground, #737373)',
+      display: 'block',
+      marginTop: '4px',
+    }}
+  >
+    Run <code>git submodule update --init --recursive</code> — or just{' '}
+    <code>pnpm install</code>, which does it for you.
+  </span>
+</div>
+
+### How the Sub-Packages Are Wired
+
+`@mieweb/ui`'s Storybook integrates three sibling MIE projects, each sourced differently:
+
+- **DataVis NITRO** — npm package `@mieweb/datavis`. _No build step:_ consumed as a published package (no submodule build needed). Powers the DataVis NITRO data-grid stories.
+- **eSheet** — git submodule `packages/esheet`. _Built automatically_ by the `prestorybook` hook (nx) before Storybook starts; rebuilds only when its artifacts are missing. The form builder/renderer toolkit.
+- **YChart** — git submodule `packages/ychart`. _No build step:_ linked from source and aliased into Storybook's Vite config. Org-chart / visualization toolkit.
+
+> **Heads up:** DataVis NITRO was recently moved from a git submodule to the published `@mieweb/datavis` npm package — a fresh clone no longer builds DataVis from source.
+
+### Common Commands
+
+- `pnpm storybook` — Run Storybook in dev mode on port 6006
+- `pnpm build-storybook` — Build the static Storybook site
+- `pnpm build` — Build the publishable `@mieweb/ui` library
+- `pnpm test` — Run the unit test suite (Vitest)
+- `pnpm test:visual` — Run Playwright visual regression tests
+- `pnpm typecheck` — Type-check without emitting
+- `pnpm lint` — Lint `src/**`
+
+---
+
 ## 🔗 Resources
 
 - [GitHub Repository](https://github.com/mieweb/ui) — Source code and issue tracker
