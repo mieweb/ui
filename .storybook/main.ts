@@ -44,7 +44,7 @@ function readDependencyNames(packageDirName: string): string[] {
 }
 
 const datavisDependencyNames = Array.from(
-  new Set(readDependencyNames('datavis')),
+  new Set(readDependencyNames('@mieweb/datavis')),
 );
 
 const esheetPackagesDir = path.join(workspaceRoot, 'packages/esheet/packages');
