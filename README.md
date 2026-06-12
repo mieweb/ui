@@ -54,7 +54,7 @@ Heavy or specialized dependencies are kept in separate entry points so they don'
 | Entry point              | Install                                              | Import path              |
 | ------------------------ | ---------------------------------------------------- | ------------------------ |
 | **AG Grid**              | `npm install ag-grid-community ag-grid-react`        | `@mieweb/ui/ag-grid`    |
-| **DataVis**              | `npm install datavis-ace`                             | `@mieweb/ui/datavis`    |
+| **DataVis**              | `npm install @mieweb/datavis datavis-ace`            | `@mieweb/ui/datavis`    |
 
 ## Quick Start
 
