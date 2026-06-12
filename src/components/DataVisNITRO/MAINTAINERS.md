@@ -27,11 +27,12 @@ back here later.
 ## Dependencies — two moving parts
 
 1. **`datavis-ace`** (optional peer dep) — provides `ComputedView`, `Source`.
-2. **`@mieweb/datavis`** (published npm package) — provides `DataGrid`,
-   `determineColumns`, `useView`, `TableRenderer`, and the related types. This
-   was previously a `packages/datavis` git submodule consumed via deep
-   `datavis/src/...` paths; it is now a normal package dependency, so no
-   submodule init/link step is required.
+2. **`@mieweb/datavis`** (optional peer dep, published npm package) — provides
+   `DataGrid`, `determineColumns`, `useView`, `TableRenderer`, and the related
+   types. This was previously a `packages/datavis` git submodule consumed via
+   deep `datavis/src/...` paths; it is now an optional peer dependency (declared
+   in `package.json`), so no submodule init/link step is required. Consumers who
+   use `@mieweb/ui/datavis` install it alongside `datavis-ace`.
 
 ## Gotchas
 

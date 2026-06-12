@@ -33,7 +33,7 @@ src/
   hooks/  utils/  styles/  types/
   test/setup.ts         # Vitest setup
 packages/               # Git submodules with heavy/optional implementations
-  datavis/  esheet/  ychart/
+  esheet/  ychart/      # (DataVis NITRO is an npm package, not a submodule)
 .storybook/             # Storybook (react-vite) config
 tests/visual/           # Playwright visual-regression specs + snapshots
 lessons/                # Consumer-facing adoption + policy docs
@@ -196,8 +196,8 @@ If a submodule-backed component fails to resolve, run
 ## Optional peer dependencies
 
 `react` / `react-dom` are required peers. Everything else heavy is **optional**:
-`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@esheet/builder`,
-`@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
+`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@mieweb/datavis`,
+`@esheet/builder`, `@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
 
@@ -221,7 +221,7 @@ Current notes:
 | [AI](src/components/AI/MAINTAINERS.md) | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer |
 | [AGGrid](src/components/AGGrid/MAINTAINERS.md) | Registers AG Grid modules at import; optional peers; brand theming; base vs. enhanced split |
 | [ESheet](src/components/ESheet/MAINTAINERS.md) | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src` |
-| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) | Wraps `datavis-ace` + the `datavis` submodule; context/source/grid wiring |
+| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring |
 | [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled |
 | [YChart](src/components/YChart/MAINTAINERS.md) | Vanilla editor in a submodule, dynamically imported; not in the public API |
 
