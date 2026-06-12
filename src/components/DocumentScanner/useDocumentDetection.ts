@@ -261,7 +261,7 @@ export function useDocumentDetection(
   const mergedConfig = useMemo(
     () => ({ ...DEFAULT_CONFIG, ...config }),
     // Intentionally depend on individual properties to avoid unnecessary re-renders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [
       config.minFocusScore,
       config.minBrightness,

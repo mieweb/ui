@@ -1,7 +1,7 @@
-export { CreateInvoiceModal } from './CreateInvoiceModal';
 export type {
-  CreateInvoiceModalProps,
   CreateInvoiceData,
+  CreateInvoiceModalProps,
   EmployerOption,
   OrderOption,
 } from './CreateInvoiceModal';
+export { CreateInvoiceModal } from './CreateInvoiceModal';

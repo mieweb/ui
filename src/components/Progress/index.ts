@@ -1,9 +1,9 @@
 export {
-  Progress,
   CircularProgress,
-  progressBarTrackVariants,
-  progressBarFillVariants,
-  circularProgressVariants,
-  type ProgressProps,
   type CircularProgressProps,
+  circularProgressVariants,
+  Progress,
+  progressBarFillVariants,
+  progressBarTrackVariants,
+  type ProgressProps,
 } from './Progress';

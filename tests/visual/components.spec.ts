@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 // Helper to navigate to a story and wait for it to render
 async function gotoStory(page: Page, storyId: string) {

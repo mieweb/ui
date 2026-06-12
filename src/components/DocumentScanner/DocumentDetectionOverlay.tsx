@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+
 import type { DetectionMetrics } from './useDocumentDetection';
 
 export interface DocumentDetectionOverlayProps {
@@ -134,17 +135,17 @@ export function DocumentDetectionOverlay({
         className={`absolute inset-4 rounded-lg border-4 transition-colors duration-300 ${borderColor}`}
       >
         {/* Corner accents */}
-        <div className="absolute -top-1 -left-1 h-6 w-6 rounded-tl border-t-4 border-l-4 border-current" />
-        <div className="absolute -top-1 -right-1 h-6 w-6 rounded-tr border-t-4 border-r-4 border-current" />
+        <div className="absolute -left-1 -top-1 h-6 w-6 rounded-tl border-l-4 border-t-4 border-current" />
+        <div className="absolute -right-1 -top-1 h-6 w-6 rounded-tr border-r-4 border-t-4 border-current" />
         <div className="absolute -bottom-1 -left-1 h-6 w-6 rounded-bl border-b-4 border-l-4 border-current" />
-        <div className="absolute -right-1 -bottom-1 h-6 w-6 rounded-br border-r-4 border-b-4 border-current" />
+        <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-br border-b-4 border-r-4 border-current" />
       </div>
 
       {/* Countdown display */}
       <CountdownDisplay seconds={captureCountdown} />
 
       {/* Status indicators */}
-      <div className="absolute top-3 right-3 left-3">
+      <div className="absolute left-3 right-3 top-3">
         {/* Main status message */}
         <div
           className={`mb-2 rounded-lg px-4 py-2 text-center backdrop-blur-sm ${
@@ -187,7 +188,7 @@ export function DocumentDetectionOverlay({
 
       {/* Detailed metrics (bottom) */}
       {showDetailedMetrics && (
-        <div className="absolute right-3 bottom-3 left-3">
+        <div className="absolute bottom-3 left-3 right-3">
           <div className="flex flex-wrap justify-center gap-2 rounded-lg bg-black/60 p-2 backdrop-blur-sm">
             <StatusPill label="Focus" isOk={isInFocus} value={focusScore} />
             <StatusPill

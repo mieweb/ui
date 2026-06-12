@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
+
 import { DateInput } from './DateInput';
 
 const meta: Meta<typeof DateInput> = {
@@ -113,7 +114,7 @@ export const Controlled: Story = {
           onChange={setDate}
           validateOnBlur
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Value: {date || '(empty)'}
         </p>
       </div>

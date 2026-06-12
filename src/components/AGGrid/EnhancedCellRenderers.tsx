@@ -5,12 +5,13 @@
  * They provide better integration, performance, and consistency with the overall design system.
  */
 
+import type { ICellRendererParams } from 'ag-grid-community';
 import * as React from 'react';
 import { memo } from 'react';
-import type { ICellRendererParams } from 'ag-grid-community';
+
 import { cn } from '../../utils/cn';
-import { Badge } from '../Badge';
 import { Avatar } from '../Avatar';
+import { Badge } from '../Badge';
 import { Button } from '../Button';
 
 // =============================================================================
@@ -35,9 +36,9 @@ export const EnhancedAvatarNameRenderer = memo<ICellRendererParams>(
       <div className="flex items-center gap-3">
         <Avatar src={avatar} alt={name} size="sm" className="flex-shrink-0" />
         <div className="min-w-0 flex-1">
-          <div className="text-foreground truncate font-medium">{name}</div>
+          <div className="truncate font-medium text-foreground">{name}</div>
           {email && (
-            <div className="text-muted-foreground truncate text-xs">
+            <div className="truncate text-xs text-muted-foreground">
               {email}
             </div>
           )}
@@ -168,7 +169,7 @@ export const EnhancedActionsRenderer = memo<ActionsRendererProps>((params) => {
           variant="ghost"
           size="sm"
           onClick={() => onDelete(data)}
-          className="hover:bg-destructive/10 hover:text-destructive h-8 w-8 p-0"
+          className="hover:bg-destructive/10 h-8 w-8 p-0 hover:text-destructive"
         >
           <span className="sr-only">Delete</span>
           🗑️
@@ -323,7 +324,7 @@ export const EnhancedDateRenderer = memo<ICellRendererParams>((params) => {
         formatted = date.toLocaleDateString('en-US');
     }
 
-    return <span className="text-muted-foreground font-mono">{formatted}</span>;
+    return <span className="font-mono text-muted-foreground">{formatted}</span>;
   } catch {
     return <span className="text-muted-foreground">Invalid Date</span>;
   }
@@ -345,7 +346,7 @@ export const EnhancedProgressRenderer = memo<ICellRendererParams>((params) => {
 
   return (
     <div className="flex w-full items-center gap-2">
-      <div className="bg-muted h-2 flex-1 overflow-hidden rounded-full">
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
         <div
           className={cn(
             'h-full rounded-full transition-all duration-300',
@@ -360,7 +361,7 @@ export const EnhancedProgressRenderer = memo<ICellRendererParams>((params) => {
           style={{ width: `${progress}%` }}
         />
       </div>
-      <span className="text-muted-foreground min-w-[3ch] font-mono text-xs">
+      <span className="min-w-[3ch] font-mono text-xs text-muted-foreground">
         {Math.round(progress)}%
       </span>
     </div>

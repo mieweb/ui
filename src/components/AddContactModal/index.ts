@@ -1,7 +1,7 @@
-export { AddContactModal } from './AddContactModal';
 export type {
   AddContactModalProps,
-  ContactFormData,
   ContactAddress,
+  ContactFormData,
   CustomField,
 } from './AddContactModal';
+export { AddContactModal } from './AddContactModal';

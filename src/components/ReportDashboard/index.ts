@@ -1,7 +1,7 @@
 export {
+  type ChartDataPoint,
+  type MetricData,
   ReportDashboard,
   type ReportDashboardProps,
-  type MetricData,
-  type ChartDataPoint,
   type TopItem,
 } from './ReportDashboard';

@@ -1,6 +1,6 @@
-export { OrderConfirmationWizard } from './OrderConfirmationWizard';
 export type {
+  ConfirmationResult,
   OrderConfirmationWizardProps,
   OrderDetails,
-  ConfirmationResult,
 } from './OrderConfirmationWizard';
+export { OrderConfirmationWizard } from './OrderConfirmationWizard';

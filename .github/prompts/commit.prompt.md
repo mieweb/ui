@@ -11,21 +11,25 @@ Run the standard commit workflow: format, lint, and commit with a generated mess
 Execute these steps in order:
 
 1. **Format the code**
+
    ```bash
    npm run format:fix
    ```
 
 2. **Lint and fix issues**
+
    ```bash
    npm run lint:fix
    ```
 
 3. **Check for any remaining errors**
+
    ```bash
    npm run lint && npm run typecheck
    ```
 
 4. **Stage all changes**
+
    ```bash
    git add -A
    ```

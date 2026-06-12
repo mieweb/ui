@@ -1,6 +1,6 @@
-export { InvoiceView } from './InvoiceView';
 export type {
-  InvoiceViewProps,
   InvoiceDetails,
   InvoiceLineItem,
+  InvoiceViewProps,
 } from './InvoiceView';
+export { InvoiceView } from './InvoiceView';

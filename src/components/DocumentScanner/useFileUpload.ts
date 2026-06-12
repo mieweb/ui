@@ -1,6 +1,7 @@
 import * as React from 'react';
-import type { PreviewFile, ValidationError, ScannerSource } from './types';
-import { DEFAULT_MAX_FILE_SIZE_MB, DEFAULT_ACCEPTED_FILE_TYPES } from './types';
+
+import type { PreviewFile, ScannerSource, ValidationError } from './types';
+import { DEFAULT_ACCEPTED_FILE_TYPES, DEFAULT_MAX_FILE_SIZE_MB } from './types';
 
 /**
  * Generate a unique ID for a file
@@ -113,7 +114,6 @@ export function useFileUpload({
       files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
     };
     // Only run on unmount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addFiles = React.useCallback(

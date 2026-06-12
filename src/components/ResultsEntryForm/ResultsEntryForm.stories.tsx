@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+
+import { Button } from '../Button';
+import { Card } from '../Card';
 import {
+  ProviderContact,
   ResultsEntryForm,
   ResultsEntryModal,
-  ProviderContact,
 } from './ResultsEntryForm';
-import { Card } from '../Card';
-import { Button } from '../Button';
 
 // Sample provider contacts
 const sampleContacts: ProviderContact[] = [

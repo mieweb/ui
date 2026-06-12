@@ -1,7 +1,8 @@
 import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
-import { CloseIcon, ImageIcon, FileTextIcon } from '../Icons';
+import { CloseIcon, FileTextIcon, ImageIcon } from '../Icons';
 import type { FilePreviewProps, PreviewFile } from './types';
 
 /**
@@ -31,8 +32,8 @@ function FilePreviewItem({ file, onRemove, disabled }: FilePreviewItemProps) {
       data-slot="doc-scanner-preview-item"
       className={cn(
         'group relative overflow-hidden rounded-lg',
-        'border-border bg-card border',
-        'focus-within:ring-primary-500 focus-within:ring-2 focus-within:ring-offset-2'
+        'border border-border bg-card',
+        'focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2'
       )}
     >
       {/* Preview container */}
@@ -45,13 +46,13 @@ function FilePreviewItem({ file, onRemove, disabled }: FilePreviewItemProps) {
           />
         ) : isPdf ? (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-            <FileTextIcon className="text-muted-foreground h-12 w-12" />
-            <span className="text-muted-foreground text-xs">PDF Document</span>
+            <FileTextIcon className="h-12 w-12 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">PDF Document</span>
           </div>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-            <ImageIcon className="text-muted-foreground h-12 w-12" />
-            <span className="text-muted-foreground text-xs">File</span>
+            <ImageIcon className="h-12 w-12 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">File</span>
           </div>
         )}
 
@@ -97,12 +98,12 @@ function FilePreviewItem({ file, onRemove, disabled }: FilePreviewItemProps) {
       {/* File info */}
       <div className="p-2" data-slot="doc-scanner-preview-info">
         <p
-          className="text-foreground truncate text-sm font-medium"
+          className="truncate text-sm font-medium text-foreground"
           title={file.file.name}
         >
           {file.file.name}
         </p>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {formatFileSize(file.file.size)}
         </p>
       </div>

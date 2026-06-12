@@ -1,6 +1,6 @@
 export {
   AdditionalFields,
-  generateId,
   type AdditionalFieldsProps,
+  generateId,
   type KeyValueEntry,
 } from './AdditionalFields';

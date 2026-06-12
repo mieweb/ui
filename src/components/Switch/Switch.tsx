@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const switchTrackVariants = cva(
@@ -47,8 +48,7 @@ const switchThumbVariants = cva(
 );
 
 export interface SwitchProps
-  extends
-    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'>,
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'>,
     VariantProps<typeof switchTrackVariants> {
   /** Controlled checked state */
   checked?: boolean;
@@ -167,7 +167,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           htmlFor={switchId}
           data-slot="switch-label"
           className={cn(
-            'text-foreground cursor-pointer font-medium select-none',
+            'cursor-pointer select-none font-medium text-foreground',
             labelSizeClasses[size || 'md'],
             disabled && 'cursor-not-allowed opacity-50'
           )}
@@ -206,4 +206,4 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
 
 Switch.displayName = 'Switch';
 
-export { Switch, switchTrackVariants, switchThumbVariants };
+export { Switch, switchThumbVariants, switchTrackVariants };

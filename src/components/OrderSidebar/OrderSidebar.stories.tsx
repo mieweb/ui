@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import { OrderSidebar } from './OrderSidebar';
 
 const meta: Meta<typeof OrderSidebar> = {
@@ -10,7 +11,7 @@ const meta: Meta<typeof OrderSidebar> = {
   },
   decorators: [
     (Story) => (
-      <div className="bg-background relative h-[700px] w-full">
+      <div className="relative h-[700px] w-full bg-background">
         <Story />
       </div>
     ),

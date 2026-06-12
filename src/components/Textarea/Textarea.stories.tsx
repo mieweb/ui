@@ -1,5 +1,6 @@
-import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as React from 'react';
+
 import { Textarea } from './Textarea';
 
 const meta: Meta<typeof Textarea> = {
@@ -195,7 +196,7 @@ function ControlledTextareaDemo() {
         showCount
         maxLength={200}
       />
-      <p className="text-muted-foreground text-xs">
+      <p className="text-xs text-muted-foreground">
         Characters: <code className="font-mono">{value.length}</code>
       </p>
     </div>

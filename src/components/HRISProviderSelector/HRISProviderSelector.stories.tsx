@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import {
-  HRISProviderSelector,
   type HRISProvider,
+  HRISProviderSelector,
 } from './HRISProviderSelector';
 
 // HRIS provider logos - stored in .storybook/public/hris-logos/

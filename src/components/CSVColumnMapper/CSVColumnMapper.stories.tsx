@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+
 import {
+  type CSVColumn,
   CSVColumnMapper,
   CSVFileUpload,
-  type CSVColumn,
 } from './CSVColumnMapper';
 
 const meta: Meta<typeof CSVColumnMapper> = {
@@ -155,7 +156,7 @@ function FileUploadWrapper() {
         }}
       />
       {file && (
-        <p className="text-muted-foreground text-center">
+        <p className="text-center text-muted-foreground">
           Selected file: {file.name}
         </p>
       )}

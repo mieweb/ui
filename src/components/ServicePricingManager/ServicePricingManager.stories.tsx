@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import {
-  ServicePricingManager,
   type ServicePrice,
+  ServicePricingManager,
 } from './ServicePricingManager';
 
 const meta: Meta<typeof ServicePricingManager> = {

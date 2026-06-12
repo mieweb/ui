@@ -1,5 +1,6 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+
 import { cn } from '../../utils/cn';
 
 const skeletonVariants = cva(
@@ -23,8 +24,7 @@ const skeletonVariants = cva(
 );
 
 export interface SkeletonProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof skeletonVariants> {
   /** Width of the skeleton */
   width?: string | number;
@@ -163,7 +163,7 @@ function SkeletonCard({
     <div
       data-slot="skeleton-card"
       className={cn(
-        'border-border bg-card space-y-4 rounded-xl border p-4',
+        'space-y-4 rounded-xl border border-border bg-card p-4',
         className
       )}
       aria-hidden="true"
@@ -246,8 +246,8 @@ SkeletonTable.displayName = 'SkeletonTable';
 
 export {
   Skeleton,
-  SkeletonText,
   SkeletonCard,
   SkeletonTable,
+  SkeletonText,
   skeletonVariants,
 };

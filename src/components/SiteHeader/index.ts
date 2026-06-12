@@ -1,23 +1,22 @@
-export {
-  SiteHeader,
-  SiteLogo,
-  NavLinks,
-  AuthButtons,
-  UserMenu,
-  MobileMenuButton,
-  MobileMenuPanel,
-  CompactHeader,
-} from './SiteHeader';
-
 export type {
-  SiteHeaderProps,
-  SiteLogoProps,
-  NavLinksProps,
   AuthButtonsProps,
-  UserMenuProps,
+  CompactHeaderProps,
   MobileMenuButtonProps,
   MobileMenuPanelProps,
-  CompactHeaderProps,
   NavLink,
+  NavLinksProps,
+  SiteHeaderProps,
+  SiteLogoProps,
+  UserMenuProps,
   UserProfile,
+} from './SiteHeader';
+export {
+  AuthButtons,
+  CompactHeader,
+  MobileMenuButton,
+  MobileMenuPanel,
+  NavLinks,
+  SiteHeader,
+  SiteLogo,
+  UserMenu,
 } from './SiteHeader';

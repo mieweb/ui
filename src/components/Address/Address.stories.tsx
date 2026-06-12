@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import {
   Address,
   AddressCard,
-  AddressInline,
   AddressCompact,
   type AddressData,
+  AddressInline,
 } from './Address';
 
 const meta: Meta<typeof Address> = {

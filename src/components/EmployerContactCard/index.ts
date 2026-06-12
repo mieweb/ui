@@ -1,2 +1,2 @@
+export type { Contact, EmployerContactCardProps } from './EmployerContactCard';
 export { EmployerContactCard } from './EmployerContactCard';
-export type { EmployerContactCardProps, Contact } from './EmployerContactCard';
