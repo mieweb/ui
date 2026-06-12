@@ -180,6 +180,7 @@
   "peerDependencies": {
     "@esheet/builder": ">=0.0.2",
     "@esheet/renderer": ">=0.0.2",
+    "@mieweb/datavis": "=0.0.0-PRE.2",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.2",
@@ -195,6 +196,9 @@
       "optional": true
     },
     "@esheet/renderer": {
+      "optional": true
+    },
+    "@mieweb/datavis": {
       "optional": true
     },
     "ag-grid-community": {
