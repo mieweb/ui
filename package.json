@@ -178,8 +178,6 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@esheet/builder": ">=0.0.2",
-    "@esheet/renderer": ">=0.0.2",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.2",
@@ -191,12 +189,6 @@
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
-    "@esheet/builder": {
-      "optional": true
-    },
-    "@esheet/renderer": {
-      "optional": true
-    },
     "ag-grid-community": {
       "optional": true
     },
