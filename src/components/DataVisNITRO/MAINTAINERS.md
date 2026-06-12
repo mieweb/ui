@@ -27,21 +27,19 @@ back here later.
 ## Dependencies — two moving parts
 
 1. **`datavis-ace`** (optional peer dep) — provides `ComputedView`, `Source`.
-2. **The `datavis` git submodule** — imported via deep paths like
-   `datavis/src/components/DataGrid`, `datavis/src/adapters/*`,
-   `datavis/src/components/table/TableRenderer`. The submodule lives in
-   `packages/datavis` and is **linked into `node_modules/datavis`**.
-
-Because it reaches into `datavis/src/...`, the submodule **and its transitive
-deps** must be resolvable.
+2. **`@mieweb/datavis`** (published npm package) — provides `DataGrid`,
+   `determineColumns`, `useView`, `TableRenderer`, and the related types. This
+   was previously a `packages/datavis` git submodule consumed via deep
+   `datavis/src/...` paths; it is now a normal package dependency, so no
+   submodule init/link step is required.
 
 ## Gotchas
 
-- **Stale submodule link** is the classic failure. `postinstall` auto-detects and
-  re-links it; if imports still fail, run `git submodule update --init
-  --recursive` then `pnpm install`. [.storybook/main.ts](../../../.storybook/main.ts)
-  also aliases datavis's deps from the pnpm virtual store so Storybook resolves
-  them.
+- **CJS/ESM interop.** `@mieweb/datavis` ships CJS, so
+  [.storybook/main.ts](../../../.storybook/main.ts) force pre-bundles it (and its
+  deps) via `optimizeDeps` and aliases them from the pnpm virtual store so
+  Storybook resolves them. If a DataVis import breaks in Storybook, check that
+  wiring first.
 - Source/Grid are **coupled through React context** — a `DataVisNitroGrid` must be
   rendered inside a `DataVisNitroSource`. Don't refactor one without the other.
 - View instances are tagged (`_dvType` / `_dvUrl`) for tracking; preserve those

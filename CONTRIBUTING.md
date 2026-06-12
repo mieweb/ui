@@ -51,8 +51,7 @@ pnpm storybook        # http://localhost:6006
 ```
 
 If you cloned without `--recurse-submodules`, run
-`git submodule update --init --recursive` and re-run `pnpm install`. A stale
-`datavis` link is auto-repaired by the `postinstall` script.
+`git submodule update --init --recursive` and re-run `pnpm install`.
 
 ## Everyday commands
 
@@ -176,17 +175,20 @@ file should:
   Test brand switching via `ThemeProvider`.
 - Deep reference: [lessons/tailwind4-integration.md](lessons/tailwind4-integration.md).
 
-## Submodules (datavis, esheet, ychart)
+## Submodules (esheet, ychart)
 
-Three heavy capabilities live in **git submodules** under `packages/`, not in
+Two heavy capabilities live in **git submodules** under `packages/`, not in
 `src/`. This is the most common source of "it builds on CI but not locally"
 confusion, so know which is which:
 
 | Submodule | Backs | Exposed as | Notes |
 |-----------|-------|-----------|-------|
-| `packages/datavis` | `DataVisNITRO` | `@mieweb/ui/datavis` | Linked into `node_modules/datavis`; `postinstall` repairs a stale link. Also needs the `datavis-ace` peer. |
 | `packages/esheet` | `EsheetBuilder` / `EsheetRenderer` | `@mieweb/ui/esheet` | nx monorepo (`core/fields/adapters/builder/renderer`); built by `build:esheet` before the main build. |
 | `packages/ychart` | `YChart` (Storybook only) | *not exported* | A vanilla editor class dynamically imported by the story only. |
+
+DataVis NITRO is **not** a submodule: it's consumed from the published
+`@mieweb/datavis` npm package (plus the `datavis-ace` peer), exposed as
+`@mieweb/ui/datavis`.
 
 If a submodule-backed component fails to resolve, run
 `git submodule update --init --recursive` then `pnpm install`.

@@ -120,7 +120,7 @@ git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
 ```
 
-> `--recurse-submodules` is strongly recommended for first clone so the `packages/esheet` and `packages/ychart` submodules are populated immediately. Without them, the eSheet and YChart stories will not work. A `packages/datavis` submodule is still declared in `.gitmodules` and gets cloned too, but DataVis NITRO now ships as the published `@mieweb/datavis` npm package, so that submodule is no longer required by the build.
+> `--recurse-submodules` is strongly recommended for first clone so the `packages/esheet` and `packages/ychart` submodules are populated immediately. Without them, the eSheet and YChart stories will not work. DataVis NITRO is not a submodule — it ships as the published `@mieweb/datavis` npm package.
 
 If you already cloned without submodules, run:
 
@@ -157,7 +157,7 @@ This starts the Storybook development server at [http://localhost:6006](http://l
 
 Storybook integrates three sibling MIE projects, each sourced differently:
 
-- **DataVis NITRO** — npm package `@mieweb/datavis`. No build step; consumed as a published package (no submodule build needed). The legacy `packages/datavis` submodule is still cloned but unused by the build.
+- **DataVis NITRO** — npm package `@mieweb/datavis`. No build step; consumed as a published package (no submodule needed).
 - **eSheet** — git submodule `packages/esheet`. Built automatically by the `prestorybook` hook; rebuilds only when its artifacts are missing.
 - **YChart** — git submodule `packages/ychart`. No build step; the story imports it directly from source via a relative dynamic import, and Storybook's Vite config adds a `virtual:git-info` plugin, a `__YCHART_VERSION__` define, and dependency pre-bundling (`optimizeDeps`).
 
