@@ -6,6 +6,8 @@ export * from './components/Address';
 // This avoids forcing ag-grid-community/ag-grid-react on all consumers.
 // See: src/ag-grid.ts
 // Same with DataVis (src/datavis.ts)
+// Kerebron editors (RichEditor/CodeEditor) are exported via @mieweb/ui/kerebron
+// to keep @kerebron/* (and its WASM/CSS) optional. See: src/kerebron.ts
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AlertDialog';
@@ -117,7 +119,6 @@ export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
-export * from './components/RichEditor';
 export * from './components/RichTextEditor';
 export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';

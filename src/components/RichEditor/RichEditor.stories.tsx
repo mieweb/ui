@@ -19,7 +19,7 @@ function BasicExample() {
   const [value, setValue] = useState('');
   return (
     <div className="max-w-2xl">
-      <RichEditor value={value} onChange={setValue} />
+      <RichEditor value={value} onChange={setValue} showPreview />
     </div>
   );
 }

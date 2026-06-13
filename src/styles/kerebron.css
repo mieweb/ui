@@ -1,0 +1,11 @@
+/**
+ * Kerebron editor styles — opt-in stylesheet for @mieweb/ui/kerebron.
+ *
+ * Import this only when you use the RichEditor / CodeEditor components:
+ *   import '@mieweb/ui/kerebron.css';
+ *
+ * Kept separate from the library's global styles.css so consumers that don't
+ * use the Kerebron editor don't ship its CSS.
+ */
+@import '@kerebron/editor/assets/index.css';
+@import '@kerebron/editor-kits/assets/AdvancedEditorKit.css';

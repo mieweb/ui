@@ -1,7 +1,3 @@
-export {
-  RichEditor,
-} from './RichEditor';
+export { RichEditor, type RichEditorProps } from './RichEditor';
 
-export {
-  CodeEditor,
-} from './CodeEditor';
+export { CodeEditor, type CodeEditorProps } from './CodeEditor';

@@ -22,15 +22,6 @@ importers:
 
   .:
     dependencies:
-      '@kerebron/editor':
-        specifier: 0.7.9
-        version: 0.7.9
-      '@kerebron/editor-kits':
-        specifier: 0.7.9
-        version: 0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
-      '@kerebron/wasm':
-        specifier: 0.7.9
-        version: 0.7.9
       '@swc/helpers':
         specifier: ^0.5.19
         version: 0.5.19
@@ -98,6 +89,15 @@ importers:
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
+      '@kerebron/editor':
+        specifier: 0.7.9
+        version: 0.7.9
+      '@kerebron/editor-kits':
+        specifier: 0.7.9
+        version: 0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/wasm':
+        specifier: 0.7.9
+        version: 0.7.9
       '@mieweb/datavis':
         specifier: '=0.0.0-PRE.2'
         version: 0.0.0-PRE.2(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)(wavesurfer.js@7.12.1)
