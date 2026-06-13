@@ -33,7 +33,7 @@ src/
   hooks/  utils/  styles/  types/
   test/setup.ts         # Vitest setup
 packages/               # Git submodules with heavy/optional implementations
-  datavis/  esheet/  ychart/
+  esheet/  ychart/      # (DataVis NITRO is an npm package, not a submodule)
 .storybook/             # Storybook (react-vite) config
 tests/visual/           # Playwright visual-regression specs + snapshots
 lessons/                # Consumer-facing adoption + policy docs
@@ -51,8 +51,7 @@ pnpm storybook        # http://localhost:6006
 ```
 
 If you cloned without `--recurse-submodules`, run
-`git submodule update --init --recursive` and re-run `pnpm install`. A stale
-`datavis` link is auto-repaired by the `postinstall` script.
+`git submodule update --init --recursive` and re-run `pnpm install`.
 
 ## Everyday commands
 
@@ -176,17 +175,20 @@ file should:
   Test brand switching via `ThemeProvider`.
 - Deep reference: [lessons/tailwind4-integration.md](lessons/tailwind4-integration.md).
 
-## Submodules (datavis, esheet, ychart)
+## Submodules (esheet, ychart)
 
-Three heavy capabilities live in **git submodules** under `packages/`, not in
+Two heavy capabilities live in **git submodules** under `packages/`, not in
 `src/`. This is the most common source of "it builds on CI but not locally"
 confusion, so know which is which:
 
 | Submodule | Backs | Exposed as | Notes |
 |-----------|-------|-----------|-------|
-| `packages/datavis` | `DataVisNITRO` | `@mieweb/ui/datavis` | Linked into `node_modules/datavis`; `postinstall` repairs a stale link. Also needs the `datavis-ace` peer. |
 | `packages/esheet` | `EsheetBuilder` / `EsheetRenderer` | `@mieweb/ui/esheet` | nx monorepo (`core/fields/adapters/builder/renderer`); built by `build:esheet` before the main build. |
 | `packages/ychart` | `YChart` (Storybook only) | *not exported* | A vanilla editor class dynamically imported by the story only. |
+
+DataVis NITRO is **not** a submodule: it's consumed from the published
+`@mieweb/datavis` npm package (plus the `datavis-ace` peer), exposed as
+`@mieweb/ui/datavis`.
 
 If a submodule-backed component fails to resolve, run
 `git submodule update --init --recursive` then `pnpm install`.
@@ -194,8 +196,8 @@ If a submodule-backed component fails to resolve, run
 ## Optional peer dependencies
 
 `react` / `react-dom` are required peers. Everything else heavy is **optional**:
-`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@esheet/builder`,
-`@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
+`ag-grid-community`, `ag-grid-react`, `datavis-ace`, `@mieweb/datavis`,
+`@esheet/builder`, `@esheet/renderer`, `wavesurfer.js`. Components that need them must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
 
@@ -219,7 +221,7 @@ Current notes:
 | [AI](src/components/AI/MAINTAINERS.md) | `renderTextContent` extension point; host owns sanitization; reuses the Messaging composer |
 | [AGGrid](src/components/AGGrid/MAINTAINERS.md) | Registers AG Grid modules at import; optional peers; brand theming; base vs. enhanced split |
 | [ESheet](src/components/ESheet/MAINTAINERS.md) | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src` |
-| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) | Wraps `datavis-ace` + the `datavis` submodule; context/source/grid wiring |
+| [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md) | Wraps `datavis-ace` + the `@mieweb/datavis` npm package; context/source/grid wiring |
 | [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md) | Manual drag/resize math; modal vs. floating modes; fully controlled |
 | [YChart](src/components/YChart/MAINTAINERS.md) | Vanilla editor in a submodule, dynamically imported; not in the public API |
 

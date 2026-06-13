@@ -1,4 +1,6 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import { ArrowRight } from 'lucide-react';
+import { Button } from './components/Button';
 
 <Meta title="Introduction" />
 
@@ -42,14 +44,17 @@ A **themeable, accessible React component library** built with Tailwind CSS 4. D
   style={{
     padding: '24px',
     borderRadius: '12px',
-    background:
-      'linear-gradient(135deg, var(--mieweb-primary-500, #27aae1) 0%, var(--mieweb-primary-700, #1786b3) 100%)',
+    backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+    border: '1px solid var(--mieweb-border, #e5e7eb)',
     marginTop: '16px',
     marginBottom: '24px',
   }}
 >
-  <div style={{ color: 'white', marginBottom: '12px' }}>
-    <strong style={{ fontSize: '18px', display: 'block', marginBottom: '8px' }}>
+  <div style={{ color: 'var(--mieweb-foreground, #171717)', marginBottom: '12px' }}>
+    <strong
+      className="mie-cta-heading"
+      style={{ fontSize: '18px', display: 'block', marginBottom: '8px' }}
+    >
       🚀 Full Dashboard Example
     </strong>
     <span
@@ -66,21 +71,18 @@ A **themeable, accessible React component library** built with Tailwind CSS 4. D
       Data tables, and more.
     </span>
   </div>
-  <a
-    href="?path=/story/product-feature-modules-dashboard--dashboard"
-    style={{
-      display: 'inline-block',
-      padding: '10px 20px',
-      backgroundColor: 'white',
-      color: 'var(--mieweb-primary-700, #1786b3)',
-      borderRadius: '6px',
-      fontWeight: '600',
-      textDecoration: 'none',
-      fontSize: '14px',
+  <Button
+    variant="primary"
+    size="md"
+    type="button"
+    rightIcon={<ArrowRight size={16} aria-hidden="true" />}
+    onClick={() => {
+      (window.top ?? window).location.href =
+        '?path=/story/product-feature-modules-dashboard--dashboard';
     }}
   >
-    View Dashboard Example →
-  </a>
+    View Dashboard Example
+  </Button>
 </div>
 
 ---
@@ -654,7 +656,7 @@ Want to develop components, browse the full library on your machine, or contribu
 ### Setup
 
 ```bash
-# 1. Clone with submodules (esheet, ychart, and datavis are git submodules)
+# 1. Clone with submodules (esheet and ychart are git submodules)
 git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
 
@@ -696,11 +698,11 @@ That's the whole flow — `pnpm install && pnpm storybook`. A `prestorybook` hoo
 
 `@mieweb/ui`'s Storybook integrates three sibling MIE projects, each sourced differently:
 
-- **DataVis NITRO** — npm package `@mieweb/datavis`. _No build step:_ consumed as a published package (no submodule build needed). Powers the DataVis NITRO data-grid stories. (A legacy `packages/datavis` submodule is still declared in `.gitmodules` and gets cloned, but the build no longer uses it.)
+- **DataVis NITRO** — npm package `@mieweb/datavis`. _No build step:_ consumed as a published package (not a submodule). Powers the DataVis NITRO data-grid stories.
 - **eSheet** — git submodule `packages/esheet`. _Built automatically_ by the `prestorybook` hook (nx) before Storybook starts; rebuilds only when its artifacts are missing. The form builder/renderer toolkit.
 - **YChart** — git submodule `packages/ychart`. _No build step:_ the story imports it directly from source via a relative dynamic import; Storybook's Vite config supplies a `virtual:git-info` plugin, a `__YCHART_VERSION__` define, and dependency pre-bundling (`optimizeDeps`). Org-chart / visualization toolkit.
 
-> **Heads up:** DataVis NITRO is now consumed from the published `@mieweb/datavis` npm package rather than built from source — a fresh clone no longer builds DataVis. The `packages/datavis` submodule still exists for now, but it's no longer required by the build.
+> **Heads up:** DataVis NITRO is consumed from the published `@mieweb/datavis` npm package — it is not a git submodule, and a fresh clone does not build DataVis from source.
 
 ### Common Commands
 
