@@ -190,8 +190,6 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@esheet/builder": ">=0.0.2",
-    "@esheet/renderer": ">=0.0.2",
     "@kerebron/editor": ">=0.7.9",
     "@kerebron/editor-kits": ">=0.7.9",
     "@kerebron/wasm": ">=0.7.9",
@@ -207,12 +205,6 @@
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
-    "@esheet/builder": {
-      "optional": true
-    },
-    "@esheet/renderer": {
-      "optional": true
-    },
     "@kerebron/editor": {
       "optional": true
     },
