@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import { createCodePlugin } from './plugins/code';
 import { createGenUIPlugin } from './plugins/genui';
@@ -8,6 +8,8 @@ import { createMermaidPlugin } from './plugins/mermaid';
 import { createImagePlugin } from './plugins/image';
 import { createNitroTablePlugin } from './plugins/nitroTable';
 import { SuperChat } from './SuperChat';
+import { SuperChatConversations } from './SuperChatConversations';
+import { SuperChatInbox } from './SuperChatInbox';
 import type {
   GenUIRegistry,
   GenUIWidgetProps,
@@ -227,11 +229,10 @@ describe('SuperChat', () => {
   it('renders participants and markdown messages', () => {
     render(
       <div style={{ height: 400 }}>
-        <SuperChat conversations={[conversation]} currentParticipantId="u1" />
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
       </div>
     );
-    // 'Intake' appears in both the sidebar and the thread header.
-    expect(screen.getAllByText('Intake').length).toBeGreaterThan(0);
+    expect(screen.getByText('Intake')).toBeInTheDocument();
     expect(screen.getAllByText('Triage Agent').length).toBeGreaterThan(0);
     expect(screen.getByText('hi').tagName).toBe('STRONG');
   });
@@ -242,7 +243,7 @@ describe('SuperChat', () => {
     const user = userEvent.setup();
     render(
       <SuperChat
-        conversations={[conversation]}
+        conversation={conversation}
         currentParticipantId="u1"
         onMessageSent={onMessageSent}
       />
@@ -269,7 +270,7 @@ describe('SuperChat', () => {
     const user = userEvent.setup();
     render(
       <SuperChat
-        conversations={[withSystem]}
+        conversation={withSystem}
         currentParticipantId="u1"
         onMessageSent={onMessageSent}
       />
@@ -286,7 +287,7 @@ describe('SuperChat', () => {
   it('disables the composer when readOnly', () => {
     render(
       <SuperChat
-        conversations={[conversation]}
+        conversation={conversation}
         currentParticipantId="u1"
         readOnly
       />
@@ -298,7 +299,7 @@ describe('SuperChat', () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
     render(
-      <SuperChat conversations={[conversation]} currentParticipantId="u1" />
+      <SuperChat conversation={conversation} currentParticipantId="u1" />
     );
     const input = screen.getByLabelText('Message') as HTMLTextAreaElement;
     await user.type(input, 'hello @Tri');
@@ -324,9 +325,151 @@ describe('SuperChat', () => {
     };
     const { container } = render(
       <div style={{ height: 400 }}>
-        <SuperChat conversations={[withCode]} currentParticipantId="u1" />
+        <SuperChat conversation={withCode} currentParticipantId="u1" />
       </div>
     );
     expect(container.querySelector('code')).toHaveTextContent('const x = 1;');
+  });
+});
+
+describe('SuperChatConversations', () => {
+  const conversations: SuperChatConversation[] = [
+    {
+      id: 'c1',
+      title: 'Intake',
+      unread: 2,
+      participants: [{ id: 'u1', kind: 'human', name: 'Alice Reyes' }],
+      thread: [
+        {
+          id: 'm1',
+          participantId: 'u1',
+          text: 'hello',
+          time: '2026-06-07T09:00:00Z',
+        },
+      ],
+    },
+    {
+      id: 'c2',
+      title: 'Follow-up',
+      participants: [{ id: 'u1', kind: 'human', name: 'Alice Reyes' }],
+      thread: [
+        {
+          id: 'm2',
+          participantId: 'u1',
+          text: 'later',
+          time: '2026-06-07T10:00:00Z',
+        },
+      ],
+    },
+  ];
+
+  it('renders the conversation list with an unread badge', () => {
+    render(<SuperChatConversations conversations={conversations} />);
+    expect(screen.getByText('Intake')).toBeInTheDocument();
+    expect(screen.getByText('Follow-up')).toBeInTheDocument();
+    expect(screen.getByText('unread messages', { exact: false }));
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
+  it('fires onConversationOpened when a conversation is selected', async () => {
+    const onConversationOpened = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <SuperChatConversations
+        conversations={conversations}
+        onConversationOpened={onConversationOpened}
+      />
+    );
+    await user.click(screen.getByText('Follow-up'));
+    expect(onConversationOpened).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'c2' })
+    );
+  });
+
+  it('fires onNewConversation from the new-conversation button', async () => {
+    const onNewConversation = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <SuperChatConversations
+        conversations={conversations}
+        onNewConversation={onNewConversation}
+      />
+    );
+    await user.click(screen.getByLabelText('New conversation'));
+    expect(onNewConversation).toHaveBeenCalled();
+  });
+});
+
+describe('SuperChatInbox', () => {
+  const conversations: SuperChatConversation[] = [
+    {
+      id: 'c1',
+      title: 'Intake',
+      participants: [
+        { id: 'u1', kind: 'human', name: 'Alice Reyes' },
+        { id: 'a1', kind: 'agent', name: 'Triage Agent', color: '#2563eb' },
+      ],
+      thread: [
+        {
+          id: 'm1',
+          participantId: 'a1',
+          text: 'first conversation',
+          time: '2026-06-07T09:00:00Z',
+        },
+      ],
+    },
+    {
+      id: 'c2',
+      title: 'Follow-up',
+      participants: [{ id: 'u1', kind: 'human', name: 'Alice Reyes' }],
+      thread: [
+        {
+          id: 'm2',
+          participantId: 'u1',
+          text: 'second conversation',
+          time: '2026-06-07T10:00:00Z',
+        },
+      ],
+    },
+  ];
+
+  it('renders both the conversation list and the active panel', () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+        />
+      </div>
+    );
+    expect(
+      container.querySelector('[data-slot="superchat-conversations"]')
+    ).not.toBeNull();
+    const panel = container.querySelector('[data-slot="superchat"]');
+    expect(panel).not.toBeNull();
+    const thread = within(panel as HTMLElement);
+    expect(thread.getByText('first conversation')).toBeInTheDocument();
+  });
+
+  it('switches the active panel when another conversation is opened', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+        />
+      </div>
+    );
+    const panel = () =>
+      within(container.querySelector('[data-slot="superchat"]') as HTMLElement);
+    expect(panel().getByText('first conversation')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Follow-up/ }));
+    expect(panel().getByText('second conversation')).toBeInTheDocument();
   });
 });

@@ -1,13 +1,25 @@
 /**
  * SuperChat — multi-participant chat for `@mieweb/ui`.
  *
- * The base entry ships the {@link SuperChat} shell + Markdown core
- * ({@link createMarkdownRenderer}). Rich render plugins (code / math / genui /
- * NITRO / mermaid) are opt-in via the subpath:
- * `@mieweb/ui/components/SuperChat/plugins`.
+ * Three composable surfaces share one import path:
+ * - {@link SuperChat} — a single-conversation message panel.
+ * - {@link SuperChatConversations} — the conversation list (sidebar).
+ * - {@link SuperChatInbox} — the combined list + panel (drop-in for the
+ *   original monolithic component).
+ *
+ * The base entry ships the Markdown core ({@link createMarkdownRenderer}). Rich
+ * render plugins (code / math / genui / NITRO / mermaid) are opt-in via the
+ * subpath: `@mieweb/ui/components/SuperChat/plugins`.
  */
 
 export { SuperChat, type SuperChatProps } from './SuperChat';
+
+export {
+  SuperChatConversations,
+  type SuperChatConversationsProps,
+} from './SuperChatConversations';
+
+export { SuperChatInbox, type SuperChatInboxProps } from './SuperChatInbox';
 
 export {
   createMarkdownRenderer,

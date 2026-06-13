@@ -11,11 +11,22 @@
 
 | Surface | File | Role |
 |---------|------|------|
-| `SuperChat` | [SuperChat.tsx](SuperChat.tsx) | Native shell: sidebar + thread + composer (controlled props) |
+| `SuperChatInbox` | [SuperChatInbox.tsx](SuperChatInbox.tsx) | Combined surface: composes the list + panel; owns active-conversation selection (drop-in for the original monolithic component) |
+| `SuperChat` | [SuperChat.tsx](SuperChat.tsx) | Single-conversation **panel**: header + thread + composer (takes one `conversation`) |
+| `SuperChatConversations` | [SuperChatConversations.tsx](SuperChatConversations.tsx) | Conversation **list** (sidebar); controlled/uncontrolled selection |
+| shared internals | [parts.tsx](parts.tsx) | Internal-only helpers + presentational pieces (`ParticipantAvatar`, `ReferenceChip`, `MessageRow`, `Composer`, `sidebarItem`) shared by all three components — **not** exported from `index.ts` |
 | `createMarkdownRenderer` | [render/createMarkdownRenderer.tsx](render/createMarkdownRenderer.tsx) | Composes render plugins → one `renderTextContent` (Markdown core) |
 | render context | [render/renderContext.ts](render/renderContext.ts) | Threads `messageId`/`streaming` into custom nodes (GenUI) |
 | code / math / genui / mermaid / image / nitro-table plugins | [plugins/](plugins) | Opt-in rich plugins (subpath entry) |
 | types | [types.ts](types.ts) | Participant model + chat-component-compatible data model + plugin/GenUI contracts |
+
+> **Component split.** The three components share one folder and one import path
+> (`@mieweb/ui/components/SuperChat`) and one tsup entry. `SuperChat` owns the
+> panel-only state (`renderText` memo, thread scroll effect, `participantById`,
+> `orderedThread`); `SuperChatConversations` owns the list-only state (sorting +
+> selection); `SuperChatInbox` owns the shared active-conversation coordination
+> and renders the other two. Data slots: `superchat-inbox` (inbox root),
+> `superchat` (panel root), `superchat-conversations` (list root).
 
 ## Architecture (3 decisions from the plan)
 
@@ -32,7 +43,8 @@
 
 ## Bundle / entry layout
 
-- `@mieweb/ui/components/SuperChat` ships the shell **+ Markdown core** only
+- `@mieweb/ui/components/SuperChat` ships the three components (`SuperChatInbox`
+  / `SuperChat` / `SuperChatConversations`) **+ Markdown core** only
   (`react-markdown` + `remark-gfm` + `rehype-sanitize`).
 - `@mieweb/ui/components/SuperChat/plugins` ships `code` / `math` / `genui` /
   `mermaid` / `image` / `nitro-table`. Each rich dependency (`rehype-highlight`,
