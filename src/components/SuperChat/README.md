@@ -1,8 +1,8 @@
 # SuperChat
 
 > **Consumer guide** — how to *use* the SuperChat components in your own
-> application. For internals and how to *change* the module, see
-> [MAINTAINERS.md](MAINTAINERS.md) and [superchat-plan.md](../../../superchat-plan.md).
+> application. For internals, how to *change* the module, and the design
+> rationale, see [MAINTAINERS.md](MAINTAINERS.md).
 
 SuperChat is a native, multi-participant chat surface for `@mieweb/ui`: any mix
 of **multiple AI agents** and **multiple humans** in a single conversation.

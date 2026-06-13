@@ -6,7 +6,7 @@
  * `external`/`internal`/`system` roles into a single **participant** concept,
  * plus the pluggable Markdown render pipeline contracts.
  *
- * See `superchat-plan.md` (Decisions 2 & 3) for the design rationale.
+ * See `MAINTAINERS.md` (Mission → Decisions 2 & 3) for the design rationale.
  */
 
 import type * as React from 'react';

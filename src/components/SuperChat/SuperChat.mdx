@@ -9,7 +9,7 @@ import rawReadme from './README.md?raw';
   this file.
 
   Storybook has no file server for the repo, so the README's *relative* links to
-  other Markdown files (MAINTAINERS.md, superchat-plan.md, ../AI/MAINTAINERS.md)
+  other Markdown files (MAINTAINERS.md, ../AI/MAINTAINERS.md)
   would 404 here. Rewrite those to absolute GitHub URLs, resolved against the
   README's own location, so they stay clickable in Storybook while remaining
   correct relative links on GitHub / npm.
