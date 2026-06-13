@@ -233,7 +233,7 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.0",
     "google-libphonenumber": "^3.2.44",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.562.0",
@@ -275,7 +275,7 @@
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.6",
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
@@ -300,7 +300,7 @@
     "jsdom": "^26.1.0",
     "mermaid": "^11.12.3",
     "papaparse": "^5.5.3",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.10",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "^19.2.4",
@@ -311,22 +311,30 @@
     "tailwindcss": "^4.2.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vitest": "^3.2.4",
+    "vite": "^7.3.2",
+    "vitest": "^3.2.6",
     "wavesurfer.js": "^7.12.1",
     "ychart": "file:./packages/ychart",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "pnpm": {
     "overrides": {
       "datavis-ace": "=4.0.0-PRE.2",
       "@esheet/adapters": "link:./packages/esheet/packages/adapters",
       "@esheet/core": "link:./packages/esheet/packages/core",
-      "@esheet/fields": "link:./packages/esheet/packages/fields"
+      "@esheet/fields": "link:./packages/esheet/packages/fields",
+      "esbuild@<0.28.1": "0.28.1",
+      "axios@>=1.0.0 <1.16.0": "1.16.0",
+      "minimatch@>=10.0.0 <10.2.3": "10.2.3",
+      "minimatch@>=9.0.0 <9.0.7": "9.0.7",
+      "flatted@<3.4.2": "3.4.2",
+      "picomatch@>=4.0.0 <4.0.4": "4.0.4",
+      "uuid@<11.1.1": "11.1.1",
+      "dompurify@<3.4.0": "3.4.0"
     }
   }
 }
