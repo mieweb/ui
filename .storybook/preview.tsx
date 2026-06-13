@@ -3,6 +3,7 @@ import type { Preview, Decorator } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
+import '../src/styles/kerebron.css';
 import './preview.css';
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { ccmeBrand } from '../src/brands/ccme';

@@ -139,9 +139,20 @@
         "default": "./dist/esheet.cjs"
       }
     },
+    "./kerebron": {
+      "import": {
+        "types": "./dist/kerebron.d.ts",
+        "default": "./dist/kerebron.js"
+      },
+      "require": {
+        "types": "./dist/kerebron.d.cts",
+        "default": "./dist/kerebron.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./markdown.css": "./dist/components/Markdown/styles.css",
+    "./kerebron.css": "./dist/kerebron.css",
     "./init.css": "./dist/styles/init.css"
   },
   "files": [
@@ -153,12 +164,13 @@
     "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
     "dev": "tsup --watch",
     "prebuild": "npm run build:esheet",
-    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css",
+    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css && npm run copy:kerebron-css",
     "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ] || [ ! -f packages/esheet/packages/renderer/src/index.output.css ]; then cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel; fi",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
     "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
     "copy:markdown-css": "mkdir -p dist/components/Markdown && cp src/components/Markdown/styles.css dist/components/Markdown/ 2>/dev/null || true",
+    "copy:kerebron-css": "cp src/styles/kerebron.css dist/kerebron.css 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -180,6 +192,9 @@
   "peerDependencies": {
     "@esheet/builder": ">=0.0.2",
     "@esheet/renderer": ">=0.0.2",
+    "@kerebron/editor": ">=0.7.9",
+    "@kerebron/editor-kits": ">=0.7.9",
+    "@kerebron/wasm": ">=0.7.9",
     "@mieweb/datavis": "=0.0.0-PRE.2",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
@@ -196,6 +211,15 @@
       "optional": true
     },
     "@esheet/renderer": {
+      "optional": true
+    },
+    "@kerebron/editor": {
+      "optional": true
+    },
+    "@kerebron/editor-kits": {
+      "optional": true
+    },
+    "@kerebron/wasm": {
       "optional": true
     },
     "@mieweb/datavis": {
@@ -253,6 +277,9 @@
     "@esheet/fields": "link:./packages/esheet/packages/fields",
     "@esheet/renderer": "link:./packages/esheet/packages/renderer",
     "@eslint/js": "^9.39.3",
+    "@kerebron/editor": "0.7.9",
+    "@kerebron/editor-kits": "0.7.9",
+    "@kerebron/wasm": "0.7.9",
     "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
