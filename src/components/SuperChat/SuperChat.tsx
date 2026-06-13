@@ -199,7 +199,11 @@ function MessageRow({
 
   if (message.type === 'system') {
     return (
-      <div className="my-1 text-center text-xs text-neutral-500 dark:text-neutral-400">
+      <div
+        data-slot="superchat-system-message"
+        role="status"
+        className="my-1 text-center text-xs text-neutral-500 dark:text-neutral-400"
+      >
         {message.text}
       </div>
     );
@@ -207,7 +211,10 @@ function MessageRow({
 
   if (message.type === 'ref' && message.ref) {
     return (
-      <div className={cn('flex', isSelf && 'justify-end')}>
+      <div
+        data-slot="superchat-reference"
+        className={cn('flex', isSelf && 'justify-end')}
+      >
         <ReferenceChip
           reference={message.ref}
           linkBuilder={linkBuilder}
@@ -218,20 +225,26 @@ function MessageRow({
   }
 
   const accent = participant?.color;
+  const authorName = participant?.name ?? 'Unknown';
 
   return (
     <div
       data-slot="superchat-message"
+      role="article"
+      aria-label={`${authorName}, ${formatTime(message.time)}`}
       className={cn('flex gap-2', isSelf ? 'flex-row-reverse' : 'flex-row')}
     >
       <ParticipantAvatar participant={participant} size="sm" />
       <div className={cn('flex min-w-0 flex-col gap-1', isSelf && 'items-end')}>
-        <div className="flex items-baseline gap-2">
+        <div
+          data-slot="superchat-message-meta"
+          className="flex items-baseline gap-2"
+        >
           <span
             className="text-xs font-medium"
             style={accent ? { color: accent } : undefined}
           >
-            {participant?.name ?? 'Unknown'}
+            {authorName}
           </span>
           {participant?.role && (
             <span className="text-[10px] text-neutral-400">
@@ -244,6 +257,7 @@ function MessageRow({
         </div>
 
         <div
+          data-slot="superchat-bubble"
           className={cn(
             'w-fit max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
             isSelf
@@ -360,6 +374,9 @@ function Composer({
   }, [mention, mentionable]);
 
   const menuOpen = mention !== null && suggestions.length > 0;
+  const listboxId = React.useId();
+  const optionId = (i: number) => `${listboxId}-option-${i}`;
+  const activeOptionId = menuOpen ? optionId(highlight) : undefined;
 
   const syncMention = (value: string, caret: number) => {
     const next = activeMentionQuery(value, caret);
@@ -396,9 +413,13 @@ function Composer({
   };
 
   return (
-    <div className="relative flex items-end gap-2 border-t border-neutral-200 p-3 dark:border-neutral-700">
+    <div
+      data-slot="superchat-composer"
+      className="relative flex items-end gap-2 border-t border-neutral-200 p-3 dark:border-neutral-700"
+    >
       {menuOpen && (
         <ul
+          id={listboxId}
           role="listbox"
           aria-label="Mention a participant"
           className="absolute bottom-full left-3 z-10 mb-1 max-h-56 w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
@@ -407,6 +428,7 @@ function Composer({
             <li key={p.id}>
               <button
                 type="button"
+                id={optionId(i)}
                 role="option"
                 aria-selected={i === highlight}
                 // onMouseDown (not onClick) so the textarea doesn't blur first.
@@ -489,6 +511,12 @@ function Composer({
             : 'Type a message… use @ to address an agent'
         }
         aria-label="Message"
+        role="combobox"
+        aria-expanded={menuOpen}
+        aria-controls={menuOpen ? listboxId : undefined}
+        aria-activedescendant={activeOptionId}
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
         name="superchat-message"
         autoComplete="off"
         autoCorrect="off"
@@ -591,6 +619,7 @@ export function SuperChat({
   onNewConversation,
   onReferenceClick,
 }: SuperChatProps) {
+  const headingId = React.useId();
   const [internalActive, setInternalActive] = React.useState(
     defaultActiveConversationId ?? conversations[0]?.id
   );
@@ -639,13 +668,19 @@ export function SuperChat({
   return (
     <div
       data-slot="superchat"
+      role="group"
+      aria-label={active ? `Chat: ${active.title}` : 'Chat'}
       className={cn(
         'flex h-full overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
         className
       )}
     >
       {showSidebar && (
-        <aside className="flex w-64 shrink-0 flex-col border-r border-neutral-200 dark:border-neutral-700">
+        <aside
+          data-slot="superchat-sidebar"
+          aria-label="Conversations"
+          className="flex w-64 shrink-0 flex-col border-r border-neutral-200 dark:border-neutral-700"
+        >
           <div className="flex items-center justify-between p-3">
             <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">
               Conversations
@@ -661,49 +696,72 @@ export function SuperChat({
               </button>
             )}
           </div>
-          <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
+          <div
+            data-slot="superchat-conversation-list"
+            role="list"
+            className="flex-1 space-y-1 overflow-y-auto px-2 pb-2"
+          >
             {sortedConversations.map((c) => {
               const last = lastMessageByTime(c.thread);
+              const isActive = c.id === active?.id;
               return (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => selectConversation(c)}
-                  className={sidebarItem({ active: c.id === active?.id })}
-                >
-                  <span className="flex-1 truncate">
-                    <span className="block truncate font-medium">
-                      {c.title}
+                <div key={c.id} role="listitem">
+                  <button
+                    type="button"
+                    aria-current={isActive ? 'true' : undefined}
+                    onClick={() => selectConversation(c)}
+                    className={sidebarItem({ active: isActive })}
+                  >
+                    <span className="flex-1 truncate">
+                      <span className="block truncate font-medium">
+                        {c.title}
+                      </span>
+                      {last?.text && (
+                        <span className="block truncate text-xs text-neutral-400">
+                          {last.text}
+                        </span>
+                      )}
                     </span>
-                    {last?.text && (
-                      <span className="block truncate text-xs text-neutral-400">
-                        {last.text}
+                    {!!c.unread && (
+                      <span className="bg-primary-600 ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white">
+                        {c.unread}
+                        <span className="sr-only"> unread messages</span>
                       </span>
                     )}
-                  </span>
-                  {!!c.unread && (
-                    <span className="bg-primary-600 ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white">
-                      {c.unread}
-                    </span>
-                  )}
-                </button>
+                  </button>
+                </div>
               );
             })}
           </div>
         </aside>
       )}
 
-      <section className="flex min-w-0 flex-1 flex-col">
+      <section
+        data-slot="superchat-main"
+        aria-labelledby={active ? headingId : undefined}
+        className="flex min-w-0 flex-1 flex-col"
+      >
         {active ? (
           <>
-            <header className="flex items-center justify-between border-b border-neutral-200 p-3 dark:border-neutral-700">
+            <header
+              data-slot="superchat-header"
+              className="flex items-center justify-between border-b border-neutral-200 p-3 dark:border-neutral-700"
+            >
               <div className="min-w-0">
-                <h2 className="truncate text-sm font-semibold text-neutral-800 dark:text-neutral-100">
+                <h2
+                  id={headingId}
+                  className="truncate text-sm font-semibold text-neutral-800 dark:text-neutral-100"
+                >
                   {active.title}
                 </h2>
-                <div className="mt-0.5 flex items-center gap-1">
+                <div
+                  data-slot="superchat-participants"
+                  role="group"
+                  aria-label="Participants"
+                  className="mt-0.5 flex items-center gap-1"
+                >
                   {active.participants.slice(0, 6).map((p) => (
-                    <span key={p.id} title={p.name}>
+                    <span key={p.id} role="img" aria-label={p.name}>
                       <ParticipantAvatar participant={p} size="sm" />
                     </span>
                   ))}
@@ -722,7 +780,14 @@ export function SuperChat({
             </header>
 
             <div
+              data-slot="superchat-thread"
               ref={threadRef}
+              role="log"
+              aria-label="Messages"
+              aria-live="polite"
+              // Focusable so keyboard-only users can scroll the message history.
+              // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+              tabIndex={0}
               className="flex-1 space-y-4 overflow-y-auto p-4"
             >
               {orderedThread.map((m) => (

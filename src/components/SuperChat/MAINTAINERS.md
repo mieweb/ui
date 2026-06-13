@@ -1,7 +1,8 @@
 # SuperChat — Maintainer Notes
 
 > **Provider notes** — how to *change* the SuperChat module. Consumers should read
-> the Storybook autodocs (Product › Feature Modules › SuperChat) and
+> the [README.md](README.md) (getting started + vocabulary), the Storybook autodocs
+> (Product › Feature Modules › SuperChat), and
 > [superchat-plan.md](../../../superchat-plan.md). General conventions live in
 > [CONTRIBUTING.md](../../../CONTRIBUTING.md). This module **composes** the AI
 > module — see [../AI/MAINTAINERS.md](../AI/MAINTAINERS.md).
