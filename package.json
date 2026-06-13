@@ -230,6 +230,9 @@
     }
   },
   "dependencies": {
+    "@kerebron/editor": "0.7.9",
+    "@kerebron/editor-kits": "0.7.9",
+    "@kerebron/wasm": "0.7.9",
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -253,9 +256,6 @@
     "@esheet/fields": "link:./packages/esheet/packages/fields",
     "@esheet/renderer": "link:./packages/esheet/packages/renderer",
     "@eslint/js": "^9.39.3",
-    "@kerebron/editor": "0.7.9",
-    "@kerebron/editor-kits": "0.7.9",
-    "@kerebron/wasm": "0.7.9",
     "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
