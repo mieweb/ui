@@ -1,0 +1,40 @@
+import { Meta, Markdown } from '@storybook/addon-docs/blocks';
+import rawReadme from './README.md?raw';
+
+<Meta title="Product/Feature Modules/SuperChat/Overview" />
+
+{/*
+  Single source of truth: this page renders the consumer README verbatim so the
+  docs never drift from the guide shipped in the package. Edit README.md, not
+  this file.
+
+  Storybook has no file server for the repo, so the README's *relative* links to
+  other Markdown files (MAINTAINERS.md, superchat-plan.md, ../AI/MAINTAINERS.md)
+  would 404 here. Rewrite those to absolute GitHub URLs, resolved against the
+  README's own location, so they stay clickable in Storybook while remaining
+  correct relative links on GitHub / npm.
+*/}
+
+export const README_DIR = 'src/components/SuperChat';
+export const GITHUB_BLOB_BASE = 'https://github.com/mieweb/ui/blob/main';
+
+export function resolveRepoPath(dir, relative) {
+  const segments = dir.split('/').filter(Boolean);
+  for (const part of relative.split('/')) {
+    if (part === '' || part === '.') continue;
+    if (part === '..') segments.pop();
+    else segments.push(part);
+  }
+  return segments.join('/');
+}
+
+export const readme = rawReadme.replace(
+  /\]\((?!https?:|#)([^)]+)\)/g,
+  (_match, target) => {
+    const [path, hash = ''] = target.split('#');
+    const resolved = resolveRepoPath(README_DIR, path);
+    return `](${GITHUB_BLOB_BASE}/${resolved}${hash ? `#${hash}` : ''})`;
+  }
+);
+
+<Markdown>{readme}</Markdown>

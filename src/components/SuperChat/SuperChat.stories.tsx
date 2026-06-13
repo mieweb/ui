@@ -53,21 +53,13 @@ const meta: Meta<typeof SuperChat> = {
     docs: {
       description: {
         component: [
-          '`SuperChat` is the **single-conversation panel**: header (title + participants + optional',
-          'close), a `role="log"` message thread, and the compose box. It renders exactly one',
-          '`conversation` — the host owns its state.',
+          '`SuperChat` is the **single-conversation panel**: header (title + participants +',
+          'optional close), a `role="log"` message thread, and the compose box. It renders',
+          'exactly one `conversation` — the host owns its state.',
           '',
-          'For a conversation list use `SuperChatConversations`; for the combined inbox (list + panel)',
+          'See **SuperChat › Overview** for the full consumer guide (install, props, plugins,',
+          'accessibility). For the list use `SuperChatConversations`; for the combined inbox',
           'use `SuperChatInbox`.',
-          '',
-          'Use the **Playground** story with the Controls panel to toggle `readOnly`, `trustedContent`,',
-          'and the current participant.',
-          '',
-          '### Rich Markdown',
-          'Message text renders through a pluggable Markdown pipeline (`createMarkdownRenderer`). The base',
-          'ships Markdown core (GFM) with sanitization of untrusted output. Opt into `code`, `math`,',
-          '`genui`, `mermaid`, `image`, and `nitro-table` plugins from',
-          '`@mieweb/ui/components/SuperChat/plugins`.',
         ].join('\n'),
       },
     },
@@ -146,33 +138,7 @@ export const Playground: Story = {
     <div style={{ height: '90vh', display: 'flex' }}>
       <InteractivePanel
         {...args}
-        initial={conversation}
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
-  ),
-};
-
-export const MarkdownCore: Story = {
-  render: () => (
-    <div style={{ height: '90vh', display: 'flex' }}>
-      <InteractivePanel
-        initial={conversation}
-        currentParticipantId="u1"
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
-  ),
-};
-
-export const WithRichPlugins: Story = {
-  render: () => (
-    <div style={{ height: '90vh', display: 'flex' }}>
-      <InteractivePanel
         initial={richConversation}
-        currentParticipantId="u1"
         renderPlugins={[
           createCodePlugin(),
           createMathPlugin(),
@@ -181,39 +147,39 @@ export const WithRichPlugins: Story = {
           createImagePlugin(),
           createNitroTablePlugin(),
         ]}
+        onReferenceClick={(ref) => console.log('ref', ref)}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
       />
     </div>
   ),
 };
 
-export const ReadOnly: Story = {
+// The only plugin-less example. Math (`$$ … $$`, `$x$`) and the ```genui``` block
+// in the sample thread intentionally render as raw text here — see the note.
+export const CoreNoPlugins: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'This panel renders with **no plugins** — Markdown core (GFM) only.',
+          '',
+          'Because the `math` and `genui` plugins are not enabled, the sample',
+          "thread's `$$ … $$` / `$x > 0.7$` math and the ```genui``` block",
+          '**intentionally appear as raw text** rather than rendered output. This is',
+          'the expected baseline — enable the matching plugins (see the',
+          '**Playground** story) to render math, code, GenUI, mermaid, images, and',
+          'tables.',
+        ].join('\n'),
+      },
+    },
+  },
   render: () => (
     <div style={{ height: '90vh', display: 'flex' }}>
-      <SuperChat
-        conversation={richConversation}
+      <InteractivePanel
+        initial={conversation}
         currentParticipantId="u1"
-        readOnly
-        renderPlugins={[
-          createCodePlugin(),
-          createMathPlugin(),
-          createGenUIPlugin(registry),
-          createMermaidPlugin(),
-          createImagePlugin(),
-          createNitroTablePlugin(),
-        ]}
-      />
-    </div>
-  ),
-};
-
-export const Closable: Story = {
-  render: () => (
-    <div style={{ height: '90vh', display: 'flex' }}>
-      <SuperChat
-        conversation={conversation}
-        currentParticipantId="u1"
-        onConversationClosed={(c) => console.log('closed', c.id)}
+        onReferenceClick={(ref) => console.log('ref', ref)}
+        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
       />
     </div>
   ),

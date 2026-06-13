@@ -11,7 +11,6 @@ import {
 } from './plugins';
 import type { SuperChatConversation } from './index';
 import {
-  conversation,
   richConversation,
   secondConversation,
   registry,
@@ -73,21 +72,14 @@ const meta: Meta<typeof SuperChatInbox> = {
     docs: {
       description: {
         component: [
-          '`SuperChatInbox` is the combined surface: the `SuperChatConversations` list plus the active',
-          '`SuperChat` panel. It is the drop-in equivalent of the original monolithic component — it',
-          'accepts the full `conversations` array and owns active-conversation selection (controlled via',
-          '`activeConversationId` or uncontrolled via `defaultActiveConversationId`).',
+          '`SuperChatInbox` is the combined surface: the `SuperChatConversations` list plus the',
+          'active `SuperChat` panel. It is the drop-in equivalent of the original monolithic',
+          'component — it accepts the full `conversations` array and owns active-conversation',
+          'selection (controlled via `activeConversationId` or uncontrolled via',
+          '`defaultActiveConversationId`).',
           '',
-          'It is a native, multi-participant chat surface: any mix of multiple **AI agents** and multiple',
-          '**humans** in one conversation, generalizing `chat-component` roles into a **participant** model.',
-          '',
-          'Use the **Playground** story with the Controls panel to toggle `readOnly`, `showSidebar`,',
-          '`trustedContent`, the current participant, and the initial conversation.',
-          '',
-          '### Rich Markdown',
-          'Message text renders through a pluggable Markdown pipeline (`createMarkdownRenderer`). Opt into',
-          '`code`, `math`, `genui`, `mermaid`, `image`, and `nitro-table` plugins from',
-          '`@mieweb/ui/components/SuperChat/plugins`.',
+          'See **SuperChat › Overview** for the full consumer guide (install, props, plugins,',
+          'accessibility).',
         ].join('\n'),
       },
     },
@@ -173,33 +165,7 @@ export const Playground: Story = {
     <div style={{ height: '90vh' }}>
       <InteractiveInbox
         {...args}
-        initial={[conversation, secondConversation]}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
-  ),
-};
-
-export const MarkdownCore: Story = {
-  render: () => (
-    <div style={{ height: '90vh' }}>
-      <InteractiveInbox
-        initial={[conversation, secondConversation]}
-        currentParticipantId="u1"
-        onConversationOpened={(c) => console.log('opened', c.id)}
-        onReferenceClick={(ref) => console.log('ref', ref)}
-        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
-  ),
-};
-
-export const WithRichPlugins: Story = {
-  render: () => (
-    <div style={{ height: '90vh' }}>
-      <InteractiveInbox
         initial={[richConversation, secondConversation]}
-        currentParticipantId="u1"
         renderPlugins={[
           createCodePlugin(),
           createMathPlugin(),
@@ -209,26 +175,6 @@ export const WithRichPlugins: Story = {
           createNitroTablePlugin(),
         ]}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
-      />
-    </div>
-  ),
-};
-
-export const ReadOnly: Story = {
-  render: () => (
-    <div style={{ height: '90vh' }}>
-      <SuperChatInbox
-        conversations={[richConversation]}
-        currentParticipantId="u1"
-        readOnly
-        renderPlugins={[
-          createCodePlugin(),
-          createMathPlugin(),
-          createGenUIPlugin(registry),
-          createMermaidPlugin(),
-          createImagePlugin(),
-          createNitroTablePlugin(),
-        ]}
       />
     </div>
   ),
