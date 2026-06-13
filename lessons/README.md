@@ -8,6 +8,11 @@ These documents capture pitfalls, workarounds, and recommended changes discovere
 2. **For maintainers** — track improvements that should be made to the library itself so consumers don't have to work around these issues.
 3. **For organizations** — standardize adoption, local development, and upstream contribution of components.
 
+> **Building or changing the library itself?** This folder is consumer/adoption
+> material. The provider (maintainer) guide is
+> [CONTRIBUTING.md](../CONTRIBUTING.md), plus per-component `MAINTAINERS.md` files
+> for non-trivial modules.
+
 ## Start Here
 
 | File | Audience | Summary |

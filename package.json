@@ -141,6 +141,7 @@
     },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
+    "./markdown.css": "./dist/components/Markdown/styles.css",
     "./init.css": "./dist/styles/init.css"
   },
   "files": [
@@ -150,14 +151,14 @@
   ],
   "scripts": {
     "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
-    "postinstall": "if [ -z \"$_DATAVIS_RELINK\" ] && [ ! -f node_modules/datavis/package.json ] && [ -f packages/datavis/package.json ]; then echo '⚠️  Stale datavis link detected — re-linking submodule...'; _DATAVIS_RELINK=1 pnpm install; fi",
     "dev": "tsup --watch",
     "prebuild": "npm run build:esheet",
-    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css",
-    "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ]; then cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel; fi",
+    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css",
+    "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ] || [ ! -f packages/esheet/packages/renderer/src/index.output.css ]; then cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel; fi",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
     "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
+    "copy:markdown-css": "mkdir -p dist/components/Markdown && cp src/components/Markdown/styles.css dist/components/Markdown/ 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -165,6 +166,7 @@
     "format:fix": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
     "test:watch": "vitest",
+    "prestorybook": "npm run build:esheet",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "npm run build:esheet && storybook build",
     "test:coverage": "vitest run --coverage",
@@ -178,9 +180,13 @@
   "peerDependencies": {
     "@esheet/builder": ">=0.0.2",
     "@esheet/renderer": ">=0.0.2",
+    "@mieweb/datavis": "=0.0.0-PRE.2",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.0.0-PRE.2",
+    "js-yaml": ">=4.0.0",
+    "mermaid": ">=10.0.0",
+    "papaparse": ">=5.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "wavesurfer.js": ">=7.0.0"
@@ -192,6 +198,9 @@
     "@esheet/renderer": {
       "optional": true
     },
+    "@mieweb/datavis": {
+      "optional": true
+    },
     "ag-grid-community": {
       "optional": true
     },
@@ -199,6 +208,15 @@
       "optional": true
     },
     "datavis-ace": {
+      "optional": true
+    },
+    "js-yaml": {
+      "optional": true
+    },
+    "mermaid": {
+      "optional": true
+    },
+    "papaparse": {
       "optional": true
     },
     "react": {
@@ -215,9 +233,12 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.0",
     "google-libphonenumber": "^3.2.44",
+    "highlight.js": "^11.11.1",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
+    "marked": "^17.0.3",
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
@@ -232,6 +253,9 @@
     "@esheet/fields": "link:./packages/esheet/packages/fields",
     "@esheet/renderer": "link:./packages/esheet/packages/renderer",
     "@eslint/js": "^9.39.3",
+    "@kerebron/editor": "0.7.9",
+    "@kerebron/editor-kits": "0.7.9",
+    "@kerebron/wasm": "0.7.9",
     "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
@@ -246,13 +270,15 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/google-libphonenumber": "^7.4.30",
+    "@types/js-yaml": "^4.0.9",
     "@types/luxon": "^3.7.1",
     "@types/node": "^22.19.11",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.6",
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
@@ -267,10 +293,7 @@
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.2.0",
     "d3-zoom": "^3.0.0",
-    "datavis": "file:./packages/datavis",
-    "@kerebron/editor": "0.7.9",
-    "@kerebron/editor-kits": "0.7.9",
-    "@kerebron/wasm": "0.7.9",
+    "@mieweb/datavis": "=0.0.0-PRE.2",
     "eslint": "^9.39.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -278,7 +301,9 @@
     "eslint-plugin-storybook": "^10.2.11",
     "js-yaml": "^4.1.1",
     "jsdom": "^26.1.0",
-    "postcss": "^8.5.6",
+    "mermaid": "^11.12.3",
+    "papaparse": "^5.5.3",
+    "postcss": "^8.5.10",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "^19.2.4",
@@ -289,22 +314,30 @@
     "tailwindcss": "^4.2.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vitest": "^3.2.4",
+    "vite": "^7.3.2",
+    "vitest": "^3.2.6",
     "wavesurfer.js": "^7.12.1",
     "ychart": "file:./packages/ychart",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "pnpm": {
     "overrides": {
       "datavis-ace": "=4.0.0-PRE.2",
       "@esheet/adapters": "link:./packages/esheet/packages/adapters",
       "@esheet/core": "link:./packages/esheet/packages/core",
-      "@esheet/fields": "link:./packages/esheet/packages/fields"
+      "@esheet/fields": "link:./packages/esheet/packages/fields",
+      "esbuild@<0.28.1": "0.28.1",
+      "axios@>=1.0.0 <1.16.0": "1.16.0",
+      "minimatch@>=10.0.0 <10.2.3": "10.2.3",
+      "minimatch@>=9.0.0 <9.0.7": "9.0.7",
+      "flatted@<3.4.2": "3.4.2",
+      "picomatch@>=4.0.0 <4.0.4": "4.0.4",
+      "uuid@<11.1.1": "11.1.1",
+      "dompurify@<3.4.0": "3.4.0"
     }
   }
 }

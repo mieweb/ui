@@ -59,6 +59,24 @@ html, body {
   color: #ffffff !important;
 }
 
+/* Exception: text/icons inside rendered Buttons must inherit the button's own
+   color (MDX wraps button labels in <p> and icons in <span>, which the broad
+   prose rules above would otherwise force to muted grey). */
+[data-theme="dark"] .sbdocs button p,
+[data-theme="dark"] .sbdocs button span,
+[data-theme="dark"] .sbdocs button label,
+[data-theme="dark"] .sbdocs button li,
+[data-theme="dark"] .sbdocs button svg {
+  color: inherit !important;
+}
+
+/* Exception: CTA banner heading should use full foreground (near-white in dark),
+   not the muted prose color that the broad rules above apply to <p>. */
+[data-theme="dark"] .sbdocs .mie-cta-heading,
+[data-theme="dark"] .sbdocs .mie-cta-heading p {
+  color: var(--mieweb-foreground) !important;
+}
+
 /* Story preview containers */
 [data-theme="dark"] .docs-story,
 [data-theme="dark"] .sb-story,
