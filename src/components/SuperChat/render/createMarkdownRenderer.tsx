@@ -191,6 +191,68 @@ function baseComponents(): Components {
     li: ({ node: _node, ...props }) => (
       <li {...props} className={cn('ps-1', props.className)} />
     ),
+    // Preflight also flattens headings to body size/weight; restore a sensible
+    // hierarchy without depending on the typography plugin.
+    h1: ({ node: _node, children, ...props }) => (
+      <h1
+        {...props}
+        className={cn('mt-3 mb-1 text-xl font-semibold', props.className)}
+      >
+        {children}
+      </h1>
+    ),
+    h2: ({ node: _node, children, ...props }) => (
+      <h2
+        {...props}
+        className={cn('mt-3 mb-1 text-lg font-semibold', props.className)}
+      >
+        {children}
+      </h2>
+    ),
+    h3: ({ node: _node, children, ...props }) => (
+      <h3
+        {...props}
+        className={cn('mt-2 mb-1 text-base font-semibold', props.className)}
+      >
+        {children}
+      </h3>
+    ),
+    h4: ({ node: _node, children, ...props }) => (
+      <h4
+        {...props}
+        className={cn('mt-2 mb-1 text-sm font-semibold', props.className)}
+      >
+        {children}
+      </h4>
+    ),
+    h5: ({ node: _node, children, ...props }) => (
+      <h5
+        {...props}
+        className={cn('mt-2 mb-1 text-sm font-semibold', props.className)}
+      >
+        {children}
+      </h5>
+    ),
+    h6: ({ node: _node, children, ...props }) => (
+      <h6
+        {...props}
+        className={cn(
+          'mt-2 mb-1 text-xs font-semibold tracking-wide uppercase',
+          props.className
+        )}
+      >
+        {children}
+      </h6>
+    ),
+    hr: ({ node: _node, ...props }) => (
+      <hr
+        {...props}
+        className={cn(
+          'my-2 border-neutral-300 dark:border-neutral-600',
+          props.className
+        )}
+      />
+    ),
   };
 }
 
