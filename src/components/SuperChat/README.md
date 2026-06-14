@@ -437,8 +437,10 @@ get Markdown. No host wiring is required — the copy control is always availabl
 ## Pasting images
 
 Paste an image into the composer (⌘V / Ctrl+V from a screenshot or copied picture)
-and it appears as a removable thumbnail above the input. Multiple images can be
-queued, and a draft can be sent with attachments only (no text required).
+and it appears as a removable thumbnail above the input. You can also click the
+**paperclip** button next to the send action to pick image files from disk
+(multiple selection supported). Either way, the queued images show as removable
+thumbnails, and a draft can be sent with attachments only (no text required).
 
 Because SuperChat is **controlled**, the component never mutates the thread itself —
 pasted files are surfaced to the host through `onMessageSent` so it can embed, upload,

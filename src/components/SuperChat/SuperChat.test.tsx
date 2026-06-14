@@ -403,6 +403,40 @@ describe('SuperChat', () => {
     );
   });
 
+  it('attaches a file chosen via the paperclip and sends it', async () => {
+    const onMessageSent = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    expect(screen.getByLabelText('Attach files')).toBeInTheDocument();
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['fake-bytes'], 'picked.png', { type: 'image/png' });
+    await user.upload(fileInput, file);
+    const remove = await screen.findByLabelText('Remove picked.png');
+    expect(remove).toBeInTheDocument();
+    await user.click(screen.getByLabelText('Send message'));
+    expect(onMessageSent).toHaveBeenCalledWith(
+      '',
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            name: 'picked.png',
+            type: 'image/png',
+            dataUrl: expect.stringMatching(/^data:image\/png/),
+          }),
+        ],
+      })
+    );
+  });
+
   it('does not detect mentions for system participants', async () => {
     const onMessageSent = vi.fn();
     const withSystem: SuperChatConversation = {
