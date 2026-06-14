@@ -35,6 +35,22 @@ describe('createMarkdownRenderer', () => {
     expect(screen.getByText('two')).toBeInTheDocument();
   });
 
+  it('preserves single newlines as hard line breaks', () => {
+    const r = createMarkdownRenderer();
+    const { container } = renderText(
+      r('another\none\nthere', {
+        messageId: 'm1',
+        streaming: false,
+        role: 'user',
+      })
+    );
+    // Three lines separated by two <br> elements (newlines preserved).
+    expect(container.querySelectorAll('br')).toHaveLength(2);
+    expect(container.querySelector('p')?.textContent).toBe(
+      'another\none\nthere'
+    );
+  });
+
   it('sanitizes untrusted HTML / script by default', () => {
     const r = createMarkdownRenderer();
     const { container } = renderText(

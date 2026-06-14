@@ -28,6 +28,46 @@ type PluggableList = NonNullable<Options['remarkPlugins']>;
 type SanitizeSchema = Record<string, unknown>;
 
 /**
+ * Minimal mdast node shape we touch when splitting soft line breaks. Kept local
+ * so the renderer stays free of extra `unist`/`mdast` util dependencies.
+ */
+interface MdastNode {
+  type: string;
+  value?: string;
+  children?: MdastNode[];
+}
+
+/**
+ * A self-contained `remark-breaks` equivalent: turns soft line breaks (single
+ * `\n` inside a paragraph) into hard breaks so chat messages preserve the
+ * newlines the author typed — the expected behavior for messaging UIs, where
+ * Markdown's default "collapse single newlines to spaces" is surprising.
+ *
+ * Only `text` nodes are split, so fenced/inline code (which carry their value
+ * on non-`text` nodes) and existing hard breaks are left untouched.
+ */
+function remarkPreserveLineBreaks() {
+  const splitNode = (node: MdastNode): void => {
+    if (!node.children) return;
+    const next: MdastNode[] = [];
+    for (const child of node.children) {
+      if (child.type === 'text' && child.value && child.value.includes('\n')) {
+        const segments = child.value.split('\n');
+        segments.forEach((segment, i) => {
+          if (i > 0) next.push({ type: 'break' });
+          if (segment) next.push({ type: 'text', value: segment });
+        });
+      } else {
+        splitNode(child);
+        next.push(child);
+      }
+    }
+    node.children = next;
+  };
+  return (tree: MdastNode) => splitNode(tree);
+}
+
+/**
  * A sanitize schema that, on top of the library default, lets syntax-highlight
  * token classes (`hljs-*`) and `language-*` survive on `code`/`pre`/`span`.
  */
@@ -167,6 +207,7 @@ export function createMarkdownRenderer(
 
   const remarkPlugins: PluggableList = [
     remarkGfm,
+    remarkPreserveLineBreaks,
     ...plugins.flatMap((p) => (p.remarkPlugins ?? []) as PluggableList),
   ];
 
