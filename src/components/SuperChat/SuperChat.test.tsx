@@ -6,6 +6,11 @@ import { createCodePlugin } from './plugins/code';
 import { createGenUIPlugin } from './plugins/genui';
 import { createMermaidPlugin } from './plugins/mermaid';
 import { createImagePlugin } from './plugins/image';
+import {
+  createAttachmentPlugin,
+  attachmentMarkdown,
+} from './plugins/attachment';
+import { attachmentCache } from './render/attachmentCache';
 import { createNitroTablePlugin } from './plugins/nitroTable';
 import { SuperChat } from './SuperChat';
 import { SuperChatConversations } from './SuperChatConversations';
@@ -286,6 +291,100 @@ describe('image plugin', () => {
     expect(
       screen.getByRole('dialog', { name: /ECG strip/ })
     ).toBeInTheDocument();
+  });
+});
+
+describe('attachment plugin', () => {
+  it('renders a video player from an attachment block', async () => {
+    const r = createMarkdownRenderer({ plugins: [createAttachmentPlugin()] });
+    const { container } = renderText(
+      r(
+        attachmentMarkdown({
+          id: 'att-v',
+          type: 'video/mp4',
+          name: 'clip.mp4',
+          src: 'data:video/mp4;base64,AAAA',
+        }),
+        { messageId: 'att1', streaming: false, role: 'user' }
+      )
+    );
+    await waitFor(() =>
+      expect(container.querySelector('video')).toBeInTheDocument()
+    );
+    expect(container.querySelector('video')).toHaveAttribute(
+      'src',
+      'data:video/mp4;base64,AAAA'
+    );
+  });
+
+  it('renders an audio player from an attachment block', async () => {
+    const r = createMarkdownRenderer({ plugins: [createAttachmentPlugin()] });
+    const { container } = renderText(
+      r(
+        attachmentMarkdown({
+          id: 'att-a',
+          type: 'audio/mpeg',
+          name: 'song.mp3',
+          src: 'data:audio/mpeg;base64,AAAA',
+        }),
+        { messageId: 'att2', streaming: false, role: 'user' }
+      )
+    );
+    await waitFor(() =>
+      expect(container.querySelector('audio')).toBeInTheDocument()
+    );
+    expect(screen.getByText('song.mp3')).toBeInTheDocument();
+  });
+
+  it('renders a pdf in an iframe with a download link', async () => {
+    const r = createMarkdownRenderer({ plugins: [createAttachmentPlugin()] });
+    const { container } = renderText(
+      r(
+        attachmentMarkdown({
+          id: 'att-p',
+          type: 'application/pdf',
+          name: 'report.pdf',
+          src: 'data:application/pdf;base64,AAAA',
+        }),
+        { messageId: 'att3', streaming: false, role: 'user' }
+      )
+    );
+    await waitFor(() =>
+      expect(container.querySelector('iframe')).toBeInTheDocument()
+    );
+    const link = screen.getByRole('link', { name: /Open/ });
+    expect(link).toHaveAttribute('download', 'report.pdf');
+  });
+
+  it('renders a generic file as a download chip', async () => {
+    const r = createMarkdownRenderer({ plugins: [createAttachmentPlugin()] });
+    renderText(
+      r(
+        attachmentMarkdown({
+          id: 'att-f',
+          type: 'application/zip',
+          name: 'bundle.zip',
+          src: 'data:application/zip;base64,AAAA',
+        }),
+        { messageId: 'att4', streaming: false, role: 'user' }
+      )
+    );
+    const link = await screen.findByRole('link', { name: /bundle\.zip/ });
+    expect(link).toHaveAttribute('download', 'bundle.zip');
+  });
+
+  it('caches gracefully when IndexedDB is unavailable', async () => {
+    expect(attachmentCache.isAvailable()).toBe(false);
+    expect(
+      await attachmentCache.put({
+        id: 'x',
+        name: 'n.txt',
+        type: 'text/plain',
+        dataUrl: 'data:text/plain;base64,QUJD',
+      })
+    ).toBe(false);
+    expect(await attachmentCache.get('x')).toBeUndefined();
+    expect(await attachmentCache.getObjectURL('x')).toBeUndefined();
   });
 });
 

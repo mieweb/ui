@@ -8,6 +8,9 @@ import {
   createMermaidPlugin,
   createImagePlugin,
   createNitroTablePlugin,
+  createAttachmentPlugin,
+  attachmentMarkdown,
+  attachmentCache,
 } from './plugins';
 import type { SuperChatConversation } from './index';
 import { conversation, richConversation, registry } from './storyData';
@@ -126,9 +129,24 @@ function InteractivePanel(
           .filter((att) => att.type.startsWith('image/'))
           .map((att) => `![${att.name}](${att.dataUrl})`)
           .join('\n\n');
+        // Non-image files: cache the bytes for offline use, then embed an
+        // attachment block that renders an inline player from the cached id.
         const files = meta.attachments
           .filter((att) => !att.type.startsWith('image/'))
-          .map((att) => `📎 ${att.name}`)
+          .map((att) => {
+            void attachmentCache.put({
+              id: att.id,
+              name: att.name,
+              type: att.type,
+              dataUrl: att.dataUrl,
+            });
+            return attachmentMarkdown({
+              id: att.id,
+              type: att.type,
+              name: att.name,
+              src: att.dataUrl,
+            });
+          })
           .join('\n\n');
         const body = [text, images, files].filter(Boolean).join('\n\n');
         appendMessage({
@@ -245,6 +263,7 @@ export const Playground: Story = {
           createMermaidPlugin(),
           createImagePlugin(),
           createNitroTablePlugin(),
+          createAttachmentPlugin(),
         ]}
         onReferenceClick={(ref) => console.log('ref', ref)}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
@@ -287,6 +306,7 @@ export const Reverse: Story = {
           createMermaidPlugin(),
           createImagePlugin(),
           createNitroTablePlugin(),
+          createAttachmentPlugin(),
         ]}
         onReferenceClick={(ref) => console.log('ref', ref)}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}

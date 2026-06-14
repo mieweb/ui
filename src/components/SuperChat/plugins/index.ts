@@ -19,6 +19,20 @@ export { createGenUIPlugin, GENUI_TAG } from './genui';
 export { createMermaidPlugin, MERMAID_TAG } from './mermaid';
 export { createImagePlugin } from './image';
 export { createNitroTablePlugin } from './nitroTable';
+export {
+  createAttachmentPlugin,
+  attachmentMarkdown,
+  useAttachmentUrl,
+  ATTACHMENT_TAG,
+  ATTACHMENT_FENCE,
+  type AttachmentBlockPayload,
+} from './attachment';
+export {
+  attachmentCache,
+  type AttachmentCache,
+  type CachedAttachment,
+  type PutAttachmentInput,
+} from '../render/attachmentCache';
 export type {
   GenUIRegistry,
   GenUIWidgetEntry,

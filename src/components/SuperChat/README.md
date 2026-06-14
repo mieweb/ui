@@ -490,8 +490,72 @@ Each `ComposerAttachment` carries a base64 `dataUrl`. To render inline `data:` (
 `rehype-sanitize` allow-list to permit those protocols on `<img src>` (safe, since
 scripts inside an SVG loaded via `src` do not execute). For production you'll
 typically upload the file and swap in the hosted URL instead of the `data:` URL.
-Non-image files (PDF/audio/video) are surfaced the same way; how you render them in
-the thread is up to the host (e.g. a link, a player, or a custom render plugin).
+
+### Rendering video / audio / PDF inline
+
+Add `createAttachmentPlugin()` to render non-image attachments (video, audio, PDF,
+or a generic download chip) **inline** in the thread. It reads a fenced
+` ```superchat-attachment ` block whose body is a small JSON descriptor — build it
+with the `attachmentMarkdown()` helper:
+
+```tsx
+import {
+  createAttachmentPlugin,
+  attachmentMarkdown,
+  attachmentCache,
+} from '@mieweb/ui/components/SuperChat/plugins';
+
+// renderPlugins={[createAttachmentPlugin(), /* … */]}
+
+onMessageSent={(text, { conversation, attachments }) => {
+  const blocks = attachments
+    .filter((a) => !a.type.startsWith('image/'))
+    .map((a) => {
+      // Cache the bytes once so the media renders offline next session.
+      void attachmentCache.put({
+        id: a.id,
+        name: a.name,
+        type: a.type,
+        dataUrl: a.dataUrl,
+      });
+      // Embed only the id (+ an inline src fallback) — keeps the thread small.
+      return attachmentMarkdown({ id: a.id, type: a.type, name: a.name, src: a.dataUrl });
+    });
+  appendMessage(conversation.id, {
+    id: crypto.randomUUID(),
+    participantId: 'me',
+    text: [text, ...blocks].filter(Boolean).join('\n\n'),
+    time: new Date().toISOString(),
+  });
+}}
+```
+
+The descriptor accepts `{ id?, type, name, src? }`. At render time the plugin
+resolves a `blob:` URL from the cache by `id`; if the cache is empty it falls back
+to the inline `src` (and opportunistically persists it for next time). Provide at
+least an `id` **or** a `src`.
+
+### Offline cache (IndexedDB)
+
+`attachmentCache` is a tiny IndexedDB-backed blob store keyed by attachment **id**.
+Persist bytes once (e.g. on send) and the attachment plugin serves them from the
+cache on later renders — so media keeps working offline without storing base64 in
+your conversation records.
+
+```tsx
+import { attachmentCache } from '@mieweb/ui/components/SuperChat/plugins';
+
+await attachmentCache.put({ id, name, type, dataUrl }); // or { ..., blob }
+const url = await attachmentCache.getObjectURL(id); // blob: URL (revoke when done)
+const entry = await attachmentCache.get(id); // { blob, type, name, size, … }
+await attachmentCache.delete(id);
+await attachmentCache.clear();
+```
+
+For React, `useAttachmentUrl(id, fallbackSrc?)` returns `{ url, status }` and revokes
+the object URL automatically on unmount. Everything degrades gracefully: without
+IndexedDB (SSR, private mode) the methods become no-ops and callers fall back to any
+inline `src`.
 
 ---
 

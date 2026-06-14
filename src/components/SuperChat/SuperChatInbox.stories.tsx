@@ -8,6 +8,9 @@ import {
   createMermaidPlugin,
   createImagePlugin,
   createNitroTablePlugin,
+  createAttachmentPlugin,
+  attachmentMarkdown,
+  attachmentCache,
 } from './plugins';
 import type { SuperChatConversation } from './index';
 import { richConversation, secondConversation, registry } from './storyData';
@@ -124,7 +127,20 @@ function InteractiveInbox(
           .join('\n\n');
         const files = meta.attachments
           .filter((att) => !att.type.startsWith('image/'))
-          .map((att) => `📎 ${att.name}`)
+          .map((att) => {
+            void attachmentCache.put({
+              id: att.id,
+              name: att.name,
+              type: att.type,
+              dataUrl: att.dataUrl,
+            });
+            return attachmentMarkdown({
+              id: att.id,
+              type: att.type,
+              name: att.name,
+              src: att.dataUrl,
+            });
+          })
           .join('\n\n');
         const body = [text, images, files].filter(Boolean).join('\n\n');
         appendMessage(meta.conversation.id, {
@@ -177,6 +193,7 @@ export const Playground: Story = {
           createMermaidPlugin(),
           createImagePlugin(),
           createNitroTablePlugin(),
+          createAttachmentPlugin(),
         ]}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
       />
@@ -290,6 +307,7 @@ const sourcesAndGuardsRenderer = createMarkdownRenderer({
     createMermaidPlugin(),
     createImagePlugin(),
     createNitroTablePlugin(),
+    createAttachmentPlugin(),
   ],
 });
 
