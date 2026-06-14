@@ -557,6 +557,15 @@ the object URL automatically on unmount. Everything degrades gracefully: without
 IndexedDB (SSR, private mode) the methods become no-ops and callers fall back to any
 inline `src`.
 
+The cache is bounded — once the total exceeds the budget (default **100 MB**) the
+least-recently-used entries are evicted on the next `put`. Tune or disable it:
+
+```tsx
+attachmentCache.configure({ maxBytes: 250 * 1024 * 1024 }); // 250 MB
+attachmentCache.configure({ maxBytes: Infinity }); // never evict
+const bytes = await attachmentCache.usage(); // current total
+```
+
 ---
 
 ## Rich Markdown plugins

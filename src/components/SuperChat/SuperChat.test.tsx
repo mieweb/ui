@@ -385,6 +385,9 @@ describe('attachment plugin', () => {
     ).toBe(false);
     expect(await attachmentCache.get('x')).toBeUndefined();
     expect(await attachmentCache.getObjectURL('x')).toBeUndefined();
+    expect(await attachmentCache.usage()).toBe(0);
+    // configure is a safe no-op even without a backing store.
+    expect(() => attachmentCache.configure({ maxBytes: 1024 })).not.toThrow();
   });
 });
 

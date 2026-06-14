@@ -344,6 +344,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-storybook": "^10.2.11",
+    "fake-indexeddb": "^6.2.5",
     "js-yaml": "^4.1.1",
     "jsdom": "^26.1.0",
     "katex": "^0.17.0",
