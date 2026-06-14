@@ -324,6 +324,23 @@ describe('SuperChat', () => {
     expect(articles[1]).toHaveTextContent('hello');
   });
 
+  it('mounts the virtualized thread without error when virtualized', () => {
+    const { getByRole } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          virtualized
+        />
+      </div>
+    );
+    // The scroll container keeps its log role; rows window in based on layout
+    // (jsdom reports zero size, so the assertion stays on the container).
+    const log = getByRole('log', { name: 'Messages' });
+    expect(log).toBeInTheDocument();
+    expect(log).toHaveAttribute('data-slot', 'superchat-thread');
+  });
+
   it('renders AI content blocks of type code', () => {
     const withCode: SuperChatConversation = {
       ...conversation,

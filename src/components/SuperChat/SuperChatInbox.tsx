@@ -45,6 +45,8 @@ export interface SuperChatInboxProps {
   readOnly?: boolean;
   /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
   order?: 'asc' | 'desc';
+  /** Virtualize the message thread (windowed rendering) for long histories. */
+  virtualized?: boolean;
   /** Show the conversation sidebar. */
   showSidebar?: boolean;
   /** Build hrefs for `ref` thread items. */
@@ -78,6 +80,7 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   order,
+  virtualized,
   showSidebar = true,
   linkBuilder,
   className,
@@ -140,6 +143,7 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           order={order}
+          virtualized={virtualized}
           linkBuilder={linkBuilder}
           onMessageSent={onMessageSent}
           onConversationClosed={onConversationClosed}

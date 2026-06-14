@@ -15,6 +15,7 @@ import { cn } from '../../utils/cn';
 import { CloseIcon } from '../AI/icons';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import { ParticipantAvatar, Composer, MessageRow, byTime } from './parts';
+import { VirtualThread } from './VirtualThread';
 import type {
   AIRenderTextContent,
   Participant,
@@ -49,6 +50,12 @@ export interface SuperChatProps {
    *   (auto-scrolls to the top when a new message arrives).
    */
   order?: 'asc' | 'desc';
+  /**
+   * Virtualize the message thread (windowed rendering). Only the rows near the
+   * viewport are mounted, so very long threads (hundreds to thousands of
+   * messages) stay responsive. Off by default — enable for long histories.
+   */
+  virtualized?: boolean;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /** Additional class name. */
@@ -80,6 +87,7 @@ export function SuperChat({
   trustedContent,
   readOnly,
   order = 'asc',
+  virtualized = false,
   linkBuilder,
   className,
   onMessageSent,
@@ -101,12 +109,13 @@ export function SuperChat({
 
   const threadRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
+    if (virtualized) return; // VirtualThread manages its own scroll anchoring.
     const el = threadRef.current;
     if (!el) return;
     // Anchor to the newest message: bottom for ascending order, top for
     // descending (feed-style) order.
     el.scrollTop = order === 'desc' ? 0 : el.scrollHeight;
-  }, [conversation.thread.length, conversation.id, order]);
+  }, [conversation.thread.length, conversation.id, order, virtualized]);
 
   const participantById = React.useMemo(() => {
     const map = new Map<string, Participant>();
@@ -189,31 +198,54 @@ export function SuperChat({
         )}
       </header>
 
-      <div
-        data-slot="superchat-thread"
-        ref={threadRef}
-        role="log"
-        aria-label="Messages"
-        aria-live="polite"
-        // Focusable so keyboard-only users can scroll the message history.
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-        tabIndex={0}
-        className="flex-1 space-y-4 overflow-y-auto p-4"
-      >
-        {orderedThread.map((m) => (
-          <MessageRow
-            key={m.id}
-            message={m}
-            participant={participantById.get(m.participantId)}
-            isSelf={
-              !!currentParticipantId && m.participantId === currentParticipantId
-            }
-            renderText={renderText}
-            linkBuilder={linkBuilder}
-            onReferenceClick={onReferenceClick}
-          />
-        ))}
-      </div>
+      {virtualized ? (
+        <VirtualThread
+          items={orderedThread}
+          participantById={participantById}
+          currentParticipantId={currentParticipantId}
+          renderText={renderText}
+          linkBuilder={linkBuilder}
+          onReferenceClick={onReferenceClick}
+          order={order}
+          conversationId={conversation.id}
+          containerProps={{
+            'data-slot': 'superchat-thread',
+            role: 'log',
+            'aria-label': 'Messages',
+            'aria-live': 'polite',
+            // Focusable so keyboard-only users can scroll the message history.
+            tabIndex: 0,
+            className: 'flex-1 overflow-y-auto p-4',
+          }}
+        />
+      ) : (
+        <div
+          data-slot="superchat-thread"
+          ref={threadRef}
+          role="log"
+          aria-label="Messages"
+          aria-live="polite"
+          // Focusable so keyboard-only users can scroll the message history.
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          tabIndex={0}
+          className="flex-1 space-y-4 overflow-y-auto p-4"
+        >
+          {orderedThread.map((m) => (
+            <MessageRow
+              key={m.id}
+              message={m}
+              participant={participantById.get(m.participantId)}
+              isSelf={
+                !!currentParticipantId &&
+                m.participantId === currentParticipantId
+              }
+              renderText={renderText}
+              linkBuilder={linkBuilder}
+              onReferenceClick={onReferenceClick}
+            />
+          ))}
+        </div>
+      )}
 
       <Composer
         participants={conversation.participants}

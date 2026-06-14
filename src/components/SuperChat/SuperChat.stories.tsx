@@ -39,6 +39,12 @@ const meta: Meta<typeof SuperChat> = {
         "Thread ordering: 'asc' (oldest→newest, messenger style) or 'desc' (newest→oldest, feed style).",
       table: { category: 'Behavior' },
     },
+    virtualized: {
+      control: 'boolean',
+      description:
+        'Windowed rendering — only mount rows near the viewport. Recommended for long threads.',
+      table: { category: 'Behavior' },
+    },
     currentParticipantId: {
       control: 'select',
       options: ['u1', 'u2', 'a1', 'a2'],
@@ -277,16 +283,17 @@ export const Long: Story = {
     readOnly: false,
     trustedContent: false,
     order: 'asc',
+    virtualized: true,
   },
   parameters: {
     docs: {
       description: {
         story: [
           'A **300-message** conversation in the default `order="asc"` (oldest→newest)',
-          'layout, anchored to the bottom. Use this to sanity-check scrolling and',
-          'render cost on long threads. For very large histories, hosts should',
-          'cap/paginate `thread` rather than render everything (see the README',
-          '**Performance & long conversations** section).',
+          'layout, anchored to the bottom. Rendered with `virtualized` so only the',
+          'rows near the viewport are mounted — scroll to see rows window in and out.',
+          'For very large histories, hosts can additionally cap/paginate `thread`',
+          '(see the README **Performance & long conversations** section).',
         ].join('\n'),
       },
     },
@@ -305,13 +312,14 @@ export const LongReverse: Story = {
     readOnly: false,
     trustedContent: false,
     order: 'desc',
+    virtualized: true,
   },
   parameters: {
     docs: {
       description: {
         story: [
           'The same **300-message** thread as **Long**, but `order="desc"` —',
-          'newest-first, top-anchored social-feed layout.',
+          'newest-first, top-anchored social-feed layout, also `virtualized`.',
         ].join('\n'),
       },
     },
