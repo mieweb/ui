@@ -159,6 +159,48 @@ export const Playground: Story = {
   ),
 };
 
+// Reverse (newest-first, social-feed style) ordering. Same conversation and
+// plugins as the Playground, but `order="desc"` flips the thread and anchors
+// scroll to the top so the freshest message leads.
+export const Reverse: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    readOnly: false,
+    trustedContent: false,
+    order: 'desc',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Newest-first ordering via `order="desc"` — a social-feed layout where',
+          'the most recent message leads and older messages trail below. The thread',
+          'anchors scroll to the **top** (rather than the bottom) when new messages',
+          'arrive. Useful for activity feeds or when the latest update matters most.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
+      <InteractivePanel
+        {...args}
+        initial={richConversation}
+        renderPlugins={[
+          createCodePlugin(),
+          createMathPlugin(),
+          createGenUIPlugin(registry),
+          createMermaidPlugin(),
+          createImagePlugin(),
+          createNitroTablePlugin(),
+        ]}
+        onReferenceClick={(ref) => console.log('ref', ref)}
+        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+      />
+    </div>
+  ),
+};
+
 // The only plugin-less example. Math (`$$ … $$`, `$x$`) and the ```genui``` block
 // in the sample thread intentionally render as raw text here — see the note.
 export const CoreNoPlugins: Story = {
