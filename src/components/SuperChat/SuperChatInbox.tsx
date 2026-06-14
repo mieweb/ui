@@ -94,8 +94,14 @@ export function SuperChatInbox({
   // highlight never disagrees with the panel when `conversations` changes.
   const activeId = active?.id;
 
+  // On small screens the list and panel can't fit side by side, so we show one
+  // at a time (master-detail). `mobileView` tracks which is visible; on `sm`+
+  // both are always shown and this state is ignored.
+  const [mobileView, setMobileView] = React.useState<'list' | 'chat'>('list');
+
   const handleOpen = (c: SuperChatConversation) => {
     if (activeConversationId === undefined) setInternalActive(c.id);
+    setMobileView('chat');
     onConversationOpened?.(c);
   };
 
@@ -115,6 +121,10 @@ export function SuperChatInbox({
           activeConversationId={activeId}
           onConversationOpened={handleOpen}
           onNewConversation={onNewConversation}
+          className={cn(
+            'w-full sm:w-64',
+            mobileView === 'chat' && 'hidden sm:flex'
+          )}
         />
       )}
 
@@ -130,11 +140,18 @@ export function SuperChatInbox({
           onMessageSent={onMessageSent}
           onConversationClosed={onConversationClosed}
           onReferenceClick={onReferenceClick}
+          onBack={showSidebar ? () => setMobileView('list') : undefined}
+          className={cn(
+            showSidebar && mobileView === 'list' && 'hidden sm:flex'
+          )}
         />
       ) : (
         <section
           data-slot="superchat"
-          className="flex min-w-0 flex-1 items-center justify-center text-sm text-neutral-400"
+          className={cn(
+            'min-w-0 flex-1 items-center justify-center text-sm text-neutral-400',
+            showSidebar && mobileView === 'list' ? 'hidden sm:flex' : 'flex'
+          )}
         >
           No conversation selected
         </section>

@@ -53,6 +53,11 @@ export interface SuperChatProps {
   ) => void;
   onConversationClosed?: (conversation: SuperChatConversation) => void;
   onReferenceClick?: (ref: SuperChatRef) => void;
+  /**
+   * Show a "back" affordance in the header (used by {@link SuperChatInbox} on
+   * small screens to return from the chat panel to the conversation list).
+   */
+  onBack?: () => void;
 }
 
 /**
@@ -71,6 +76,7 @@ export function SuperChat({
   onMessageSent,
   onConversationClosed,
   onReferenceClick,
+  onBack,
 }: SuperChatProps) {
   const headingId = React.useId();
 
@@ -113,26 +119,50 @@ export function SuperChat({
     >
       <header
         data-slot="superchat-header"
-        className="flex items-center justify-between border-b border-neutral-200 p-3 dark:border-neutral-700"
+        className="flex items-center justify-between gap-2 border-b border-neutral-200 p-3 dark:border-neutral-700"
       >
-        <div className="min-w-0">
-          <h2
-            id={headingId}
-            className="truncate text-sm font-semibold text-neutral-800 dark:text-neutral-100"
-          >
-            {conversation.title}
-          </h2>
-          <div
-            data-slot="superchat-participants"
-            role="group"
-            aria-label="Participants"
-            className="mt-0.5 flex items-center gap-1"
-          >
-            {conversation.participants.slice(0, 6).map((p) => (
-              <span key={p.id} role="img" aria-label={p.name}>
-                <ParticipantAvatar participant={p} size="sm" />
-              </span>
-            ))}
+        <div className="flex min-w-0 items-center gap-2">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back to conversations"
+              className="-ml-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          )}
+          <div className="min-w-0">
+            <h2
+              id={headingId}
+              className="truncate text-sm font-semibold text-neutral-800 dark:text-neutral-100"
+            >
+              {conversation.title}
+            </h2>
+            <div
+              data-slot="superchat-participants"
+              role="group"
+              aria-label="Participants"
+              className="mt-0.5 flex items-center gap-1"
+            >
+              {conversation.participants.slice(0, 6).map((p) => (
+                <span key={p.id} role="img" aria-label={p.name}>
+                  <ParticipantAvatar participant={p} size="sm" />
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         {onConversationClosed && (
