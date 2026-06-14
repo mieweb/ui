@@ -32,6 +32,13 @@ const meta: Meta<typeof SuperChat> = {
       description: 'Skip sanitization — only for host-authored content.',
       table: { category: 'Behavior' },
     },
+    order: {
+      control: 'inline-radio',
+      options: ['asc', 'desc'],
+      description:
+        "Thread ordering: 'asc' (oldest→newest, messenger style) or 'desc' (newest→oldest, feed style).",
+      table: { category: 'Behavior' },
+    },
     currentParticipantId: {
       control: 'select',
       options: ['u1', 'u2', 'a1', 'a2'],

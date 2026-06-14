@@ -43,6 +43,8 @@ export interface SuperChatInboxProps {
   trustedContent?: boolean;
   /** Disable the composer. */
   readOnly?: boolean;
+  /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
+  order?: 'asc' | 'desc';
   /** Show the conversation sidebar. */
   showSidebar?: boolean;
   /** Build hrefs for `ref` thread items. */
@@ -75,6 +77,7 @@ export function SuperChatInbox({
   renderTextContent,
   trustedContent,
   readOnly,
+  order,
   showSidebar = true,
   linkBuilder,
   className,
@@ -136,6 +139,7 @@ export function SuperChatInbox({
           renderTextContent={renderTextContent}
           trustedContent={trustedContent}
           readOnly={readOnly}
+          order={order}
           linkBuilder={linkBuilder}
           onMessageSent={onMessageSent}
           onConversationClosed={onConversationClosed}

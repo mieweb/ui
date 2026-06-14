@@ -296,6 +296,7 @@ uncontrolled).
 | `renderTextContent` | `AIRenderTextContent` | Markdown core | Replace the entire text renderer (advanced). |
 | `trustedContent` | `boolean` | `false` | Skip sanitization — **only** for host-authored content. |
 | `readOnly` | `boolean` | `false` | Disable the composer. |
+| `order` | `'asc' \| 'desc'` | `'asc'` | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style). |
 | `showSidebar` | `boolean` | `true` | Show the conversation list. |
 | `linkBuilder` | `SuperChatLinkBuilder` | — | Build hrefs for `ref` thread items. |
 | `className` | `string` | — | Extra classes on the root. |
@@ -317,6 +318,7 @@ Renders exactly one conversation.
 | `renderTextContent` | `AIRenderTextContent` | Markdown core | Replace the entire text renderer (advanced). |
 | `trustedContent` | `boolean` | `false` | Skip sanitization — **only** for host-authored content. |
 | `readOnly` | `boolean` | `false` | Disable the composer. |
+| `order` | `'asc' \| 'desc'` | `'asc'` | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style). |
 | `linkBuilder` | `SuperChatLinkBuilder` | — | Build hrefs for `ref` thread items. |
 | `className` | `string` | — | Extra classes on the root. |
 | `onMessageSent` | `(text, { conversation, mentions }) => void` | — | Fired on send; `mentions` are the addressed participant ids. |
@@ -390,6 +392,28 @@ SuperChat ships with assistive-tech support built in:
 
 When supplying `trustedContent` or custom plugins, you remain responsible for the
 safety of any HTML those plugins allow through the sanitizer.
+
+---
+
+## Performance & long conversations
+
+The thread renders **every** message in `thread` (there is no built-in
+virtualization). Each row is wrapped in `React.memo`, so appending a message
+only renders the new row — existing rows are not re-rendered and their Markdown
+is not re-parsed, as long as you keep message objects referentially stable
+(don't recreate them on every render).
+
+For very long histories (hundreds to thousands of messages) the host should
+**cap or paginate `thread`** rather than handing the component the entire
+history at once. Typical patterns:
+
+- Keep the most recent ~50–100 messages in `thread`; load older messages on
+  scroll-up (windowed history).
+- Use `order="desc"` (newest-first, feed style) so the freshest content is at
+  the top and older messages trail off-screen.
+
+These keep first render and memory bounded regardless of total history size,
+since the component only ever holds what you pass in `thread`.
 
 ---
 

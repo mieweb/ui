@@ -41,6 +41,14 @@ export interface SuperChatProps {
   trustedContent?: boolean;
   /** Disable the composer. */
   readOnly?: boolean;
+  /**
+   * Thread ordering.
+   * - `'asc'` (default): oldest → newest, anchored to the bottom like a
+   *   classic messenger (auto-scrolls to the newest message).
+   * - `'desc'`: newest → oldest, anchored to the top like a social feed
+   *   (auto-scrolls to the top when a new message arrives).
+   */
+  order?: 'asc' | 'desc';
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /** Additional class name. */
@@ -71,6 +79,7 @@ export function SuperChat({
   renderTextContent,
   trustedContent,
   readOnly,
+  order = 'asc',
   linkBuilder,
   className,
   onMessageSent,
@@ -93,8 +102,11 @@ export function SuperChat({
   const threadRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     const el = threadRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [conversation.thread.length, conversation.id]);
+    if (!el) return;
+    // Anchor to the newest message: bottom for ascending order, top for
+    // descending (feed-style) order.
+    el.scrollTop = order === 'desc' ? 0 : el.scrollHeight;
+  }, [conversation.thread.length, conversation.id, order]);
 
   const participantById = React.useMemo(() => {
     const map = new Map<string, Participant>();
@@ -102,10 +114,10 @@ export function SuperChat({
     return map;
   }, [conversation]);
 
-  const orderedThread = React.useMemo(
-    () => [...conversation.thread].sort(byTime),
-    [conversation]
-  );
+  const orderedThread = React.useMemo(() => {
+    const sorted = [...conversation.thread].sort(byTime);
+    return order === 'desc' ? sorted.reverse() : sorted;
+  }, [conversation, order]);
 
   return (
     <section

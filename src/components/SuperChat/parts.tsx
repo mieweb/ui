@@ -194,7 +194,16 @@ interface MessageRowProps {
   onReferenceClick?: (ref: SuperChatRef) => void;
 }
 
-export function MessageRow({
+/**
+ * A single thread row (message / system notice / reference chip).
+ *
+ * Wrapped in {@link React.memo}: in long threads the parent re-renders on every
+ * new message, but each existing row's props are stable (the host owns the
+ * message objects), so memoization skips re-rendering — and, crucially,
+ * re-running the Markdown pipeline — for the hundreds of rows that did not
+ * change. Keep the props referentially stable from the host for this to help.
+ */
+export const MessageRow = React.memo(function MessageRow({
   message,
   participant,
   isSelf,
@@ -333,7 +342,7 @@ export function MessageRow({
       </div>
     </div>
   );
-}
+});
 
 // ============================================================================
 // Composer

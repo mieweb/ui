@@ -308,6 +308,22 @@ describe('SuperChat', () => {
     expect(screen.queryByRole('listbox')).toBeNull();
   });
 
+  it('orders the thread newest-first when order="desc"', () => {
+    const { getAllByRole } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          order="desc"
+        />
+      </div>
+    );
+    const articles = getAllByRole('article');
+    // Newest (m2 "hi Alice") should appear before oldest (m1 "hello @Triage").
+    expect(articles[0]).toHaveTextContent('hi');
+    expect(articles[1]).toHaveTextContent('hello');
+  });
+
   it('renders AI content blocks of type code', () => {
     const withCode: SuperChatConversation = {
       ...conversation,
