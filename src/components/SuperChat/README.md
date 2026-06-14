@@ -411,6 +411,29 @@ Notes:
 
 ---
 
+## Copying messages
+
+Every content message exposes a **Copy** affordance that floats in the margin —
+to the **left** of incoming messages and to the **right** of the local user's own
+(matched by `currentParticipantId`) — and appears on hover/focus. It opens a small
+menu with three choices:
+
+| Option                | Writes                                                            |
+| --------------------- | ---------------------------------------------------------------- |
+| **Copy**              | _Both_ rich text (`text/html`) and Markdown (`text/plain`) in one clipboard write — the paste target decides which it takes |
+| **Copy as Markdown**  | The raw Markdown source as plain text                            |
+| **Copy as plain text**| The rendered text with all formatting stripped                  |
+
+The primary **Copy** is the "smart" default: paste into a rich editor (Word, Google
+Docs, email) and you get formatting; paste into a code editor or terminal and you
+get Markdown. No host wiring is required — the copy control is always available.
+
+> Copying uses the async Clipboard API (`navigator.clipboard.write`), which requires
+> a secure context (HTTPS or `localhost`). On older browsers it falls back to a
+> plain-text `writeText`.
+
+---
+
 ## Rich Markdown plugins
 
 The base ships Markdown core (GFM) with **sanitization on by default** — untrusted

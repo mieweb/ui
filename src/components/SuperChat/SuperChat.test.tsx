@@ -519,6 +519,48 @@ describe('SuperChat', () => {
     expect(screen.getByText('(edited)')).toBeInTheDocument();
   });
 
+  it('shows a copy affordance on every content message', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+    // m1 (u1) and m2 (a1) are content messages; the system/ref rows have none.
+    const copyButtons = screen.getAllByRole('button', {
+      name: 'Copy message',
+    });
+    expect(copyButtons).toHaveLength(2);
+  });
+
+  it('copies the message source as Markdown via the copy menu', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const writeText = vi.fn(async () => {});
+    const write = vi.fn(async () => {});
+    vi.stubGlobal('navigator', {
+      ...globalThis.navigator,
+      clipboard: { writeText, write },
+    });
+
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+
+    // Open the menu on the first message (m1, authored by u1) and pick Markdown.
+    const [firstCopy] = screen.getAllByRole('button', {
+      name: 'Copy message',
+    });
+    await user.click(firstCopy);
+    await user.click(
+      screen.getByRole('menuitem', { name: 'Copy as Markdown' })
+    );
+
+    expect(writeText).toHaveBeenCalledWith(conversation.thread[0].text);
+    vi.unstubAllGlobals();
+  });
+
   it('renders AI content blocks of type code', () => {
     const withCode: SuperChatConversation = {
       ...conversation,

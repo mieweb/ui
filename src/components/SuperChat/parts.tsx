@@ -205,6 +205,193 @@ function PencilIcon() {
   );
 }
 
+function ClipboardIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+interface CopyMenuProps {
+  /** Aligns the popover to the outer margin (right for self, left otherwise). */
+  isSelf: boolean;
+  /** Markdown source for this message (plain-text / Markdown copy). */
+  markdown: string;
+  /** Read the rendered bubble HTML at copy time (rich-text copy). */
+  getHtml: () => string;
+  /** Read the rendered bubble plain text at copy time. */
+  getText: () => string;
+}
+
+/**
+ * Per-message copy control. The primary **Copy** writes *both* a rich-text
+ * (`text/html`) and a Markdown (`text/plain`) representation in a single
+ * clipboard write, so the paste target decides: rich editors get formatting,
+ * plain editors get Markdown. Explicit "as Markdown" / "as plain text" options
+ * are also offered.
+ */
+function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
+  const [open, setOpen] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const copiedTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+
+  // Close on outside click / Escape while the menu is open.
+  React.useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  React.useEffect(() => () => window.clearTimeout(copiedTimer.current), []);
+
+  const flash = () => {
+    setCopied(true);
+    window.clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopied(false), 1200);
+  };
+
+  const writeText = async (value: string) => {
+    try {
+      await navigator.clipboard?.writeText(value);
+    } catch {
+      // Clipboard may be unavailable (insecure context / denied permission).
+    }
+  };
+
+  const writeBoth = async () => {
+    const html = getHtml();
+    const text = markdown || getText();
+    try {
+      if (
+        typeof window !== 'undefined' &&
+        'ClipboardItem' in window &&
+        navigator.clipboard?.write
+      ) {
+        await navigator.clipboard.write([
+          new window.ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([text], { type: 'text/plain' }),
+          }),
+        ]);
+      } else {
+        await writeText(text);
+      }
+    } catch {
+      await writeText(text);
+    }
+  };
+
+  const run = (fn: () => Promise<void>) => {
+    setOpen(false);
+    void fn().then(flash);
+  };
+
+  return (
+    <div ref={rootRef} className="relative shrink-0">
+      <button
+        type="button"
+        data-slot="superchat-copy-button"
+        aria-label="Copy message"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="rounded p-1 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-neutral-600 focus-visible:opacity-100 dark:hover:text-neutral-200"
+      >
+        {copied ? <CheckIcon /> : <ClipboardIcon />}
+      </button>
+      {open && (
+        <div
+          role="menu"
+          data-slot="superchat-copy-menu"
+          className={cn(
+            'absolute top-full z-10 mt-1 min-w-44 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-left text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800',
+            isSelf ? 'end-0' : 'start-0'
+          )}
+        >
+          <CopyMenuItem
+            label="Copy"
+            hint="Rich text + Markdown"
+            onSelect={() => run(writeBoth)}
+          />
+          <CopyMenuItem
+            label="Copy as Markdown"
+            onSelect={() => run(() => writeText(markdown || getText()))}
+          />
+          <CopyMenuItem
+            label="Copy as plain text"
+            onSelect={() => run(() => writeText(getText()))}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CopyMenuItem({
+  label,
+  hint,
+  onSelect,
+}: {
+  label: string;
+  hint?: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onSelect}
+      className="flex w-full flex-col items-start px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-700"
+    >
+      <span>{label}</span>
+      {hint && <span className="text-[10px] text-neutral-400">{hint}</span>}
+    </button>
+  );
+}
+
 interface MessageRowProps {
   message: SuperChatMessage;
   participant?: Participant;
@@ -241,6 +428,8 @@ export const MessageRow = React.memo(function MessageRow({
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
   const editRef = React.useRef<HTMLTextAreaElement>(null);
+  // The rendered bubble content, read at copy time for the rich-text payload.
+  const bubbleRef = React.useRef<HTMLDivElement>(null);
   // Grow the editor to fit its content (accounts for wrapped lines, not just
   // explicit newlines), clamped by the textarea's CSS max-height.
   const autosize = React.useCallback(() => {
@@ -309,6 +498,34 @@ export const MessageRow = React.memo(function MessageRow({
     setIsEditing(false);
   };
 
+  // The Markdown source for copying: prefer the raw `text`, otherwise assemble
+  // it from the message's text/code content blocks.
+  const markdownSource =
+    typeof message.text === 'string' && message.text
+      ? message.text
+      : (message.content
+          ?.map((block) => {
+            if (block.type === 'code' && block.text) {
+              return `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+            }
+            if (
+              (block.type === 'text' || block.type === 'thinking') &&
+              block.text
+            ) {
+              return block.text;
+            }
+            return '';
+          })
+          .filter(Boolean)
+          .join('\n\n') ?? '');
+
+  // A copy affordance appears on every message that has a body (not while it is
+  // being edited).
+  const canCopy =
+    !isEditing &&
+    (!!message.content?.length ||
+      (typeof message.text === 'string' && message.text.length > 0));
+
   return (
     <div
       data-slot="superchat-message"
@@ -362,122 +579,143 @@ export const MessageRow = React.memo(function MessageRow({
         </div>
 
         <div
-          data-slot="superchat-bubble"
           className={cn(
-            'w-fit max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
-            isSelf
-              ? 'bg-primary-800 text-white'
-              : 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
-            message.status === 'error' &&
-              'border border-red-300 dark:border-red-700'
+            'flex items-center gap-1',
+            isSelf ? 'flex-row-reverse' : 'flex-row'
           )}
-          style={
-            !isSelf && accent
-              ? { borderLeft: `3px solid ${accent}` }
-              : undefined
-          }
         >
-          {isEditing ? (
-            <div
-              data-slot="superchat-message-editor"
-              className="flex w-80 max-w-full flex-col gap-2"
-            >
-              <textarea
-                value={draft}
-                ref={editRef}
-                rows={2}
-                onChange={(e) => {
-                  setDraft(e.target.value);
-                  autosize();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    saveEdit();
-                  } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    cancelEdit();
-                  }
-                }}
-                aria-label="Edit message"
-                className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={saveEdit}
-                  disabled={!draft.trim() || draft.trim() === message.text}
-                  className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
-              {message.content?.map((block, i) => {
-                if (block.type === 'tool_use' && block.toolCall) {
-                  return (
-                    <MCPToolCallDisplay key={i} toolCall={block.toolCall} />
-                  );
-                }
-                if (
-                  (block.type === 'text' || block.type === 'thinking') &&
-                  block.text
-                ) {
-                  return (
-                    <div
-                      key={i}
-                      className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                    >
-                      {renderText(block.text, {
-                        messageId: message.id,
-                        streaming,
-                        role:
-                          participant?.kind === 'human' ? 'user' : 'assistant',
-                      })}
-                    </div>
-                  );
-                }
-                if (block.type === 'code' && block.text) {
-                  const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
-                  return (
-                    <div
-                      key={i}
-                      className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                    >
-                      {renderText(fenced, {
-                        messageId: message.id,
-                        streaming,
-                        role:
-                          participant?.kind === 'human' ? 'user' : 'assistant',
-                      })}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-
-              {/* Plain `text` body (the common case). */}
-              {message.text && (
-                <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
-                  {renderText(message.text, {
-                    messageId: message.id,
-                    streaming,
-                    role: participant?.kind === 'human' ? 'user' : 'assistant',
-                  })}
-                </div>
-              )}
-            </>
+          {canCopy && (
+            <CopyMenu
+              isSelf={isSelf}
+              markdown={markdownSource}
+              getHtml={() => bubbleRef.current?.innerHTML ?? ''}
+              getText={() => bubbleRef.current?.textContent ?? ''}
+            />
           )}
+          <div
+            ref={bubbleRef}
+            data-slot="superchat-bubble"
+            className={cn(
+              'w-fit max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
+              isSelf
+                ? 'bg-primary-800 text-white'
+                : 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
+              message.status === 'error' &&
+                'border border-red-300 dark:border-red-700'
+            )}
+            style={
+              !isSelf && accent
+                ? { borderLeft: `3px solid ${accent}` }
+                : undefined
+            }
+          >
+            {isEditing ? (
+              <div
+                data-slot="superchat-message-editor"
+                className="flex w-80 max-w-full flex-col gap-2"
+              >
+                <textarea
+                  value={draft}
+                  ref={editRef}
+                  rows={2}
+                  onChange={(e) => {
+                    setDraft(e.target.value);
+                    autosize();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      saveEdit();
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault();
+                      cancelEdit();
+                    }
+                  }}
+                  aria-label="Edit message"
+                  className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveEdit}
+                    disabled={!draft.trim() || draft.trim() === message.text}
+                    className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
+                {message.content?.map((block, i) => {
+                  if (block.type === 'tool_use' && block.toolCall) {
+                    return (
+                      <MCPToolCallDisplay key={i} toolCall={block.toolCall} />
+                    );
+                  }
+                  if (
+                    (block.type === 'text' || block.type === 'thinking') &&
+                    block.text
+                  ) {
+                    return (
+                      <div
+                        key={i}
+                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                      >
+                        {renderText(block.text, {
+                          messageId: message.id,
+                          streaming,
+                          role:
+                            participant?.kind === 'human'
+                              ? 'user'
+                              : 'assistant',
+                        })}
+                      </div>
+                    );
+                  }
+                  if (block.type === 'code' && block.text) {
+                    const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+                    return (
+                      <div
+                        key={i}
+                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                      >
+                        {renderText(fenced, {
+                          messageId: message.id,
+                          streaming,
+                          role:
+                            participant?.kind === 'human'
+                              ? 'user'
+                              : 'assistant',
+                        })}
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+
+                {/* Plain `text` body (the common case). */}
+                {message.text && (
+                  <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
+                    {renderText(message.text, {
+                      messageId: message.id,
+                      streaming,
+                      role:
+                        participant?.kind === 'human' ? 'user' : 'assistant',
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
