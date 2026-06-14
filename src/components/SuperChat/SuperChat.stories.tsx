@@ -130,6 +130,73 @@ function InteractivePanel(
 }
 
 // ============================================================================
+// Long-thread fixture (synthetic)
+// ============================================================================
+// Builds a conversation with `count` messages to exercise rendering on very
+// long threads (memoized rows, scroll anchoring, asc/desc ordering). The
+// participants rotate and each message gets a monotonically increasing time so
+// the thread has a stable order.
+
+function makeLongConversation(
+  count: number,
+  id = 'long'
+): SuperChatConversation {
+  const speakers = [
+    {
+      id: 'u1',
+      kind: 'human' as const,
+      name: 'Dr. Alice Reyes',
+      color: '#0e7490',
+    },
+    { id: 'u2', kind: 'human' as const, name: 'Sam Carter', color: '#9333ea' },
+    {
+      id: 'a1',
+      kind: 'agent' as const,
+      name: 'Triage Agent',
+      color: '#2563eb',
+    },
+    {
+      id: 'a2',
+      kind: 'agent' as const,
+      name: 'Coding Agent',
+      color: '#16a34a',
+    },
+  ];
+  const samples = [
+    'Reviewing the latest vitals now.',
+    'BP is **128/82**, HR 76 — within range.',
+    'Can you pull the most recent `CBC` panel?',
+    'Potassium trended down to 4.6 after the second draw.',
+    'Here is the summary:\n\n- Stable overnight\n- No new orders\n- Follow-up in AM',
+    'Flagging for coding review — see `99213` vs `99214`.',
+    'Agreed, the documentation supports the higher level.',
+    'Patient reports improved symptoms since the last visit.',
+    'Scheduling a follow-up for next Tuesday.',
+    'Note added to the chart.',
+  ];
+  const start = new Date('2026-06-01T08:00:00Z').getTime();
+  const thread = Array.from({ length: count }, (_, i) => {
+    const speaker = speakers[i % speakers.length];
+    return {
+      id: `lm-${i}`,
+      participantId: speaker.id,
+      text: `${samples[i % samples.length]} _(message ${i + 1} of ${count})_`,
+      time: new Date(start + i * 60_000).toISOString(),
+    };
+  });
+  return {
+    id,
+    title: `Long thread — ${count} messages`,
+    reference_id: 'patient/4821',
+    unread: 0,
+    participants: speakers,
+    thread,
+  };
+}
+
+const longConversation = makeLongConversation(300, 'long');
+
+// ============================================================================
 // Stories
 // ============================================================================
 
@@ -197,6 +264,61 @@ export const Reverse: Story = {
         onReferenceClick={(ref) => console.log('ref', ref)}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
       />
+    </div>
+  ),
+};
+
+// A 300-message thread (oldest→newest, bottom-anchored). Exercises rendering
+// and scroll behavior on long histories; each row is memoized so only changed
+// rows re-render.
+export const Long: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    readOnly: false,
+    trustedContent: false,
+    order: 'asc',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'A **300-message** conversation in the default `order="asc"` (oldest→newest)',
+          'layout, anchored to the bottom. Use this to sanity-check scrolling and',
+          'render cost on long threads. For very large histories, hosts should',
+          'cap/paginate `thread` rather than render everything (see the README',
+          '**Performance & long conversations** section).',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
+      <InteractivePanel {...args} initial={longConversation} />
+    </div>
+  ),
+};
+
+// The same 300-message thread, newest-first (social-feed style, top-anchored).
+export const LongReverse: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    readOnly: false,
+    trustedContent: false,
+    order: 'desc',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The same **300-message** thread as **Long**, but `order="desc"` —',
+          'newest-first, top-anchored social-feed layout.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
+      <InteractivePanel {...args} initial={longConversation} />
     </div>
   ),
 };
