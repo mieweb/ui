@@ -44,6 +44,7 @@ export type {
   SuperChatChannel,
   SuperChatRef,
   SuperChatLinkBuilder,
+  ComposerAttachment,
   // render pipeline
   SuperChatRenderPlugin,
   SuperChatPluggable,

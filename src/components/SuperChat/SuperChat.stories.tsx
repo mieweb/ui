@@ -122,10 +122,14 @@ function InteractivePanel(
         }));
       }}
       onMessageSent={(text, meta) => {
+        const images = meta.attachments
+          .map((att) => `![${att.name}](${att.dataUrl})`)
+          .join('\n\n');
+        const body = [text, images].filter(Boolean).join('\n\n');
         appendMessage({
           id: `m-${Date.now()}`,
           participantId: props.currentParticipantId ?? 'u1',
-          text,
+          text: body,
           time: new Date().toISOString(),
         });
         meta.conversation.participants

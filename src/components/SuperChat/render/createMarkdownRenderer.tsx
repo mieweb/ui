@@ -13,7 +13,11 @@
  */
 
 import * as React from 'react';
-import Markdown, { type Components, type Options } from 'react-markdown';
+import Markdown, {
+  defaultUrlTransform,
+  type Components,
+  type Options,
+} from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { cn } from '../../../utils/cn';
@@ -120,9 +124,24 @@ function mergeSanitizeSchema(
     out.attributes = baseAttrs;
   }
 
+  // protocols: per-attribute union (e.g. allow `data:`/`blob:` image src)
+  if (extra.protocols && typeof extra.protocols === 'object') {
+    const baseProtocols = {
+      ...((base.protocols as Record<string, string[]>) ?? {}),
+    };
+    for (const [attr, protocols] of Object.entries(
+      extra.protocols as Record<string, string[]>
+    )) {
+      baseProtocols[attr] = Array.from(
+        new Set([...(baseProtocols[attr] ?? []), ...protocols])
+      );
+    }
+    out.protocols = baseProtocols;
+  }
+
   // any other keys (clobber)
   for (const [k, v] of Object.entries(extra)) {
-    if (k === 'tagNames' || k === 'attributes') continue;
+    if (k === 'tagNames' || k === 'attributes' || k === 'protocols') continue;
     out[k] = v;
   }
   return out;
@@ -319,6 +338,23 @@ export function createMarkdownRenderer(
   return MarkdownRenderer;
 }
 
+/**
+ * react-markdown's default `urlTransform` drops `data:`/`blob:` URLs, which
+ * would strip pasted/attached images before sanitization runs. Permit those
+ * two protocols for image `src` only (sanitization still gates the final
+ * markup); everything else keeps react-markdown's safe defaults.
+ */
+const transformUrl: NonNullable<Options['urlTransform']> = (url, key, node) => {
+  if (
+    key === 'src' &&
+    node.tagName === 'img' &&
+    (/^data:image\//i.test(url) || /^blob:/i.test(url))
+  ) {
+    return url;
+  }
+  return defaultUrlTransform(url);
+};
+
 interface MarkdownContentProps {
   text: string;
   messageId: string;
@@ -341,6 +377,7 @@ const MarkdownContent = React.memo(function MarkdownContent({
       <Markdown
         remarkPlugins={remarkPlugins}
         rehypePlugins={rehypePlugins}
+        urlTransform={transformUrl}
         components={components}
       >
         {text}

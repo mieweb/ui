@@ -85,5 +85,11 @@ export function createImagePlugin(): SuperChatRenderPlugin {
     components: {
       img: ZoomableImage as React.ComponentType<Record<string, unknown>>,
     },
+    // Allow inline (`data:`) and object-URL (`blob:`) image sources in addition
+    // to the default http/https, so pasted/attached images render. These are
+    // safe for `<img>` (scripts in SVG loaded via `src` do not execute).
+    sanitizeSchema: {
+      protocols: { src: ['data', 'blob'] },
+    },
   };
 }

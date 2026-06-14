@@ -18,6 +18,7 @@ import { ParticipantAvatar, Composer, MessageRow, byTime } from './parts';
 import { VirtualThread } from './VirtualThread';
 import type {
   AIRenderTextContent,
+  ComposerAttachment,
   Participant,
   SuperChatConversation,
   SuperChatLinkBuilder,
@@ -64,7 +65,11 @@ export interface SuperChatProps {
   // --- callbacks (chat-component-compatible) ---
   onMessageSent?: (
     text: string,
-    meta: { conversation: SuperChatConversation; mentions: string[] }
+    meta: {
+      conversation: SuperChatConversation;
+      mentions: string[];
+      attachments: ComposerAttachment[];
+    }
   ) => void;
   /**
    * Fired when the local user saves an edit to one of their own messages.
@@ -282,8 +287,8 @@ export function SuperChat({
       <Composer
         participants={conversation.participants}
         disabled={readOnly}
-        onSend={(text, mentions) =>
-          onMessageSent?.(text, { conversation, mentions })
+        onSend={(text, mentions, attachments) =>
+          onMessageSent?.(text, { conversation, mentions, attachments })
         }
       />
     </section>

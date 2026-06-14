@@ -118,10 +118,14 @@ function InteractiveInbox(
       conversations={conversations}
       onMessageSent={(text, meta) => {
         const now = new Date().toISOString();
+        const images = meta.attachments
+          .map((att) => `![${att.name}](${att.dataUrl})`)
+          .join('\n\n');
+        const body = [text, images].filter(Boolean).join('\n\n');
         appendMessage(meta.conversation.id, {
           id: `m-${Date.now()}`,
           participantId: props.currentParticipantId ?? 'u1',
-          text,
+          text: body,
           time: now,
         });
         // Simulate each mentioned agent replying shortly after.

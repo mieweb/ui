@@ -65,6 +65,22 @@ describe('createMarkdownRenderer', () => {
     expect(container.querySelector('img')).toBeNull();
   });
 
+  it('renders inline data: image URLs when the image plugin is enabled', () => {
+    const r = createMarkdownRenderer({ plugins: [createImagePlugin()] });
+    const dataUrl =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const { container } = renderText(
+      r(`![shot](${dataUrl})`, {
+        messageId: 'mimg',
+        streaming: false,
+        role: 'assistant',
+      })
+    );
+    const img = container.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute('src')).toBe(dataUrl);
+  });
+
   it('keeps syntax-highlight token classes through sanitization (code plugin)', () => {
     const r = createMarkdownRenderer({ plugins: [createCodePlugin()] });
     const { container } = renderText(
@@ -341,6 +357,49 @@ describe('SuperChat', () => {
     expect(onMessageSent).toHaveBeenCalledWith(
       'ping @Triage',
       expect.objectContaining({ mentions: ['a1'] })
+    );
+  });
+
+  it('attaches a pasted image and sends it with the message', async () => {
+    const onMessageSent = vi.fn();
+    const { fireEvent } = await import('@testing-library/react');
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const input = screen.getByLabelText('Message');
+    const file = new File(['fake-bytes'], 'shot.png', { type: 'image/png' });
+    fireEvent.paste(input, {
+      clipboardData: {
+        items: [
+          {
+            kind: 'file',
+            type: 'image/png',
+            getAsFile: () => file,
+          },
+        ],
+      },
+    });
+    // The pasted image shows up as a removable preview thumbnail.
+    const remove = await screen.findByLabelText('Remove shot.png');
+    expect(remove).toBeInTheDocument();
+    await user.click(screen.getByLabelText('Send message'));
+    expect(onMessageSent).toHaveBeenCalledWith(
+      '',
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            name: 'shot.png',
+            type: 'image/png',
+            dataUrl: expect.stringMatching(/^data:image\/png/),
+          }),
+        ],
+      })
     );
   });
 

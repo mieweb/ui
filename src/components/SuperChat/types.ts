@@ -124,6 +124,22 @@ export interface SuperChatMessage {
   sender_name?: string;
 }
 
+/**
+ * A file (typically an image) the local user pasted or attached in the
+ * composer, surfaced to the host via the send callback so it can be embedded,
+ * uploaded, or otherwise added to the conversation.
+ */
+export interface ComposerAttachment {
+  /** Stable id for the attachment (unique within a single draft). */
+  id: string;
+  /** File name, derived from the pasted file or a generated fallback. */
+  name: string;
+  /** MIME type, e.g. `image/png`. */
+  type: string;
+  /** Base64 `data:` URL of the file contents. */
+  dataUrl: string;
+}
+
 /** A conversation: participants + an ordered thread. */
 export interface SuperChatConversation {
   /** Unique identifier. */

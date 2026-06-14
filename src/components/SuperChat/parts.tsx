@@ -13,6 +13,7 @@ import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { SendIcon, SparklesIcon } from '../AI/icons';
 import type {
   AIRenderTextContent,
+  ComposerAttachment,
   Participant,
   SuperChatConversation,
   SuperChatLinkBuilder,
@@ -758,9 +759,17 @@ export function Composer({
 }: {
   participants: Participant[];
   disabled?: boolean;
-  onSend: (text: string, mentions: string[]) => void;
+  onSend: (
+    text: string,
+    mentions: string[],
+    attachments: ComposerAttachment[]
+  ) => void;
 }) {
   const [draft, setDraft] = React.useState('');
+  const [attachments, setAttachments] = React.useState<ComposerAttachment[]>(
+    []
+  );
+  const attachmentSeq = React.useRef(0);
   const [mention, setMention] = React.useState<{
     query: string;
     start: number;
@@ -813,11 +822,51 @@ export function Composer({
 
   const submit = () => {
     const text = draft.trim();
-    if (!text) return;
-    onSend(text, detectMentions(text, participants));
+    if (!text && attachments.length === 0) return;
+    onSend(text, detectMentions(text, participants), attachments);
     setDraft('');
+    setAttachments([]);
     setMention(null);
   };
+
+  const readImageFile = (file: File) => {
+    const reader = new window.FileReader();
+    reader.onload = () => {
+      const dataUrl =
+        typeof reader.result === 'string' ? reader.result : undefined;
+      if (!dataUrl) return;
+      attachmentSeq.current += 1;
+      setAttachments((prev) => [
+        ...prev,
+        {
+          id: `att-${Date.now()}-${attachmentSeq.current}`,
+          name: file.name || `pasted-image-${attachmentSeq.current}.png`,
+          type: file.type || 'image/png',
+          dataUrl,
+        },
+      ]);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    if (disabled) return;
+    const files = Array.from(e.clipboardData.items)
+      .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+      .map((item) => item.getAsFile())
+      .filter((f): f is File => f !== null);
+    if (files.length === 0) return;
+    // We're handling the image ourselves; don't also paste a file path/blob.
+    e.preventDefault();
+    files.forEach(readImageFile);
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const canSend =
+    !disabled && (draft.trim().length > 0 || attachments.length > 0);
 
   return (
     <div
@@ -866,81 +915,114 @@ export function Composer({
           ))}
         </ul>
       )}
-      <textarea
-        ref={textareaRef}
-        value={draft}
-        onChange={(e) => {
-          setDraft(e.target.value);
-          syncMention(
-            e.target.value,
-            e.target.selectionStart ?? e.target.value.length
-          );
-        }}
-        onClick={(e) => {
-          const el = e.currentTarget;
-          syncMention(el.value, el.selectionStart ?? el.value.length);
-        }}
-        onKeyDown={(e) => {
-          if (menuOpen) {
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              setHighlight((h) => (h + 1) % suggestions.length);
-              return;
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        {attachments.length > 0 && (
+          <ul
+            data-slot="superchat-composer-attachments"
+            className="flex flex-wrap gap-2"
+          >
+            {attachments.map((att) => (
+              <li
+                key={att.id}
+                className="group/att relative h-16 w-16 overflow-hidden rounded-lg border border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800"
+              >
+                {/* Local preview of a pasted image; data: URL stays in-browser. */}
+                <img
+                  src={att.dataUrl}
+                  alt={att.name}
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(att.id)}
+                  aria-label={`Remove ${att.name}`}
+                  className="absolute end-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900/70 text-white opacity-0 transition-opacity group-hover/att:opacity-100 focus:opacity-100 focus:outline-none"
+                >
+                  <span aria-hidden className="text-xs leading-none">
+                    ×
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <textarea
+          ref={textareaRef}
+          value={draft}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            syncMention(
+              e.target.value,
+              e.target.selectionStart ?? e.target.value.length
+            );
+          }}
+          onClick={(e) => {
+            const el = e.currentTarget;
+            syncMention(el.value, el.selectionStart ?? el.value.length);
+          }}
+          onPaste={handlePaste}
+          onKeyDown={(e) => {
+            if (menuOpen) {
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setHighlight((h) => (h + 1) % suggestions.length);
+                return;
+              }
+              if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setHighlight(
+                  (h) => (h - 1 + suggestions.length) % suggestions.length
+                );
+                return;
+              }
+              if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                // `highlight` can fall out of range if `suggestions` shrank while
+                // the menu was open; fall back to the first suggestion.
+                const chosen = suggestions[highlight] ?? suggestions[0];
+                if (chosen) insertMention(chosen);
+                return;
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                setMention(null);
+                return;
+              }
             }
-            if (e.key === 'ArrowUp') {
+            if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
-              setHighlight(
-                (h) => (h - 1 + suggestions.length) % suggestions.length
-              );
-              return;
+              submit();
             }
-            if (e.key === 'Enter' || e.key === 'Tab') {
-              e.preventDefault();
-              // `highlight` can fall out of range if `suggestions` shrank while
-              // the menu was open; fall back to the first suggestion.
-              const chosen = suggestions[highlight] ?? suggestions[0];
-              if (chosen) insertMention(chosen);
-              return;
-            }
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              setMention(null);
-              return;
-            }
+          }}
+          disabled={disabled}
+          rows={1}
+          placeholder={
+            disabled
+              ? 'Read-only conversation'
+              : 'Type a message… use @ to address an agent'
           }
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            submit();
-          }
-        }}
-        disabled={disabled}
-        rows={1}
-        placeholder={
-          disabled
-            ? 'Read-only conversation'
-            : 'Type a message… use @ to address an agent'
-        }
-        aria-label="Message"
-        role="combobox"
-        aria-expanded={menuOpen}
-        aria-controls={menuOpen ? listboxId : undefined}
-        aria-activedescendant={activeOptionId}
-        aria-autocomplete="list"
-        aria-haspopup="listbox"
-        name="superchat-message"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="sentences"
-        spellCheck
-        data-1p-ignore
-        data-lpignore="true"
-        data-form-type="other"
-        className="focus:border-primary-500 focus:ring-primary-500 max-h-32 min-h-10 flex-1 resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:ring-1 focus:outline-none disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
-      />
+          aria-label="Message"
+          role="combobox"
+          aria-expanded={menuOpen}
+          aria-controls={menuOpen ? listboxId : undefined}
+          aria-activedescendant={activeOptionId}
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          name="superchat-message"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="sentences"
+          spellCheck
+          data-1p-ignore
+          data-lpignore="true"
+          data-form-type="other"
+          className="focus:border-primary-500 focus:ring-primary-500 max-h-32 min-h-10 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:ring-1 focus:outline-none disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
+        />
+      </div>
       <button
         type="button"
         onClick={submit}
-        disabled={disabled || !draft.trim()}
+        disabled={!canSend}
         aria-label="Send message"
         className="bg-primary-800 hover:bg-primary-700 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white disabled:opacity-40"
       >

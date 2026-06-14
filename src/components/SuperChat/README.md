@@ -418,11 +418,11 @@ to the **left** of incoming messages and to the **right** of the local user's ow
 (matched by `currentParticipantId`) — and appears on hover/focus. It opens a small
 menu with three choices:
 
-| Option                | Writes                                                            |
-| --------------------- | ---------------------------------------------------------------- |
-| **Copy**              | _Both_ rich text (`text/html`) and Markdown (`text/plain`) in one clipboard write — the paste target decides which it takes |
-| **Copy as Markdown**  | The raw Markdown source as plain text                            |
-| **Copy as plain text**| The rendered text with all formatting stripped                  |
+| Option                 | Writes                                                                                                                      |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Copy**               | _Both_ rich text (`text/html`) and Markdown (`text/plain`) in one clipboard write — the paste target decides which it takes |
+| **Copy as Markdown**   | The raw Markdown source as plain text                                                                                       |
+| **Copy as plain text** | The rendered text with all formatting stripped                                                                              |
 
 The primary **Copy** is the "smart" default: paste into a rich editor (Word, Google
 Docs, email) and you get formatting; paste into a code editor or terminal and you
@@ -431,6 +431,39 @@ get Markdown. No host wiring is required — the copy control is always availabl
 > Copying uses the async Clipboard API (`navigator.clipboard.write`), which requires
 > a secure context (HTTPS or `localhost`). On older browsers it falls back to a
 > plain-text `writeText`.
+
+---
+
+## Pasting images
+
+Paste an image into the composer (⌘V / Ctrl+V from a screenshot or copied picture)
+and it appears as a removable thumbnail above the input. Multiple images can be
+queued, and a draft can be sent with attachments only (no text required).
+
+Because SuperChat is **controlled**, the component never mutates the thread itself —
+pasted files are surfaced to the host through `onMessageSent` so it can embed, upload,
+or persist them however it likes:
+
+```tsx
+onMessageSent={(text, { conversation, mentions, attachments }) => {
+  // attachments: { id, name, type, dataUrl }[]
+  const images = attachments
+    .map((a) => `![${a.name}](${a.dataUrl})`)
+    .join('\n\n');
+  appendMessage(conversation.id, {
+    id: crypto.randomUUID(),
+    participantId: 'me',
+    text: [text, images].filter(Boolean).join('\n\n'),
+    time: new Date().toISOString(),
+  });
+}}
+```
+
+Each `ComposerAttachment` carries a base64 `dataUrl`. To render inline `data:` (or
+`blob:`) image sources, include `createImagePlugin()` — it extends the
+`rehype-sanitize` allow-list to permit those protocols on `<img src>` (safe, since
+scripts inside an SVG loaded via `src` do not execute). For production you'll
+typically upload the file and swap in the hosted URL instead of the `data:` URL.
 
 ---
 

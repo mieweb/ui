@@ -16,6 +16,7 @@ import { SuperChat } from './SuperChat';
 import { SuperChatConversations } from './SuperChatConversations';
 import type {
   AIRenderTextContent,
+  ComposerAttachment,
   SuperChatConversation,
   SuperChatLinkBuilder,
   SuperChatRef,
@@ -57,7 +58,11 @@ export interface SuperChatInboxProps {
   // --- callbacks (chat-component-compatible) ---
   onMessageSent?: (
     text: string,
-    meta: { conversation: SuperChatConversation; mentions: string[] }
+    meta: {
+      conversation: SuperChatConversation;
+      mentions: string[];
+      attachments: ComposerAttachment[];
+    }
   ) => void;
   /** Fired when the local user saves an edit to one of their own messages. */
   onMessageEdited?: (
