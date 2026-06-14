@@ -10,11 +10,7 @@ import {
   createNitroTablePlugin,
 } from './plugins';
 import type { SuperChatConversation } from './index';
-import {
-  richConversation,
-  secondConversation,
-  registry,
-} from './storyData';
+import { richConversation, secondConversation, registry } from './storyData';
 import 'katex/dist/katex.min.css';
 
 // ============================================================================
@@ -38,8 +34,7 @@ const meta: Meta<typeof SuperChatInbox> = {
     },
     trustedContent: {
       control: 'boolean',
-      description:
-        'Skip sanitization — only for host-authored content.',
+      description: 'Skip sanitization — only for host-authored content.',
       table: { category: 'Behavior' },
     },
     currentParticipantId: {

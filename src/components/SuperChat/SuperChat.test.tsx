@@ -298,9 +298,7 @@ describe('SuperChat', () => {
   it('opens an @-mention menu and inserts the chosen participant', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
-    render(
-      <SuperChat conversation={conversation} currentParticipantId="u1" />
-    );
+    render(<SuperChat conversation={conversation} currentParticipantId="u1" />);
     const input = screen.getByLabelText('Message') as HTMLTextAreaElement;
     await user.type(input, 'hello @Tri');
     const menu = screen.getByRole('listbox', { name: 'Mention a participant' });

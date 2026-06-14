@@ -84,9 +84,7 @@ function InteractivePanel(
   const { initial, ...rest } = props;
   const [convo, setConvo] = React.useState(initial);
 
-  const appendMessage = (
-    message: SuperChatConversation['thread'][number]
-  ) => {
+  const appendMessage = (message: SuperChatConversation['thread'][number]) => {
     setConvo((prev) => ({
       ...prev,
       thread: [...prev.thread, message],

@@ -165,8 +165,7 @@ export function SuperChat({
             message={m}
             participant={participantById.get(m.participantId)}
             isSelf={
-              !!currentParticipantId &&
-              m.participantId === currentParticipantId
+              !!currentParticipantId && m.participantId === currentParticipantId
             }
             renderText={renderText}
             linkBuilder={linkBuilder}
