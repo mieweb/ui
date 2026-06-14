@@ -496,7 +496,10 @@ export function Composer({
             }
             if (e.key === 'Enter' || e.key === 'Tab') {
               e.preventDefault();
-              insertMention(suggestions[highlight]);
+              // `highlight` can fall out of range if `suggestions` shrank while
+              // the menu was open; fall back to the first suggestion.
+              const chosen = suggestions[highlight] ?? suggestions[0];
+              if (chosen) insertMention(chosen);
               return;
             }
             if (e.key === 'Escape') {

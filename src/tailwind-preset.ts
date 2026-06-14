@@ -334,6 +334,18 @@ export const miewebUISafelist = [
   'last:border-b-0',
   'border-dashed',
   'text-[11px]',
+  // SuperChat (participant chips, unread badge, active/hover states)
+  'bg-primary-100',
+  'bg-primary-600',
+  'hover:bg-primary-700',
+  'dark:bg-primary-900/40',
+  'text-primary-900',
+  'dark:text-primary-100',
+  'dark:text-primary-200',
+  'hover:border-primary-300',
+  'focus:border-primary-500',
+  'focus:ring-primary-500',
+  'text-[10px]',
 ];
 
 export interface MiewebUIPreset {
