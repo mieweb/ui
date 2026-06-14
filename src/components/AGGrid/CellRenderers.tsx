@@ -53,7 +53,7 @@ function getFaviconUrl(domain: string | null | undefined): string | null {
   if (!domain || typeof domain !== 'string') return null;
   const cleanDomain = domain
     .replace(/^https?:\/\//, '')
-    .replace(/\/.*$/, '')
+    .split('/')[0]
     .trim();
   if (!cleanDomain) return null;
   return `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=64`;

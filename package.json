@@ -139,9 +139,20 @@
         "default": "./dist/esheet.cjs"
       }
     },
+    "./kerebron": {
+      "import": {
+        "types": "./dist/kerebron.d.ts",
+        "default": "./dist/kerebron.js"
+      },
+      "require": {
+        "types": "./dist/kerebron.d.cts",
+        "default": "./dist/kerebron.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles": "./dist/styles.css",
     "./markdown.css": "./dist/components/Markdown/styles.css",
+    "./kerebron.css": "./dist/kerebron.css",
     "./init.css": "./dist/styles/init.css"
   },
   "files": [
@@ -153,12 +164,13 @@
     "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
     "dev": "tsup --watch",
     "prebuild": "npm run build:esheet",
-    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css",
+    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css && npm run copy:kerebron-css",
     "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ] || [ ! -f packages/esheet/packages/renderer/src/index.output.css ]; then cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel; fi",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
     "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
     "copy:markdown-css": "mkdir -p dist/components/Markdown && cp src/components/Markdown/styles.css dist/components/Markdown/ 2>/dev/null || true",
+    "copy:kerebron-css": "cp src/styles/kerebron.css dist/kerebron.css 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -178,8 +190,9 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@esheet/builder": ">=0.0.2",
-    "@esheet/renderer": ">=0.0.2",
+    "@kerebron/editor": ">=0.7.9",
+    "@kerebron/editor-kits": ">=0.7.9",
+    "@kerebron/wasm": ">=0.7.9",
     "@mieweb/datavis": "=0.0.0-PRE.2",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
@@ -199,10 +212,13 @@
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
-    "@esheet/builder": {
+    "@kerebron/editor": {
       "optional": true
     },
-    "@esheet/renderer": {
+    "@kerebron/editor-kits": {
+      "optional": true
+    },
+    "@kerebron/wasm": {
       "optional": true
     },
     "@mieweb/datavis": {
@@ -261,7 +277,7 @@
     "@swc/helpers": "^0.5.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.0",
     "google-libphonenumber": "^3.2.44",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.562.0",
@@ -281,6 +297,9 @@
     "@esheet/fields": "link:./packages/esheet/packages/fields",
     "@esheet/renderer": "link:./packages/esheet/packages/renderer",
     "@eslint/js": "^9.39.3",
+    "@kerebron/editor": "0.7.9",
+    "@kerebron/editor-kits": "0.7.9",
+    "@kerebron/wasm": "0.7.9",
     "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
@@ -303,7 +322,7 @@
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.6",
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
@@ -329,7 +348,7 @@
     "katex": "^0.17.0",
     "mermaid": "^11.15.0",
     "papaparse": "^5.5.3",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.10",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "^19.2.4",
@@ -346,22 +365,30 @@
     "tailwindcss": "^4.2.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vitest": "^3.2.4",
+    "vite": "^7.3.2",
+    "vitest": "^3.2.6",
     "wavesurfer.js": "^7.12.1",
     "ychart": "file:./packages/ychart",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "pnpm": {
     "overrides": {
       "datavis-ace": "=4.0.0-PRE.2",
       "@esheet/adapters": "link:./packages/esheet/packages/adapters",
       "@esheet/core": "link:./packages/esheet/packages/core",
-      "@esheet/fields": "link:./packages/esheet/packages/fields"
+      "@esheet/fields": "link:./packages/esheet/packages/fields",
+      "esbuild@<0.28.1": "0.28.1",
+      "axios@>=1.0.0 <1.16.0": "1.16.0",
+      "minimatch@>=10.0.0 <10.2.3": "10.2.3",
+      "minimatch@>=9.0.0 <9.0.7": "9.0.7",
+      "flatted@<3.4.2": "3.4.2",
+      "picomatch@>=4.0.0 <4.0.4": "4.0.4",
+      "uuid@<11.1.1": "11.1.1",
+      "dompurify@<3.4.0": "3.4.0"
     }
   }
 }
