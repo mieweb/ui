@@ -538,6 +538,39 @@ describe('SuperChat', () => {
     });
   });
 
+  it('pastes an image into the edit window as Markdown', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    const file = new File(['fake-bytes'], 'edited.png', { type: 'image/png' });
+    fireEvent.paste(editor, {
+      clipboardData: {
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => file }],
+      },
+    });
+    await waitFor(() =>
+      expect((editor as HTMLTextAreaElement).value).toMatch(
+        /!\[edited\.png\]\(data:image\/png/
+      )
+    );
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onMessageEdited).toHaveBeenCalledTimes(1);
+    const [, savedText] = onMessageEdited.mock.calls[0];
+    expect(savedText).toMatch(/!\[edited\.png\]\(data:image\/png/);
+  });
+
   it('cancels an edit without firing onMessageEdited', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();

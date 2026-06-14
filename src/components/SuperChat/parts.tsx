@@ -512,6 +512,42 @@ export const MessageRow = React.memo(function MessageRow({
     setIsEditing(false);
   };
 
+  // Paste an image into the editor: splice its Markdown at the caret so it
+  // becomes part of the message source (the bubble renders Markdown).
+  const handleEditPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = Array.from(e.clipboardData.items)
+      .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+      .map((item) => item.getAsFile())
+      .filter((f): f is File => f !== null);
+    if (files.length === 0) return;
+    e.preventDefault();
+    const el = e.currentTarget;
+    const start = el.selectionStart ?? draft.length;
+    const end = el.selectionEnd ?? draft.length;
+    Promise.all(
+      files.map(
+        (file, i) =>
+          new Promise<string>((resolve) => {
+            const reader = new window.FileReader();
+            reader.onload = () => {
+              const dataUrl =
+                typeof reader.result === 'string' ? reader.result : '';
+              const name = file.name || `pasted-image-${i + 1}.png`;
+              resolve(dataUrl ? `![${name}](${dataUrl})` : '');
+            };
+            reader.readAsDataURL(file);
+          })
+      )
+    ).then((snippets) => {
+      const insert = snippets.filter(Boolean).join('\n');
+      if (!insert) return;
+      setDraft(
+        (prev) => `${prev.slice(0, start)}${insert}\n${prev.slice(end)}`
+      );
+      requestAnimationFrame(autosize);
+    });
+  };
+
   // The Markdown source for copying: prefer the raw `text`, otherwise assemble
   // it from the message's text/code content blocks.
   const markdownSource =
@@ -636,6 +672,7 @@ export const MessageRow = React.memo(function MessageRow({
                     setDraft(e.target.value);
                     autosize();
                   }}
+                  onPaste={handleEditPaste}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
