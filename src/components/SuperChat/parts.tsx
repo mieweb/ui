@@ -330,7 +330,13 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
   };
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div
+      ref={rootRef}
+      // Self-align to the bottom of the (possibly tall) message row and stick to
+      // the viewport bottom: on long messages the control follows the scroll and
+      // settles at the message's end once it is fully in view.
+      className="sticky bottom-2 shrink-0 self-end"
+    >
       <button
         type="button"
         data-slot="superchat-copy-button"
@@ -347,7 +353,7 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
           role="menu"
           data-slot="superchat-copy-menu"
           className={cn(
-            'absolute top-full z-10 mt-1 min-w-44 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-left text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800',
+            'absolute bottom-full z-10 mb-1 min-w-44 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-left text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800',
             isSelf ? 'end-0' : 'start-0'
           )}
         >
