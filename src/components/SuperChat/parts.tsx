@@ -334,8 +334,15 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
       ref={rootRef}
       // Self-align to the bottom of the (possibly tall) message row and stick to
       // the viewport bottom: on long messages the control follows the scroll and
-      // settles at the message's end once it is fully in view.
-      className="sticky bottom-2 shrink-0 self-end"
+      // settles at the message's end once it is fully in view. Raise the whole
+      // (sticky) stacking context above the sibling bubble while open so the
+      // menu sits over rich content like tables.
+      className={cn(
+        'sticky bottom-2 shrink-0 self-end',
+        // Rich content (e.g. NITRO tables) layers internals up to z-50, so the
+        // open menu's stacking context must clear that.
+        open ? 'z-[60]' : 'z-10'
+      )}
     >
       <button
         type="button"
@@ -353,7 +360,7 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
           role="menu"
           data-slot="superchat-copy-menu"
           className={cn(
-            'absolute bottom-full z-10 mb-1 min-w-44 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-left text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800',
+            'absolute bottom-full z-[60] mb-1 min-w-44 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-left text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800',
             isSelf ? 'end-0' : 'start-0'
           )}
         >
