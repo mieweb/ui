@@ -133,7 +133,7 @@ export const Playground: Story = {
     trustedContent: false,
   },
   render: (args) => (
-    <div style={{ height: '90vh', display: 'flex' }}>
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
       <InteractivePanel
         {...args}
         initial={richConversation}
@@ -172,7 +172,7 @@ export const CoreNoPlugins: Story = {
     },
   },
   render: () => (
-    <div style={{ height: '90vh', display: 'flex' }}>
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
       <InteractivePanel
         initial={conversation}
         currentParticipantId="u1"

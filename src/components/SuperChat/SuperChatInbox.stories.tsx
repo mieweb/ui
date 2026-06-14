@@ -157,7 +157,7 @@ export const Playground: Story = {
     defaultActiveConversationId: 'c1',
   },
   render: (args) => (
-    <div style={{ height: '90vh' }}>
+    <div style={{ height: 'min(90vh, 600px)' }}>
       <InteractiveInbox
         {...args}
         initial={[richConversation, secondConversation]}

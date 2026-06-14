@@ -57,7 +57,7 @@ export const Playground: Story = {
     defaultActiveConversationId: 'c1',
   },
   render: (args) => (
-    <div style={{ height: '90vh', display: 'flex' }}>
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
       <SuperChatConversations
         {...args}
         conversations={conversations}
@@ -70,7 +70,7 @@ export const Playground: Story = {
 
 export const Default: Story = {
   render: () => (
-    <div style={{ height: '90vh', display: 'flex' }}>
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
       <SuperChatConversations
         conversations={conversations}
         defaultActiveConversationId="c1"
@@ -85,7 +85,7 @@ export const Default: Story = {
 function ControlledList() {
   const [activeId, setActiveId] = React.useState('c1');
   return (
-    <div style={{ height: '90vh', display: 'flex' }}>
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
       <SuperChatConversations
         conversations={conversations}
         activeConversationId={activeId}
