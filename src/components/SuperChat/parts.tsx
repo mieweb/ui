@@ -241,14 +241,23 @@ export const MessageRow = React.memo(function MessageRow({
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
   const editRef = React.useRef<HTMLTextAreaElement>(null);
-  // Move focus into the editor (caret at end) when entering edit mode.
+  // Grow the editor to fit its content (accounts for wrapped lines, not just
+  // explicit newlines), clamped by the textarea's CSS max-height.
+  const autosize = React.useCallback(() => {
+    const el = editRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+  // Move focus into the editor (caret at end) and size it when editing starts.
   React.useEffect(() => {
     if (!isEditing) return;
     const el = editRef.current;
     if (!el) return;
     el.focus();
     el.setSelectionRange(el.value.length, el.value.length);
-  }, [isEditing]);
+    autosize();
+  }, [isEditing, autosize]);
 
   if (message.type === 'system') {
     return (
@@ -371,13 +380,16 @@ export const MessageRow = React.memo(function MessageRow({
           {isEditing ? (
             <div
               data-slot="superchat-message-editor"
-              className="flex w-72 max-w-full flex-col gap-2"
+              className="flex w-80 max-w-full flex-col gap-2"
             >
               <textarea
                 value={draft}
                 ref={editRef}
-                rows={Math.min(8, Math.max(1, draft.split('\n').length))}
-                onChange={(e) => setDraft(e.target.value)}
+                rows={2}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  autosize();
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -388,7 +400,7 @@ export const MessageRow = React.memo(function MessageRow({
                   }
                 }}
                 aria-label="Edit message"
-                className="focus:ring-primary-500 max-h-40 min-h-9 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+                className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
               />
               <div className="flex justify-end gap-2">
                 <button
