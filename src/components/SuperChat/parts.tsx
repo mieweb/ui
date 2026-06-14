@@ -541,9 +541,20 @@ export const MessageRow = React.memo(function MessageRow({
     ).then((snippets) => {
       const insert = snippets.filter(Boolean).join('\n');
       if (!insert) return;
-      setDraft(
-        (prev) => `${prev.slice(0, start)}${insert}\n${prev.slice(end)}`
-      );
+      // Insert via `execCommand('insertText')` so the browser records it on its
+      // native undo stack (Cmd/Ctrl+Z works) and fires a normal input event
+      // that flows back through `onChange`. Fall back to a controlled-state
+      // splice if the (deprecated) command is unavailable.
+      el.focus();
+      el.setSelectionRange(start, end);
+      const text = `${insert}\n`;
+      const inserted =
+        typeof document !== 'undefined' &&
+        typeof document.execCommand === 'function' &&
+        document.execCommand('insertText', false, text);
+      if (!inserted) {
+        setDraft((prev) => `${prev.slice(0, start)}${text}${prev.slice(end)}`);
+      }
       requestAnimationFrame(autosize);
     });
   };
