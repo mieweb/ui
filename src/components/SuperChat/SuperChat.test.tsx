@@ -437,6 +437,64 @@ describe('SuperChat', () => {
     );
   });
 
+  it('attaches a non-image file (pdf) with an icon preview', async () => {
+    const onMessageSent = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['%PDF-1.4'], 'report.pdf', {
+      type: 'application/pdf',
+    });
+    await user.upload(fileInput, file);
+    // Non-image attachments show a labelled chip (no broken <img> preview).
+    const remove = await screen.findByLabelText('Remove report.pdf');
+    expect(remove).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'report.pdf' })).toBeNull();
+    await user.click(screen.getByLabelText('Send message'));
+    expect(onMessageSent).toHaveBeenCalledWith(
+      '',
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            name: 'report.pdf',
+            type: 'application/pdf',
+          }),
+        ],
+      })
+    );
+  });
+
+  it('restricts the file picker to acceptedFileTypes', async () => {
+    const onMessageSent = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        acceptedFileTypes={['image']}
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    expect(fileInput.accept).toBe('image/*');
+    // A disallowed type (audio) is ignored — no preview chip appears.
+    const file = new File(['id3'], 'song.mp3', { type: 'audio/mpeg' });
+    await user.upload(fileInput, file);
+    expect(screen.queryByLabelText('Remove song.mp3')).toBeNull();
+  });
+
   it('does not detect mentions for system participants', async () => {
     const onMessageSent = vi.fn();
     const withSystem: SuperChatConversation = {

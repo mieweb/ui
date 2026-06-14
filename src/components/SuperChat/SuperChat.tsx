@@ -18,6 +18,7 @@ import { ParticipantAvatar, Composer, MessageRow, byTime } from './parts';
 import { VirtualThread } from './VirtualThread';
 import type {
   AIRenderTextContent,
+  AttachmentKind,
   ComposerAttachment,
   Participant,
   SuperChatConversation,
@@ -43,6 +44,11 @@ export interface SuperChatProps {
   trustedContent?: boolean;
   /** Disable the composer. */
   readOnly?: boolean;
+  /**
+   * File categories the composer accepts for paste and the paperclip picker.
+   * Defaults to `['image', 'video', 'audio', 'pdf']`.
+   */
+  acceptedFileTypes?: AttachmentKind[];
   /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
@@ -102,6 +108,7 @@ export function SuperChat({
   renderTextContent,
   trustedContent,
   readOnly,
+  acceptedFileTypes,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -287,6 +294,7 @@ export function SuperChat({
       <Composer
         participants={conversation.participants}
         disabled={readOnly}
+        acceptedFileTypes={acceptedFileTypes}
         onSend={(text, mentions, attachments) =>
           onMessageSent?.(text, { conversation, mentions, attachments })
         }

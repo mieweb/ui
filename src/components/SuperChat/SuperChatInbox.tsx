@@ -16,6 +16,7 @@ import { SuperChat } from './SuperChat';
 import { SuperChatConversations } from './SuperChatConversations';
 import type {
   AIRenderTextContent,
+  AttachmentKind,
   ComposerAttachment,
   SuperChatConversation,
   SuperChatLinkBuilder,
@@ -44,6 +45,11 @@ export interface SuperChatInboxProps {
   trustedContent?: boolean;
   /** Disable the composer. */
   readOnly?: boolean;
+  /**
+   * File categories the composer accepts for paste and the paperclip picker.
+   * Defaults to `['image', 'video', 'audio', 'pdf']`.
+   */
+  acceptedFileTypes?: AttachmentKind[];
   /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
   order?: 'asc' | 'desc';
   /** Virtualize the message thread (windowed rendering) for long histories. */
@@ -90,6 +96,7 @@ export function SuperChatInbox({
   renderTextContent,
   trustedContent,
   readOnly,
+  acceptedFileTypes,
   order,
   virtualized,
   showSidebar = true,
@@ -154,6 +161,7 @@ export function SuperChatInbox({
           renderTextContent={renderTextContent}
           trustedContent={trustedContent}
           readOnly={readOnly}
+          acceptedFileTypes={acceptedFileTypes}
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}

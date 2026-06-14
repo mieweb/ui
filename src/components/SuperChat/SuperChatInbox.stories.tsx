@@ -119,9 +119,14 @@ function InteractiveInbox(
       onMessageSent={(text, meta) => {
         const now = new Date().toISOString();
         const images = meta.attachments
+          .filter((att) => att.type.startsWith('image/'))
           .map((att) => `![${att.name}](${att.dataUrl})`)
           .join('\n\n');
-        const body = [text, images].filter(Boolean).join('\n\n');
+        const files = meta.attachments
+          .filter((att) => !att.type.startsWith('image/'))
+          .map((att) => `📎 ${att.name}`)
+          .join('\n\n');
+        const body = [text, images, files].filter(Boolean).join('\n\n');
         appendMessage(meta.conversation.id, {
           id: `m-${Date.now()}`,
           participantId: props.currentParticipantId ?? 'u1',

@@ -434,22 +434,46 @@ get Markdown. No host wiring is required — the copy control is always availabl
 
 ---
 
-## Pasting images
+## Attaching files
 
-Paste an image into the composer (⌘V / Ctrl+V from a screenshot or copied picture)
-and it appears as a removable thumbnail above the input. You can also click the
-**paperclip** button next to the send action to pick image files from disk
-(multiple selection supported). Either way, the queued images show as removable
-thumbnails, and a draft can be sent with attachments only (no text required).
+Paste a file into the composer (⌘V / Ctrl+V from a screenshot or copied file) and
+it appears as a removable chip above the input. You can also click the **paperclip**
+button next to the send action to pick files from disk (multiple selection
+supported). Images show a thumbnail; other files show a type icon with the file
+name. A draft can be sent with attachments only (no text required).
+
+### Supported types
+
+Out of the box the composer accepts **images, video, audio, and PDFs**. Restrict
+the allowed categories with `acceptedFileTypes` (on `SuperChat` or `SuperChatInbox`):
+
+```tsx
+// images only
+<SuperChat acceptedFileTypes={['image']} ... />
+
+// images + PDFs
+<SuperChat acceptedFileTypes={['image', 'pdf']} ... />
+```
+
+| `AttachmentKind` | `<input accept>`  | Matches           |
+| ---------------- | ----------------- | ----------------- |
+| `image`          | `image/*`         | `image/*`         |
+| `video`          | `video/*`         | `video/*`         |
+| `audio`          | `audio/*`         | `audio/*`         |
+| `pdf`            | `application/pdf` | `application/pdf` |
+
+The chosen types drive both the paperclip picker's `accept` filter and which
+pasted files are accepted; anything else is ignored.
 
 Because SuperChat is **controlled**, the component never mutates the thread itself —
-pasted files are surfaced to the host through `onMessageSent` so it can embed, upload,
-or persist them however it likes:
+attached files are surfaced to the host through `onMessageSent` so it can embed,
+upload, or persist them however it likes:
 
 ```tsx
 onMessageSent={(text, { conversation, mentions, attachments }) => {
   // attachments: { id, name, type, dataUrl }[]
   const images = attachments
+    .filter((a) => a.type.startsWith('image/'))
     .map((a) => `![${a.name}](${a.dataUrl})`)
     .join('\n\n');
   appendMessage(conversation.id, {
@@ -466,6 +490,8 @@ Each `ComposerAttachment` carries a base64 `dataUrl`. To render inline `data:` (
 `rehype-sanitize` allow-list to permit those protocols on `<img src>` (safe, since
 scripts inside an SVG loaded via `src` do not execute). For production you'll
 typically upload the file and swap in the hosted URL instead of the `data:` URL.
+Non-image files (PDF/audio/video) are surfaced the same way; how you render them in
+the thread is up to the host (e.g. a link, a player, or a custom render plugin).
 
 ---
 

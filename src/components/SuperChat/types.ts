@@ -140,6 +140,17 @@ export interface ComposerAttachment {
   dataUrl: string;
 }
 
+/**
+ * Categories of files the composer can accept. Developers pick which kinds are
+ * allowed via `acceptedFileTypes`; each maps to an `<input accept>` token and a
+ * MIME matcher used to filter pastes and file-picker selections.
+ * - `image` → `image/*`
+ * - `video` → `video/*`
+ * - `audio` → `audio/*`
+ * - `pdf` → `application/pdf`
+ */
+export type AttachmentKind = 'image' | 'video' | 'audio' | 'pdf';
+
 /** A conversation: participants + an ordered thread. */
 export interface SuperChatConversation {
   /** Unique identifier. */

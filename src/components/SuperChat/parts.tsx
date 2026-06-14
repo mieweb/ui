@@ -13,6 +13,7 @@ import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { SendIcon, SparklesIcon } from '../AI/icons';
 import type {
   AIRenderTextContent,
+  AttachmentKind,
   ComposerAttachment,
   Participant,
   SuperChatConversation,
@@ -223,6 +224,91 @@ function PaperclipIcon() {
       <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
     </svg>
   );
+}
+
+const ATTACHMENT_ICON_PROPS = {
+  width: 22,
+  height: 22,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+} as const;
+
+/** Document glyph used for PDFs and unrecognized files. */
+function FileIcon() {
+  return (
+    <svg {...ATTACHMENT_ICON_PROPS}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+      <path d="M14 2v6h6" />
+    </svg>
+  );
+}
+
+/** Film/clapper glyph for video attachments. */
+function VideoFileIcon() {
+  return (
+    <svg {...ATTACHMENT_ICON_PROPS}>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="m10 9 5 3-5 3Z" />
+    </svg>
+  );
+}
+
+/** Musical-note glyph for audio attachments. */
+function AudioFileIcon() {
+  return (
+    <svg {...ATTACHMENT_ICON_PROPS}>
+      <path d="M9 18V5l12-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </svg>
+  );
+}
+
+/**
+ * Supported attachment categories: their `<input accept>` token and a MIME
+ * matcher used to filter pastes and file-picker selections.
+ */
+const ATTACHMENT_KIND_CONFIG: Record<
+  AttachmentKind,
+  { accept: string; match: (type: string) => boolean }
+> = {
+  image: { accept: 'image/*', match: (t) => t.startsWith('image/') },
+  video: { accept: 'video/*', match: (t) => t.startsWith('video/') },
+  audio: { accept: 'audio/*', match: (t) => t.startsWith('audio/') },
+  pdf: { accept: 'application/pdf', match: (t) => t === 'application/pdf' },
+};
+
+const DEFAULT_ACCEPTED_FILE_TYPES: AttachmentKind[] = [
+  'image',
+  'video',
+  'audio',
+  'pdf',
+];
+
+/** Resolve a MIME type to its broad category (for preview icons). */
+function attachmentKindOf(type: string): AttachmentKind | 'file' {
+  if (type.startsWith('image/')) return 'image';
+  if (type.startsWith('video/')) return 'video';
+  if (type.startsWith('audio/')) return 'audio';
+  if (type === 'application/pdf') return 'pdf';
+  return 'file';
+}
+
+/** Pick the preview icon for a non-image attachment. */
+function AttachmentTypeIcon({ type }: { type: string }) {
+  switch (attachmentKindOf(type)) {
+    case 'video':
+      return <VideoFileIcon />;
+    case 'audio':
+      return <AudioFileIcon />;
+    default:
+      return <FileIcon />;
+  }
 }
 
 function ClipboardIcon() {
@@ -823,6 +909,7 @@ export function Composer({
   participants,
   disabled,
   onSend,
+  acceptedFileTypes = DEFAULT_ACCEPTED_FILE_TYPES,
 }: {
   participants: Participant[];
   disabled?: boolean;
@@ -831,6 +918,8 @@ export function Composer({
     mentions: string[],
     attachments: ComposerAttachment[]
   ) => void;
+  /** File categories the composer accepts (paste + paperclip). */
+  acceptedFileTypes?: AttachmentKind[];
 }) {
   const [draft, setDraft] = React.useState('');
   const [attachments, setAttachments] = React.useState<ComposerAttachment[]>(
@@ -844,6 +933,25 @@ export function Composer({
   const [highlight, setHighlight] = React.useState(0);
   const textareaRef = React.useRef<React.ComponentRef<'textarea'>>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Accepted file types → `<input accept>` token + a predicate for filtering
+  // pastes and picker selections.
+  const acceptKinds =
+    acceptedFileTypes.length > 0
+      ? acceptedFileTypes
+      : DEFAULT_ACCEPTED_FILE_TYPES;
+  const acceptAttr = React.useMemo(
+    () =>
+      Array.from(
+        new Set(acceptKinds.map((k) => ATTACHMENT_KIND_CONFIG[k].accept))
+      ).join(','),
+    [acceptKinds]
+  );
+  const acceptsType = React.useCallback(
+    (type: string) =>
+      acceptKinds.some((k) => ATTACHMENT_KIND_CONFIG[k].match(type)),
+    [acceptKinds]
+  );
 
   // Agents/humans you can address (exclude the system participant).
   const mentionable = React.useMemo(
@@ -897,7 +1005,7 @@ export function Composer({
     setMention(null);
   };
 
-  const readImageFile = (file: File) => {
+  const readFile = (file: File) => {
     const reader = new window.FileReader();
     reader.onload = () => {
       const dataUrl =
@@ -908,8 +1016,8 @@ export function Composer({
         ...prev,
         {
           id: `att-${Date.now()}-${attachmentSeq.current}`,
-          name: file.name || `pasted-image-${attachmentSeq.current}.png`,
-          type: file.type || 'image/png',
+          name: file.name || `attachment-${attachmentSeq.current}`,
+          type: file.type || 'application/octet-stream',
           dataUrl,
         },
       ]);
@@ -920,13 +1028,13 @@ export function Composer({
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     if (disabled) return;
     const files = Array.from(e.clipboardData.items)
-      .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+      .filter((item) => item.kind === 'file' && acceptsType(item.type))
       .map((item) => item.getAsFile())
       .filter((f): f is File => f !== null);
     if (files.length === 0) return;
-    // We're handling the image ourselves; don't also paste a file path/blob.
+    // We're handling the file ourselves; don't also paste a file path/blob.
     e.preventDefault();
-    files.forEach(readImageFile);
+    files.forEach(readFile);
   };
 
   const openFilePicker = () => {
@@ -936,9 +1044,9 @@ export function Composer({
 
   const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).filter((f) =>
-      f.type.startsWith('image/')
+      acceptsType(f.type)
     );
-    files.forEach(readImageFile);
+    files.forEach(readFile);
     // Reset so selecting the same file again still fires `change`.
     e.target.value = '';
   };
@@ -1003,29 +1111,47 @@ export function Composer({
             data-slot="superchat-composer-attachments"
             className="flex flex-wrap gap-2"
           >
-            {attachments.map((att) => (
-              <li
-                key={att.id}
-                className="group/att relative h-16 w-16 overflow-hidden rounded-lg border border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800"
-              >
-                {/* Local preview of a pasted image; data: URL stays in-browser. */}
-                <img
-                  src={att.dataUrl}
-                  alt={att.name}
-                  className="h-full w-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeAttachment(att.id)}
-                  aria-label={`Remove ${att.name}`}
-                  className="absolute end-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900/70 text-white opacity-0 transition-opacity group-hover/att:opacity-100 focus:opacity-100 focus:outline-none"
+            {attachments.map((att) => {
+              const isImage = att.type.startsWith('image/');
+              return (
+                <li
+                  key={att.id}
+                  className={cn(
+                    'group/att relative flex h-16 items-center overflow-hidden rounded-lg border border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800',
+                    isImage ? 'w-16' : 'w-44 max-w-full gap-2 px-2'
+                  )}
+                  title={att.name}
                 >
-                  <span aria-hidden className="text-xs leading-none">
-                    ×
-                  </span>
-                </button>
-              </li>
-            ))}
+                  {isImage ? (
+                    // Local preview of an image; data: URL stays in-browser.
+                    <img
+                      src={att.dataUrl}
+                      alt={att.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300">
+                        <AttachmentTypeIcon type={att.type} />
+                      </span>
+                      <span className="min-w-0 flex-1 truncate pe-4 text-xs text-neutral-700 dark:text-neutral-200">
+                        {att.name}
+                      </span>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(att.id)}
+                    aria-label={`Remove ${att.name}`}
+                    className="absolute end-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900/70 text-white opacity-0 transition-opacity group-hover/att:opacity-100 focus:opacity-100 focus:outline-none"
+                  >
+                    <span aria-hidden className="text-xs leading-none">
+                      ×
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
         <textarea
@@ -1104,7 +1230,7 @@ export function Composer({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept={acceptAttr}
         multiple
         onChange={handleFilesSelected}
         className="hidden"
