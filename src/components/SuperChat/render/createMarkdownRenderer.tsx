@@ -180,6 +180,23 @@ function baseComponents(): Components {
         />
       </div>
     ),
+    // Tailwind's preflight resets list markers/padding; restore them explicitly
+    // so bullets/numbers show without depending on the typography plugin.
+    ul: ({ node: _node, ...props }) => (
+      <ul
+        {...props}
+        className={cn('my-2 list-disc space-y-0.5 ps-5', props.className)}
+      />
+    ),
+    ol: ({ node: _node, ...props }) => (
+      <ol
+        {...props}
+        className={cn('my-2 list-decimal space-y-0.5 ps-5', props.className)}
+      />
+    ),
+    li: ({ node: _node, ...props }) => (
+      <li {...props} className={cn('ps-1', props.className)} />
+    ),
   };
 }
 
