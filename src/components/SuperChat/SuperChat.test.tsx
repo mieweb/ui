@@ -78,6 +78,77 @@ describe('createMarkdownRenderer', () => {
       container.querySelector('code.hljs, code[class*="language-"]')
     ).not.toBeNull();
   });
+
+  it('styles each core/GFM markdown element', () => {
+    const r = createMarkdownRenderer();
+    const md = [
+      '# H1',
+      '## H2',
+      '### H3',
+      '',
+      'Para with **bold**, _italic_, ~~strike~~, `inline`, and [link](https://example.com).',
+      '',
+      '> A quote',
+      '',
+      '- bullet one',
+      '- bullet two',
+      '',
+      '1. step one',
+      '2. step two',
+      '',
+      '| Code | Desc |',
+      '| --- | --- |',
+      '| 93000 | ECG |',
+      '',
+      '---',
+    ].join('\n');
+    const { container } = renderText(
+      r(md, { messageId: 'm-md', streaming: false, role: 'assistant' })
+    );
+
+    // Headings render with a distinct size/weight class (preflight would
+    // otherwise flatten them to body text).
+    const h1 = container.querySelector('h1');
+    const h2 = container.querySelector('h2');
+    const h3 = container.querySelector('h3');
+    expect(h1?.textContent).toBe('H1');
+    expect(h1?.className).toContain('font-semibold');
+    expect(h2?.className).toContain('text-lg');
+    expect(h3?.className).toContain('text-base');
+
+    // Inline emphasis.
+    expect(screen.getByText('bold').tagName).toBe('STRONG');
+    expect(screen.getByText('italic').tagName).toBe('EM');
+    expect(screen.getByText('strike').tagName).toBe('DEL');
+    expect(screen.getByText('inline').tagName).toBe('CODE');
+
+    // Link opens safely in a new tab.
+    const link = screen.getByRole('link', { name: 'link' });
+    expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+
+    // Blockquote.
+    expect(container.querySelector('blockquote')?.textContent).toContain(
+      'A quote'
+    );
+
+    // Unordered list shows disc markers; ordered list shows decimals.
+    const ul = container.querySelector('ul');
+    const ol = container.querySelector('ol');
+    expect(ul?.className).toContain('list-disc');
+    expect(ul?.querySelectorAll('li')).toHaveLength(2);
+    expect(ol?.className).toContain('list-decimal');
+    expect(ol?.querySelectorAll('li')).toHaveLength(2);
+
+    // GFM table.
+    expect(container.querySelector('table')).not.toBeNull();
+    expect(screen.getByText('Code').tagName).toBe('TH');
+    expect(screen.getByText('93000').tagName).toBe('TD');
+
+    // Horizontal rule.
+    expect(container.querySelector('hr')).not.toBeNull();
+  });
 });
 
 describe('GenUI plugin', () => {

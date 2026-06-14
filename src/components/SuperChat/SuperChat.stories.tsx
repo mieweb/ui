@@ -11,6 +11,7 @@ import {
 } from './plugins';
 import type { SuperChatConversation } from './index';
 import { conversation, richConversation, registry } from './storyData';
+import { markdownShowcaseConversation } from './storyData';
 import 'katex/dist/katex.min.css';
 
 // ============================================================================
@@ -367,6 +368,40 @@ export const CoreNoPlugins: Story = {
         initial={conversation}
         currentParticipantId="u1"
         onReferenceClick={(ref) => console.log('ref', ref)}
+        linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+      />
+    </div>
+  ),
+};
+
+// A single post exercising every core/GFM markdown element, so the renderer's
+// styling (headings, lists, tables, quotes, code, hr, …) can be inspected in
+// one place. The code plugin is enabled so the fenced block is highlighted.
+export const MarkdownShowcase: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    readOnly: false,
+    trustedContent: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'A single message containing **one of each** core/GFM markdown element —',
+          'headings, emphasis, lists, task lists, blockquotes, inline + fenced code,',
+          'a table, links, and a horizontal rule. Use it to verify the renderer',
+          'styles every element correctly without the `@tailwindcss/typography`',
+          'plugin.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <div style={{ height: 'min(90vh, 600px)', display: 'flex' }}>
+      <InteractivePanel
+        {...args}
+        initial={markdownShowcaseConversation}
+        renderPlugins={[createCodePlugin()]}
         linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
       />
     </div>
