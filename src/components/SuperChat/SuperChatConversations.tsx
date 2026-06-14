@@ -47,7 +47,12 @@ export function SuperChatConversations({
   const [internalActive, setInternalActive] = React.useState(
     defaultActiveConversationId ?? conversations[0]?.id
   );
-  const activeId = activeConversationId ?? internalActive;
+  const requestedId = activeConversationId ?? internalActive;
+  // Fall back to the first conversation when the requested id no longer exists
+  // (e.g. the active conversation was removed) so an item stays highlighted.
+  const activeId = conversations.some((c) => c.id === requestedId)
+    ? requestedId
+    : conversations[0]?.id;
 
   const sortedConversations = React.useMemo(
     () =>

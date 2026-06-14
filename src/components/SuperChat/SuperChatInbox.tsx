@@ -87,9 +87,12 @@ export function SuperChatInbox({
   const [internalActive, setInternalActive] = React.useState(
     defaultActiveConversationId ?? conversations[0]?.id
   );
-  const activeId = activeConversationId ?? internalActive;
+  const requestedId = activeConversationId ?? internalActive;
   const active =
-    conversations.find((c) => c.id === activeId) ?? conversations[0];
+    conversations.find((c) => c.id === requestedId) ?? conversations[0];
+  // Resolve the active id from the conversation actually shown so the sidebar
+  // highlight never disagrees with the panel when `conversations` changes.
+  const activeId = active?.id;
 
   const handleOpen = (c: SuperChatConversation) => {
     if (activeConversationId === undefined) setInternalActive(c.id);

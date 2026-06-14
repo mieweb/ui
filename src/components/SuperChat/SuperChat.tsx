@@ -106,7 +106,6 @@ export function SuperChat({
       data-slot="superchat"
       role="group"
       aria-labelledby={headingId}
-      aria-label={`Chat: ${conversation.title}`}
       className={cn(
         'flex min-w-0 flex-1 flex-col bg-white dark:bg-neutral-900',
         className

@@ -60,7 +60,7 @@ import {
 
 | Entry | Ships | Notes |
 |-------|-------|-------|
-| `@mieweb/ui/components/SuperChat` | `SuperChatInbox` / `SuperChat` / `SuperChatConversations` + Markdown core (`react-markdown` + `remark-gfm` + `rehype-sanitize`) | Always safe to import; no heavy deps. |
+| `@mieweb/ui/components/SuperChat` | `SuperChatInbox` / `SuperChat` / `SuperChatConversations` + Markdown core (`react-markdown` + `remark-gfm` + `rehype-sanitize`) | Requires the three Markdown-core peers above; no heavy deps. |
 | `@mieweb/ui/components/SuperChat/plugins` | `code` / `math` / `genui` / `mermaid` / `image` / `nitro-table` | Each rich dep (`rehype-highlight`, `katex`, `mermaid`, `datavis`) is an **optional peer dependency** — install only what you use. |
 
 > The **math** plugin renders KaTeX. Consumers must import the stylesheet

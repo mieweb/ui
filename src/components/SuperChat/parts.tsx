@@ -52,6 +52,10 @@ export function lastActivityOf(c: SuperChatConversation): number {
 }
 
 /** Compute mentioned participant ids from `@Name` tokens in the draft. */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function detectMentions(
   text: string,
   participants: Participant[]
@@ -60,7 +64,14 @@ export function detectMentions(
   for (const p of participants) {
     if (p.kind === 'system') continue;
     const token = '@' + p.name.split(' ')[0];
-    if (text.toLowerCase().includes(token.toLowerCase())) ids.push(p.id);
+    // Match a whole mention token only: the `@` must not be preceded by a word
+    // character or another `@`, and the token must not be followed by a word
+    // character (so `@Triage` does not match `@TriageAgent`).
+    const pattern = new RegExp(
+      `(?<![\\w@])${escapeRegExp(token)}(?![\\w])`,
+      'i'
+    );
+    if (pattern.test(text)) ids.push(p.id);
   }
   return ids;
 }
@@ -96,7 +107,7 @@ export function ParticipantAvatar({
     return (
       <img
         src={participant.avatar}
-        alt={participant.name}
+        alt=""
         className={cn('shrink-0 rounded-full object-cover', dim)}
       />
     );
