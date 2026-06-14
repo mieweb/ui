@@ -58,6 +58,7 @@ const meta: Meta<typeof SuperChat> = {
     linkBuilder: { control: false, table: { category: 'Rendering' } },
     className: { control: false },
     onMessageSent: { control: false, table: { category: 'Callbacks' } },
+    onMessageEdited: { control: false, table: { category: 'Callbacks' } },
     onConversationClosed: { control: false, table: { category: 'Callbacks' } },
     onReferenceClick: { control: false, table: { category: 'Callbacks' } },
   },
@@ -109,6 +110,16 @@ function InteractivePanel(
     <SuperChat
       {...rest}
       conversation={convo}
+      onMessageEdited={(messageId, text) => {
+        setConvo((prev) => ({
+          ...prev,
+          thread: prev.thread.map((m) =>
+            m.id === messageId
+              ? { ...m, text, editedAt: new Date().toISOString() }
+              : m
+          ),
+        }));
+      }}
       onMessageSent={(text, meta) => {
         appendMessage({
           id: `m-${Date.now()}`,

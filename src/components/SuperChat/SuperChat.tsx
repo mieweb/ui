@@ -66,6 +66,17 @@ export interface SuperChatProps {
     text: string,
     meta: { conversation: SuperChatConversation; mentions: string[] }
   ) => void;
+  /**
+   * Fired when the local user saves an edit to one of their own messages.
+   * Providing this enables the inline "Edit" affordance on self-authored
+   * messages (the host owns state, so apply the new `text` to the message and
+   * typically stamp `editedAt`).
+   */
+  onMessageEdited?: (
+    messageId: string,
+    text: string,
+    meta: { conversation: SuperChatConversation }
+  ) => void;
   onConversationClosed?: (conversation: SuperChatConversation) => void;
   onReferenceClick?: (ref: SuperChatRef) => void;
   /**
@@ -91,6 +102,7 @@ export function SuperChat({
   linkBuilder,
   className,
   onMessageSent,
+  onMessageEdited,
   onConversationClosed,
   onReferenceClick,
   onBack,
@@ -127,6 +139,22 @@ export function SuperChat({
     const sorted = [...conversation.thread].sort(byTime);
     return order === 'desc' ? sorted.reverse() : sorted;
   }, [conversation, order]);
+
+  // Stable edit handler so memoized rows don't re-render when the conversation
+  // changes. Latest `onMessageEdited`/`conversation` are read from refs.
+  const onMessageEditedRef = React.useRef(onMessageEdited);
+  onMessageEditedRef.current = onMessageEdited;
+  const conversationRef = React.useRef(conversation);
+  conversationRef.current = conversation;
+  const handleMessageEdited = React.useCallback(
+    (messageId: string, text: string) => {
+      onMessageEditedRef.current?.(messageId, text, {
+        conversation: conversationRef.current,
+      });
+    },
+    []
+  );
+  const editable = !readOnly && !!onMessageEdited;
 
   return (
     <section
@@ -206,6 +234,8 @@ export function SuperChat({
           renderText={renderText}
           linkBuilder={linkBuilder}
           onReferenceClick={onReferenceClick}
+          editable={editable}
+          onMessageEdited={handleMessageEdited}
           order={order}
           conversationId={conversation.id}
           containerProps={{
@@ -242,6 +272,8 @@ export function SuperChat({
               renderText={renderText}
               linkBuilder={linkBuilder}
               onReferenceClick={onReferenceClick}
+              editable={editable}
+              onMessageEdited={handleMessageEdited}
             />
           ))}
         </div>

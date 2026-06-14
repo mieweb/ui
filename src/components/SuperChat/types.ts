@@ -101,6 +101,11 @@ export interface SuperChatMessage {
   content?: AIMessageContent[];
   /** Timestamp; the thread is append-only and ordered by `time`. */
   time: Date | string;
+  /**
+   * Timestamp of the most recent edit, if the message has been edited. When
+   * set, surfaces an "(edited)" indicator next to the message time.
+   */
+  editedAt?: Date | string;
   /** Delivery/generation status. */
   status?: AIMessageStatus;
   /** Channel the item belongs to. */

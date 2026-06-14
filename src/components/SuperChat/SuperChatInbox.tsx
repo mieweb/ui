@@ -59,6 +59,12 @@ export interface SuperChatInboxProps {
     text: string,
     meta: { conversation: SuperChatConversation; mentions: string[] }
   ) => void;
+  /** Fired when the local user saves an edit to one of their own messages. */
+  onMessageEdited?: (
+    messageId: string,
+    text: string,
+    meta: { conversation: SuperChatConversation }
+  ) => void;
   onConversationOpened?: (conversation: SuperChatConversation) => void;
   onConversationClosed?: (conversation: SuperChatConversation) => void;
   onNewConversation?: () => void;
@@ -85,6 +91,7 @@ export function SuperChatInbox({
   linkBuilder,
   className,
   onMessageSent,
+  onMessageEdited,
   onConversationOpened,
   onConversationClosed,
   onNewConversation,
@@ -146,6 +153,7 @@ export function SuperChatInbox({
           virtualized={virtualized}
           linkBuilder={linkBuilder}
           onMessageSent={onMessageSent}
+          onMessageEdited={onMessageEdited}
           onConversationClosed={onConversationClosed}
           onReferenceClick={onReferenceClick}
           onBack={showSidebar ? () => setMobileView('list') : undefined}

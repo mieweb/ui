@@ -36,6 +36,10 @@ export interface VirtualThreadProps {
   linkBuilder?: SuperChatLinkBuilder;
   /** Fired when a reference chip is activated. */
   onReferenceClick?: (ref: SuperChatRef) => void;
+  /** Whether self-authored text messages expose an inline "Edit" affordance. */
+  editable?: boolean;
+  /** Save handler for an inline message edit (bound to the message's id). */
+  onMessageEdited?: (messageId: string, text: string) => void;
   /**
    * Thread ordering. `'asc'` anchors new messages to the bottom; `'desc'`
    * anchors them to the top (feed style).
@@ -56,6 +60,8 @@ export function VirtualThread({
   renderText,
   linkBuilder,
   onReferenceClick,
+  editable,
+  onMessageEdited,
   order,
   conversationId,
   containerProps,
@@ -126,6 +132,8 @@ export function VirtualThread({
                   renderText={renderText}
                   linkBuilder={linkBuilder}
                   onReferenceClick={onReferenceClick}
+                  editable={editable}
+                  onMessageEdited={onMessageEdited}
                 />
               </div>
             </div>

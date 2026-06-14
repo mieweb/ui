@@ -185,6 +185,26 @@ export function ReferenceChip({
 // Message row
 // ============================================================================
 
+/** Small pencil glyph for the inline message-edit affordance. */
+function PencilIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 interface MessageRowProps {
   message: SuperChatMessage;
   participant?: Participant;
@@ -192,6 +212,10 @@ interface MessageRowProps {
   renderText: AIRenderTextContent;
   linkBuilder?: SuperChatLinkBuilder;
   onReferenceClick?: (ref: SuperChatRef) => void;
+  /** Whether self-authored text messages expose an inline "Edit" affordance. */
+  editable?: boolean;
+  /** Save handler for an inline message edit (bound to this message's id). */
+  onMessageEdited?: (messageId: string, text: string) => void;
 }
 
 /**
@@ -210,8 +234,21 @@ export const MessageRow = React.memo(function MessageRow({
   renderText,
   linkBuilder,
   onReferenceClick,
+  editable,
+  onMessageEdited,
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(message.text ?? '');
+  const editRef = React.useRef<HTMLTextAreaElement>(null);
+  // Move focus into the editor (caret at end) when entering edit mode.
+  React.useEffect(() => {
+    if (!isEditing) return;
+    const el = editRef.current;
+    if (!el) return;
+    el.focus();
+    el.setSelectionRange(el.value.length, el.value.length);
+  }, [isEditing]);
 
   if (message.type === 'system') {
     return (
@@ -243,12 +280,35 @@ export const MessageRow = React.memo(function MessageRow({
   const accent = participant?.color;
   const authorName = participant?.name ?? 'Unknown';
 
+  // Inline editing applies only to the local user's own plain-text messages
+  // (rich content blocks / streaming messages are not inline-editable).
+  const canEdit =
+    !!editable &&
+    isSelf &&
+    !streaming &&
+    typeof message.text === 'string' &&
+    !message.content?.length;
+
+  const startEdit = () => {
+    setDraft(message.text ?? '');
+    setIsEditing(true);
+  };
+  const cancelEdit = () => setIsEditing(false);
+  const saveEdit = () => {
+    const next = draft.trim();
+    if (next && next !== message.text) onMessageEdited?.(message.id, next);
+    setIsEditing(false);
+  };
+
   return (
     <div
       data-slot="superchat-message"
       role="article"
       aria-label={`${authorName}, ${formatTime(message.time)}`}
-      className={cn('flex gap-2', isSelf ? 'flex-row-reverse' : 'flex-row')}
+      className={cn(
+        'group flex gap-2',
+        isSelf ? 'flex-row-reverse' : 'flex-row'
+      )}
     >
       <ParticipantAvatar participant={participant} size="sm" />
       <div className={cn('flex min-w-0 flex-col gap-1', isSelf && 'items-end')}>
@@ -270,6 +330,26 @@ export const MessageRow = React.memo(function MessageRow({
           <span className="text-[10px] text-neutral-400">
             {formatTime(message.time)}
           </span>
+          {message.editedAt && (
+            <span
+              data-slot="superchat-edited-indicator"
+              className="text-[10px] text-neutral-400"
+              title={`Edited ${formatTime(message.editedAt)}`}
+            >
+              (edited)
+            </span>
+          )}
+          {canEdit && !isEditing && (
+            <button
+              type="button"
+              data-slot="superchat-edit-button"
+              onClick={startEdit}
+              aria-label="Edit message"
+              className="rounded p-0.5 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-neutral-600 focus-visible:opacity-100 dark:hover:text-neutral-200"
+            >
+              <PencilIcon />
+            </button>
+          )}
         </div>
 
         <div
@@ -288,55 +368,103 @@ export const MessageRow = React.memo(function MessageRow({
               : undefined
           }
         >
-          {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
-          {message.content?.map((block, i) => {
-            if (block.type === 'tool_use' && block.toolCall) {
-              return <MCPToolCallDisplay key={i} toolCall={block.toolCall} />;
-            }
-            if (
-              (block.type === 'text' || block.type === 'thinking') &&
-              block.text
-            ) {
-              return (
-                <div
-                  key={i}
-                  className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+          {isEditing ? (
+            <div
+              data-slot="superchat-message-editor"
+              className="flex w-72 max-w-full flex-col gap-2"
+            >
+              <textarea
+                value={draft}
+                ref={editRef}
+                rows={Math.min(8, Math.max(1, draft.split('\n').length))}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    saveEdit();
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit();
+                  }
+                }}
+                aria-label="Edit message"
+                className="focus:ring-primary-500 max-h-40 min-h-9 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
                 >
-                  {renderText(block.text, {
-                    messageId: message.id,
-                    streaming,
-                    role: participant?.kind === 'human' ? 'user' : 'assistant',
-                  })}
-                </div>
-              );
-            }
-            if (block.type === 'code' && block.text) {
-              const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
-              return (
-                <div
-                  key={i}
-                  className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={saveEdit}
+                  disabled={!draft.trim() || draft.trim() === message.text}
+                  className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
                 >
-                  {renderText(fenced, {
-                    messageId: message.id,
-                    streaming,
-                    role: participant?.kind === 'human' ? 'user' : 'assistant',
-                  })}
-                </div>
-              );
-            }
-            return null;
-          })}
-
-          {/* Plain `text` body (the common case). */}
-          {message.text && (
-            <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
-              {renderText(message.text, {
-                messageId: message.id,
-                streaming,
-                role: participant?.kind === 'human' ? 'user' : 'assistant',
-              })}
+                  Save
+                </button>
+              </div>
             </div>
+          ) : (
+            <>
+              {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
+              {message.content?.map((block, i) => {
+                if (block.type === 'tool_use' && block.toolCall) {
+                  return (
+                    <MCPToolCallDisplay key={i} toolCall={block.toolCall} />
+                  );
+                }
+                if (
+                  (block.type === 'text' || block.type === 'thinking') &&
+                  block.text
+                ) {
+                  return (
+                    <div
+                      key={i}
+                      className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                    >
+                      {renderText(block.text, {
+                        messageId: message.id,
+                        streaming,
+                        role:
+                          participant?.kind === 'human' ? 'user' : 'assistant',
+                      })}
+                    </div>
+                  );
+                }
+                if (block.type === 'code' && block.text) {
+                  const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+                  return (
+                    <div
+                      key={i}
+                      className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
+                    >
+                      {renderText(fenced, {
+                        messageId: message.id,
+                        streaming,
+                        role:
+                          participant?.kind === 'human' ? 'user' : 'assistant',
+                      })}
+                    </div>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Plain `text` body (the common case). */}
+              {message.text && (
+                <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
+                  {renderText(message.text, {
+                    messageId: message.id,
+                    streaming,
+                    role: participant?.kind === 'human' ? 'user' : 'assistant',
+                  })}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

@@ -341,6 +341,97 @@ describe('SuperChat', () => {
     expect(log).toHaveAttribute('data-slot', 'superchat-thread');
   });
 
+  it('does not show an edit affordance without onMessageEdited', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+    expect(
+      screen.queryByRole('button', { name: 'Edit message' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('only offers editing on the local user’s own messages', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={() => {}}
+        />
+      </div>
+    );
+    // u1 authored m1; a1 authored m2 — only one edit button should exist.
+    const editButtons = screen.getAllByRole('button', { name: 'Edit message' });
+    expect(editButtons).toHaveLength(1);
+  });
+
+  it('edits a message and fires onMessageEdited with the new text', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    await user.clear(editor);
+    await user.type(editor, 'edited body');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(onMessageEdited).toHaveBeenCalledTimes(1);
+    expect(onMessageEdited).toHaveBeenCalledWith('m1', 'edited body', {
+      conversation,
+    });
+  });
+
+  it('cancels an edit without firing onMessageEdited', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit message' }));
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    await user.type(editor, ' extra');
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(onMessageEdited).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('textbox', { name: 'Edit message' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows an "(edited)" indicator when a message has editedAt', () => {
+    const edited: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        { ...conversation.thread[0], editedAt: '2026-06-07T09:05:00Z' },
+        conversation.thread[1],
+      ],
+    };
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat conversation={edited} currentParticipantId="u1" />
+      </div>
+    );
+    expect(screen.getByText('(edited)')).toBeInTheDocument();
+  });
+
   it('renders AI content blocks of type code', () => {
     const withCode: SuperChatConversation = {
       ...conversation,
