@@ -419,8 +419,13 @@ const MessageComposer = React.forwardRef<
 
     const mentionMenuOpen =
       mentionsEnabled && mention !== null && mentionSuggestions.length > 0;
+    // Clamp the highlight to the current suggestion range so
+    // `aria-activedescendant` never points at a stale/out-of-range option id
+    // (the list can shrink while the menu is open as the query narrows).
     const activeMentionOptionId = mentionMenuOpen
-      ? mentionOptionId(mentionHighlight)
+      ? mentionOptionId(
+          Math.min(mentionHighlight, mentionSuggestions.length - 1)
+        )
       : undefined;
 
     const syncMention = React.useCallback(

@@ -380,16 +380,42 @@ function childText(children: React.ReactNode): string {
     .join('');
 }
 
+/**
+ * Allow-list the URL schemes that may back an attachment `src`.
+ *
+ * The payload rides as a Markdown text child, so it bypasses `rehype-sanitize`
+ * and could otherwise smuggle a `javascript:` href or a `data:text/html` /
+ * `image/svg+xml` source that executes script when rendered in the PDF iframe
+ * or opened in a new tab (XSS / UI-redress). We trust only object URLs,
+ * http(s), and `data:` URLs — and for `data:` we reject the MIME types that a
+ * browser will execute as an active document. Anything else (including
+ * `javascript:` / `vbscript:`) is treated as an absent `src`.
+ */
+function sanitizeSrc(src: string | undefined): string | undefined {
+  if (!src) return undefined;
+  if (/^(?:blob:|https?:\/\/)/i.test(src)) return src;
+  const dataMatch = /^data:([\w.+-]+\/[\w.+-]+)?[;,]/i.exec(src);
+  if (dataMatch) {
+    const mime = (dataMatch[1] ?? 'text/plain').toLowerCase();
+    const EXECUTABLE_MIME =
+      /^(?:text\/html|application\/xhtml\+xml|image\/svg\+xml|text\/xml|application\/xml)$/;
+    return EXECUTABLE_MIME.test(mime) ? undefined : src;
+  }
+  return undefined;
+}
+
 function parsePayload(raw: string): AttachmentBlockPayload | null {
   try {
     const parsed = JSON.parse(raw) as Partial<AttachmentBlockPayload>;
     if (!parsed || typeof parsed.type !== 'string') return null;
-    if (!parsed.id && !parsed.src) return null;
+    const src =
+      typeof parsed.src === 'string' ? sanitizeSrc(parsed.src) : undefined;
+    if (!parsed.id && !src) return null;
     return {
       id: typeof parsed.id === 'string' ? parsed.id : undefined,
       type: parsed.type,
       name: typeof parsed.name === 'string' ? parsed.name : 'attachment',
-      src: typeof parsed.src === 'string' ? parsed.src : undefined,
+      src,
     };
   } catch {
     return null;
