@@ -234,9 +234,9 @@ they map one-to-one to the regions you see on screen.
 │ │                          │ │ │ │        │ │ rendered Markdown       │ │ │ │ │
 │ │                          │ │ │ │        │ └─────────────────────────┘ │ │ │ │
 │ │                          │ │ │ └────────┴─────────────────────────────┘ │ │ │
-│ │                          │ │ ┌─ superchat-composer ─────────────────────┐ │ │
+│ │                          │ │ ┌─ message-composer ───────────────────────┐ │ │
 │ │                          │ │ │ [ combobox "Message" ……………… ] [ ▷ Send ] │ │ │
-│ │                          │ │ │    listbox "Mention a participant"       │ │ │
+│ │                          │ │ │    listbox "Mention"                     │ │ │
 │ │                          │ │ └──────────────────────────────────────────┘ │ │
 │ └──────────────────────────┘ └──────────────────────────────────────────────┘ │
 └───────────────────────────────────────────────────────────────────────────────┘
@@ -274,7 +274,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | **Header**                   | `superchat-header`            | `header`                      | —                             | `SuperChat`              | Title, participant face-pile, and close affordance.                                |
 | **Participants** (face-pile) | `superchat-participants`      | `div` · `group`               | `Participants`                | `SuperChat`              | Avatars of (up to 6) participants.                                                 |
 | **Thread** (log)             | `superchat-thread`            | `div` · `log`                 | `Messages`                    | `SuperChat`              | Scrollable, append-only message history; `aria-live="polite"`, keyboard-focusable. |
-| **Composer**                 | `superchat-composer`          | `div`                         | —                             | `SuperChat`              | The input region: mention-aware textarea + send button.                            |
+| **Composer**                 | `message-composer`            | `form`                        | —                             | `SuperChat`              | The input region: mention-aware textarea + send button.                            |
 
 ### Message parts
 
@@ -292,7 +292,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | Term               | Element / role          | Accessible name         | Purpose                                                             |
 | ------------------ | ----------------------- | ----------------------- | ------------------------------------------------------------------- |
 | **Message input**  | `textarea` · `combobox` | `Message`               | Draft input; `aria-autocomplete="list"`, wired to the mention menu. |
-| **Mention menu**   | `ul` · `listbox`        | `Mention a participant` | `@`-mention autocomplete (keyboard: ↑/↓, Enter/Tab, Esc).           |
+| **Mention menu**   | `ul` · `listbox`        | `Mention`               | `@`-mention autocomplete (keyboard: ↑/↓, Enter/Tab, Esc).           |
 | **Mention option** | `button` · `option`     | participant name        | A single suggestion; `aria-selected` tracks the highlight.          |
 | **Send button**    | `button`                | `Send message`          | Submits the draft (also Enter, without Shift).                      |
 

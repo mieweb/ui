@@ -13,8 +13,17 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { CloseIcon } from '../AI/icons';
+import { MessageComposer } from '../Messaging/MessageComposer';
+import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
-import { ParticipantAvatar, Composer, MessageRow, byTime } from './parts';
+import {
+  ParticipantAvatar,
+  MessageRow,
+  byTime,
+  detectMentions,
+  filesToComposerAttachments,
+  acceptTokensFor,
+} from './parts';
 import { VirtualThread } from './VirtualThread';
 import type {
   AIRenderTextContent,
@@ -168,6 +177,40 @@ export function SuperChat({
   );
   const editable = !readOnly && !!onMessageEdited;
 
+  // Agents/humans addressable via `@` (exclude the system participant).
+  const mentionOptions = React.useMemo(
+    () =>
+      conversation.participants
+        .filter((p) => p.kind !== 'system')
+        .map((p) => ({
+          id: p.id,
+          label: p.name,
+          description: p.role,
+          meta: p.kind,
+          icon: <ParticipantAvatar participant={p} />,
+        })),
+    [conversation.participants]
+  );
+
+  const composerAccept = React.useMemo(
+    () => acceptTokensFor(acceptedFileTypes),
+    [acceptedFileTypes]
+  );
+
+  // Bridge the shared composer's `NewMessage` (File[] attachments) to
+  // SuperChat's host callback (mentions + base64 `data:` URL attachments).
+  const handleComposerSend = React.useCallback(
+    async (message: NewMessage) => {
+      const text = message.content;
+      const mentions = detectMentions(text, conversation.participants);
+      const attachments = await filesToComposerAttachments(
+        message.attachments ?? []
+      );
+      onMessageSent?.(text, { conversation, mentions, attachments });
+    },
+    [conversation, onMessageSent]
+  );
+
   return (
     <section
       data-slot="superchat"
@@ -220,7 +263,7 @@ export function SuperChat({
             >
               {conversation.participants.slice(0, 6).map((p) => (
                 <span key={p.id} role="img" aria-label={p.name}>
-                  <ParticipantAvatar participant={p} size="sm" />
+                  <ParticipantAvatar participant={p} />
                 </span>
               ))}
             </div>
@@ -291,13 +334,19 @@ export function SuperChat({
         </div>
       )}
 
-      <Composer
-        participants={conversation.participants}
+      <MessageComposer
+        onSend={handleComposerSend}
         disabled={readOnly}
-        acceptedFileTypes={acceptedFileTypes}
-        onSend={(text, mentions, attachments) =>
-          onMessageSent?.(text, { conversation, mentions, attachments })
+        placeholder={
+          readOnly
+            ? 'Read-only conversation'
+            : 'Type a message… use @ to address an agent'
         }
+        mentionOptions={mentionOptions}
+        showAttachmentPicker={!readOnly}
+        showCameraButton={false}
+        acceptedFileTypes={composerAccept}
+        maxLength={100000}
       />
     </section>
   );

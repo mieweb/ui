@@ -41,6 +41,7 @@ export {
   type MessageComposerProps,
   type CharacterCounterProps,
   type SendButtonProps,
+  type MentionOption,
 } from './MessageComposer';
 
 export {

@@ -4,7 +4,13 @@ import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { inputVariants } from '../Input';
 
-export type DropdownPlacement = 'bottom-start' | 'bottom-end' | 'bottom';
+export type DropdownPlacement =
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'bottom'
+  | 'top-start'
+  | 'top-end'
+  | 'top';
 
 export interface DropdownProps {
   /** The trigger element (usually a button) */
@@ -55,6 +61,9 @@ const placementStyles: Record<DropdownPlacement, string> = {
   'bottom-start': 'top-full left-0 mt-2',
   'bottom-end': 'top-full right-0 mt-2',
   bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+  'top-start': 'bottom-full left-0 mb-2',
+  'top-end': 'bottom-full right-0 mb-2',
+  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
 };
 
 interface DropdownContextValue {

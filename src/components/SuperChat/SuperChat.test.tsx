@@ -641,7 +641,7 @@ describe('SuperChat', () => {
     render(<SuperChat conversation={conversation} currentParticipantId="u1" />);
     const input = screen.getByLabelText('Message') as HTMLTextAreaElement;
     await user.type(input, 'hello @Tri');
-    const menu = screen.getByRole('listbox', { name: 'Mention a participant' });
+    const menu = screen.getByRole('listbox', { name: 'Mention' });
     expect(menu).toBeInTheDocument();
     await user.click(screen.getByRole('option', { name: /Triage Agent/ }));
     expect(input.value).toBe('hello @Triage ');

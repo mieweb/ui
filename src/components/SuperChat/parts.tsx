@@ -8,9 +8,18 @@
 
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
+import {
+  Check as CheckIcon,
+  Clipboard as ClipboardIcon,
+  Pencil as PencilIcon,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { Avatar } from '../Avatar';
+import { Badge } from '../Badge';
+import { Dropdown, DropdownItem } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
-import { SendIcon, SparklesIcon } from '../AI/icons';
+import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
+import { SparklesIcon } from '../AI/icons';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -25,16 +34,6 @@ import type {
 // ============================================================================
 // Helpers
 // ============================================================================
-
-export function initials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .filter(Boolean)
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 export function formatTime(time: Date | string): string {
   return new Date(time).toLocaleTimeString(undefined, {
@@ -99,41 +98,26 @@ export function lastMessageByTime(
 
 export function ParticipantAvatar({
   participant,
-  size = 'md',
 }: {
   participant?: Participant;
-  size?: 'sm' | 'md';
 }) {
-  const dim = size === 'sm' ? 'h-6 w-6 text-[10px]' : 'h-8 w-8 text-xs';
-  if (participant?.avatar) {
-    return (
-      <img
-        src={participant.avatar}
-        alt=""
-        className={cn('shrink-0 rounded-full object-cover', dim)}
-      />
-    );
-  }
   const isAgent = participant?.kind === 'agent';
+  const backgroundColor =
+    participant?.color ??
+    (isAgent ? 'var(--mieweb-primary-700, #1f2937)' : '#64748b');
   return (
-    <div
-      className={cn(
-        'flex shrink-0 items-center justify-center rounded-full font-medium text-white',
-        dim
-      )}
-      style={{
-        backgroundColor:
-          participant?.color ??
-          (isAgent ? 'var(--mieweb-primary-700, #1f2937)' : '#64748b'),
-      }}
+    <Avatar
+      size="xs"
+      src={participant?.avatar}
+      alt=""
+      name={participant?.name ?? '?'}
+      fallback={isAgent ? <SparklesIcon size="sm" /> : undefined}
+      // Per-participant color (or agent/default) disambiguates concurrent
+      // speakers; overrides Avatar's default primary background.
+      style={{ backgroundColor }}
       aria-hidden="true"
-    >
-      {isAgent ? (
-        <SparklesIcon size="sm" />
-      ) : (
-        initials(participant?.name ?? '?')
-      )}
-    </div>
+      className="shrink-0"
+    />
   );
 }
 
@@ -153,9 +137,13 @@ export function ReferenceChip({
   const href = linkBuilder?.(reference);
   const content = (
     <>
-      <span className="bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200 rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+      <Badge
+        variant="default"
+        size="sm"
+        className="rounded px-1.5 text-[10px] font-semibold tracking-wide uppercase"
+      >
         {reference.refType}
-      </span>
+      </Badge>
       <span className="truncate">{reference.title}</span>
     </>
   );
@@ -187,88 +175,6 @@ export function ReferenceChip({
 // Message row
 // ============================================================================
 
-/** Small pencil glyph for the inline message-edit affordance. */
-function PencilIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  );
-}
-
-/** Paperclip glyph for the composer's attach-file affordance. */
-function PaperclipIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-    </svg>
-  );
-}
-
-const ATTACHMENT_ICON_PROPS = {
-  width: 22,
-  height: 22,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 2,
-  strokeLinecap: 'round',
-  strokeLinejoin: 'round',
-  'aria-hidden': true,
-} as const;
-
-/** Document glyph used for PDFs and unrecognized files. */
-function FileIcon() {
-  return (
-    <svg {...ATTACHMENT_ICON_PROPS}>
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-      <path d="M14 2v6h6" />
-    </svg>
-  );
-}
-
-/** Film/clapper glyph for video attachments. */
-function VideoFileIcon() {
-  return (
-    <svg {...ATTACHMENT_ICON_PROPS}>
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <path d="m10 9 5 3-5 3Z" />
-    </svg>
-  );
-}
-
-/** Musical-note glyph for audio attachments. */
-function AudioFileIcon() {
-  return (
-    <svg {...ATTACHMENT_ICON_PROPS}>
-      <path d="M9 18V5l12-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="18" cy="16" r="3" />
-    </svg>
-  );
-}
-
 /**
  * Supported attachment categories: their `<input accept>` token and a MIME
  * matcher used to filter pastes and file-picker selections.
@@ -290,61 +196,45 @@ const DEFAULT_ACCEPTED_FILE_TYPES: AttachmentKind[] = [
   'pdf',
 ];
 
-/** Resolve a MIME type to its broad category (for preview icons). */
-function attachmentKindOf(type: string): AttachmentKind | 'file' {
-  if (type.startsWith('image/')) return 'image';
-  if (type.startsWith('video/')) return 'video';
-  if (type.startsWith('audio/')) return 'audio';
-  if (type === 'application/pdf') return 'pdf';
-  return 'file';
-}
-
-/** Pick the preview icon for a non-image attachment. */
-function AttachmentTypeIcon({ type }: { type: string }) {
-  switch (attachmentKindOf(type)) {
-    case 'video':
-      return <VideoFileIcon />;
-    case 'audio':
-      return <AudioFileIcon />;
-    default:
-      return <FileIcon />;
-  }
-}
-
-function ClipboardIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
+/**
+ * Map SuperChat's high-level {@link AttachmentKind} categories to the
+ * `<input accept>` tokens consumed by the shared `MessageComposer`.
+ */
+export function acceptTokensFor(
+  kinds: AttachmentKind[] = DEFAULT_ACCEPTED_FILE_TYPES
+): string[] {
+  const source = kinds.length > 0 ? kinds : DEFAULT_ACCEPTED_FILE_TYPES;
+  return Array.from(
+    new Set(source.map((k) => ATTACHMENT_KIND_CONFIG[k].accept))
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
+/**
+ * Read the `File` objects emitted by the shared `MessageComposer` into the
+ * base64 `data:` URL {@link ComposerAttachment}s SuperChat hosts expect.
+ */
+export function filesToComposerAttachments(
+  files: File[]
+): Promise<ComposerAttachment[]> {
+  return Promise.all(
+    files.map(
+      (file, i) =>
+        new Promise<ComposerAttachment>((resolve, reject) => {
+          const reader = new window.FileReader();
+          reader.onload = () => {
+            const dataUrl =
+              typeof reader.result === 'string' ? reader.result : '';
+            resolve({
+              id: `att-${Date.now()}-${i}`,
+              name: file.name || `attachment-${i}`,
+              type: file.type || 'application/octet-stream',
+              dataUrl,
+            });
+          };
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(file);
+        })
+    )
   );
 }
 
@@ -369,27 +259,9 @@ interface CopyMenuProps {
 function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
   const [open, setOpen] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
-  const rootRef = React.useRef<HTMLDivElement>(null);
   const copiedTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   );
-
-  // Close on outside click / Escape while the menu is open.
-  React.useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
 
   React.useEffect(() => () => window.clearTimeout(copiedTimer.current), []);
 
@@ -437,7 +309,6 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
 
   return (
     <div
-      ref={rootRef}
       // Self-align to the bottom of the (possibly tall) message row and stick to
       // the viewport bottom: on long messages the control follows the scroll and
       // settles at the message's end once it is fully in view. Raise the whole
@@ -450,64 +321,43 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
         open ? 'z-[60]' : 'z-10'
       )}
     >
-      <button
-        type="button"
-        data-slot="superchat-copy-button"
-        aria-label="Copy message"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className="rounded p-1 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-neutral-600 focus-visible:opacity-100 dark:hover:text-neutral-200"
+      <Dropdown
+        open={open}
+        onOpenChange={setOpen}
+        placement={isSelf ? 'top-end' : 'top-start'}
+        trigger={
+          <button
+            type="button"
+            data-slot="superchat-copy-button"
+            aria-label="Copy message"
+            className="rounded p-1 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-neutral-600 focus-visible:opacity-100 dark:hover:text-neutral-200"
+          >
+            {copied ? (
+              <CheckIcon size={14} aria-hidden="true" />
+            ) : (
+              <ClipboardIcon size={14} aria-hidden="true" />
+            )}
+          </button>
+        }
       >
-        {copied ? <CheckIcon /> : <ClipboardIcon />}
-      </button>
-      {open && (
-        <div
-          role="menu"
-          data-slot="superchat-copy-menu"
-          className={cn(
-            'absolute bottom-full z-[60] mb-1 min-w-44 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-left text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-800',
-            isSelf ? 'end-0' : 'start-0'
-          )}
+        <DropdownItem onClick={() => run(writeBoth)}>
+          <span className="flex flex-col items-start">
+            <span>Copy</span>
+            <span className="text-[10px] font-normal text-neutral-400">
+              Rich text + Markdown
+            </span>
+          </span>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => run(() => writeText(markdown || getText()))}
         >
-          <CopyMenuItem
-            label="Copy"
-            hint="Rich text + Markdown"
-            onSelect={() => run(writeBoth)}
-          />
-          <CopyMenuItem
-            label="Copy as Markdown"
-            onSelect={() => run(() => writeText(markdown || getText()))}
-          />
-          <CopyMenuItem
-            label="Copy as plain text"
-            onSelect={() => run(() => writeText(getText()))}
-          />
-        </div>
-      )}
+          Copy as Markdown
+        </DropdownItem>
+        <DropdownItem onClick={() => run(() => writeText(getText()))}>
+          Copy as plain text
+        </DropdownItem>
+      </Dropdown>
     </div>
-  );
-}
-
-function CopyMenuItem({
-  label,
-  hint,
-  onSelect,
-}: {
-  label: string;
-  hint?: string;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      onClick={onSelect}
-      className="flex w-full flex-col items-start px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-700"
-    >
-      <span>{label}</span>
-      {hint && <span className="text-[10px] text-neutral-400">{hint}</span>}
-    </button>
   );
 }
 
@@ -544,6 +394,7 @@ export const MessageRow = React.memo(function MessageRow({
   onMessageEdited,
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
+  const hasBody = !!message.text || (message.content?.length ?? 0) > 0;
   const [isEditing, setIsEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(message.text ?? '');
   const editRef = React.useRef<HTMLTextAreaElement>(null);
@@ -702,7 +553,7 @@ export const MessageRow = React.memo(function MessageRow({
         isSelf ? 'flex-row-reverse' : 'flex-row'
       )}
     >
-      <ParticipantAvatar participant={participant} size="sm" />
+      <ParticipantAvatar participant={participant} />
       <div className={cn('flex min-w-0 flex-col gap-1', isSelf && 'items-end')}>
         <div
           data-slot="superchat-message-meta"
@@ -739,7 +590,7 @@ export const MessageRow = React.memo(function MessageRow({
               aria-label="Edit message"
               className="rounded p-0.5 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-neutral-600 focus-visible:opacity-100 dark:hover:text-neutral-200"
             >
-              <PencilIcon />
+              <PencilIcon size={14} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -758,22 +609,13 @@ export const MessageRow = React.memo(function MessageRow({
               getText={() => bubbleRef.current?.textContent ?? ''}
             />
           )}
-          <div
+          <ChatBubble
             ref={bubbleRef}
             data-slot="superchat-bubble"
-            className={cn(
-              'w-fit max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
-              isSelf
-                ? 'bg-primary-800 text-white'
-                : 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
-              message.status === 'error' &&
-                'border border-red-300 dark:border-red-700'
-            )}
-            style={
-              !isSelf && accent
-                ? { borderLeft: `3px solid ${accent}` }
-                : undefined
-            }
+            variant={isSelf ? 'user' : 'assistant'}
+            hasError={message.status === 'error'}
+            accent={!isSelf ? accent : undefined}
+            className="text-sm"
           >
             {isEditing ? (
               <div
@@ -880,385 +722,22 @@ export const MessageRow = React.memo(function MessageRow({
                     })}
                   </div>
                 )}
+
+                {/* Animated typing indicator while a reply streams in with no
+                    body yet — matches the AI chat's streaming affordance. */}
+                {streaming && !hasBody && (
+                  <div className="flex items-center justify-center">
+                    <AITypingIndicator />
+                  </div>
+                )}
               </>
             )}
-          </div>
+          </ChatBubble>
         </div>
       </div>
     </div>
   );
 });
-
-// ============================================================================
-// Composer
-// ============================================================================
-
-/** Match a trailing `@token` immediately before the caret. */
-export function activeMentionQuery(
-  value: string,
-  caret: number
-): { query: string; start: number } | null {
-  const upToCaret = value.slice(0, caret);
-  const match = /(^|\s)@([^\s@]*)$/.exec(upToCaret);
-  if (!match) return null;
-  const query = match[2];
-  return { query, start: caret - query.length - 1 };
-}
-
-export function Composer({
-  participants,
-  disabled,
-  onSend,
-  acceptedFileTypes = DEFAULT_ACCEPTED_FILE_TYPES,
-}: {
-  participants: Participant[];
-  disabled?: boolean;
-  onSend: (
-    text: string,
-    mentions: string[],
-    attachments: ComposerAttachment[]
-  ) => void;
-  /** File categories the composer accepts (paste + paperclip). */
-  acceptedFileTypes?: AttachmentKind[];
-}) {
-  const [draft, setDraft] = React.useState('');
-  const [attachments, setAttachments] = React.useState<ComposerAttachment[]>(
-    []
-  );
-  const attachmentSeq = React.useRef(0);
-  const [mention, setMention] = React.useState<{
-    query: string;
-    start: number;
-  } | null>(null);
-  const [highlight, setHighlight] = React.useState(0);
-  const textareaRef = React.useRef<React.ComponentRef<'textarea'>>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  // Accepted file types → `<input accept>` token + a predicate for filtering
-  // pastes and picker selections.
-  const acceptKinds =
-    acceptedFileTypes.length > 0
-      ? acceptedFileTypes
-      : DEFAULT_ACCEPTED_FILE_TYPES;
-  const acceptAttr = React.useMemo(
-    () =>
-      Array.from(
-        new Set(acceptKinds.map((k) => ATTACHMENT_KIND_CONFIG[k].accept))
-      ).join(','),
-    [acceptKinds]
-  );
-  const acceptsType = React.useCallback(
-    (type: string) =>
-      acceptKinds.some((k) => ATTACHMENT_KIND_CONFIG[k].match(type)),
-    [acceptKinds]
-  );
-
-  // Agents/humans you can address (exclude the system participant).
-  const mentionable = React.useMemo(
-    () => participants.filter((p) => p.kind !== 'system'),
-    [participants]
-  );
-
-  const suggestions = React.useMemo(() => {
-    if (!mention) return [];
-    const q = mention.query.toLowerCase();
-    return mentionable.filter((p) => p.name.toLowerCase().includes(q));
-  }, [mention, mentionable]);
-
-  const menuOpen = mention !== null && suggestions.length > 0;
-  const listboxId = React.useId();
-  const optionId = (i: number) => `${listboxId}-option-${i}`;
-  const activeOptionId = menuOpen ? optionId(highlight) : undefined;
-
-  const syncMention = (value: string, caret: number) => {
-    const next = activeMentionQuery(value, caret);
-    setMention(next);
-    setHighlight(0);
-  };
-
-  const insertMention = (participant: Participant) => {
-    if (!mention) return;
-    const first = participant.name.split(' ')[0];
-    const before = draft.slice(0, mention.start);
-    const after = draft.slice(mention.start + 1 + mention.query.length);
-    const insert = `@${first} `;
-    const nextValue = before + insert + after;
-    setDraft(nextValue);
-    setMention(null);
-    // Restore caret just after the inserted mention.
-    const caret = before.length + insert.length;
-    requestAnimationFrame(() => {
-      const el = textareaRef.current;
-      if (el) {
-        el.focus();
-        el.setSelectionRange(caret, caret);
-      }
-    });
-  };
-
-  const submit = () => {
-    const text = draft.trim();
-    if (!text && attachments.length === 0) return;
-    onSend(text, detectMentions(text, participants), attachments);
-    setDraft('');
-    setAttachments([]);
-    setMention(null);
-  };
-
-  const readFile = (file: File) => {
-    const reader = new window.FileReader();
-    reader.onload = () => {
-      const dataUrl =
-        typeof reader.result === 'string' ? reader.result : undefined;
-      if (!dataUrl) return;
-      attachmentSeq.current += 1;
-      setAttachments((prev) => [
-        ...prev,
-        {
-          id: `att-${Date.now()}-${attachmentSeq.current}`,
-          name: file.name || `attachment-${attachmentSeq.current}`,
-          type: file.type || 'application/octet-stream',
-          dataUrl,
-        },
-      ]);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    if (disabled) return;
-    const files = Array.from(e.clipboardData.items)
-      .filter((item) => item.kind === 'file' && acceptsType(item.type))
-      .map((item) => item.getAsFile())
-      .filter((f): f is File => f !== null);
-    if (files.length === 0) return;
-    // We're handling the file ourselves; don't also paste a file path/blob.
-    e.preventDefault();
-    files.forEach(readFile);
-  };
-
-  const openFilePicker = () => {
-    if (disabled) return;
-    fileInputRef.current?.click();
-  };
-
-  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []).filter((f) =>
-      acceptsType(f.type)
-    );
-    files.forEach(readFile);
-    // Reset so selecting the same file again still fires `change`.
-    e.target.value = '';
-  };
-
-  const removeAttachment = (id: string) => {
-    setAttachments((prev) => prev.filter((a) => a.id !== id));
-  };
-
-  const canSend =
-    !disabled && (draft.trim().length > 0 || attachments.length > 0);
-
-  return (
-    <div
-      data-slot="superchat-composer"
-      className="relative flex items-end gap-2 border-t border-neutral-200 p-3 dark:border-neutral-700"
-    >
-      {menuOpen && (
-        <ul
-          id={listboxId}
-          role="listbox"
-          aria-label="Mention a participant"
-          className="absolute bottom-full left-3 z-10 mb-1 max-h-56 w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
-        >
-          {suggestions.map((p, i) => (
-            <li key={p.id}>
-              <button
-                type="button"
-                id={optionId(i)}
-                role="option"
-                aria-selected={i === highlight}
-                // onMouseDown (not onClick) so the textarea doesn't blur first.
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  insertMention(p);
-                }}
-                onMouseEnter={() => setHighlight(i)}
-                className={cn(
-                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
-                  i === highlight
-                    ? 'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-100'
-                    : 'text-neutral-700 dark:text-neutral-200'
-                )}
-              >
-                <ParticipantAvatar participant={p} size="sm" />
-                <span className="min-w-0 flex-1 truncate">
-                  <span className="font-medium">{p.name}</span>
-                  {p.role && (
-                    <span className="ml-1 text-xs text-neutral-400">
-                      {p.role}
-                    </span>
-                  )}
-                </span>
-                <span className="text-[10px] text-neutral-400">{p.kind}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        {attachments.length > 0 && (
-          <ul
-            data-slot="superchat-composer-attachments"
-            className="flex flex-wrap gap-2"
-          >
-            {attachments.map((att) => {
-              const isImage = att.type.startsWith('image/');
-              return (
-                <li
-                  key={att.id}
-                  className={cn(
-                    'group/att relative flex h-16 items-center overflow-hidden rounded-lg border border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800',
-                    isImage ? 'w-16' : 'w-44 max-w-full gap-2 px-2'
-                  )}
-                  title={att.name}
-                >
-                  {isImage ? (
-                    // Local preview of an image; data: URL stays in-browser.
-                    <img
-                      src={att.dataUrl}
-                      alt={att.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <>
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300">
-                        <AttachmentTypeIcon type={att.type} />
-                      </span>
-                      <span className="min-w-0 flex-1 truncate pe-4 text-xs text-neutral-700 dark:text-neutral-200">
-                        {att.name}
-                      </span>
-                    </>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => removeAttachment(att.id)}
-                    aria-label={`Remove ${att.name}`}
-                    className="absolute end-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900/70 text-white opacity-0 transition-opacity group-hover/att:opacity-100 focus:opacity-100 focus:outline-none"
-                  >
-                    <span aria-hidden className="text-xs leading-none">
-                      ×
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-        <textarea
-          ref={textareaRef}
-          value={draft}
-          onChange={(e) => {
-            setDraft(e.target.value);
-            syncMention(
-              e.target.value,
-              e.target.selectionStart ?? e.target.value.length
-            );
-          }}
-          onClick={(e) => {
-            const el = e.currentTarget;
-            syncMention(el.value, el.selectionStart ?? el.value.length);
-          }}
-          onPaste={handlePaste}
-          onKeyDown={(e) => {
-            if (menuOpen) {
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                setHighlight((h) => (h + 1) % suggestions.length);
-                return;
-              }
-              if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                setHighlight(
-                  (h) => (h - 1 + suggestions.length) % suggestions.length
-                );
-                return;
-              }
-              if (e.key === 'Enter' || e.key === 'Tab') {
-                e.preventDefault();
-                // `highlight` can fall out of range if `suggestions` shrank while
-                // the menu was open; fall back to the first suggestion.
-                const chosen = suggestions[highlight] ?? suggestions[0];
-                if (chosen) insertMention(chosen);
-                return;
-              }
-              if (e.key === 'Escape') {
-                e.preventDefault();
-                setMention(null);
-                return;
-              }
-            }
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              submit();
-            }
-          }}
-          disabled={disabled}
-          rows={1}
-          placeholder={
-            disabled
-              ? 'Read-only conversation'
-              : 'Type a message… use @ to address an agent'
-          }
-          aria-label="Message"
-          role="combobox"
-          aria-expanded={menuOpen}
-          aria-controls={menuOpen ? listboxId : undefined}
-          aria-activedescendant={activeOptionId}
-          aria-autocomplete="list"
-          aria-haspopup="listbox"
-          name="superchat-message"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="sentences"
-          spellCheck
-          data-1p-ignore
-          data-lpignore="true"
-          data-form-type="other"
-          className="focus:border-primary-500 focus:ring-primary-500 max-h-32 min-h-10 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:ring-1 focus:outline-none disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
-        />
-      </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={acceptAttr}
-        multiple
-        onChange={handleFilesSelected}
-        className="hidden"
-        tabIndex={-1}
-        aria-hidden="true"
-      />
-      <button
-        type="button"
-        onClick={openFilePicker}
-        disabled={disabled}
-        aria-label="Attach files"
-        title="Attach files"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 disabled:opacity-40 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-      >
-        <PaperclipIcon />
-      </button>
-      <button
-        type="button"
-        onClick={submit}
-        disabled={!canSend}
-        aria-label="Send message"
-        className="bg-primary-800 hover:bg-primary-700 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white disabled:opacity-40"
-      >
-        <SendIcon />
-      </button>
-    </div>
-  );
-}
 
 // ============================================================================
 // Sidebar item style
