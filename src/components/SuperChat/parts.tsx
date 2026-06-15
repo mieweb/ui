@@ -614,7 +614,6 @@ export const MessageRow = React.memo(function MessageRow({
             data-slot="superchat-bubble"
             variant={isSelf ? 'user' : 'assistant'}
             hasError={message.status === 'error'}
-            accent={!isSelf ? accent : undefined}
             className="text-sm"
           >
             {isEditing ? (
