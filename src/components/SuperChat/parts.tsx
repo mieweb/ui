@@ -48,7 +48,7 @@ export function byTime(a: SuperChatMessage, b: SuperChatMessage): number {
 
 export function lastActivityOf(c: SuperChatConversation): number {
   if (c.lastActivity) return new Date(c.lastActivity).getTime();
-  const last = c.thread[c.thread.length - 1];
+  const last = lastMessageByTime(c.thread);
   return last ? new Date(last.time).getTime() : 0;
 }
 
@@ -272,11 +272,12 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
   };
 
   const writeText = async (value: string) => {
-    try {
-      await navigator.clipboard?.writeText(value);
-    } catch {
-      // Clipboard may be unavailable (insecure context / denied permission).
+    if (!navigator.clipboard?.writeText) {
+      // Insecure context / unsupported browser: reject so the caller doesn't
+      // flash a misleading "Copied" success.
+      throw new Error('Clipboard API unavailable');
     }
+    await navigator.clipboard.writeText(value);
   };
 
   const writeBoth = async () => {
@@ -304,7 +305,10 @@ function CopyMenu({ isSelf, markdown, getHtml, getText }: CopyMenuProps) {
 
   const run = (fn: () => Promise<void>) => {
     setOpen(false);
-    void fn().then(flash);
+    // Only flash "Copied" when the write actually succeeds; swallow failures
+    // (insecure context / denied permission) instead of leaking an unhandled
+    // rejection or showing a false success.
+    void fn().then(flash, () => {});
   };
 
   return (
