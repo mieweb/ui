@@ -233,11 +233,16 @@ export const attachmentCache = {
    * Writing past the configured `maxBytes` evicts least-recently-used entries.
    */
   async put(input: PutAttachmentInput): Promise<boolean> {
-    const blob =
-      input.blob ?? (input.dataUrl ? dataUrlToBlob(input.dataUrl) : null);
-    if (!blob) return false;
+    // Open the store first so SSR / non-browser callers bail out before we
+    // touch `window` (dataUrlToBlob uses window.atob / window.Blob).
     const db = await openDB();
     if (!db) return false;
+    const blob =
+      input.blob ?? (input.dataUrl ? dataUrlToBlob(input.dataUrl) : null);
+    if (!blob) {
+      db.close();
+      return false;
+    }
     const now = Date.now();
     const entry: CachedAttachment = {
       id: input.id,

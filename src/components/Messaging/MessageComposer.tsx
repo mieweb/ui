@@ -61,13 +61,17 @@ function activeMentionQuery(
 }
 
 /**
- * Whether a MIME type satisfies one of the accepted `<input accept>` tokens.
- * Supports `type/*` wildcards and exact `type/subtype` tokens; extension tokens
- * (e.g. `.pdf`) can't be matched against a pasted blob and are ignored here.
+ * Whether a file satisfies one of the accepted `<input accept>` tokens.
+ * Supports `type/*` wildcards, exact `type/subtype` tokens, and `.ext`
+ * extension tokens (matched against the file name, mirroring the native
+ * `<input accept>` behavior used by the picker and drag-and-drop).
  */
-function isMimeAccepted(mime: string, accepted: string[]): boolean {
+function isFileAccepted(file: File, accepted: string[]): boolean {
   if (!accepted || accepted.length === 0) return true;
+  const mime = file.type;
+  const name = file.name.toLowerCase();
   return accepted.some((token) => {
+    if (token.startsWith('.')) return name.endsWith(token.toLowerCase());
     if (token.endsWith('/*')) return mime.startsWith(token.slice(0, -1));
     if (token.includes('/')) return mime === token;
     return false;
@@ -563,7 +567,7 @@ const MessageComposer = React.forwardRef<
         .filter((item) => item.kind === 'file')
         .map((item) => item.getAsFile())
         .filter((f): f is File => f !== null)
-        .filter((f) => isMimeAccepted(f.type, acceptedFileTypes));
+        .filter((f) => isFileAccepted(f, acceptedFileTypes));
       if (pasted.length === 0) return;
       // We're attaching the file ourselves; don't also paste a blob/path.
       event.preventDefault();
