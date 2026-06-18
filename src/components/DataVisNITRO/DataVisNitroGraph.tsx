@@ -156,7 +156,9 @@ function DataVisNitroGraphInner({
   onConfigChange,
 }: DataVisNitroGraphProps & { computedView: ViewInstance }) {
   const viewState = useView(computedView);
-  const [liveConfig, setLiveConfig] = useState<Partial<GraphConfig> | undefined>(initialConfig);
+  const [liveConfig, setLiveConfig] = useState<
+    Partial<GraphConfig> | undefined
+  >(initialConfig);
 
   const handleConfigChange = useCallback(
     (newConfig: GraphConfig) => {
