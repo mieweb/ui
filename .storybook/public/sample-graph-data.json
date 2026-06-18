@@ -1,0 +1,39 @@
+{
+  "typeInfo": [
+    { "field": "month", "type": "string", "displayText": "Month" },
+    { "field": "region", "type": "string", "displayText": "Region" },
+    { "field": "product", "type": "string", "displayText": "Product" },
+    { "field": "revenue", "type": "number", "displayText": "Revenue ($)" },
+    { "field": "units_sold", "type": "number", "displayText": "Units Sold" },
+    { "field": "expenses", "type": "number", "displayText": "Expenses ($)" },
+    { "field": "profit", "type": "number", "displayText": "Profit ($)" },
+    { "field": "customer_count", "type": "number", "displayText": "Customers" },
+    { "field": "satisfaction", "type": "number", "displayText": "Satisfaction (%)" }
+  ],
+  "data": [
+    { "month": "Jan", "region": "North", "product": "Widget A", "revenue": 42000, "units_sold": 840, "expenses": 28000, "profit": 14000, "customer_count": 312, "satisfaction": 87 },
+    { "month": "Jan", "region": "South", "product": "Widget A", "revenue": 38000, "units_sold": 760, "expenses": 25000, "profit": 13000, "customer_count": 285, "satisfaction": 91 },
+    { "month": "Jan", "region": "East", "product": "Widget B", "revenue": 55000, "units_sold": 620, "expenses": 34000, "profit": 21000, "customer_count": 198, "satisfaction": 82 },
+    { "month": "Jan", "region": "West", "product": "Widget B", "revenue": 61000, "units_sold": 690, "expenses": 37000, "profit": 24000, "customer_count": 224, "satisfaction": 85 },
+    { "month": "Feb", "region": "North", "product": "Widget A", "revenue": 45000, "units_sold": 900, "expenses": 29500, "profit": 15500, "customer_count": 330, "satisfaction": 88 },
+    { "month": "Feb", "region": "South", "product": "Widget A", "revenue": 41000, "units_sold": 820, "expenses": 26000, "profit": 15000, "customer_count": 298, "satisfaction": 90 },
+    { "month": "Feb", "region": "East", "product": "Widget B", "revenue": 58000, "units_sold": 650, "expenses": 35500, "profit": 22500, "customer_count": 210, "satisfaction": 84 },
+    { "month": "Feb", "region": "West", "product": "Widget B", "revenue": 63000, "units_sold": 710, "expenses": 38000, "profit": 25000, "customer_count": 231, "satisfaction": 86 },
+    { "month": "Mar", "region": "North", "product": "Widget A", "revenue": 51000, "units_sold": 1020, "expenses": 31000, "profit": 20000, "customer_count": 356, "satisfaction": 89 },
+    { "month": "Mar", "region": "South", "product": "Widget A", "revenue": 47000, "units_sold": 940, "expenses": 28500, "profit": 18500, "customer_count": 321, "satisfaction": 92 },
+    { "month": "Mar", "region": "East", "product": "Widget B", "revenue": 62000, "units_sold": 700, "expenses": 36000, "profit": 26000, "customer_count": 225, "satisfaction": 83 },
+    { "month": "Mar", "region": "West", "product": "Widget B", "revenue": 68000, "units_sold": 770, "expenses": 40000, "profit": 28000, "customer_count": 248, "satisfaction": 87 },
+    { "month": "Apr", "region": "North", "product": "Widget A", "revenue": 48000, "units_sold": 960, "expenses": 30000, "profit": 18000, "customer_count": 342, "satisfaction": 86 },
+    { "month": "Apr", "region": "South", "product": "Widget A", "revenue": 44000, "units_sold": 880, "expenses": 27000, "profit": 17000, "customer_count": 310, "satisfaction": 89 },
+    { "month": "Apr", "region": "East", "product": "Widget B", "revenue": 59000, "units_sold": 660, "expenses": 35000, "profit": 24000, "customer_count": 215, "satisfaction": 81 },
+    { "month": "Apr", "region": "West", "product": "Widget B", "revenue": 65000, "units_sold": 730, "expenses": 39000, "profit": 26000, "customer_count": 238, "satisfaction": 84 },
+    { "month": "May", "region": "North", "product": "Widget A", "revenue": 54000, "units_sold": 1080, "expenses": 32000, "profit": 22000, "customer_count": 375, "satisfaction": 90 },
+    { "month": "May", "region": "South", "product": "Widget A", "revenue": 50000, "units_sold": 1000, "expenses": 30000, "profit": 20000, "customer_count": 340, "satisfaction": 93 },
+    { "month": "May", "region": "East", "product": "Widget B", "revenue": 64000, "units_sold": 720, "expenses": 37000, "profit": 27000, "customer_count": 232, "satisfaction": 85 },
+    { "month": "May", "region": "West", "product": "Widget B", "revenue": 71000, "units_sold": 800, "expenses": 41000, "profit": 30000, "customer_count": 260, "satisfaction": 88 },
+    { "month": "Jun", "region": "North", "product": "Widget A", "revenue": 58000, "units_sold": 1160, "expenses": 33500, "profit": 24500, "customer_count": 392, "satisfaction": 91 },
+    { "month": "Jun", "region": "South", "product": "Widget A", "revenue": 53000, "units_sold": 1060, "expenses": 31500, "profit": 21500, "customer_count": 358, "satisfaction": 94 },
+    { "month": "Jun", "region": "East", "product": "Widget B", "revenue": 67000, "units_sold": 750, "expenses": 38000, "profit": 29000, "customer_count": 245, "satisfaction": 86 },
+    { "month": "Jun", "region": "West", "product": "Widget B", "revenue": 74000, "units_sold": 830, "expenses": 42000, "profit": 32000, "customer_count": 272, "satisfaction": 89 }
+  ]
+}
