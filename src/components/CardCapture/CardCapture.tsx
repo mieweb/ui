@@ -285,7 +285,8 @@ export function CardCapture({
   } = useDocumentDetection(videoRef, {
     enableAutoCapture: false,
     minFocusScore: 15,
-    stabilityDuration: 500,
+    stabilityThreshold: 80,
+    stabilityDuration: 400,
   });
 
   const {

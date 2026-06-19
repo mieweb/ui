@@ -81,6 +81,8 @@ export interface DetectionConfig {
   minDocumentCoverage?: number;
   /** Maximum document coverage percentage (default: 95) - not used in simplified mode */
   maxDocumentCoverage?: number;
+  /** Minimum frame similarity required for stability (0-100, default: 85) */
+  stabilityThreshold?: number;
   /** Stability duration required before capture (ms, default: 500) */
   stabilityDuration?: number;
   /** Auto-capture countdown duration (seconds, default: 2) */
@@ -97,6 +99,7 @@ const DEFAULT_CONFIG: Required<DetectionConfig> = {
   maxBrightness: 240,
   minDocumentCoverage: 10,
   maxDocumentCoverage: 95,
+  stabilityThreshold: 85,
   stabilityDuration: 500,
   captureCountdown: 2,
   detectionFps: 5,
@@ -268,6 +271,7 @@ export function useDocumentDetection(
       config.maxBrightness,
       config.minDocumentCoverage,
       config.maxDocumentCoverage,
+      config.stabilityThreshold,
       config.stabilityDuration,
       config.captureCountdown,
       config.detectionFps,
@@ -284,9 +288,6 @@ export function useDocumentDetection(
   const stabilityStartRef = useRef<number | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isDetectingRef = useRef(false);
-
-  // Stability threshold - how similar frames need to be (0-100)
-  const STABILITY_THRESHOLD = 85;
 
   // Initialize canvas
   useEffect(() => {
@@ -343,7 +344,7 @@ export function useDocumentDetection(
       fingerprint,
       lastFingerprintRef.current
     );
-    const isSimilarFrame = similarity >= STABILITY_THRESHOLD;
+    const isSimilarFrame = similarity >= mergedConfig.stabilityThreshold;
 
     if (isSimilarFrame && lastFingerprintRef.current.length > 0) {
       if (!stabilityStartRef.current) {

@@ -144,6 +144,15 @@ describe('Stability Detection Functions', () => {
       // First few values (top-left) should differ
       expect(fp1.slice(0, 16)).not.toEqual(fp2.slice(0, 16));
     });
+    it('allows mild handheld movement with a relaxed threshold', () => {
+      const firstFrame = Array(64).fill(100);
+      const slightlyMovedFrame = Array(64).fill(109);
+
+      const similarity = compareFingerprints(firstFrame, slightlyMovedFrame);
+
+      expect(similarity).toBeLessThan(85);
+      expect(similarity).toBeGreaterThanOrEqual(80);
+    });
   });
 
   describe('compareFingerprints', () => {
