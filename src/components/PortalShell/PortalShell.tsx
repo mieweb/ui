@@ -75,6 +75,13 @@ export interface PortalShellProps {
    * but are distinct from the app-wide top bar.
    */
   subHeader?: React.ReactNode;
+  /**
+   * Optional mobile bottom navigation. Rendered only on small screens
+   * (`lg:hidden`) as a flex child beneath the scrolling content, so it
+   * reserves its own space and never overlaps content. On desktop the
+   * sidebar remains the primary navigation.
+   */
+  bottomNav?: React.ReactNode;
   /** Optional footer content rendered inside the sidebar (above default toggle). */
   sidebarFooter?: React.ReactNode;
   /** When true, hide the default `SidebarToggle` in the footer. */
@@ -138,6 +145,7 @@ export function PortalShell({
   topBarRight,
   topBarCenter,
   subHeader,
+  bottomNav,
   sidebarFooter,
   hideDefaultSidebarToggle = false,
   storageKey,
@@ -167,6 +175,14 @@ export function PortalShell({
   return (
     <SidebarProvider storageKey={storageKey}>
       <div className="flex h-screen overflow-hidden bg-background text-foreground">
+        {/* Keyboard skip link — first focusable element so keyboard/AT users
+         *  can jump past the sidebar straight to the page content. */}
+        <a
+          href="#portal-main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:inline-flex focus:items-center focus:rounded-md focus:bg-primary-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/60"
+        >
+          Skip to content
+        </a>
         <Sidebar>
           <SidebarHeader>{brand}</SidebarHeader>
           <SidebarContent>
@@ -245,6 +261,8 @@ export function PortalShell({
               {children}
             </div>
           </main>
+
+          {bottomNav && <div className="lg:hidden">{bottomNav}</div>}
         </div>
       </div>
     </SidebarProvider>
