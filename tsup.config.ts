@@ -4,9 +4,9 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     'ag-grid': 'src/ag-grid.ts',
-    'datavis': 'src/datavis.ts',
-    'esheet': 'src/esheet.ts',
-    'kerebron': 'src/kerebron.ts',
+    datavis: 'src/datavis.ts',
+    esheet: 'src/esheet.ts',
+    kerebron: 'src/kerebron.ts',
     'hooks/index': 'src/hooks/index.ts',
     'utils/index': 'src/utils/index.ts',
     'tailwind-preset': 'src/tailwind-preset.ts',
@@ -21,9 +21,11 @@ export default defineConfig({
     'components/Breadcrumb/index': 'src/components/Breadcrumb/index.ts',
     'components/Button/index': 'src/components/Button/index.ts',
     'components/Card/index': 'src/components/Card/index.ts',
+    'components/CardCapture/index': 'src/components/CardCapture/index.ts',
     'components/Checkbox/index': 'src/components/Checkbox/index.ts',
     'components/Collapsible/index': 'src/components/Collapsible/index.ts',
-    'components/CountryCodeDropdown/index': 'src/components/CountryCodeDropdown/index.ts',
+    'components/CountryCodeDropdown/index':
+      'src/components/CountryCodeDropdown/index.ts',
     'components/DateInput/index': 'src/components/DateInput/index.ts',
     'components/Dropdown/index': 'src/components/Dropdown/index.ts',
     'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
@@ -71,6 +73,7 @@ export default defineConfig({
   external: [
     'react',
     'react-dom',
+    'onnxruntime-web',
     'ag-grid-community',
     'ag-grid-react',
     '@mieweb/ui',
