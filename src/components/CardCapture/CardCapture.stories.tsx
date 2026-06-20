@@ -188,7 +188,7 @@ export const LiveBrowserModel: Story = {
     open: false,
     onOpenChange: () => undefined,
     onCapture: () => undefined,
-    modelUrl: '/models/id-card-detector.onnx',
+    modelUrl: '/models/id-card-detector-v1.onnx',
     wasmPaths: '/ort-wasm/',
     enableAutoCapture: true,
     confidenceThreshold: 0.7,
