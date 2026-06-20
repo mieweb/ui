@@ -201,13 +201,18 @@ export function useCardDetection(
   }, [processFrame]);
 
   React.useEffect(() => {
+    if (!enabled) {
+      setStatus('idle');
+      setIsModelReady(false);
+      setError(null);
+      return;
+    }
     let cancelled = false;
     let loadedSession: InferenceSession | null = null;
 
     setStatus('loading');
     setIsModelReady(false);
     setError(null);
-
     void loadCardModel(modelUrl, {
       wasmPaths,
     })
@@ -253,7 +258,7 @@ export function useCardDetection(
         void loadedSession.release();
       }
     };
-  }, [modelUrl, wasmPaths]);
+  }, [enabled, modelUrl, wasmPaths]);
 
   React.useEffect(() => {
     mountedRef.current = true;
