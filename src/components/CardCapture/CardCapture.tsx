@@ -510,18 +510,18 @@ export function CardCapture({
           </Text>
         </div>
 
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-neutral-950">
+        <div className="relative mx-auto h-[48vh] max-h-[28rem] min-h-64 w-full overflow-hidden rounded-lg bg-neutral-950">
+          {' '}
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
             className={cn(
-              'h-full w-full object-cover transition-opacity duration-300',
+              'h-full w-full object-contain transition-opacity duration-300',
               isReady ? 'opacity-100' : 'opacity-0'
             )}
           />
-
           {!isReady && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
               <Spinner size="lg" />
@@ -530,7 +530,6 @@ export function CardCapture({
               </Text>
             </div>
           )}
-
           <CaptureStatusOverlay
             isCameraReady={isReady}
             isModelReady={isModelReady}

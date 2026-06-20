@@ -10,7 +10,7 @@ const meta: Meta<typeof CardCapture> = {
   component: CardCapture,
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
     docs: {
       description: {
         component: `
@@ -45,7 +45,7 @@ be performed independently without changing the component API.
   },
   decorators: [
     (Story) => (
-      <div className="w-full max-w-2xl p-4">
+      <div className="flex min-h-screen w-full items-center justify-center p-4">
         <Story />
       </div>
     ),
