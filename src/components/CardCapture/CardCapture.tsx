@@ -545,7 +545,7 @@ export function CardCapture({
           />
         </div>
 
-        {cardDetectionError && (
+        {enableAutoCapture && cardDetectionError && (
           <Alert variant="warning">
             <AlertCircleIcon className="h-5 w-5" />
             <AlertTitle>Automatic detection unavailable</AlertTitle>

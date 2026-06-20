@@ -28,11 +28,15 @@ export async function loadCardModel(
     throw new Error('A model URL is required to load the card detector.');
   }
 
-  const normalizedWasmPathsInput = options.wasmPaths?.trim() || DEFAULT_WASM_PATHS;
+  const normalizedWasmPathsInput =
+    options.wasmPaths?.trim() || DEFAULT_WASM_PATHS;
   const normalizedWasmPaths = normalizedWasmPathsInput.endsWith('/')
     ? normalizedWasmPathsInput
     : `${normalizedWasmPathsInput}/`;
-
+  ort.env.wasm.wasmPaths =
+    typeof window === 'undefined'
+      ? normalizedWasmPaths
+      : new URL(normalizedWasmPaths, window.location.origin).href;
   return ort.InferenceSession.create(normalizedModelUrl, {
     executionProviders: ['wasm'],
   });
