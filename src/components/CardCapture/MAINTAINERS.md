@@ -1,4 +1,3 @@
-````markdown
 # CardCapture — Maintainer Notes
 
 > **Provider notes:** Implementation details for maintainers changing the
@@ -30,6 +29,7 @@ The component is available through its individual subpath entry:
 ```ts
 import { CardCapture } from '@mieweb/ui/components/CardCapture';
 ```
+
 ````
 
 Do not export it from the main package barrel unless the optional dependency
@@ -46,7 +46,7 @@ Consumers provide a browser-accessible model URL:
 
 ```tsx
 <CardCapture
-  modelUrl="/models/id-card-detector.onnx"
+  modelUrl="/models/id-card-detector-v1.onnx"
   onCapture={handleCapture}
 />
 ```
@@ -65,7 +65,7 @@ The `wasmPaths` prop must point to the public directory containing those files:
 
 ```tsx
 <CardCapture
-  modelUrl="/models/id-card-detector.onnx"
+  modelUrl="/models/id-card-detector-v1.onnx"
   wasmPaths="/ort-wasm/"
   onCapture={handleCapture}
 />
@@ -259,6 +259,4 @@ runtime errors.
 - Dataset management
 - Model-hosting credentials
 
-```
-
-```
+````

@@ -300,6 +300,9 @@ export function CardCapture({
     modelUrl,
     wasmPaths,
     confidenceThreshold,
+    detectionIntervalMs: 500,
+    stableDetectionsRequired: 2,
+    allowedMisses: 1,
   });
 
   const [capturedFile, setCapturedFile] = React.useState<File | null>(null);
@@ -511,7 +514,6 @@ export function CardCapture({
         </div>
 
         <div className="relative mx-auto h-[48vh] max-h-[28rem] min-h-64 w-full overflow-hidden rounded-lg bg-neutral-950">
-          {' '}
           <video
             ref={videoRef}
             autoPlay

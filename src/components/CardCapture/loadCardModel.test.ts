@@ -35,7 +35,7 @@ describe('loadCardModel', () => {
     mockCreateSession.mockResolvedValue(session);
 
     await expect(
-      loadCardModel('/models/id-card-detector.onnx', {
+      loadCardModel('/models/id-card-detector-v1.onnx', {
         wasmPaths: 'https://assets.example.test/ort-wasm/',
       })
     ).resolves.toBe(session);
@@ -45,7 +45,7 @@ describe('loadCardModel', () => {
     );
 
     expect(mockCreateSession).toHaveBeenCalledWith(
-      '/models/id-card-detector.onnx',
+      '/models/id-card-detector-v1.onnx',
       {
         executionProviders: ['wasm'],
       }
@@ -57,12 +57,12 @@ describe('loadCardModel', () => {
 
     mockCreateSession.mockResolvedValue(session);
 
-    await loadCardModel('  /models/id-card-detector.onnx  ', {
+    await loadCardModel('  /models/id-card-detector-v1.onnx  ', {
       wasmPaths: 'https://assets.example.test/ort-wasm/',
     });
 
     expect(mockCreateSession).toHaveBeenCalledWith(
-      '/models/id-card-detector.onnx',
+      '/models/id-card-detector-v1.onnx',
       {
         executionProviders: ['wasm'],
       }

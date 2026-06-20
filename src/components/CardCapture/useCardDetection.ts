@@ -13,6 +13,7 @@ export type CardDetectionStatus =
   | 'error';
 
 export interface UseCardDetectionOptions {
+  enabled?: boolean;
   modelUrl: string;
   wasmPaths?: string;
   confidenceThreshold?: number;
@@ -46,6 +47,7 @@ const DEFAULT_ALLOWED_MISSES = 1;
 export function useCardDetection(
   videoRef: React.RefObject<HTMLVideoElement | null>,
   {
+    enabled = true,
     modelUrl,
     wasmPaths,
     confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD,
@@ -72,7 +74,7 @@ export function useCardDetection(
   const missedDetectionsRef = React.useRef(0);
   const mountedRef = React.useRef(true);
   const processFrameRef = React.useRef<(() => Promise<void>) | null>(null);
-
+  const preprocessingCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const clearScheduledDetection = React.useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -110,7 +112,9 @@ export function useCardDetection(
       scheduleNextDetection();
       return;
     }
-
+    if (!preprocessingCanvasRef.current) {
+      preprocessingCanvasRef.current = document.createElement('canvas');
+    }
     if (isInferenceRunningRef.current) {
       return;
     }
@@ -127,6 +131,7 @@ export function useCardDetection(
           confidenceThreshold,
           inputSize,
           iouThreshold,
+          preprocessingCanvas: preprocessingCanvasRef.current,
         }
       );
 
@@ -261,6 +266,9 @@ export function useCardDetection(
   }, [clearScheduledDetection]);
 
   const startDetection = React.useCallback(() => {
+    if (!enabled) {
+      return;
+    }
     isDetectingRef.current = true;
     setIsDetecting(true);
     setError(null);
@@ -269,7 +277,7 @@ export function useCardDetection(
     if (sessionRef.current) {
       void processFrameRef.current?.();
     }
-  }, []);
+  }, [enabled]);
 
   const stopDetection = React.useCallback(() => {
     isDetectingRef.current = false;

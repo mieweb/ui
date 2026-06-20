@@ -123,7 +123,7 @@ function renderCardCapture(
   render(
     <CardCapture
       open
-      modelUrl="/models/id-card-detector.onnx"
+      modelUrl="/models/id-card-detector-v1.onnx"
       onOpenChange={onOpenChange}
       onCapture={onCapture}
       {...props}

@@ -202,13 +202,13 @@ export const LiveBrowserModel: Story = {
       description: {
         story: `
 This live story loads the ONNX detector from
-\`/models/id-card-detector.onnx\` and performs inference directly inside the
+\`/models/id-card-detector-v1.onnx\` and performs inference directly inside the
 browser.
 
 For local development, place the approved model at:
 
 \`\`\`text
-.storybook/public/models/id-card-detector.onnx
+.storybook/public/models/id-card-detector-v1.onnx
 \`\`\`
 
 The model is intentionally not bundled with the component. Manual capture

@@ -78,7 +78,7 @@ describe('useCardDetection', () => {
 
     const { result, unmount } = renderHook(() =>
       useCardDetection(createVideoRef(), {
-        modelUrl: '/models/id-card-detector.onnx',
+        modelUrl: '/models/id-card-detector-v1.onnx',
       })
     );
 
@@ -90,7 +90,7 @@ describe('useCardDetection', () => {
 
     expect(result.current.isModelReady).toBe(true);
     expect(mockLoadCardModel).toHaveBeenCalledWith(
-      '/models/id-card-detector.onnx',
+      '/models/id-card-detector-v1.onnx',
       {
         wasmPaths: undefined,
       }
@@ -114,7 +114,7 @@ describe('useCardDetection', () => {
 
     const { result, unmount } = renderHook(() =>
       useCardDetection(videoRef, {
-        modelUrl: '/models/id-card-detector.onnx',
+        modelUrl: '/models/id-card-detector-v1.onnx',
         detectionIntervalMs: 5,
         stableDetectionsRequired: 2,
       })
@@ -167,7 +167,7 @@ describe('useCardDetection', () => {
 
     const { result, unmount } = renderHook(() =>
       useCardDetection(createVideoRef(), {
-        modelUrl: '/models/id-card-detector.onnx',
+        modelUrl: '/models/id-card-detector-v1.onnx',
         detectionIntervalMs: 20,
         stableDetectionsRequired: 1,
         allowedMisses: 0,
@@ -225,7 +225,7 @@ describe('useCardDetection', () => {
 
     const { result, unmount } = renderHook(() =>
       useCardDetection(createVideoRef(), {
-        modelUrl: '/models/id-card-detector.onnx',
+        modelUrl: '/models/id-card-detector-v1.onnx',
         detectionIntervalMs: 5,
       })
     );

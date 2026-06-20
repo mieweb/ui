@@ -9,8 +9,8 @@ import { preprocessCardFrame } from './preprocessCardFrame';
 
 export interface RunCardInferenceOptions extends PostprocessCardDetectionsOptions {
   inputSize?: number;
+  preprocessingCanvas?: HTMLCanvasElement;
 }
-
 export interface CardInferenceResult {
   detected: boolean;
   confidence: number;
@@ -49,13 +49,18 @@ export async function runCardInference(
     throw new Error('The card-detection model has no output.');
   }
 
-  const { inputSize = 640, ...postprocessOptions } = options;
+  const {
+    inputSize = 640,
+    preprocessingCanvas,
+    ...postprocessOptions
+  } = options;
 
   const { tensor, metadata } = preprocessCardFrame(
     source,
     sourceWidth,
     sourceHeight,
-    inputSize
+    inputSize,
+    preprocessingCanvas
   );
 
   const outputs = await session.run({

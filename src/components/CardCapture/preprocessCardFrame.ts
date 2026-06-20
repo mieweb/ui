@@ -82,7 +82,8 @@ export function preprocessCardFrame(
   source: CanvasImageSource,
   sourceWidth: number,
   sourceHeight: number,
-  inputSize = 640
+  inputSize = 640,
+  reusableCanvas?: HTMLCanvasElement
 ): PreprocessedCardFrame {
   const metadata = calculateLetterboxMetadata(
     sourceWidth,
@@ -90,7 +91,7 @@ export function preprocessCardFrame(
     inputSize
   );
 
-  const canvas = document.createElement('canvas');
+  const canvas = reusableCanvas ?? document.createElement('canvas');
   canvas.width = inputSize;
   canvas.height = inputSize;
 

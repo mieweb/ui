@@ -101,18 +101,20 @@ describe('runCardInference', () => {
     const { session, run } = createMockSession(outputTensor);
 
     const source = {} as CanvasImageSource;
-
+    const preprocessingCanvas = document.createElement('canvas');
     const result = await runCardInference(session, source, 1280, 720, {
       inputSize: 640,
       confidenceThreshold: 0.7,
       iouThreshold: 0.45,
+      preprocessingCanvas,
     });
 
     expect(mockPreprocessCardFrame).toHaveBeenCalledWith(
       source,
       1280,
       720,
-      640
+      640,
+      preprocessingCanvas
     );
 
     expect(run).toHaveBeenCalledWith({
