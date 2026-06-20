@@ -20,6 +20,11 @@ const buttonVariants = cva(
           'hover:bg-primary-900',
           'active:bg-primary-950',
         ],
+        brand: [
+          'bg-gradient-brand text-white shadow-glow',
+          'hover:-translate-y-0.5 hover:shadow-glow-hover',
+          'active:translate-y-0 active:shadow-glow',
+        ],
         secondary: [
           'bg-neutral-200 text-neutral-900',
           'hover:bg-neutral-300',
@@ -76,7 +81,8 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   /** Optional icon element to render before the button text */
   leftIcon?: React.ReactElement | null;
@@ -94,6 +100,7 @@ export interface ButtonProps
  * @example
  * ```tsx
  * <Button variant="primary" size="md">Click me</Button>
+ * <Button variant="brand" size="lg">Get started</Button>
  * <Button variant="danger" leftIcon={<TrashIcon />}>Delete</Button>
  * <Button variant="ghost" isLoading loadingText="Saving...">Save</Button>
  * ```

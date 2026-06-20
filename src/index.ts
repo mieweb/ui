@@ -69,6 +69,7 @@ export {
 } from './components/HelpSupportPanel';
 export * from './components/HeroActionCard';
 export * from './components/HRISProviderSelector';
+export * from './components/IconBadge';
 export * from './components/Input';
 export * from './components/InventoryManager';
 export * from './components/Label';
@@ -97,6 +98,7 @@ export {
 } from './components/OrderList';
 export * from './components/OrderLookupForm';
 export * from './components/OrderSidebar';
+export * from './components/OTPInput';
 export * from './components/PageHeader';
 export * from './components/Pagination';
 export * from './components/PatientHeader';

@@ -121,7 +121,15 @@ const meta: Meta<typeof Button> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'ghost', 'outline', 'danger', 'link'],
+      options: [
+        'primary',
+        'brand',
+        'secondary',
+        'ghost',
+        'outline',
+        'danger',
+        'link',
+      ],
     },
     size: {
       control: 'select',
@@ -162,6 +170,22 @@ export const Primary: Story = {
   args: {
     children: 'Primary Button',
     variant: 'primary',
+  },
+};
+
+export const Brand: Story = {
+  args: {
+    children: 'Get started',
+    variant: 'brand',
+    size: 'lg',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'High-emphasis brand action with a gradient fill, brand-tinted glow, and a subtle lift on hover. Use for hero CTAs and auth flows — not for routine actions.',
+      },
+    },
   },
 };
 

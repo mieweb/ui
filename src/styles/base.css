@@ -160,6 +160,15 @@
   /* ── Typography ────────────────────────────────────────────────────── */
   --font-sans: var(--mieweb-font-sans, ui-sans-serif);
   --font-mono: var(--mieweb-font-mono, ui-monospace);
+
+  /* ── Elevation / Effects (exposed as shadow-* utilities) ───────────── */
+  --shadow-card: var(--mieweb-shadow-card);
+  --shadow-dropdown: var(--mieweb-shadow-dropdown);
+  --shadow-modal: var(--mieweb-shadow-modal);
+  --shadow-elevated: var(--mieweb-shadow-elevated);
+  --shadow-elevated-hover: var(--mieweb-shadow-elevated-hover);
+  --shadow-glow: var(--mieweb-shadow-glow);
+  --shadow-glow-hover: var(--mieweb-shadow-glow-hover);
 }
 
 /* ============================================
@@ -301,6 +310,24 @@
     0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --mieweb-shadow-modal:
     0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Primary RGB channels — for translucent glows, tints & focus rings */
+  --mieweb-primary-rgb: 39 170 225;
+
+  /* Brand Gradients */
+  --mieweb-gradient-brand: linear-gradient(135deg, #1f98ca 0%, #0f749c 100%);
+  --mieweb-gradient-brand-strong: linear-gradient(
+    135deg,
+    #27aae1 0%,
+    #1786b3 100%
+  );
+
+  /* Elevation & Glow Shadows */
+  --mieweb-shadow-elevated: 0 10px 40px -4px rgb(0 0 0 / 0.12);
+  --mieweb-shadow-elevated-hover: 0 18px 50px -6px rgb(0 0 0 / 0.18);
+  --mieweb-shadow-glow: 0 4px 14px -2px rgb(var(--mieweb-primary-rgb) / 0.35);
+  --mieweb-shadow-glow-hover: 0 8px 24px -4px
+    rgb(var(--mieweb-primary-rgb) / 0.45);
 }
 
 /* Dark Mode */
@@ -323,6 +350,15 @@
   --mieweb-warning-foreground: #451a03;
   --mieweb-info-foreground: #fafafa;
   --mieweb-secondary-foreground: #fafafa;
+
+  /* Deepen the hero gradient & strengthen ambient shadow for dark surfaces */
+  --mieweb-gradient-brand-strong: linear-gradient(
+    135deg,
+    #1786b3 0%,
+    #00506e 100%
+  );
+  --mieweb-shadow-elevated: 0 10px 40px -4px rgb(0 0 0 / 0.5);
+  --mieweb-shadow-elevated-hover: 0 18px 50px -6px rgb(0 0 0 / 0.6);
 
   /* Chart */
   --mieweb-chart-1: #38bdf8;
@@ -382,4 +418,16 @@ kbd {
 
 .animate-waveform {
   animation: waveform 0.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Brand Gradient Utilities
+   ============================================ */
+
+@utility bg-gradient-brand {
+  background-image: var(--mieweb-gradient-brand);
+}
+
+@utility bg-gradient-brand-strong {
+  background-image: var(--mieweb-gradient-brand-strong);
 }
