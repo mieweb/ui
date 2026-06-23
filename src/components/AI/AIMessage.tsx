@@ -233,9 +233,12 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
   }
 
   if (content.type === 'image' && content.imageUrl) {
+    const safeHref = /^\s*javascript:/i.test(content.imageUrl)
+      ? undefined
+      : content.imageUrl;
     return (
       <a
-        href={content.imageUrl}
+        href={safeHref}
         target="_blank"
         rel="noopener noreferrer"
         className="block w-fit transition-transform hover:scale-[1.02]"
@@ -243,7 +246,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
       >
         <img
           src={content.imageUrl}
-          alt={content.name ?? 'Uploaded image'}
+          alt={content.name || 'Uploaded image'}
           loading="lazy"
           className="my-1 max-h-64 w-auto rounded-lg object-cover"
         />
@@ -274,7 +277,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">
-            {content.name ?? 'Document'}
+            {content.name || 'Document'}
           </p>
           {sizeLabel && (
             <p className="text-xs opacity-70">{sizeLabel}</p>
@@ -284,9 +287,12 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
     );
 
     if (content.fileUrl) {
+      const safeFileHref = /^\s*javascript:/i.test(content.fileUrl)
+        ? undefined
+        : content.fileUrl;
       return (
         <a
-          href={content.fileUrl}
+          href={safeFileHref}
           target="_blank"
           rel="noopener noreferrer"
           className="block w-fit no-underline"
