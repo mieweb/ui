@@ -81,6 +81,7 @@ export function NotificationCenter({
       case 'order':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -97,6 +98,7 @@ export function NotificationCenter({
       case 'invoice':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -113,6 +115,7 @@ export function NotificationCenter({
       case 'claim':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -129,6 +132,7 @@ export function NotificationCenter({
       case 'message':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -145,6 +149,7 @@ export function NotificationCenter({
       case 'alert':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -161,6 +166,7 @@ export function NotificationCenter({
       default:
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -198,7 +204,7 @@ export function NotificationCenter({
       case 'alert':
         return 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900/30';
       default:
-        return 'text-gray-500 bg-gray-100 dark:bg-gray-800';
+        return 'text-muted-foreground bg-gray-100 dark:bg-gray-800';
     }
   };
 
@@ -210,7 +216,7 @@ export function NotificationCenter({
 
   if (isLoading) {
     return (
-      <div className={`space-y-2 ${className}`}>
+      <div data-slot="notification-center" className={`space-y-2 ${className}`}>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
@@ -223,10 +229,14 @@ export function NotificationCenter({
 
   return (
     <div
+      data-slot="notification-center"
       className={`rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900 ${className}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+      <div
+        data-slot="notification-center-header"
+        className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700"
+      >
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-gray-900 dark:text-white">
             Notifications
@@ -249,9 +259,13 @@ export function NotificationCenter({
 
       {/* Notifications List */}
       {notifications.length === 0 ? (
-        <div className="py-12 text-center">
+        <div
+          data-slot="notification-center-empty"
+          className="py-12 text-center"
+        >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+            aria-hidden="true"
+            className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -263,16 +277,20 @@ export function NotificationCenter({
               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
             />
           </svg>
-          <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+          <p className="text-muted-foreground">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="max-h-[400px] divide-y divide-gray-100 overflow-y-auto dark:divide-gray-800">
+        <div
+          data-slot="notification-center-list"
+          className="max-h-[400px] divide-y divide-gray-100 overflow-y-auto dark:divide-gray-800"
+        >
           {visibleNotifications.map((notification) => (
             <div
               key={notification.id}
               role="button"
               tabIndex={0}
-              className={`cursor-pointer px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+              data-slot="notification-center-item"
+              className={`group cursor-pointer px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
                 !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
               }`}
               onClick={() => {
@@ -294,7 +312,10 @@ export function NotificationCenter({
                 }
               }}
             >
-              <div className="flex gap-3">
+              <div
+                data-slot="notification-center-item-row"
+                className="flex gap-3"
+              >
                 {/* Icon or Avatar */}
                 {notification.senderAvatar || notification.senderName ? (
                   <Avatar
@@ -304,6 +325,7 @@ export function NotificationCenter({
                   />
                 ) : (
                   <div
+                    data-slot="notification-center-icon"
                     className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${getTypeColor(notification.type, notification.priority)}`}
                   >
                     {getTypeIcon(notification.type)}
@@ -311,7 +333,10 @@ export function NotificationCenter({
                 )}
 
                 {/* Content */}
-                <div className="min-w-0 flex-1">
+                <div
+                  data-slot="notification-center-content"
+                  className="min-w-0 flex-1"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <p
                       className={`text-sm ${
@@ -322,7 +347,10 @@ export function NotificationCenter({
                     >
                       {notification.title}
                     </p>
-                    <div className="flex flex-shrink-0 items-center gap-2">
+                    <div
+                      data-slot="notification-center-badges"
+                      className="flex flex-shrink-0 items-center gap-2"
+                    >
                       {notification.priority === 'urgent' && (
                         <Badge variant="danger">Urgent</Badge>
                       )}
@@ -334,11 +362,14 @@ export function NotificationCenter({
                       )}
                     </div>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground mt-0.5 line-clamp-2 text-sm">
                     {notification.message}
                   </p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <div
+                    data-slot="notification-center-meta"
+                    className="mt-2 flex items-center justify-between"
+                  >
+                    <span className="text-muted-foreground text-xs">
                       {formatTimestamp(notification.timestamp)}
                     </span>
                     <div className="flex items-center gap-2">
@@ -361,7 +392,8 @@ export function NotificationCenter({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100"
+                          className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          aria-label="Dismiss notification"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDismiss(notification.id);
@@ -381,7 +413,10 @@ export function NotificationCenter({
 
       {/* Footer */}
       {hasMore && onSeeAll && (
-        <div className="border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+        <div
+          data-slot="notification-center-footer"
+          className="border-t border-gray-200 px-4 py-3 dark:border-gray-700"
+        >
           <Button variant="ghost" className="w-full" onClick={onSeeAll}>
             See all notifications
           </Button>

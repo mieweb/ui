@@ -59,21 +59,15 @@ export const AllFormats: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          Block format
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Block format</p>
         <Address address={sampleAddress} format="block" showIcon linkToMaps />
       </div>
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          Inline format
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Inline format</p>
         <Address address={sampleAddress} format="inline" showIcon />
       </div>
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          Compact format
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">Compact format</p>
         <Address address={sampleAddress} format="compact" showIcon />
       </div>
     </div>
@@ -85,15 +79,11 @@ export const ConvenienceComponents: Story = {
   render: () => (
     <div className="space-y-4">
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          AddressInline
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">AddressInline</p>
         <AddressInline address={sampleAddress} showIcon />
       </div>
       <div>
-        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-          AddressCompact
-        </p>
+        <p className="text-muted-foreground mb-2 text-sm">AddressCompact</p>
         <AddressCompact address={sampleAddress} showIcon />
       </div>
     </div>

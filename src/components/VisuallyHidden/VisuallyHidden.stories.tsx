@@ -92,7 +92,7 @@ export const SkipLink: Story = {
       </p>
       <a
         href="#main-content"
-        className="absolute top-0 left-0 -translate-y-full rounded-b-lg bg-[var(--mieweb-primary-500)] px-4 py-2 text-white transition-transform focus:translate-y-0 focus:ring-2 focus:ring-[var(--mieweb-ring)] focus:outline-none"
+        className="absolute top-0 left-0 -translate-y-full rounded-b-lg bg-[var(--mieweb-primary-800)] px-4 py-2 text-white transition-transform focus:translate-y-0 focus:ring-2 focus:ring-[var(--mieweb-ring)] focus:outline-none"
         onClick={(e) => e.preventDefault()}
       >
         Skip to main content

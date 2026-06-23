@@ -16,6 +16,7 @@ import type {
   AIChatSession,
   AISuggestedAction,
   AIChatCallbacks,
+  AIRenderTextContent,
   MCPResourceLink,
 } from './types';
 import { AIMessageDisplay } from './AIMessage';
@@ -27,6 +28,7 @@ import {
   EmptyState as MessagingEmptyState,
   type EmptyStateProps as MessagingEmptyStateProps,
 } from '../Messaging/MessageList';
+import { RecordButton } from '../RecordButton';
 import { SparklesIcon, CloseIcon, RefreshIcon } from './icons';
 
 // ============================================================================
@@ -45,6 +47,7 @@ export interface SuggestedActionsProps {
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   patient: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -60,6 +63,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   search: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -75,6 +79,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   appointment: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -90,6 +95,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   document: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -105,6 +111,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   help: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -120,6 +127,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   ),
   default: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -141,14 +149,18 @@ export function SuggestedActions({
   className,
 }: SuggestedActionsProps) {
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div
+      data-slot="ai-chat-suggestions"
+      className={cn('flex flex-wrap gap-2', className)}
+    >
       {actions.map((action) => (
         <button
           key={action.id}
+          data-slot="ai-chat-suggestion-btn"
           onClick={() => onSelect(action)}
           className={cn(
             'flex items-center gap-2 rounded-full border border-neutral-200 px-3 py-1.5',
-            'hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 text-sm text-neutral-700',
+            'hover:border-primary-300 hover:bg-primary-50 hover:text-primary-900 text-sm text-neutral-700',
             'dark:border-neutral-700 dark:text-neutral-300',
             'dark:hover:border-primary-700 dark:hover:bg-primary-900/20 dark:hover:text-primary-300',
             'transition-colors'
@@ -180,7 +192,10 @@ function AIEmptyState({
   ...props
 }: AIEmptyStateProps) {
   const aiIcon = (
-    <div className="bg-primary-500 dark:bg-primary-600 flex h-16 w-16 items-center justify-center rounded-full text-white">
+    <div
+      data-slot="ai-empty-state-icon"
+      className="bg-primary-800 dark:bg-primary-800 flex h-16 w-16 items-center justify-center rounded-full text-white"
+    >
       <SparklesIcon size="lg" className="h-8 w-8" />
     </div>
   );
@@ -188,9 +203,7 @@ function AIEmptyState({
   const suggestionsAction =
     suggestions && suggestions.length > 0 && onSuggestionSelect ? (
       <div className="mt-6">
-        <p className="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
-          Try asking:
-        </p>
+        <p className="text-muted-foreground mb-3 text-sm">Try asking:</p>
         <SuggestedActions actions={suggestions} onSelect={onSuggestionSelect} />
       </div>
     ) : undefined;
@@ -257,8 +270,19 @@ export interface AIChatProps
   height?: string | number;
   /** Props to pass to the MessageComposer */
   composerProps?: Partial<MessageComposerProps>;
+  /** Enable talk-to-text microphone button inside the input */
+  talkToText?: boolean;
+  /** Callback when recording starts */
+  onRecordingStart?: () => void;
+  /** Callback when recording completes (receives audio blob and duration) */
+  onRecordingComplete?: (blob: Blob, duration: number) => void;
   /** Callback when close button is clicked (shows close button when provided) */
   onClose?: () => void;
+  /**
+   * Optional renderer for `text` content blocks (e.g. Markdown). Called per
+   * text block with `{ messageId, streaming, role }`. Host must sanitize.
+   */
+  renderTextContent?: AIRenderTextContent;
   /** Additional class name */
   className?: string;
 }
@@ -281,6 +305,9 @@ export function AIChat({
   size,
   height,
   composerProps,
+  talkToText = false,
+  onRecordingStart,
+  onRecordingComplete,
   className,
   onSendMessage,
   onToolCall: _onToolCall,
@@ -289,6 +316,7 @@ export function AIChat({
   onCancel,
   onClear,
   onClose,
+  renderTextContent,
 }: AIChatProps) {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -325,14 +353,21 @@ export function AIChat({
 
   return (
     <div
+      data-slot="ai-chat"
       className={cn(chatVariants({ variant, size }), className)}
       style={{ height: height || undefined }}
     >
       {/* Header */}
       {showHeader && (
-        <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
+        <div
+          data-slot="ai-chat-header"
+          className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700"
+        >
           <div className="flex items-center gap-3">
-            <div className="bg-primary-500 dark:bg-primary-600 flex h-8 w-8 items-center justify-center rounded-full text-white">
+            <div
+              data-slot="ai-chat-header-icon"
+              className="bg-primary-800 dark:bg-primary-800 flex h-8 w-8 items-center justify-center rounded-full text-white"
+            >
               <SparklesIcon size="sm" />
             </div>
             <div>
@@ -351,7 +386,7 @@ export function AIChat({
                 onClick={onCancel}
                 className={cn(
                   'rounded-lg px-3 py-1.5 text-sm',
-                  'bg-red-100 text-red-600 hover:bg-red-200',
+                  'bg-red-100 text-red-700 hover:bg-red-200',
                   'dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50',
                   'transition-colors'
                 )}
@@ -362,8 +397,10 @@ export function AIChat({
             {onClear && messages.length > 0 && (
               <button
                 onClick={onClear}
+                data-slot="ai-chat-header-action"
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Clear chat"
+                aria-label="Clear chat"
               >
                 <RefreshIcon />
               </button>
@@ -371,6 +408,7 @@ export function AIChat({
             {onClose && (
               <button
                 onClick={onClose}
+                data-slot="ai-chat-header-action"
                 className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 title="Close chat"
                 aria-label="Close chat"
@@ -383,7 +421,10 @@ export function AIChat({
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div
+        data-slot="ai-chat-messages"
+        className="flex-1 overflow-y-auto px-4 py-4"
+      >
         {messages.length === 0 ? (
           <AIEmptyState
             suggestions={suggestions}
@@ -398,6 +439,7 @@ export function AIChat({
                 userName={userName}
                 showTimestamp={showTimestamps}
                 onLinkClick={handleLinkClick}
+                renderTextContent={renderTextContent}
               />
             ))}
             <div ref={messagesEndRef} />
@@ -406,12 +448,15 @@ export function AIChat({
       </div>
 
       {/* Input - Using MessageComposer from Messaging */}
-      <div className="shrink-0 border-t border-neutral-200 dark:border-neutral-700">
+      <div
+        data-slot="ai-chat-input"
+        className="shrink-0 border-t border-neutral-200 dark:border-neutral-700"
+      >
         {suggestions &&
           suggestions.length > 0 &&
           messages.length > 0 &&
           !isGenerating && (
-            <div className="px-4 pt-3">
+            <div data-slot="ai-chat-input-suggestions" className="px-4 pt-3">
               <SuggestedActions
                 actions={suggestions}
                 onSelect={handleSuggestionSelect}
@@ -427,6 +472,19 @@ export function AIChat({
           showCameraButton={false}
           showCharacterCount={false}
           variant="minimal"
+          inputTrailing={
+            talkToText ? (
+              <RecordButton
+                variant="ghost"
+                size="sm"
+                showPulse={false}
+                showWaveform
+                disabled={isGenerating}
+                onRecordingStart={onRecordingStart}
+                onRecordingComplete={onRecordingComplete}
+              />
+            ) : undefined
+          }
           {...composerProps}
         />
       </div>

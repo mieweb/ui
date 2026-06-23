@@ -224,9 +224,13 @@ function PhoneInputGroup({
   const canRemove = phones.length > minEntries;
 
   return (
-    <div className={cn('space-y-3', className)}>
+    <div data-slot="phone-group" className={cn('space-y-3', className)}>
       {phones.map((phone, index) => (
-        <div key={index} className="flex items-start gap-2">
+        <div
+          key={index}
+          data-slot="phone-row"
+          className="flex items-start gap-2"
+        >
           {/* Phone number input */}
           <div className="flex-1">
             <PhoneInput
@@ -240,25 +244,26 @@ function PhoneInputGroup({
           </div>
 
           {/* Type selector */}
-          <div className="w-32 shrink-0">
+          <div className="w-24 shrink-0 sm:w-32">
             <label htmlFor={`phone-type-${index}`} className="sr-only">
               Phone type
             </label>
             <select
               id={`phone-type-${index}`}
+              data-slot="phone-type-select"
               value={phone.type}
               onChange={(e) =>
                 handleTypeChange(index, e.target.value as PhoneType)
               }
               disabled={disabled}
               className={cn(
-                'w-full rounded-md border px-3 py-2 text-sm',
+                'h-10 w-full rounded-md border px-3 py-2 text-sm',
                 'border-gray-300 bg-white text-gray-900',
                 'focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2 focus:outline-none',
-                'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500',
+                'disabled:text-muted-foreground disabled:cursor-not-allowed disabled:bg-gray-50',
                 'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100',
                 'dark:focus:border-brand-400 dark:focus:ring-brand-400/20',
-                index === 0 && label ? 'mt-6' : ''
+                index === 0 && label ? 'mt-[26px]' : ''
               )}
             >
               {PHONE_TYPES.map((type) => (
@@ -271,14 +276,16 @@ function PhoneInputGroup({
 
           {/* Add/Remove buttons */}
           <div
+            data-slot="phone-action"
             className={cn(
               'flex shrink-0 items-center',
-              index === 0 && label ? 'mt-6' : ''
+              index === 0 && label ? 'mt-[26px]' : ''
             )}
           >
             {index === 0 ? (
               <button
                 type="button"
+                data-slot="phone-add-btn"
                 onClick={handleAdd}
                 disabled={disabled || !canAdd}
                 className={cn(
@@ -286,11 +293,13 @@ function PhoneInputGroup({
                   'text-brand-600 hover:bg-brand-50',
                   'disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent',
                   'dark:text-brand-400 dark:hover:bg-brand-900/20',
-                  'dark:disabled:text-gray-600'
+                  'dark:disabled:text-muted-foreground'
                 )}
                 aria-label="Add phone number"
               >
                 <svg
+                  aria-hidden="true"
+                  data-slot="phone-add-icon"
                   className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -307,6 +316,7 @@ function PhoneInputGroup({
             ) : (
               <button
                 type="button"
+                data-slot="phone-remove-btn"
                 onClick={() => handleRemove(index)}
                 disabled={disabled || !canRemove}
                 className={cn(
@@ -314,11 +324,13 @@ function PhoneInputGroup({
                   'text-red-600 hover:bg-red-50',
                   'disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent',
                   'dark:text-red-400 dark:hover:bg-red-900/20',
-                  'dark:disabled:text-gray-600'
+                  'dark:disabled:text-muted-foreground'
                 )}
                 aria-label="Remove phone number"
               >
                 <svg
+                  aria-hidden="true"
+                  data-slot="phone-remove-icon"
                   className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"

@@ -314,3 +314,50 @@ export const Mobile: Story = {
     viewport: { defaultViewport: 'mobile1' },
   },
 };
+
+// Condensed density variant
+// Activate condensed via the Storybook toolbar density toggle.
+export const Condensed: Story = {
+  args: {
+    serviceName: 'Drug Screen - 5 Panel',
+    employeeFirstName: 'John',
+    employeeLastName: 'Doe',
+    showFileUpload: true,
+    showApplyToAll: true,
+    initialData: {
+      result: 'passed',
+      dateDrawn: '2024-01-15',
+      dateCompleted: '2024-01-16',
+      recommendations: 'All results within normal range.',
+    },
+  },
+  decorators: [
+    (Story) => (
+      <div className="max-w-2xl">
+        <Card className="p-4">
+          <Story />
+        </Card>
+      </div>
+    ),
+  ],
+};
+
+// Condensed density – default view (no initial data)
+export const CondensedDefault: Story = {
+  args: {
+    serviceName: 'Physical Exam',
+    employeeFirstName: 'Jane',
+    employeeLastName: 'Smith',
+    showFileUpload: false,
+    providerContacts: sampleContacts,
+  },
+  decorators: [
+    (Story) => (
+      <div className="max-w-2xl">
+        <Card className="p-4">
+          <Story />
+        </Card>
+      </div>
+    ),
+  ],
+};

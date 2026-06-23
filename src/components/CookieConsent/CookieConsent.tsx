@@ -145,6 +145,7 @@ export function CookieConsentBanner({
       role="dialog"
       aria-label="Cookie consent"
       aria-live="polite"
+      data-slot="cookie-consent"
       className={cn(
         bannerVariants({ position, variant }),
         isAnimating && 'translate-y-4 opacity-0',
@@ -152,7 +153,10 @@ export function CookieConsentBanner({
         className
       )}
     >
-      <div className={cn('p-4', !isCompact && 'container mx-auto')}>
+      <div
+        className={cn('p-4', !isCompact && 'container mx-auto')}
+        data-slot="cookie-consent-inner"
+      >
         <div
           className={cn(
             isCompact
@@ -162,6 +166,7 @@ export function CookieConsentBanner({
         >
           {/* Message */}
           <div
+            data-slot="cookie-consent-message"
             className={cn(
               'text-sm',
               variant === 'default'
@@ -176,7 +181,7 @@ export function CookieConsentBanner({
               className={cn(
                 'text-xs',
                 variant === 'default'
-                  ? 'text-gray-600 dark:text-gray-400'
+                  ? 'text-muted-foreground'
                   : 'text-white/80'
               )}
             >
@@ -204,6 +209,7 @@ export function CookieConsentBanner({
 
           {/* Buttons */}
           <div
+            data-slot="cookie-consent-actions"
             className={cn(
               'flex gap-2',
               isCompact ? 'flex-col' : 'flex-shrink-0'
@@ -213,10 +219,11 @@ export function CookieConsentBanner({
               <button
                 type="button"
                 onClick={onCustomize}
+                data-slot="cookie-consent-btn"
                 className={cn(
                   'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                   variant === 'default'
-                    ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'
+                    ? 'text-muted-foreground hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-200'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                 )}
               >
@@ -227,10 +234,11 @@ export function CookieConsentBanner({
               <button
                 type="button"
                 onClick={onDecline}
+                data-slot="cookie-consent-btn"
                 className={cn(
                   'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                   variant === 'default'
-                    ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'
+                    ? 'text-muted-foreground hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-200'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                 )}
               >
@@ -240,10 +248,11 @@ export function CookieConsentBanner({
             <button
               type="button"
               onClick={handleAccept}
+              data-slot="cookie-consent-btn"
               className={cn(
                 'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                 variant === 'default'
-                  ? 'bg-primary-700 hover:bg-primary-800 text-white'
+                  ? 'bg-primary-800 hover:bg-primary-900 text-white'
                   : 'bg-white text-gray-900 hover:bg-gray-100'
               )}
             >
@@ -283,13 +292,14 @@ export function CompactCookieBanner({
     <div
       role="dialog"
       aria-label="Cookie consent"
+      data-slot="compact-cookie-banner"
       className={cn(
         'fixed right-4 bottom-4 left-4 md:right-4 md:left-auto md:max-w-sm',
         'z-50 rounded-lg bg-gray-900 p-4 text-white shadow-xl',
         className
       )}
     >
-      <p className="mb-3 text-sm">
+      <p className="mb-3 text-sm" data-slot="compact-cookie-banner-message">
         We use cookies to improve your experience.{' '}
         <a href={privacyHref} className="underline hover:no-underline">
           Learn more
@@ -298,6 +308,7 @@ export function CompactCookieBanner({
       <button
         type="button"
         onClick={onAccept}
+        data-slot="compact-cookie-banner-btn"
         className="w-full rounded-lg bg-white px-4 py-2 font-medium text-gray-900 transition-colors hover:bg-gray-100"
       >
         Got it

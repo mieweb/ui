@@ -138,7 +138,7 @@ function RemovableWrapper() {
     return (
       <button
         onClick={() => setVisible(true)}
-        className="text-primary-600 underline"
+        className="text-primary-800 underline"
       >
         Reset
       </button>

@@ -19,4 +19,5 @@ export {
   type CardActionsProps,
   type CardCollapsibleProps,
   type CardStatProps,
+  type CardTitleProps,
 } from './Card';

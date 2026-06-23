@@ -110,6 +110,7 @@ function SkeletonMessage({
 }: SkeletonMessageProps) {
   return (
     <div
+      data-slot="skeleton-message"
       className={cn(
         'flex items-end gap-2',
         isOutgoing ? 'flex-row-reverse' : 'flex-row',
@@ -118,9 +119,13 @@ function SkeletonMessage({
       aria-hidden="true"
     >
       {showAvatar && !isOutgoing && (
-        <div className="h-8 w-8 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
+        <div
+          data-slot="skeleton-avatar"
+          className="h-8 w-8 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700"
+        />
       )}
       <div
+        data-slot="skeleton-bubble"
         className={cn(
           'animate-pulse rounded-2xl',
           isOutgoing
@@ -129,7 +134,9 @@ function SkeletonMessage({
           'h-10 w-48'
         )}
       />
-      {showAvatar && isOutgoing && <div className="w-8" />}
+      {showAvatar && isOutgoing && (
+        <div data-slot="skeleton-spacer" className="w-8" />
+      )}
     </div>
   );
 }
@@ -162,6 +169,7 @@ function TypingIndicator({ typingState, className }: TypingIndicatorProps) {
 
   return (
     <div
+      data-slot="typing-indicator"
       className={cn('flex items-center gap-2 px-4 py-2', className)}
       role="status"
       aria-live="polite"
@@ -182,9 +190,7 @@ function TypingIndicator({ typingState, className }: TypingIndicatorProps) {
           style={{ animationDelay: '300ms' }}
         />
       </div>
-      <span className="text-xs text-neutral-500 dark:text-neutral-400">
-        {typingText}
-      </span>
+      <span className="text-muted-foreground text-xs">{typingText}</span>
     </div>
   );
 }
@@ -206,6 +212,7 @@ export interface DateSeparatorProps {
 function DateSeparator({ label, className }: DateSeparatorProps) {
   return (
     <div
+      data-slot="date-separator"
       className={cn('flex items-center justify-center py-4', className)}
       role="separator"
       aria-label={label}
@@ -253,6 +260,7 @@ function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
+      data-slot="message-empty-state"
       className={cn(
         'flex flex-1 flex-col items-center justify-center p-8 text-center',
         className
@@ -261,8 +269,12 @@ function EmptyState({
       aria-label={title}
     >
       {icon || (
-        <div className="mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800">
+        <div
+          data-slot="message-empty-state-icon"
+          className="mb-4 rounded-full bg-neutral-100 p-4 dark:bg-neutral-800"
+        >
           <svg
+            aria-hidden="true"
             className="h-12 w-12 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"
@@ -280,7 +292,7 @@ function EmptyState({
       <h3 className="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
         {title}
       </h3>
-      <p className="mb-4 max-w-sm text-sm text-neutral-500 dark:text-neutral-400">
+      <p className="text-muted-foreground mb-4 max-w-sm text-sm">
         {description}
       </p>
       {action}
@@ -309,7 +321,10 @@ function LoadMoreButton({
   className,
 }: LoadMoreButtonProps) {
   return (
-    <div className={cn('flex justify-center py-4', className)}>
+    <div
+      data-slot="load-more-button"
+      className={cn('flex justify-center py-4', className)}
+    >
       <button
         type="button"
         onClick={onClick}
@@ -327,6 +342,7 @@ function LoadMoreButton({
         {isLoading ? (
           <span className="flex items-center gap-2">
             <svg
+              aria-hidden="true"
               className="h-4 w-4 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -492,6 +508,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
     if (isLoading) {
       return (
         <div
+          role="status"
           className={cn(
             'flex flex-1 flex-col gap-3 overflow-y-auto p-4',
             className
@@ -518,6 +535,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
     return (
       <div
         ref={scrollContainerRef}
+        data-slot="message-list"
         className={cn(
           'flex flex-1 flex-col overflow-y-auto',
           'scroll-smooth',
@@ -534,7 +552,10 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
         )}
 
         {/* Messages grouped by date */}
-        <div className="flex flex-col gap-1 p-4">
+        <div
+          data-slot="message-list-content"
+          className="flex flex-col gap-1 p-4"
+        >
           {messageGroups.map((group) => (
             <React.Fragment key={group.date}>
               {/* Date separator */}
@@ -609,6 +630,7 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
             aria-label="Scroll to bottom"
           >
             <svg
+              aria-hidden="true"
               className="h-5 w-5 text-neutral-600 dark:text-neutral-300"
               fill="none"
               viewBox="0 0 24 24"

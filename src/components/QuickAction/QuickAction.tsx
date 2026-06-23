@@ -8,7 +8,7 @@ const quickActionIconVariants = cva(
     variants: {
       color: {
         primary:
-          'bg-primary-100 text-primary-600 dark:bg-primary-900/50 dark:text-primary-400',
+          'bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-400',
         green:
           'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400',
         purple:
@@ -119,12 +119,23 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
   ) => {
     const content = (
       <>
-        <div className={cn(quickActionIconVariants({ color }))}>{icon}</div>
-        <div>
-          <div className="font-medium text-neutral-900 dark:text-white">
+        <div
+          data-slot="quick-action-icon"
+          className={cn(quickActionIconVariants({ color }))}
+        >
+          {icon}
+        </div>
+        <div data-slot="quick-action-content">
+          <div
+            data-slot="quick-action-title"
+            className="font-medium text-neutral-900 dark:text-white"
+          >
             {title}
           </div>
-          <div className="text-xs text-neutral-500 dark:text-neutral-400">
+          <div
+            data-slot="quick-action-subtitle"
+            className="text-muted-foreground text-xs"
+          >
             {subtitle}
           </div>
         </div>
@@ -134,6 +145,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
     if (as === 'a' && href) {
       return (
         <a
+          data-slot="quick-action"
           href={href}
           className={cn(quickActionVariants({ disabled }), className)}
           aria-disabled={disabled}
@@ -146,6 +158,7 @@ const QuickAction = React.forwardRef<HTMLButtonElement, QuickActionProps>(
 
     return (
       <button
+        data-slot="quick-action"
         ref={ref}
         type="button"
         disabled={disabled ?? undefined}
@@ -164,6 +177,7 @@ QuickAction.displayName = 'QuickAction';
 export const QuickActionIcons = {
   Calendar: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -181,6 +195,7 @@ export const QuickActionIcons = {
   ),
   Clipboard: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -198,6 +213,7 @@ export const QuickActionIcons = {
   ),
   User: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -215,6 +231,7 @@ export const QuickActionIcons = {
   ),
   Document: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -232,6 +249,7 @@ export const QuickActionIcons = {
   ),
   Settings: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -255,6 +273,7 @@ export const QuickActionIcons = {
   ),
   Help: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -272,6 +291,7 @@ export const QuickActionIcons = {
   ),
   Search: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -289,6 +309,7 @@ export const QuickActionIcons = {
   ),
   Bell: (props: React.SVGProps<globalThis.SVGSVGElement>) => (
     <svg
+      aria-hidden="true"
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
@@ -366,13 +387,23 @@ const QuickActionGroup = React.forwardRef<
     );
 
     return (
-      <div ref={ref} className={className} {...props}>
+      <div
+        data-slot="quick-action-group"
+        ref={ref}
+        className={className}
+        {...props}
+      >
         {title && (
-          <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
+          <h2
+            data-slot="quick-action-group-title"
+            className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white"
+          >
             {title}
           </h2>
         )}
-        <div className={gridCols}>{children}</div>
+        <div data-slot="quick-action-group-grid" className={gridCols}>
+          {children}
+        </div>
       </div>
     );
   }

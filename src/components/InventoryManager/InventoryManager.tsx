@@ -119,7 +119,7 @@ export function InventoryManager({
     : null;
 
   return (
-    <div className={className}>
+    <div data-slot="inventory-manager" className={className}>
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
@@ -146,10 +146,11 @@ export function InventoryManager({
           <button
             type="button"
             onClick={onUpdateClick}
-            className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
+            className="text-primary-800 hover:text-primary-900 dark:text-primary-300 dark:hover:text-primary-200 flex items-center gap-1 text-sm font-medium"
           >
             Update Inventory
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -208,12 +209,13 @@ export function InventoryManager({
                       <span
                         className={`inline-flex items-center gap-1 ${
                           entry.type === 'credit'
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-red-600 dark:text-red-400'
+                            ? 'text-green-700 dark:text-green-400'
+                            : 'text-red-700 dark:text-red-400'
                         }`}
                       >
                         {entry.type === 'credit' ? (
                           <svg
+                            aria-hidden="true"
                             className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -228,6 +230,7 @@ export function InventoryManager({
                           </svg>
                         ) : (
                           <svg
+                            aria-hidden="true"
                             className="h-3.5 w-3.5"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -262,6 +265,7 @@ export function InventoryManager({
       ) : (
         <div className="text-muted-foreground py-8 text-center">
           <svg
+            aria-hidden="true"
             className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12"
             fill="none"
             viewBox="0 0 24 24"
@@ -293,15 +297,15 @@ export function InventoryManager({
         </ModalHeader>
         <ModalBody className="space-y-4">
           <div>
-            <h4 className="text-foreground text-lg font-semibold">
+            <h3 className="text-foreground text-lg font-semibold">
               {serviceName}
-            </h4>
+            </h3>
           </div>
 
           <div>
-            <h5 className="text-muted-foreground mb-2 text-sm font-medium">
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
               Update Inventory
-            </h5>
+            </h4>
           </div>
 
           {/* Add/Remove Toggle */}
@@ -311,11 +315,12 @@ export function InventoryManager({
               onClick={() => setUpdateType('debit')}
               className={`rounded-l-md border px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'debit'
-                  ? 'border-primary bg-primary text-primary-foreground'
+                  ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -335,11 +340,12 @@ export function InventoryManager({
               onClick={() => setUpdateType('credit')}
               className={`rounded-r-md border-t border-r border-b px-4 py-2 text-sm font-medium transition-colors ${
                 updateType === 'credit'
-                  ? 'border-primary bg-primary text-primary-foreground'
+                  ? 'border-primary bg-primary-800 text-white'
                   : 'border-input bg-card text-foreground hover:bg-muted'
               } `}
             >
               <svg
+                aria-hidden="true"
                 className="mr-1 inline-block h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"

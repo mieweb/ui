@@ -108,38 +108,61 @@ export function EmployerServiceModal({
           </ModalTitle>
         </ModalHeader>
 
-        <ModalBody className="space-y-4">
+        <ModalBody className="space-y-4" data-slot="employer-service-body">
           {/* Error message */}
           {errorMessage && (
-            <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
-              <p className="text-destructive text-sm">{errorMessage}</p>
+            <div
+              className="border-destructive/30 bg-destructive/10 rounded-lg border p-3"
+              data-slot="employer-service-error"
+            >
+              <p className="text-destructive-700 dark:text-destructive-300 text-sm">
+                {errorMessage}
+              </p>
             </div>
           )}
 
           {/* Service info */}
           {service && (
-            <div className="border-primary/30 bg-primary/10 rounded-lg border p-3">
-              <p className="text-primary-900 dark:text-primary-300 text-sm font-medium">
+            <div
+              className="border-primary/30 bg-primary/10 rounded-lg border p-3"
+              data-slot="employer-service-info"
+            >
+              <p
+                className="text-primary-900 dark:text-primary-300 text-sm font-medium"
+                data-slot="employer-service-info-name"
+              >
                 {service.name}
               </p>
-              <p className="text-primary-800 dark:text-primary-400 text-xs">
+              <p
+                className="text-primary-800 dark:text-primary-400 text-xs"
+                data-slot="employer-service-info-price"
+              >
                 Base price: ${service.basePrice.toFixed(2)}
               </p>
             </div>
           )}
 
           {/* Pricing section */}
-          <div className="space-y-3">
-            <p className="text-foreground text-sm font-medium">Pricing</p>
+          <div className="space-y-3" data-slot="employer-service-section">
+            <p
+              className="text-foreground text-sm font-medium"
+              data-slot="employer-service-section-title"
+            >
+              Pricing
+            </p>
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div
+              className="flex items-center justify-between"
+              data-slot="employer-service-switch-row"
+            >
+              <div data-slot="employer-service-switch-label">
                 <p className="text-foreground text-sm">Use Base Price</p>
                 <p className="text-muted-foreground text-xs">
                   Use the service&apos;s default pricing
                 </p>
               </div>
               <Switch
+                aria-label="Use Base Price"
                 checked={config.useBasePrice}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({
@@ -152,15 +175,22 @@ export function EmployerServiceModal({
             </div>
 
             {!config.useBasePrice && (
-              <div className="border-border ml-4 border-l-2 pl-4">
+              <div
+                className="border-border ml-4 border-l-2 pl-4"
+                data-slot="employer-service-indent"
+              >
                 <label
                   htmlFor="custom-price"
                   className="text-foreground mb-1 block text-sm font-medium"
+                  data-slot="employer-service-label"
                 >
                   Custom Price
                 </label>
                 <div className="relative w-40">
-                  <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                  <span
+                    className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2"
+                    data-slot="employer-service-price-prefix"
+                  >
                     $
                   </span>
                   <input
@@ -168,6 +198,7 @@ export function EmployerServiceModal({
                     type="number"
                     min="0"
                     step="0.01"
+                    data-slot="employer-service-price-input"
                     className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-7 shadow-sm focus:ring-2 focus:outline-none"
                     value={config.customPrice ?? ''}
                     onChange={(e) =>
@@ -194,19 +225,26 @@ export function EmployerServiceModal({
           />
 
           {/* Order handling */}
-          <div className="space-y-3">
-            <p className="text-foreground text-sm font-medium">
+          <div className="space-y-3" data-slot="employer-service-section">
+            <p
+              className="text-foreground text-sm font-medium"
+              data-slot="employer-service-section-title"
+            >
               Order Handling
             </p>
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div
+              className="flex items-center justify-between"
+              data-slot="employer-service-switch-row"
+            >
+              <div data-slot="employer-service-switch-label">
                 <p className="text-foreground text-sm">Auto-Accept Orders</p>
                 <p className="text-muted-foreground text-xs">
                   Automatically accept orders from this employer
                 </p>
               </div>
               <Switch
+                aria-label="Auto-Accept Orders"
                 checked={config.autoAccept}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({ ...prev, autoAccept: checked }))
@@ -214,14 +252,18 @@ export function EmployerServiceModal({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div
+              className="flex items-center justify-between"
+              data-slot="employer-service-switch-row"
+            >
+              <div data-slot="employer-service-switch-label">
                 <p className="text-foreground text-sm">Requires Approval</p>
                 <p className="text-muted-foreground text-xs">
                   Orders need manual approval before processing
                 </p>
               </div>
               <Switch
+                aria-label="Requires Approval"
                 checked={config.requiresApproval}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({ ...prev, requiresApproval: checked }))
@@ -231,17 +273,26 @@ export function EmployerServiceModal({
           </div>
 
           {/* Notifications */}
-          <div className="space-y-3">
-            <p className="text-foreground text-sm font-medium">Notifications</p>
+          <div className="space-y-3" data-slot="employer-service-section">
+            <p
+              className="text-foreground text-sm font-medium"
+              data-slot="employer-service-section-title"
+            >
+              Notifications
+            </p>
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div
+              className="flex items-center justify-between"
+              data-slot="employer-service-switch-row"
+            >
+              <div data-slot="employer-service-switch-label">
                 <p className="text-foreground text-sm">Notify on New Orders</p>
                 <p className="text-muted-foreground text-xs">
                   Send email when orders are placed
                 </p>
               </div>
               <Switch
+                aria-label="Notify on New Orders"
                 checked={config.notifyOnOrder}
                 onCheckedChange={(checked) =>
                   setConfig((prev) => ({ ...prev, notifyOnOrder: checked }))
@@ -250,7 +301,10 @@ export function EmployerServiceModal({
             </div>
 
             {config.notifyOnOrder && (
-              <div className="border-border ml-4 border-l-2 pl-4">
+              <div
+                className="border-border ml-4 border-l-2 pl-4"
+                data-slot="employer-service-indent"
+              >
                 <Input
                   label="Notification Email"
                   type="email"
@@ -268,15 +322,17 @@ export function EmployerServiceModal({
           </div>
 
           {/* Notes */}
-          <div>
+          <div data-slot="employer-service-notes">
             <label
               htmlFor="employer-service-notes"
               className="text-foreground mb-1 block text-sm font-medium"
+              data-slot="employer-service-label"
             >
               Internal Notes
             </label>
             <textarea
               id="employer-service-notes"
+              data-slot="employer-service-textarea"
               className="border-input bg-background text-foreground focus:ring-ring w-full rounded-md border px-3 py-2 shadow-sm focus:ring-2 focus:outline-none"
               rows={3}
               value={config.notes || ''}
@@ -301,7 +357,9 @@ export function EmployerServiceModal({
             {isSubmitting ? (
               <>
                 <svg
+                  aria-hidden="true"
                   className="mr-2 -ml-1 h-4 w-4 animate-spin"
+                  data-slot="employer-service-spinner"
                   fill="none"
                   viewBox="0 0 24 24"
                 >

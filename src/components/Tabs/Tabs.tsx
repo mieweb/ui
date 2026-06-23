@@ -87,7 +87,9 @@ function Tabs({
     <TabsContext.Provider
       value={{ value, onValueChange: handleValueChange, variant }}
     >
-      <div className={cn('w-full', className)}>{children}</div>
+      <div data-slot="tabs" className={cn('w-full', className)}>
+        {children}
+      </div>
     </TabsContext.Provider>
   );
 }
@@ -179,6 +181,7 @@ const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
           }
         }}
         role="tablist"
+        data-slot="tabs-list"
         tabIndex={0}
         onKeyDown={handleKeyDown}
         className={cn(tabsListVariants({ variant }), className)}
@@ -210,6 +213,7 @@ const tabsTriggerVariants = cva(
           'border-b-2 border-transparent',
           'text-muted-foreground hover:text-foreground',
           'data-[state=active]:border-primary-700 data-[state=active]:text-primary-800',
+          'dark:data-[state=active]:border-primary-400 dark:data-[state=active]:text-primary-400',
         ],
         pills: [
           'px-3 py-1.5 rounded-md text-sm',
@@ -250,6 +254,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         ref={ref}
         type="button"
         role="tab"
+        data-slot="tabs-trigger"
         aria-selected={isSelected}
         aria-controls={`tabpanel-${value}`}
         id={`tab-${value}`}
@@ -260,7 +265,11 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         className={cn(tabsTriggerVariants({ variant }), className)}
         {...props}
       >
-        {icon && <span className="shrink-0">{icon}</span>}
+        {icon && (
+          <span data-slot="tabs-trigger-icon" className="shrink-0">
+            {icon}
+          </span>
+        )}
         {children}
       </button>
     );
@@ -296,6 +305,7 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
       <div
         ref={ref}
         role="tabpanel"
+        data-slot="tabs-content"
         id={`tabpanel-${value}`}
         aria-labelledby={`tab-${value}`}
         tabIndex={0}

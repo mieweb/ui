@@ -209,7 +209,7 @@ export const FullPageDemo: Story = {
             {['Drug Testing', 'DOT Physical', 'Breath Alcohol'].map((s) => (
               <span
                 key={s}
-                className="bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 rounded-full px-3 py-1.5 text-sm"
+                className="bg-primary-100 text-primary-900 dark:bg-primary-900 dark:text-primary-300 rounded-full px-3 py-1.5 text-sm"
               >
                 {s}
               </span>

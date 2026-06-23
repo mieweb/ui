@@ -24,8 +24,19 @@
 
 /**
  * Safelist of classes used by @mieweb/ui components.
- * These must be safelisted because Tailwind may not detect them when
- * components are imported from node_modules (especially with Tailwind CSS 4).
+ *
+ * **Tailwind CSS 3**: These must be safelisted because Tailwind may not detect
+ * them when components are imported from node_modules.
+ *
+ * **Tailwind CSS 4**: The safelist is NOT needed if you add the `@source`
+ * directive to your CSS. Add this line to your main CSS file:
+ *
+ *   @source "../node_modules/@mieweb/ui/dist";
+ *
+ * This tells Tailwind 4 to scan @mieweb/ui's dist folder for class names,
+ * replacing the need for a manual safelist.
+ *
+ * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
   // Semantic colors
@@ -36,6 +47,10 @@ export const miewebUISafelist = [
   'bg-card',
   'bg-muted',
   'bg-primary',
+  'bg-primary-800',
+  'dark:bg-primary-500',
+  'checked:border-primary-500',
+  'dark:checked:border-primary-800',
   'bg-success',
   'bg-warning',
   'bg-destructive',
@@ -62,6 +77,11 @@ export const miewebUISafelist = [
   'border-success',
   'focus:ring-success/20',
   'focus:ring-destructive/20',
+  'opacity-0',
+  'group-hover:opacity-100',
+  'focus:opacity-100',
+  // Markdown SurveyBlock
+  'accent-primary-500',
   // Opacity-modifier variants for semantic colors used by components
   'bg-background/60',
   'bg-background/80',
@@ -164,11 +184,21 @@ export const miewebUISafelist = [
   'dark:text-neutral-400',
   'dark:border-neutral-600',
   'dark:border-neutral-700',
+  // Indigo (StripeBadge)
+  'bg-indigo-500/10',
+  'dark:bg-indigo-400/20',
+  'text-indigo-700',
+  'dark:text-indigo-300',
+  'border-indigo-500/30',
+  'hover:text-indigo-700',
+  'dark:hover:text-indigo-300',
   // Destructive scale
   'bg-destructive-50',
   'bg-destructive-100',
   'bg-destructive-500',
   'bg-destructive-600',
+  'bg-destructive-700',
+  'hover:bg-destructive-800',
   'text-destructive-500',
   'text-destructive-600',
   'text-destructive-700',
@@ -185,6 +215,8 @@ export const miewebUISafelist = [
   'bg-success-100',
   'bg-success-500',
   'bg-success-600',
+  'bg-success-700',
+  'hover:bg-success-800',
   'text-success-500',
   'text-success-600',
   'text-success-700',
@@ -201,6 +233,8 @@ export const miewebUISafelist = [
   'bg-warning-100',
   'bg-warning-500',
   'bg-warning-600',
+  'bg-warning-700',
+  'text-warning-900',
   'text-warning-500',
   'text-warning-600',
   'text-warning-700',
@@ -246,6 +280,11 @@ export const miewebUISafelist = [
   'border-chart-5',
   // Switch component
   'bg-primary-500',
+  // Primary scale (a11y contrast)
+  'text-primary-800',
+  'dark:text-primary-300',
+  // Text decoration
+  'underline',
   'h-5',
   'w-9',
   'h-6',
@@ -265,6 +304,36 @@ export const miewebUISafelist = [
   'overflow-hidden',
   // Select component
   'truncate',
+  // AIReconciliationPanel
+  'ring-primary-200',
+  'dark:ring-primary-900',
+  'border-primary-300',
+  'dark:border-primary-700',
+  'bg-primary-50/60',
+  'dark:bg-primary-950/30',
+  'text-primary-700',
+  'dark:text-primary-400',
+  'border-border/60',
+  'bg-muted/40',
+  'bg-muted/60',
+  'divide-border',
+  'max-h-[60vh]',
+  'bg-success-100',
+  'dark:bg-success-900/30',
+  'bg-amber-100',
+  'bg-amber-200',
+  'text-amber-700',
+  'text-amber-800',
+  'text-amber-200',
+  'text-amber-300',
+  'dark:bg-amber-900/30',
+  'dark:bg-amber-900/40',
+  'dark:text-amber-200',
+  'dark:text-amber-300',
+  'ring-1',
+  'last:border-b-0',
+  'border-dashed',
+  'text-[11px]',
 ];
 
 export interface MiewebUIPreset {
@@ -345,13 +414,14 @@ export const miewebUIPreset: MiewebUIPreset = {
         },
         // Destructive / error scale
         destructive: {
-          DEFAULT: 'var(--mieweb-destructive-500, #ef4444)',
+          DEFAULT:
+            'var(--mieweb-destructive, var(--mieweb-destructive-500, #dc2626))',
           50: 'var(--mieweb-destructive-50, #fef2f2)',
           100: 'var(--mieweb-destructive-100, #fee2e2)',
           200: 'var(--mieweb-destructive-200, #fecaca)',
           300: 'var(--mieweb-destructive-300, #fca5a5)',
           400: 'var(--mieweb-destructive-400, #f87171)',
-          500: 'var(--mieweb-destructive-500, #ef4444)',
+          500: 'var(--mieweb-destructive-500, #dc2626)',
           600: 'var(--mieweb-destructive-600, #dc2626)',
           700: 'var(--mieweb-destructive-700, #b91c1c)',
           800: 'var(--mieweb-destructive-800, #991b1b)',

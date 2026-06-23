@@ -25,6 +25,7 @@ export interface StripeBadgeProps {
 function StripeLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
+      aria-hidden="true"
       viewBox="0 0 60 25"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
@@ -82,9 +83,11 @@ export function StripeBadge({
   };
 
   const variantClasses = {
-    default: 'bg-[#635bff]/10 text-[#635bff] dark:bg-[#635bff]/20',
-    outline: 'border border-[#635bff]/30 text-[#635bff]',
-    minimal: 'text-muted-foreground hover:text-[#635bff]',
+    default:
+      'bg-indigo-500/10 text-indigo-700 dark:bg-indigo-400/20 dark:text-indigo-300',
+    outline: 'border border-indigo-500/30 text-indigo-700 dark:text-indigo-300',
+    minimal:
+      'text-neutral-600 dark:text-neutral-400 hover:text-indigo-700 dark:hover:text-indigo-300',
   };
 
   const content = (
@@ -113,6 +116,7 @@ export function StripeBadge({
         target="_blank"
         rel="noopener noreferrer"
         className={cn(badgeClasses, 'hover:opacity-80')}
+        data-slot="stripe-badge"
         aria-label="Powered by Stripe - Visit Stripe website"
       >
         {content}
@@ -121,7 +125,12 @@ export function StripeBadge({
   }
 
   return (
-    <div className={badgeClasses} role="img" aria-label="Powered by Stripe">
+    <div
+      className={badgeClasses}
+      data-slot="stripe-badge"
+      role="img"
+      aria-label="Powered by Stripe"
+    >
       {content}
     </div>
   );
@@ -173,10 +182,12 @@ export function StripeSecureBadge({
         sizeClasses[size].container,
         className
       )}
+      data-slot="stripe-secure-badge"
       role="img"
       aria-label="Secure payments powered by Stripe"
     >
       <svg
+        aria-hidden="true"
         className={cn(
           sizeClasses[size].icon,
           'text-green-600 dark:text-green-500'

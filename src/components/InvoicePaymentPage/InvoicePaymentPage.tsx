@@ -134,6 +134,7 @@ export function InvoicePaymentPage({
   if (isLoading) {
     return (
       <div
+        data-slot="invoice-payment"
         className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
       >
         <div className="mx-auto max-w-4xl">
@@ -152,12 +153,17 @@ export function InvoicePaymentPage({
   if (!invoice) {
     return (
       <div
+        data-slot="invoice-payment"
         className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
-        <Card className="w-full max-w-md text-center">
+        <Card
+          data-slot="invoice-payment-not-found"
+          className="w-full max-w-md text-center"
+        >
           <CardContent className="py-12">
             <svg
-              className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-gray-600"
+              aria-hidden="true"
+              className="text-muted-foreground dark:text-muted-foreground mx-auto mb-4 h-16 w-16"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -172,7 +178,7 @@ export function InvoicePaymentPage({
             <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Invoice Not Found
             </h2>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground">
               The invoice you&apos;re looking for doesn&apos;t exist or has
               expired.
             </p>
@@ -185,12 +191,20 @@ export function InvoicePaymentPage({
   if (successMessage || invoice.status === 'paid') {
     return (
       <div
+        data-slot="invoice-payment"
         className={`flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900 ${className}`}
       >
-        <Card className="w-full max-w-md text-center">
+        <Card
+          data-slot="invoice-payment-success"
+          className="w-full max-w-md text-center"
+        >
           <CardContent className="py-12">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+            <div
+              data-slot="invoice-payment-success-icon"
+              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+            >
               <svg
+                aria-hidden="true"
                 className="h-8 w-8 text-green-600 dark:text-green-400"
                 fill="none"
                 stroke="currentColor"
@@ -207,11 +221,11 @@ export function InvoicePaymentPage({
             <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Payment Successful
             </h2>
-            <p className="mb-4 text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground mb-4">
               {successMessage ||
                 'Thank you! Your payment has been processed successfully.'}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground text-sm">
               Invoice {invoice.invoiceNumber}
             </p>
           </CardContent>
@@ -222,11 +236,15 @@ export function InvoicePaymentPage({
 
   return (
     <div
+      data-slot="invoice-payment"
       className={`min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900 ${className}`}
     >
       <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
+        <div
+          data-slot="invoice-payment-header"
+          className="mb-8 flex items-center gap-4"
+        >
           {invoice.providerLogoUrl ? (
             <img
               src={invoice.providerLogoUrl}
@@ -240,10 +258,13 @@ export function InvoicePaymentPage({
           )}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div
+          data-slot="invoice-payment-grid"
+          className="grid gap-6 lg:grid-cols-2"
+        >
           {/* Invoice Summary */}
           <div>
-            <Card>
+            <Card data-slot="invoice-payment-summary">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Invoice {invoice.invoiceNumber}</CardTitle>
@@ -253,12 +274,12 @@ export function InvoicePaymentPage({
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-muted-foreground space-y-1 text-sm">
                   <p>Issued: {formatDate(invoice.issuedDate)}</p>
                   <p
                     className={
                       invoice.status === 'overdue'
-                        ? 'font-medium text-red-600 dark:text-red-400'
+                        ? 'font-medium text-red-700 dark:text-red-400'
                         : ''
                     }
                   >
@@ -267,10 +288,13 @@ export function InvoicePaymentPage({
                   <p>Bill to: {invoice.employerName}</p>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
+                <div
+                  data-slot="invoice-payment-line-items"
+                  className="border-t border-gray-200 pt-4 dark:border-gray-700"
+                >
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-gray-500 dark:text-gray-400">
+                      <tr className="text-muted-foreground">
                         <th className="pb-2 text-left font-medium">Item</th>
                         <th className="pb-2 text-right font-medium">Amount</th>
                       </tr>
@@ -288,18 +312,17 @@ export function InvoicePaymentPage({
                   </table>
                 </div>
 
-                <div className="space-y-2 border-t border-gray-200 pt-4 dark:border-gray-700">
+                <div
+                  data-slot="invoice-payment-totals"
+                  className="space-y-2 border-t border-gray-200 pt-4 dark:border-gray-700"
+                >
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">
-                      Subtotal
-                    </span>
+                    <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatCurrency(invoice.subtotal)}</span>
                   </div>
                   {invoice.tax !== undefined && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">
-                        Tax
-                      </span>
+                      <span className="text-muted-foreground">Tax</span>
                       <span>{formatCurrency(invoice.tax)}</span>
                     </div>
                   )}
@@ -314,15 +337,18 @@ export function InvoicePaymentPage({
 
           {/* Payment Form */}
           <div>
-            <Card>
+            <Card data-slot="invoice-payment-form">
               <CardHeader>
                 <CardTitle>Payment Details</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {errorMessage && (
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                      <p className="text-sm text-red-600 dark:text-red-400">
+                    <div
+                      data-slot="invoice-payment-error"
+                      className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+                    >
+                      <p className="text-sm text-red-700 dark:text-red-400">
                         {errorMessage}
                       </p>
                     </div>
@@ -330,7 +356,10 @@ export function InvoicePaymentPage({
 
                   {/* Payment method toggle */}
                   {acceptedMethods.length > 1 && (
-                    <div className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div
+                      data-slot="invoice-payment-methods"
+                      className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                    >
                       {acceptedMethods.includes('card') && (
                         <button
                           type="button"
@@ -338,7 +367,7 @@ export function InvoicePaymentPage({
                           className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                             paymentMethod === 'card'
                               ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                              : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-800'
                           } `}
                         >
                           Credit Card
@@ -351,7 +380,7 @@ export function InvoicePaymentPage({
                           className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
                             paymentMethod === 'ach'
                               ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                              : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-800'
                           } `}
                         >
                           Bank Transfer
@@ -386,7 +415,10 @@ export function InvoicePaymentPage({
                         placeholder="4242 4242 4242 4242"
                         required
                       />
-                      <div className="grid grid-cols-2 gap-4">
+                      <div
+                        data-slot="invoice-payment-card-row"
+                        className="grid grid-cols-2 gap-4"
+                      >
                         <Input
                           label="Expiry"
                           value={expiry}
@@ -430,6 +462,7 @@ export function InvoicePaymentPage({
                     {isProcessing ? (
                       <>
                         <svg
+                          aria-hidden="true"
                           className="mr-2 -ml-1 h-4 w-4 animate-spin"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -456,7 +489,7 @@ export function InvoicePaymentPage({
                   </Button>
 
                   {showStripeBranding && (
-                    <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground text-center text-xs">
                       Secured by Stripe
                     </p>
                   )}

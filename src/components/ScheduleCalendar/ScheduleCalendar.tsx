@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '../../utils/cn';
 import { Button } from '../Button/Button';
 
 export interface CalendarAppointment {
@@ -155,7 +156,11 @@ export function ScheduleCalendar({
   if (isLoading) {
     return (
       <div
-        className={`rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${className}`}
+        data-slot="schedule-calendar"
+        className={cn(
+          'rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+          className
+        )}
       >
         <div className="h-12 animate-pulse rounded-t-lg bg-gray-200 dark:bg-gray-700" />
         <div className="space-y-2 p-4">
@@ -174,17 +179,26 @@ export function ScheduleCalendar({
 
   return (
     <div
-      className={`rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 ${className}`}
+      data-slot="schedule-calendar"
+      className={cn(
+        'rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+        className
+      )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+      <div
+        data-slot="schedule-calendar-header"
+        className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700"
+      >
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigateDate('prev')}
+            aria-label="Previous"
           >
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               stroke="currentColor"
@@ -202,8 +216,10 @@ export function ScheduleCalendar({
             variant="outline"
             size="sm"
             onClick={() => navigateDate('next')}
+            aria-label="Next"
           >
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               stroke="currentColor"
@@ -243,11 +259,14 @@ export function ScheduleCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <div className="overflow-auto">
+      <div data-slot="schedule-calendar-grid" className="overflow-auto">
         <div className="min-w-[600px]">
           {/* Day Headers for Week View */}
           {view === 'week' && (
-            <div className="flex border-b border-gray-200 dark:border-gray-700">
+            <div
+              data-slot="schedule-calendar-day-headers"
+              className="flex border-b border-gray-200 dark:border-gray-700"
+            >
               <div className="w-16 flex-shrink-0" />
               {weekDates.map((date, i) => (
                 <div
@@ -258,7 +277,9 @@ export function ScheduleCalendar({
                       : ''
                   }`}
                 >
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p
+                    className={`text-xs ${isSameDay(date, new Date()) ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+                  >
                     {date.toLocaleDateString('en-US', { weekday: 'short' })}
                   </p>
                   <p
@@ -278,11 +299,14 @@ export function ScheduleCalendar({
           {/* Time Grid */}
           <div className="flex">
             {/* Time Labels */}
-            <div className="w-16 flex-shrink-0">
+            <div
+              data-slot="schedule-calendar-time-labels"
+              className="w-16 flex-shrink-0"
+            >
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="h-16 pr-2 text-right text-xs text-gray-500 dark:text-gray-400"
+                  className="text-muted-foreground h-16 pr-2 text-right text-xs"
                 >
                   {new Date(2000, 0, 1, hour).toLocaleTimeString('en-US', {
                     hour: 'numeric',
@@ -311,6 +335,11 @@ export function ScheduleCalendar({
                       key={hour}
                       role={onAddAppointment ? 'button' : undefined}
                       tabIndex={onAddAppointment ? 0 : undefined}
+                      aria-label={
+                        onAddAppointment
+                          ? `Add appointment at ${new Date(2000, 0, 1, hour).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })}`
+                          : undefined
+                      }
                       className="h-16 border-b border-gray-100 dark:border-gray-800"
                       onClick={() => {
                         if (onAddAppointment) {
@@ -320,7 +349,11 @@ export function ScheduleCalendar({
                         }
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && onAddAppointment) {
+                        if (
+                          (e.key === 'Enter' || e.key === ' ') &&
+                          onAddAppointment
+                        ) {
+                          e.preventDefault();
                           const clickDate = new Date(date);
                           clickDate.setHours(hour, 0, 0, 0);
                           onAddAppointment(clickDate, `${hour}:00`);
@@ -335,8 +368,10 @@ export function ScheduleCalendar({
                     return (
                       <div
                         key={appointment.id}
+                        data-slot="schedule-calendar-appointment"
                         role="button"
                         tabIndex={0}
+                        aria-label={`${appointment.patientName || appointment.title}, ${formatTime(appointment.startTime)}`}
                         className={`absolute right-1 left-1 cursor-pointer overflow-hidden rounded border-l-4 px-2 py-1 text-xs text-white ${getStatusColor(appointment.status)}`}
                         style={{
                           top: position.top,
@@ -344,9 +379,12 @@ export function ScheduleCalendar({
                           minHeight: '1.5rem',
                         }}
                         onClick={() => onAppointmentClick?.(appointment)}
-                        onKeyDown={(e) =>
-                          e.key === 'Enter' && onAppointmentClick?.(appointment)
-                        }
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onAppointmentClick?.(appointment);
+                          }
+                        }}
                       >
                         <p className="truncate font-medium">
                           {appointment.patientName || appointment.title}
@@ -365,22 +403,25 @@ export function ScheduleCalendar({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 border-t border-gray-200 p-4 text-xs dark:border-gray-700">
+      <div
+        data-slot="schedule-calendar-legend"
+        className="flex items-center gap-4 border-t border-gray-200 p-4 text-xs dark:border-gray-700"
+      >
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-blue-700" />
-          <span className="text-gray-600 dark:text-gray-400">Confirmed</span>
+          <span className="text-muted-foreground">Confirmed</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-yellow-700" />
-          <span className="text-gray-600 dark:text-gray-400">Pending</span>
+          <span className="text-muted-foreground">Pending</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-green-700" />
-          <span className="text-gray-600 dark:text-gray-400">Completed</span>
+          <span className="text-muted-foreground">Completed</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="h-3 w-3 rounded bg-gray-600" />
-          <span className="text-gray-600 dark:text-gray-400">Cancelled</span>
+          <span className="text-muted-foreground">Cancelled</span>
         </div>
       </div>
     </div>

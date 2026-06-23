@@ -161,31 +161,46 @@ export function ErrorPage({
   };
 
   return (
-    <div className={cn(errorPageVariants({ size }), className)}>
+    <div
+      className={cn(errorPageVariants({ size }), className)}
+      data-slot="error-page"
+    >
       {/* Illustration */}
-      <div className="mb-8">
+      <div className="mb-8" data-slot="error-page-illustration">
         {illustration || <DefaultIllustration type={type} />}
       </div>
 
       {/* Error Code */}
       {displayCode && (
-        <div className="mb-4 text-6xl font-bold text-gray-300 sm:text-8xl dark:text-gray-600">
+        <div
+          className="text-muted-foreground mb-4 text-6xl font-bold sm:text-8xl"
+          data-slot="error-page-code"
+        >
           {displayCode}
         </div>
       )}
 
       {/* Title */}
-      <h1 className="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+      <h1
+        className="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
+        data-slot="error-page-title"
+      >
         {displayTitle}
       </h1>
 
       {/* Description */}
-      <p className="mb-8 max-w-md text-gray-600 dark:text-gray-400">
+      <p
+        className="text-muted-foreground mb-8 max-w-md"
+        data-slot="error-page-description"
+      >
         {displayDescription}
       </p>
 
       {/* Actions */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div
+        className="flex flex-col gap-3 sm:flex-row"
+        data-slot="error-page-actions"
+      >
         {primaryAction && (
           <ActionButton
             label={primaryAction.label}
@@ -219,7 +234,11 @@ export function ErrorPage({
       </div>
 
       {/* Additional Content */}
-      {children && <div className="mt-8">{children}</div>}
+      {children && (
+        <div className="mt-8" data-slot="error-page-children">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -273,7 +292,10 @@ export function ServerErrorPage({
   return (
     <ErrorPage type="500" {...props}>
       {showErrorDetails && errorMessage && (
-        <div className="mt-4 max-w-2xl text-left">
+        <div
+          className="mt-4 max-w-2xl text-left"
+          data-slot="error-page-details"
+        >
           <details className="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
             <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
               Error Details
@@ -283,7 +305,7 @@ export function ServerErrorPage({
                 {errorMessage}
               </p>
               {errorStack && (
-                <pre className="overflow-x-auto rounded bg-gray-50 p-2 text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-400">
+                <pre className="text-muted-foreground overflow-x-auto rounded bg-gray-50 p-2 text-xs dark:bg-gray-900">
                   {errorStack}
                 </pre>
               )}
@@ -377,7 +399,7 @@ export function MaintenancePage({
           href={statusUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+          className="text-primary-800 hover:text-primary-900 text-sm font-medium"
         >
           Check Status Page →
         </a>
@@ -470,7 +492,7 @@ interface DefaultIllustrationProps {
 }
 
 function DefaultIllustration({ type }: DefaultIllustrationProps) {
-  const iconClasses = 'h-24 w-24 text-gray-300 dark:text-gray-600';
+  const iconClasses = 'h-24 w-24 text-muted-foreground';
 
   switch (type) {
     case '404':
@@ -496,6 +518,7 @@ function DefaultIllustration({ type }: DefaultIllustrationProps) {
 function Search404Icon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -519,6 +542,7 @@ function Search404Icon({ className }: { className?: string }) {
 function ServerErrorIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -537,6 +561,7 @@ function ServerErrorIcon({ className }: { className?: string }) {
 function LockIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -555,6 +580,7 @@ function LockIcon({ className }: { className?: string }) {
 function WifiOffIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -574,6 +600,7 @@ function WifiOffIcon({ className }: { className?: string }) {
 function WrenchIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -597,6 +624,7 @@ function WrenchIcon({ className }: { className?: string }) {
 function AlertIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

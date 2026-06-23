@@ -14,6 +14,7 @@ import { useSidebar } from './SidebarProvider';
 
 const ChevronLeftIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -26,6 +27,7 @@ const ChevronLeftIcon = () => (
 
 const ChevronRightIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -38,6 +40,7 @@ const ChevronRightIcon = () => (
 
 const ChevronDownIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-3 w-3"
     fill="none"
     viewBox="0 0 24 24"
@@ -50,6 +53,7 @@ const ChevronDownIcon = () => (
 
 const XIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -66,6 +70,7 @@ const XIcon = () => (
 
 const MenuIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -82,6 +87,7 @@ const MenuIcon = () => (
 
 const SearchIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -137,6 +143,7 @@ export function Sidebar({
       {/* Mobile backdrop */}
       {isMobileViewport && isMobileOpen && (
         <div
+          data-slot="sidebar-backdrop"
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={closeMobile}
           aria-hidden="true"
@@ -145,6 +152,7 @@ export function Sidebar({
 
       {/* Sidebar */}
       <nav
+        data-slot="sidebar"
         data-testid={testId}
         className={cn(
           'flex h-screen flex-col',
@@ -193,6 +201,7 @@ export function SidebarHeader({
 
   return (
     <div
+      data-slot="sidebar-header"
       className={cn(
         'flex items-center border-b border-neutral-200 py-4 dark:border-neutral-700',
         showCollapsed ? 'justify-center px-2' : 'justify-between px-4',
@@ -239,6 +248,7 @@ export function SidebarFooter({
 
   return (
     <div
+      data-slot="sidebar-footer"
       className={cn(
         'mt-auto border-t border-neutral-200 py-4 dark:border-neutral-700',
         showCollapsed ? 'flex justify-center px-2' : 'px-4',
@@ -265,7 +275,10 @@ export function SidebarContent({
   className,
 }: SidebarContentProps): React.JSX.Element {
   return (
-    <div className={cn('flex-1 overflow-y-auto py-4', className)}>
+    <div
+      data-slot="sidebar-content"
+      className={cn('flex-1 overflow-y-auto py-4', className)}
+    >
       {children}
     </div>
   );
@@ -285,7 +298,11 @@ export function SidebarNav({
   children,
   className,
 }: SidebarNavProps): React.JSX.Element {
-  return <nav className={cn('space-y-1 px-2', className)}>{children}</nav>;
+  return (
+    <div data-slot="sidebar-nav" className={cn('space-y-1 px-2', className)}>
+      {children}
+    </div>
+  );
 }
 
 // =============================================================================
@@ -335,9 +352,10 @@ export function SidebarNavGroup({
   }, [groupId, toggleGroup]);
 
   return (
-    <div className={cn('mb-2', className)}>
+    <div data-slot="sidebar-nav-group" className={cn('mb-2', className)}>
       {/* Group Header */}
       <button
+        data-slot="sidebar-nav-group-button"
         onClick={handleToggle}
         className={cn(
           'flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold',
@@ -346,11 +364,12 @@ export function SidebarNavGroup({
           showCollapsed && 'justify-center'
         )}
         title={showCollapsed ? label : undefined}
+        aria-label={showCollapsed ? label : undefined}
       >
         {icon && (
           <span
             className={cn(
-              'h-5 w-5 flex-shrink-0 text-neutral-500 dark:text-neutral-400',
+              'text-muted-foreground h-5 w-5 flex-shrink-0',
               !showCollapsed && 'mr-3'
             )}
           >
@@ -444,8 +463,8 @@ export function SidebarNavItem({
           className={cn(
             'h-5 w-5 flex-shrink-0',
             isActive
-              ? 'text-primary-600 dark:text-primary-400'
-              : 'text-neutral-500 dark:text-neutral-400',
+              ? 'text-primary-800 dark:text-primary-400'
+              : 'text-muted-foreground',
             !showCollapsed && 'mr-3'
           )}
         >
@@ -485,11 +504,13 @@ export function SidebarNavItem({
   if (href && !disabled) {
     return (
       <a
+        data-slot="sidebar-nav-item"
         href={href}
         onClick={handleClick}
         data-testid={testId}
         className={baseClasses}
         title={showCollapsed ? label : undefined}
+        aria-label={showCollapsed ? label : undefined}
       >
         {content}
       </a>
@@ -498,11 +519,13 @@ export function SidebarNavItem({
 
   return (
     <button
+      data-slot="sidebar-nav-item"
       onClick={handleClick}
       disabled={disabled}
       data-testid={testId}
       className={baseClasses}
       title={showCollapsed ? label : undefined}
+      aria-label={showCollapsed ? label : undefined}
     >
       {content}
     </button>
@@ -533,7 +556,7 @@ export function SidebarToggle({
     <button
       onClick={toggleCollapsed}
       className={cn(
-        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
@@ -579,7 +602,7 @@ export function SidebarMobileToggle({
     <button
       onClick={openMobile}
       className={cn(
-        'rounded-lg p-2 text-neutral-500 dark:text-neutral-400',
+        'text-muted-foreground rounded-lg p-2',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         className
@@ -654,7 +677,7 @@ export function SidebarSearch({
   if (showCollapsed) return <></>;
 
   return (
-    <div className={cn('px-3 py-2', className)}>
+    <div data-slot="sidebar-search" className={cn('px-3 py-2', className)}>
       <div className="relative">
         <div className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400">
           <SearchIcon />

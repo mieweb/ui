@@ -256,7 +256,10 @@ function OnboardingWizardDemo({
   };
 
   return (
-    <div className="border-border relative h-[700px] overflow-hidden rounded-lg border shadow-lg">
+    <div
+      className="border-border relative h-[700px] overflow-hidden rounded-lg border shadow-lg"
+      data-slot="onboarding-wizard-preview"
+    >
       <OnboardingWizard
         {...getProps()}
         className="!absolute !inset-0 !h-full"

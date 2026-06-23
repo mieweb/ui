@@ -1,14 +1,36 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import { ArrowRight } from 'lucide-react';
+import { Button } from './components/Button';
 
 <Meta title="Introduction" />
 
 # MIE Web UI
 
-<div className="sb-unstyled" style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
-  <img src="https://img.shields.io/npm/v/@mieweb/ui?style=flat-square&color=27aae1" alt="npm version" />
-  <img src="https://img.shields.io/badge/React-18%2B-61dafb?style=flat-square" alt="React 18+" />
-  <img src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square" alt="Tailwind CSS 4" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square" alt="TypeScript" />
+<div
+  className="sb-unstyled"
+  style={{
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="https://img.shields.io/npm/v/@mieweb/ui?style=flat-square&color=27aae1"
+    alt="npm version"
+  />
+  <img
+    src="https://img.shields.io/badge/React-18%2B-61dafb?style=flat-square"
+    alt="React 18+"
+  />
+  <img
+    src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square"
+    alt="Tailwind CSS 4"
+  />
+  <img
+    src="https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square"
+    alt="TypeScript"
+  />
 </div>
 
 A **themeable, accessible React component library** built with Tailwind CSS 4. Designed for MIE's suite of healthcare applications including BlueHive, Enterprise Health, WebChart, and Waggleline.
@@ -17,35 +39,50 @@ A **themeable, accessible React component library** built with Tailwind CSS 4. D
 
 ## 🎯 See It In Action
 
-<div className="sb-unstyled" style={{ 
-  padding: '24px', 
-  borderRadius: '12px', 
-  background: 'linear-gradient(135deg, var(--mieweb-primary-500, #27aae1) 0%, var(--mieweb-primary-700, #1786b3) 100%)',
-  marginTop: '16px',
-  marginBottom: '24px'
-}}>
-  <div style={{ color: 'white', marginBottom: '12px' }}>
-    <strong style={{ fontSize: '18px', display: 'block', marginBottom: '8px' }}>🚀 Full Dashboard Example</strong>
-    <span style={{ margin: 0, opacity: 0.9, fontSize: '14px', lineHeight: '1.5', display: 'block' }}>
-      Want to see how all the components work together? Check out a complete dashboard implementation 
-      featuring Sidebar navigation, AppHeader, Cards, Data tables, and more.
+<div
+  className="sb-unstyled"
+  style={{
+    padding: '24px',
+    borderRadius: '12px',
+    backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+    border: '1px solid var(--mieweb-border, #e5e7eb)',
+    marginTop: '16px',
+    marginBottom: '24px',
+  }}
+>
+  <div style={{ color: 'var(--mieweb-foreground, #171717)', marginBottom: '12px' }}>
+    <strong
+      className="mie-cta-heading"
+      style={{ fontSize: '18px', display: 'block', marginBottom: '8px' }}
+    >
+      🚀 Full Dashboard Example
+    </strong>
+    <span
+      style={{
+        margin: 0,
+        opacity: 0.9,
+        fontSize: '14px',
+        lineHeight: '1.5',
+        display: 'block',
+      }}
+    >
+      Want to see how all the components work together? Check out a complete
+      dashboard implementation featuring Sidebar navigation, AppHeader, Cards,
+      Data tables, and more.
     </span>
   </div>
-  <a 
-    href="?path=/story/product-feature-modules-dashboard--dashboard"
-    style={{ 
-      display: 'inline-block',
-      padding: '10px 20px', 
-      backgroundColor: 'white', 
-      color: 'var(--mieweb-primary-700, #1786b3)',
-      borderRadius: '6px',
-      fontWeight: '600',
-      textDecoration: 'none',
-      fontSize: '14px'
+  <Button
+    variant="primary"
+    size="md"
+    type="button"
+    rightIcon={<ArrowRight size={16} aria-hidden="true" />}
+    onClick={() => {
+      (window.top ?? window).location.href =
+        '?path=/story/product-feature-modules-dashboard--dashboard';
     }}
   >
-    View Dashboard Example →
-  </a>
+    View Dashboard Example
+  </Button>
 </div>
 
 ---
@@ -54,26 +91,74 @@ A **themeable, accessible React component library** built with Tailwind CSS 4. D
 
 This documentation site is built with **Storybook** — an interactive component explorer that lets you browse, test, and understand each component in isolation.
 
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginTop: '16px', marginBottom: '24px' }}>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '16px',
+    marginTop: '16px',
+    marginBottom: '24px',
+  }}
+>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>📁 Sidebar (Left Panel)</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
-      Browse all available components organized by category. Click on any component to see its documentation, 
-      interactive examples, and all available variants.
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Browse all available components organized by category. Click on any
+      component to see its documentation, interactive examples, and all
+      available variants.
     </span>
   </div>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>🎮 Controls Panel</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
-      Interact with component props in real-time. Adjust sizes, colors, states, and content to see 
-      how components behave with different configurations.
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Interact with component props in real-time. Adjust sizes, colors, states,
+      and content to see how components behave with different configurations.
     </span>
   </div>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>🔧 Toolbar (Top)</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
-      Switch between brand themes, toggle dark/light mode, adjust viewport sizes, and access 
-      accessibility testing tools.
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Switch between brand themes, toggle dark/light mode, adjust viewport
+      sizes, and access accessibility testing tools.
     </span>
   </div>
 </div>
@@ -82,40 +167,127 @@ This documentation site is built with **Storybook** — an interactive component
 
 ## ✨ Features
 
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginTop: '16px' }}>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '16px',
+    marginTop: '16px',
+  }}
+>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>🎨 Fully Themeable</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
       Customize colors, fonts, border radius, and more using CSS variables
     </span>
   </div>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>🏢 Multi-Brand Support</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
-      Pre-configured themes for BlueHive, Enterprise Health, WebChart, Waggleline, and MIE
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Pre-configured themes for BlueHive, Enterprise Health, WebChart,
+      Waggleline, and MIE
     </span>
   </div>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>♿ Accessible</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
-      Built with WCAG guidelines, proper ARIA attributes, and keyboard navigation
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Built with WCAG guidelines, proper ARIA attributes, and keyboard
+      navigation
     </span>
   </div>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>🌙 Dark Mode</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
       Built-in dark mode support with system preference detection
     </span>
   </div>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>🌳 Tree-Shakeable</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
       Import only the components you need for optimal bundle size
     </span>
   </div>
-  <div style={{ padding: '16px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)' }}>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
     <strong>📦 TypeScript</strong>
-    <span style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
       Full TypeScript support with comprehensive type definitions
     </span>
   </div>
@@ -179,31 +351,139 @@ module.exports = {
 
 This library includes pre-built themes for MIE's product suite. Use the **Brand** selector in the toolbar above to preview components with different brand styles.
 
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginTop: '16px', marginBottom: '16px' }}>
-  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #27aae1' }}>
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '12px',
+    marginTop: '16px',
+    marginBottom: '16px',
+  }}
+>
+  <div
+    style={{
+      padding: '12px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+      borderLeft: '4px solid #27aae1',
+    }}
+  >
     <strong>BlueHive</strong>
-    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#27aae1' }}>#27aae1</div>
-    <span style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>DOT Physical scheduling platform</span>
+    <div
+      style={{ fontSize: '12px', fontFamily: 'monospace', color: '#27aae1' }}
+    >
+      #27aae1
+    </div>
+    <span
+      style={{
+        margin: '4px 0 0',
+        fontSize: '13px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      DOT Physical scheduling platform
+    </span>
   </div>
-  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #2563eb' }}>
+  <div
+    style={{
+      padding: '12px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+      borderLeft: '4px solid #2563eb',
+    }}
+  >
     <strong>Enterprise Health</strong>
-    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#2563eb' }}>#2563eb</div>
-    <span style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>Occupational health management</span>
+    <div
+      style={{ fontSize: '12px', fontFamily: 'monospace', color: '#2563eb' }}
+    >
+      #2563eb
+    </div>
+    <span
+      style={{
+        margin: '4px 0 0',
+        fontSize: '13px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Occupational health management
+    </span>
   </div>
-  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #16a34a' }}>
+  <div
+    style={{
+      padding: '12px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+      borderLeft: '4px solid #16a34a',
+    }}
+  >
     <strong>WebChart</strong>
-    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#16a34a' }}>#16a34a</div>
-    <span style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>Electronic health records</span>
+    <div
+      style={{ fontSize: '12px', fontFamily: 'monospace', color: '#16a34a' }}
+    >
+      #16a34a
+    </div>
+    <span
+      style={{
+        margin: '4px 0 0',
+        fontSize: '13px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Electronic health records
+    </span>
   </div>
-  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #17aeed' }}>
+  <div
+    style={{
+      padding: '12px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+      borderLeft: '4px solid #17aeed',
+    }}
+  >
     <strong>Waggleline</strong>
-    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#17aeed' }}>#17aeed</div>
-    <span style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>Experience visualization platform</span>
+    <div
+      style={{ fontSize: '12px', fontFamily: 'monospace', color: '#17aeed' }}
+    >
+      #17aeed
+    </div>
+    <span
+      style={{
+        margin: '4px 0 0',
+        fontSize: '13px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Experience visualization platform
+    </span>
   </div>
-  <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--mieweb-border, #e5e7eb)', borderLeft: '4px solid #6366f1' }}>
+  <div
+    style={{
+      padding: '12px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+      borderLeft: '4px solid #6366f1',
+    }}
+  >
     <strong>MIE</strong>
-    <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#6366f1' }}>#6366f1</div>
-    <span style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--mieweb-muted-foreground, #737373)', display: 'block' }}>Medical Informatics Engineering</span>
+    <div
+      style={{ fontSize: '12px', fontFamily: 'monospace', color: '#6366f1' }}
+    >
+      #6366f1
+    </div>
+    <span
+      style={{
+        margin: '4px 0 0',
+        fontSize: '13px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Medical Informatics Engineering
+    </span>
   </div>
 </div>
 
@@ -224,24 +504,215 @@ import { bluehiveBrand } from '@mieweb/ui/brands/bluehive';
 Use the **sidebar on the left** to browse available components. Each component page includes:
 
 - **Interactive examples** — Live preview with real-time prop controls
-- **Props documentation** — Full API reference with types and defaults  
+- **Props documentation** — Full API reference with types and defaults
 - **Accessibility notes** — Keyboard shortcuts and ARIA information
 - **Code snippets** — Copy-paste ready implementation examples
 
 ### Component Categories
 
-| Category | Components |
-|----------|------------|
-| **Forms** | Input, Select, Checkbox, Radio, Switch, Textarea, DateInput, PhoneInput |
-| **Buttons** | Button, Dropdown |
-| **Layout** | Card, Modal, Sidebar, AppHeader, CommandPalette |
-| **Feedback** | Alert, Progress, Toast, Spinner, Skeleton, Tooltip |
-| **Navigation** | Breadcrumb, Pagination |
-| **Data Display** | Table, Badge, Avatar |
+| Category         | Components                                                              |
+| ---------------- | ----------------------------------------------------------------------- |
+| **Forms**        | Input, Select, Checkbox, Radio, Switch, Textarea, DateInput, PhoneInput |
+| **Buttons**      | Button, Dropdown                                                        |
+| **Layout**       | Card, Modal, Sidebar, AppHeader, CommandPalette                         |
+| **Feedback**     | Alert, Progress, Toast, Spinner, Skeleton, Tooltip                      |
+| **Navigation**   | Breadcrumb, Pagination                                                  |
+| **Data Display** | Table, Badge, Avatar                                                    |
 
-<div style={{ marginTop: '16px', padding: '16px', borderRadius: '8px', border: '2px dashed var(--mieweb-border, #e5e7eb)' }}>
-  <strong>💡 Pro Tip:</strong> Use <kbd style={{ padding: '2px 6px', backgroundColor: 'var(--mieweb-muted, #f5f5f5)', borderRadius: '4px', fontSize: '12px' }}>⌘</kbd> + <kbd style={{ padding: '2px 6px', backgroundColor: 'var(--mieweb-muted, #f5f5f5)', borderRadius: '4px', fontSize: '12px' }}>K</kbd> to quickly search for any component in Storybook.
+<div
+  style={{
+    marginTop: '16px',
+    padding: '16px',
+    borderRadius: '8px',
+    border: '2px dashed var(--mieweb-border, #e5e7eb)',
+  }}
+>
+  <strong>💡 Pro Tip:</strong> Use{' '}
+  <kbd
+    style={{
+      padding: '2px 6px',
+      backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+      borderRadius: '4px',
+      fontSize: '12px',
+    }}
+  >
+    ⌘
+  </kbd>{' '}
+  +{' '}
+  <kbd
+    style={{
+      padding: '2px 6px',
+      backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+      borderRadius: '4px',
+      fontSize: '12px',
+    }}
+  >
+    K
+  </kbd>{' '}
+  to quickly search for any component in Storybook.
 </div>
+
+---
+
+## 📝 eSheet — Form Builder & Renderer
+
+`@mieweb/ui` includes optional support for **eSheet**, a modular form builder and renderer toolkit. eSheet components are exported from a **separate entry point** (`@mieweb/ui/esheet`) so they stay out of your main bundle unless you need them.
+
+### What You Get
+
+| Export                 | Description                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `EsheetBuilder`        | Visual drag-and-drop form builder for creating and editing form definitions         |
+| `EsheetRenderer`       | Lightweight form renderer for end-users to fill out forms                           |
+| `FormDefinition`       | TypeScript type for the form schema (from `@esheet/core`)                           |
+| `EsheetBuilderProps`   | Props type for the builder component                                                |
+| `EsheetRendererProps`  | Props type for the renderer component                                               |
+| `EsheetRendererHandle` | Ref handle type for imperative renderer control (`getResponse`, `getValidResponse`) |
+
+### Installation
+
+eSheet packages are **optional peer dependencies** of `@mieweb/ui`. Install only what you need:
+
+```bash
+# Builder + Renderer (most common)
+npm install @esheet/builder @esheet/renderer
+
+# Renderer only (form fill-out, no editing UI)
+npm install @esheet/renderer
+
+# Builder only (form authoring, no fill-out UI)
+npm install @esheet/builder
+```
+
+> `@esheet/core` and `@esheet/fields` are included transitively — no need to install them separately.
+
+### Usage
+
+```tsx
+import {
+  EsheetBuilder,
+  EsheetRenderer,
+  type FormDefinition,
+  type EsheetRendererHandle,
+} from '@mieweb/ui/esheet';
+import '@mieweb/ui/styles.css';
+import { useRef, useState } from 'react';
+
+function FormEditor() {
+  const [form, setForm] = useState<FormDefinition>({
+    id: 'my-form',
+    title: 'My Form',
+    fields: [],
+  });
+
+  return <EsheetBuilder definition={form} onChange={setForm} />;
+}
+
+function FormFillOut({ form }: { form: FormDefinition }) {
+  const rendererRef = useRef<EsheetRendererHandle>(null);
+
+  const handleSubmit = () => {
+    if (!rendererRef.current) return;
+    const result = rendererRef.current.getValidResponse();
+    if (result.errors.length > 0) {
+      console.warn('Validation errors:', result.errors);
+    } else {
+      console.log('Form response:', result.response);
+    }
+  };
+
+  return (
+    <>
+      <EsheetRenderer ref={rendererRef} formDataInput={form} />
+      <button onClick={handleSubmit}>Submit</button>
+    </>
+  );
+}
+```
+
+### Key Points
+
+- **Import path**: Always import from `@mieweb/ui/esheet`, not from `@esheet/*` directly. This ensures proper theme integration with `@mieweb/ui` brand CSS.
+- **Styles**: eSheet components use `@mieweb/ui` design tokens automatically. No additional CSS import is needed beyond `@mieweb/ui/styles.css`.
+- **Theming**: eSheet respects your active brand theme (BlueHive, Enterprise Health, WebChart, etc.) and dark/light mode — no extra configuration.
+- **Bundle impact**: The `@mieweb/ui/esheet` entry point is tree-shaken separately from the main `@mieweb/ui` export. If you don't import it, it adds zero bytes to your bundle.
+
+### Full eSheet Documentation
+
+For advanced usage — custom field types, conditional logic, standalone/Blaze renderers, and the full API reference — see the [eSheet documentation](https://esheet-docs.os.mieweb.org).
+
+---
+
+## 🛠️ Running Storybook Locally
+
+Want to develop components, browse the full library on your machine, or contribute? Getting this Storybook running locally is a two-command flow.
+
+### Prerequisites
+
+- **Node.js** ≥ 20
+- **pnpm** 10.29.1 — pinned via the repo's `packageManager` field. Enable it with `corepack enable`.
+- **Git** with submodule support
+
+### Setup
+
+```bash
+# 1. Clone with submodules (esheet and ychart are git submodules)
+git clone --recurse-submodules https://github.com/mieweb/ui.git
+cd ui
+
+# 2. Install dependencies
+#    A preinstall hook auto-inits/updates submodules — so even if you
+#    forgot --recurse-submodules above, this step pulls them in.
+pnpm install
+
+# 3. Start Storybook on http://localhost:6006
+pnpm storybook
+```
+
+That's the whole flow — `pnpm install && pnpm storybook`. A `prestorybook` hook builds the eSheet packages automatically on first run, so the eSheet stories work out of the box with no manual build step (it's a near-instant no-op on later runs once the artifacts exist).
+
+<div
+  style={{
+    marginTop: '16px',
+    padding: '12px 16px',
+    borderRadius: '8px',
+    border: '1px solid var(--mieweb-border, #e5e7eb)',
+    backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+  }}
+>
+  <strong>Already cloned without submodules?</strong>
+  <span
+    style={{
+      fontSize: '14px',
+      color: 'var(--mieweb-muted-foreground, #737373)',
+      display: 'block',
+      marginTop: '4px',
+    }}
+  >
+    Run <code>git submodule update --init --recursive</code> — or just{' '}
+    <code>pnpm install</code>, which does it for you.
+  </span>
+</div>
+
+### How the Sub-Packages Are Wired
+
+`@mieweb/ui`'s Storybook integrates three sibling MIE projects, each sourced differently:
+
+- **DataVis NITRO** — npm package `@mieweb/datavis`. _No build step:_ consumed as a published package (not a submodule). Powers the DataVis NITRO data-grid stories.
+- **eSheet** — git submodule `packages/esheet`. _Built automatically_ by the `prestorybook` hook (nx) before Storybook starts; rebuilds only when its artifacts are missing. The form builder/renderer toolkit.
+- **YChart** — git submodule `packages/ychart`. _No build step:_ the story imports it directly from source via a relative dynamic import; Storybook's Vite config supplies a `virtual:git-info` plugin, a `__YCHART_VERSION__` define, and dependency pre-bundling (`optimizeDeps`). Org-chart / visualization toolkit.
+
+> **Heads up:** DataVis NITRO is consumed from the published `@mieweb/datavis` npm package — it is not a git submodule, and a fresh clone does not build DataVis from source.
+
+### Common Commands
+
+- `pnpm storybook` — Run Storybook in dev mode on port 6006
+- `pnpm build-storybook` — Build the static Storybook site
+- `pnpm build` — Build the publishable `@mieweb/ui` library
+- `pnpm test` — Run the unit test suite (Vitest)
+- `pnpm test:visual` — Run Playwright visual regression tests
+- `pnpm typecheck` — Type-check without emitting
+- `pnpm lint` — Lint `src/**`
 
 ---
 
@@ -253,6 +724,450 @@ Use the **sidebar on the left** to browse available components. Each component p
 
 ---
 
-<div style={{ marginTop: '32px', padding: '16px', borderRadius: '8px', backgroundColor: 'var(--mieweb-muted, #f5f5f5)' }}>
-  <strong>💡 Tip:</strong> Use the toolbar above to toggle dark mode and switch between brand themes while browsing components.
+## 🤖 Migrating Your App to MIE Web UI
+
+Have an existing React + Tailwind project and want to adopt `@mieweb/ui`? We've built a **10-step execution plan** designed for AI agents (like GitHub Copilot, Claude, etc.) and human developers alike. Feed your AI the plan and it will systematically convert your app — replacing local/shadcn components, wiring up brand theming, cleaning up dead dependencies, and producing a structured migration report.
+
+This process has been **iteratively tested and validated** across 5 test cycles to achieve 100% single-pass completion.
+
+### How It Works
+
+<div
+  style={{
+    padding: '20px',
+    borderRadius: '12px',
+    border: '2px solid var(--mieweb-primary-500, #27aae1)',
+    backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+    marginTop: '16px',
+    marginBottom: '24px',
+  }}
+>
+  <strong style={{ fontSize: '16px', display: 'block', marginBottom: '12px' }}>
+    📋 Feed these 3 files to your AI agent — in this order:
+  </strong>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <span
+        style={{
+          fontWeight: '700',
+          fontSize: '18px',
+          color: 'var(--mieweb-primary-500, #27aae1)',
+          minWidth: '24px',
+        }}
+      >
+        1.
+      </span>
+      <div>
+        <a
+          href="https://github.com/mieweb/ui/blob/main/lessons/tailwind4-integration.md"
+          style={{ fontWeight: '600' }}
+        >
+          tailwind4-integration.md
+        </a>
+        <span
+          style={{
+            fontSize: '14px',
+            color: 'var(--mieweb-muted-foreground, #737373)',
+            display: 'block',
+          }}
+        >
+          Full <code>@theme</code> block with all CSS variable mappings and hex
+          fallbacks. <strong>Critical</strong> — Step 2 cannot be completed
+          without it.
+        </span>
+      </div>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <span
+        style={{
+          fontWeight: '700',
+          fontSize: '18px',
+          color: 'var(--mieweb-primary-500, #27aae1)',
+          minWidth: '24px',
+        }}
+      >
+        2.
+      </span>
+      <div>
+        <a
+          href="https://github.com/mieweb/ui/blob/main/lessons/component-policy.md"
+          style={{ fontWeight: '600' }}
+        >
+          component-policy.md
+        </a>
+        <span
+          style={{
+            fontSize: '14px',
+            color: 'var(--mieweb-muted-foreground, #737373)',
+            display: 'block',
+          }}
+        >
+          Complete list of 126+ available <code>@mieweb/ui</code> components.
+          Needed for Steps 4–5 to know what replacements exist.
+        </span>
+      </div>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <span
+        style={{
+          fontWeight: '700',
+          fontSize: '18px',
+          color: 'var(--mieweb-primary-500, #27aae1)',
+          minWidth: '24px',
+        }}
+      >
+        3.
+      </span>
+      <div>
+        <a
+          href="https://github.com/mieweb/ui/blob/main/lessons/execution-plan.md"
+          style={{ fontWeight: '600' }}
+        >
+          execution-plan.md
+        </a>
+        <span
+          style={{
+            fontSize: '14px',
+            color: 'var(--mieweb-muted-foreground, #737373)',
+            display: 'block',
+          }}
+        >
+          The 10-step procedure. Must come last so the reference data from files
+          1–2 is in context when the AI starts executing.
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    style={{
+      marginTop: '12px',
+      fontSize: '13px',
+      color: 'var(--mieweb-muted-foreground, #737373)',
+      fontStyle: 'italic',
+    }}
+  >
+    Order matters — AI models lose attention on earlier content as the prompt
+    grows. Reference data before procedure ensures the best results.
+  </div>
+  <div
+    style={{
+      marginTop: '16px',
+      padding: '12px 16px',
+      borderRadius: '8px',
+      backgroundColor: 'white',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong
+      style={{
+        fontSize: '13px',
+        display: 'block',
+        marginBottom: '6px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+      }}
+    >
+      Then send this prompt:
+    </strong>
+    <code style={{ fontSize: '14px', display: 'block', lineHeight: '1.5' }}>
+      Migrate this project to @mieweb/ui following the execution plan. Work step
+      by step, create the migration report first, and update it after each step.
+    </code>
+  </div>
+</div>
+
+Once the AI has all 3 files, it will audit your project, identify your framework, existing components, and theme system, then proceed through the migration step by step — validating each step before the next begins.
+
+### The 10 Steps
+
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '12px',
+    marginTop: '16px',
+    marginBottom: '24px',
+  }}
+>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 1 — Install</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Add <code>@mieweb/ui</code> as a dependency using your project's package
+      manager.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 2 — CSS Foundation</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Wire up the brand CSS, Tailwind 4 theme block, dark mode variant, and
+      PostCSS configuration — the foundation everything else depends on.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 3 — Brand Switching</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Set up runtime brand switching with a <code>useBrand</code> hook and{' '}
+      <code>BrandInitializer</code> so users can change themes on the fly.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 4 — Component Swap</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Replace local or shadcn/ui components with <code>@mieweb/ui</code>{' '}
+      equivalents — Buttons first, then Modals, Forms, Data Display, Feedback,
+      Navigation, and Overlays.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 5 — Icon Migration</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Standardize on <code>lucide-react</code> icons, replacing any other icon
+      libraries or inline SVGs.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 6 — Clean Up</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Migrate <code>cn()</code> imports to <code>@mieweb/ui</code>, remove
+      unused dependencies (Radix, clsx, cva), and delete empty wrapper files.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 7 — Accessibility Pass</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Audit interactive elements for missing ARIA labels, verify keyboard
+      navigation, and ensure screen reader compatibility.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 8 — Testing & Verification</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Visual smoke tests across light/dark/brand combinations, responsive
+      checks, build verification, and a compliance audit.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+    }}
+  >
+    <strong>Step 9 — Gap Detection</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Identify components without <code>@mieweb/ui</code> equivalents, document
+      remaining local components, and flag candidates for upstream contribution.
+    </span>
+  </div>
+  <div
+    style={{
+      padding: '16px',
+      borderRadius: '8px',
+      border: '1px solid var(--mieweb-border, #e5e7eb)',
+      borderColor: 'var(--mieweb-primary-500, #27aae1)',
+    }}
+  >
+    <strong>Step 10 — Migration Report</strong>
+    <span
+      style={{
+        margin: '8px 0 0',
+        fontSize: '14px',
+        color: 'var(--mieweb-muted-foreground, #737373)',
+        display: 'block',
+      }}
+    >
+      Generate a structured <code>MIEWEB-UI-MIGRATION.md</code> documenting
+      everything: wrapper audit, compliance metrics, import map, files changed,
+      known gaps, and variant mappings.
+    </span>
+  </div>
+</div>
+
+### What You'll Get
+
+<div
+  style={{
+    padding: '20px',
+    borderRadius: '12px',
+    border: '1px solid var(--mieweb-border, #e5e7eb)',
+    backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+    marginBottom: '24px',
+  }}
+>
+  <strong style={{ fontSize: '16px', display: 'block', marginBottom: '8px' }}>
+    📄 A complete <code>MIEWEB-UI-MIGRATION.md</code> report including:
+  </strong>
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+      gap: '8px',
+      marginTop: '8px',
+    }}
+  >
+    <span style={{ fontSize: '14px' }}>
+      ✅ Project profile & framework details
+    </span>
+    <span style={{ fontSize: '14px' }}>✅ Export availability matrix</span>
+    <span style={{ fontSize: '14px' }}>
+      ✅ Full wrapper file audit (every file)
+    </span>
+    <span style={{ fontSize: '14px' }}>
+      ✅ Pattern audit (raw HTML, badges, cards)
+    </span>
+    <span style={{ fontSize: '14px' }}>✅ Post-migration import map</span>
+    <span style={{ fontSize: '14px' }}>✅ Before/after compliance metrics</span>
+    <span style={{ fontSize: '14px' }}>✅ Known gaps & kept components</span>
+    <span style={{ fontSize: '14px' }}>
+      ✅ Files modified, created, and deleted
+    </span>
+  </div>
+  <span
+    style={{
+      fontSize: '13px',
+      color: 'var(--mieweb-muted-foreground, #737373)',
+      display: 'block',
+      marginTop: '12px',
+    }}
+  >
+    This report serves as the permanent record for PR reviewers, future
+    maintainers, and cross-project comparison.
+  </span>
+</div>
+
+### Additional Guides
+
+The [`lessons/`](https://github.com/mieweb/ui/tree/main/lessons) directory also includes optional reference guides:
+
+| Guide                                                                                         | Purpose                                             |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [adopting-mieweb-ui.md](https://github.com/mieweb/ui/blob/main/lessons/adopting-mieweb-ui.md) | Audit methodology and component mapping             |
+| [compliance-prompt.md](https://github.com/mieweb/ui/blob/main/lessons/compliance-prompt.md)   | Copy-paste AI prompt for a single-session migration |
+
+### Framework Support
+
+The plan works across frameworks — **Next.js**, **Vite**, **Remix**, **Meteor**, and more. Each step includes framework-specific notes where setup differs.
+
+---
+
+<div
+  style={{
+    marginTop: '32px',
+    padding: '16px',
+    borderRadius: '8px',
+    backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
+  }}
+>
+  <strong>💡 Tip:</strong> Use the toolbar above to toggle dark mode and switch
+  between brand themes while browsing components.
 </div>

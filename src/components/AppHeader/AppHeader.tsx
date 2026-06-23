@@ -29,6 +29,7 @@ export function AppHeader({
 }: AppHeaderProps): React.JSX.Element {
   return (
     <header
+      data-slot="app-header"
       data-testid={testId}
       className={cn(
         'flex items-center justify-between px-4 lg:px-6',
@@ -63,6 +64,7 @@ export function AppHeaderSection({
 }: AppHeaderSectionProps): React.JSX.Element {
   return (
     <div
+      data-slot="app-header-section"
       className={cn(
         'flex items-center gap-3',
         align === 'left' && 'mr-auto',
@@ -72,6 +74,40 @@ export function AppHeaderSection({
       )}
     >
       {children}
+    </div>
+  );
+}
+
+// =============================================================================
+// AppHeaderBrand Component
+// =============================================================================
+
+export interface AppHeaderBrandProps {
+  /** Brand/app name */
+  children: ReactNode;
+  /** Logo element (icon, image, or text) */
+  logo?: ReactNode;
+  /** Additional CSS classes */
+  className?: string;
+}
+
+export function AppHeaderBrand({
+  children,
+  logo,
+  className,
+}: AppHeaderBrandProps): React.JSX.Element {
+  return (
+    <div
+      data-slot="app-header-brand"
+      className={cn('flex items-center gap-2', className)}
+    >
+      {logo && <div data-slot="app-header-brand-logo">{logo}</div>}
+      <span
+        data-slot="app-header-brand-name"
+        className="hidden font-semibold text-gray-900 sm:block dark:text-white"
+      >
+        {children}
+      </span>
     </div>
   );
 }
@@ -94,14 +130,12 @@ export function AppHeaderTitle({
   className,
 }: AppHeaderTitleProps): React.JSX.Element {
   return (
-    <div className={cn('min-w-0', className)}>
+    <div data-slot="app-header-title" className={cn('min-w-0', className)}>
       <h1 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
         {children}
       </h1>
       {subtitle && (
-        <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-          {subtitle}
-        </p>
+        <p className="text-muted-foreground truncate text-sm">{subtitle}</p>
       )}
     </div>
   );
@@ -122,7 +156,12 @@ export function AppHeaderActions({
   className,
 }: AppHeaderActionsProps): React.JSX.Element {
   return (
-    <div className={cn('flex items-center gap-2', className)}>{children}</div>
+    <div
+      data-slot="app-header-actions"
+      className={cn('flex items-center gap-2', className)}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -140,6 +179,7 @@ export function AppHeaderDivider({
 }: AppHeaderDividerProps): React.JSX.Element {
   return (
     <div
+      data-slot="app-header-divider"
       className={cn('mx-2 h-6 w-px bg-gray-200 dark:bg-gray-700', className)}
       aria-hidden="true"
     />
@@ -178,15 +218,17 @@ export function AppHeaderIconButton({
 }: AppHeaderIconButtonProps): React.JSX.Element {
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-slot="app-header-icon-btn"
       data-testid={testId}
       className={cn(
         'relative rounded-lg p-2 transition-colors',
-        'text-gray-500 dark:text-gray-400',
+        'text-muted-foreground',
         'hover:bg-gray-100 dark:hover:bg-gray-800',
         'focus:ring-primary-500 focus:ring-2 focus:outline-none',
         isActive &&
-          'text-primary-600 dark:text-primary-400 bg-gray-100 dark:bg-gray-800',
+          'text-primary-800 dark:text-primary-400 bg-gray-100 dark:bg-gray-800',
         className
       )}
       aria-label={label}
@@ -198,7 +240,7 @@ export function AppHeaderIconButton({
           className={cn(
             'absolute -top-1 -right-1 flex items-center justify-center',
             'h-[18px] min-w-[18px] px-1 text-[10px] font-bold',
-            'rounded-full bg-red-500 text-white'
+            'rounded-full bg-red-700 text-white'
           )}
         >
           {badge > 99 ? '99+' : badge}
@@ -227,6 +269,7 @@ export interface AppHeaderSearchProps {
 
 const SearchIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -256,11 +299,13 @@ export function AppHeaderSearch({
 }: AppHeaderSearchProps): React.JSX.Element {
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-slot="app-header-search"
       data-testid={testId}
       className={cn(
         'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-600',
-        'bg-white px-4 py-2 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+        'bg-white px-4 py-2 text-sm text-neutral-600 dark:bg-gray-700 dark:text-neutral-400',
         'hover:border-gray-400 dark:hover:border-gray-500',
         'transition-colors hover:bg-gray-50 dark:hover:bg-gray-600',
         !showOnMobile && 'hidden sm:flex',
@@ -274,7 +319,7 @@ export function AppHeaderSearch({
         className={cn(
           'hidden items-center gap-0.5 px-2 py-0.5 sm:inline-flex',
           'rounded border border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-600',
-          'flex-shrink-0 text-xs text-gray-600 dark:text-gray-300'
+          'flex-shrink-0 text-xs text-neutral-600 dark:text-neutral-400'
         )}
       >
         {isMac ? '⌘' : 'Ctrl'}+K
@@ -327,7 +372,9 @@ export function AppHeaderUserMenu({
 
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-slot="app-header-user-menu"
       data-testid={testId}
       className={cn(
         'flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors',
@@ -339,6 +386,7 @@ export function AppHeaderUserMenu({
     >
       {/* Avatar */}
       <div
+        data-slot="app-header-user-avatar"
         className={cn(
           'flex h-8 w-8 items-center justify-center overflow-hidden rounded-full',
           'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100 text-sm font-medium'
@@ -357,11 +405,17 @@ export function AppHeaderUserMenu({
 
       {/* Name (hidden on small screens) */}
       <div className="hidden min-w-0 text-left lg:block">
-        <div className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white">
+        <div
+          data-slot="app-header-user-name"
+          className="max-w-[150px] truncate text-sm font-medium text-gray-900 dark:text-white"
+        >
           {name}
         </div>
         {email && (
-          <div className="max-w-[150px] truncate text-xs text-gray-500 dark:text-gray-400">
+          <div
+            data-slot="app-header-user-email"
+            className="text-muted-foreground max-w-[150px] truncate text-xs"
+          >
             {email}
           </div>
         )}
@@ -369,6 +423,7 @@ export function AppHeaderUserMenu({
 
       {/* Chevron */}
       <svg
+        aria-hidden="true"
         className={cn(
           'hidden h-4 w-4 text-gray-400 transition-transform lg:block',
           isOpen && 'rotate-180'

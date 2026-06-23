@@ -372,6 +372,7 @@ export const BusinessDashboard: StoryObj = {
               key={stat.label}
               title={stat.label}
               icon={<ActivityIcon className="h-4 w-4" />}
+              headingLevel="h2"
             >
               <Text size="3xl" weight="bold">
                 {stat.value}
@@ -390,6 +391,7 @@ export const BusinessDashboard: StoryObj = {
               title="Recent Orders"
               icon={<DollarSignIcon className="h-4 w-4" />}
               count={orderData.length}
+              headingLevel="h2"
             >
               <DashboardWidgetTable<Order>
                 showHeader
@@ -432,6 +434,7 @@ export const BusinessDashboard: StoryObj = {
             title="Recent Activity"
             icon={<ActivityIcon className="h-4 w-4" />}
             count={activityData.length}
+            headingLevel="h2"
           >
             <DashboardWidgetTable<ActivityItem>
               columns={[
@@ -466,6 +469,7 @@ export const BusinessDashboard: StoryObj = {
         <DashboardWidget
           title="Quick Actions"
           icon={<ZapIcon className="h-4 w-4" />}
+          headingLevel="h2"
         >
           <DashboardWidgetActions columns={3} actions={quickActions} />
         </DashboardWidget>

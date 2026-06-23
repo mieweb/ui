@@ -81,16 +81,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const describedByIds = [
       error ? errorId : null,
-      helperText ? helperId : null,
+      helperText && !error ? helperId : null,
       ariaDescribedBy,
     ]
       .filter(Boolean)
       .join(' ');
 
     return (
-      <div className={cn('flex flex-col gap-1.5', disabled && 'opacity-50')}>
+      <div
+        data-slot="input-wrapper"
+        className={cn('flex flex-col gap-1.5', disabled && 'opacity-50')}
+      >
         {label && (
           <label
+            data-slot="input-label"
             htmlFor={inputId}
             className={cn(
               'text-foreground text-sm font-medium',
@@ -106,6 +110,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input
+          data-slot="input"
           id={inputId}
           ref={ref}
           className={cn(
@@ -119,12 +124,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p id={errorId} className="text-destructive text-sm" role="alert">
+          <p
+            id={errorId}
+            data-slot="input-error"
+            className="text-destructive-700 dark:text-destructive-400 text-sm"
+            role="alert"
+          >
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={helperId} className="text-muted-foreground text-sm">
+          <p
+            id={helperId}
+            data-slot="input-helper"
+            className="text-muted-foreground text-sm"
+          >
             {helperText}
           </p>
         )}

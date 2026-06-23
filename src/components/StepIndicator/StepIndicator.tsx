@@ -37,6 +37,7 @@ export interface StepIndicatorProps {
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -55,6 +56,7 @@ function CheckIcon({ className }: { className?: string }) {
 function ErrorIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -131,15 +133,17 @@ export function StepIndicator({
   ) => (
     <button
       type="button"
+      data-slot="step-indicator-circle"
       onClick={() => handleStepClick(index)}
       disabled={!clickable}
+      aria-label={`Step ${index + 1}: ${step.label}`}
       className={`${sizes.circle} flex shrink-0 items-center justify-center rounded-full font-medium transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-neutral-900 ${clickable ? 'cursor-pointer' : 'cursor-default'} ${
         step.hasError
           ? 'bg-red-100 text-red-600 focus:ring-red-500 dark:bg-red-900/30 dark:text-red-400'
           : status === 'completed'
-            ? 'bg-primary-600 focus:ring-primary-500 dark:bg-primary-500 text-white'
+            ? 'bg-primary-800 focus:ring-primary-500 dark:bg-primary-800 text-white'
             : status === 'current'
-              ? 'bg-primary-600 ring-primary-600 focus:ring-primary-500 dark:bg-primary-500 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
+              ? 'bg-primary-800 ring-primary-600 focus:ring-primary-500 dark:bg-primary-800 dark:ring-primary-500 text-white ring-2 ring-offset-2 dark:ring-offset-neutral-900'
               : 'bg-neutral-200 text-neutral-500 focus:ring-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
       }`.trim()}
       aria-current={status === 'current' ? 'step' : undefined}
@@ -165,26 +169,29 @@ export function StepIndicator({
   );
 
   const stepLabel = (step: Step, status: string, horizontal: boolean) => (
-    <div className={`${horizontal ? 'text-center' : 'flex-1'} ${sizes.text}`}>
+    <div
+      data-slot="step-indicator-label"
+      className={`${horizontal ? 'text-center' : 'flex-1'} ${sizes.text}`}
+    >
       <p
         className={`font-medium ${
           step.hasError
             ? 'text-red-600 dark:text-red-400'
             : status === 'completed' || status === 'current'
               ? 'text-neutral-900 dark:text-white'
-              : 'text-neutral-500 dark:text-neutral-400'
+              : 'text-muted-foreground'
         }`.trim()}
       >
         {step.label}
         {step.optional && (
-          <span className="font-normal text-neutral-500 dark:text-neutral-400">
-            {' '}
-            (optional)
-          </span>
+          <span className="text-muted-foreground font-normal"> (optional)</span>
         )}
       </p>
       {step.description && (
-        <p className="mt-0.5 text-neutral-500 dark:text-neutral-400">
+        <p
+          data-slot="step-indicator-description"
+          className="text-muted-foreground mt-0.5"
+        >
           {step.description}
         </p>
       )}
@@ -193,7 +200,11 @@ export function StepIndicator({
 
   if (orientation === 'horizontal') {
     return (
-      <nav className={`flex ${className}`.trim()} aria-label="Progress">
+      <nav
+        data-slot="step-indicator"
+        className={`flex ${className}`.trim()}
+        aria-label="Progress"
+      >
         {steps.map((step, index) => {
           const status = getStepStatus(index);
           const isLast = index === steps.length - 1;
@@ -205,9 +216,10 @@ export function StepIndicator({
               <div className="flex w-full items-center">
                 {index > 0 ? (
                   <div
+                    data-slot="step-indicator-connector"
                     className={`flex-1 ${sizes.line} ${
                       index <= currentStep
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     }`}
                     aria-hidden="true"
@@ -220,9 +232,10 @@ export function StepIndicator({
 
                 {!isLast ? (
                   <div
+                    data-slot="step-indicator-connector"
                     className={`flex-1 ${sizes.line} ${
                       index < currentStep
-                        ? 'bg-primary-600 dark:bg-primary-500'
+                        ? 'bg-primary-800 dark:bg-primary-800'
                         : 'bg-neutral-200 dark:bg-neutral-700'
                     }`}
                     aria-hidden="true"
@@ -244,6 +257,7 @@ export function StepIndicator({
   // Vertical orientation
   return (
     <nav
+      data-slot="step-indicator"
       className={`flex flex-col ${sizes.gap} ${className}`.trim()}
       aria-label="Progress"
     >
@@ -261,13 +275,14 @@ export function StepIndicator({
 
             {!isLast && (
               <div
+                data-slot="step-indicator-connector"
                 className={`flex min-h-4 justify-center ${size === 'sm' ? 'w-6' : size === 'lg' ? 'w-10' : 'w-8'}`}
                 aria-hidden="true"
               >
                 <div
                   className={`h-full min-h-4 ${sizes.line} ${
                     index < currentStep
-                      ? 'bg-primary-600 dark:bg-primary-500'
+                      ? 'bg-primary-800 dark:bg-primary-800'
                       : 'bg-neutral-200 dark:bg-neutral-700'
                   }`}
                 />

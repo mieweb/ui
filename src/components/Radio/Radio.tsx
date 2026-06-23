@@ -39,7 +39,7 @@ const radioVariants = cva(
     'cursor-pointer',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
-    'checked:border-primary-500',
+    'checked:border-primary-500 dark:checked:border-primary-800',
   ],
   {
     variants: {
@@ -138,6 +138,7 @@ function RadioGroup({
       value={{ name: groupName, value, onChange: handleChange, disabled, size }}
     >
       <fieldset
+        data-slot="radio-group"
         role="radiogroup"
         className={cn('flex flex-col gap-2', className)}
         aria-describedby={
@@ -148,6 +149,7 @@ function RadioGroup({
       >
         {label && (
           <legend
+            data-slot="radio-group-legend"
             className={cn(
               'text-foreground font-medium',
               size === 'sm' && 'text-xs',
@@ -161,6 +163,7 @@ function RadioGroup({
         {description && (
           <p
             id={descriptionId}
+            data-slot="radio-group-description"
             className={cn(
               'text-muted-foreground',
               size === 'sm' && 'text-[10px]',
@@ -172,6 +175,7 @@ function RadioGroup({
           </p>
         )}
         <div
+          data-slot="radio-group-items"
           className={cn(
             'flex gap-4',
             orientation === 'vertical' && 'flex-col gap-3'
@@ -182,6 +186,7 @@ function RadioGroup({
         {error && (
           <p
             id={errorId}
+            data-slot="radio-group-error"
             className={cn(
               'text-destructive',
               size === 'sm' && 'text-xs',
@@ -258,9 +263,13 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
     }, [isDisabled, context, value]);
 
     const radioElement = (
-      <span className="relative inline-flex items-center justify-center">
+      <span
+        data-slot="radio-indicator"
+        className="relative inline-flex items-center justify-center"
+      >
         <input
           ref={ref}
+          data-slot="radio"
           id={radioId}
           type="radio"
           name={context.name}
@@ -274,8 +283,9 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         />
         {/* Custom dot indicator */}
         <span
+          data-slot="radio-dot"
           className={cn(
-            'bg-primary-500 pointer-events-none absolute rounded-full transition-transform',
+            'bg-primary-800 dark:bg-primary-500 pointer-events-none absolute rounded-full transition-transform',
             size === 'sm' && 'h-2 w-2',
             size === 'md' && 'h-2.5 w-2.5',
             size === 'lg' && 'h-3 w-3',
@@ -289,6 +299,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
       <div className="flex flex-col gap-0.5">
         <label
           htmlFor={radioId}
+          data-slot="radio-label"
           className={cn(
             'text-foreground cursor-pointer font-medium select-none',
             size === 'sm' && 'text-xs',
@@ -302,6 +313,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
         {description && (
           <p
             id={descriptionId}
+            data-slot="radio-description"
             className={cn(
               'text-muted-foreground',
               size === 'sm' && 'text-[10px]',
@@ -317,6 +329,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
 
     return (
       <div
+        data-slot="radio-wrapper"
         className={cn(
           'flex items-start gap-3',
           labelPosition === 'left' && 'flex-row-reverse'

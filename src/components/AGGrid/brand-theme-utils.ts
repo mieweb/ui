@@ -10,6 +10,7 @@ import type { BrandConfig } from '../../brands/types';
 import {
   miewebBrand,
   bluehiveBrand,
+  ccmeBrand,
   wagglelineBrand,
   webchartBrand,
   enterpriseHealthBrand,
@@ -22,6 +23,7 @@ import {
 export type AGGridBrandName =
   | 'mieweb'
   | 'bluehive'
+  | 'ccme'
   | 'waggleline'
   | 'webchart'
   | 'enterprise-health';
@@ -46,6 +48,11 @@ export const agGridBrandThemes: Record<AGGridBrandName, AGGridBrandTheme> = {
     name: 'bluehive',
     config: bluehiveBrand,
     cssClass: 'ag-brand-bluehive',
+  },
+  ccme: {
+    name: 'ccme',
+    config: ccmeBrand,
+    cssClass: 'ag-brand-ccme',
   },
   waggleline: {
     name: 'waggleline',

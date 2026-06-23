@@ -5,12 +5,17 @@ export * from './components/Address';
 // AG Grid is exported via a separate entry point: @mieweb/ui/ag-grid
 // This avoids forcing ag-grid-community/ag-grid-react on all consumers.
 // See: src/ag-grid.ts
+// Same with DataVis (src/datavis.ts)
+// Kerebron editors (RichEditor/CodeEditor) are exported via @mieweb/ui/kerebron
+// to keep @kerebron/* (and its WASM/CSS) optional. See: src/kerebron.ts
 export * from './components/AI';
 export * from './components/Alert';
+export * from './components/AlertDialog';
 export * from './components/AppHeader';
 export * from './components/AudioPlayer';
 export * from './components/AudioRecorder';
 export * from './components/AuthDialog';
+export * from './components/Autocomplete';
 export * from './components/Avatar';
 export * from './components/Badge';
 export * from './components/BookingDialog';
@@ -21,6 +26,7 @@ export * from './components/Button';
 export * from './components/Card';
 export * from './components/Checkbox';
 export * from './components/CheckrIntegration';
+export * from './components/Collapsible';
 export * from './components/CommandPalette';
 export * from './components/ConnectionStatus';
 export * from './components/CountBadge';
@@ -52,10 +58,12 @@ export * from './components/EmployerView';
 export * from './components/EmployerServiceModal';
 export * from './components/ErrorPage';
 export * from './components/FileManager';
+export * from './components/FloatingWindow';
 export * from './components/HelpSupportPanel';
 export * from './components/HRISProviderSelector';
 export * from './components/Input';
 export * from './components/InventoryManager';
+export * from './components/Label';
 export * from './components/InviteUserModal';
 export * from './components/InvoiceList';
 export * from './components/InvoicePaymentPage';
@@ -63,6 +71,7 @@ export * from './components/InvoicePaymentPage';
 export { InvoiceView, type InvoiceViewProps } from './components/InvoiceView';
 export * from './components/LanguageSelector';
 export * from './components/LoadingPage';
+export * from './components/Markdown';
 export * from './components/Messaging';
 export * from './components/Modal';
 export * from './components/NotificationCenter';
@@ -110,8 +119,10 @@ export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
+export * from './components/RichTextEditor';
 export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
+export * from './components/ScrollArea';
 export * from './components/Select';
 export * from './components/ServiceAccordion';
 export * from './components/ServiceBadge';
@@ -121,6 +132,8 @@ export * from './components/ServiceGrid';
 export * from './components/ServicePicker';
 export * from './components/ServicePricingManager';
 export * from './components/ServiceShippingSettings';
+export * from './components/Separator';
+export * from './components/Sheet';
 // SetupServiceModal exports ServiceCategory which conflicts with ServiceAccordion
 export {
   SetupServiceModal,
@@ -138,12 +151,14 @@ export * from './components/StepIndicator';
 export * from './components/StripeBadge';
 export * from './components/Switch';
 export * from './components/Table';
+export * from './components/TableOfContents';
 export * from './components/Tabs';
 export * from './components/Text';
 export * from './components/Textarea';
 export * from './components/ThemeProvider';
 export * from './components/Timeline';
 export * from './components/Toast';
+export * from './components/Toggle';
 export * from './components/Tooltip';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker

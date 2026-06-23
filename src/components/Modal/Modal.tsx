@@ -213,6 +213,7 @@ function Modal({
               id={modalId}
               tabIndex={-1}
               data-state={open ? 'open' : 'closed'}
+              data-slot="modal"
               className={cn(modalContentVariants({ size }), className)}
               onClick={(e) => e.stopPropagation()}
             >
@@ -261,6 +262,7 @@ const ModalHeader = React.forwardRef<HTMLDivElement, ModalHeaderProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
+      data-slot="modal-header"
       className={cn(
         'flex shrink-0 items-center justify-between',
         'border-border border-b px-6 py-4',
@@ -289,6 +291,7 @@ const ModalTitle = React.forwardRef<HTMLHeadingElement, ModalTitleProps>(
       <h2
         ref={ref}
         id={`${modalId}-title`}
+        data-slot="modal-title"
         className={cn(
           'text-lg leading-none font-semibold tracking-tight',
           className
@@ -331,6 +334,7 @@ const ModalClose = React.forwardRef<HTMLButtonElement, ModalCloseProps>(
         ref={ref}
         type="button"
         onClick={handleClick}
+        data-slot="modal-close"
         className={cn(
           'inline-flex h-8 w-8 items-center justify-center rounded-lg',
           'text-muted-foreground hover:text-foreground',
@@ -362,6 +366,7 @@ const ModalBody = React.forwardRef<HTMLDivElement, ModalBodyProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
+      data-slot="modal-body"
       className={cn('min-h-0 flex-1 overflow-y-auto px-6 py-4', className)}
       {...props}
     />
@@ -383,6 +388,7 @@ const ModalFooter = React.forwardRef<HTMLDivElement, ModalFooterProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
+      data-slot="modal-footer"
       className={cn(
         'flex shrink-0 items-center justify-end gap-3',
         'border-border border-t px-6 py-4',

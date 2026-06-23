@@ -56,7 +56,7 @@ const cardVariants = cva(
 const cardAccentVariants = cva('absolute left-0 top-0 bottom-0 w-1', {
   variants: {
     color: {
-      primary: 'bg-primary-500',
+      primary: 'bg-primary-800',
       success: 'bg-success',
       warning: 'bg-warning',
       destructive: 'bg-destructive',
@@ -121,6 +121,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           accent && 'pl-4',
           className
         )}
+        data-slot="card"
         data-loading={loading || undefined}
         aria-busy={loading || undefined}
         {...props}
@@ -134,9 +135,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {loading && (
           <div className="bg-card/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
             <div className="flex gap-1">
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
-              <div className="bg-primary-500 h-2 w-2 animate-bounce rounded-full" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.3s]" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full [animation-delay:-0.15s]" />
+              <div className="bg-primary-800 h-2 w-2 animate-bounce rounded-full" />
             </div>
           </div>
         )}
@@ -157,6 +158,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    data-slot="card-header"
     className={cn('flex flex-col gap-1.5 pb-4', className)}
     {...props}
   />
@@ -167,12 +169,18 @@ CardHeader.displayName = 'CardHeader';
 /**
  * Title for a Card
  */
+export interface CardTitleProps extends React.HTMLAttributes<globalThis.HTMLHeadingElement> {
+  /** Heading level — defaults to `h3` */
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+}
+
 const CardTitle = React.forwardRef<
   globalThis.HTMLHeadingElement,
-  React.HTMLAttributes<globalThis.HTMLHeadingElement>
->(({ className, children, ...props }, ref) => (
-  <h3
+  CardTitleProps
+>(({ className, children, as: Comp = 'h3', ...props }, ref) => (
+  <Comp
     ref={ref}
+    data-slot="card-title"
     className={cn(
       'text-lg leading-none font-semibold tracking-tight',
       className
@@ -180,7 +188,7 @@ const CardTitle = React.forwardRef<
     {...props}
   >
     {children}
-  </h3>
+  </Comp>
 ));
 
 CardTitle.displayName = 'CardTitle';
@@ -194,6 +202,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
+    data-slot="card-description"
     className={cn('text-muted-foreground text-sm', className)}
     {...props}
   />
@@ -208,7 +217,12 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('', className)} {...props} />
+  <div
+    ref={ref}
+    data-slot="card-content"
+    className={cn('', className)}
+    {...props}
+  />
 ));
 
 CardContent.displayName = 'CardContent';
@@ -222,6 +236,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    data-slot="card-footer"
     className={cn('flex items-center pt-4', className)}
     {...props}
   />
@@ -251,6 +266,7 @@ const CardMedia = React.forwardRef<HTMLDivElement, CardMediaProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-media"
         className={cn(
           'relative -mx-4 -mt-4 overflow-hidden first:rounded-t-xl',
           className
@@ -297,9 +313,9 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
   ) => {
     const variantClasses = {
       default: 'bg-muted text-muted-foreground',
-      primary: 'bg-primary-500 text-white',
-      success: 'bg-success text-success-foreground',
-      warning: 'bg-warning text-warning-foreground',
+      primary: 'bg-primary-800 text-white',
+      success: 'bg-success-700 text-success-foreground',
+      warning: 'bg-warning-700 text-warning-foreground',
       destructive: 'bg-destructive text-destructive-foreground',
     };
 
@@ -313,6 +329,7 @@ const CardBadge = React.forwardRef<HTMLSpanElement, CardBadgeProps>(
     return (
       <span
         ref={ref}
+        data-slot="card-badge"
         className={cn(
           'absolute z-10 rounded-md px-2 py-1 text-xs font-medium',
           variantClasses[variant],
@@ -350,6 +367,7 @@ const CardActions = React.forwardRef<HTMLDivElement, CardActionsProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-actions"
         className={cn(
           'flex items-center gap-2 pt-4',
           alignClasses[align],
@@ -374,6 +392,7 @@ const CardDivider = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <hr
     ref={ref}
+    data-slot="card-divider"
     className={cn('border-border -mx-4 my-4', className)}
     {...props}
   />
@@ -418,17 +437,23 @@ const CardCollapsible = React.forwardRef<HTMLDivElement, CardCollapsibleProps>(
     };
 
     return (
-      <div ref={ref} className={cn('', className)} {...props}>
+      <div
+        ref={ref}
+        data-slot="card-collapsible"
+        className={cn('', className)}
+        {...props}
+      >
         <button
           type="button"
           onClick={handleToggle}
-          className="text-primary-600 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="text-primary-800 focus-visible:ring-primary-500 flex items-center gap-1 rounded text-sm hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           aria-expanded={expanded}
         >
           {typeof trigger === 'string' ? (
             <>
               {expanded ? 'Show less' : trigger}
               <svg
+                aria-hidden="true"
                 className={cn(
                   'h-4 w-4 transition-transform',
                   expanded && 'rotate-180'
@@ -485,11 +510,12 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
     return (
       <div
         ref={ref}
+        data-slot="card-stat"
         className={cn('flex items-start gap-3', className)}
         {...props}
       >
         {icon && (
-          <div className="bg-primary-500/10 text-primary-600 rounded-lg p-2">
+          <div className="bg-primary-500/10 text-primary-800 rounded-lg p-2">
             {icon}
           </div>
         )}
@@ -500,10 +526,13 @@ const CardStat = React.forwardRef<HTMLDivElement, CardStatProps>(
             <div
               className={cn(
                 'mt-1 flex items-center gap-1 text-sm',
-                trend.value >= 0 ? 'text-success' : 'text-destructive'
+                trend.value >= 0
+                  ? 'text-success-700 dark:text-success-300'
+                  : 'text-destructive-700 dark:text-destructive-400'
               )}
             >
               <svg
+                aria-hidden="true"
                 className={cn('h-4 w-4', trend.value < 0 && 'rotate-180')}
                 fill="none"
                 stroke="currentColor"

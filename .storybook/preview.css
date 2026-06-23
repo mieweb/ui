@@ -59,6 +59,24 @@ html, body {
   color: #ffffff !important;
 }
 
+/* Exception: text/icons inside rendered Buttons must inherit the button's own
+   color (MDX wraps button labels in <p> and icons in <span>, which the broad
+   prose rules above would otherwise force to muted grey). */
+[data-theme="dark"] .sbdocs button p,
+[data-theme="dark"] .sbdocs button span,
+[data-theme="dark"] .sbdocs button label,
+[data-theme="dark"] .sbdocs button li,
+[data-theme="dark"] .sbdocs button svg {
+  color: inherit !important;
+}
+
+/* Exception: CTA banner heading should use full foreground (near-white in dark),
+   not the muted prose color that the broad rules above apply to <p>. */
+[data-theme="dark"] .sbdocs .mie-cta-heading,
+[data-theme="dark"] .sbdocs .mie-cta-heading p {
+  color: var(--mieweb-foreground) !important;
+}
+
 /* Story preview containers */
 [data-theme="dark"] .docs-story,
 [data-theme="dark"] .sb-story,
@@ -214,7 +232,7 @@ html, body {
 
 /* Story name labels */
 [data-theme="dark"] .sbdocs-a,
-[data-theme="dark"] .sbdocs a {
+[data-theme="dark"] .sbdocs a:not(.docs-story a):not(.sb-story a):not(.sb-unstyled a) {
   color: var(--mieweb-primary, #3b82f6) !important;
 }
 
@@ -270,4 +288,46 @@ html, body {
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: var(--mieweb-muted-foreground, #71717a);
+}
+
+/* ============================================
+   eSheet — re-map compiled vars to live brand tokens
+   Tailwind 4 @theme resolves var() statically at build time,
+   so we override the --ms-color-* custom props here to keep
+   them wired to the runtime --mieweb-* values.
+   !important needed because eSheet's compiled CSS sets these
+   on :root,:host and loads after this file.
+   ============================================ */
+:root,
+.ms-builder-root,
+.esheet-renderer-root,
+.ms-builder-root.dark,
+.esheet-renderer-root.dark {
+  --ms-color-msprimary: var(--mieweb-primary-500, #3b82f6) !important;
+  --ms-color-msprimary-active: var(--mieweb-primary-800, #1e40af) !important;
+  --ms-color-mssecondary: var(--mieweb-muted-foreground, #6b7280) !important;
+  --ms-color-msaccent: var(--mieweb-success, #10b981) !important;
+  --ms-color-msdanger: var(--mieweb-destructive, #ef4444) !important;
+  --ms-color-mswarning: var(--mieweb-warning, #f97316) !important;
+  --ms-color-mssurface: var(--mieweb-card, #ffffff) !important;
+  --ms-color-msborder: var(--mieweb-border, #e5e7eb) !important;
+  --ms-color-msborderinactive: var(--mieweb-muted-foreground, #9ca3af) !important;
+  --ms-color-mstext: var(--mieweb-foreground, #111827) !important;
+  --ms-color-mstextsecondary: var(--mieweb-secondary-foreground, #f8fafc) !important;
+  --ms-color-mstextmuted: var(--mieweb-muted-foreground, #6b7280) !important;
+  --ms-color-msbackground: var(--mieweb-muted, #f5f5f5) !important;
+  --ms-color-msbackgroundsecondary: var(--mieweb-muted, #f3f4f6) !important;
+  --ms-color-msbackgroundhover: var(--mieweb-muted, #eceef1) !important;
+  --ms-color-msoverlay: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* eSheet scoped reset sets border-width:0 on all descendants,
+   which strips borders from @mieweb/ui Radio and Checkbox inputs.
+   Restore border-width for @mieweb/ui form controls via data-slot. */
+.ms-builder-root [data-slot="radio"],
+.ms-builder-root [data-slot="checkbox"],
+.esheet-renderer-root [data-slot="radio"],
+.esheet-renderer-root [data-slot="checkbox"] {
+  border-width: 2px !important;
+  border-style: solid !important;
 }

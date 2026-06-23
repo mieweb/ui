@@ -131,9 +131,16 @@ export function ProviderSelector({
   };
 
   return (
-    <div className={cn('relative', className)} ref={containerRef}>
+    <div
+      data-slot="provider-selector"
+      className={cn('relative', className)}
+      ref={containerRef}
+    >
       {label && (
-        <label className="text-foreground mb-1 block text-sm font-medium">
+        <label
+          data-slot="provider-selector-label"
+          className="text-foreground mb-1 block text-sm font-medium"
+        >
           {label}
         </label>
       )}
@@ -141,6 +148,7 @@ export function ProviderSelector({
       {/* Trigger button */}
       <button
         type="button"
+        data-slot="provider-selector-trigger"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
@@ -156,6 +164,7 @@ export function ProviderSelector({
         {isLoading ? (
           <div className="flex flex-1 items-center gap-2">
             <svg
+              aria-hidden="true"
               className="text-muted-foreground h-5 w-5 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -181,21 +190,31 @@ export function ProviderSelector({
             {/* Provider avatar/logo */}
             {selectedProvider.logoUrl ? (
               <img
+                data-slot="provider-selector-trigger-avatar"
                 src={selectedProvider.logoUrl}
                 alt={selectedProvider.name}
                 className="h-6 w-6 rounded object-cover"
               />
             ) : (
-              <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded text-xs font-medium">
+              <div
+                data-slot="provider-selector-trigger-avatar"
+                className="bg-primary/10 text-primary-800 dark:text-primary-400 flex h-6 w-6 items-center justify-center rounded text-xs font-medium"
+              >
                 {getInitials(selectedProvider.name)}
               </div>
             )}
             <div className="min-w-0 flex-1 leading-tight">
-              <div className="text-foreground truncate text-sm">
+              <div
+                data-slot="provider-selector-trigger-name"
+                className="text-foreground truncate text-sm"
+              >
                 {selectedProvider.name}
               </div>
               {selectedProvider.location && (
-                <div className="text-muted-foreground truncate text-[11px]">
+                <div
+                  data-slot="provider-selector-trigger-loc"
+                  className="text-muted-foreground truncate text-[11px]"
+                >
                   {selectedProvider.location}
                 </div>
               )}
@@ -207,6 +226,8 @@ export function ProviderSelector({
 
         {/* Dropdown arrow */}
         <svg
+          aria-hidden="true"
+          data-slot="provider-selector-arrow"
           className={cn(
             'text-muted-foreground h-4 w-4 flex-shrink-0 transition-transform',
             isOpen && 'rotate-180'
@@ -226,12 +247,16 @@ export function ProviderSelector({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="border-border bg-card absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
+        <div
+          data-slot="provider-selector-dropdown"
+          className="border-border bg-card absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg"
+        >
           {/* Search */}
           {searchable && (
             <div className="border-border border-b p-2">
               <div className="relative">
                 <svg
+                  aria-hidden="true"
                   className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -246,6 +271,7 @@ export function ProviderSelector({
                 </svg>
                 <input
                   type="text"
+                  data-slot="provider-selector-search"
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -268,6 +294,7 @@ export function ProviderSelector({
                 <button
                   key={provider.id}
                   type="button"
+                  data-slot="provider-selector-option"
                   onClick={() => handleSelect(provider)}
                   className={cn(
                     'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
@@ -278,34 +305,50 @@ export function ProviderSelector({
                   {/* Provider avatar/logo */}
                   {provider.logoUrl ? (
                     <img
+                      data-slot="provider-selector-option-avatar"
                       src={provider.logoUrl}
                       alt={provider.name}
                       className="h-8 w-8 rounded object-cover"
                     />
                   ) : (
-                    <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded text-sm font-medium">
+                    <div
+                      data-slot="provider-selector-option-avatar"
+                      className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded text-sm font-medium"
+                    >
                       {getInitials(provider.name)}
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-foreground font-medium">
+                      <span
+                        data-slot="provider-selector-option-name"
+                        className="text-foreground font-medium"
+                      >
                         {provider.name}
                       </span>
                       {provider.code && (
-                        <span className="text-muted-foreground text-xs">
+                        <span
+                          data-slot="provider-selector-option-code"
+                          className="text-xs text-neutral-600 dark:text-neutral-400"
+                        >
                           ({provider.code})
                         </span>
                       )}
                       {provider.isActive === false && (
-                        <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium">
+                        <span
+                          data-slot="provider-selector-option-badge"
+                          className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400"
+                        >
                           Inactive
                         </span>
                       )}
                     </div>
                     {(provider.location || provider.type) && (
-                      <div className="text-muted-foreground truncate text-sm">
+                      <div
+                        data-slot="provider-selector-option-detail"
+                        className="text-muted-foreground truncate text-sm"
+                      >
                         {[provider.type, provider.location]
                           .filter(Boolean)
                           .join(' • ')}
@@ -316,7 +359,8 @@ export function ProviderSelector({
                   {/* Selected checkmark */}
                   {selectedProvider?.id === provider.id && (
                     <svg
-                      className="text-primary h-5 w-5 flex-shrink-0"
+                      aria-hidden="true"
+                      className="text-primary-800 dark:text-primary-400 h-5 w-5 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

@@ -33,6 +33,7 @@ export default [
         HTMLInputElement: 'readonly',
         HTMLButtonElement: 'readonly',
         HTMLDivElement: 'readonly',
+        HTMLDListElement: 'readonly',
         HTMLSpanElement: 'readonly',
         HTMLParagraphElement: 'readonly',
         HTMLTableElement: 'readonly',
@@ -42,9 +43,12 @@ export default [
         HTMLTableCaptionElement: 'readonly',
         HTMLTextAreaElement: 'readonly',
         HTMLUListElement: 'readonly',
+        HTMLLabelElement: 'readonly',
         HTMLHeadingElement: 'readonly',
         HTMLCanvasElement: 'readonly',
         HTMLImageElement: 'readonly',
+        HTMLIFrameElement: 'readonly',
+        HTMLStyleElement: 'readonly',
         HTMLVideoElement: 'readonly',
         HTMLFormElement: 'readonly',
         HTMLSelectElement: 'readonly',
@@ -76,6 +80,7 @@ export default [
         ArrayBuffer: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
+        queueMicrotask: 'readonly',
         getComputedStyle: 'readonly',
         // File APIs
         File: 'readonly',
@@ -84,6 +89,14 @@ export default [
         // Encoding APIs
         atob: 'readonly',
         btoa: 'readonly',
+        // Observer APIs
+        IntersectionObserver: 'readonly',
+        IntersectionObserverEntry: 'readonly',
+        MutationObserver: 'readonly',
+        // DOM types
+        Element: 'readonly',
+        Document: 'readonly',
+        ScrollBehavior: 'readonly',
         // Types
         PermissionName: 'readonly',
       },

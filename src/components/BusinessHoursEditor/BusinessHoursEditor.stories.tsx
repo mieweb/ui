@@ -85,7 +85,14 @@ function BusinessHoursEditorWrapper({
 
       <div className="mt-6 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
         <h4 className="mb-2 text-sm font-medium">Current Schedule:</h4>
-        <pre className="max-h-48 overflow-auto text-xs">
+        <pre
+          className="max-h-48 overflow-auto text-xs"
+          // tabIndex makes this scrollable region keyboard-accessible (axe: scrollable-region-focusable)
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          tabIndex={0}
+          role="region"
+          aria-label="Current schedule data"
+        >
           {JSON.stringify(schedule, null, 2)}
         </pre>
       </div>

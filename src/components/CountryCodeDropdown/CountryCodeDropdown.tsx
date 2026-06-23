@@ -1,8 +1,15 @@
 import * as React from 'react';
-import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
+import * as libphonenumber from 'google-libphonenumber';
 import { cn } from '../../utils/cn';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+
+const PhoneNumberUtil =
+  (libphonenumber as unknown as { default?: typeof libphonenumber }).default
+    ?.PhoneNumberUtil ?? libphonenumber.PhoneNumberUtil;
+const PhoneNumberFormat =
+  (libphonenumber as unknown as { default?: typeof libphonenumber }).default
+    ?.PhoneNumberFormat ?? libphonenumber.PhoneNumberFormat;
 
 // =============================================================================
 // Types
@@ -289,10 +296,15 @@ function CountryCodeDropdown({
       : 'top-full left-0 mt-1';
 
   return (
-    <div ref={containerRef} className="relative inline-flex">
+    <div
+      ref={containerRef}
+      data-slot="country-dropdown"
+      className="relative inline-flex"
+    >
       {/* Trigger button */}
       <button
         type="button"
+        data-slot="country-dropdown-trigger"
         onClick={handleToggle}
         disabled={disabled}
         aria-label={ariaLabel}
@@ -309,11 +321,16 @@ function CountryCodeDropdown({
           className
         )}
       >
-        <span className="text-base leading-none" aria-hidden="true">
+        <span
+          data-slot="country-dropdown-flag"
+          className="text-base leading-none"
+          aria-hidden="true"
+        >
           {selected.flag}
         </span>
-        <span>{selected.dialCode}</span>
+        <span data-slot="country-dropdown-dialcode">{selected.dialCode}</span>
         <svg
+          data-slot="country-dropdown-chevron"
           className={cn(
             'h-4 w-4 shrink-0 text-neutral-500 transition-transform duration-200',
             isOpen && 'rotate-180'
@@ -336,6 +353,7 @@ function CountryCodeDropdown({
         <div
           id={menuId}
           role="listbox"
+          data-slot="country-dropdown-panel"
           aria-label={ariaLabel}
           tabIndex={-1}
           onKeyDown={handleKeyDown}
@@ -348,10 +366,14 @@ function CountryCodeDropdown({
           )}
         >
           {/* Search input */}
-          <div className="border-b border-neutral-200 p-2 dark:border-neutral-700">
+          <div
+            data-slot="country-dropdown-search"
+            className="border-b border-neutral-200 p-2 dark:border-neutral-700"
+          >
             <input
               ref={searchInputRef}
               type="text"
+              data-slot="country-dropdown-search-input"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={searchPlaceholder}
@@ -366,7 +388,11 @@ function CountryCodeDropdown({
           </div>
 
           {/* Country list */}
-          <div ref={listRef} className="max-h-60 overflow-y-auto p-1">
+          <div
+            ref={listRef}
+            data-slot="country-dropdown-list"
+            className="max-h-60 overflow-y-auto p-1"
+          >
             {filtered.length === 0 ? (
               <div className="text-muted-foreground px-3 py-4 text-center text-sm">
                 No countries found
@@ -377,6 +403,7 @@ function CountryCodeDropdown({
                   key={country.code}
                   type="button"
                   role="option"
+                  data-slot="country-dropdown-option"
                   aria-selected={country.code === selected.code}
                   onClick={() => handleSelect(country)}
                   className={cn(
@@ -389,11 +416,23 @@ function CountryCodeDropdown({
                     'focus:bg-neutral-100 dark:focus:bg-neutral-700'
                   )}
                 >
-                  <span className="text-base leading-none" aria-hidden="true">
+                  <span
+                    data-slot="country-dropdown-option-flag"
+                    className="text-base leading-none"
+                    aria-hidden="true"
+                  >
                     {country.flag}
                   </span>
-                  <span className="flex-1 truncate">{country.name}</span>
-                  <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+                  <span
+                    data-slot="country-dropdown-option-name"
+                    className="flex-1 truncate"
+                  >
+                    {country.name}
+                  </span>
+                  <span
+                    data-slot="country-dropdown-option-dialcode"
+                    className="text-muted-foreground shrink-0 text-xs"
+                  >
                     {country.dialCode}
                   </span>
                 </button>

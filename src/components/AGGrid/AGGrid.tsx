@@ -271,6 +271,7 @@ function AGGridInner<TData = unknown>(
 
   return (
     <div
+      data-slot="ag-grid"
       className={cn(agGridVariants({ variant, size, brand }), className)}
       style={{
         height:
