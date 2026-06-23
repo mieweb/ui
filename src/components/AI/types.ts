@@ -129,7 +129,7 @@ export type AIMessageStatus = 'pending' | 'streaming' | 'complete' | 'error';
  */
 export interface AIMessageContent {
   /** Type of content */
-  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'code';
+  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'code' | 'image' | 'file';
   /** Text content */
   text?: string;
   /** Tool call reference */
@@ -138,6 +138,16 @@ export interface AIMessageContent {
   language?: string;
   /** Whether this content is collapsed by default */
   collapsed?: boolean;
+  /** Image source URL (for `image` blocks) */
+  imageUrl?: string;
+  /** Alt text / file name (for `image` and `file` blocks) */
+  name?: string;
+  /** File size in bytes (for `file` blocks) */
+  fileSize?: number;
+  /** MIME type (for `file` blocks) */
+  mimeType?: string;
+  /** Download/open URL (for `file` blocks) */
+  fileUrl?: string;
 }
 
 /**
