@@ -256,9 +256,11 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
 
   if (content.type === 'file') {
     const sizeLabel =
-      typeof content.fileSize === 'number' ? formatFileSize(content.fileSize) : undefined;
+      typeof content.fileSize === 'number'
+        ? formatFileSize(content.fileSize)
+        : undefined;
     const card = (
-      <div className="my-1 flex items-center gap-3 rounded-lg p-3 bg-neutral-100 dark:bg-neutral-800 transition-colors">
+      <div className="my-1 flex items-center gap-3 rounded-lg bg-neutral-100 p-3 transition-colors dark:bg-neutral-800">
         <div className="rounded-lg bg-neutral-200 p-2 dark:bg-neutral-700">
           <svg
             aria-hidden="true"
@@ -279,9 +281,7 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
           <p className="truncate text-sm font-medium">
             {content.name || 'Document'}
           </p>
-          {sizeLabel && (
-            <p className="text-xs opacity-70">{sizeLabel}</p>
-          )}
+          {sizeLabel && <p className="text-xs opacity-70">{sizeLabel}</p>}
         </div>
       </div>
     );
@@ -415,10 +415,13 @@ export function AIMessageDisplay({
           message.role === 'user' && 'items-end'
         )}
       >
-        <div className={cn(
-          bubbleVariants({ role: message.role }),
-          message.status === 'error' && 'border border-red-300 dark:border-red-700'
-        )}>
+        <div
+          className={cn(
+            bubbleVariants({ role: message.role }),
+            message.status === 'error' &&
+              'border border-red-300 dark:border-red-700'
+          )}
+        >
           {hasContent ? (
             <div className="space-y-3">
               {message.content.map((content, index) => (

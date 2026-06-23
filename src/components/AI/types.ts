@@ -129,7 +129,14 @@ export type AIMessageStatus = 'pending' | 'streaming' | 'complete' | 'error';
  */
 export interface AIMessageContent {
   /** Type of content */
-  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'code' | 'image' | 'file';
+  type:
+    | 'text'
+    | 'tool_use'
+    | 'tool_result'
+    | 'thinking'
+    | 'code'
+    | 'image'
+    | 'file';
   /** Text content */
   text?: string;
   /** Tool call reference */
