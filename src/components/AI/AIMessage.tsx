@@ -268,7 +268,86 @@ function ContentBlock({
     );
   }
 
+  if (content.type === 'image' && content.imageUrl) {
+    const safeHref = /^\s*javascript:/i.test(content.imageUrl)
+      ? undefined
+      : content.imageUrl;
+    return (
+      <a
+        href={safeHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-fit transition-transform hover:scale-[1.02]"
+        aria-label={`View ${content.name || 'Uploaded image'}`}
+      >
+        <img
+          src={content.imageUrl}
+          alt={content.name || 'Uploaded image'}
+          loading="lazy"
+          className="my-1 max-h-64 w-auto rounded-lg object-cover"
+        />
+      </a>
+    );
+  }
+
+  if (content.type === 'file') {
+    const sizeLabel =
+      typeof content.fileSize === 'number'
+        ? formatFileSize(content.fileSize)
+        : undefined;
+    const card = (
+      <div className="my-1 flex items-center gap-3 rounded-lg bg-neutral-100 p-3 transition-colors dark:bg-neutral-800">
+        <div className="rounded-lg bg-neutral-200 p-2 dark:bg-neutral-700">
+          <svg
+            aria-hidden="true"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">
+            {content.name || 'Document'}
+          </p>
+          {sizeLabel && <p className="text-xs opacity-70">{sizeLabel}</p>}
+        </div>
+      </div>
+    );
+
+    if (content.fileUrl) {
+      const safeFileHref = /^\s*javascript:/i.test(content.fileUrl)
+        ? undefined
+        : content.fileUrl;
+      return (
+        <a
+          href={safeFileHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-fit no-underline"
+        >
+          {card}
+        </a>
+      );
+    }
+    return card;
+  }
+
   return null;
+}
+
+/** Human-readable file size (e.g. "1.2 MB"). */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ============================================================================
