@@ -30,6 +30,8 @@ const meta: Meta<typeof AIMessageDisplay> = {
           '| `tool_use` | An embedded `MCPToolCallDisplay` |',
           '| `thinking` | A collapsible "Thinking…" reasoning panel |',
           '| `code` | A syntax-styled code block |',
+          '| `image` | A clickable image thumbnail |',
+          '| `file` | A document card with icon, filename & size |',
           '',
           '### Rich content: Markdown, images & Mermaid',
           'Text blocks are plain text by default. To render **Markdown, images, or Mermaid diagrams**,',
@@ -223,5 +225,55 @@ export const WithCustomMarkdownRenderer: Story = {
         renderTextContent={renderTextContent}
       />
     );
+  },
+};
+
+/** An assistant turn with a clickable image thumbnail. */
+export const WithImageBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '7',
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: "Here's the lab result image you requested.",
+        },
+        {
+          type: 'image',
+          imageUrl:
+            'https://placehold.co/600x400/4f46e5/ffffff/png?text=Lab+Result',
+          name: 'Lab result scan',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} />;
+  },
+};
+
+/** An assistant turn with a file document card showing icon, filename, and size. */
+export const WithFileBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '8',
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: "Here's the full report you requested.",
+        },
+        {
+          type: 'file',
+          name: 'patient-report.pdf',
+          fileSize: 1_258_291,
+          mimeType: 'application/pdf',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} />;
   },
 };
