@@ -144,8 +144,31 @@ html, body {
 [data-theme="dark"] .docblock-argstable code,
 [data-theme="dark"] .sbdocs code {
   background-color: var(--mieweb-card, #27272a) !important;
-  color: var(--mieweb-primary, #3b82f6) !important;
+  color: var(--mieweb-primary-400, #3b82f6) !important;
   border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* ============================================
+   PROSE TABLES (Markdown / README) - DARK MODE
+   ============================================ */
+
+/* Markdown-authored tables in docs (e.g. the README rendered on the Overview
+   page) are plain <table>/<th>/<td>, NOT .docblock-argstable. Storybook's docs
+   theme hardcodes a dark cell color (rgb(46,51,56)) that is unreadable on the
+   dark background, so force the themed foreground + borders here. */
+[data-theme="dark"] .sbdocs-content table th,
+[data-theme="dark"] .sbdocs-content table td {
+  color: var(--mieweb-foreground) !important;
+  border-color: var(--mieweb-border, #3f3f46) !important;
+}
+
+/* Header row + zebra striping for legibility. */
+[data-theme="dark"] .sbdocs-content table th {
+  background-color: var(--mieweb-card, #27272a) !important;
+}
+
+[data-theme="dark"] .sbdocs-content table tr:nth-child(even) td {
+  background-color: var(--mieweb-card, #27272a) !important;
 }
 
 /* ============================================
@@ -201,7 +224,7 @@ html, body {
 }
 
 [data-theme="dark"] .docblock-argstable button:hover {
-  background-color: var(--mieweb-accent, #3f3f46) !important;
+  background-color: var(--mieweb-muted, #3f3f46) !important;
 }
 
 /* ============================================
@@ -233,7 +256,7 @@ html, body {
 /* Story name labels */
 [data-theme="dark"] .sbdocs-a,
 [data-theme="dark"] .sbdocs a:not(.docs-story a):not(.sb-story a):not(.sb-unstyled a) {
-  color: var(--mieweb-primary, #3b82f6) !important;
+  color: var(--mieweb-primary-400, #3b82f6) !important;
 }
 
 /* ============================================
@@ -246,7 +269,7 @@ html, body {
 }
 
 [data-theme="dark"] [class*="IconButton"]:hover {
-  background-color: var(--mieweb-accent, #3f3f46) !important;
+  background-color: var(--mieweb-muted, #3f3f46) !important;
 }
 
 /* Show code button */

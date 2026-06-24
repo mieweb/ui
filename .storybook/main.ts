@@ -84,6 +84,43 @@ const datavisLegacySubpathDependencies = [
   'core-js/es/string/replace-all',
 ] as const;
 
+// CJS-only transitive dependencies (via react-i18next → html-parse-stringify →
+// void-elements) that live only in the pnpm virtual store. They must be aliased
+// to a resolvable path and force-included so Vite pre-bundles them with proper
+// CJS→ESM default-export interop; otherwise `void-elements` is served raw and
+// throws "does not provide an export named 'default'".
+//
+// The shared `pnpmVirtualNodeModulesDir` is computed from `monorepoRoot`, which
+// does not match this repo's layout; resolve against the workspace-local pnpm
+// store instead.
+const workspacePnpmVirtualNodeModulesDir = path.join(
+  rootNodeModulesDir,
+  '.pnpm/node_modules',
+);
+
+const pnpmVirtualCjsInteropDependencies = [
+  'react-i18next',
+  'html-parse-stringify',
+  'void-elements',
+] as const;
+
+const pnpmVirtualCjsInteropAliases = pnpmVirtualCjsInteropDependencies
+  .filter(
+    (dependencyName) =>
+      !existsSync(path.join(rootNodeModulesDir, dependencyName)) &&
+      existsSync(path.join(workspacePnpmVirtualNodeModulesDir, dependencyName)),
+  )
+  .map((dependencyName) => ({
+    find: new RegExp(`^${escapeRegExp(dependencyName)}(\/.*)?$`),
+    replacement: `${path.join(workspacePnpmVirtualNodeModulesDir, dependencyName)}$1`,
+  }));
+
+const pnpmVirtualCjsInteropIncludes = pnpmVirtualCjsInteropDependencies.filter(
+  (dependencyName) =>
+    existsSync(path.join(rootNodeModulesDir, dependencyName)) ||
+    existsSync(path.join(workspacePnpmVirtualNodeModulesDir, dependencyName)),
+);
+
 function getPackageRootName(dependencyName: string): string {
   if (dependencyName.startsWith('@')) {
     return dependencyName.split('/').slice(0, 2).join('/');
@@ -188,6 +225,7 @@ const config: StorybookConfig = {
           : []),
       ...localUiAliases,
       ...buildVirtualStoreAliases(optimizeDepNames),
+      ...pnpmVirtualCjsInteropAliases,
       ...esheetSourceAliases,
     ];
 
@@ -221,6 +259,12 @@ const config: StorybookConfig = {
         ...(config.optimizeDeps.include ?? []),
         ...optimizeDepNames,
       ].filter(isLocalNodeModuleDependency)),
+    );
+    config.optimizeDeps.include = Array.from(
+      new Set([
+        ...(config.optimizeDeps.include ?? []),
+        ...pnpmVirtualCjsInteropIncludes,
+      ]),
     );
     config.optimizeDeps.esbuildOptions = {
       ...config.optimizeDeps.esbuildOptions,

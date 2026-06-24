@@ -268,6 +268,14 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     [role="toolbar"] button[data-active="true"] {
       color: ${brand.primary} !important;
     }
+
+    /* Brand-theme switcher reflects the active brand (higher specificity than
+       the generic muted toolbar-button rule, so it wins in both light/dark). */
+    [role="toolbar"] button[aria-label*="brand themes"],
+    [class*="toolbar"] button[aria-label*="brand themes"],
+    [class*="bar"] button[aria-label*="brand themes"] {
+      color: ${brand.primary} !important;
+    }
     
     /* Links */
     a[href]:hover {
