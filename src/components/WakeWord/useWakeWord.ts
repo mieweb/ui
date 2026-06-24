@@ -33,6 +33,21 @@ export interface WakeWordState {
 const ASSET = '/wakeword';
 const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
 
+// Load the SAME onnxruntime-web build the working demo uses (1.19.0), as a global `ort`.
+// The detector's onnx.js prefers a global `ort` over the bundled package — matching the demo's
+// pinned version fixes the slow/choppy inference and behavior diffs the newer npm version caused.
+const ORT_URL = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.0/dist/ort.min.js';
+function ensureOrt(): Promise<void> {
+  if (typeof (window as unknown as { ort?: unknown }).ort !== 'undefined') return Promise.resolve();
+  return new Promise<void>((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = ORT_URL;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('failed to load onnxruntime-web 1.19.0'));
+    document.head.appendChild(s);
+  });
+}
+
 export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
   const { onWake, thresholds, enabled = true } = opts;
   const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
@@ -48,6 +63,10 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
       try {
         // mic permission first (also what unlocks AudioContext)
         await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (cancelled) return;
+
+        // load the demo's exact onnxruntime (1.19.0) as a global BEFORE the detector imports onnx.js
+        await ensureOrt();
         if (cancelled) return;
 
         // vendored vanilla-JS detector — dynamic import avoids TS typing the .js module
