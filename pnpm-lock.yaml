@@ -75,8 +75,8 @@ importers:
         specifier: link:packages/esheet/packages/adapters
         version: link:packages/esheet/packages/adapters
       '@esheet/builder':
-        specifier: link:./packages/esheet/packages/builder
-        version: link:packages/esheet/packages/builder
+        specifier: file:./packages/esheet/packages/builder
+        version: file:packages/esheet/packages/builder(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))
       '@esheet/core':
         specifier: link:packages/esheet/packages/core
         version: link:packages/esheet/packages/core
@@ -84,8 +84,8 @@ importers:
         specifier: link:packages/esheet/packages/fields
         version: link:packages/esheet/packages/fields
       '@esheet/renderer':
-        specifier: link:./packages/esheet/packages/renderer
-        version: link:packages/esheet/packages/renderer
+        specifier: file:./packages/esheet/packages/renderer
+        version: file:packages/esheet/packages/renderer(react@19.2.4)
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
@@ -734,6 +734,17 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@esheet/builder@file:packages/esheet/packages/builder':
+    resolution: {directory: packages/esheet/packages/builder, type: directory}
+
+  '@esheet/renderer@file:packages/esheet/packages/renderer':
+    resolution: {directory: packages/esheet/packages/renderer, type: directory}
+    peerDependencies:
+      react: '>=19.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   '@eslint-community/eslint-utils@4.9.1':
     resolution: {integrity: sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==}
@@ -5851,6 +5862,29 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.1':
     optional: true
+
+  '@esheet/builder@file:packages/esheet/packages/builder(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))':
+    dependencies:
+      '@esheet/adapters': link:packages/esheet/packages/adapters
+      '@esheet/core': link:packages/esheet/packages/core
+      '@esheet/fields': link:packages/esheet/packages/fields
+      '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      js-yaml: 4.1.1
+      react: 19.2.4
+      sortablejs: 1.15.7
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - monaco-editor
+      - react-dom
+
+  '@esheet/renderer@file:packages/esheet/packages/renderer(react@19.2.4)':
+    dependencies:
+      '@esheet/adapters': link:packages/esheet/packages/adapters
+      '@esheet/core': link:packages/esheet/packages/core
+      '@esheet/fields': link:packages/esheet/packages/fields
+      js-yaml: 4.1.1
+    optionalDependencies:
+      react: 19.2.4
 
   '@eslint-community/eslint-utils@4.9.1(eslint@9.39.3(jiti@2.6.1))':
     dependencies:
