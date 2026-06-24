@@ -5,6 +5,8 @@
  * interactions, tool calls, and chat messages.
  */
 
+import type * as React from 'react';
+
 // ============================================================================
 // MCP Tool Types
 // ============================================================================
@@ -129,7 +131,15 @@ export type AIMessageStatus = 'pending' | 'streaming' | 'complete' | 'error';
  */
 export interface AIMessageContent {
   /** Type of content */
-  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'code' | 'audio';
+  type:
+    | 'text'
+    | 'tool_use'
+    | 'tool_result'
+    | 'thinking'
+    | 'code'
+    | 'image'
+    | 'file'
+    | 'audio';
   /** Text content (also used as the audio label for `audio` blocks) */
   text?: string;
   /** Tool call reference */
@@ -138,10 +148,18 @@ export interface AIMessageContent {
   language?: string;
   /** Whether this content is collapsed by default */
   collapsed?: boolean;
+  /** Image source URL (for `image` blocks) */
+  imageUrl?: string;
+  /** Alt text / file name (for `image` and `file` blocks) */
+  name?: string;
+  /** File size in bytes (for `file` blocks) */
+  fileSize?: number;
+  /** MIME type (for `file` and `audio` blocks) */
+  mimeType?: string;
+  /** Download/open URL (for `file` blocks) */
+  fileUrl?: string;
   /** Source URL for `audio` blocks */
   audioUrl?: string;
-  /** MIME type for `audio` blocks */
-  mimeType?: string;
   /** Duration in seconds for `audio` blocks */
   duration?: number;
 }
@@ -171,6 +189,29 @@ export interface AIMessage {
   /** Custom metadata */
   metadata?: Record<string, unknown>;
 }
+
+// ============================================================================
+// Render Customization Types
+// ============================================================================
+
+/** Context passed to a custom text content renderer. */
+export interface AITextRenderContext {
+  /** id of the parent message (useful as a render cache key) */
+  messageId: string;
+  /** true while the message is still streaming */
+  streaming: boolean;
+  /** role of the parent message */
+  role: AIMessage['role'];
+}
+
+/**
+ * Render-prop for customizing `text` content blocks. Host is responsible
+ * for sanitizing untrusted input.
+ */
+export type AIRenderTextContent = (
+  text: string,
+  ctx: AITextRenderContext
+) => React.ReactNode;
 
 // ============================================================================
 // AI Chat Types

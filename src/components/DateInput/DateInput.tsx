@@ -432,7 +432,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                   day === null && 'invisible',
                   day !== null && 'hover:bg-muted',
                   isSelectedDay(day!) &&
-                    'bg-primary-800 hover:bg-primary-700 text-white',
+                    'bg-primary-800 hover:bg-primary-900 text-white',
                   isToday(day!) &&
                     !isSelectedDay(day!) &&
                     'border-primary-800 text-primary-800 border'
@@ -593,6 +593,7 @@ DateInput.displayName = 'DateInput';
 function ChevronLeftIcon() {
   return (
     <svg
+      aria-hidden="true"
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -610,6 +611,7 @@ function ChevronLeftIcon() {
 function ChevronRightIcon() {
   return (
     <svg
+      aria-hidden="true"
       width="16"
       height="16"
       viewBox="0 0 24 24"

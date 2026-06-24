@@ -44,9 +44,13 @@ interface ToolStatusIconProps {
 
 function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
   return (
-    <span className={cn(statusIconVariants({ status }), className)}>
+    <span
+      data-slot="ai-tool-status-icon"
+      className={cn(statusIconVariants({ status }), className)}
+    >
       {status === 'pending' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-neutral-500"
           fill="currentColor"
           viewBox="0 0 20 20"
@@ -56,7 +60,8 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'running' && (
         <svg
-          className="text-primary-600 dark:text-primary-400 h-3 w-3 animate-spin"
+          aria-hidden="true"
+          className="text-primary-800 dark:text-primary-400 h-3 w-3 animate-spin"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -77,6 +82,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'success' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-green-600 dark:text-green-400"
           fill="none"
           viewBox="0 0 24 24"
@@ -92,6 +98,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'error' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-red-600 dark:text-red-400"
           fill="none"
           viewBox="0 0 24 24"
@@ -107,6 +114,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
       )}
       {status === 'cancelled' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 text-neutral-500"
           fill="none"
           viewBox="0 0 24 24"
@@ -128,6 +136,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Patient tools
   create_patient: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -143,6 +152,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   ),
   get_patient: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -158,6 +168,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   ),
   search_patients: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -174,6 +185,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Appointment tools
   schedule_appointment: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -190,6 +202,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Document tools
   create_document: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -206,6 +219,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Provider tools
   search_providers: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -227,6 +241,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   // Default tool icon
   default: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -267,6 +282,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
   const linkTypeIcons: Record<string, React.ReactNode> = {
     patient: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -282,6 +298,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     document: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -297,6 +314,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     appointment: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -312,6 +330,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     order: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -327,6 +346,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     provider: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -347,6 +367,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     external: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -362,6 +383,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
     ),
     internal: (
       <svg
+        aria-hidden="true"
         className="h-4 w-4"
         fill="none"
         viewBox="0 0 24 24"
@@ -385,7 +407,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
       onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
-        'bg-primary-50 text-primary-700 hover:bg-primary-100',
+        'bg-primary-50 text-primary-900 hover:bg-primary-100',
         'dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50',
         'text-sm font-medium transition-colors',
         'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
@@ -397,6 +419,7 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
       <span>{link.label}</span>
       {link.type === 'external' && (
         <svg
+          aria-hidden="true"
           className="h-3 w-3 opacity-60"
           fill="none"
           viewBox="0 0 24 24"
@@ -484,9 +507,10 @@ function ToolResultDisplay({
         <div className="mt-2">
           <button
             onClick={() => setShowJson(!showJson)}
-            className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
+            className="flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
           >
             <svg
+              aria-hidden="true"
               className={cn(
                 'h-3 w-3 transition-transform',
                 showJson && 'rotate-90'
@@ -686,6 +710,7 @@ export function MCPToolCallDisplay({
 
   return (
     <div
+      data-slot="ai-tool-call"
       className={cn(
         toolCallVariants({ status: toolCall.status, compact }),
         className
@@ -694,12 +719,15 @@ export function MCPToolCallDisplay({
       {/* Main Content - Always Visible */}
       <div className="flex items-start gap-3">
         {/* Tool Icon */}
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400">
+        <div
+          data-slot="ai-tool-icon"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/50 text-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-400"
+        >
           {getToolIcon(toolCall.toolName)}
         </div>
 
         {/* Content */}
-        <div className="min-w-0 flex-1">
+        <div data-slot="ai-tool-content" className="min-w-0 flex-1">
           {/* Friendly Status Line */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-neutral-900 dark:text-white">
@@ -707,7 +735,7 @@ export function MCPToolCallDisplay({
             </span>
             <ToolStatusIcon status={toolCall.status} />
             {toolCall.duration && (
-              <span className="text-xs text-neutral-400">
+              <span className="text-xs text-neutral-600 dark:text-neutral-400">
                 {formatDuration(toolCall.duration)}
               </span>
             )}
@@ -715,14 +743,14 @@ export function MCPToolCallDisplay({
 
           {/* Parameter Summary (user-friendly) */}
           {paramSummary && toolCall.status !== 'success' && (
-            <p className="mt-0.5 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="text-muted-foreground mt-0.5 text-sm">
               {paramSummary}
             </p>
           )}
 
           {/* Result Summary & Links */}
           {toolCall.result && (
-            <div className="mt-2">
+            <div data-slot="ai-tool-result" className="mt-2">
               <ToolResultDisplay
                 result={toolCall.result}
                 onLinkClick={onLinkClick}
@@ -744,9 +772,10 @@ export function MCPToolCallDisplay({
           {collapsible && showParameters && toolCall.parameters.length > 0 && (
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="mt-2 flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
+              className="mt-2 flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
             >
               <svg
+                aria-hidden="true"
                 className={cn(
                   'h-3 w-3 transition-transform',
                   showDetails && 'rotate-90'
@@ -768,8 +797,11 @@ export function MCPToolCallDisplay({
 
           {/* Technical Details (collapsed by default) */}
           {showDetails && showParameters && toolCall.parameters.length > 0 && (
-            <div className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800">
-              <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400">
+            <div
+              data-slot="ai-tool-parameters"
+              className="mt-3 rounded-md bg-neutral-100 p-2 dark:bg-neutral-800"
+            >
+              <h4 className="mb-1.5 text-xs font-medium tracking-wide text-neutral-600 uppercase dark:text-neutral-400">
                 Parameters
               </h4>
               <div className="space-y-0.5">
@@ -778,7 +810,7 @@ export function MCPToolCallDisplay({
                     key={param.name}
                     className="flex items-start gap-2 text-xs"
                   >
-                    <span className="font-mono text-neutral-500 dark:text-neutral-500">
+                    <span className="font-mono text-neutral-600 dark:text-neutral-400">
                       {param.name}:
                     </span>
                     <span className="font-mono text-neutral-700 dark:text-neutral-300">

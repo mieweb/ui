@@ -7,7 +7,12 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
-import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
+import type {
+  AIMessage,
+  AIMessageContent,
+  AIRenderTextContent,
+  MCPResourceLink,
+} from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
 import { SparklesIcon, ChevronIcon } from './icons';
 import { AudioPlayer } from '../AudioPlayer';
@@ -21,8 +26,8 @@ const avatarVariants = cva(
   {
     variants: {
       role: {
-        user: 'bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300',
-        assistant: 'bg-primary-500 text-white dark:bg-primary-600',
+        user: 'bg-primary-100 text-primary-900 dark:bg-primary-900/50 dark:text-primary-300',
+        assistant: 'bg-primary-800 text-white dark:bg-primary-800',
         system:
           'bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400',
         tool: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
@@ -62,13 +67,17 @@ function MessageAvatar({
   };
 
   return (
-    <div className={cn(avatarVariants({ role, size }), className)}>
+    <div
+      data-slot="ai-message-avatar"
+      className={cn(avatarVariants({ role, size }), className)}
+    >
       {role === 'assistant' ? (
         <SparklesIcon size="md" />
       ) : role === 'user' ? (
         <span className="font-medium">{getInitials(userName)}</span>
       ) : role === 'system' ? (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -83,6 +92,7 @@ function MessageAvatar({
         </svg>
       ) : (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -115,6 +125,7 @@ function AITypingIndicator({ className }: { className?: string }) {
 
   return (
     <div
+      data-slot="ai-typing-indicator"
       className={cn('inline-flex items-center justify-center gap-2', className)}
     >
       <span
@@ -157,14 +168,32 @@ function AITypingIndicator({ className }: { className?: string }) {
 interface ContentBlockProps {
   content: AIMessageContent;
   onLinkClick?: (link: MCPResourceLink) => void;
+  messageId: string;
+  streaming: boolean;
+  role: AIMessage['role'];
+  renderTextContent?: AIRenderTextContent;
 }
 
-function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
+function ContentBlock({
+  content,
+  onLinkClick,
+  messageId,
+  streaming,
+  role,
+  renderTextContent,
+}: ContentBlockProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(
     content.collapsed ?? false
   );
 
   if (content.type === 'text' && content.text) {
+    if (renderTextContent) {
+      return (
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          {renderTextContent(content.text, { messageId, streaming, role })}
+        </div>
+      );
+    }
     return (
       <div className="prose prose-sm dark:prose-invert max-w-none">
         <p className="whitespace-pre-wrap">{content.text}</p>
@@ -184,13 +213,17 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
 
   if (content.type === 'thinking' && content.text) {
     return (
-      <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50">
+      <div
+        data-slot="ai-message-thinking"
+        className="rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/50"
+      >
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="flex w-full items-center justify-between px-3 py-2 text-left"
         >
-          <span className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+          <span className="text-muted-foreground flex items-center gap-2 text-sm">
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -223,7 +256,10 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
 
   if (content.type === 'code' && content.text) {
     return (
-      <pre className="rounded-lg bg-neutral-900 p-3 text-sm dark:bg-neutral-950">
+      <pre
+        data-slot="ai-message-code"
+        className="rounded-lg bg-neutral-900 p-3 text-sm dark:bg-neutral-950"
+      >
         <code
           className={content.language ? `language-${content.language}` : ''}
         >
@@ -245,7 +281,86 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
     );
   }
 
+  if (content.type === 'image' && content.imageUrl) {
+    const safeHref = /^\s*javascript:/i.test(content.imageUrl)
+      ? undefined
+      : content.imageUrl;
+    return (
+      <a
+        href={safeHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-fit transition-transform hover:scale-[1.02]"
+        aria-label={`View ${content.name || 'Uploaded image'}`}
+      >
+        <img
+          src={content.imageUrl}
+          alt={content.name || 'Uploaded image'}
+          loading="lazy"
+          className="my-1 max-h-64 w-auto rounded-lg object-cover"
+        />
+      </a>
+    );
+  }
+
+  if (content.type === 'file') {
+    const sizeLabel =
+      typeof content.fileSize === 'number'
+        ? formatFileSize(content.fileSize)
+        : undefined;
+    const card = (
+      <div className="my-1 flex items-center gap-3 rounded-lg bg-neutral-100 p-3 transition-colors dark:bg-neutral-800">
+        <div className="rounded-lg bg-neutral-200 p-2 dark:bg-neutral-700">
+          <svg
+            aria-hidden="true"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">
+            {content.name || 'Document'}
+          </p>
+          {sizeLabel && <p className="text-xs opacity-70">{sizeLabel}</p>}
+        </div>
+      </div>
+    );
+
+    if (content.fileUrl) {
+      const safeFileHref = /^\s*javascript:/i.test(content.fileUrl)
+        ? undefined
+        : content.fileUrl;
+      return (
+        <a
+          href={safeFileHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-fit no-underline"
+        >
+          {card}
+        </a>
+      );
+    }
+    return card;
+  }
+
   return null;
+}
+
+/** Human-readable file size (e.g. "1.2 MB"). */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ============================================================================
@@ -268,8 +383,8 @@ const messageVariants = cva('flex gap-3', {
 
 const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
   variants: {
-    role: {
-      user: 'bg-primary-600 text-white dark:bg-primary-500',
+    variant: {
+      user: 'bg-primary-800 text-white dark:bg-primary-800',
       assistant:
         'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
       system:
@@ -278,9 +393,52 @@ const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
     },
   },
   defaultVariants: {
-    role: 'assistant',
+    variant: 'assistant',
   },
 });
+
+export interface ChatBubbleProps
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof bubbleVariants> {
+  /** Show error styling (red border). */
+  hasError?: boolean;
+  /**
+   * Optional left-border accent color. Used by multi-participant surfaces
+   * (e.g. SuperChat) to tint a speaker's bubble; AI chat leaves it unset.
+   */
+  accent?: string;
+}
+
+/**
+ * The shared chat bubble shell. This is the single source of truth for how a
+ * chat message bubble looks across the library (AI chat, SuperChat, etc.).
+ * Presentational only — callers render their own content inside.
+ */
+const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
+  (
+    { className, variant, hasError, accent, style, children, ...props },
+    ref
+  ) => {
+    return (
+      <div
+        ref={ref}
+        data-slot="chat-bubble"
+        className={cn(
+          bubbleVariants({ variant }),
+          hasError && 'border border-red-300 dark:border-red-700',
+          className
+        )}
+        style={accent ? { borderLeft: `3px solid ${accent}`, ...style } : style}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+ChatBubble.displayName = 'ChatBubble';
 
 export interface AIMessageDisplayProps {
   /** The message to display */
@@ -293,6 +451,11 @@ export interface AIMessageDisplayProps {
   showTimestamp?: boolean;
   /** Callback when a resource link is clicked */
   onLinkClick?: (link: MCPResourceLink) => void;
+  /**
+   * Optional renderer for `text` content blocks (e.g. Markdown). Called per
+   * text block with `{ messageId, streaming, role }`. Host must sanitize.
+   */
+  renderTextContent?: AIRenderTextContent;
   /** Additional class name */
   className?: string;
 }
@@ -306,6 +469,7 @@ export function AIMessageDisplay({
   showAvatar = true,
   showTimestamp = false,
   onLinkClick,
+  renderTextContent,
   className,
 }: AIMessageDisplayProps) {
   const isStreaming = message.status === 'streaming';
@@ -322,7 +486,10 @@ export function AIMessageDisplay({
   // For tool messages, render just the tool call without bubble
   if (message.role === 'tool') {
     return (
-      <div className={cn(messageVariants({ role: message.role }), className)}>
+      <div
+        data-slot="ai-message"
+        className={cn(messageVariants({ role: message.role }), className)}
+      >
         {showAvatar && <MessageAvatar role={message.role} />}
         <div className="flex-1 space-y-2">
           {message.content.map((content, index) => (
@@ -330,6 +497,10 @@ export function AIMessageDisplay({
               key={index}
               content={content}
               onLinkClick={onLinkClick}
+              messageId={message.id}
+              streaming={isStreaming}
+              role={message.role}
+              renderTextContent={renderTextContent}
             />
           ))}
         </div>
@@ -338,7 +509,10 @@ export function AIMessageDisplay({
   }
 
   return (
-    <div className={cn(messageVariants({ role: message.role }), className)}>
+    <div
+      data-slot="ai-message"
+      className={cn(messageVariants({ role: message.role }), className)}
+    >
       {showAvatar && message.role !== 'system' && (
         <MessageAvatar role={message.role} userName={userName} />
       )}
@@ -349,10 +523,11 @@ export function AIMessageDisplay({
           message.role === 'user' && 'items-end'
         )}
       >
-        <div className={cn(
-          bubbleVariants({ role: message.role }),
-          message.status === 'error' && 'border border-red-300 dark:border-red-700'
-        )}>
+        <ChatBubble
+          data-slot="ai-message-bubble"
+          variant={message.role}
+          hasError={message.status === 'error'}
+        >
           {hasContent ? (
             <div className="space-y-3">
               {message.content.map((content, index) => (
@@ -360,6 +535,10 @@ export function AIMessageDisplay({
                   key={index}
                   content={content}
                   onLinkClick={onLinkClick}
+                  messageId={message.id}
+                  streaming={isStreaming}
+                  role={message.role}
+                  renderTextContent={renderTextContent}
                 />
               ))}
             </div>
@@ -368,10 +547,13 @@ export function AIMessageDisplay({
               <AITypingIndicator />
             </div>
           ) : null}
-        </div>
+        </ChatBubble>
 
         {showTimestamp && (
-          <span className="px-2 text-xs text-neutral-500">
+          <span
+            data-slot="ai-message-timestamp"
+            className="px-2 text-xs text-neutral-500"
+          >
             {formatTime(message.timestamp)}
           </span>
         )}
@@ -386,4 +568,4 @@ export function AIMessageDisplay({
   );
 }
 
-export { MessageAvatar, AITypingIndicator };
+export { MessageAvatar, AITypingIndicator, ChatBubble, bubbleVariants };

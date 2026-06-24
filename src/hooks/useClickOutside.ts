@@ -10,7 +10,7 @@ import { useEffect, type RefObject } from 'react';
  *   const [isOpen, setIsOpen] = useState(false);
  *   const ref = useRef<HTMLDivElement>(null);
  *
- *   useClickOutside(ref, () => setIsOpen(false));
+ *   useClickOutside(ref, () => setIsOpen(false), isOpen);
  *
  *   return (
  *     <div ref={ref}>
@@ -23,9 +23,12 @@ import { useEffect, type RefObject } from 'react';
  */
 export function useClickOutside<T extends HTMLElement>(
   ref: RefObject<T | null>,
-  callback: () => void
+  callback: () => void,
+  enabled: boolean = true
 ): void {
   useEffect(() => {
+    if (!enabled) return;
+
     const handleClick = (event: Event) => {
       if (
         ref.current &&
@@ -42,5 +45,5 @@ export function useClickOutside<T extends HTMLElement>(
       document.removeEventListener('mousedown', handleClick);
       document.removeEventListener('touchstart', handleClick);
     };
-  }, [ref, callback]);
+  }, [ref, callback, enabled]);
 }

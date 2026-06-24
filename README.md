@@ -47,6 +47,15 @@ This library requires React 18+ and React DOM 18+:
 npm install react react-dom
 ```
 
+### Optional Add-ons
+
+Heavy or specialized dependencies are kept in separate entry points so they don't bloat the core bundle. Install the peer dependencies for the add-ons you need:
+
+| Entry point              | Install                                              | Import path              |
+| ------------------------ | ---------------------------------------------------- | ------------------------ |
+| **AG Grid**              | `npm install ag-grid-community ag-grid-react`        | `@mieweb/ui/ag-grid`    |
+| **DataVis**              | `npm install @mieweb/datavis datavis-ace`            | `@mieweb/ui/datavis`    |
+
 ## Quick Start
 
 ### Option 1: With Tailwind CSS (Recommended)
@@ -104,11 +113,19 @@ import { Button } from '@mieweb/ui';
 
 ### Getting Started
 
-1. **Clone the repository:**
+1. **Clone the repository (including submodules):**
 
 ```bash
-git clone https://github.com/mieweb/ui.git
+git clone --recurse-submodules https://github.com/mieweb/ui.git
 cd ui
+```
+
+> `--recurse-submodules` is strongly recommended for first clone so the `packages/esheet` and `packages/ychart` submodules are populated immediately. Without them, the eSheet and YChart stories will not work. DataVis NITRO is not a submodule — it ships as the published `@mieweb/datavis` npm package.
+
+If you already cloned without submodules, run:
+
+```bash
+git submodule update --init --recursive
 ```
 
 2. **Install dependencies:**
@@ -117,22 +134,52 @@ cd ui
 npm install
 ```
 
-3. **Start development mode:**
+Use one package manager consistently per clone. The commands below use npm.
+
+3. **eSheet packages build automatically.** A `prestorybook` hook runs `npm run build:esheet` before Storybook starts, so the `@esheet/*` packages are compiled on first run with no manual step. It's a near-instant no-op on later runs once the artifacts exist.
+
+If `packages/esheet` is updated later (submodule update, branch switch, or pull) and you need to force a fresh rebuild, remove the built artifacts and run the build again:
+
+```bash
+rm -f packages/esheet/packages/core/dist/index.d.ts packages/esheet/packages/renderer/src/index.output.css
+npm run build:esheet
+```
+
+4. **Start Storybook:**
+
+```bash
+npm run storybook
+```
+
+This starts the Storybook development server at [http://localhost:6006](http://localhost:6006) with all components, including eSheet, DataVis NITRO, and YChart.
+
+### How the Sub-Packages Are Wired
+
+Storybook integrates three sibling MIE projects, each sourced differently:
+
+- **DataVis NITRO** — npm package `@mieweb/datavis`. No build step; consumed as a published package (no submodule needed).
+- **eSheet** — git submodule `packages/esheet`. Built automatically by the `prestorybook` hook; rebuilds only when its artifacts are missing.
+- **YChart** — git submodule `packages/ychart`. No build step; the story imports it directly from source via a relative dynamic import, and Storybook's Vite config adds a `virtual:git-info` plugin, a `__YCHART_VERSION__` define, and dependency pre-bundling (`optimizeDeps`).
+
+### Library Development (watch mode)
+
+To rebuild the library on file changes (for consumers that link this repo locally):
 
 ```bash
 npm run dev
 ```
 
-This will watch for changes and rebuild the library automatically.
+This watches for source changes and rebuilds automatically. It does **not** start Storybook.
 
 ### Available Scripts
 
-| Script                    | Description                         |
-| ------------------------- | ----------------------------------- |
-| `npm run dev`             | Start development mode with watch   |
-| `npm run build`           | Build the library for production    |
-| `npm run storybook`       | Start Storybook development server  |
-| `npm run build-storybook` | Build Storybook for static hosting  |
+| Script                    | Description                                               |
+| ------------------------- | --------------------------------------------------------- |
+| `npm run dev`             | Watch & rebuild the library (for local consumers, not Storybook) |
+| `npm run build:esheet`    | Build eSheet submodule packages (auto-run by `prestorybook`/`prebuild`; skips when already built) |
+| `npm run build`           | Build the library for production                          |
+| `npm run storybook`       | Start Storybook development server                        |
+| `npm run build-storybook` | Build Storybook for static hosting                        |
 | `npm run typecheck`       | Run TypeScript type checking        |
 | `npm run lint`            | Run ESLint                          |
 | `npm run lint:fix`        | Run ESLint with auto-fix            |
@@ -684,40 +731,27 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ## Contributing
 
-We welcome contributions! Here's how to get started:
+We welcome contributions! This README and the [Storybook](https://ui.mieweb.org)
+are the **consumer** docs (how to *use* the library). If you want to *build or
+change* the library itself, the **provider / maintainer** guide is
+**[CONTRIBUTING.md](CONTRIBUTING.md)** — it covers repo layout, the component
+anatomy and conventions, the autodocs story pattern, exports & tree-shaking,
+build, testing (unit + visual baselines), submodules, brands, and the release
+process.
 
-### Development Workflow
+Quick start for contributors:
 
-1. **Fork and clone the repository**
-2. **Install dependencies:** `npm install`
-3. **Create a branch:** `git checkout -b feature/your-feature`
-4. **Start Storybook:** `npm run storybook`
-5. **Make your changes**
-6. **Run checks:**
-   ```bash
-   npm run typecheck  # TypeScript
-   npm run lint       # ESLint
-   npm run format     # Prettier
-   npm run test       # Tests
-   ```
-7. **Commit your changes** following [Conventional Commits](https://www.conventionalcommits.org/)
-8. **Push and create a Pull Request**
+```bash
+git clone --recurse-submodules https://github.com/mieweb/ui.git
+cd ui && pnpm install
+pnpm storybook            # http://localhost:6006
+# before opening a PR:
+pnpm typecheck && pnpm lint && pnpm format && pnpm test
+```
 
-### Adding a New Component
-
-1. Create a new directory in `src/components/YourComponent/`
-2. Add the component file: `YourComponent.tsx`
-3. Add the index export: `index.ts`
-4. Add Storybook stories: `YourComponent.stories.tsx`
-5. Export from `src/components/index.ts`
-6. Add to the README components list
-
-### Adding a New Brand
-
-1. Create `src/brands/your-brand.ts` with the `BrandConfig`
-2. Create `src/brands/your-brand.css` with CSS variables
-3. Export from `src/brands/index.ts`
-4. Add to the README brands table
+Non-trivial modules also carry a `MAINTAINERS.md` next to the code with internals,
+invariants, and gotchas for that module — see the table in
+[CONTRIBUTING.md](CONTRIBUTING.md#per-component-maintainer-notes).
 
 ## License
 

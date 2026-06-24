@@ -142,7 +142,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     // Build aria-describedby
     const describedByIds = [
       error ? errorId : null,
-      helperText ? helperId : null,
+      helperText && !error ? helperId : null,
       showCount ? countId : null,
       ariaDescribedBy,
     ]
@@ -150,9 +150,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       .join(' ');
 
     return (
-      <div className="flex flex-col gap-1.5">
+      <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
         {label && (
           <label
+            data-slot="textarea-label"
             htmlFor={textareaId}
             className={cn(
               'text-foreground text-sm font-medium',
@@ -163,6 +164,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           </label>
         )}
         <textarea
+          data-slot="textarea"
           ref={internalRef}
           id={textareaId}
           value={value}
@@ -181,15 +183,27 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           )}
           {...props}
         />
-        <div className="flex items-center justify-between gap-2">
+        <div
+          data-slot="textarea-footer"
+          className="flex items-center justify-between gap-2"
+        >
           <div className="flex-1">
             {error && (
-              <p id={errorId} className="text-destructive text-sm" role="alert">
+              <p
+                id={errorId}
+                data-slot="textarea-error"
+                className="text-destructive-700 dark:text-destructive-400 text-sm"
+                role="alert"
+              >
                 {error}
               </p>
             )}
             {helperText && !error && (
-              <p id={helperId} className="text-muted-foreground text-sm">
+              <p
+                id={helperId}
+                data-slot="textarea-helper"
+                className="text-muted-foreground text-sm"
+              >
                 {helperText}
               </p>
             )}
@@ -197,6 +211,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           {showCount && (
             <p
               id={countId}
+              data-slot="textarea-count"
               className={cn(
                 'text-muted-foreground shrink-0 text-xs',
                 maxLength && characterCount >= maxLength && 'text-destructive'

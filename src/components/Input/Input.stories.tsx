@@ -58,7 +58,7 @@ export const WithError: Story = {
   args: {
     label: 'Email',
     placeholder: 'you@example.com',
-    value: 'invalid-email',
+    defaultValue: 'invalid-email',
     error: 'Please enter a valid email address.',
     hasError: true,
   },
@@ -69,7 +69,7 @@ export const Disabled: Story = {
     label: 'Disabled Input',
     placeholder: 'Cannot edit',
     disabled: true,
-    value: 'Disabled value',
+    defaultValue: 'Disabled value',
   },
 };
 

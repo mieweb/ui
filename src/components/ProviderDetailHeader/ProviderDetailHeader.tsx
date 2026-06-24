@@ -55,7 +55,7 @@ const actionButtonVariants = cva(
     variants: {
       variant: {
         default:
-          'text-gray-600 hover:text-primary-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-primary-400 dark:hover:bg-gray-800',
+          'text-muted-foreground hover:text-primary-800 hover:bg-gray-50  dark:hover:text-primary-400 dark:hover:bg-gray-800',
         active:
           'text-primary-800 bg-primary-50 dark:text-primary-300 dark:bg-primary-900/20',
       },
@@ -149,6 +149,7 @@ export function ActionButtonsBar({
 
   return (
     <div
+      data-slot="provider-detail-actions"
       className={cn(
         'flex justify-center border-b border-gray-200 dark:border-gray-700',
         className
@@ -200,12 +201,16 @@ export interface BreadcrumbProps {
 
 export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb" className={cn('py-2', className)}>
+    <nav
+      aria-label="Breadcrumb"
+      data-slot="provider-detail-breadcrumb"
+      className={cn('py-2', className)}
+    >
       <ol className="flex flex-wrap items-center gap-1 text-sm">
         {items.map((item, index) => (
           <li key={item.href} className="flex items-center">
             {index > 0 && (
-              <ChevronRightIcon className="mx-2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <ChevronRightIcon className="text-muted-foreground mx-2 h-4 w-4" />
             )}
             {index === items.length - 1 ? (
               <span className="max-w-[200px] truncate font-medium text-gray-900 dark:text-white">
@@ -242,10 +247,13 @@ export function MobileBackButton({
   className,
 }: MobileBackButtonProps) {
   return (
-    <div className={cn('py-2 sm:hidden', className)}>
+    <div
+      data-slot="provider-detail-back"
+      className={cn('py-2 sm:hidden', className)}
+    >
       <a
         href={href}
-        className="bg-primary-700 hover:bg-primary-800 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        className="bg-primary-800 hover:bg-primary-900 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
       >
         <ChevronLeftIcon className="h-4 w-4" />
         {label}
@@ -289,9 +297,10 @@ export function ProviderLogo({
   if (!src || hasError) {
     return (
       <div
+        data-slot="provider-detail-logo"
         className={cn(
           logoSizeClasses[size],
-          'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 flex items-center justify-center rounded-lg font-bold',
+          'bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-400 flex items-center justify-center rounded-lg font-bold',
           size === 'sm' && 'text-lg',
           size === 'md' && 'text-2xl',
           size === 'lg' && 'text-3xl',
@@ -308,6 +317,7 @@ export function ProviderLogo({
     <img
       src={src}
       alt={`${name} logo`}
+      data-slot="provider-detail-logo"
       className={cn(
         logoSizeClasses[size],
         'rounded-lg object-contain',
@@ -388,7 +398,10 @@ export function SocialMediaLinks({
   }
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-3', className)}>
+    <div
+      data-slot="provider-detail-social"
+      className={cn('flex flex-wrap items-center gap-3', className)}
+    >
       {socialLinks.map((link) => (
         <a
           key={link.key}
@@ -397,7 +410,7 @@ export function SocialMediaLinks({
           rel="noopener noreferrer"
           title={`Visit ${providerName} on ${link.label}`}
           className={cn(
-            'hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-gray-400',
+            'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground transition-colors',
             socialIconSizes[size]
           )}
         >
@@ -438,8 +451,9 @@ export function VerifiedBadge({
 
   return (
     <div
+      data-slot="provider-detail-verified"
       className={cn(
-        'flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400',
+        'text-muted-foreground flex items-center gap-2 text-sm',
         className
       )}
     >
@@ -495,7 +509,7 @@ export function AddressDisplay({
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
-          'hover:text-primary-600 dark:hover:text-primary-400 text-gray-600 hover:underline dark:text-gray-300',
+          'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground hover:underline',
           className
         )}
       >
@@ -505,9 +519,7 @@ export function AddressDisplay({
   }
 
   return (
-    <address
-      className={cn('text-gray-600 not-italic dark:text-gray-300', className)}
-    >
+    <address className={cn('text-muted-foreground not-italic', className)}>
       {addressContent}
     </address>
   );
@@ -534,7 +546,7 @@ export function ClaimListingButton({
     <a
       href={claimUrl}
       className={cn(
-        'hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400',
+        'hover:text-primary-800 dark:hover:text-primary-400 text-muted-foreground inline-flex items-center gap-2 text-sm',
         className
       )}
     >
@@ -561,7 +573,7 @@ export function ReportLink({ slug, href, className }: ReportLinkProps) {
     <a
       href={reportUrl}
       className={cn(
-        'inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
+        'text-muted-foreground inline-flex items-center gap-2 text-sm hover:text-gray-700 dark:hover:text-gray-300',
         className
       )}
     >
@@ -586,7 +598,7 @@ const bookButtonVariants = cva(
       },
       variant: {
         primary:
-          'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+          'bg-primary-800 text-white hover:bg-primary-900 focus:ring-primary-500',
         outline:
           'border-2 border-primary-800 text-primary-800 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-300 dark:text-primary-300 dark:hover:bg-primary-900/20',
       },
@@ -704,6 +716,7 @@ export function ProviderDetailHeader({
 
   return (
     <div
+      data-slot="provider-detail-header"
       className={cn(
         headerVariants({ variant: variant ?? 'default' }),
         className
@@ -720,7 +733,10 @@ export function ProviderDetailHeader({
       )}
 
       {/* Main Header Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div
+        data-slot="provider-detail-content"
+        className="container mx-auto px-4 py-6"
+      >
         {/* Breadcrumb (Desktop) */}
         {showBreadcrumb && (
           <Breadcrumb
@@ -741,7 +757,10 @@ export function ProviderDetailHeader({
 
           {/* Details */}
           <div className="flex-1">
-            <h1 className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+            <h1
+              data-slot="provider-detail-name"
+              className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white"
+            >
               {provider.name}
             </h1>
 
@@ -806,6 +825,7 @@ export function CompactProviderHeader({
 }: CompactProviderHeaderProps) {
   return (
     <div
+      data-slot="provider-detail-compact"
       className={cn(
         'rounded-lg bg-white p-4 shadow-sm dark:bg-gray-900',
         className
@@ -819,7 +839,7 @@ export function CompactProviderHeader({
           <h2 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
             {provider.name}
           </h2>
-          <p className="truncate text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground truncate text-sm">
             {provider.address.city}, {provider.address.state}{' '}
             {provider.address.postalCode}
           </p>
@@ -919,6 +939,7 @@ export function ProviderDetailHeaderSkeleton({
 function DirectionsIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -933,6 +954,7 @@ function DirectionsIcon({ className }: { className?: string }) {
 function PhoneIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -947,6 +969,7 @@ function PhoneIcon({ className }: { className?: string }) {
 function WebsiteIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -961,6 +984,7 @@ function WebsiteIcon({ className }: { className?: string }) {
 function ShareIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -975,6 +999,7 @@ function ShareIcon({ className }: { className?: string }) {
 function CopyIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -989,6 +1014,7 @@ function CopyIcon({ className }: { className?: string }) {
 function ChevronRightIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1003,6 +1029,7 @@ function ChevronRightIcon({ className }: { className?: string }) {
 function ChevronLeftIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1017,6 +1044,7 @@ function ChevronLeftIcon({ className }: { className?: string }) {
 function CheckCircleIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1031,6 +1059,7 @@ function CheckCircleIcon({ className }: { className?: string }) {
 function FlagIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1045,6 +1074,7 @@ function FlagIcon({ className }: { className?: string }) {
 function CalendarCheckIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1059,6 +1089,7 @@ function CalendarCheckIcon({ className }: { className?: string }) {
 function LinkedInIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1073,6 +1104,7 @@ function LinkedInIcon({ className }: { className?: string }) {
 function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1087,6 +1119,7 @@ function FacebookIcon({ className }: { className?: string }) {
 function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1101,6 +1134,7 @@ function InstagramIcon({ className }: { className?: string }) {
 function TwitterIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1115,6 +1149,7 @@ function TwitterIcon({ className }: { className?: string }) {
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1129,6 +1164,7 @@ function TikTokIcon({ className }: { className?: string }) {
 function YelpIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1143,6 +1179,7 @@ function YelpIcon({ className }: { className?: string }) {
 function YouTubeIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1157,6 +1194,7 @@ function YouTubeIcon({ className }: { className?: string }) {
 function PinterestIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"
@@ -1171,6 +1209,7 @@ function PinterestIcon({ className }: { className?: string }) {
 function BlogIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="currentColor"
       viewBox="0 0 24 24"

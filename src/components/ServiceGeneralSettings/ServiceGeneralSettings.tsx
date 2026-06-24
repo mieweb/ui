@@ -85,45 +85,64 @@ export function ServiceGeneralSettings({
   className = '',
 }: ServiceGeneralSettingsProps) {
   return (
-    <Card className={className}>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg">General Settings</CardTitle>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+    <Card className={className} data-slot="service-settings">
+      <CardHeader className="pb-4" data-slot="service-settings-header">
+        <CardTitle className="text-lg" data-slot="service-settings-title">
+          General Settings
+        </CardTitle>
+        <p
+          className="text-muted-foreground text-sm"
+          data-slot="service-settings-description"
+        >
           Basic service information and configuration
         </p>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6" data-slot="service-settings-content">
         {/* Error message */}
         {errorMessage && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-sm text-red-600 dark:text-red-400">
+          <div
+            className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20"
+            data-slot="service-settings-error"
+          >
+            <p className="text-sm text-red-700 dark:text-red-400">
               {errorMessage}
             </p>
           </div>
         )}
 
         {/* Status toggles */}
-        <div className="flex flex-wrap gap-6 border-b border-gray-200 pb-4 dark:border-gray-700">
+        <div
+          className="flex flex-wrap gap-6 border-b border-gray-200 pb-4 dark:border-gray-700"
+          data-slot="service-settings-toggles"
+        >
           <div className="flex items-center gap-3">
-            <Switch checked={isActive} onCheckedChange={onIsActiveChange} />
+            <Switch
+              aria-label="Active"
+              checked={isActive}
+              onCheckedChange={onIsActiveChange}
+            />
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Active
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground text-xs">
                 Service is available for orders
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Switch checked={isFeatured} onCheckedChange={onIsFeaturedChange} />
+            <Switch
+              aria-label="Featured"
+              checked={isFeatured}
+              onCheckedChange={onIsFeaturedChange}
+            />
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Featured
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground text-xs">
                 Show prominently in listings
               </p>
             </div>
@@ -131,7 +150,7 @@ export function ServiceGeneralSettings({
         </div>
 
         {/* Basic info */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-slot="service-settings-basic">
           <Input
             label="Service Name"
             value={name}
@@ -181,8 +200,11 @@ export function ServiceGeneralSettings({
         </div>
 
         {/* Pricing and timing */}
-        <div className="space-y-4">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="space-y-4" data-slot="service-settings-pricing">
+          <p
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            data-slot="service-settings-section-label"
+          >
             Pricing & Timing
           </p>
 
@@ -195,7 +217,7 @@ export function ServiceGeneralSettings({
                 Base Price
               </label>
               <div className="relative">
-                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                   $
                 </span>
                 <input
@@ -232,7 +254,7 @@ export function ServiceGeneralSettings({
                   }
                   placeholder="0"
                 />
-                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500">
+                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
                   days
                 </span>
               </div>
@@ -241,8 +263,11 @@ export function ServiceGeneralSettings({
         </div>
 
         {/* Billing codes */}
-        <div className="space-y-4">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="space-y-4" data-slot="service-settings-billing">
+          <p
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            data-slot="service-settings-section-label"
+          >
             Billing Information
           </p>
 
@@ -256,7 +281,10 @@ export function ServiceGeneralSettings({
 
         {/* Save button */}
         {onSave && (
-          <div className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">
+          <div
+            className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700"
+            data-slot="service-settings-actions"
+          >
             <Button onClick={onSave} disabled={isSaving}>
               {isSaving ? 'Saving...' : 'Save Settings'}
             </Button>

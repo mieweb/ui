@@ -14,6 +14,7 @@ import {
 
 const SearchIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -30,6 +31,7 @@ const SearchIcon = () => (
 
 const XIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -45,7 +47,12 @@ const XIcon = () => (
 );
 
 const SpinnerIcon = () => (
-  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+  <svg
+    aria-hidden="true"
+    className="h-4 w-4 animate-spin"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
     <circle
       className="opacity-25"
       cx="12"
@@ -83,6 +90,28 @@ export interface CommandPaletteProps {
   isLoading?: boolean;
   /** Called when an item is selected */
   onSelect?: (item: CommandPaletteItem) => void;
+  /**
+   * Fires whenever the search query changes. Consumers should debounce
+   * inside this callback if they're hitting a network. Provider's `items`
+   * is still the source of truth for what renders.
+   */
+  onQueryChange?: (query: string) => void;
+  /**
+   * Items always shown at the top, regardless of query. Use for smart
+   * actions ("Call John", "Ask AI: …") or other affordances that should
+   * remain reachable while typing. Filtered out when a category filter
+   * is active so the category view stays scoped.
+   */
+  pinnedItems?: CommandPaletteItem[];
+  /** Group label rendered above pinned items. Defaults to "Actions". */
+  pinnedCategoryLabel?: string;
+  /**
+   * Items shown only when the query is empty and there are no provider
+   * items to display. Use for recent searches / recently opened records.
+   */
+  recentItems?: CommandPaletteItem[];
+  /** Group label rendered above recent items. Defaults to "Recent". */
+  recentCategoryLabel?: string;
   /** Custom empty state content */
   emptyState?: React.ReactNode;
   /** Custom render function for items */
@@ -96,17 +125,29 @@ export interface CommandPaletteProps {
   className?: string;
   /** Test ID for testing */
   'data-testid'?: string;
+  /**
+   * Skip the built-in client-side query filter. Use when `items` are
+   * already filtered server-side (e.g. semantic search) and labels
+   * won't necessarily contain the query as a substring.
+   */
+  serverFiltered?: boolean;
 }
 
 export function CommandPalette({
   placeholder = 'Search...',
   isLoading = false,
   onSelect,
+  onQueryChange,
+  pinnedItems,
+  pinnedCategoryLabel = 'Actions',
+  recentItems,
+  recentCategoryLabel = 'Recent',
   emptyState,
   renderItem,
   footer,
   className,
   'data-testid': testId = 'command-palette',
+  serverFiltered = false,
 }: CommandPaletteProps): React.JSX.Element | null {
   const {
     isOpen,
@@ -125,6 +166,17 @@ export function CommandPalette({
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Notify consumers of query changes so they can fetch async results.
+  useEffect(() => {
+    if (!isOpen) return;
+    onQueryChange?.(query);
+  }, [query, isOpen, onQueryChange]);
+
+  // Reserved category IDs so consumers can't collide with the synthetic
+  // pinned/recent groups.
+  const PINNED_CATEGORY_ID = '__palette_pinned__';
+  const RECENT_CATEGORY_ID = '__palette_recent__';
+
   // Filter items by query and category
   const filteredItems = useMemo(() => {
     let result = items;
@@ -134,8 +186,10 @@ export function CommandPalette({
       result = result.filter((item) => item.category === activeCategory);
     }
 
-    // Filter by query
-    if (query.trim()) {
+    // Filter by query (skipped when consumer signals items are already
+    // server-filtered — e.g. semantic search where the query won't
+    // appear as a literal substring in result labels).
+    if (query.trim() && !serverFiltered) {
       const lowerQuery = query.toLowerCase();
       result = result.filter(
         (item) =>
@@ -146,13 +200,40 @@ export function CommandPalette({
     }
 
     return result;
-  }, [items, query, activeCategory]);
+  }, [items, query, activeCategory, serverFiltered]);
+
+  // Effective list: prepend pinned, fall back to recents on empty state.
+  // Pinned/recent are hidden when a category filter is active so the
+  // filtered view stays scoped to that category.
+  const effectiveItems = useMemo(() => {
+    const pinned =
+      !activeCategory && pinnedItems?.length
+        ? pinnedItems.map((it) => ({
+            ...it,
+            category: it.category ?? PINNED_CATEGORY_ID,
+          }))
+        : [];
+
+    const showRecents =
+      !activeCategory &&
+      !query.trim() &&
+      filteredItems.length === 0 &&
+      !!recentItems?.length;
+    const recents = showRecents
+      ? recentItems!.map((it) => ({
+          ...it,
+          category: it.category ?? RECENT_CATEGORY_ID,
+        }))
+      : [];
+
+    return [...pinned, ...filteredItems, ...recents];
+  }, [pinnedItems, recentItems, filteredItems, activeCategory, query]);
 
   // Group items by category
   const groupedItems = useMemo(() => {
     const groups: Map<string, CommandPaletteItem[]> = new Map();
 
-    filteredItems.forEach((item) => {
+    effectiveItems.forEach((item) => {
       const category = item.category ?? 'Other';
       const group = groups.get(category) ?? [];
       group.push(item);
@@ -160,7 +241,7 @@ export function CommandPalette({
     });
 
     return groups;
-  }, [filteredItems]);
+  }, [effectiveItems]);
 
   // Handle close
   useEscapeKey(close, isOpen);
@@ -173,10 +254,10 @@ export function CommandPalette({
     }
   }, [isOpen]);
 
-  // Reset selected index when filtered items change
+  // Reset selected index when effective items change
   useEffect(() => {
-    setSelectedIndex(filteredItems.length > 0 ? 0 : -1);
-  }, [filteredItems.length, setSelectedIndex]);
+    setSelectedIndex(effectiveItems.length > 0 ? 0 : -1);
+  }, [effectiveItems.length, setSelectedIndex]);
 
   // Scroll selected item into view
   useEffect(() => {
@@ -195,7 +276,7 @@ export function CommandPalette({
         case 'ArrowDown':
           e.preventDefault();
           setSelectedIndex(
-            Math.min(selectedIndex + 1, filteredItems.length - 1)
+            Math.min(selectedIndex + 1, effectiveItems.length - 1)
           );
           break;
         case 'ArrowUp':
@@ -204,8 +285,8 @@ export function CommandPalette({
           break;
         case 'Enter':
           e.preventDefault();
-          if (selectedIndex >= 0 && filteredItems[selectedIndex]) {
-            const item = filteredItems[selectedIndex];
+          if (selectedIndex >= 0 && effectiveItems[selectedIndex]) {
+            const item = effectiveItems[selectedIndex];
             if (!item.disabled) {
               onSelect?.(item);
               close();
@@ -232,7 +313,7 @@ export function CommandPalette({
       }
     },
     [
-      filteredItems,
+      effectiveItems,
       selectedIndex,
       setSelectedIndex,
       onSelect,
@@ -255,9 +336,15 @@ export function CommandPalette({
 
   const getCategoryInfo = useCallback(
     (categoryId: string): CommandPaletteCategory | undefined => {
+      if (categoryId === PINNED_CATEGORY_ID) {
+        return { id: PINNED_CATEGORY_ID, label: pinnedCategoryLabel };
+      }
+      if (categoryId === RECENT_CATEGORY_ID) {
+        return { id: RECENT_CATEGORY_ID, label: recentCategoryLabel };
+      }
       return categories.find((c) => c.id === categoryId);
     },
-    [categories]
+    [categories, pinnedCategoryLabel, recentCategoryLabel]
   );
 
   if (!isOpen) return null;
@@ -269,6 +356,7 @@ export function CommandPalette({
     <>
       {/* Backdrop */}
       <div
+        data-slot="command-palette-backdrop"
         className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/70"
         aria-hidden="true"
       />
@@ -278,6 +366,7 @@ export function CommandPalette({
         <div
           ref={containerRef}
           data-testid={testId}
+          data-slot="command-palette"
           className={cn(
             'rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800',
             'overflow-hidden shadow-2xl',
@@ -285,8 +374,11 @@ export function CommandPalette({
           )}
         >
           {/* Search Input */}
-          <div className="relative border-b border-gray-200 dark:border-gray-700">
-            <div className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-500">
+          <div
+            data-slot="command-palette-search"
+            className="relative border-b border-gray-200 dark:border-gray-700"
+          >
+            <div className="text-muted-foreground absolute top-1/2 left-4 -translate-y-1/2">
               <SearchIcon />
             </div>
             <input
@@ -308,13 +400,14 @@ export function CommandPalette({
               <button
                 onClick={() => setQuery('')}
                 data-testid={`${testId}-clear`}
-                className="absolute top-1/2 right-12 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
+                className="text-muted-foreground absolute top-1/2 right-12 -translate-y-1/2 hover:text-gray-700 dark:hover:text-gray-200"
+                aria-label="Clear search"
               >
                 <XIcon />
               </button>
             )}
             {isLoading && (
-              <div className="text-primary-500 absolute top-1/2 right-4 -translate-y-1/2">
+              <div className="text-primary-800 absolute top-1/2 right-4 -translate-y-1/2">
                 <SpinnerIcon />
               </div>
             )}
@@ -322,7 +415,10 @@ export function CommandPalette({
 
           {/* Category Filters */}
           {categories.length > 0 && (
-            <div className="flex items-center gap-1 overflow-x-auto border-b border-gray-100 p-2 dark:border-gray-700">
+            <div
+              data-slot="command-palette-filters"
+              className="flex items-center gap-1 overflow-x-auto border-b border-gray-100 p-2 dark:border-gray-700"
+            >
               <button
                 onClick={() => setActiveCategory(null)}
                 data-testid={`${testId}-filter-all`}
@@ -330,7 +426,7 @@ export function CommandPalette({
                   'rounded px-2 py-1 text-xs font-medium transition-colors',
                   activeCategory === null
                     ? 'bg-primary-800 text-white'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                    : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
                 )}
               >
                 All
@@ -344,7 +440,7 @@ export function CommandPalette({
                     'flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors',
                     activeCategory === cat.id
                       ? 'bg-primary-800 text-white'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                      : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
                   )}
                 >
                   {cat.icon && <span className="h-3 w-3">{cat.icon}</span>}
@@ -355,18 +451,27 @@ export function CommandPalette({
           )}
 
           {/* Results List */}
-          <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
-            {filteredItems.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+          <div
+            ref={listRef}
+            data-slot="command-palette-results"
+            className="max-h-[60vh] overflow-y-auto"
+          >
+            {effectiveItems.length === 0 ? (
+              <div
+                data-slot="command-palette-empty"
+                className="text-muted-foreground p-8 text-center"
+              >
                 {emptyState ?? (
                   <>
                     <div className="mx-auto mb-2 h-8 w-8 opacity-50">
                       <SearchIcon />
                     </div>
                     <p className="text-sm">
-                      {query.trim()
-                        ? `No results for "${query}"`
-                        : 'Start typing to search...'}
+                      {isLoading && query.trim()
+                        ? `Searching for "${query}"…`
+                        : query.trim()
+                          ? `No results for "${query}"`
+                          : 'Start typing to search...'}
                     </p>
                   </>
                 )}
@@ -379,9 +484,10 @@ export function CommandPalette({
                     <div key={categoryId}>
                       {/* Group Header */}
                       <div
+                        data-slot="command-palette-group"
                         className={cn(
                           'sticky top-0 px-3 py-2 text-xs font-semibold',
-                          'text-gray-500 dark:text-gray-400',
+                          'text-muted-foreground',
                           'bg-gray-50 dark:bg-gray-900/50'
                         )}
                       >
@@ -409,9 +515,9 @@ export function CommandPalette({
                           return (
                             <div
                               key={item.id}
-                              role="option"
-                              aria-selected={isSelected}
+                              role="button"
                               data-index={currentIndex}
+                              data-slot="command-palette-item"
                               onClick={() => handleItemClick(item)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -436,24 +542,26 @@ export function CommandPalette({
                           <button
                             key={item.id}
                             data-index={currentIndex}
+                            data-slot="command-palette-item"
                             onClick={() => handleItemClick(item)}
                             onMouseEnter={() => setSelectedIndex(currentIndex)}
                             disabled={item.disabled}
                             className={cn(
                               'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
                               isSelected
-                                ? 'bg-primary-50 dark:bg-primary-500/20'
+                                ? 'bg-primary-50 dark:bg-primary-900/20'
                                 : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
                               item.disabled && 'cursor-not-allowed opacity-50'
                             )}
                           >
                             {item.icon && (
                               <div
+                                data-slot="command-palette-item-icon"
                                 className={cn(
                                   'mt-0.5 h-4 w-4 flex-shrink-0',
                                   isSelected
                                     ? 'text-primary-800 dark:text-primary-300'
-                                    : 'text-gray-500'
+                                    : 'text-muted-foreground'
                                 )}
                               >
                                 {item.icon}
@@ -464,12 +572,12 @@ export function CommandPalette({
                                 {item.label}
                               </div>
                               {item.subtitle && (
-                                <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-muted-foreground truncate text-xs">
                                   {item.subtitle}
                                 </div>
                               )}
                               {item.description && (
-                                <div className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-muted-foreground mt-0.5 truncate text-xs">
                                   {item.description}
                                 </div>
                               )}
@@ -480,7 +588,7 @@ export function CommandPalette({
                                   'hidden items-center px-1.5 py-0.5 text-[10px] sm:inline-flex',
                                   'rounded border bg-gray-100 dark:bg-gray-700',
                                   'border-gray-200 dark:border-gray-600',
-                                  'text-gray-600 dark:text-gray-400'
+                                  'text-muted-foreground'
                                 )}
                               >
                                 {item.shortcut}
@@ -499,9 +607,10 @@ export function CommandPalette({
           {/* Footer */}
           {footer ?? (
             <div
+              data-slot="command-palette-footer"
               className={cn(
                 'border-t border-gray-100 p-2 dark:border-gray-700',
-                'bg-gray-50 text-xs text-gray-500 dark:bg-gray-900/50 dark:text-gray-400',
+                'text-muted-foreground bg-gray-50 text-xs dark:bg-gray-900/50',
                 'flex items-center justify-between'
               )}
             >
@@ -519,7 +628,7 @@ export function CommandPalette({
                 </kbd>
                 <span>close</span>
               </div>
-              <span>{filteredItems.length} results</span>
+              <span>{effectiveItems.length} results</span>
             </div>
           )}
         </div>
@@ -555,9 +664,10 @@ export function CommandPaletteTrigger({
     <button
       onClick={open}
       data-testid={testId}
+      data-slot="command-palette-trigger"
       className={cn(
         'flex items-center gap-3 rounded-lg border border-gray-300 dark:border-gray-400',
-        'bg-white px-4 py-2.5 text-sm text-gray-500 dark:bg-gray-700 dark:text-gray-300',
+        'text-muted-foreground bg-white px-4 py-2.5 text-sm dark:bg-gray-700',
         'hover:border-gray-400 dark:hover:border-gray-300',
         'transition-colors hover:bg-gray-50 dark:hover:bg-gray-600',
         'min-w-[200px] sm:min-w-[300px]',

@@ -86,7 +86,7 @@ export function EmployerList({
 
   if (isLoading) {
     return (
-      <div className={`space-y-4 ${className}`}>
+      <div data-slot="employer-list" className={`space-y-4 ${className}`}>
         {showSearch && (
           <div className="h-10 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
         )}
@@ -103,12 +103,13 @@ export function EmployerList({
   }
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div data-slot="employer-list" className={`space-y-4 ${className}`}>
       {/* Header with search and add button */}
-      <div className="flex items-center gap-3">
+      <div data-slot="employer-list-header" className="flex items-center gap-3">
         {showSearch && (
-          <div className="relative flex-1">
+          <div data-slot="employer-list-search" className="relative flex-1">
             <svg
+              aria-hidden="true"
               className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
               fill="none"
               stroke="currentColor"
@@ -133,6 +134,7 @@ export function EmployerList({
         {onAddEmployer && (
           <Button onClick={onAddEmployer} size="sm">
             <svg
+              aria-hidden="true"
               className="mr-1 h-4 w-4"
               fill="none"
               stroke="currentColor"
@@ -152,9 +154,13 @@ export function EmployerList({
 
       {/* List */}
       {filteredEmployers.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700">
+        <div
+          data-slot="employer-list-empty"
+          className="rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700"
+        >
           <svg
-            className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+            aria-hidden="true"
+            className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -166,9 +172,7 @@ export function EmployerList({
               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
             />
           </svg>
-          <p className="mb-3 text-gray-500 dark:text-gray-400">
-            {emptyMessage}
-          </p>
+          <p className="text-muted-foreground mb-3">{emptyMessage}</p>
           {onAddEmployer && !searchQuery && (
             <Button variant="outline" onClick={onAddEmployer}>
               Link Employer
@@ -176,10 +180,11 @@ export function EmployerList({
           )}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div data-slot="employer-list-items" className="space-y-2">
           {filteredEmployers.map((employer) => (
             <div
               key={employer.id}
+              data-slot="employer-list-item"
               role={onEmployerClick ? 'button' : undefined}
               tabIndex={onEmployerClick ? 0 : undefined}
               onClick={() => onEmployerClick?.(employer)}
@@ -188,16 +193,23 @@ export function EmployerList({
               }
               className={`rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900 ${onEmployerClick ? 'cursor-pointer transition-all hover:border-gray-300 hover:shadow-sm dark:hover:border-gray-600' : ''} `}
             >
-              <div className="flex items-center gap-4">
+              <div
+                data-slot="employer-list-item-content"
+                className="flex items-center gap-4"
+              >
                 {/* Logo */}
                 {employer.logoUrl ? (
                   <img
                     src={employer.logoUrl}
                     alt={employer.name}
+                    data-slot="employer-list-item-logo"
                     className="h-10 w-10 rounded bg-gray-50 object-contain dark:bg-gray-800"
                   />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-100 dark:bg-blue-900/30">
+                  <div
+                    data-slot="employer-list-item-logo"
+                    className="flex h-10 w-10 items-center justify-center rounded bg-blue-100 dark:bg-blue-900/30"
+                  >
                     <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
                       {employer.name.charAt(0)}
                     </span>
@@ -205,7 +217,10 @@ export function EmployerList({
                 )}
 
                 {/* Info */}
-                <div className="min-w-0 flex-1">
+                <div
+                  data-slot="employer-list-item-info"
+                  className="min-w-0 flex-1"
+                >
                   <div className="flex items-center gap-2">
                     <h3 className="truncate font-medium text-gray-900 dark:text-white">
                       {employer.name}
@@ -216,12 +231,12 @@ export function EmployerList({
                   </div>
                   <div className="mt-0.5 flex items-center gap-4">
                     {employer.email && (
-                      <span className="truncate text-sm text-gray-500 dark:text-gray-400">
+                      <span className="text-muted-foreground truncate text-sm">
                         {employer.email}
                       </span>
                     )}
                     {employer.linkedDate && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-muted-foreground text-xs">
                         Linked {formatDate(employer.linkedDate)}
                       </span>
                     )}
@@ -229,15 +244,16 @@ export function EmployerList({
                 </div>
 
                 {/* Stats */}
-                <div className="hidden items-center gap-4 text-center sm:flex">
+                <div
+                  data-slot="employer-list-item-stats"
+                  className="hidden items-center gap-4 text-center sm:flex"
+                >
                   {employer.activeEmployees !== undefined && (
                     <div>
                       <p className="text-lg font-bold text-gray-900 dark:text-white">
                         {employer.activeEmployees}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Employees
-                      </p>
+                      <p className="text-muted-foreground text-xs">Employees</p>
                     </div>
                   )}
                   {employer.pendingOrders !== undefined && (
@@ -247,9 +263,7 @@ export function EmployerList({
                       >
                         {employer.pendingOrders}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Pending
-                      </p>
+                      <p className="text-muted-foreground text-xs">Pending</p>
                     </div>
                   )}
                 </div>
@@ -257,6 +271,7 @@ export function EmployerList({
                 {/* Arrow */}
                 {onEmployerClick && (
                   <svg
+                    aria-hidden="true"
                     className="h-5 w-5 text-gray-400"
                     fill="none"
                     stroke="currentColor"

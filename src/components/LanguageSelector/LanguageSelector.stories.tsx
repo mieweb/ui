@@ -66,7 +66,7 @@ function LanguageSelectorWithState({
 }
 
 const meta: Meta<typeof LanguageSelectorWithState> = {
-  title: 'Components/Navigation/LanguageSelector',
+  title: 'Components/Forms & Inputs/LanguageSelector',
   component: LanguageSelectorWithState,
   tags: ['autodocs'],
   parameters: {
@@ -234,7 +234,7 @@ export const InHeader: Story = {
             value={value}
             onChange={(language) => setValue(language.code)}
           />
-          <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm">
+          <button className="bg-primary-800 rounded-lg px-3 py-1.5 text-sm text-white">
             Sign In
           </button>
         </div>

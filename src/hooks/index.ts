@@ -17,3 +17,8 @@ export {
   useIsLargeDesktop,
   useIsMobileOrTablet,
 } from './useMediaQuery';
+export {
+  useScrollSpy,
+  type UseScrollSpyOptions,
+  type UseScrollSpyReturn,
+} from './useScrollSpy';

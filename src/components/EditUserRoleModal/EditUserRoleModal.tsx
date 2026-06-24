@@ -98,6 +98,7 @@ export function EditUserRoleModal({
           <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
             <div className="flex items-center gap-2">
               <svg
+                aria-hidden="true"
                 className="text-destructive h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -110,7 +111,12 @@ export function EditUserRoleModal({
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="text-destructive text-sm">{errorMessage}</p>
+              <p
+                className="text-destructive-700 dark:text-destructive-400 text-sm"
+                role="alert"
+              >
+                {errorMessage}
+              </p>
             </div>
           </div>
         )}
@@ -173,6 +179,7 @@ export function EditUserRoleModal({
           {isSubmitting ? (
             <>
               <svg
+                aria-hidden="true"
                 className="mr-2 -ml-1 h-4 w-4 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"

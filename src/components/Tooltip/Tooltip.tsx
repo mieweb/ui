@@ -390,6 +390,7 @@ function Tooltip({
             ref={tooltipRef}
             id={tooltipId}
             role="tooltip"
+            data-slot="tooltip"
             aria-hidden={!isOpen}
             style={{
               position: 'fixed',

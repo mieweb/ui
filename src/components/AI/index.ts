@@ -41,7 +41,9 @@ export {
   AIMessageDisplay,
   MessageAvatar,
   AITypingIndicator,
+  ChatBubble,
   type AIMessageDisplayProps,
+  type ChatBubbleProps,
 } from './AIMessage';
 
 // AI Chat
@@ -61,3 +63,15 @@ export {
   type AIChatTriggerProps,
   type FloatingAIChatProps,
 } from './AIChatModal';
+
+// AI Reconciliation Panel
+export {
+  AIReconciliationPanel,
+  defaultReconciliationIsEqual,
+  reconciliationPanelVariants,
+  type AIReconciliationPanelProps,
+  type ReconciliationProposal,
+  type ReconciliationSource,
+  type ReconciliationAcceptedChange,
+  type ReconciliationConfidenceLevel,
+} from './Reconciliation';

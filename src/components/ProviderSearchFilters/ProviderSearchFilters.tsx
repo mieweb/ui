@@ -265,6 +265,7 @@ interface ServiceTagProps {
 function ServiceTag({ service, onRemove }: ServiceTagProps) {
   return (
     <span
+      data-slot="provider-service-tag"
       className={cn(
         'inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm',
         'bg-primary-100 text-primary-800',
@@ -386,7 +387,11 @@ export function ServiceMultiSelect({
   }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div
+      ref={containerRef}
+      className="relative"
+      data-slot="provider-service-select"
+    >
       {label && <label className={labelVariants()}>{label}</label>}
 
       {/* Selected tags display */}
@@ -415,8 +420,7 @@ export function ServiceMultiSelect({
           className={cn(
             selectVariants(),
             'w-full text-left',
-            !selectedServices.length &&
-              'text-neutral-500 dark:text-neutral-400',
+            !selectedServices.length && 'text-muted-foreground',
             disabled && 'cursor-not-allowed opacity-50'
           )}
         >
@@ -483,12 +487,13 @@ export function ServiceMultiSelect({
                             className={cn(
                               'flex h-4 w-4 items-center justify-center rounded border',
                               isSelected
-                                ? 'bg-primary-500 border-primary-500 text-white'
+                                ? 'bg-primary-800 border-primary-500 text-white'
                                 : 'border-neutral-300 dark:border-neutral-600'
                             )}
                           >
                             {isSelected && (
                               <svg
+                                aria-hidden="true"
                                 className="h-3 w-3"
                                 viewBox="0 0 12 12"
                                 fill="currentColor"
@@ -511,7 +516,7 @@ export function ServiceMultiSelect({
               )
             )
           ) : (
-            <div className="px-3 py-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+            <div className="text-muted-foreground px-3 py-4 text-center text-sm">
               No services found
             </div>
           )}
@@ -613,6 +618,7 @@ export function ProviderSearchFilters({
     <FormWrapper
       {...formProps}
       className={cn(containerVariants({ layout }), className)}
+      data-slot="provider-search-filters"
     >
       {/* Provider Name Search */}
       {showNameSearch && (
@@ -737,6 +743,7 @@ export function CompactFilterBar({
         'dark:border-neutral-700 dark:bg-neutral-800',
         className
       )}
+      data-slot="provider-compact-filter"
     >
       {/* Search Input */}
       <div className="min-w-[150px] flex-1">
@@ -781,6 +788,7 @@ export function CompactFilterBar({
           value={filters.radius}
           onChange={(e) => handleFieldChange('radius', Number(e.target.value))}
           disabled={loading}
+          aria-label="Search radius"
           className={cn(
             'h-9 rounded-r-md border border-l-0 border-neutral-200 px-2 text-sm',
             'focus:ring-primary-500 focus:ring-2 focus:outline-none',
@@ -805,6 +813,7 @@ export function CompactFilterBar({
               handleFieldChange('services', value ? [value] : []);
             }}
             disabled={loading}
+            aria-label="Service filter"
             className={cn(
               'h-9 w-full rounded-md border border-neutral-200 px-3 text-sm',
               'focus:ring-primary-500 focus:ring-2 focus:outline-none',
@@ -830,14 +839,18 @@ export function CompactFilterBar({
           disabled={loading}
           className={cn(
             'h-9 rounded-md px-4 text-sm font-medium',
-            'bg-primary-500 hover:bg-primary-600 text-white',
+            'bg-primary-800 hover:bg-primary-900 text-white',
             'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
             'disabled:cursor-not-allowed disabled:opacity-50'
           )}
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4 animate-spin"
+                viewBox="0 0 24 24"
+              >
                 <circle
                   className="opacity-25"
                   cx="12"
@@ -929,10 +942,11 @@ export function ActiveFilters({
   }
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2', className)}>
-      <span className="text-sm text-neutral-500 dark:text-neutral-400">
-        Active filters:
-      </span>
+    <div
+      className={cn('flex flex-wrap items-center gap-2', className)}
+      data-slot="provider-active-filters"
+    >
+      <span className="text-muted-foreground text-sm">Active filters:</span>
       {activeFilters.map((filter) => (
         <span
           key={filter.key}
@@ -956,7 +970,7 @@ export function ActiveFilters({
       <button
         type="button"
         onClick={onClearAll}
-        className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm"
+        className="text-primary-800 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 text-sm"
       >
         Clear all
       </button>

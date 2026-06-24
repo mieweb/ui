@@ -288,7 +288,12 @@ export function SSOConfigForm({
             />
           </label>
           {errors.certificate && (
-            <p className="text-destructive text-sm">{errors.certificate}</p>
+            <p
+              className="text-destructive-700 dark:text-destructive-400 text-sm"
+              role="alert"
+            >
+              {errors.certificate}
+            </p>
           )}
         </div>
 

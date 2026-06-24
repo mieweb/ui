@@ -49,10 +49,11 @@ export function AIChatTrigger({
   return (
     <button
       onClick={onClick}
+      data-slot="ai-chat-trigger"
       className={cn(
         'fixed z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg',
-        'bg-primary-500 text-white',
-        'hover:bg-primary-600',
+        'bg-primary-800 text-white',
+        'hover:bg-primary-900',
         'focus:ring-primary-500 focus:ring-2 focus:ring-offset-2 focus:outline-none',
         'dark:focus:ring-offset-neutral-900',
         'transition-all duration-200',
@@ -69,7 +70,10 @@ export function AIChatTrigger({
 
       {/* Badge */}
       {badge && badge > 0 && (
-        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold">
+        <span
+          data-slot="ai-chat-trigger-badge"
+          className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold"
+        >
           {badge > 9 ? '9+' : badge}
         </span>
       )}
@@ -147,6 +151,7 @@ export function AIChatModal({
       {/* Modal */}
       <div
         ref={modalRef}
+        data-slot="ai-chat-modal"
         className={cn(
           'fixed z-50',
           'animate-in fade-in-0 zoom-in-95',

@@ -51,8 +51,8 @@ export function EmployerContactCard({
 }: EmployerContactCardProps) {
   if (isLoading) {
     return (
-      <Card className={className}>
-        <CardHeader>
+      <Card data-slot="employer-contact-card" className={className}>
+        <CardHeader data-slot="employer-contact-header">
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>
@@ -73,12 +73,16 @@ export function EmployerContactCard({
   }
 
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card data-slot="employer-contact-card" className={className}>
+      <CardHeader
+        data-slot="employer-contact-header"
+        className="flex flex-row items-center justify-between"
+      >
         <CardTitle>{title}</CardTitle>
         {showActions && onAddContact && (
           <Button variant="ghost" size="sm" onClick={onAddContact}>
             <svg
+              aria-hidden="true"
               className="mr-1 h-4 w-4"
               fill="none"
               stroke="currentColor"
@@ -97,9 +101,10 @@ export function EmployerContactCard({
       </CardHeader>
       <CardContent>
         {contacts.length === 0 ? (
-          <div className="py-6 text-center">
+          <div data-slot="employer-contact-empty" className="py-6 text-center">
             <svg
-              className="mx-auto mb-2 h-10 w-10 text-gray-400 dark:text-gray-600"
+              aria-hidden="true"
+              className="text-muted-foreground dark:text-muted-foreground mx-auto mb-2 h-10 w-10"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -111,7 +116,7 @@ export function EmployerContactCard({
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground text-sm">
               No contacts added yet
             </p>
             {showActions && onAddContact && (
@@ -126,10 +131,11 @@ export function EmployerContactCard({
             )}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div data-slot="employer-contact-list" className="space-y-3">
             {contacts.map((contact) => (
               <div
                 key={contact.id}
+                data-slot="employer-contact-item"
                 role={onContactClick ? 'button' : undefined}
                 tabIndex={onContactClick ? 0 : undefined}
                 className={`flex items-center gap-3 rounded-lg p-2 ${onContactClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
@@ -139,7 +145,10 @@ export function EmployerContactCard({
                 }
               >
                 <Avatar name={contact.name} size="sm" />
-                <div className="min-w-0 flex-1">
+                <div
+                  data-slot="employer-contact-info"
+                  className="min-w-0 flex-1"
+                >
                   <div className="flex items-center gap-2">
                     <p className="truncate font-medium text-gray-900 dark:text-white">
                       {contact.name}
@@ -151,23 +160,27 @@ export function EmployerContactCard({
                     )}
                   </div>
                   {contact.role && (
-                    <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground truncate text-xs">
                       {contact.role}
                     </p>
                   )}
                 </div>
                 {showActions && (
-                  <div className="flex items-center gap-1">
+                  <div
+                    data-slot="employer-contact-actions"
+                    className="flex items-center gap-1"
+                  >
                     {contact.email && onEmail && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onEmail(contact);
                         }}
-                        className="rounded p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="hover:text-muted-foreground rounded p-1.5 text-gray-400 dark:hover:text-gray-300"
                         title={`Email ${contact.name}`}
                       >
                         <svg
+                          aria-hidden="true"
                           className="h-4 w-4"
                           fill="none"
                           stroke="currentColor"
@@ -188,10 +201,11 @@ export function EmployerContactCard({
                           e.stopPropagation();
                           onCall(contact);
                         }}
-                        className="rounded p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="hover:text-muted-foreground rounded p-1.5 text-gray-400 dark:hover:text-gray-300"
                         title={`Call ${contact.name}`}
                       >
                         <svg
+                          aria-hidden="true"
                           className="h-4 w-4"
                           fill="none"
                           stroke="currentColor"

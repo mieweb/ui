@@ -37,6 +37,7 @@ export interface SocialLink {
 function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -51,6 +52,7 @@ function InstagramIcon({ className }: { className?: string }) {
 function LinkedInIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -65,6 +67,7 @@ function LinkedInIcon({ className }: { className?: string }) {
 function TwitterIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -79,6 +82,7 @@ function TwitterIcon({ className }: { className?: string }) {
 function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -93,6 +97,7 @@ function FacebookIcon({ className }: { className?: string }) {
 function YouTubeIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -107,6 +112,7 @@ function YouTubeIcon({ className }: { className?: string }) {
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -121,6 +127,7 @@ function TikTokIcon({ className }: { className?: string }) {
 function GitHubIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -166,13 +173,17 @@ export function SocialMediaLinks({
   };
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div
+      data-slot="site-footer-social"
+      className={cn('flex items-center gap-2', className)}
+    >
       {links.map((link) => {
         const Icon = socialIcons[link.platform];
         return (
           <a
             key={link.platform}
             href={link.href}
+            data-slot="site-footer-social-link"
             target="_blank"
             rel="noopener noreferrer"
             aria-label={link.label || `Follow us on ${link.platform}`}
@@ -181,7 +192,7 @@ export function SocialMediaLinks({
               sizeClasses[size],
               variant === 'light'
                 ? 'text-white/70 hover:bg-white/10 hover:text-white'
-                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
+                : 'dark:text-muted-foreground text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'
             )}
           >
             <Icon />
@@ -224,7 +235,11 @@ export function NewsletterForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className={cn('flex gap-2', className)}>
+    <form
+      data-slot="site-footer-newsletter-form"
+      onSubmit={handleSubmit}
+      className={cn('flex gap-2', className)}
+    >
       <input
         type="email"
         value={email}
@@ -234,7 +249,7 @@ export function NewsletterForm({
         className={cn(
           'min-w-0 flex-1 rounded-lg px-4 py-2 text-sm transition-colors',
           variant === 'light'
-            ? 'border border-white/40 bg-white/20 text-white placeholder-white/60 focus:border-white/60 focus:outline-none'
+            ? 'border border-white/40 bg-white/20 text-white placeholder-white/80 focus:border-white/60 focus:outline-none'
             : 'focus:border-primary-500 border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400'
         )}
         disabled={isLoading}
@@ -246,7 +261,7 @@ export function NewsletterForm({
           'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors',
           variant === 'light'
             ? 'text-primary-900 bg-white hover:bg-white/90'
-            : 'bg-primary-700 hover:bg-primary-800 text-white',
+            : 'bg-primary-800 hover:bg-primary-900 text-white',
           isLoading && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -272,13 +287,14 @@ export function FooterLinkSection({
   className,
 }: FooterLinkSectionProps) {
   return (
-    <div className={className}>
+    <div data-slot="site-footer-link-section" className={className}>
       <h3
+        data-slot="site-footer-link-title"
         className={cn(
           'mb-4 text-sm font-semibold tracking-wider uppercase',
           variant === 'light'
             ? 'text-white/70'
-            : 'text-gray-600 dark:text-gray-400'
+            : 'dark:text-muted-foreground text-gray-600'
         )}
       >
         {group.title}
@@ -294,7 +310,7 @@ export function FooterLinkSection({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                  : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               {link.label}
@@ -328,11 +344,12 @@ export function CopyrightText({
 }: CopyrightTextProps) {
   return (
     <span
+      data-slot="site-footer-copyright"
       className={cn(
         'text-sm',
         variant === 'light'
           ? 'text-white/60'
-          : 'text-gray-600 dark:text-gray-400',
+          : 'dark:text-muted-foreground text-gray-600',
         className
       )}
     >
@@ -371,6 +388,7 @@ export function LegalLinks({
 
   return (
     <nav
+      data-slot="site-footer-legal"
       className={cn('flex flex-wrap items-center gap-x-4 gap-y-1', className)}
     >
       {links.map((link, index) => (
@@ -381,7 +399,7 @@ export function LegalLinks({
                 'hidden sm:inline',
                 variant === 'light'
                   ? 'text-white/40'
-                  : 'text-gray-300 dark:text-gray-600'
+                  : 'dark:text-muted-foreground text-gray-300'
               )}
             >
               |
@@ -395,7 +413,7 @@ export function LegalLinks({
               'text-sm transition-colors',
               variant === 'light'
                 ? 'text-white/60 hover:text-white'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
             )}
           >
             {link.label}
@@ -423,11 +441,12 @@ export function DisclaimerText({
 }: DisclaimerTextProps) {
   return (
     <p
+      data-slot="site-footer-disclaimer"
       className={cn(
         'text-xs leading-relaxed',
         variant === 'light'
           ? 'text-white/50'
-          : 'text-gray-500 dark:text-gray-400',
+          : 'dark:text-muted-foreground text-gray-600',
         className
       )}
     >
@@ -445,7 +464,7 @@ const footerVariants = cva('', {
     variant: {
       default: 'bg-gray-100 dark:bg-gray-900',
       dark: 'bg-gray-900 dark:bg-gray-950',
-      primary: 'bg-primary-600 dark:bg-primary-800',
+      primary: 'bg-primary-800 dark:bg-primary-800',
       white:
         'bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800',
     },
@@ -501,18 +520,25 @@ export function SiteFooter({
 
   return (
     <footer
+      data-slot="site-footer"
       className={cn(
         footerVariants({ variant: variant ?? 'default' }),
         className
       )}
     >
-      <div className="container mx-auto px-4 py-12">
+      <div
+        data-slot="site-footer-container"
+        className="container mx-auto px-4 py-12"
+      >
         {/* Main Footer Content */}
-        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12">
+        <div
+          data-slot="site-footer-main"
+          className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12"
+        >
           {/* Brand & Description */}
-          <div className="lg:col-span-4">
+          <div data-slot="site-footer-brand" className="lg:col-span-4">
             {(logo.name || logo.src) && (
-              <div className="mb-4">
+              <div data-slot="site-footer-brand-logo" className="mb-4">
                 {logo.href ? (
                   <a
                     href={logo.href}
@@ -559,11 +585,12 @@ export function SiteFooter({
             )}
             {description && (
               <p
+                data-slot="site-footer-description"
                 className={cn(
                   'mb-4 text-sm',
                   colorVariant === 'light'
                     ? 'text-white/70'
-                    : 'text-gray-600 dark:text-gray-400'
+                    : 'dark:text-muted-foreground text-gray-600'
                 )}
               >
                 {description}
@@ -576,7 +603,10 @@ export function SiteFooter({
 
           {/* Link Groups */}
           {linkGroups.length > 0 && (
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4">
+            <div
+              data-slot="site-footer-links"
+              className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4"
+            >
               {linkGroups.map((group) => (
                 <FooterLinkSection
                   key={group.title}
@@ -591,6 +621,7 @@ export function SiteFooter({
         {/* Newsletter Section */}
         {showNewsletter && (
           <div
+            data-slot="site-footer-newsletter"
             className={cn(
               'mb-6 border-t py-6',
               colorVariant === 'light'
@@ -620,6 +651,7 @@ export function SiteFooter({
 
         {/* Bottom Section */}
         <div
+          data-slot="site-footer-bottom"
           className={cn(
             'border-t pt-6',
             colorVariant === 'light'
@@ -628,7 +660,10 @@ export function SiteFooter({
           )}
         >
           {/* Legal Links & Copyright */}
-          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            data-slot="site-footer-bottom-row"
+            className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+          >
             <CopyrightText companyName={companyName} variant={colorVariant} />
             <LegalLinks
               privacyHref={privacyHref}
@@ -683,10 +718,11 @@ export function SimpleFooter({
 }: SimpleFooterProps) {
   return (
     <footer
+      data-slot="site-footer-simple"
       className={cn(
         'border-t py-4',
         variant === 'light'
-          ? 'bg-primary-700 border-white/10'
+          ? 'bg-primary-800 border-white/10'
           : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900',
         className
       )}
@@ -701,7 +737,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                  : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               Privacy
@@ -712,7 +748,7 @@ export function SimpleFooter({
                 'text-sm transition-colors',
                 variant === 'light'
                   ? 'text-white/60 hover:text-white'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                  : 'dark:text-muted-foreground text-gray-600 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               Terms
@@ -731,6 +767,7 @@ export function SimpleFooter({
 function ExternalLinkIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       stroke="currentColor"

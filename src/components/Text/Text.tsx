@@ -7,10 +7,10 @@ const textVariants = cva('', {
     variant: {
       default: 'text-foreground',
       muted: 'text-muted-foreground',
-      primary: 'text-primary-600 dark:text-primary-400',
+      primary: 'text-primary-800 dark:text-primary-400',
       destructive: 'text-destructive',
-      success: 'text-success',
-      warning: 'text-warning',
+      success: 'text-success-700 dark:text-success-400',
+      warning: 'text-warning-700 dark:text-warning-400',
     },
     size: {
       xs: 'text-xs',

@@ -19,7 +19,7 @@ const statusIconVariants = cva(
       status: {
         sending: 'text-neutral-500',
         sent: 'text-neutral-500',
-        delivered: 'text-neutral-600 dark:text-neutral-400',
+        delivered: 'text-muted-foreground',
         read: 'text-primary-800 dark:text-primary-300',
         failed: 'text-red-500',
       },
@@ -47,6 +47,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
     >
       {status === 'sending' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5 animate-spin"
           fill="none"
           viewBox="0 0 24 24"
@@ -68,6 +69,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {status === 'sent' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5"
           fill="none"
           viewBox="0 0 24 24"
@@ -83,6 +85,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {(status === 'delivered' || status === 'read') && (
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -104,6 +107,7 @@ function MessageStatusIcon({ status, className }: MessageStatusIconProps) {
       )}
       {status === 'failed' && (
         <svg
+          aria-hidden="true"
           className="h-3.5 w-3.5"
           fill="none"
           viewBox="0 0 24 24"
@@ -241,6 +245,7 @@ function AttachmentPreview({
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
             <div className="rounded-full bg-white/90 p-3">
               <svg
+                aria-hidden="true"
                 className="h-6 w-6 text-neutral-900"
                 fill="currentColor"
                 viewBox="0 0 24 24"
@@ -255,6 +260,7 @@ function AttachmentPreview({
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <div className="text-center text-white">
                 <svg
+                  aria-hidden="true"
                   className="mx-auto h-8 w-8 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -281,6 +287,7 @@ function AttachmentPreview({
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <div className="text-center text-white">
               <svg
+                aria-hidden="true"
                 className="mx-auto h-8 w-8 text-red-400"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -316,6 +323,7 @@ function AttachmentPreview({
     >
       <div className="rounded-lg bg-white/20 p-2">
         <svg
+          aria-hidden="true"
           className="h-6 w-6"
           fill="none"
           viewBox="0 0 24 24"
@@ -368,13 +376,13 @@ const bubbleVariants = cva(
         ],
         system: [
           'mx-auto max-w-none',
-          'bg-transparent text-neutral-500 dark:text-neutral-400',
+          'bg-transparent text-muted-foreground',
           'text-center text-sm',
           'py-1 px-2',
         ],
       },
       status: {
-        sending: 'opacity-70',
+        sending: '',
         sent: '',
         delivered: '',
         read: '',
@@ -469,6 +477,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
       return (
         <div
           ref={ref}
+          data-slot="message-system"
           className={cn(bubbleVariants({ variant: 'system' }), className)}
           role="status"
           aria-live="polite"
@@ -482,6 +491,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
     return (
       <div
         ref={ref}
+        data-slot="message-bubble"
         className={cn(
           'group flex items-end gap-2',
           isOutgoing ? 'flex-row-reverse' : 'flex-row',
@@ -491,7 +501,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
       >
         {/* Avatar */}
         {showAvatar && !isOutgoing && (
-          <div className="mb-1 shrink-0">
+          <div data-slot="message-avatar" className="mb-1 shrink-0">
             <div
               className={cn(
                 'flex h-8 w-8 items-center justify-center rounded-full',
@@ -511,16 +521,28 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           </div>
         )}
 
-        {/* Message content container */}
+        {/* Message content container.
+         *
+         * `flex-1 min-w-0` lets this column expand to fill the row so the
+         * bubble's `max-w-[85%]` resolves against the row width instead of
+         * collapsing to the bubble's own min-content. Without this, short
+         * words like "Yes!" get squeezed into a vertical stack because the
+         * column shrink-wraps the bubble and the bubble's max-width then
+         * shrinks the bubble further — a feedback loop that bottoms out at
+         * `overflow-wrap: break-word` breaking every character.
+         */}
         <div
           className={cn(
-            'flex flex-col',
+            'flex min-w-0 flex-1 flex-col',
             isOutgoing ? 'items-end' : 'items-start'
           )}
         >
           {/* Sender name (for group chats) */}
           {showSenderName && !isOutgoing && (
-            <span className="mb-1 px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+            <span
+              data-slot="message-sender-name"
+              className="text-muted-foreground mb-1 px-1 text-xs font-medium"
+            >
               {message.sender.name}
             </span>
           )}
@@ -528,6 +550,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {/* Reply preview */}
           {message.replyTo && (
             <div
+              data-slot="message-reply-preview"
               className={cn(
                 'mb-1 max-w-full rounded-lg px-3 py-1.5 text-xs',
                 isOutgoing
@@ -542,6 +565,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 
           {/* Bubble */}
           <div
+            data-slot="message-bubble-content"
             className={cn(bubbleVariants({ variant, status: message.status }))}
             role="article"
             aria-label={`Message from ${message.sender.name}`}
@@ -580,13 +604,14 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
 
           {/* Footer: timestamp, status, read receipts */}
           <div
+            data-slot="message-footer"
             className={cn(
               'mt-1 flex items-center gap-2 px-1',
               isOutgoing ? 'flex-row-reverse' : 'flex-row'
             )}
           >
             {showTimestamp && (
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="text-muted-foreground text-xs">
                 {formatTimestamp(message.timestamp)}
               </span>
             )}
@@ -609,13 +634,14 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
                 onClick={onRetry}
                 className={cn(
                   'flex items-center gap-1 rounded px-2 py-0.5',
-                  'text-xs font-medium text-red-500',
+                  'text-xs font-medium text-red-700 dark:text-red-400',
                   'hover:bg-red-50 dark:hover:bg-red-900/20',
                   'focus:ring-2 focus:ring-red-500 focus:outline-none'
                 )}
                 aria-label="Retry sending message"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-3 w-3"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -636,6 +662,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
           {/* Reactions */}
           {message.reactions && message.reactions.length > 0 && (
             <div
+              data-slot="message-reactions"
               className={cn(
                 '-mt-1 flex flex-wrap gap-1',
                 isOutgoing ? 'justify-end' : 'justify-start'

@@ -28,7 +28,7 @@ const progressBarFillVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary-500',
+        default: 'bg-primary-800',
         success: 'bg-green-500',
         warning: 'bg-yellow-500',
         danger: 'bg-red-500',
@@ -110,11 +110,15 @@ function Progress({
     : `${Math.round(percentage)}%`;
 
   return (
-    <div className={cn('w-full', className)}>
+    <div data-slot="progress" className={cn('w-full', className)}>
       {(label || showValue) && (
-        <div className="mb-1.5 flex items-center justify-between">
+        <div
+          data-slot="progress-label-row"
+          className="mb-1.5 flex items-center justify-between"
+        >
           {label && (
             <label
+              data-slot="progress-label"
               id={`${progressId}-label`}
               className="text-foreground text-sm font-medium"
             >
@@ -122,13 +126,17 @@ function Progress({
             </label>
           )}
           {showValue && !indeterminate && (
-            <span className="text-muted-foreground text-sm">
+            <span
+              data-slot="progress-value"
+              className="text-sm text-neutral-600 dark:text-neutral-400"
+            >
               {displayValue}
             </span>
           )}
         </div>
       )}
       <div
+        data-slot="progress-track"
         role="progressbar"
         aria-valuenow={indeterminate ? undefined : value}
         aria-valuemin={0}
@@ -138,11 +146,12 @@ function Progress({
         className={cn(progressBarTrackVariants({ size }))}
       >
         <div
+          data-slot="progress-fill"
           className={cn(
             progressBarFillVariants({ variant, animated, striped }),
             indeterminate &&
               'w-1/3 animate-[indeterminate_1.5s_ease-in-out_infinite]',
-            !striped && variant === 'default' && 'bg-primary-500',
+            !striped && variant === 'default' && 'bg-primary-800',
             !striped && variant === 'success' && 'bg-green-500',
             !striped && variant === 'warning' && 'bg-yellow-500',
             !striped && variant === 'danger' && 'bg-red-500'
@@ -234,6 +243,7 @@ function CircularProgress({
 
   return (
     <div
+      data-slot="circular-progress"
       role="progressbar"
       aria-valuenow={indeterminate ? undefined : value}
       aria-valuemin={0}
@@ -242,6 +252,7 @@ function CircularProgress({
       className={cn(circularProgressVariants({ size }), className)}
     >
       <svg
+        aria-hidden="true"
         className={cn('-rotate-90 transform', indeterminate && 'animate-spin')}
         width={svgSize}
         height={svgSize}
@@ -272,7 +283,10 @@ function CircularProgress({
         />
       </svg>
       {showValue && !indeterminate && (
-        <span className="text-foreground absolute inset-0 flex items-center justify-center text-xs font-medium">
+        <span
+          data-slot="circular-progress-value"
+          className="text-foreground absolute inset-0 flex items-center justify-center text-xs font-medium"
+        >
           {Math.round(percentage)}%
         </span>
       )}

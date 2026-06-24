@@ -71,6 +71,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       <div
         ref={ref}
         role="alert"
+        data-slot="alert"
         className={cn(
           alertVariants({ variant }),
           React.isValidElement(icon) && 'pl-11',
@@ -84,6 +85,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         {dismissible && (
           <button
             type="button"
+            data-slot="alert-dismiss"
             onClick={onDismiss}
             className={cn(
               'absolute top-2 right-2 rounded-md p-1',
@@ -112,6 +114,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <h5
     ref={ref}
+    data-slot="alert-title"
     className={cn('mb-1 leading-none font-semibold tracking-tight', className)}
     {...props}
   >
@@ -130,6 +133,7 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
+    data-slot="alert-description"
     className={cn('text-sm [&_p]:leading-relaxed', className)}
     {...props}
   />

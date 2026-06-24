@@ -11,8 +11,8 @@ const checkboxVariants = cva(
     'cursor-pointer',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-50',
-    'checked:bg-primary-500 checked:border-primary-500',
-    'indeterminate:bg-primary-500 indeterminate:border-primary-500',
+    'checked:bg-primary-800 checked:border-primary-500',
+    'indeterminate:bg-primary-800 indeterminate:border-primary-500',
   ],
   {
     variants: {
@@ -88,9 +88,13 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     React.useImperativeHandle(ref, () => internalRef.current!);
 
     const checkboxElement = (
-      <span className="relative inline-flex items-center justify-center">
+      <span
+        data-slot="checkbox-indicator"
+        className="relative inline-flex items-center justify-center"
+      >
         <input
           ref={internalRef}
+          data-slot="checkbox"
           id={checkboxId}
           type="checkbox"
           disabled={disabled}
@@ -120,6 +124,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       <div className="flex flex-col">
         <label
           htmlFor={checkboxId}
+          data-slot="checkbox-label"
           className={cn(
             'text-foreground cursor-pointer text-sm font-medium select-none',
             disabled && 'cursor-not-allowed opacity-50'
@@ -130,6 +135,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         {description && (
           <p
             id={descriptionId}
+            data-slot="checkbox-description"
             className="text-muted-foreground mt-0.5 text-xs"
           >
             {description}
@@ -139,8 +145,9 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     );
 
     return (
-      <div className="flex flex-col gap-1">
+      <div data-slot="checkbox-wrapper" className="flex flex-col gap-1">
         <div
+          data-slot="checkbox-row"
           className={cn(
             'flex gap-2',
             description ? 'items-start' : 'items-center',
@@ -151,7 +158,12 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           {labelElement}
         </div>
         {error && (
-          <p id={errorId} className="text-destructive text-sm" role="alert">
+          <p
+            id={errorId}
+            data-slot="checkbox-error"
+            className="text-destructive-700 dark:text-destructive-400 text-sm"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -207,6 +219,7 @@ function CheckboxGroup({
 
   return (
     <fieldset
+      data-slot="checkbox-group"
       className={cn('flex flex-col', className)}
       aria-describedby={
         [description ? descriptionId : null, error ? errorId : null]
@@ -215,17 +228,25 @@ function CheckboxGroup({
       }
     >
       {label && (
-        <legend className="text-foreground mb-1 text-sm font-medium">
+        <legend
+          data-slot="checkbox-group-legend"
+          className="text-foreground mb-1 text-sm font-medium"
+        >
           {label}
         </legend>
       )}
       {description && (
-        <p id={descriptionId} className="text-muted-foreground mb-3 text-xs">
+        <p
+          id={descriptionId}
+          data-slot="checkbox-group-description"
+          className="text-muted-foreground mb-3 text-xs"
+        >
           {description}
         </p>
       )}
       <div
         role="group"
+        data-slot="checkbox-group-items"
         className={cn(
           'flex gap-4',
           orientation === 'vertical' && 'flex-col gap-2'
@@ -234,7 +255,12 @@ function CheckboxGroup({
         {children}
       </div>
       {error && (
-        <p id={errorId} className="text-destructive mt-2 text-sm" role="alert">
+        <p
+          id={errorId}
+          data-slot="checkbox-group-error"
+          className="text-destructive mt-2 text-sm"
+          role="alert"
+        >
           {error}
         </p>
       )}

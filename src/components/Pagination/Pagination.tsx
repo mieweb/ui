@@ -18,17 +18,17 @@ const paginationButtonVariants = cva(
       variant: {
         default: [
           'text-muted-foreground hover:text-foreground hover:bg-muted',
-          'data-[active=true]:bg-primary-500 data-[active=true]:text-white',
+          'data-[active=true]:bg-primary-800 data-[active=true]:text-white',
         ],
         outline: [
           'border border-border text-muted-foreground',
           'hover:bg-muted hover:text-foreground',
-          'data-[active=true]:border-primary-500 data-[active=true]:bg-primary-50 data-[active=true]:text-primary-500',
+          'data-[active=true]:border-primary-500 data-[active=true]:bg-primary-50 data-[active=true]:text-primary-800',
           'dark:data-[active=true]:bg-primary-950',
         ],
         ghost: [
           'text-muted-foreground hover:text-foreground hover:bg-muted',
-          'data-[active=true]:text-primary-500 data-[active=true]:font-semibold',
+          'data-[active=true]:text-primary-800 data-[active=true]:font-semibold',
         ],
       },
       size: {
@@ -70,6 +70,8 @@ export interface PaginationProps extends VariantProps<
     next?: string;
     last?: string;
   };
+  /** Accessible label for the navigation landmark */
+  label?: string;
   /** Additional class name */
   className?: string;
 }
@@ -96,6 +98,7 @@ function Pagination({
   variant,
   size,
   labels,
+  label,
   className,
 }: PaginationProps) {
   // Calculate page range to display
@@ -142,13 +145,15 @@ function Pagination({
 
   return (
     <nav
+      data-slot="pagination"
       role="navigation"
-      aria-label="Pagination"
+      aria-label={label || 'Pagination'}
       className={cn('flex items-center gap-1', className)}
     >
       {/* First Page Button */}
       {showFirstLast && (
         <button
+          data-slot="pagination-first"
           type="button"
           onClick={() => onPageChange(1)}
           disabled={!canGoPrev}
@@ -163,6 +168,7 @@ function Pagination({
       {/* Previous Button */}
       {showPrevNext && (
         <button
+          data-slot="pagination-prev"
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={!canGoPrev}
@@ -177,12 +183,13 @@ function Pagination({
       )}
 
       {/* Page Numbers */}
-      <div className="flex items-center gap-1">
+      <div data-slot="pagination-pages" className="flex items-center gap-1">
         {pageRange.map((item, index) => {
           if (item === 'ellipsis') {
             return (
               <span
                 key={`ellipsis-${index}`}
+                data-slot="pagination-ellipsis"
                 className={cn(
                   paginationButtonVariants({ variant, size }),
                   'cursor-default hover:bg-transparent'
@@ -197,6 +204,7 @@ function Pagination({
           return (
             <button
               key={item}
+              data-slot="pagination-page"
               type="button"
               onClick={() => onPageChange(item)}
               aria-label={`Go to page ${item}`}
@@ -213,6 +221,7 @@ function Pagination({
       {/* Next Button */}
       {showPrevNext && (
         <button
+          data-slot="pagination-next"
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={!canGoNext}
@@ -229,6 +238,7 @@ function Pagination({
       {/* Last Page Button */}
       {showFirstLast && (
         <button
+          data-slot="pagination-last"
           type="button"
           onClick={() => onPageChange(totalPages)}
           disabled={!canGoNext}
@@ -260,6 +270,8 @@ export interface SimplePaginationProps extends VariantProps<
   onPageChange: (page: number) => void;
   /** Show page info */
   showPageInfo?: boolean;
+  /** Accessible label for the navigation landmark */
+  label?: string;
   /** Additional class name */
   className?: string;
 }
@@ -284,6 +296,7 @@ function SimplePagination({
   showPageInfo = true,
   variant,
   size,
+  label,
   className,
 }: SimplePaginationProps) {
   const canGoPrev = page > 1;
@@ -291,11 +304,13 @@ function SimplePagination({
 
   return (
     <nav
+      data-slot="simple-pagination"
       role="navigation"
-      aria-label="Pagination"
+      aria-label={label || 'Pagination'}
       className={cn('flex items-center gap-2', className)}
     >
       <button
+        data-slot="pagination-prev"
         type="button"
         onClick={() => onPageChange(page - 1)}
         disabled={!canGoPrev}
@@ -307,12 +322,16 @@ function SimplePagination({
       </button>
 
       {showPageInfo && (
-        <span className="text-muted-foreground px-2 text-sm">
+        <span
+          data-slot="pagination-info"
+          className="text-muted-foreground px-2 text-sm"
+        >
           Page {page} of {totalPages}
         </span>
       )}
 
       <button
+        data-slot="pagination-next"
         type="button"
         onClick={() => onPageChange(page + 1)}
         disabled={!canGoNext}

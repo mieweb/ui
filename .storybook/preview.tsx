@@ -3,11 +3,14 @@ import type { Preview, Decorator } from '@storybook/react-vite';
 import { useEffect, useMemo } from 'react';
 import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
+import '../src/styles/kerebron.css';
 import './preview.css';
 import { bluehiveBrand } from '../src/brands/bluehive';
+import { ccmeBrand } from '../src/brands/ccme';
 import { defaultBrand } from '../src/brands/default';
 import { enterpriseHealthBrand } from '../src/brands/enterprise-health';
 import { miewebBrand } from '../src/brands/mieweb';
+import { ozwellBrand } from '../src/brands/ozwell';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
@@ -15,9 +18,11 @@ import type { BrandConfig } from '../src/brands/types';
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
   bluehive: bluehiveBrand,
+  ccme: ccmeBrand,
   default: defaultBrand,
   'enterprise-health': enterpriseHealthBrand,
   mieweb: miewebBrand,
+  ozwell: ozwellBrand,
   waggleline: wagglelineBrand,
   webchart: webchartBrand,
 };
@@ -29,6 +34,7 @@ const brands: Record<string, BrandConfig> = {
 function applyGlobalTheme(globals: Record<string, unknown>) {
   const brandName = (globals?.brand || 'bluehive') as string;
   const isDark = globals?.theme === 'dark';
+  const isCondensed = globals?.density === 'condensed';
   const brand = brands[brandName] || brands.bluehive;
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
@@ -39,6 +45,14 @@ function applyGlobalTheme(globals: Record<string, unknown>) {
     document.documentElement.classList.remove('dark');
     document.documentElement.setAttribute('data-theme', 'light');
   }
+
+  // Toggle condensed density class on body
+  if (isCondensed) {
+    document.body.classList.add('condensed');
+  } else {
+    document.body.classList.remove('condensed');
+  }
+
   document.body.style.backgroundColor = semanticColors.background;
   document.body.style.color = semanticColors.foreground;
   applyBrandStyles(brand, isDark);
@@ -68,7 +82,7 @@ try {
     const [key, value] = pair.split(':');
     if (key && value) globals[key] = value;
   }
-  if (globals.theme || globals.brand) {
+  if (globals.theme || globals.brand || globals.density) {
     applyGlobalTheme(globals);
   }
 } catch {
@@ -135,6 +149,46 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
+// Appends a "View source on GitHub" link below each story, derived from the
+// story file's absolute path on disk (context.parameters.fileName).
+const withGitHubSource: Decorator = (Story, context) => {
+  const rawFileName = context.parameters?.fileName as string | undefined;
+  // Normalize Windows backslashes to forward slashes before any path operations
+  const fileName = rawFileName ? rawFileName.replace(/\\/g, '/') : undefined;
+  const srcIndex = fileName ? fileName.indexOf('/src/') : -1;
+
+  const githubUrl = (() => {
+    if (srcIndex < 0 || !fileName) return null;
+    const relPath = fileName.slice(srcIndex + 1);
+    const basename = relPath.split('/').pop() ?? '';
+    // Only strip `.stories` when the basename is strictly `Name.stories.(ts|tsx|js|jsx)`
+    // (no extra dot-segments before `.stories`). Otherwise link to the stories file itself.
+    const stripped = /^[^.]+\.stories\.(tsx?|jsx?)$/.test(basename)
+      ? relPath.replace(/\.stories(\.[^.]+)$/, '$1')
+      : relPath;
+    return `https://github.com/mieweb/ui/blob/main/${stripped}`;
+  })();
+
+  return (
+    <>
+      <Story />
+      {githubUrl && (
+        <div
+          style={{
+            marginTop: '12px',
+            fontSize: '11px',
+            textAlign: 'right',
+          }}
+        >
+          <a href={githubUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--mieweb-muted-foreground, #636363)', textDecoration: 'none' }}>
+            View source on GitHub ↗
+          </a>
+        </div>
+      )}
+    </>
+  );
+};
+
 // Brand switcher decorator
 const withBrand: Decorator = (Story, context) => {
   const brandName = context.globals.brand || 'bluehive';
@@ -144,10 +198,12 @@ const withBrand: Decorator = (Story, context) => {
   // Get the actual color values for this brand/mode
   const semanticColors = isDark ? brand.colors.dark : brand.colors.light;
 
+  const isCondensed = context.globals.density === 'condensed';
+
   useEffect(() => {
     // Delegate to shared applyGlobalTheme to keep a single source of truth
     applyGlobalTheme(context.globals);
-  }, [brand, isDark, semanticColors]);
+  }, [brand, isDark, isCondensed, semanticColors]);
 
   // Load Google Fonts for the brand
   const fontLink = useMemo(() => {
@@ -188,18 +244,24 @@ const withBrand: Decorator = (Story, context) => {
 };
 
 const preview: Preview = {
+  initialGlobals: {
+    brand: 'bluehive',
+    theme: 'light',
+    density: 'standard',
+  },
   globalTypes: {
     brand: {
       name: 'Brand',
       description: 'Switch between brand themes',
-      defaultValue: 'bluehive',
       toolbar: {
         icon: 'paintbrush',
         items: [
           { value: 'bluehive', title: '🐝 BlueHive' },
+          { value: 'ccme', title: '🌿 ccMe' },
           { value: 'default', title: '⚪ Default' },
           { value: 'enterprise-health', title: '🏥 Enterprise Health' },
           { value: 'mieweb', title: '🟢 MIE Web' },
+          { value: 'ozwell', title: '🤖 Ozwell' },
           { value: 'waggleline', title: '🍯 Waggleline' },
           { value: 'webchart', title: '🟠 WebChart' },
         ],
@@ -209,7 +271,6 @@ const preview: Preview = {
     theme: {
       name: 'Theme',
       description: 'Color mode',
-      defaultValue: 'light',
       toolbar: {
         icon: 'circlehollow',
         items: [
@@ -219,8 +280,36 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    density: {
+      name: 'Density',
+      description: 'UI density mode',
+      toolbar: {
+        icon: 'collapse',
+        items: [
+          { value: 'standard', title: 'Standard' },
+          { value: 'condensed', title: 'Condensed' },
+        ],
+        dynamicTitle: true,
+      },
+    },
   },
   parameters: {
+    a11y: {
+      config: {
+        rules: [
+          // These rules fire on every story because Storybook renders components
+          // in an iframe without <main>, <h1>, or landmark regions. They are not
+          // real-world issues — host applications provide these structural elements.
+          { id: 'landmark-one-main', enabled: false },
+          { id: 'page-has-heading-one', enabled: false },
+          { id: 'region', enabled: false },
+          // Components use <h3> (Card titles) correctly in context, but stories
+          // render in isolation without parent <h1>/<h2> elements, causing false
+          // positives. Host apps provide proper heading hierarchy.
+          { id: 'heading-order', enabled: false },
+        ],
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -233,6 +322,7 @@ const preview: Preview = {
         order: [
           'Introduction',
           'Foundations',
+          ['Components', ['Forms & Inputs', ['eSheet', '*']]],
           'Inputs & Controls',
           'Data Display',
           'Navigation',
@@ -254,7 +344,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withBrand],
+  decorators: [withGitHubSource, withBrand],
 };
 
 export default preview;

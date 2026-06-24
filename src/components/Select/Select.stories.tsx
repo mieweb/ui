@@ -406,14 +406,14 @@ function ControlledDemo() {
       />
       <p className="text-muted-foreground text-sm">
         Selected:{' '}
-        <code className="bg-muted rounded px-1 font-mono">
+        <code className="bg-muted text-foreground rounded px-1 font-mono">
           {value || 'none'}
         </code>
       </p>
       <button
         type="button"
         onClick={() => setValue('')}
-        className="bg-primary text-primary-foreground hover:bg-primary/90 rounded px-3 py-1.5 text-sm"
+        className="bg-primary-800 hover:bg-primary-900 rounded px-3 py-1.5 text-sm text-white"
       >
         Reset
       </button>

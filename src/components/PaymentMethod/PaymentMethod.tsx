@@ -141,23 +141,27 @@ export function PaymentMethodCard({
         card.isDefault || selected
           ? 'border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900/20'
           : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800',
-        selectable && !disabled && 'hover:border-brand-400 cursor-pointer',
-        disabled && 'cursor-not-allowed opacity-50',
+        selectable && !disabled && 'hover:border-brand-400',
+        disabled && 'pointer-events-none grayscale',
         className
       )}
-      onClick={handleSelect}
-      role={selectable ? 'button' : undefined}
-      tabIndex={selectable ? 0 : undefined}
-      onKeyDown={
-        selectable
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleSelect();
-            }
-          : undefined
-      }
+      data-slot="payment-card"
     >
+      {/* Selectable overlay button */}
+      {selectable && !disabled && (
+        <button
+          type="button"
+          className="absolute inset-0 z-0 cursor-pointer"
+          aria-label={`Select card ending in ${card.last4}`}
+          onClick={handleSelect}
+          tabIndex={0}
+        />
+      )}
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+      <div
+        className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700"
+        data-slot="payment-card-header"
+      >
         <div className="flex items-center gap-2">
           <i
             className={cn(
@@ -167,29 +171,41 @@ export function PaymentMethodCard({
             )}
             aria-hidden="true"
           />
-          <span className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+          <span
+            className="text-muted-foreground text-xs font-medium uppercase"
+            data-slot="payment-card-label"
+          >
             Credit Card
           </span>
         </div>
         {(card.isDefault || selected) && (
-          <span className="text-brand-600 dark:text-brand-400 text-xs font-medium">
+          <span
+            className="text-brand-600 dark:text-brand-400 text-xs font-medium"
+            data-slot="payment-card-badge"
+          >
             Default
           </span>
         )}
       </div>
 
       {/* Card Details */}
-      <div className="mt-3 flex items-center justify-between">
+      <div
+        className="mt-3 flex items-center justify-between"
+        data-slot="payment-card-details"
+      >
         <div className="font-mono text-sm text-gray-900 dark:text-gray-100">
           <span className="hidden lg:inline">•••• •••• </span>•••• {card.last4}
         </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-muted-foreground text-sm">
           {expMonth}/{expYear}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
+      <div
+        className="relative z-10 mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700"
+        data-slot="payment-card-footer"
+      >
         {selectable && !card.isDefault && !selected ? (
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -201,7 +217,7 @@ export function PaymentMethodCard({
               disabled={disabled}
               className="text-brand-600 focus:ring-brand-500"
             />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
+            <span className="text-muted-foreground text-xs">
               Set as default
             </span>
           </label>
@@ -314,37 +330,44 @@ export function PaymentMethodBank({
           (account.isDefault || selected
             ? 'border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900/20'
             : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'),
-        selectable && !disabled && 'hover:border-brand-400 cursor-pointer',
-        disabled && 'cursor-not-allowed opacity-50',
+        selectable && !disabled && 'hover:border-brand-400',
+        disabled && 'pointer-events-none grayscale',
         className
       )}
-      onClick={handleSelect}
-      role={selectable ? 'button' : undefined}
-      tabIndex={selectable ? 0 : undefined}
-      onKeyDown={
-        selectable
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleSelect();
-            }
-          : undefined
-      }
+      data-slot="payment-bank"
     >
+      {/* Selectable overlay button */}
+      {selectable && !disabled && (
+        <button
+          type="button"
+          className="absolute inset-0 z-0 cursor-pointer"
+          aria-label={`Select account ending in ${account.last4}`}
+          onClick={handleSelect}
+          tabIndex={0}
+        />
+      )}
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+      <div
+        className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700"
+        data-slot="payment-bank-header"
+      >
         <div className="flex items-center gap-2">
-          <BankIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <span className="text-xs font-medium text-gray-600 uppercase dark:text-gray-400">
+          <BankIcon className="text-foreground/70 h-5 w-5" />
+          <span
+            className="text-foreground/70 text-xs font-medium uppercase"
+            data-slot="payment-bank-label"
+          >
             ACH
           </span>
         </div>
         <div className="flex items-center gap-2">
           {isNew && (
-            <span className="text-xs font-medium text-yellow-600 dark:text-yellow-400">
+            <span className="text-xs font-medium text-yellow-800 dark:text-yellow-300">
               Pending Verification
             </span>
           )}
           {isError && (
-            <span className="text-xs font-medium text-red-600 dark:text-red-400">
+            <span className="text-xs font-medium text-red-800 dark:text-red-300">
               Verification Failed
             </span>
           )}
@@ -357,25 +380,28 @@ export function PaymentMethodBank({
       </div>
 
       {/* Account Details */}
-      <div className="mt-3 space-y-1">
+      <div className="mt-3 space-y-1" data-slot="payment-bank-details">
         {account.bankName && (
           <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {account.bankName}
           </div>
         )}
-        <div className="font-mono text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-foreground/70 font-mono text-sm">
           <span className="hidden lg:inline">•••• •••• </span>••••{' '}
           {account.last4}
         </div>
         {account.accountType && (
-          <div className="text-xs text-gray-500 capitalize dark:text-gray-500">
+          <div className="text-foreground/70 text-xs capitalize">
             {account.accountType}
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
+      <div
+        className="relative z-10 mt-3 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-700"
+        data-slot="payment-bank-footer"
+      >
         {selectable && !account.isDefault && !selected ? (
           <label className="flex cursor-pointer items-center gap-2">
             <input
@@ -387,7 +413,7 @@ export function PaymentMethodBank({
               disabled={disabled}
               className="text-brand-600 focus:ring-brand-500"
             />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
+            <span className="text-muted-foreground text-xs">
               Set as default
             </span>
           </label>
@@ -478,14 +504,21 @@ export function PaymentMethodList({
           'dark:border-yellow-700 dark:bg-yellow-900/20',
           className
         )}
+        data-slot="payment-list-empty"
       >
         <div className="flex items-start gap-3">
           <WarningIcon className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
           <div>
-            <h4 className="font-medium text-yellow-800 dark:text-yellow-200">
+            <h4
+              className="font-medium text-yellow-800 dark:text-yellow-200"
+              data-slot="payment-list-empty-title"
+            >
               No Payment Methods
             </h4>
-            <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
+            <p
+              className="mt-1 text-sm text-yellow-700 dark:text-yellow-300"
+              data-slot="payment-list-empty-message"
+            >
               {emptyMessage}
             </p>
           </div>
@@ -495,7 +528,10 @@ export function PaymentMethodList({
   }
 
   return (
-    <div className={cn('grid gap-4 md:grid-cols-2', className)}>
+    <div
+      className={cn('grid gap-4 md:grid-cols-2', className)}
+      data-slot="payment-list"
+    >
       {methods.map((method) =>
         method.type === 'card' ? (
           <PaymentMethodCard
@@ -534,6 +570,7 @@ PaymentMethodList.displayName = 'PaymentMethodList';
 function BankIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -552,6 +589,7 @@ function BankIcon({ className }: { className?: string }) {
 function TrashIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
@@ -570,6 +608,7 @@ function TrashIcon({ className }: { className?: string }) {
 function WarningIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       fill="none"
       viewBox="0 0 24 24"

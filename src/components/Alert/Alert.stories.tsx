@@ -178,7 +178,7 @@ function DismissibleExample() {
     return (
       <button
         onClick={() => setVisible(true)}
-        className="text-primary-500 text-sm underline"
+        className="text-primary-800 text-sm underline"
       >
         Show alert again
       </button>

@@ -1,0 +1,198 @@
+/*
+ * DataVis NITRO — Dark Mode Overrides
+ *
+ * The datavis package uses hardcoded Tailwind gray/blue classes.
+ * These overrides remap them to semantic design tokens in dark mode
+ * so the grid matches the rest of the UI without modifying the
+ * datavis submodule.
+ *
+ * Prod reference colors (Tailwind neutral scale):
+ *   neutral-900: #171717  →  --color-background
+ *   neutral-800: #262626  →  --color-card
+ *   neutral-700: #404040  →  --color-border / --color-muted
+ *
+ * NOTE: These overrides are included via base.css (the full styles.css
+ * entrypoint). Consumers using only init.css (tokens-only) will not
+ * get DataVis dark-mode support.
+ */
+
+/* ── Grid container ──────────────────────────────────────────────────── */
+.dark .wcdv-grid,
+[data-theme='dark'] .wcdv-grid {
+  background-color: var(--color-background) !important;
+  color: var(--color-foreground) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Title bar ───────────────────────────────────────────────────────── */
+.dark .wcdv-title-bar,
+[data-theme='dark'] .wcdv-title-bar {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+}
+
+.dark .wcdv-title,
+[data-theme='dark'] .wcdv-title {
+  color: var(--color-foreground) !important;
+}
+
+.dark .wcdv-status-info,
+[data-theme='dark'] .wcdv-status-info {
+  color: var(--color-muted-foreground) !important;
+}
+
+/* ── Table headers ───────────────────────────────────────────────────── */
+.dark .wcdv-th,
+[data-theme='dark'] .wcdv-th {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-muted-foreground) !important;
+}
+
+.dark .wcdv-grid thead,
+[data-theme='dark'] .wcdv-grid thead {
+  background-color: var(--color-card) !important;
+}
+
+/* ── Table rows & cells ──────────────────────────────────────────────── */
+.dark .wcdv-tr,
+[data-theme='dark'] .wcdv-tr {
+  border-color: var(--color-border) !important;
+}
+
+.dark .wcdv-tr:nth-child(even),
+[data-theme='dark'] .wcdv-tr:nth-child(even) {
+  background-color: var(--color-card) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--color-card) 50%,
+    transparent
+  ) !important;
+}
+
+.dark .wcdv-td,
+[data-theme='dark'] .wcdv-td {
+  border-color: var(--color-border) !important;
+  color: var(--color-foreground) !important;
+}
+
+.dark .wcdv-grid table,
+[data-theme='dark'] .wcdv-grid table {
+  color: var(--color-foreground) !important;
+}
+
+/* ── Table footer ────────────────────────────────────────────────────── */
+.dark .wcdv-table-footer,
+[data-theme='dark'] .wcdv-table-footer {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-muted-foreground) !important;
+}
+
+/* ── Aggregate footer ────────────────────────────────────────────────── */
+.dark .wcdv-agg-footer,
+[data-theme='dark'] .wcdv-agg-footer {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Control panel ───────────────────────────────────────────────────── */
+.dark .wcdv-control-panel,
+[data-theme='dark'] .wcdv-control-panel {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Filter bar ──────────────────────────────────────────────────────── */
+.dark .wcdv-filter-bar,
+[data-theme='dark'] .wcdv-filter-bar {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────── */
+.dark .wcdv-toolbar,
+[data-theme='dark'] .wcdv-toolbar {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Slider (detail panel) ───────────────────────────────────────────── */
+.dark .wcdv-slider,
+[data-theme='dark'] .wcdv-slider {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-foreground) !important;
+}
+
+.dark .wcdv-slider-header,
+[data-theme='dark'] .wcdv-slider-header {
+  background-color: var(--color-muted) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Group headers ───────────────────────────────────────────────────── */
+.dark .wcdv-group-header,
+[data-theme='dark'] .wcdv-group-header {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-foreground) !important;
+}
+
+/* ── Field pills (controls) ──────────────────────────────────────────── */
+.dark .wcdv-field-pill,
+[data-theme='dark'] .wcdv-field-pill {
+  background-color: var(--color-muted) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-foreground) !important;
+}
+
+/* ── Aggregate entries ───────────────────────────────────────────────── */
+.dark .wcdv-aggregate-entry,
+[data-theme='dark'] .wcdv-aggregate-entry {
+  background-color: var(--color-muted) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Loading overlay ─────────────────────────────────────────────────── */
+.dark .wcdv-loading-overlay,
+[data-theme='dark'] .wcdv-loading-overlay {
+  background-color: var(--color-background) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--color-background) 70%,
+    transparent
+  ) !important;
+}
+
+/* ── Pivot table specifics ───────────────────────────────────────────── */
+.dark .wcdv-pivot-table thead th,
+[data-theme='dark'] .wcdv-pivot-table thead th {
+  background-color: var(--color-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-muted-foreground) !important;
+}
+
+/* ── Operations palette ──────────────────────────────────────────────── */
+.dark .wcdv-operations-palette,
+[data-theme='dark'] .wcdv-operations-palette {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ── Progress bar ────────────────────────────────────────────────────── */
+.dark .wcdv-table-progress,
+[data-theme='dark'] .wcdv-table-progress {
+  background-color: var(--color-background) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 10%,
+    var(--color-background)
+  ) !important;
+  border-color: var(--color-border) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary) 20%,
+    var(--color-border)
+  ) !important;
+}

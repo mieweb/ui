@@ -89,6 +89,7 @@ export function HelpSupportPanel({
       case 'email':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -105,6 +106,7 @@ export function HelpSupportPanel({
       case 'phone':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -121,6 +123,7 @@ export function HelpSupportPanel({
       case 'chat':
         return (
           <svg
+            aria-hidden="true"
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
@@ -138,14 +141,17 @@ export function HelpSupportPanel({
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div data-slot="help-support-panel" className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div
+        data-slot="help-support-header"
+        className="flex flex-col justify-between gap-4 md:flex-row md:items-center"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Help & Support
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-muted-foreground text-sm">
             Find answers or get in touch with our support team
           </p>
         </div>
@@ -156,6 +162,7 @@ export function HelpSupportPanel({
               onClick={() => window.open(docsUrl, '_blank')}
             >
               <svg
+                aria-hidden="true"
                 className="mr-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -174,6 +181,7 @@ export function HelpSupportPanel({
           {onStartChat && chatAvailable && (
             <Button onClick={onStartChat}>
               <svg
+                aria-hidden="true"
                 className="mr-2 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -192,11 +200,11 @@ export function HelpSupportPanel({
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div data-slot="help-support-grid" className="grid gap-6 md:grid-cols-3">
         {/* FAQs */}
         <div className="space-y-4 md:col-span-2">
           {faqs.length > 0 && (
-            <Card>
+            <Card data-slot="help-support-faq-card">
               <CardHeader>
                 <CardTitle className="text-lg">
                   Frequently Asked Questions
@@ -212,7 +220,7 @@ export function HelpSupportPanel({
 
                 {/* FAQ List */}
                 {filteredFaqs.length === 0 ? (
-                  <p className="py-4 text-center text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground py-4 text-center">
                     No FAQs match your search
                   </p>
                 ) : (
@@ -220,6 +228,7 @@ export function HelpSupportPanel({
                     {filteredFaqs.map((faq) => (
                       <div
                         key={faq.id}
+                        data-slot="help-support-faq-item"
                         className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
                       >
                         <button
@@ -234,6 +243,7 @@ export function HelpSupportPanel({
                             {faq.question}
                           </span>
                           <svg
+                            aria-hidden="true"
                             className={`h-5 w-5 text-gray-400 transition-transform ${
                               expandedFaq === faq.id ? 'rotate-180' : ''
                             }`}
@@ -251,7 +261,7 @@ export function HelpSupportPanel({
                         </button>
                         {expandedFaq === faq.id && (
                           <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-                            <p className="text-gray-600 dark:text-gray-300">
+                            <p className="text-muted-foreground">
                               {faq.answer}
                             </p>
                           </div>
@@ -266,13 +276,16 @@ export function HelpSupportPanel({
 
           {/* Contact Form */}
           {onSubmitRequest && (
-            <Card>
+            <Card data-slot="help-support-form-card">
               <CardHeader>
                 <CardTitle className="text-lg">Contact Support</CardTitle>
               </CardHeader>
               <CardContent>
                 {showSuccess && successMessage && (
-                  <div className="mb-4 rounded-lg bg-green-100 p-3 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                  <div
+                    data-slot="help-support-success"
+                    className="mb-4 rounded-lg bg-green-100 p-3 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                  >
                     {successMessage}
                   </div>
                 )}
@@ -351,7 +364,7 @@ export function HelpSupportPanel({
         {/* Sidebar - Contact Options */}
         <div className="space-y-4">
           {contacts.length > 0 && (
-            <Card>
+            <Card data-slot="help-support-contacts-card">
               <CardHeader>
                 <CardTitle className="text-lg">Contact Us</CardTitle>
               </CardHeader>
@@ -359,9 +372,10 @@ export function HelpSupportPanel({
                 {contacts.map((contact, index) => (
                   <div
                     key={index}
+                    data-slot="help-support-contact-item"
                     className="flex items-start gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800"
                   >
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-muted-foreground">
                       {getContactIcon(contact.type)}
                     </div>
                     <div>
@@ -383,12 +397,12 @@ export function HelpSupportPanel({
                           {contact.value}
                         </a>
                       ) : (
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-muted-foreground text-sm">
                           {contact.value}
                         </p>
                       )}
                       {contact.availability && (
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-muted-foreground mt-1 text-xs">
                           {contact.availability}
                         </p>
                       )}
@@ -400,7 +414,7 @@ export function HelpSupportPanel({
           )}
 
           {/* Quick Links */}
-          <Card>
+          <Card data-slot="help-support-links-card">
             <CardHeader>
               <CardTitle className="text-lg">Quick Links</CardTitle>
             </CardHeader>
@@ -410,6 +424,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
@@ -429,6 +444,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
@@ -448,6 +464,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
@@ -467,6 +484,7 @@ export function HelpSupportPanel({
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"

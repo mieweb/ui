@@ -13,6 +13,10 @@ export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> 
 /**
  * An accessible table component.
  *
+ * Prefer DataVis NITRO in most cases -- it is designed to be simple out of the box while
+ * exposing power-user features for click-curious users. Use `Table` only in lightweight
+ * situations where that overhead is genuinely unneeded.
+ *
  * @example
  * ```tsx
  * <Table>
@@ -36,6 +40,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
     const table = (
       <table
         ref={ref}
+        data-slot="table"
         className={cn('w-full caption-bottom text-sm', className)}
         {...props}
       >
@@ -61,7 +66,12 @@ export type TableHeaderProps = React.HTMLAttributes<HTMLTableSectionElement>;
 
 const TableHeader = React.forwardRef<HTMLTableSectionElement, TableHeaderProps>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn('[&_tr]:border-b', className)} {...props} />
+    <thead
+      ref={ref}
+      data-slot="table-header"
+      className={cn('[&_tr]:border-b', className)}
+      {...props}
+    />
   )
 );
 
@@ -77,6 +87,7 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
   ({ className, ...props }, ref) => (
     <tbody
       ref={ref}
+      data-slot="table-body"
       className={cn('[&_tr:last-child]:border-0', className)}
       {...props}
     />
@@ -95,6 +106,7 @@ const TableFooter = React.forwardRef<HTMLTableSectionElement, TableFooterProps>(
   ({ className, ...props }, ref) => (
     <tfoot
       ref={ref}
+      data-slot="table-footer"
       className={cn(
         'bg-muted/50 border-t font-medium [&>tr]:last:border-b-0',
         className
@@ -119,6 +131,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
   ({ className, selected, ...props }, ref) => (
     <tr
       ref={ref}
+      data-slot="table-row"
       data-selected={selected}
       className={cn(
         'border-border border-b transition-colors',
@@ -168,6 +181,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
     return (
       <th
         ref={ref}
+        data-slot="table-head"
         aria-sort={
           sortable
             ? sortDirection === 'asc'
@@ -202,6 +216,7 @@ const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
   ({ className, ...props }, ref) => (
     <td
       ref={ref}
+      data-slot="table-cell"
       className={cn(
         'p-4 align-middle [&:has([role=checkbox])]:pr-0',
         className
@@ -225,6 +240,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
+    data-slot="table-caption"
     className={cn('text-muted-foreground mt-4 text-sm', className)}
     {...props}
   />

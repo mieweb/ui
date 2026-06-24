@@ -65,7 +65,7 @@ export function PendingClaimsTable({
 
   if (isLoading) {
     return (
-      <div className={`space-y-2 ${className}`}>
+      <div data-slot="pending-claims" className={`space-y-2 ${className}`}>
         {[1, 2, 3].map((i) => (
           <div
             key={i}
@@ -79,10 +79,12 @@ export function PendingClaimsTable({
   if (claims.length === 0) {
     return (
       <div
+        data-slot="pending-claims"
         className={`rounded-lg border border-dashed border-gray-300 py-12 text-center dark:border-gray-700 ${className}`}
       >
         <svg
-          className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-600"
+          aria-hidden="true"
+          className="text-muted-foreground dark:text-muted-foreground mx-auto mb-3 h-12 w-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -94,40 +96,47 @@ export function PendingClaimsTable({
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+        <p data-slot="pending-claims-empty" className="text-muted-foreground">
+          {emptyMessage}
+        </p>
       </div>
     );
   }
 
   return (
     <div
+      data-slot="pending-claims"
       className={`overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}
     >
       {/* Desktop table */}
       <div className="hidden md:block">
-        <table className="w-full">
+        <table data-slot="pending-claims-table" className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                 Claimant
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                 Role
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                 Submitted
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="text-muted-foreground px-4 py-3 text-center text-xs font-medium tracking-wider uppercase">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium tracking-wider uppercase">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {claims.map((claim) => (
-              <tr key={claim.id} className="bg-white dark:bg-gray-900">
+              <tr
+                key={claim.id}
+                data-slot="pending-claims-row"
+                className="bg-white dark:bg-gray-900"
+              >
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-3">
                     <Avatar name={claim.claimantName} size="sm" />
@@ -135,7 +144,7 @@ export function PendingClaimsTable({
                       <p className="font-medium text-gray-900 dark:text-white">
                         {claim.claimantName}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-muted-foreground text-xs">
                         {claim.claimantEmail}
                       </p>
                     </div>
@@ -147,7 +156,7 @@ export function PendingClaimsTable({
                   </p>
                 </td>
                 <td className="px-4 py-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground text-sm">
                     {formatDate(claim.submittedDate)}
                   </p>
                 </td>
@@ -199,9 +208,16 @@ export function PendingClaimsTable({
       </div>
 
       {/* Mobile cards */}
-      <div className="divide-y divide-gray-200 md:hidden dark:divide-gray-700">
+      <div
+        data-slot="pending-claims-cards"
+        className="divide-y divide-gray-200 md:hidden dark:divide-gray-700"
+      >
         {claims.map((claim) => (
-          <div key={claim.id} className="bg-white p-4 dark:bg-gray-900">
+          <div
+            key={claim.id}
+            data-slot="pending-claims-card"
+            className="bg-white p-4 dark:bg-gray-900"
+          >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Avatar name={claim.claimantName} size="sm" />
@@ -209,7 +225,7 @@ export function PendingClaimsTable({
                   <p className="font-medium text-gray-900 dark:text-white">
                     {claim.claimantName}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-muted-foreground text-xs">
                     {claim.claimantEmail}
                   </p>
                 </div>
@@ -219,7 +235,7 @@ export function PendingClaimsTable({
               </Badge>
             </div>
             <div className="mt-3 flex items-center justify-between">
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-muted-foreground text-sm">
                 <span>{claim.claimantRole || 'No role'}</span>
                 <span className="mx-2">•</span>
                 <span>{formatDate(claim.submittedDate)}</span>

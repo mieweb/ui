@@ -77,8 +77,11 @@ function Breadcrumb({
   );
 
   return (
-    <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center gap-1.5">
+    <nav data-slot="breadcrumb" aria-label="Breadcrumb" className={className}>
+      <ol
+        data-slot="breadcrumb-list"
+        className="flex flex-wrap items-center gap-1.5"
+      >
         {displayedItems.map((item, index) => {
           const isLast = index === displayedItems.length - 1;
           const isEllipsis = (item as BreadcrumbItem & { isEllipsis?: boolean })
@@ -87,14 +90,23 @@ function Breadcrumb({
           return (
             <li key={index} className="flex items-center gap-1.5">
               {index > 0 && (
-                <span aria-hidden="true">{separator || defaultSeparator}</span>
+                <span data-slot="breadcrumb-separator" aria-hidden="true">
+                  {separator || defaultSeparator}
+                </span>
               )}
               {isEllipsis ? (
-                <span className="text-muted-foreground text-sm">...</span>
+                <span
+                  data-slot="breadcrumb-ellipsis"
+                  className="text-muted-foreground text-sm"
+                >
+                  ...
+                </span>
               ) : isLast || !item.href ? (
                 <BreadcrumbPage item={item} />
               ) : renderLink ? (
-                renderLink(item, index)
+                <span data-slot="breadcrumb-link">
+                  {renderLink(item, index)}
+                </span>
               ) : (
                 <BreadcrumbLink item={item} />
               )}
@@ -120,6 +132,7 @@ function BreadcrumbLink({ item }: BreadcrumbLinkProps) {
   return (
     <a
       href={item.href}
+      data-slot="breadcrumb-link"
       className={cn(
         'inline-flex items-center gap-1.5',
         'text-muted-foreground text-sm',
@@ -144,6 +157,7 @@ interface BreadcrumbPageProps {
 function BreadcrumbPage({ item }: BreadcrumbPageProps) {
   return (
     <span
+      data-slot="breadcrumb-page"
       className="text-foreground inline-flex items-center gap-1.5 text-sm font-medium"
       aria-current="page"
     >

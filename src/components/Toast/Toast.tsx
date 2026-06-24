@@ -8,6 +8,7 @@ import type { ToastData, ToastVariant, ToastPosition } from './ToastProvider';
 
 const CheckIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -20,6 +21,7 @@ const CheckIcon = () => (
 
 const XCircleIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -36,6 +38,7 @@ const XCircleIcon = () => (
 
 const ExclamationIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -52,6 +55,7 @@ const ExclamationIcon = () => (
 
 const InfoIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-5 w-5"
     fill="none"
     viewBox="0 0 24 24"
@@ -68,6 +72,7 @@ const InfoIcon = () => (
 
 const XIcon = () => (
   <svg
+    aria-hidden="true"
     className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
@@ -90,23 +95,23 @@ const variantStyles: Record<ToastVariant, { container: string; icon: string }> =
   {
     success: {
       container:
-        'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
+        'bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
       icon: 'text-green-500 dark:text-green-400',
     },
     error: {
       container:
-        'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
+        'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
       icon: 'text-red-500 dark:text-red-400',
     },
     warning: {
       container:
-        'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
+        'bg-amber-50 dark:bg-amber-900 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
       icon: 'text-amber-500 dark:text-amber-400',
     },
     info: {
       container:
-        'bg-primary-50 dark:bg-primary-900/30 border-primary-200 dark:border-primary-800 text-primary-800 dark:text-primary-200',
-      icon: 'text-primary-500 dark:text-primary-400',
+        'bg-primary-50 dark:bg-primary-900 border-primary-200 dark:border-primary-800 text-primary-800 dark:text-primary-200',
+      icon: 'text-primary-800 dark:text-primary-400',
     },
   };
 
@@ -141,6 +146,7 @@ export function Toast({
   return (
     <div
       role="alert"
+      data-slot="toast"
       className={cn(
         'flex items-start gap-3 rounded-lg border p-4 shadow-lg',
         'max-w-[420px] min-w-[300px]',
@@ -149,15 +155,24 @@ export function Toast({
       )}
     >
       {/* Icon */}
-      <div className={cn('flex-shrink-0', styles.icon)}>{displayIcon}</div>
+      <div data-slot="toast-icon" className={cn('flex-shrink-0', styles.icon)}>
+        {displayIcon}
+      </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1">
-        {title && <p className="mb-1 text-sm font-semibold">{title}</p>}
-        <div className="text-sm opacity-90">{message}</div>
+      <div data-slot="toast-content" className="min-w-0 flex-1">
+        {title && (
+          <p data-slot="toast-title" className="mb-1 text-sm font-semibold">
+            {title}
+          </p>
+        )}
+        <div data-slot="toast-message" className="text-sm">
+          {message}
+        </div>
         {action && (
           <button
             onClick={action.onClick}
+            data-slot="toast-action"
             className="mt-2 rounded text-sm font-medium underline hover:no-underline focus:ring-2 focus:ring-current focus:ring-offset-2 focus:outline-none"
           >
             {action.label}
@@ -169,6 +184,7 @@ export function Toast({
       {dismissible && (
         <button
           onClick={onClose}
+          data-slot="toast-dismiss"
           className="flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10 focus:ring-2 focus:ring-current focus:outline-none dark:hover:bg-white/10"
           aria-label="Dismiss notification"
         >
@@ -214,6 +230,7 @@ export function ToastContainer({
 
   return (
     <div
+      data-slot="toast-container"
       className={cn(
         'pointer-events-none fixed z-50 flex flex-col gap-2',
         positionStyles[position]

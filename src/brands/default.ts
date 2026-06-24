@@ -37,7 +37,7 @@ export const defaultBrand: BrandConfig = {
       border: '#e2e8f0',
       input: '#e2e8f0',
       ring: '#3b82f6',
-      destructive: '#ef4444',
+      destructive: '#dc2626',
       destructiveForeground: '#ffffff',
       success: '#22c55e',
       successForeground: '#ffffff',

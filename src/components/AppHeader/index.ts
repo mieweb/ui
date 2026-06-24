@@ -1,5 +1,6 @@
 export {
   AppHeader,
+  AppHeaderBrand,
   AppHeaderSection,
   AppHeaderTitle,
   AppHeaderActions,
@@ -8,6 +9,7 @@ export {
   AppHeaderSearch,
   AppHeaderUserMenu,
   type AppHeaderProps,
+  type AppHeaderBrandProps,
   type AppHeaderSectionProps,
   type AppHeaderTitleProps,
   type AppHeaderActionsProps,

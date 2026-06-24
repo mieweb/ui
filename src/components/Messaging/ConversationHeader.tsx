@@ -165,6 +165,7 @@ const ConversationHeader = React.forwardRef<
     return (
       <header
         ref={ref}
+        data-slot="conversation-header"
         className={cn(headerVariants({ size }), className)}
         {...props}
       >
@@ -185,6 +186,7 @@ const ConversationHeader = React.forwardRef<
               aria-label="Go back"
             >
               <svg
+                aria-hidden="true"
                 className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -201,7 +203,10 @@ const ConversationHeader = React.forwardRef<
           ))}
 
         {/* Avatar */}
-        <div className="relative shrink-0">
+        <div
+          data-slot="conversation-header-avatar"
+          className="relative shrink-0"
+        >
           <div
             className={cn(
               'flex h-10 w-10 items-center justify-center rounded-full',
@@ -226,13 +231,14 @@ const ConversationHeader = React.forwardRef<
                 'h-3 w-3 rounded-full',
                 'bg-green-500 ring-2 ring-white dark:ring-neutral-900'
               )}
+              role="status"
               aria-label="Online"
             />
           )}
         </div>
 
         {/* Title and subtitle */}
-        <div className="min-w-0 flex-1">
+        <div data-slot="conversation-header-info" className="min-w-0 flex-1">
           <h2 className="truncate font-semibold text-neutral-900 dark:text-neutral-100">
             {displayTitle}
           </h2>
@@ -241,8 +247,8 @@ const ConversationHeader = React.forwardRef<
               className={cn(
                 'truncate text-sm',
                 isOnline
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-neutral-500 dark:text-neutral-400'
+                  ? 'text-green-700 dark:text-green-400'
+                  : 'text-muted-foreground'
               )}
             >
               {displaySubtitle}
@@ -325,6 +331,7 @@ const ConversationListItem = React.forwardRef<
       ref={ref}
       type="button"
       onClick={() => onSelect?.(conversation)}
+      data-slot="conversation-list-item"
       className={cn(
         'flex w-full items-center gap-3 px-4 py-3',
         'text-left transition-colors',
@@ -338,7 +345,10 @@ const ConversationListItem = React.forwardRef<
       {...props}
     >
       {/* Avatar */}
-      <div className="relative shrink-0">
+      <div
+        data-slot="conversation-list-item-avatar"
+        className="relative shrink-0"
+      >
         <div
           className={cn(
             'flex h-12 w-12 items-center justify-center rounded-full',
@@ -367,7 +377,10 @@ const ConversationListItem = React.forwardRef<
       </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1">
+      <div
+        data-slot="conversation-list-item-content"
+        className="min-w-0 flex-1"
+      >
         <div className="flex items-center justify-between gap-2">
           <h3
             className={cn(
@@ -380,7 +393,7 @@ const ConversationListItem = React.forwardRef<
             {title}
           </h3>
           {lastMessage && (
-            <span className="shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+            <span className="shrink-0 text-xs text-neutral-600 dark:text-neutral-400">
               {formatTime(lastMessage.timestamp)}
             </span>
           )}
@@ -391,17 +404,18 @@ const ConversationListItem = React.forwardRef<
               'truncate text-sm',
               isUnread
                 ? 'text-neutral-700 dark:text-neutral-300'
-                : 'text-neutral-500 dark:text-neutral-400'
+                : 'text-neutral-600 dark:text-neutral-400'
             )}
           >
             {lastMessage?.content || 'No messages yet'}
           </p>
           {isUnread && (
             <span
+              data-slot="conversation-list-item-badge"
               className={cn(
                 'flex shrink-0 items-center justify-center',
                 'h-5 min-w-[20px] rounded-full px-1.5',
-                'bg-primary-600 text-xs font-medium text-white'
+                'bg-primary-800 text-xs font-medium text-white'
               )}
             >
               {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
@@ -414,7 +428,8 @@ const ConversationListItem = React.forwardRef<
       <div className="flex shrink-0 flex-col items-center gap-1">
         {conversation.isPinned && (
           <svg
-            className="text-primary-500 h-4 w-4"
+            aria-hidden="true"
+            className="text-primary-800 h-4 w-4"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -423,6 +438,7 @@ const ConversationListItem = React.forwardRef<
         )}
         {conversation.isMuted && (
           <svg
+            aria-hidden="true"
             className="h-4 w-4 text-neutral-500"
             fill="none"
             viewBox="0 0 24 24"

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import {
   DashboardWidget,
   DashboardWidgetInfo,
@@ -49,16 +49,17 @@ const meta: Meta<typeof DashboardWidget> = {
       ],
     },
   },
-  decorators: [
-    (Story) => (
-      <div className="w-[420px]">
-        <Story />
-      </div>
-    ),
-  ],
 };
 
 export default meta;
+
+const widgetDecorator: Decorator[] = [
+  (Story) => (
+    <div className="w-[420px]">
+      <Story />
+    </div>
+  ),
+];
 
 type Story = StoryObj<typeof DashboardWidget>;
 
@@ -306,6 +307,7 @@ type VariantKey = keyof typeof variantMap;
  * `info`, `table`, `actions`, and `data-cards`.
  */
 export const Playground: Story = {
+  decorators: widgetDecorator,
   args: {
     title: 'Widget Title',
     loading: false,
@@ -323,7 +325,7 @@ export const Playground: Story = {
     } as Record<string, unknown>),
   },
   render: (args) => {
-    const key = ((args as Record<string, unknown>).variant ??
+    const key = ((args as unknown as Record<string, unknown>).variant ??
       'info') as VariantKey;
     const preset = variantMap[key];
 
@@ -350,6 +352,7 @@ export const Playground: Story = {
  * Info variant — static label/value pairs for demographics-style data.
  */
 export const Info: Story = {
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Demographics"
@@ -374,6 +377,7 @@ export const Info: Story = {
  */
 export const TableList: Story = {
   name: 'Table (Encounters)',
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Encounters"
@@ -429,6 +433,7 @@ export const TableList: Story = {
  */
 export const AllergyList: Story = {
   name: 'Table (Allergies)',
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Allergies"
@@ -483,6 +488,7 @@ export const AllergyList: Story = {
  */
 export const MedicationList: Story = {
   name: 'Table (Medications)',
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Medications"
@@ -525,6 +531,7 @@ export const MedicationList: Story = {
  */
 export const MedicalHistory: Story = {
   name: 'Table (Medical History)',
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Medical History"
@@ -576,6 +583,7 @@ export const MedicalHistory: Story = {
  */
 export const Actions: Story = {
   name: 'Actions (Quick Links)',
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget title="Quick Links" icon={<ZapIcon className="h-4 w-4" />}>
       <DashboardWidgetActions columns={2} actions={quickLinkActions} />
@@ -588,6 +596,7 @@ export const Actions: Story = {
  */
 export const DataCards: Story = {
   name: 'Data Cards (Vitals)',
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Vitals"
@@ -619,6 +628,7 @@ export const DataCards: Story = {
  * Loading state — shows the Card loading overlay.
  */
 export const Loading: Story = {
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Encounters"
@@ -638,6 +648,7 @@ export const Loading: Story = {
  * Empty state — table with no data.
  */
 export const Empty: Story = {
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Allergies"
@@ -658,6 +669,7 @@ export const Empty: Story = {
  * With accent — a widget with a left-side accent color bar.
  */
 export const WithAccent: Story = {
+  decorators: widgetDecorator,
   render: () => (
     <DashboardWidget
       title="Vitals"

@@ -1,6 +1,6 @@
 {
   "name": "@mieweb/ui",
-  "version": "0.2.4",
+  "version": "0.6.1",
   "description": "A themeable, accessible React component library built with Tailwind CSS",
   "author": "Medical Informatics Engineering, Inc.",
   "license": "SEE LICENSE IN LICENSE",
@@ -93,11 +93,34 @@
         "default": "./dist/brands/index.cjs"
       }
     },
-    "./brands/bluehive.css": "./dist/brands/bluehive.css",
-    "./brands/mieweb.css": "./dist/brands/mieweb.css",
-    "./brands/ozwell.css": "./dist/brands/ozwell.css",
-    "./brands/webchart.css": "./dist/brands/webchart.css",
-    "./brands/enterprise-health.css": "./dist/brands/enterprise-health.css",
+    "./brands/bluehive.css": {
+      "style": "./dist/brands/bluehive.css",
+      "default": "./dist/brands/bluehive.css"
+    },
+    "./brands/ccme.css": {
+      "style": "./dist/brands/ccme.css",
+      "default": "./dist/brands/ccme.css"
+    },
+    "./brands/mieweb.css": {
+      "style": "./dist/brands/mieweb.css",
+      "default": "./dist/brands/mieweb.css"
+    },
+    "./brands/ozwell.css": {
+      "style": "./dist/brands/ozwell.css",
+      "default": "./dist/brands/ozwell.css"
+    },
+    "./brands/webchart.css": {
+      "style": "./dist/brands/webchart.css",
+      "default": "./dist/brands/webchart.css"
+    },
+    "./brands/enterprise-health.css": {
+      "style": "./dist/brands/enterprise-health.css",
+      "default": "./dist/brands/enterprise-health.css"
+    },
+    "./brands/waggleline.css": {
+      "style": "./dist/brands/waggleline.css",
+      "default": "./dist/brands/waggleline.css"
+    },
     "./brands/*": {
       "import": {
         "types": "./dist/brands/*.d.ts",
@@ -118,8 +141,60 @@
         "default": "./dist/ag-grid.cjs"
       }
     },
-    "./styles.css": "./dist/styles.css",
-    "./styles": "./dist/styles.css"
+    "./datavis": {
+      "import": {
+        "types": "./dist/datavis.d.ts",
+        "default": "./dist/datavis.js"
+      },
+      "require": {
+        "types": "./dist/datavis.d.cts",
+        "default": "./dist/datavis.cjs"
+      }
+    },
+    "./esheet": {
+      "import": {
+        "types": "./dist/esheet.d.ts",
+        "default": "./dist/esheet.js"
+      },
+      "require": {
+        "types": "./dist/esheet.d.cts",
+        "default": "./dist/esheet.cjs"
+      }
+    },
+    "./kerebron": {
+      "import": {
+        "types": "./dist/kerebron.d.ts",
+        "default": "./dist/kerebron.js"
+      },
+      "require": {
+        "types": "./dist/kerebron.d.cts",
+        "default": "./dist/kerebron.cjs"
+      }
+    },
+    "./styles.css": {
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./styles": {
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./markdown.css": {
+      "style": "./dist/components/Markdown/styles.css",
+      "default": "./dist/components/Markdown/styles.css"
+    },
+    "./kerebron.css": {
+      "style": "./dist/kerebron.css",
+      "default": "./dist/kerebron.css"
+    },
+    "./init.css": {
+      "style": "./dist/styles/init.css",
+      "default": "./dist/styles/init.css"
+    },
+    "./components/Markdown/styles.css": {
+      "style": "./dist/components/Markdown/styles.css",
+      "default": "./dist/components/Markdown/styles.css"
+    }
   },
   "files": [
     "dist",
@@ -127,10 +202,16 @@
     "LICENSE"
   ],
   "scripts": {
+    "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
     "dev": "tsup --watch",
-    "build": "tsup && npm run build:css && npm run copy:brand-css",
+    "prebuild": "npm run build:esheet",
+    "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css && npm run copy:kerebron-css",
+    "build:esheet": "if [ ! -f packages/esheet/packages/core/dist/index.d.ts ] || [ ! -f packages/esheet/packages/renderer/src/index.output.css ]; then cd packages/esheet && npm ci && npx nx run-many --target=build --projects=@esheet/core,@esheet/fields,@esheet/adapters,@esheet/builder,@esheet/renderer --parallel; fi",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/base.css -o ./dist/styles.css --minify",
     "copy:brand-css": "cp src/brands/*.css dist/brands/ 2>/dev/null || true",
+    "copy:style-css": "mkdir -p dist/styles && cp src/styles/init.css dist/styles/ 2>/dev/null || true",
+    "copy:markdown-css": "mkdir -p dist/components/Markdown && cp src/components/Markdown/styles.css dist/components/Markdown/ 2>/dev/null || true",
+    "copy:kerebron-css": "cp src/styles/kerebron.css dist/kerebron.css 2>/dev/null || true",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -138,27 +219,89 @@
     "format:fix": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
     "test:watch": "vitest",
+    "prestorybook": "npm run build:esheet",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "npm run build:esheet && storybook build",
     "test:coverage": "vitest run --coverage",
     "playwright:install": "playwright install --with-deps",
     "test:visual": "playwright test",
     "test:visual:ui": "playwright test --ui",
     "test:visual:debug": "playwright test --debug",
+    "test:storybook": "test-storybook --url http://localhost:6006",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@kerebron/editor": ">=0.7.9",
+    "@kerebron/editor-kits": ">=0.7.9",
+    "@kerebron/wasm": ">=0.7.9",
+    "@mieweb/datavis": "=0.0.0-PRE.4",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
+    "datavis-ace": "=4.0.0-PRE.2",
+    "js-yaml": ">=4.0.0",
+    "katex": ">=0.16.0",
+    "mermaid": ">=11.0.0",
+    "papaparse": ">=5.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
+    "react-markdown": ">=9.0.0",
+    "rehype-highlight": ">=7.0.0",
+    "rehype-katex": ">=7.0.0",
+    "rehype-sanitize": ">=6.0.0",
+    "remark-gfm": ">=4.0.0",
+    "remark-math": ">=6.0.0",
     "wavesurfer.js": ">=7.0.0"
   },
   "peerDependenciesMeta": {
+    "@kerebron/editor": {
+      "optional": true
+    },
+    "@kerebron/editor-kits": {
+      "optional": true
+    },
+    "@kerebron/wasm": {
+      "optional": true
+    },
+    "@mieweb/datavis": {
+      "optional": true
+    },
     "ag-grid-community": {
       "optional": true
     },
     "ag-grid-react": {
+      "optional": true
+    },
+    "datavis-ace": {
+      "optional": true
+    },
+    "js-yaml": {
+      "optional": true
+    },
+    "mermaid": {
+      "optional": true
+    },
+    "papaparse": {
+      "optional": true
+    },
+    "react-markdown": {
+      "optional": true
+    },
+    "remark-gfm": {
+      "optional": true
+    },
+    "remark-math": {
+      "optional": true
+    },
+    "rehype-katex": {
+      "optional": true
+    },
+    "katex": {
+      "optional": true
+    },
+    "rehype-sanitize": {
+      "optional": true
+    },
+    "rehype-highlight": {
       "optional": true
     },
     "react": {
@@ -173,57 +316,119 @@
   },
   "dependencies": {
     "@swc/helpers": "^0.5.19",
+    "@tanstack/react-virtual": "^3.14.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.0",
     "google-libphonenumber": "^3.2.44",
+    "highlight.js": "^11.11.1",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
+    "marked": "^17.0.3",
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
+    "@codemirror/lang-yaml": "^6.1.3",
+    "@codemirror/lint": "6.9.5",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "@codemirror/view": "^6.41.0",
+    "@esheet/adapters": "0.0.3",
+    "@esheet/builder": "0.0.3",
+    "@esheet/core": "0.0.3",
+    "@esheet/fields": "0.0.3",
+    "@esheet/renderer": "0.0.3",
     "@eslint/js": "^9.39.3",
+    "@kerebron/editor": "0.7.9",
+    "@kerebron/editor-kits": "0.7.9",
+    "@kerebron/wasm": "0.7.9",
+    "@mieweb/datavis": "=0.0.0-PRE.4",
+    "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
     "@storybook/addon-docs": "^10.2.11",
     "@storybook/addon-links": "^10.2.11",
     "@storybook/react": "^10.2.11",
     "@storybook/react-vite": "^10.2.11",
+    "@storybook/test-runner": "0.24.3",
     "@tailwindcss/cli": "^4.2.1",
     "@tailwindcss/postcss": "^4.2.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/google-libphonenumber": "^7.4.30",
+    "@types/js-yaml": "^4.0.9",
     "@types/luxon": "^3.7.1",
     "@types/node": "^22.19.11",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.6",
     "ag-grid-community": "^35.1.0",
     "ag-grid-react": "^35.1.0",
     "autoprefixer": "^10.4.24",
+    "bootstrap": "^5.3.8",
+    "codemirror": "^6.0.2",
+    "d3": "^7.9.0",
+    "d3-array": "^3.2.4",
+    "d3-drag": "^3.0.0",
+    "d3-flextree": "^2.1.2",
+    "d3-hierarchy": "^3.1.2",
+    "d3-org-chart": "^3.1.1",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "d3-zoom": "^3.0.0",
     "eslint": "^9.39.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-storybook": "^10.2.11",
+    "fake-indexeddb": "^6.2.5",
+    "js-yaml": "^4.1.1",
     "jsdom": "^26.1.0",
-    "postcss": "^8.5.6",
+    "katex": "^0.17.0",
+    "mermaid": "^11.15.0",
+    "papaparse": "^5.5.3",
+    "postcss": "^8.5.10",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-katex": "^7.0.1",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "sass": "1.100.0",
+    "sortablejs": "^1.15.7",
     "storybook": "^10.2.11",
     "tailwindcss": "^4.2.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vitest": "^3.2.4",
-    "wavesurfer.js": "^7.12.1"
+    "vite": "^7.3.2",
+    "vitest": "^3.2.6",
+    "wavesurfer.js": "^7.12.1",
+    "ychart": "file:./packages/ychart",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "datavis-ace": "=4.0.0-PRE.2",
+      "esbuild@<0.28.1": "0.28.1",
+      "axios@>=1.0.0 <1.16.0": "1.16.0",
+      "minimatch@>=10.0.0 <10.2.3": "10.2.3",
+      "minimatch@>=9.0.0 <9.0.7": "9.0.7",
+      "flatted@<3.4.2": "3.4.2",
+      "picomatch@>=4.0.0 <4.0.4": "4.0.4",
+      "uuid@<11.1.1": "11.1.1",
+      "dompurify@<3.4.0": "3.4.0"
+    }
   }
 }

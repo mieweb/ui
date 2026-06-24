@@ -269,7 +269,9 @@ function MedicationRow({
           </Badge>
         ))}
         {remaining > 0 && (
-          <span className="text-primary text-xs">+{remaining} more</span>
+          <span className="text-primary-800 dark:text-primary-400 text-xs">
+            +{remaining} more
+          </span>
         )}
       </div>
     </div>
@@ -617,6 +619,7 @@ export const PatientHeader = React.forwardRef<
       <div
         ref={ref}
         data-testid={testId}
+        data-slot="patient-header"
         className={cn(
           'border-border bg-card text-card-foreground w-full border-b',
           'transition-colors duration-200',

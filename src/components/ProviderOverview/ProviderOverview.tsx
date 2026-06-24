@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '../../utils/cn';
 import { Card, CardHeader, CardTitle, CardContent } from '../Card/Card';
 import { Badge } from '../Badge/Badge';
 
@@ -91,6 +92,7 @@ export function ProviderOverview({
       case 'order':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -107,6 +109,7 @@ export function ProviderOverview({
       case 'appointment':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -123,6 +126,7 @@ export function ProviderOverview({
       case 'invoice':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -139,6 +143,7 @@ export function ProviderOverview({
       case 'employer':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -155,6 +160,7 @@ export function ProviderOverview({
       case 'user':
         return (
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
@@ -173,14 +179,20 @@ export function ProviderOverview({
 
   if (isLoading) {
     return (
-      <div className={`space-y-6 ${className}`}>
+      <div data-slot="provider-overview" className={cn('space-y-6', className)}>
         {/* Header skeleton */}
-        <div className="flex animate-pulse items-center gap-4">
+        <div
+          data-slot="provider-overview-header"
+          className="flex animate-pulse items-center gap-4"
+        >
           <div className="h-12 w-12 rounded-lg bg-gray-200 dark:bg-gray-700" />
           <div className="h-6 w-48 rounded bg-gray-200 dark:bg-gray-700" />
         </div>
         {/* Stats skeleton */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div
+          data-slot="provider-overview-stats"
+          className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        >
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
@@ -193,9 +205,12 @@ export function ProviderOverview({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div data-slot="provider-overview" className={cn('space-y-6', className)}>
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div
+        data-slot="provider-overview-header"
+        className="flex items-center gap-4"
+      >
         {logoUrl ? (
           <img
             src={logoUrl}
@@ -213,19 +228,21 @@ export function ProviderOverview({
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             {providerName}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Dashboard Overview
-          </p>
+          <p className="text-muted-foreground text-sm">Dashboard Overview</p>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div
+        data-slot="provider-overview-stats"
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+      >
         <StatCard
           label="Pending Orders"
           value={stats.pendingOrders}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -247,6 +264,7 @@ export function ProviderOverview({
           value={stats.completedToday}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -268,6 +286,7 @@ export function ProviderOverview({
           value={stats.upcomingAppointments}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -289,6 +308,7 @@ export function ProviderOverview({
           value={stats.linkedEmployers}
           icon={
             <svg
+              aria-hidden="true"
               className="h-5 w-5"
               fill="none"
               stroke="currentColor"
@@ -309,103 +329,108 @@ export function ProviderOverview({
 
       {/* Quick Actions */}
       {quickActions.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {quickActions.map((action) => (
-                <button
-                  key={action.id}
-                  onClick={() => {
-                    action.onClick?.();
-                    onQuickActionClick?.(action);
-                  }}
-                  className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                >
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {action.icon || (
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="text-center text-xs font-medium text-gray-700 dark:text-gray-300">
-                    {action.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div data-slot="provider-overview-actions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {quickActions.map((action) => (
+                  <button
+                    key={action.id}
+                    onClick={() => {
+                      action.onClick?.();
+                      onQuickActionClick?.(action);
+                    }}
+                    className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                  >
+                    <span className="text-muted-foreground">
+                      {action.icon || (
+                        <svg
+                          aria-hidden="true"
+                          className="h-5 w-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {action.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  role={onActivityClick ? 'button' : undefined}
-                  tabIndex={onActivityClick ? 0 : undefined}
-                  onClick={() => onActivityClick?.(activity)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && onActivityClick?.(activity)
-                  }
-                  className={`flex items-start gap-3 rounded-lg p-2 ${onActivityClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
-                >
-                  <div className="rounded-full bg-gray-100 p-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate font-medium text-gray-900 dark:text-white">
-                        {activity.title}
-                      </p>
-                      {activity.status && (
-                        <Badge
-                          variant={
-                            activity.status === 'completed'
-                              ? 'success'
-                              : activity.status === 'cancelled'
-                                ? 'danger'
-                                : 'warning'
-                          }
-                        >
-                          {activity.status}
-                        </Badge>
-                      )}
+        <div data-slot="provider-overview-activity">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    role={onActivityClick ? 'button' : undefined}
+                    tabIndex={onActivityClick ? 0 : undefined}
+                    onClick={() => onActivityClick?.(activity)}
+                    onKeyDown={(e) =>
+                      e.key === 'Enter' && onActivityClick?.(activity)
+                    }
+                    className={`flex items-start gap-3 rounded-lg p-2 ${onActivityClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} `}
+                  >
+                    <div className="text-muted-foreground rounded-full bg-gray-100 p-2 dark:bg-gray-800">
+                      {getActivityIcon(activity.type)}
                     </div>
-                    {activity.description && (
-                      <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                        {activity.description}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-medium text-gray-900 dark:text-white">
+                          {activity.title}
+                        </p>
+                        {activity.status && (
+                          <Badge
+                            variant={
+                              activity.status === 'completed'
+                                ? 'success'
+                                : activity.status === 'cancelled'
+                                  ? 'danger'
+                                  : 'warning'
+                            }
+                          >
+                            {activity.status}
+                          </Badge>
+                        )}
+                      </div>
+                      {activity.description && (
+                        <p className="text-muted-foreground truncate text-sm">
+                          {activity.description}
+                        </p>
+                      )}
+                      <p className="text-muted-foreground mt-0.5 text-xs">
+                        {formatTime(activity.timestamp)}
                       </p>
-                    )}
-                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      {formatTime(activity.timestamp)}
-                    </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
@@ -432,6 +457,7 @@ function StatCard({ label, value, icon, color, onClick }: StatCardProps) {
 
   return (
     <div
+      data-slot="provider-overview-stat"
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
@@ -444,7 +470,7 @@ function StatCard({ label, value, icon, color, onClick }: StatCardProps) {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {value}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="text-muted-foreground text-xs">{label}</p>
         </div>
       </div>
     </div>

@@ -118,7 +118,11 @@ function AdditionalFields({
     <>
       {/* Existing entries */}
       {value.map((entry) => (
-        <div key={entry.id} className="mb-3 flex items-center gap-2">
+        <div
+          key={entry.id}
+          data-slot="additional-fields-row"
+          className="mb-3 flex items-center gap-2"
+        >
           {/* Field name */}
           <div className="min-w-0 flex-1">
             <Input
@@ -174,9 +178,12 @@ function AdditionalFields({
 
   if (!collapsible) {
     return (
-      <div className={cn('space-y-3', className)}>
+      <div data-slot="additional-fields" className={cn('space-y-3', className)}>
         {title && (
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <h3
+            data-slot="additional-fields-title"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             {title}
           </h3>
         )}
@@ -186,10 +193,11 @@ function AdditionalFields({
   }
 
   return (
-    <div className={cn('', className)}>
+    <div data-slot="additional-fields" className={cn('', className)}>
       {/* Collapsible header */}
       <button
         type="button"
+        data-slot="additional-fields-header"
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
           'flex w-full items-center gap-2 text-left text-sm font-medium',
@@ -217,6 +225,7 @@ function AdditionalFields({
       {/* Collapsible content */}
       <div
         id={contentId}
+        data-slot="additional-fields-content"
         className={cn(
           'transition-all duration-200',
           isExpanded ? 'mt-4 opacity-100' : 'max-h-0 overflow-hidden opacity-0'

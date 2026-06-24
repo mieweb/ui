@@ -116,13 +116,14 @@ export const AllVariants: Story = {
     <div className="space-y-8">
       {(['default', 'bordered', 'cards'] as const).map((variant) => (
         <div key={variant} className="space-y-2">
-          <div className="text-sm font-medium text-gray-500 capitalize">
+          <div className="text-sm font-medium text-neutral-600 capitalize dark:text-neutral-400">
             {variant}
           </div>
           <ServiceAccordion
             variant={variant}
             categories={mockCategories.slice(0, 2)}
             onServiceClick={(service) => console.log('Clicked:', service.slug)}
+            aria-label={`Service categories (${variant} variant)`}
           />
         </div>
       ))}

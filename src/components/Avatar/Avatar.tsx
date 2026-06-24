@@ -89,13 +89,14 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     return (
       <div
         ref={ref}
+        data-slot="avatar"
         className={cn(avatarVariants({ size, ring }), className)}
         {...props}
       >
         {showImage ? (
           <img
             src={src}
-            alt={alt || name || 'Avatar'}
+            alt={alt !== undefined ? alt : name || 'Avatar'}
             className="h-full w-full object-cover"
             onError={() => setImageError(true)}
           />
@@ -105,6 +106,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           initials
         ) : (
           <svg
+            aria-hidden="true"
             className="h-[60%] w-[60%] text-white/80"
             fill="currentColor"
             viewBox="0 0 24 24"
@@ -152,7 +154,12 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
     const remainingCount = max ? Math.max(0, childrenArray.length - max) : 0;
 
     return (
-      <div ref={ref} className={cn('flex -space-x-2', className)} {...props}>
+      <div
+        ref={ref}
+        data-slot="avatar-group"
+        className={cn('flex -space-x-2', className)}
+        {...props}
+      >
         {visibleChildren.map((child, index) => {
           if (React.isValidElement(child)) {
             return React.cloneElement(

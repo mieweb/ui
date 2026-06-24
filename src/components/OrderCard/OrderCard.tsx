@@ -248,6 +248,7 @@ export function OrderCard({
         {scheduledDate && (
           <div className="text-muted-foreground mb-3 flex items-center gap-2 text-sm">
             <svg
+              aria-hidden="true"
               className="h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
@@ -266,7 +267,7 @@ export function OrderCard({
 
         {/* Rejection Reason */}
         {status === 'rejected' && rejectionReason && (
-          <div className="bg-destructive/10 text-destructive mb-3 rounded p-2 text-sm">
+          <div className="bg-destructive/10 text-destructive-700 dark:text-destructive-400 mb-3 rounded p-2 text-sm">
             <span className="font-medium">Reason:</span> {rejectionReason}
           </div>
         )}
@@ -277,7 +278,7 @@ export function OrderCard({
             <button
               type="button"
               onClick={handleViewClick}
-              className="text-primary hover:text-primary/80 text-sm font-medium"
+              className="text-primary-800 hover:text-primary-800/80 dark:text-primary-400 text-sm font-medium"
             >
               View Details
             </button>
@@ -297,7 +298,7 @@ export function OrderCard({
                 <button
                   type="button"
                   onClick={handleAcceptClick}
-                  className="bg-primary hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors"
+                  className="bg-primary-800 hover:bg-primary-900 rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors"
                 >
                   Accept
                 </button>

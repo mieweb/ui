@@ -12,6 +12,15 @@ const brandThemes = {
     borderColor: '#b3e6f6',
     borderColorDark: '#1e4a6e',
   },
+  ccme: {
+    name: 'ccMe',
+    primary: '#9ed0c4',
+    secondary: '#7ab8ac',
+    appBg: '#eef8f6',
+    appBgDark: '#0a1f1c',
+    borderColor: '#b9e2dc',
+    borderColorDark: '#2b6b60',
+  },
   mieweb: {
     name: 'MIE Web',
     primary: '#27ae60',
@@ -257,6 +266,14 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
     /* Toolbar selected button */
     [role="toolbar"] button[aria-pressed="true"],
     [role="toolbar"] button[data-active="true"] {
+      color: ${brand.primary} !important;
+    }
+
+    /* Brand-theme switcher reflects the active brand (higher specificity than
+       the generic muted toolbar-button rule, so it wins in both light/dark). */
+    [role="toolbar"] button[aria-label*="brand themes"],
+    [class*="toolbar"] button[aria-label*="brand themes"],
+    [class*="bar"] button[aria-label*="brand themes"] {
       color: ${brand.primary} !important;
     }
     
