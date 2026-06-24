@@ -129,8 +129,8 @@ export type AIMessageStatus = 'pending' | 'streaming' | 'complete' | 'error';
  */
 export interface AIMessageContent {
   /** Type of content */
-  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'code';
-  /** Text content */
+  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'code' | 'audio';
+  /** Text content (also used as the audio label for `audio` blocks) */
   text?: string;
   /** Tool call reference */
   toolCall?: MCPToolCall;
@@ -138,6 +138,12 @@ export interface AIMessageContent {
   language?: string;
   /** Whether this content is collapsed by default */
   collapsed?: boolean;
+  /** Source URL for `audio` blocks */
+  audioUrl?: string;
+  /** MIME type for `audio` blocks */
+  mimeType?: string;
+  /** Duration label for `audio` blocks */
+  duration?: string;
 }
 
 /**

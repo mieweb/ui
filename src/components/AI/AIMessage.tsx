@@ -10,6 +10,7 @@ import { cn } from '../../utils/cn';
 import type { AIMessage, AIMessageContent, MCPResourceLink } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
 import { SparklesIcon, ChevronIcon } from './icons';
+import { AudioPlayer } from '../AudioPlayer';
 
 // ============================================================================
 // Avatar Component
@@ -229,6 +230,18 @@ function ContentBlock({ content, onLinkClick }: ContentBlockProps) {
           {content.text}
         </code>
       </pre>
+    );
+  }
+
+  if (content.type === 'audio' && content.audioUrl) {
+    return (
+      <AudioPlayer
+        src={content.audioUrl}
+        title={content.text}
+        variant="waveform"
+        showTime
+        showPlaybackRate
+      />
     );
   }
 
