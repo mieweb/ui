@@ -86,7 +86,7 @@ function HandsFreeChat() {
       const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' });
       recRef.current = null;
       try {
-        const text = stripStopPhrase(await transcribeBlob(blob)); // strip the trailing "ozwell i'm done"
+        const text = stripStopPhrase(await transcribeBlob(blob, 0.8)); // trim spoken stop phrase + strip residual
         if (text) send(text);
       } catch (e) { console.error('[handsfree] transcription failed', e); }
       setPhase('listening');
@@ -104,11 +104,23 @@ function HandsFreeChat() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{
-        padding: '10px 16px', font: '13px system-ui, sans-serif',
+        padding: '10px 16px', font: '13px system-ui, sans-serif', display: 'flex', alignItems: 'center', gap: 12,
         background: phase === 'dictating' ? '#7f1d1d' : '#0b1622',
         color: phase === 'dictating' ? '#fecaca' : '#9fb6cc', transition: 'background .2s',
       }}>
-        {banner}
+        <span style={{ flex: 1 }}>{banner}</span>
+        <button
+          onClick={() => { if (phase === 'dictating') stopDictation(); else if (phase === 'listening') startDictation(); }}
+          disabled={phase === 'transcribing'}
+          title="Manual dictate — fallback if the wake word doesn't fire (uses the same shared mic stream)"
+          style={{
+            font: '13px system-ui', padding: '5px 12px', borderRadius: 8, cursor: phase === 'transcribing' ? 'default' : 'pointer',
+            border: '1px solid', borderColor: phase === 'dictating' ? '#ef4444' : '#2dd4bf',
+            background: phase === 'dictating' ? '#ef4444' : '#12233a', color: '#e6f6f4', opacity: phase === 'transcribing' ? 0.5 : 1,
+          }}
+        >
+          {phase === 'dictating' ? '⏹ Stop' : '🎤 Dictate'}
+        </button>
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <AIChat

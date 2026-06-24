@@ -41,7 +41,9 @@ export function isWhisperLoaded(): boolean {
   return pipePromise !== null;
 }
 
-export async function transcribeBlob(blob: Blob): Promise<string> {
+// trimEndSeconds: drop this many seconds off the END of the audio before transcribing (so Whisper
+// never hears the spoken stop phrase). Pair with stripStopPhrase as a text-level backstop.
+export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<string> {
   const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctx();
   const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
@@ -56,16 +58,23 @@ export async function transcribeBlob(blob: Blob): Promise<string> {
     mono[i] = src[i0] + (src[i1] - src[i0]) * (t - i0);
   }
   void ctx.close();
+  let samples: Float32Array = mono;
+  if (trimEndSeconds > 0) {
+    const cut = Math.round(trimEndSeconds * 16000);
+    if (samples.length > cut + 16000) samples = samples.subarray(0, samples.length - cut); // keep >=1s
+  }
   const pipe = await loadWhisper();
-  const out = await pipe(mono, isMultilingual
+  const out = await pipe(samples, isMultilingual
     ? { chunk_length_s: 30, language: 'english', task: 'transcribe' }
     : { chunk_length_s: 30 });
   return (out?.text ?? '').trim();
 }
 
-/** Peel a trailing "ozwell i'm done"-style stop phrase off the end of a transcript. */
+/** Peel a trailing "ozwell i'm done"-style stop phrase off the end of a transcript. Mirrors the
+ *  standalone demo: handles Whisper's mishearings (Ozwell / As well / Also / Oswald / "I am done")
+ *  including the bare word alone. Bare "as well" is NOT stripped (too common) unless joined to "i'm done". */
 export function stripStopPhrase(text: string): string {
-  const tail = /(?:\b(?:oz\s*well|as\s*well|oswald|oswell)\b\s*,?\s*i(?:['’]?m|\s+am)\s+done\b|\bi(?:['’]?m|\s+am)\s+done\b|\bthank(?:s|\s+you)\b|\bbye\b)[\s.,!?-]*$/i;
+  const tail = /(?:\b(?:oz\s*well|all['’]?s?\s*well|as\s*well|also|oswald)\b\s*,?\s*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all['’]?s\s*well|also|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
   let prev: string | null = null;
   let t = text;
   while (t !== prev && t) { prev = t; t = t.replace(tail, '').replace(/[\s.,!?-]+$/, ''); }
