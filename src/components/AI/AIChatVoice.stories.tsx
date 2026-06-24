@@ -52,11 +52,19 @@ function loadWhisper() {
     };
     mod.env.allowLocalModels = false;
     mod.env.backends.onnx.wasm.numThreads = 1; // plain page has no COOP/COEP headers
-    const MODEL = 'Xenova/whisper-small.en'; // light & fast; swap for large-v3-turbo on WebGPU
+    // Ask the browser to KEEP our model cache. Without this the model may never be stored (if the
+    // quota is tight) or get evicted, so it re-downloads on every reload. Best-effort; fine if false.
+    try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
+    // dtype 'q8' = 8-bit quantized → ~4x smaller than the default fp32, so the model FITS the browser
+    // cache and reloads are instant (no re-download). base.en is small + accurate enough here; for more
+    // accuracy use 'Xenova/whisper-small.en' or 'onnx-community/whisper-large-v3-turbo' — but those only
+    // cache if the browser has the storage quota for them (a bigger model needs a bigger cache).
+    const MODEL = 'Xenova/whisper-base.en';
+    const dtype = 'q8' as const;
     try {
-      return await mod.pipeline('automatic-speech-recognition', MODEL, { device: 'webgpu' });
+      return await mod.pipeline('automatic-speech-recognition', MODEL, { device: 'webgpu', dtype });
     } catch {
-      return await mod.pipeline('automatic-speech-recognition', MODEL); // WASM fallback
+      return await mod.pipeline('automatic-speech-recognition', MODEL, { dtype }); // WASM fallback
     }
   })();
   return pipePromise;
