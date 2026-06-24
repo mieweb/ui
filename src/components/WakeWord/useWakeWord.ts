@@ -60,6 +60,10 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
           embeddingModelPath: `${ASSET}/speech-embedding.onnx`,
           spectrogramModelPath: `${ASSET}/mel-spectrogram.onnx`,
           wakeWordThresholds: thresholds || { 'hey-ozwell': 0.5, "ozwell-i'm-done": 0.5 },
+          // The VAD reads low in this setup, so gate generously — the re-entrancy guard in HeyBuddy
+          // keeps the wake model from overlap-crashing even if this lets it run most of the time.
+          positiveVadThreshold: 0.05,
+          negativeVadThreshold: 0.03,
         });
 
         hb.onProcessed((result: ProcessedResult) => {

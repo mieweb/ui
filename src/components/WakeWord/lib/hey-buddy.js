@@ -496,13 +496,14 @@ export class HeyBuddy {
         if(justStartedSpeaking) this.speechStart();
         if(justStoppedSpeaking) this.speechEnd();
 
-        // Phase 1: run wake detection whenever the embedding window is full, regardless of the VAD
-        // gate. The substituted public silero-vad reads lower than the original heybuddy VAD, so
-        // `isSpeaking` under-triggers and would suppress detection. VAD still drives the speech
-        // readout. (Re-add `isSpeaking &&` once a matched VAD / tuned threshold is in place.)
-        if (this.embeddingBuffer.dims[0] === this.wakeWordEmbeddingFrames) {
-            // If we're listening, run wake word detection
-            const wakeWordsCalled = await this.checkWakeWords();
+        if (isSpeaking && this.embeddingBuffer.dims[0] === this.wakeWordEmbeddingFrames && !this._wakeBusy) {
+            // If we're listening, run wake word detection. Guard against OVERLAPPING runs — if a wake
+            // inference takes longer than the frame interval, the next frame would call run() on a
+            // still-busy session → "Session already started". The guard skips those frames safely.
+            this._wakeBusy = true;
+            let wakeWordsCalled;
+            try { wakeWordsCalled = await this.checkWakeWords(); }
+            finally { this._wakeBusy = false; }
             // Trigger callbacks with processed data
             this.processed({
                 listening: true,
