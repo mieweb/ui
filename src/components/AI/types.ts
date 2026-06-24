@@ -142,8 +142,8 @@ export interface AIMessageContent {
   audioUrl?: string;
   /** MIME type for `audio` blocks */
   mimeType?: string;
-  /** Duration label for `audio` blocks */
-  duration?: string;
+  /** Duration in seconds for `audio` blocks */
+  duration?: number;
 }
 
 /**
