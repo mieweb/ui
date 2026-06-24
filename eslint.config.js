@@ -53,6 +53,8 @@ export default [
         HTMLFormElement: 'readonly',
         HTMLSelectElement: 'readonly',
         HTMLAnchorElement: 'readonly',
+        CanvasRenderingContext2D: 'readonly',
+        CanvasImageSource: 'readonly',
         SVGSVGElement: 'readonly',
         Node: 'readonly',
         // Events

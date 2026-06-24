@@ -170,7 +170,10 @@ const config: StorybookConfig = {
   typescript: {
     reactDocgen: 'react-docgen-typescript',
   },
-  staticDirs: ['./public', { from: '../node_modules/@kerebron/wasm/assets', to: '/kerebron-wasm' }],
+  staticDirs: ['./public', { from: '../node_modules/@kerebron/wasm/assets', to: '/kerebron-wasm' },{
+    from: '../node_modules/onnxruntime-web/dist',
+    to: '/ort-wasm',
+  },],
   async viteFinal(config) {
     const optimizeDepNames = [
       ...datavisDependencyNames,
