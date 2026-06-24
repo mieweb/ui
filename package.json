@@ -179,7 +179,10 @@
       "style": "./dist/components/Markdown/styles.css",
       "default": "./dist/components/Markdown/styles.css"
     },
-    "./kerebron.css": "./dist/kerebron.css",
+    "./kerebron.css": {
+      "style": "./dist/kerebron.css",
+      "default": "./dist/kerebron.css"
+    },
     "./init.css": {
       "style": "./dist/styles/init.css",
       "default": "./dist/styles/init.css"
