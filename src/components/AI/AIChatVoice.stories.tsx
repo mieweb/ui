@@ -79,7 +79,8 @@ async function transcribeBlob(blob: Blob): Promise<string> {
   }
   void ctx.close();
   const pipe = await loadWhisper();
-  const out = await pipe(mono, { chunk_length_s: 30, language: 'english', task: 'transcribe' });
+  // whisper-small.en is English-only — it rejects `language`/`task` (those are multilingual-only).
+  const out = await pipe(mono, { chunk_length_s: 30 });
   return (out?.text ?? '').trim();
 }
 
