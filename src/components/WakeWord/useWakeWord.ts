@@ -48,12 +48,14 @@ function ensureOrt(): Promise<void> {
   });
 }
 
-export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
+export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & { getStream: () => MediaStream | null } {
   const { onWake, thresholds, enabled = true } = opts;
   const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
   // keep the latest onWake without re-running the effect
   const onWakeRef = React.useRef(onWake);
   onWakeRef.current = onWake;
+  // holds the detector so the host can reach its mic stream (one stream, many consumers — see composition)
+  const hbRef = React.useRef<HeyBuddyInstance | null>(null);
 
   React.useEffect(() => {
     if (!enabled) return;
@@ -85,6 +87,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
           positiveVadThreshold: 0.05,
           negativeVadThreshold: 0.03,
         });
+        hbRef.current = hb;
 
         hb.onProcessed((result: ProcessedResult) => {
           if (cancelled) return;
@@ -105,7 +108,9 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
     return () => { cancelled = true; };
   }, [enabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return state;
+  // getStream exposes the detector's mic stream so a host can add a second consumer (e.g. a
+  // MediaRecorder for dictation) WITHOUT opening a second getUserMedia (which goes silent).
+  return { ...state, getStream: () => hbRef.current?.batcher?.stream ?? null };
 }
 
 // minimal shapes for the vendored detector
@@ -118,4 +123,5 @@ interface HeyBuddyInstance {
   onProcessed(cb: (r: ProcessedResult) => void): void;
   onDetected(name: string, cb: () => void): void;
   onRecording(cb: (samples: Float32Array) => void): void;
+  batcher?: { stream?: MediaStream };
 }
