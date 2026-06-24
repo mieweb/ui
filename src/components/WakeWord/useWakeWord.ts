@@ -1,0 +1,97 @@
+/**
+ * useWakeWord — a headless React hook around the on-device wake-word detector.
+ *
+ * Phase 1 (this file): DETECTION only. It loads the tiny wake models + the mel/embedding/VAD
+ * front-end (all from `/wakeword/*`, served by Storybook's static dir) and fires `onWake(name)`
+ * when it hears "hey ozwell" or "ozwell i'm done". Everything runs in the browser; audio stays local.
+ *
+ * Phase 2 (later): the WHO speaker gate (TitaNet) so only the enrolled doctor's voice triggers it.
+ *
+ * The detector itself is the framework-agnostic `HeyBuddy` class vendored under ./lib (vanilla JS).
+ * Needs `onnxruntime-web` (pnpm add) and the VAD model at /wakeword/silero-vad.onnx.
+ */
+import * as React from 'react';
+
+export interface UseWakeWordOpts {
+  /** Fired with the phrase name ("hey-ozwell" | "ozwell-i'm-done") on a detection. */
+  onWake?: (name: string) => void;
+  /** Per-phrase fire thresholds (0..1). Defaults to 0.5 each. */
+  thresholds?: Record<string, number>;
+  /** Set false to not start listening. */
+  enabled?: boolean;
+}
+
+export interface WakeWordState {
+  ready: boolean;
+  error: string | null;
+  /** VAD speech probability, 0..1 (is someone talking). */
+  speech: number;
+  /** Live per-phrase wake probability, 0..1. */
+  probs: Record<string, number>;
+}
+
+const ASSET = '/wakeword';
+const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
+
+export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
+  const { onWake, thresholds, enabled = true } = opts;
+  const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
+  // keep the latest onWake without re-running the effect
+  const onWakeRef = React.useRef(onWake);
+  onWakeRef.current = onWake;
+
+  React.useEffect(() => {
+    if (!enabled) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        // mic permission first (also what unlocks AudioContext)
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (cancelled) return;
+
+        // vendored vanilla-JS detector — dynamic import avoids TS typing the .js module
+        const { HeyBuddy } = (await import('./lib/hey-buddy.js')) as { HeyBuddy: new (o: unknown) => HeyBuddyInstance };
+        if (cancelled) return;
+
+        const hb = new HeyBuddy({
+          modelPath: [`${ASSET}/hey-ozwell.onnx`, `${ASSET}/ozwell-i'm-done.onnx`],
+          vadModelPath: `${ASSET}/silero-vad.onnx`,
+          embeddingModelPath: `${ASSET}/speech-embedding.onnx`,
+          spectrogramModelPath: `${ASSET}/mel-spectrogram.onnx`,
+          wakeWordThresholds: thresholds || { 'hey-ozwell': 0.5, "ozwell-i'm-done": 0.5 },
+        });
+
+        hb.onProcessed((result: ProcessedResult) => {
+          if (cancelled) return;
+          const probs: Record<string, number> = {};
+          for (const w of Object.keys(result.wakeWords || {})) probs[w] = result.wakeWords[w].probability || 0;
+          setState((s) => ({ ...s, ready: true, speech: result.speech?.probability || 0, probs }));
+        });
+
+        for (const name of PHRASES) hb.onDetected(name, () => onWakeRef.current?.(name));
+
+        setState((s) => ({ ...s, ready: true }));
+      } catch (e) {
+        if (!cancelled) setState((s) => ({ ...s, error: e instanceof Error ? e.message : String(e) }));
+      }
+    })();
+
+    // NOTE: HeyBuddy has no stop() yet — the mic keeps running until page nav. Phase-2 TODO: add teardown.
+    return () => { cancelled = true; };
+  }, [enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return state;
+}
+
+// minimal shapes for the vendored detector
+interface ProcessedResult {
+  speech?: { probability?: number; active?: boolean };
+  wakeWords: Record<string, { probability?: number; active?: boolean }>;
+  recording?: boolean;
+}
+interface HeyBuddyInstance {
+  onProcessed(cb: (r: ProcessedResult) => void): void;
+  onDetected(name: string, cb: () => void): void;
+  onRecording(cb: (samples: Float32Array) => void): void;
+}
