@@ -423,13 +423,16 @@ const MessageComposer = React.forwardRef<
 
     const mentionMenuOpen =
       mentionsEnabled && mention !== null && mentionSuggestions.length > 0;
-    // Clamp the highlight to the current suggestion range so
-    // `aria-activedescendant` never points at a stale/out-of-range option id
-    // (the list can shrink while the menu is open as the query narrows).
+    // Clamp the highlight to the current suggestion range so the active option
+    // never points at a stale/out-of-range index (the list can shrink while the
+    // menu is open as the query narrows). The same clamped index drives
+    // `aria-activedescendant`, `aria-selected`, and the visual highlight so they
+    // can never disagree.
+    const clampedMentionHighlight = mentionMenuOpen
+      ? Math.min(mentionHighlight, mentionSuggestions.length - 1)
+      : -1;
     const activeMentionOptionId = mentionMenuOpen
-      ? mentionOptionId(
-          Math.min(mentionHighlight, mentionSuggestions.length - 1)
-        )
+      ? mentionOptionId(clampedMentionHighlight)
       : undefined;
 
     const syncMention = React.useCallback(
@@ -723,7 +726,7 @@ const MessageComposer = React.forwardRef<
                         type="button"
                         id={mentionOptionId(i)}
                         role="option"
-                        aria-selected={i === mentionHighlight}
+                        aria-selected={i === clampedMentionHighlight}
                         // onMouseDown (not onClick) so the textarea keeps focus.
                         onMouseDown={(e) => {
                           e.preventDefault();
@@ -732,7 +735,7 @@ const MessageComposer = React.forwardRef<
                         onMouseEnter={() => setMentionHighlight(i)}
                         className={cn(
                           'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
-                          i === mentionHighlight
+                          i === clampedMentionHighlight
                             ? 'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-100'
                             : 'text-neutral-700 dark:text-neutral-200'
                         )}
