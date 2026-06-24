@@ -41,6 +41,7 @@ type Story = StoryObj<typeof AIChat>;
 
 // --- on-device transcription: Transformers.js (Whisper) loaded from CDN, no install ---
 let pipePromise: Promise<(input: Float32Array, opts: unknown) => Promise<{ text?: string }>> | null = null;
+let isMultilingual = false; // turbo is multilingual (needs language/task); base.en is English-only
 function loadWhisper() {
   if (pipePromise) return pipePromise;
   pipePromise = (async () => {
@@ -55,16 +56,21 @@ function loadWhisper() {
     // Ask the browser to KEEP our model cache. Without this the model may never be stored (if the
     // quota is tight) or get evicted, so it re-downloads on every reload. Best-effort; fine if false.
     try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
-    // dtype 'q8' = 8-bit quantized → ~4x smaller than the default fp32, so the model FITS the browser
-    // cache and reloads are instant (no re-download). base.en is small + accurate enough here; for more
-    // accuracy use 'Xenova/whisper-small.en' or 'onnx-community/whisper-large-v3-turbo' — but those only
-    // cache if the browser has the storage quota for them (a bigger model needs a bigger cache).
-    const MODEL = 'Xenova/whisper-base.en';
-    const dtype = 'q8' as const;
+    // DEFAULT: large-v3-turbo on WebGPU — best accuracy. fp16 encoder + q4 decoder is the fast WebGPU
+    // recipe. It re-downloads each reload UNLESS the browser has the cache quota for it (a near-full disk
+    // makes Chrome shrink that quota); on a healthy machine / real deploy it caches once and reloads fast.
+    // FALLBACK: base.en q8 — tiny (~75MB), always fits the cache, English-only.
     try {
-      return await mod.pipeline('automatic-speech-recognition', MODEL, { device: 'webgpu', dtype });
-    } catch {
-      return await mod.pipeline('automatic-speech-recognition', MODEL, { dtype }); // WASM fallback
+      const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
+        device: 'webgpu',
+        dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
+      });
+      isMultilingual = true;
+      return pipe;
+    } catch (e) {
+      console.warn('[voice] turbo unavailable (no WebGPU?) — falling back to base.en', e);
+      try { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' }); }
+      catch { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' }); } // WASM fallback
     }
   })();
   return pipePromise;
@@ -87,8 +93,10 @@ async function transcribeBlob(blob: Blob): Promise<string> {
   }
   void ctx.close();
   const pipe = await loadWhisper();
-  // whisper-small.en is English-only — it rejects `language`/`task` (those are multilingual-only).
-  const out = await pipe(mono, { chunk_length_s: 30 });
+  // turbo is multilingual → pin English; base.en is English-only → must NOT pass language/task.
+  const out = await pipe(mono, isMultilingual
+    ? { chunk_length_s: 30, language: 'english', task: 'transcribe' }
+    : { chunk_length_s: 30 });
   return (out?.text ?? '').trim();
 }
 
