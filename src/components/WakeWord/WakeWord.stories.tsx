@@ -120,3 +120,54 @@ function WakeWordDemo() {
 export const Listener: StoryObj = {
   render: () => <WakeWordDemo />,
 };
+
+// --- Diagnostic: raw mic level, bypassing the detector entirely ---
+function MicTest() {
+  const [level, setLevel] = React.useState(0);
+  const [err, setErr] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let ctx: AudioContext | null = null, raf = 0, stream: MediaStream | null = null, cancelled = false;
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((s) => {
+      if (cancelled) { s.getTracks().forEach((t) => t.stop()); return; }
+      stream = s;
+      ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const src = ctx.createMediaStreamSource(s);
+      const an = ctx.createAnalyser(); an.fftSize = 1024;
+      src.connect(an);
+      const data = new Float32Array(an.fftSize);
+      const tick = () => {
+        an.getFloatTimeDomainData(data);
+        let peak = 0; for (let i = 0; i < data.length; i++) { const a = Math.abs(data[i]); if (a > peak) peak = a; }
+        setLevel(peak);
+        raf = requestAnimationFrame(tick);
+      };
+      tick();
+    }).catch((e) => setErr(e instanceof Error ? e.message : String(e)));
+    return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); stream?.getTracks().forEach((t) => t.stop()); ctx?.close(); };
+  }, []);
+
+  return (
+    <div style={{ fontFamily: 'system-ui, sans-serif', width: 440, color: '#1f2733' }}>
+      <h3 style={{ marginBottom: 4 }}>Mic test — raw audio level</h3>
+      <p style={{ color: '#64748b', fontSize: 13.5, marginTop: 0 }}>
+        Diagnostic only — is the mic even captured in Storybook? <b>Talk and this bar should jump.</b> It
+        reads the mic directly and bypasses the detector. If it moves but the Listener’s “speech” bar
+        doesn’t, the detector’s audio path is the problem. If this stays flat too, the iframe isn’t getting mic audio.
+      </p>
+      {err ? <div style={{ color: '#dc2626', font: '12px monospace' }}>error: {err}</div> : (
+        <>
+          <Meter label="mic input" value={Math.min(1, level * 3)} accent="#a855f7" />
+          <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>
+            raw peak: {level.toFixed(3)} {level > 0.05 ? '✅ capturing' : '— quiet'}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Diagnostic: shows the raw microphone level (bypasses the detector) to isolate capture vs pipeline. */
+export const MicTest_: StoryObj = {
+  name: 'Mic Test (diagnostic)',
+  render: () => <MicTest />,
+};
