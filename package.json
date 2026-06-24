@@ -93,12 +93,30 @@
         "default": "./dist/brands/index.cjs"
       }
     },
-    "./brands/bluehive.css": "./dist/brands/bluehive.css",
-    "./brands/ccme.css": "./dist/brands/ccme.css",
-    "./brands/mieweb.css": "./dist/brands/mieweb.css",
-    "./brands/ozwell.css": "./dist/brands/ozwell.css",
-    "./brands/webchart.css": "./dist/brands/webchart.css",
-    "./brands/enterprise-health.css": "./dist/brands/enterprise-health.css",
+    "./brands/bluehive.css": {
+      "style": "./dist/brands/bluehive.css",
+      "default": "./dist/brands/bluehive.css"
+    },
+    "./brands/ccme.css": {
+      "style": "./dist/brands/ccme.css",
+      "default": "./dist/brands/ccme.css"
+    },
+    "./brands/mieweb.css": {
+      "style": "./dist/brands/mieweb.css",
+      "default": "./dist/brands/mieweb.css"
+    },
+    "./brands/ozwell.css": {
+      "style": "./dist/brands/ozwell.css",
+      "default": "./dist/brands/ozwell.css"
+    },
+    "./brands/webchart.css": {
+      "style": "./dist/brands/webchart.css",
+      "default": "./dist/brands/webchart.css"
+    },
+    "./brands/enterprise-health.css": {
+      "style": "./dist/brands/enterprise-health.css",
+      "default": "./dist/brands/enterprise-health.css"
+    },
     "./brands/*": {
       "import": {
         "types": "./dist/brands/*.d.ts",
@@ -149,11 +167,27 @@
         "default": "./dist/kerebron.cjs"
       }
     },
-    "./styles.css": "./dist/styles.css",
-    "./styles": "./dist/styles.css",
-    "./markdown.css": "./dist/components/Markdown/styles.css",
+    "./styles.css": {
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./styles": {
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./markdown.css": {
+      "style": "./dist/components/Markdown/styles.css",
+      "default": "./dist/components/Markdown/styles.css"
+    },
     "./kerebron.css": "./dist/kerebron.css",
-    "./init.css": "./dist/styles/init.css"
+    "./init.css": {
+      "style": "./dist/styles/init.css",
+      "default": "./dist/styles/init.css"
+    },
+    "./components/Markdown/styles.css": {
+      "style": "./dist/components/Markdown/styles.css",
+      "default": "./dist/components/Markdown/styles.css"
+    }
   },
   "files": [
     "dist",
@@ -263,11 +297,6 @@
     "@codemirror/state": "^6.6.0",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.41.0",
-    "@esheet/adapters": "link:./packages/esheet/packages/adapters",
-    "@esheet/builder": "link:./packages/esheet/packages/builder",
-    "@esheet/core": "link:./packages/esheet/packages/core",
-    "@esheet/fields": "link:./packages/esheet/packages/fields",
-    "@esheet/renderer": "link:./packages/esheet/packages/renderer",
     "@eslint/js": "^9.39.3",
     "@kerebron/editor": "0.7.9",
     "@kerebron/editor-kits": "0.7.9",
