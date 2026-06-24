@@ -16,6 +16,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { AIChat } from './AIChat';
 import type { AIMessage } from './types';
+import { RecordButton } from '../RecordButton';
 import { useWakeWord } from '../WakeWord/useWakeWord';
 import { transcribeBlob, stripStopPhrase } from './whisperTranscribe';
 
@@ -104,23 +105,11 @@ function HandsFreeChat() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{
-        padding: '10px 16px', font: '13px system-ui, sans-serif', display: 'flex', alignItems: 'center', gap: 12,
+        padding: '10px 16px', font: '13px system-ui, sans-serif',
         background: phase === 'dictating' ? '#7f1d1d' : '#0b1622',
         color: phase === 'dictating' ? '#fecaca' : '#9fb6cc', transition: 'background .2s',
       }}>
-        <span style={{ flex: 1 }}>{banner}</span>
-        <button
-          onClick={() => { if (phase === 'dictating') stopDictation(); else if (phase === 'listening') startDictation(); }}
-          disabled={phase === 'transcribing'}
-          title="Manual dictate — fallback if the wake word doesn't fire (uses the same shared mic stream)"
-          style={{
-            font: '13px system-ui', padding: '5px 12px', borderRadius: 8, cursor: phase === 'transcribing' ? 'default' : 'pointer',
-            border: '1px solid', borderColor: phase === 'dictating' ? '#ef4444' : '#2dd4bf',
-            background: phase === 'dictating' ? '#ef4444' : '#12233a', color: '#e6f6f4', opacity: phase === 'transcribing' ? 0.5 : 1,
-          }}
-        >
-          {phase === 'dictating' ? '⏹ Stop' : '🎤 Dictate'}
-        </button>
+        {banner}
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         <AIChat
@@ -129,6 +118,27 @@ function HandsFreeChat() {
           title="Ozwell Assistant — hands-free"
           inputPlaceholder={phase === 'listening' ? 'Say “hey ozwell”, or type…' : banner}
           onSendMessage={send}
+          composerProps={{
+            // The composer's OWN mic button — but driven by our shared stream, not its own getUserMedia.
+            // `state` puts RecordButton in controlled mode (its internal recorder is disabled); the
+            // wrapping onClickCapture starts/stops OUR shared-stream dictation. So the built-in mic
+            // and "hey ozwell" both do the same thing — either works, one mic, no conflict.
+            inputTrailing: (
+              <span
+                onClickCapture={() => { if (phase === 'dictating') stopDictation(); else if (phase === 'listening') startDictation(); }}
+                style={{ display: 'inline-flex' }}
+                title="Dictate — or just say “hey ozwell”"
+              >
+                <RecordButton
+                  variant="ghost"
+                  size="sm"
+                  showWaveform
+                  showPulse={phase === 'dictating'}
+                  state={phase === 'dictating' ? 'recording' : phase === 'transcribing' ? 'processing' : 'idle'}
+                />
+              </span>
+            ),
+          }}
         />
       </div>
     </div>
