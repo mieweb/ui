@@ -586,6 +586,40 @@ npm install @esheet/builder
 
 > `@esheet/core` and `@esheet/fields` are included transitively — no need to install them separately.
 
+### Two Supported Ways to Consume `@mieweb/ui`
+
+Apps can depend on `@mieweb/ui` (and the `@esheet/*` packages) in two ways. Pick based on whether you're consuming **published releases** or **co-developing** against unreleased changes.
+
+#### 1. Registry install (recommended for most apps)
+
+Install `@mieweb/ui` and the `@esheet/*` packages as normal versioned dependencies from the npm registry:
+
+```jsonc
+// package.json
+{
+  "dependencies": {
+    "@mieweb/ui": "^0.6.1",
+    "@esheet/builder": "^0.0.3",
+    "@esheet/renderer": "^0.0.3"
+  }
+}
+```
+
+This is the simplest and most robust option — a published package's `devDependencies` are ignored by consumers, so you only pull in the runtime deps you actually need, and you're insulated from anything in `@mieweb/ui`'s internal dev tooling.
+
+#### 2. Submodule / local directory (`file:`)
+
+If your app **co-develops** against unreleased `@mieweb/ui` changes — for example, vendoring it as a git submodule and pointing at it locally — that's also supported:
+
+```jsonc
+// package.json
+{
+  "dependencies": {
+    "@mieweb/ui": "file:packages/mieweb-ui"
+  }
+}
+```
+
 <div
   style={{
     marginTop: '16px',
@@ -596,7 +630,7 @@ npm install @esheet/builder
     backgroundColor: 'var(--mieweb-muted, #f5f5f5)',
   }}
 >
-  <strong>📦 Install <code>@mieweb/ui</code> from the npm registry — don't vendor it as a local directory</strong>
+  <strong>⚠️ Maintainer guardrail for the <code>file:</code> approach</strong>
   <span
     style={{
       fontSize: '14px',
@@ -605,35 +639,13 @@ npm install @esheet/builder
       marginTop: '8px',
     }}
   >
-    Always consume <code>@mieweb/ui</code> (and the <code>@esheet/*</code>{' '}
-    packages) as normal versioned dependencies from the registry:
-  </span>
-
-```jsonc
-// package.json — recommended
-{
-  "dependencies": {
-    "@mieweb/ui": "^0.6.1",
-    "@esheet/builder": "^0.0.3",
-    "@esheet/renderer": "^0.0.3"
-  }
-}
-```
-
-  <span
-    style={{
-      fontSize: '14px',
-      color: 'var(--mieweb-muted-foreground, #737373)',
-      display: 'block',
-      marginTop: '8px',
-    }}
-  >
-    <strong>Avoid</strong> vendoring <code>@mieweb/ui</code> as a local copy via{' '}
-    <code>"@mieweb/ui": "file:packages/mieweb-ui"</code>. Doing so makes your
-    package manager resolve <code>@mieweb/ui</code>'s full{' '}
-    <code>devDependency</code> tree — including pnpm-only{' '}
-    <code>link:</code> entries that npm cannot understand. With npm this fails
-    hard with:
+    When you point at <code>@mieweb/ui</code> as a local <code>file:</code>{' '}
+    directory, your package manager resolves its <strong>full</strong>{' '}
+    dependency tree, including <code>devDependencies</code>. That only stays
+    healthy as long as <code>@mieweb/ui</code>'s published <code>dependencies</code>{' '}
+    and <code>devDependencies</code> contain <strong>no non-registry
+    protocols</strong> (<code>link:</code>, <code>workspace:</code>,{' '}
+    <code>file:</code>). If one is reintroduced, npm consumers break hard with:
   </span>
 
 ```text
@@ -649,9 +661,12 @@ npm error Unsupported URL Type "link:"
       marginTop: '8px',
     }}
   >
-    Installing from the registry sidesteps this entirely — a published package's{' '}
-    <code>devDependencies</code> are ignored by consumers, so you only pull in
-    the runtime deps you actually need.
+    Maintainers: keep the published dependency tree free of these protocols so{' '}
+    <code>file:</code> consumers keep working. (This is exactly the breakage that{' '}
+    PR <a href="https://github.com/mieweb/ui/pull/281">#281</a> resolved by
+    swapping <code>link:</code> esheet deps for published versions.) Registry
+    consumers are immune to this since published <code>devDependencies</code> are
+    ignored.
   </span>
 </div>
 
