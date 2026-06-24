@@ -5,9 +5,7 @@
  * This story is the bare listener with a live readout; the next step wires a verified wake to
  * the AIChat voice (hands-free), and Phase 2 adds the doctor-only speaker gate.
  *
- * Requires (one-time): `pnpm add onnxruntime-web`, and the VAD model copied to
- * `.storybook/public/wakeword/silero-vad.onnx` (it isn't in the repo yet — grab it from the
- * hey-ozwell-sv demo's pretrained/ folder). The other 4 models are already in .storybook/public/wakeword/.
+ * Requires (one-time): `pnpm add onnxruntime-web`. All 5 models ship in .storybook/public/wakeword/.
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
@@ -29,59 +27,96 @@ const meta: Meta = {
 };
 export default meta;
 
-function bar(p: number) {
-  const pct = Math.round((p || 0) * 100);
+const LABELS: Record<string, string> = { 'hey-ozwell': 'hey ozwell', "ozwell-i'm-done": "ozwell I'm done" };
+
+function Meter({ label, value, accent }: { label: string; value: number; accent: string }) {
+  const pct = Math.round((value || 0) * 100);
   return (
-    <div style={{ background: '#e5e7eb', borderRadius: 4, height: 10, overflow: 'hidden', width: 200 }}>
-      <div style={{ background: pct > 50 ? '#16a34a' : '#3b82f6', height: '100%', width: `${pct}%`, transition: 'width 80ms' }} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
+      <span style={{ width: 116, fontSize: 13, color: '#475569', textAlign: 'right' }}>{label}</span>
+      <div style={{ flex: 1, height: 12, background: '#eef2f7', borderRadius: 6, overflow: 'hidden' }}>
+        <div style={{
+          height: '100%', width: `${pct}%`, borderRadius: 6,
+          background: `linear-gradient(90deg, ${accent}aa, ${accent})`,
+          transition: 'width 90ms linear',
+        }} />
+      </div>
+      <span style={{ width: 34, fontSize: 12, color: '#94a3b8', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
     </div>
   );
 }
 
 function WakeWordDemo() {
   const [log, setLog] = React.useState<{ name: string; t: string }[]>([]);
+  const [flash, setFlash] = React.useState<string | null>(null);
   const st = useWakeWord({
     onWake: (name) => {
-      const t = new Date().toLocaleTimeString();
-      setLog((l) => [{ name, t }, ...l].slice(0, 8));
+      setLog((l) => [{ name, t: new Date().toLocaleTimeString() }, ...l].slice(0, 6));
+      setFlash(name);
+      window.setTimeout(() => setFlash((f) => (f === name ? null : f)), 900);
     },
   });
 
+  const status = st.error ? 'error' : st.ready ? 'listening' : 'loading';
+  const dotColor = status === 'error' ? '#dc2626' : status === 'listening' ? '#16a34a' : '#d97706';
+
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', width: 420, color: '#1f2733' }}>
-      <h3 style={{ marginBottom: 4 }}>Wake-word listener</h3>
-      <p style={{ color: '#6b7785', marginTop: 0, fontSize: 14 }}>
-        Say <b>“hey ozwell”</b> or <b>“ozwell I’m done”</b>. Runs fully on-device.
+    <div style={{
+      fontFamily: 'system-ui, -apple-system, sans-serif', width: 460, color: '#1f2733',
+      background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16,
+      boxShadow: '0 1px 3px rgba(0,0,0,.06)', padding: 24,
+      outline: flash ? '2px solid #16a34a' : '2px solid transparent', transition: 'outline-color .2s',
+    }}>
+      <style>{`@keyframes oz-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.82)}}`}</style>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{
+          width: 10, height: 10, borderRadius: '50%', background: dotColor,
+          animation: status === 'listening' ? 'oz-pulse 1.4s infinite' : 'none',
+        }} />
+        <h3 style={{ margin: 0, fontSize: 16 }}>Wake-word listener</h3>
+        <span style={{ marginLeft: 'auto', font: '11px monospace', color: dotColor, textTransform: 'uppercase', letterSpacing: .5 }}>
+          {status === 'error' ? st.error : status}
+        </span>
+      </div>
+      <p style={{ color: '#64748b', margin: '6px 0 4px', fontSize: 13.5 }}>
+        Say <b style={{ color: '#1f2733' }}>“hey ozwell”</b> or <b style={{ color: '#1f2733' }}>“ozwell I’m done”</b>.
+        Detection runs fully on-device — audio never leaves the page.
       </p>
 
-      <div style={{ font: '12px monospace', color: st.error ? '#dc2626' : '#16a34a', marginBottom: 12 }}>
-        {st.error ? `error: ${st.error}` : st.ready ? '● listening' : '… loading models'}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 10px', alignItems: 'center', fontSize: 13 }}>
-        <span>speech</span>{bar(st.speech)}
-        {Object.entries(st.probs).map(([n, p]) => (
-          <React.Fragment key={n}>
-            <span>{n}</span>{bar(p)}
-          </React.Fragment>
+      <div style={{ marginTop: 14 }}>
+        <Meter label="speech" value={st.speech} accent="#3b82f6" />
+        {Object.keys(LABELS).map((n) => (
+          <Meter key={n} label={LABELS[n]} value={st.probs[n] || 0} accent="#16a34a" />
         ))}
       </div>
 
-      <h4 style={{ marginBottom: 4 }}>Detections</h4>
-      {log.length === 0 ? (
-        <div style={{ color: '#9ca3af', fontSize: 13 }}>none yet — say a phrase</div>
-      ) : (
-        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13 }}>
-          {log.map((d, i) => (
-            <li key={i}>🔔 <b>{d.name}</b> <span style={{ color: '#9ca3af' }}>{d.t}</span></li>
-          ))}
-        </ul>
-      )}
+      <div style={{ marginTop: 18, borderTop: '1px solid #f1f5f9', paddingTop: 12 }}>
+        <div style={{ fontSize: 12, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: .5, marginBottom: 8 }}>
+          Detections
+        </div>
+        {log.length === 0 ? (
+          <div style={{ color: '#cbd5e1', fontSize: 13 }}>none yet — say a phrase</div>
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {log.map((d, i) => (
+              <span key={i} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5,
+                background: i === 0 ? '#dcfce7' : '#f1f5f9', color: '#166534',
+                padding: '4px 10px', borderRadius: 999,
+              }}>
+                🔔 <b>{LABELS[d.name] || d.name}</b>
+                <span style={{ color: '#94a3b8' }}>{d.t}</span>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-/** The bare on-device listener with a live readout of speech + per-phrase wake probabilities. */
+/** The on-device listener with a live readout of speech + per-phrase wake probabilities. */
 export const Listener: StoryObj = {
   render: () => <WakeWordDemo />,
 };
