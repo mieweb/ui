@@ -117,6 +117,10 @@
       "style": "./dist/brands/enterprise-health.css",
       "default": "./dist/brands/enterprise-health.css"
     },
+    "./brands/waggleline.css": {
+      "style": "./dist/brands/waggleline.css",
+      "default": "./dist/brands/waggleline.css"
+    },
     "./brands/*": {
       "import": {
         "types": "./dist/brands/*.d.ts",
@@ -300,11 +304,11 @@
     "@codemirror/state": "^6.6.0",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.41.0",
-    "@esheet/adapters": "file:./packages/esheet/packages/adapters",
-    "@esheet/builder": "file:./packages/esheet/packages/builder",
-    "@esheet/core": "file:./packages/esheet/packages/core",
-    "@esheet/fields": "file:./packages/esheet/packages/fields",
-    "@esheet/renderer": "file:./packages/esheet/packages/renderer",
+    "@esheet/adapters": "0.0.3",
+    "@esheet/builder": "0.0.3",
+    "@esheet/core": "0.0.3",
+    "@esheet/fields": "0.0.3",
+    "@esheet/renderer": "0.0.3",
     "@eslint/js": "^9.39.3",
     "@kerebron/editor": "0.7.9",
     "@kerebron/editor-kits": "0.7.9",
@@ -380,9 +384,6 @@
   "pnpm": {
     "overrides": {
       "datavis-ace": "=4.0.0-PRE.2",
-      "@esheet/adapters": "link:./packages/esheet/packages/adapters",
-      "@esheet/core": "link:./packages/esheet/packages/core",
-      "@esheet/fields": "link:./packages/esheet/packages/fields",
       "esbuild@<0.28.1": "0.28.1",
       "axios@>=1.0.0 <1.16.0": "1.16.0",
       "minimatch@>=10.0.0 <10.2.3": "10.2.3",
