@@ -61,9 +61,10 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState {
 
     (async () => {
       try {
-        // mic permission first (also what unlocks AudioContext)
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        if (cancelled) return;
+        // NOTE: do NOT open a mic stream here. The detector (audio.js) opens its OWN getUserMedia;
+        // opening a second one made the detector's stream come back near-silent (two concurrent mic
+        // streams + echo-cancellation/AGC conflict). The detector's getUserMedia also triggers the
+        // permission prompt on first run, so this isn't needed.
 
         // load the demo's exact onnxruntime (1.19.0) as a global BEFORE the detector imports onnx.js
         await ensureOrt();
