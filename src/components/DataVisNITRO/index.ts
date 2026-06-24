@@ -9,3 +9,7 @@ export type {
   DataVisNitroGridProps,
   DataVisNitroSourceProps,
 } from './DataVisNITRO';
+
+export { DataVisNitroGraph } from './DataVisNitroGraph';
+
+export type { DataVisNitroGraphProps } from './DataVisNitroGraph';

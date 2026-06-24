@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source "../../node_modules/@mieweb/datavis/dist";
 @import './condensed-view.css';
 @import './datavis-dark.css';
 @import './datavis-overrides.css';
