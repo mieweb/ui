@@ -8,16 +8,13 @@ if (typeof ort !== "undefined") {
     Tensor = ort.Tensor;
     InferenceSession = ort.InferenceSession;
 } else {
-    import(/*webpackIgnore: true */"onnxruntime-web").then((module) => {
+    // onnxruntime-web is a real dependency here, so let the bundler resolve it.
+    // (The original also had a local-file fallback "./onnxruntime-web/ort.mjs" that Vite can't
+    // resolve at build time — removed; not needed when the package is installed.)
+    import("onnxruntime-web").then((module) => {
         initialized = true;
         Tensor = module.Tensor;
         InferenceSession = module.InferenceSession;
-    }).catch(() => {
-        import(/* webpackIgnore: true */"./onnxruntime-web/ort.mjs").then((module) => {
-            initialized = true;
-            Tensor = module.Tensor;
-            InferenceSession = module.InferenceSession;
-        });
     });
 }
 
