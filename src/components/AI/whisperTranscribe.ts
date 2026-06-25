@@ -21,6 +21,9 @@ function loadWhisper(): Promise<Whisper> {
     mod.env.allowLocalModels = false;
     mod.env.backends.onnx.wasm.numThreads = 1;
     try { await navigator.storage?.persist?.(); } catch { /* best-effort */ }
+    const t0 = performance.now();
+    const secs = () => ((performance.now() - t0) / 1000).toFixed(1);
+    console.log('[whisper] loading…');
     // turbo (best accuracy) on WebGPU; falls back to base.en q8 when WebGPU is unavailable.
     try {
       const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
@@ -28,10 +31,19 @@ function loadWhisper(): Promise<Whisper> {
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
       });
       isMultilingual = true;
+      console.log(`[whisper] ready (turbo / WebGPU, ${secs()}s)`);
       return pipe;
-    } catch {
-      try { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' }); }
-      catch { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' }); }
+    } catch (e) {
+      console.log(`[whisper] turbo/WebGPU unavailable (${e instanceof Error ? e.message : e}) → base.en fallback`);
+      try {
+        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' });
+        console.log(`[whisper] ready (base.en / WebGPU, ${secs()}s)`);
+        return pipe;
+      } catch {
+        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' });
+        console.log(`[whisper] ready (base.en / wasm, ${secs()}s)`);
+        return pipe;
+      }
     }
   })();
   return pipePromise;

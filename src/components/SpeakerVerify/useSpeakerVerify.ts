@@ -53,6 +53,7 @@ export function useSpeakerVerify(): SpeakerVerifyHandle {
         await sv.ready();
         if (cancelled) return;
         svRef.current = sv;
+        console.log('[speaker] TitaNet ready');
         setReady(true);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));

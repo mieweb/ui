@@ -124,6 +124,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
         // so a host can use "the model fired for phrase X" as proof the user actually said X.
         hb.onRecording((samples: Float32Array) => { if (lastFiredRef.current) onUtteranceRef.current?.(lastFiredRef.current, samples); });
 
+        console.log('[wake] models ready');
         setState((s) => ({ ...s, ready: true }));
       } catch (e) {
         if (!cancelled) setState((s) => ({ ...s, error: e instanceof Error ? e.message : String(e) }));

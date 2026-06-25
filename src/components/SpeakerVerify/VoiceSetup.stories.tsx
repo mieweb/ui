@@ -43,6 +43,9 @@ function chime(freq: number, ms = 170) {
 function saveWhat(map: Record<string, Float32Array[]>) {
   try { localStorage.setItem(WHAT_KEY, JSON.stringify(Object.fromEntries(Object.entries(map).map(([k, v]) => [k, v.map((a) => Array.from(a))])))); } catch { /* ignore */ }
 }
+function loadWhat(): Record<string, Float32Array[]> {
+  try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
+}
 
 interface Rec { sampleRate: number; snapshot: () => Float32Array; close: () => void; }
 function openRolling(stream: MediaStream): Rec {
@@ -75,11 +78,15 @@ function VoiceSetup() {
   const [phase, setPhase] = React.useState<Phase>('intro');
   const [phrase, setPhrase] = React.useState('hey ozwell');
   const [step, setStep] = React.useState(0);
+  // adding === true → "Add another spot": APPEND this pass as a new condition (new WHO centroid + more WHAT
+  // templates, matched best-of at runtime) instead of replacing. First-time setup is a fresh enroll.
+  const [adding, setAdding] = React.useState(false);
   const TOTAL = PHRASES.length * REPS;
 
   // preload the dictation model while the doctor enrolls — it gets the full ~30s of enrollment as a
   // head start, so the very first dictation in the chat afterwards is fast instead of waiting on the load.
-  React.useEffect(() => { warmWhisper(); }, []);
+  // Also restore any persisted WHAT templates so "Add another spot" appends to them across reloads.
+  React.useEffect(() => { warmWhisper(); whatRef.current = loadWhat(); }, []);
 
   React.useEffect(() => {
     if (!wake.ready) return;
@@ -117,6 +124,7 @@ function VoiceSetup() {
 
   const run = async () => {
     if (!bothReady || phase !== 'intro' || !recRef.current) return;
+    const append = adding;
     let overall = 0;
     for (const ph of PHRASES) {
       const clips: { samples: Float32Array; sampleRate: number }[] = []; const embs: Float32Array[] = [];
@@ -133,19 +141,25 @@ function VoiceSetup() {
           chime(990); setPhase('gotit'); overall++; setStep(overall); await delay(750);
         } else { setPhase('deny'); await delay(1500); }
       }
-      sv.enroll(ph.key, clips, { append: false });
-      const merged = embs.slice(-VP_CAP);
+      // append === true keeps prior conditions: WHO adds a new centroid (speaker-verify keeps the list,
+      // verify = max cosine), WHAT concatenates templates (phraseCosine = max over them). Capped at VP_CAP.
+      sv.enroll(ph.key, clips, { append });
+      const prior = append ? (whatRef.current[ph.key] || []) : [];
+      const merged = [...prior, ...embs].slice(-VP_CAP);
       whatRef.current[ph.key] = merged; wakeRef.current.setVoiceprint(ph.key, merged);
     }
     saveWhat(whatRef.current);
+    setAdding(false);
     setPhase('done');
   };
 
-  const big = phase === 'intro' ? 'Meet Ozwell'
+  const big = phase === 'intro' ? (adding ? 'Add a spot' : 'Meet Ozwell')
     : phase === 'done' ? 'You’re all set'
     : phase === 'deny' ? 'Let’s try that again'
     : `“${phrase}”`;
-  const small = phase === 'intro' ? 'Tap Ozwell and say each phrase a few times — it learns your voice so it only responds to you, privately on your device.'
+  const small = phase === 'intro' ? (adding
+    ? 'Tap Ozwell and say each phrase here too — a new room, distance, or background. It’s remembered alongside your other spots, not instead of them.'
+    : 'Tap Ozwell and say each phrase a few times — it learns your voice so it only responds to you, privately on your device.')
     : phase === 'getready' ? 'Get ready…'
     : phase === 'speak' ? 'Now say it'
     : phase === 'gotit' ? 'Got it!'
@@ -209,7 +223,7 @@ function VoiceSetup() {
           : !bothReady ? <div style={{ font: '13px monospace', color: '#94a3b8' }}>loading…</div> : null)}
         {phase === 'done' && (
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={() => setPhase('intro')} style={{ font: '600 15px system-ui', padding: '12px 26px', borderRadius: 999, cursor: 'pointer', border: `1.5px solid ${OZ}`, background: 'transparent', color: OZ }}>Add another spot</button>
+            <button onClick={() => { setAdding(true); setPhase('intro'); }} style={{ font: '600 15px system-ui', padding: '12px 26px', borderRadius: 999, cursor: 'pointer', border: `1.5px solid ${OZ}`, background: 'transparent', color: OZ }}>Add another spot</button>
             <button onClick={() => { /* host closes the setup here */ }} style={{ font: '600 15px system-ui', padding: '12px 30px', borderRadius: 999, cursor: 'pointer', border: 'none', color: '#fff', background: OZ, boxShadow: `0 8px 24px ${OZ}55` }}>Done</button>
           </div>
         )}
