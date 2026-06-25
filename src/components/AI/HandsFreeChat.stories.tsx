@@ -96,8 +96,12 @@ function HandsFreeChat() {
 
   const wake = useWakeWord({
     onWake: (name) => {
+      // START is the doctor-only gate (don't begin a session for anyone but the enrolled doctor).
       if (name === 'hey-ozwell' && phaseRef.current === 'listening') { if (verified('hey-ozwell')) startDictation(); }
-      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') { if (verified("ozwell-i'm-done")) stopDictation(); }
+      // STOP is NOT gated: the session is already the verified doctor's, and verifying mid-dictation is
+      // unreliable (the utterance is mixed with the dictation tail) — a missed stop is far worse than a
+      // coworker harmlessly ending a session you'd just resume. So "ozwell i'm done" always stops.
+      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') stopDictation();
     },
   });
   const wakeRef = React.useRef(wake);
@@ -140,7 +144,7 @@ function HandsFreeChat() {
       const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' });
       recRef.current = null;
       try {
-        const text = stripStopPhrase(await transcribeBlob(blob, 0.8)); // trim spoken stop phrase + strip residual
+        const text = stripStopPhrase(await transcribeBlob(blob, 1.0)); // trim spoken stop phrase + strip residual
         if (text) send(text);
       } catch (e) { console.error('[handsfree] transcription failed', e); }
       setPhase('listening');
