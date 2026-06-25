@@ -131,6 +131,7 @@ function SpeakerVerifyDemo() {
     const what = enr ? wakeRef.current.phraseCosine(name, emb) : null;
     // verdict = the two REAL gates. "wake" isn't a gate — the fire itself IS the detection.
     const pass = (who ? who.pass : true) && (what != null ? what >= WHAT_THRESHOLD : true);
+    console.log('[gate]', name, '· emb', emb ? emb.length : 'NULL', '· enrolled', enr, '· hasVP', wakeRef.current.hasVoiceprint(name), '· WHO', who?.score?.toFixed(2), '· WHAT', what?.toFixed(2));
     setLog((l) => [{ id: ++rowId.current, phrase: name, base, who, what, pass, t: new Date().toLocaleTimeString() }, ...l].slice(0, 6));
   }
 
@@ -155,6 +156,7 @@ function SpeakerVerifyDemo() {
           const w = await awaitWake(ph.key);
           const samples = rollingRef.current.snapshot();
           const emb = wakeRef.current.getLastEmbedding();
+          console.log('[enroll]', ph.key, '· fired', w.fired, '· emb', emb ? emb.length : 'NULL');
           if (w.fired === ph.key) {
             clips.push({ samples, sampleRate: rollingRef.current.sampleRate }); if (emb) embs.push(emb);
             chime(990); setCue({ phrase: ph.label, mode: 'ready' }); setStatus(`✓ got ${clips.length}/${REPS}`); await delay(800);
@@ -165,6 +167,7 @@ function SpeakerVerifyDemo() {
         const base = append ? (whatRef.current[ph.key] || []) : [];
         const merged = base.concat(embs).slice(-VP_CAP);
         whatRef.current[ph.key] = merged; wakeRef.current.setVoiceprint(ph.key, merged);
+        console.log('[enroll] stored', ph.key, '· n', merged.length, '· hasVP', wakeRef.current.hasVoiceprint(ph.key));
       }
       setCue(null); setConditions(sv.conditionCount('hey-ozwell'));
       setStatus(append ? '✅ condition added — now just talk' : '✅ enrolled — now just talk; every phrase shows its gates below');
@@ -211,6 +214,7 @@ function SpeakerVerifyDemo() {
       </div>
 
       <div style={{ font: '13px monospace', color: '#475569', minHeight: 18 }}>{status}</div>
+      <div style={{ font: '11px monospace', color: '#94a3b8' }}>WHAT prints stored — hey ozwell: {wake.hasVoiceprint('hey-ozwell') ? '✓' : '✗'} · ozwell I’m done: {wake.hasVoiceprint("ozwell-i'm-done") ? '✓' : '✗'}</div>
 
       <div style={{ marginTop: 10, borderTop: '1px solid #f1f5f9', paddingTop: 8 }}>
         <div style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: .5, marginBottom: 6 }}>Live gate readout</div>
