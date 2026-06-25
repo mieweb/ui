@@ -1,10 +1,9 @@
 /**
- * Voice Setup — the client-facing enrollment page (Apple "Hey Siri"-style).
+ * Voice Setup — the client-facing enrollment page (Apple "Hey Siri"-style, Ozwell-branded).
  *
- * A polished, guided enrollment: a glowing orb that reacts to your voice, the exact phrase to say, a
- * chime cue, per-rep progress, graceful retry, and a finish state. One pass builds BOTH prints (WHO
- * speaker + WHAT phrase), phrase-validated by the wake model. This is the *pretty* front-end over the
- * same proven enroll logic in the dev diagnostic. All on-device.
+ * Tap the Ozwell octopus to start; it glows and pulses with your voice, bounces on each success.
+ * One guided pass builds BOTH prints (WHO speaker + WHAT phrase), phrase-validated by the wake model,
+ * persisted. The pretty front-end over the same enroll logic as the dev diagnostic. All on-device.
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
@@ -13,10 +12,11 @@ import { useWakeWord } from '../WakeWord/useWakeWord';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Voice Setup',
-  parameters: { layout: 'fullscreen', docs: { description: { component: 'Apple-style on-device voice enrollment — glowing reactive orb, guided phrase prompts, progress, retry.' } } },
+  parameters: { layout: 'fullscreen', docs: { description: { component: 'On-device voice enrollment — tap the Ozwell octopus, it pulses as you talk. Apple-style, brand-aligned.' } } },
 };
 export default meta;
 
+const OZ = '#0BA0E0';                 // Ozwell octopus blue
 const PHRASES = [
   { key: 'hey-ozwell', label: 'hey ozwell' },
   { key: "ozwell-i'm-done", label: "ozwell I'm done" },
@@ -63,7 +63,8 @@ function VoiceSetup() {
   const resolveRef = React.useRef<((n: string) => void) | null>(null);
   const whatRef = React.useRef<Record<string, Float32Array[]>>({});
   const recRef = React.useRef<Rec | null>(null);
-  const orbRef = React.useRef<HTMLDivElement>(null);
+  const octoRef = React.useRef<HTMLImageElement>(null);
+  const glowRef = React.useRef<HTMLDivElement>(null);
   const levelRef = React.useRef(0);
 
   const wake = useWakeWord({ onWake: (name) => { if (expectRef.current && resolveRef.current) resolveRef.current(name); } });
@@ -72,10 +73,9 @@ function VoiceSetup() {
 
   const [phase, setPhase] = React.useState<Phase>('intro');
   const [phrase, setPhrase] = React.useState('hey ozwell');
-  const [step, setStep] = React.useState(0);   // overall rep index across phrases
+  const [step, setStep] = React.useState(0);
   const TOTAL = PHRASES.length * REPS;
 
-  // tap the detector's stream: a rolling recorder (for enroll audio) + an analyser that drives the orb
   React.useEffect(() => {
     if (!wake.ready) return;
     let raf = 0, ctx: AudioContext | null = null, cancelled = false, tries = 0;
@@ -90,8 +90,10 @@ function VoiceSetup() {
       const tick = () => {
         an.getFloatTimeDomainData(data);
         let peak = 0; for (let i = 0; i < data.length; i++) { const a = Math.abs(data[i]); if (a > peak) peak = a; }
-        levelRef.current = levelRef.current * 0.75 + peak * 0.25;
-        if (orbRef.current) { const s = 1 + Math.min(0.55, levelRef.current * 3.2); orbRef.current.style.transform = `translate(-50%,-50%) scale(${s.toFixed(3)})`; }
+        levelRef.current = levelRef.current * 0.78 + peak * 0.22;
+        const lv = levelRef.current;
+        if (octoRef.current) octoRef.current.style.transform = `scale(${(1 + Math.min(0.32, lv * 2.2)).toFixed(3)})`;
+        if (glowRef.current) { glowRef.current.style.opacity = `${(0.35 + Math.min(0.6, lv * 4)).toFixed(2)}`; glowRef.current.style.transform = `translate(-50%,-50%) scale(${(1 + Math.min(0.6, lv * 3)).toFixed(3)})`; }
         raf = requestAnimationFrame(tick);
       };
       tick();
@@ -109,7 +111,7 @@ function VoiceSetup() {
   };
 
   const run = async () => {
-    if (!recRef.current) { setPhase('intro'); return; }
+    if (!bothReady || phase !== 'intro' || !recRef.current) return;
     let overall = 0;
     for (const ph of PHRASES) {
       const clips: { samples: Float32Array; sampleRate: number }[] = []; const embs: Float32Array[] = [];
@@ -123,10 +125,8 @@ function VoiceSetup() {
         const emb = wakeRef.current.getLastEmbedding();
         if (w.fired === ph.key) {
           clips.push({ samples, sampleRate: recRef.current.sampleRate }); if (emb) embs.push(emb);
-          chime(990); setPhase('gotit'); overall++; setStep(overall); await delay(700);
-        } else {
-          setPhase('deny'); await delay(1500);
-        }
+          chime(990); setPhase('gotit'); overall++; setStep(overall); await delay(750);
+        } else { setPhase('deny'); await delay(1500); }
       }
       sv.enroll(ph.key, clips, { append: false });
       const merged = embs.slice(-VP_CAP);
@@ -136,90 +136,84 @@ function VoiceSetup() {
     setPhase('done');
   };
 
-  // ---- visuals ----
-  const orbColor = phase === 'deny' ? ['#fb7185', '#f43f5e', '#be123c'] : phase === 'gotit' || phase === 'done' ? ['#4ade80', '#22c55e', '#15803d'] : ['#60a5fa', '#a78bfa', '#f0abfc'];
-  const big = phase === 'intro' ? 'Set up your voice'
+  const big = phase === 'intro' ? 'Meet Ozwell'
     : phase === 'done' ? 'You’re all set'
     : phase === 'deny' ? 'Let’s try that again'
     : `“${phrase}”`;
-  const small = phase === 'intro' ? 'So Ozwell only responds to you. Say each phrase a few times — it learns your voice, on-device.'
+  const small = phase === 'intro' ? 'Tap Ozwell and say each phrase a few times — it learns your voice so it only responds to you. On-device.'
     : phase === 'getready' ? 'Get ready…'
     : phase === 'speak' ? 'Now say it'
-    : phase === 'gotit' ? 'Got it'
+    : phase === 'gotit' ? 'Got it!'
     : phase === 'deny' ? `Say “${phrase}” clearly`
-    : phase === 'done' ? 'Ozwell now responds only to your voice.'
-    : '';
+    : 'Ozwell now responds only to your voice.';
+  const wrapAnim = phase === 'gotit' ? 'oz-bounce .6s ease' : phase === 'deny' ? 'oz-shake .5s ease' : 'oz-float 4s ease-in-out infinite';
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'system-ui, -apple-system, sans-serif', color: '#fff', textAlign: 'center', position: 'relative', overflow: 'hidden',
-      background: 'radial-gradient(1200px 600px at 50% -10%, #1b2440 0%, #0a0e1a 60%)' }}>
+      fontFamily: 'system-ui, -apple-system, sans-serif', color: '#1f2733', textAlign: 'center', position: 'relative', overflow: 'hidden',
+      background: 'radial-gradient(900px 520px at 50% -5%, #e8f6fd 0%, #ffffff 58%)' }}>
       <style>{`
-        @keyframes oz-ring { 0% { transform: translate(-50%,-50%) scale(.7); opacity:.55 } 100% { transform: translate(-50%,-50%) scale(2.1); opacity:0 } }
-        @keyframes oz-spin { to { transform: rotate(360deg) } }
+        @keyframes oz-ring { 0% { transform: translate(-50%,-50%) scale(.7); opacity:.5 } 100% { transform: translate(-50%,-50%) scale(2.2); opacity:0 } }
+        @keyframes oz-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+        @keyframes oz-bounce { 0% { transform: scale(1) } 35% { transform: scale(1.18) } 70% { transform: scale(.96) } 100% { transform: scale(1) } }
+        @keyframes oz-shake { 0%,100% { transform: translateX(0) } 20% { transform: translateX(-10px) } 40% { transform: translateX(9px) } 60% { transform: translateX(-6px) } 80% { transform: translateX(4px) } }
         @keyframes oz-fade { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform: none } }
+        @keyframes oz-invite { 0%,100% { box-shadow: 0 0 0 0 ${OZ}55 } 50% { box-shadow: 0 0 0 14px ${OZ}00 } }
       `}</style>
 
-      {/* orb stage */}
-      <div style={{ position: 'relative', width: 260, height: 260, marginBottom: 40 }}>
-        {/* pulse rings while listening */}
-        {(phase === 'speak') && [0, 0.7, 1.4].map((d, i) => (
-          <div key={i} style={{ position: 'absolute', left: '50%', top: '50%', width: 150, height: 150, borderRadius: '50%',
-            border: `2px solid ${orbColor[1]}66`, animation: `oz-ring 2.1s ${d}s infinite ease-out` }} />
+      <div style={{ position: 'relative', width: 260, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28 }}>
+        {phase === 'speak' && [0, 0.7, 1.4].map((d, i) => (
+          <div key={i} style={{ position: 'absolute', left: '50%', top: '50%', width: 150, height: 150, borderRadius: '50%', border: `2px solid ${OZ}55`, animation: `oz-ring 2.1s ${d}s infinite ease-out` }} />
         ))}
-        {/* glow */}
-        <div style={{ position: 'absolute', left: '50%', top: '50%', width: 150, height: 150, transform: 'translate(-50%,-50%)', borderRadius: '50%',
-          background: `radial-gradient(circle, ${orbColor[2]}88, transparent 70%)`, filter: 'blur(28px)' }} />
-        {/* shimmer ring */}
-        <div style={{ position: 'absolute', left: '50%', top: '50%', width: 168, height: 168, transform: 'translate(-50%,-50%)', borderRadius: '50%',
-          background: `conic-gradient(from 0deg, ${orbColor[0]}, ${orbColor[1]}, ${orbColor[2]}, ${orbColor[0]})`, filter: 'blur(10px)', opacity: 0.5,
-          animation: 'oz-spin 8s linear infinite' }} />
-        {/* the orb (reactive scale via ref) */}
-        <div ref={orbRef} style={{ position: 'absolute', left: '50%', top: '50%', width: 140, height: 140, transform: 'translate(-50%,-50%)', borderRadius: '50%',
-          background: `radial-gradient(circle at 35% 30%, #ffffff, ${orbColor[0]} 35%, ${orbColor[1]} 65%, ${orbColor[2]})`,
-          boxShadow: `0 0 60px ${orbColor[1]}aa, inset 0 0 30px #ffffff55`, transition: 'background .4s', willChange: 'transform' }} />
-        {(phase === 'gotit' || phase === 'done') && (
-          <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontSize: 56 }}>✓</div>
-        )}
+        <div ref={glowRef} style={{ position: 'absolute', left: '50%', top: '50%', width: 180, height: 180, transform: 'translate(-50%,-50%)', borderRadius: '50%',
+          background: `radial-gradient(circle, ${OZ}66, transparent 68%)`, filter: 'blur(26px)', opacity: 0.4, pointerEvents: 'none' }} />
+        {/* the octopus — tappable in intro, pulses with voice via the ref */}
+        <div
+          role={phase === 'intro' ? 'button' : undefined}
+          onClick={phase === 'intro' ? run : undefined}
+          title={phase === 'intro' ? 'Tap to set up your voice' : undefined}
+          style={{ position: 'relative', width: 150, height: 150, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: phase === 'intro' && bothReady ? 'pointer' : 'default', animation: wrapAnim,
+            ...(phase === 'intro' && bothReady ? { borderRadius: '50%' } : {}) }}
+        >
+          <div style={phase === 'intro' && bothReady ? { position: 'absolute', inset: 0, borderRadius: '50%', animation: 'oz-invite 2s infinite' } : undefined} />
+          <img ref={octoRef} src="/ozwell/icon.svg" alt="Ozwell" draggable={false}
+            style={{ width: 120, height: 122, filter: `drop-shadow(0 8px 24px ${OZ}55)`, transition: 'transform .08s linear', willChange: 'transform', userSelect: 'none' }} />
+          {(phase === 'gotit' || phase === 'done') && (
+            <div style={{ position: 'absolute', right: -2, bottom: -2, width: 36, height: 36, borderRadius: '50%', background: '#16a34a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: '0 2px 10px #16a34a66' }}>✓</div>
+          )}
+        </div>
       </div>
 
-      <div key={big} style={{ fontSize: 34, fontWeight: 700, letterSpacing: -0.5, animation: 'oz-fade .35s ease', minHeight: 42 }}>{big}</div>
-      <div style={{ fontSize: 16, color: '#9fb0c8', maxWidth: 420, marginTop: 12, lineHeight: 1.5, minHeight: 48, padding: '0 20px' }}>{small}</div>
+      <div key={big} style={{ fontSize: 32, fontWeight: 700, letterSpacing: -0.5, animation: 'oz-fade .35s ease', minHeight: 40, color: '#0f2233' }}>{big}</div>
+      <div style={{ fontSize: 15.5, color: '#5b6b7e', maxWidth: 430, marginTop: 10, lineHeight: 1.55, minHeight: 48, padding: '0 20px' }}>{small}</div>
 
-      {/* progress dots */}
       {phase !== 'intro' && phase !== 'done' && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 28 }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 26 }}>
           {Array.from({ length: TOTAL }).map((_, i) => (
-            <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', transition: 'all .3s',
-              background: i < step ? '#fff' : '#ffffff33', transform: i === step ? 'scale(1.4)' : 'none' }} />
+            <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', transition: 'all .3s', background: i < step ? OZ : '#cbd5e1', transform: i === step ? 'scale(1.4)' : 'none' }} />
           ))}
         </div>
       )}
 
-      {/* actions */}
-      <div style={{ marginTop: 40 }}>
-        {phase === 'intro' && (
-          <button disabled={!bothReady} onClick={run} style={{ font: '600 16px system-ui', padding: '14px 40px', borderRadius: 999, cursor: bothReady ? 'pointer' : 'default',
-            border: 'none', color: '#0a0e1a', background: '#fff', opacity: bothReady ? 1 : 0.5, boxShadow: '0 8px 30px #ffffff22' }}>
-            {bothReady ? 'Get started' : 'Loading…'}
-          </button>
-        )}
+      <div style={{ marginTop: 34, minHeight: 48 }}>
+        {phase === 'intro' && !bothReady && <div style={{ font: '13px monospace', color: '#94a3b8' }}>loading models…</div>}
         {phase === 'done' && (
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={() => setPhase('intro')} style={{ font: '600 15px system-ui', padding: '12px 28px', borderRadius: 999, cursor: 'pointer', border: '1px solid #ffffff44', background: 'transparent', color: '#fff' }}>Add another spot</button>
-            <button onClick={() => { /* host would close the setup here */ }} style={{ font: '600 15px system-ui', padding: '12px 28px', borderRadius: 999, cursor: 'pointer', border: 'none', color: '#0a0e1a', background: '#fff' }}>Done</button>
+            <button onClick={() => setPhase('intro')} style={{ font: '600 15px system-ui', padding: '12px 26px', borderRadius: 999, cursor: 'pointer', border: `1.5px solid ${OZ}`, background: 'transparent', color: OZ }}>Add another spot</button>
+            <button onClick={() => { /* host closes the setup here */ }} style={{ font: '600 15px system-ui', padding: '12px 30px', borderRadius: 999, cursor: 'pointer', border: 'none', color: '#fff', background: OZ, boxShadow: `0 8px 24px ${OZ}55` }}>Done</button>
           </div>
         )}
       </div>
 
-      <div style={{ position: 'absolute', bottom: 18, font: '11px monospace', color: '#ffffff33' }}>
-        {sv.error || wake.error ? 'model error — check console' : 'on-device · audio never leaves the page'}
+      <div style={{ position: 'absolute', bottom: 18, font: '11px monospace', color: '#aebccb' }}>
+        {sv.error || wake.error ? 'model error — check console' : '🔒 on-device · audio never leaves the page'}
       </div>
     </div>
   );
 }
 
-/** Apple-style on-device voice enrollment with a reactive glowing orb. */
+/** Tap the Ozwell octopus; it pulses as you talk. On-device, brand-aligned enrollment. */
 export const Setup: StoryObj = {
   render: () => <VoiceSetup />,
 };
