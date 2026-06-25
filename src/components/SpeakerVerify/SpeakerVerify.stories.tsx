@@ -241,7 +241,7 @@ function SpeakerVerifyDemo() {
               <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 10px', borderRadius: 8, fontSize: 13, background: r.pass ? '#f0fdf4' : '#fef2f2', border: `1px solid ${r.pass ? '#bbf7d0' : '#fecaca'}` }}>
                 <span style={{ fontWeight: 700, minWidth: 120 }}>{r.pass ? '✅' : '🔒'} “{lbl(r.phrase)}”</span>
                 <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot('pass')} />wake {r.base.toFixed(2)}</span>
-                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot(r.who ? (r.who.pass ? 'pass' : 'fail') : 'off')} />WHO {r.who ? r.who.score.toFixed(2) : '—'}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot(r.who ? (r.who.pass ? 'pass' : 'fail') : 'off')} />WHO {r.who ? r.who.score.toFixed(2) + (r.who.znorm != null ? ` z${r.who.znorm.toFixed(1)}` : '') : '—'}</span>
                 <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot(r.what != null ? (r.what >= WHAT_THRESHOLD ? 'pass' : 'fail') : 'off')} />WHAT {r.what != null ? r.what.toFixed(2) : '—'}</span>
               </div>
             ))}
