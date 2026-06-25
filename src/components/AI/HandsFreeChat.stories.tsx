@@ -43,7 +43,12 @@ const mkMsg = (role: AIMessage['role'], text: string): AIMessage => ({
 
 // --- doctor-only gate: restore enrolled WHAT prints + a rolling recorder for the wake-utterance audio ---
 const WHAT_KEY = 'ozwellWhatPrints';
-const WHAT_THRESHOLD = 0.8;
+// Per-phrase WHAT (phrase-print cosine) gate. Stop is a touch looser (0.75): the run-on
+// "…ozwell I'm done" at the dictation tail embeds slightly differently from the isolated enrolled
+// one, so it lands a bit lower than the clean start phrase — 0.75 catches legit stops without
+// opening the door to the doctor's own non-phrase speech.
+const WHAT_THRESHOLDS: Record<string, number> = { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.75 };
+const whatThr = (name: string) => WHAT_THRESHOLDS[name] ?? 0.8;
 function loadWhat(): Record<string, Float32Array[]> {
   try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
 }
@@ -92,8 +97,9 @@ function HandsFreeChat() {
     if (!roll) return false;
     const who = svRef.current.verify(name, roll.snapshot(), roll.sampleRate);
     const what = wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
-    const ok = (who?.pass ?? false) && (what == null || what >= WHAT_THRESHOLD);
-    console.log(`[handsfree] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} ${what != null ? (what >= WHAT_THRESHOLD ? '✓' : '✗') : ''} → ${ok ? 'ACT' : 'ignore'}`);
+    const thr = whatThr(name);
+    const ok = (who?.pass ?? false) && (what == null || what >= thr);
+    console.log(`[handsfree] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} ${what != null ? (what >= thr ? '✓' : '✗') : ''} (≥${thr}) → ${ok ? 'ACT' : 'ignore'}`);
     return ok;
   };
 
