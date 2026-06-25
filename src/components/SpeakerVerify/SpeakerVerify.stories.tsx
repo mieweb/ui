@@ -1,13 +1,12 @@
 /**
  * Speaker verification (the doctor-only WHO gate) — with PHRASE-VALIDATED enrollment.
  *
- * Enrollment runs the wake detector: it shows the exact phrase, chimes to cue you, and only accepts a
- * rep when the wake model actually fires for THAT phrase — say the wrong phrase or mumble and it denies
- * and retries. The audio the model captured is what builds your voiceprint. Then Verify scores a live
- * "hey ozwell" against it with TitaNet, on-device, showing cosine + z-score + pass/fail.
+ * Enrollment runs the wake detector and only accepts a rep when the wake model FIRES for the requested
+ * phrase (onWake — the reliable, wake-gated signal; the model firing is the proof you said it). Say the
+ * wrong phrase or anything else and it's denied + retried. The audio captured during that window builds
+ * your voiceprint. Then Verify scores a live "hey ozwell" against it with TitaNet, on-device.
  *
- * Composes two primitives: useWakeWord (validates the phrase + supplies the captured audio) and
- * useSpeakerVerify (builds/checks the voiceprint). All on-device.
+ * Composes useWakeWord (validates the phrase + shares its mic) + useSpeakerVerify (builds/checks the print).
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
@@ -21,9 +20,9 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          'On-device speaker verification with **phrase-validated** enrollment — the wake model must actually ' +
-          'fire for the requested phrase or the rep is denied. Scored as a z-score vs a cohort of other voices. ' +
-          'The "who" gate that makes the wake word doctor-only.',
+          'On-device speaker verification with **phrase-validated** enrollment — a rep is accepted only when ' +
+          'the wake model fires for the requested phrase, so you can\'t enroll junk. Scored as a z-score vs a ' +
+          'cohort of other voices. The "who" gate that makes the wake word doctor-only.',
       },
     },
   },
@@ -35,12 +34,9 @@ const PHRASES = [
   { key: "ozwell-i'm-done", label: "ozwell I'm done" },
 ];
 const REPS = 3;
-const WAKE_SR = 16000; // HeyBuddy captures utterances at 16 kHz
 const TIMEOUT_MS = 9000;
-
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
-// short chime — 660 Hz "speak now", 990 Hz "got it"
 function chime(freq: number, ms = 160) {
   try {
     const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -55,36 +51,49 @@ function chime(freq: number, ms = 160) {
   } catch { /* no audio out — fine */ }
 }
 
-type PhraseResult = { samples?: Float32Array; wrong?: boolean; timeout?: boolean };
+interface Rec { sampleRate: number; start: () => void; grab: () => Float32Array; close: () => void; }
 
 function SpeakerVerifyDemo() {
   const sv = useSpeakerVerify();
-
-  // a pending "waiting for the user to say the expected phrase" resolver, driven by the wake utterance
+  // pending "waiting for the user to say the expected phrase", resolved by onWake
   const expectRef = React.useRef<string | null>(null);
-  const resolveRef = React.useRef<((r: PhraseResult) => void) | null>(null);
+  const resolveRef = React.useRef<((firedName: string) => void) | null>(null);
 
   const wake = useWakeWord({
-    onUtterance: (name, samples) => {
-      const resolve = resolveRef.current;
-      if (!resolve || !expectRef.current) return;          // not currently enrolling/verifying
-      resolveRef.current = null;
-      if (name === expectRef.current) resolve({ samples }); // wake fired for the RIGHT phrase → accept
-      else resolve({ wrong: true });                        // fired for the other phrase → deny
-      expectRef.current = null;
-    },
+    // onWake is wake-GATED (only fires when the model classifies the phrase) — the right validation signal
+    onWake: (name) => { if (expectRef.current && resolveRef.current) resolveRef.current(name); },
   });
+  const wakeRef = React.useRef(wake);
+  wakeRef.current = wake;
 
-  // wait for the wake model to fire for `expect`; deny on wrong phrase or timeout
-  const awaitPhrase = React.useCallback((expect: string): Promise<PhraseResult> => {
+  // record off the wake detector's OWN stream (a 2nd consumer — never a 2nd getUserMedia)
+  const openRec = (): Rec | null => {
+    const stream = wakeRef.current.getStream();
+    if (!stream) return null;
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    const src = ctx.createMediaStreamSource(stream);
+    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const sink = ctx.createGain(); sink.gain.value = 0;
+    let chunks: Float32Array[] = []; let cap = false;
+    proc.onaudioprocess = (e) => { if (cap) chunks.push(Float32Array.from(e.inputBuffer.getChannelData(0))); };
+    src.connect(proc); proc.connect(sink); sink.connect(ctx.destination);
+    return {
+      sampleRate: ctx.sampleRate,
+      start: () => { chunks = []; cap = true; },
+      grab: () => { cap = false; let l = 0; for (const c of chunks) l += c.length; const s = new Float32Array(l); let o = 0; for (const c of chunks) { s.set(c, o); o += c.length; } return s; },
+      close: () => { try { proc.disconnect(); src.disconnect(); sink.disconnect(); } catch { /* ignore */ } void ctx.close(); },
+    };
+  };
+
+  // resolve when the wake fires for ANY phrase (we then check it matched), or timeout
+  const awaitWake = (expect: string): Promise<{ fired?: string; timeout?: boolean }> => {
     expectRef.current = expect;
     return new Promise((resolve) => {
-      const t = window.setTimeout(() => {
-        if (resolveRef.current) { resolveRef.current = null; expectRef.current = null; resolve({ timeout: true }); }
-      }, TIMEOUT_MS);
-      resolveRef.current = (r) => { window.clearTimeout(t); resolve(r); };
+      const t = window.setTimeout(() => { if (resolveRef.current) { resolveRef.current = null; expectRef.current = null; resolve({ timeout: true }); } }, TIMEOUT_MS);
+      resolveRef.current = (name) => { window.clearTimeout(t); expectRef.current = null; resolveRef.current = null; resolve({ fired: name }); };
     });
-  }, []);
+  };
 
   const [status, setStatus] = React.useState('');
   const [cue, setCue] = React.useState<{ phrase: string; live: boolean } | null>(null);
@@ -97,42 +106,47 @@ function SpeakerVerifyDemo() {
 
   const enroll = async () => {
     setBusy(true); setResult(null);
+    const rec = openRec();
+    if (!rec) { setStatus('mic not ready yet — give the listener a second, then retry'); setBusy(false); return; }
     try {
       for (const ph of PHRASES) {
         const clips: { samples: Float32Array; sampleRate: number }[] = [];
         while (clips.length < REPS) {
           setCue({ phrase: ph.label, live: false }); setStatus(`get ready… (${clips.length + 1} of ${REPS})`);
-          chime(660); await delay(350);
-          setCue({ phrase: ph.label, live: true });
-          const r = await awaitPhrase(ph.key);
-          if (r.samples) {
-            clips.push({ samples: r.samples, sampleRate: WAKE_SR });
-            chime(990); setStatus(`✓ got ${clips.length}/${REPS}`); await delay(750);
-          } else if (r.wrong) {
+          chime(660); await delay(400);
+          setCue({ phrase: ph.label, live: true }); rec.start();
+          const w = await awaitWake(ph.key);
+          const samples = rec.grab();
+          if (w.fired === ph.key) {
+            clips.push({ samples, sampleRate: rec.sampleRate });
+            chime(990); setStatus(`✓ got ${clips.length}/${REPS}`); await delay(700);
+          } else if (w.fired) {
             setStatus(`that was the other phrase — say “${ph.label}”`); await delay(1300);
           } else {
-            setStatus(`didn't hear “${ph.label}” — say it clearly`); await delay(900);
+            setStatus(`didn't hear “${ph.label}” — say it clearly`); await delay(700);
           }
         }
         sv.enroll(ph.key, clips, { append: false });
       }
       setCue(null); setStatus('✅ enrolled — both phrases'); setConditions(sv.conditionCount('hey-ozwell'));
     } catch (e) { setCue(null); setStatus('error: ' + (e instanceof Error ? e.message : String(e))); }
-    finally { setBusy(false); }
+    finally { rec.close(); setBusy(false); }
   };
 
   const verify = async () => {
     setBusy(true); setResult(null);
+    const rec = openRec();
+    if (!rec) { setStatus('mic not ready'); setBusy(false); return; }
     try {
       setCue({ phrase: 'hey ozwell', live: false }); setStatus('get ready…');
-      chime(660); await delay(350);
-      setCue({ phrase: 'hey ozwell', live: true });
-      const r = await awaitPhrase('hey-ozwell');
-      setCue(null);
-      if (r.samples) { setStatus('verifying on-device…'); setResult(sv.verify('hey-ozwell', r.samples, WAKE_SR)); setStatus(''); }
-      else setStatus(r.wrong ? 'that was the other phrase — try “hey ozwell”' : 'didn’t catch “hey ozwell” — try again');
+      chime(660); await delay(400);
+      setCue({ phrase: 'hey ozwell', live: true }); rec.start();
+      const w = await awaitWake('hey-ozwell');
+      const samples = rec.grab(); setCue(null);
+      if (w.fired === 'hey-ozwell') { setStatus('verifying on-device…'); setResult(sv.verify('hey-ozwell', samples, rec.sampleRate)); setStatus(''); }
+      else setStatus(w.fired ? 'that was the other phrase — try “hey ozwell”' : 'didn’t catch “hey ozwell” — try again');
     } catch (e) { setCue(null); setStatus('error: ' + (e instanceof Error ? e.message : String(e))); }
-    finally { setBusy(false); }
+    finally { rec.close(); setBusy(false); }
   };
 
   const btn: React.CSSProperties = {
@@ -144,8 +158,8 @@ function SpeakerVerifyDemo() {
     <div style={{ fontFamily: 'system-ui, sans-serif', width: 480, color: '#1f2733' }}>
       <h3 style={{ marginBottom: 4 }}>Speaker verification — the “who” gate</h3>
       <p style={{ color: '#64748b', fontSize: 13.5, marginTop: 0 }}>
-        Phrase-validated enrollment (the wake model must actually fire for the requested phrase), then verify —
-        scored on-device as a z-score vs a cohort of other voices.
+        Phrase-validated enrollment — a rep only counts if the wake model fires for the requested phrase
+        (no enrolling junk). Then verify, scored on-device as a z-score vs a cohort of other voices.
       </p>
 
       <div style={{ font: '12px monospace', color: sv.error || wake.error ? '#dc2626' : bothReady ? '#16a34a' : '#d97706', marginBottom: 12 }}>
@@ -184,7 +198,7 @@ function SpeakerVerifyDemo() {
   );
 }
 
-/** Phrase-validated enroll (wake model must fire for the phrase) → on-device verify with a z-score. */
+/** Phrase-validated enroll (wake model must fire for the phrase — no junk) → on-device verify with a z-score. */
 export const Verify: StoryObj = {
   render: () => <SpeakerVerifyDemo />,
 };
