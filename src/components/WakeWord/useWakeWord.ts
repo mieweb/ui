@@ -143,23 +143,15 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
     setVoiceprint: (name, vectors) => hbRef.current?.setVoiceprint(name, vectors),
     hasVoiceprint: (name) => hbRef.current?.hasVoiceprint(name) ?? false,
     clearVoiceprint: (name) => hbRef.current?.clearVoiceprint(name),
-    phraseCosine: (name, vec) => phraseCosine(hbRef.current, name, vec),
+    // Background-SUBTRACTED similarity: raw cosine pins ~0.9 for everything (a common-mode dominates
+    // speech embeddings), so it can't separate phrase from near-miss. voiceprintSimilarity subtracts the
+    // running common-mode so the score reflects CONTENT — that's what makes the WHAT gate actually discriminate.
+    phraseCosine: (name, vec) => {
+      const hb = hbRef.current;
+      if (!hb || !vec || !hb.hasVoiceprint(name)) return null;
+      return hb.voiceprintSimilarity(name, vec);
+    },
   };
-}
-
-// raw cosine of an embedding to a phrase's enrolled templates, max over templates (the WHAT score)
-function phraseCosine(hb: HeyBuddyInstance | null, name: string, vec: Float32Array | null): number | null {
-  const set = hb?.voiceprints?.[name];
-  if (!set || !set.length || !vec) return null;
-  let qn = 0; for (let i = 0; i < vec.length; i++) qn += vec[i] * vec[i]; qn = Math.sqrt(qn) + 1e-9;
-  let best = -1;
-  for (const t of set) {
-    let d = 0, tn = 0;
-    for (let i = 0; i < vec.length; i++) { d += vec[i] * t[i]; tn += t[i] * t[i]; }
-    const c = d / (qn * (Math.sqrt(tn) + 1e-9));
-    if (c > best) best = c;
-  }
-  return best;
 }
 
 // minimal shapes for the vendored detector
@@ -179,4 +171,5 @@ interface HeyBuddyInstance {
   setVoiceprint(name: string, vectors: Float32Array[]): void;
   hasVoiceprint(name: string): boolean;
   clearVoiceprint(name: string): void;
+  voiceprintSimilarity(name: string, liveVec: Float32Array): number;  // common-mode-subtracted (−1..1)
 }

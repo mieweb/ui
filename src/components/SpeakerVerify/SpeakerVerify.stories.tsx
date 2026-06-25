@@ -35,7 +35,7 @@ const PHRASES = [
 ];
 const REPS = 3;
 const TIMEOUT_MS = 4000;
-const WHAT_THRESHOLD = 0.6;
+const WHAT_THRESHOLD = 0.3;  // common-mode-subtracted similarity sits lower than raw cosine — TUNE from the readout
 const VP_CAP = 18;
 const ROLL_SECONDS = 2.0;
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
