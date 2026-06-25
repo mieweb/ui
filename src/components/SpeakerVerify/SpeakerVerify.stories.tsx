@@ -34,7 +34,7 @@ const PHRASES = [
   { key: "ozwell-i'm-done", label: "ozwell I'm done" },
 ];
 const REPS = 3;
-const TIMEOUT_MS = 9000;
+const TIMEOUT_MS = 5000; // how long to wait for the phrase before showing "didn't catch that"
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
 function chime(freq: number, ms = 160) {
@@ -96,7 +96,7 @@ function SpeakerVerifyDemo() {
   };
 
   const [status, setStatus] = React.useState('');
-  const [cue, setCue] = React.useState<{ phrase: string; live: boolean } | null>(null);
+  const [cue, setCue] = React.useState<{ phrase: string; mode: 'ready' | 'live' | 'deny'; msg?: string } | null>(null);
   const [conditions, setConditions] = React.useState(0);
   const [result, setResult] = React.useState<VerifyResult | null>(null);
   const [busy, setBusy] = React.useState(false);
@@ -112,18 +112,18 @@ function SpeakerVerifyDemo() {
       for (const ph of PHRASES) {
         const clips: { samples: Float32Array; sampleRate: number }[] = [];
         while (clips.length < REPS) {
-          setCue({ phrase: ph.label, live: false }); setStatus(`get ready… (${clips.length + 1} of ${REPS})`);
+          setCue({ phrase: ph.label, mode: 'ready' }); setStatus(`sample ${clips.length + 1} of ${REPS}`);
           chime(660); await delay(400);
-          setCue({ phrase: ph.label, live: true }); rec.start();
+          setCue({ phrase: ph.label, mode: 'live' }); rec.start();
           const w = await awaitWake(ph.key);
           const samples = rec.grab();
           if (w.fired === ph.key) {
             clips.push({ samples, sampleRate: rec.sampleRate });
-            chime(990); setStatus(`✓ got ${clips.length}/${REPS}`); await delay(700);
+            chime(990); setCue({ phrase: ph.label, mode: 'ready' }); setStatus(`✓ got ${clips.length}/${REPS}`); await delay(800);
           } else if (w.fired) {
-            setStatus(`that was the other phrase — say “${ph.label}”`); await delay(1300);
+            setCue({ phrase: ph.label, mode: 'deny', msg: 'that was the other phrase' }); await delay(1600);
           } else {
-            setStatus(`didn't hear “${ph.label}” — say it clearly`); await delay(700);
+            setCue({ phrase: ph.label, mode: 'deny', msg: 'didn’t catch that' }); await delay(1600);
           }
         }
         sv.enroll(ph.key, clips, { append: false });
@@ -138,13 +138,13 @@ function SpeakerVerifyDemo() {
     const rec = openRec();
     if (!rec) { setStatus('mic not ready'); setBusy(false); return; }
     try {
-      setCue({ phrase: 'hey ozwell', live: false }); setStatus('get ready…');
+      setCue({ phrase: 'hey ozwell', mode: 'ready' }); setStatus('get ready…');
       chime(660); await delay(400);
-      setCue({ phrase: 'hey ozwell', live: true }); rec.start();
+      setCue({ phrase: 'hey ozwell', mode: 'live' }); rec.start();
       const w = await awaitWake('hey-ozwell');
-      const samples = rec.grab(); setCue(null);
-      if (w.fired === 'hey-ozwell') { setStatus('verifying on-device…'); setResult(sv.verify('hey-ozwell', samples, rec.sampleRate)); setStatus(''); }
-      else setStatus(w.fired ? 'that was the other phrase — try “hey ozwell”' : 'didn’t catch “hey ozwell” — try again');
+      const samples = rec.grab();
+      if (w.fired === 'hey-ozwell') { setCue(null); setStatus('verifying on-device…'); setResult(sv.verify('hey-ozwell', samples, rec.sampleRate)); setStatus(''); }
+      else { setCue({ phrase: 'hey ozwell', mode: 'deny', msg: w.fired ? 'that was the other phrase' : 'didn’t catch that' }); await delay(1600); setCue(null); }
     } catch (e) { setCue(null); setStatus('error: ' + (e instanceof Error ? e.message : String(e))); }
     finally { rec.close(); setBusy(false); }
   };
@@ -170,9 +170,19 @@ function SpeakerVerifyDemo() {
 
       {cue && (
         <div style={{ margin: '12px 0', padding: 18, borderRadius: 12, textAlign: 'center',
-          background: cue.live ? '#fef2f2' : '#eff6ff', border: `1px solid ${cue.live ? '#fecaca' : '#bfdbfe'}` }}>
-          <div style={{ fontSize: 13, color: '#64748b' }}>{cue.live ? '🔴 say it now' : 'get ready…'}</div>
-          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>“{cue.phrase}”</div>
+          background: cue.mode === 'deny' || cue.mode === 'live' ? '#fef2f2' : '#eff6ff',
+          border: `1px solid ${cue.mode === 'deny' ? '#f87171' : cue.mode === 'live' ? '#fecaca' : '#bfdbfe'}` }}>
+          {cue.mode === 'deny' ? (
+            <>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#dc2626' }}>❌ {cue.msg} — not counted</div>
+              <div style={{ fontSize: 18, fontWeight: 700, marginTop: 4 }}>try again: “{cue.phrase}”</div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 13, color: '#64748b' }}>{cue.mode === 'live' ? '🔴 say it now' : 'get ready…'}</div>
+              <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>“{cue.phrase}”</div>
+            </>
+          )}
         </div>
       )}
 
