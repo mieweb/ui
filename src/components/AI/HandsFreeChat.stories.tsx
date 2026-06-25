@@ -19,7 +19,7 @@ import type { AIMessage } from './types';
 import { RecordButton } from '../RecordButton';
 import { useWakeWord } from '../WakeWord/useWakeWord';
 import { useSpeakerVerify } from '../SpeakerVerify/useSpeakerVerify';
-import { transcribeBlob, stripStopPhrase } from './whisperTranscribe';
+import { transcribeBlob, stripStopPhrase, warmWhisper } from './whisperTranscribe';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hands-Free Chat',
@@ -122,6 +122,9 @@ function HandsFreeChat() {
     tryOpen();
     return () => { cancelled = true; rollRef.current?.close(); rollRef.current = null; };
   }, [wake.ready]);
+
+  // preload the dictation model on open, so the first "ozwell i'm done" doesn't wait on it
+  React.useEffect(() => { warmWhisper(); }, []);
 
   function startDictation() {
     const stream = wakeRef.current.getStream(); // the listener's OWN stream — no second getUserMedia

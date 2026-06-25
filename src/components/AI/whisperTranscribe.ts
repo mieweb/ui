@@ -41,6 +41,12 @@ export function isWhisperLoaded(): boolean {
   return pipePromise !== null;
 }
 
+/** Start loading the model NOW — e.g. on app open or during enrollment — so the first dictation
+ *  doesn't pay the load. Safe to call repeatedly (loadWhisper is memoized; the load happens once). */
+export function warmWhisper(): void {
+  void loadWhisper();
+}
+
 // trimEndSeconds: drop this many seconds off the END of the audio before transcribing (so Whisper
 // never hears the spoken stop phrase). Pair with stripStopPhrase as a text-level backstop.
 export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<string> {

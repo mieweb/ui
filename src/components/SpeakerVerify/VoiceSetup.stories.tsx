@@ -9,6 +9,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { useSpeakerVerify } from './useSpeakerVerify';
 import { useWakeWord } from '../WakeWord/useWakeWord';
+import { warmWhisper } from '../AI/whisperTranscribe';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Voice Setup',
@@ -75,6 +76,10 @@ function VoiceSetup() {
   const [phrase, setPhrase] = React.useState('hey ozwell');
   const [step, setStep] = React.useState(0);
   const TOTAL = PHRASES.length * REPS;
+
+  // preload the dictation model while the doctor enrolls — it gets the full ~30s of enrollment as a
+  // head start, so the very first dictation in the chat afterwards is fast instead of waiting on the load.
+  React.useEffect(() => { warmWhisper(); }, []);
 
   React.useEffect(() => {
     if (!wake.ready) return;
