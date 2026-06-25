@@ -15,6 +15,9 @@ import * as React from 'react';
 export interface UseWakeWordOpts {
   /** Fired with the phrase name ("hey-ozwell" | "ozwell-i'm-done") on a detection. */
   onWake?: (name: string) => void;
+  /** Fired with the CAPTURED audio of a wake utterance (the phrase the model just heard) + which phrase.
+   *  Use for phrase-validated enrollment: the wake firing IS the proof it was actually the phrase. */
+  onUtterance?: (name: string, samples: Float32Array) => void;
   /** Per-phrase fire thresholds (0..1). Defaults to 0.5 each. */
   thresholds?: Record<string, number>;
   /** Set false to not start listening. */
@@ -49,11 +52,14 @@ function ensureOrt(): Promise<void> {
 }
 
 export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & { getStream: () => MediaStream | null } {
-  const { onWake, thresholds, enabled = true } = opts;
+  const { onWake, onUtterance, thresholds, enabled = true } = opts;
   const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
-  // keep the latest onWake without re-running the effect
+  // keep the latest callbacks without re-running the effect
   const onWakeRef = React.useRef(onWake);
   onWakeRef.current = onWake;
+  const onUtteranceRef = React.useRef(onUtterance);
+  onUtteranceRef.current = onUtterance;
+  const lastFiredRef = React.useRef<string | null>(null);
   // holds the detector so the host can reach its mic stream (one stream, many consumers — see composition)
   const hbRef = React.useRef<HeyBuddyInstance | null>(null);
 
@@ -96,7 +102,10 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & { getSt
           setState((s) => ({ ...s, ready: true, speech: result.speech?.probability || 0, probs }));
         });
 
-        for (const name of PHRASES) hb.onDetected(name, () => onWakeRef.current?.(name));
+        for (const name of PHRASES) hb.onDetected(name, () => { lastFiredRef.current = name; onWakeRef.current?.(name); });
+        // the captured utterance audio arrives just after a wake fires — pair it with the phrase that fired,
+        // so a host can use "the model fired for phrase X" as proof the user actually said X.
+        hb.onRecording((samples: Float32Array) => { if (lastFiredRef.current) onUtteranceRef.current?.(lastFiredRef.current, samples); });
 
         setState((s) => ({ ...s, ready: true }));
       } catch (e) {

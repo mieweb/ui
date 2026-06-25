@@ -1,17 +1,18 @@
 /**
- * Speaker verification (the doctor-only WHO gate) — standalone primitive.
+ * Speaker verification (the doctor-only WHO gate) — with PHRASE-VALIDATED enrollment.
  *
- * Enroll your voice with a guided, concrete flow — exact phrase shown, a chime cues WHEN to speak, it
- * checks you actually said something (retries on silence), confirm-chimes on success, with per-rep
- * progress — then Verify scores a live clip against your voiceprint with TitaNet, fully on-device,
- * showing the raw cosine, the z-score (graded vs a cohort of other voices), and pass/fail.
+ * Enrollment runs the wake detector: it shows the exact phrase, chimes to cue you, and only accepts a
+ * rep when the wake model actually fires for THAT phrase — say the wrong phrase or mumble and it denies
+ * and retries. The audio the model captured is what builds your voiceprint. Then Verify scores a live
+ * "hey ozwell" against it with TitaNet, on-device, showing cosine + z-score + pass/fail.
  *
- * (Full phrase validation — "was that actually 'hey ozwell'?" — happens once this is composed with the
- * wake detector; standalone we validate non-silence. Assets in .storybook/public/sv-runtime/.)
+ * Composes two primitives: useWakeWord (validates the phrase + supplies the captured audio) and
+ * useSpeakerVerify (builds/checks the voiceprint). All on-device.
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { useSpeakerVerify, type VerifyResult } from './useSpeakerVerify';
+import { useWakeWord } from '../WakeWord/useWakeWord';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Speaker Verify',
@@ -20,9 +21,9 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          'On-device speaker verification (TitaNet). Guided enrollment (exact phrase + chime cue + retry on ' +
-          'silence + confirm chime), then verify — scored as a **z-score** vs a cohort of other voices so the ' +
-          'threshold holds across rooms. The "who" gate that makes the wake word doctor-only.',
+          'On-device speaker verification with **phrase-validated** enrollment — the wake model must actually ' +
+          'fire for the requested phrase or the rep is denied. Scored as a z-score vs a cohort of other voices. ' +
+          'The "who" gate that makes the wake word doctor-only.',
       },
     },
   },
@@ -34,11 +35,10 @@ const PHRASES = [
   { key: "ozwell-i'm-done", label: "ozwell I'm done" },
 ];
 const REPS = 3;
-const CLIP_SECONDS = 2.2;
-const SILENCE_PEAK = 0.02; // below this, "didn't catch that"
+const WAKE_SR = 16000; // HeyBuddy captures utterances at 16 kHz
+const TIMEOUT_MS = 9000;
 
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
-const peak = (s: Float32Array) => { let p = 0; for (let i = 0; i < s.length; i++) { const a = Math.abs(s[i]); if (a > p) p = a; } return p; };
 
 // short chime — 660 Hz "speak now", 990 Hz "got it"
 function chime(freq: number, ms = 160) {
@@ -55,88 +55,84 @@ function chime(freq: number, ms = 160) {
   } catch { /* no audio out — fine */ }
 }
 
-// Open the mic ONCE for a session; record() grabs a clip on demand (no repeated getUserMedia).
-async function openRecorder() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  const ctx = new Ctx();
-  const src = ctx.createMediaStreamSource(stream);
-  const proc = ctx.createScriptProcessor(4096, 1, 1);
-  const sink = ctx.createGain(); sink.gain.value = 0; // muted → no feedback
-  let chunks: Float32Array[] = [];
-  let recording = false;
-  proc.onaudioprocess = (e) => { if (recording) chunks.push(Float32Array.from(e.inputBuffer.getChannelData(0))); };
-  src.connect(proc); proc.connect(sink); sink.connect(ctx.destination);
-  return {
-    async record(seconds: number) {
-      chunks = []; recording = true;
-      await delay(seconds * 1000);
-      recording = false;
-      let len = 0; for (const c of chunks) len += c.length;
-      const samples = new Float32Array(len); let o = 0; for (const c of chunks) { samples.set(c, o); o += c.length; }
-      return { samples, sampleRate: ctx.sampleRate };
-    },
-    close() {
-      try { proc.disconnect(); src.disconnect(); sink.disconnect(); } catch { /* ignore */ }
-      stream.getTracks().forEach((t) => t.stop());
-      void ctx.close();
-    },
-  };
-}
+type PhraseResult = { samples?: Float32Array; wrong?: boolean; timeout?: boolean };
 
 function SpeakerVerifyDemo() {
   const sv = useSpeakerVerify();
+
+  // a pending "waiting for the user to say the expected phrase" resolver, driven by the wake utterance
+  const expectRef = React.useRef<string | null>(null);
+  const resolveRef = React.useRef<((r: PhraseResult) => void) | null>(null);
+
+  const wake = useWakeWord({
+    onUtterance: (name, samples) => {
+      const resolve = resolveRef.current;
+      if (!resolve || !expectRef.current) return;          // not currently enrolling/verifying
+      resolveRef.current = null;
+      if (name === expectRef.current) resolve({ samples }); // wake fired for the RIGHT phrase → accept
+      else resolve({ wrong: true });                        // fired for the other phrase → deny
+      expectRef.current = null;
+    },
+  });
+
+  // wait for the wake model to fire for `expect`; deny on wrong phrase or timeout
+  const awaitPhrase = React.useCallback((expect: string): Promise<PhraseResult> => {
+    expectRef.current = expect;
+    return new Promise((resolve) => {
+      const t = window.setTimeout(() => {
+        if (resolveRef.current) { resolveRef.current = null; expectRef.current = null; resolve({ timeout: true }); }
+      }, TIMEOUT_MS);
+      resolveRef.current = (r) => { window.clearTimeout(t); resolve(r); };
+    });
+  }, []);
+
   const [status, setStatus] = React.useState('');
-  const [cue, setCue] = React.useState<{ phrase: string; rep: string } | null>(null); // the big "say this" prompt
+  const [cue, setCue] = React.useState<{ phrase: string; live: boolean } | null>(null);
   const [conditions, setConditions] = React.useState(0);
   const [result, setResult] = React.useState<VerifyResult | null>(null);
   const [busy, setBusy] = React.useState(false);
+  const bothReady = sv.ready && wake.ready;
 
   React.useEffect(() => { if (sv.ready) setConditions(sv.conditionCount('hey-ozwell')); }, [sv.ready]);
 
   const enroll = async () => {
     setBusy(true); setResult(null);
-    const rec = await openRecorder().catch((e) => { setStatus('mic error: ' + (e instanceof Error ? e.message : String(e))); return null; });
-    if (!rec) { setBusy(false); return; }
     try {
       for (const ph of PHRASES) {
         const clips: { samples: Float32Array; sampleRate: number }[] = [];
-        let i = 0;
-        while (i < REPS) {
-          setCue({ phrase: ph.label, rep: `get ready… (${i + 1} of ${REPS})` });
-          setStatus('');
-          chime(660); await delay(450);                 // cue, let the chime finish so it isn't recorded
-          setCue({ phrase: ph.label, rep: `🔴 speak now — “${ph.label}” (${i + 1} of ${REPS})` });
-          const clip = await rec.record(CLIP_SECONDS);
-          if (peak(clip.samples) < SILENCE_PEAK) {       // didn't hear anything — retry this rep
-            setStatus(`didn't catch that — let's try ${i + 1}/${REPS} again`); await delay(1100); continue;
+        while (clips.length < REPS) {
+          setCue({ phrase: ph.label, live: false }); setStatus(`get ready… (${clips.length + 1} of ${REPS})`);
+          chime(660); await delay(350);
+          setCue({ phrase: ph.label, live: true });
+          const r = await awaitPhrase(ph.key);
+          if (r.samples) {
+            clips.push({ samples: r.samples, sampleRate: WAKE_SR });
+            chime(990); setStatus(`✓ got ${clips.length}/${REPS}`); await delay(750);
+          } else if (r.wrong) {
+            setStatus(`that was the other phrase — say “${ph.label}”`); await delay(1300);
+          } else {
+            setStatus(`didn't hear “${ph.label}” — say it clearly`); await delay(900);
           }
-          clips.push(clip);
-          chime(990); setStatus(`✓ got ${i + 1}/${REPS}`); await delay(750);
-          i++;
         }
-        sv.enroll(ph.key, clips, { append: false });     // one centroid per phrase
+        sv.enroll(ph.key, clips, { append: false });
       }
-      setConditions(sv.conditionCount('hey-ozwell'));
-      setCue(null); setStatus('✅ enrolled — both phrases');
+      setCue(null); setStatus('✅ enrolled — both phrases'); setConditions(sv.conditionCount('hey-ozwell'));
     } catch (e) { setCue(null); setStatus('error: ' + (e instanceof Error ? e.message : String(e))); }
-    finally { rec.close(); setBusy(false); }
+    finally { setBusy(false); }
   };
 
   const verify = async () => {
     setBusy(true); setResult(null);
-    const rec = await openRecorder().catch(() => null);
-    if (!rec) { setBusy(false); setStatus('mic error'); return; }
     try {
-      setCue({ phrase: 'hey ozwell', rep: 'get ready…' });
-      chime(660); await delay(450);
-      setCue({ phrase: 'hey ozwell', rep: '🔴 speak now' });
-      const { samples, sampleRate } = await rec.record(CLIP_SECONDS);
-      setCue(null); setStatus('verifying on-device…');
-      setResult(sv.verify('hey-ozwell', samples, sampleRate));
-      setStatus('');
+      setCue({ phrase: 'hey ozwell', live: false }); setStatus('get ready…');
+      chime(660); await delay(350);
+      setCue({ phrase: 'hey ozwell', live: true });
+      const r = await awaitPhrase('hey-ozwell');
+      setCue(null);
+      if (r.samples) { setStatus('verifying on-device…'); setResult(sv.verify('hey-ozwell', r.samples, WAKE_SR)); setStatus(''); }
+      else setStatus(r.wrong ? 'that was the other phrase — try “hey ozwell”' : 'didn’t catch “hey ozwell” — try again');
     } catch (e) { setCue(null); setStatus('error: ' + (e instanceof Error ? e.message : String(e))); }
-    finally { rec.close(); setBusy(false); }
+    finally { setBusy(false); }
   };
 
   const btn: React.CSSProperties = {
@@ -148,25 +144,27 @@ function SpeakerVerifyDemo() {
     <div style={{ fontFamily: 'system-ui, sans-serif', width: 480, color: '#1f2733' }}>
       <h3 style={{ marginBottom: 4 }}>Speaker verification — the “who” gate</h3>
       <p style={{ color: '#64748b', fontSize: 13.5, marginTop: 0 }}>
-        Guided enrollment, then verify. Scored on-device (TitaNet) as a z-score vs a cohort of other voices.
+        Phrase-validated enrollment (the wake model must actually fire for the requested phrase), then verify —
+        scored on-device as a z-score vs a cohort of other voices.
       </p>
 
-      <div style={{ font: '12px monospace', color: sv.error ? '#dc2626' : sv.ready ? '#16a34a' : '#d97706', marginBottom: 12 }}>
-        {sv.error ? `error: ${sv.error}` : sv.ready ? `● ready · enrolled: ${conditions ? 'yes' : 'no'}` : '… loading TitaNet (~50 MB, first time)'}
+      <div style={{ font: '12px monospace', color: sv.error || wake.error ? '#dc2626' : bothReady ? '#16a34a' : '#d97706', marginBottom: 12 }}>
+        {sv.error ? `speaker error: ${sv.error}` : wake.error ? `wake error: ${wake.error}`
+          : bothReady ? `● ready · enrolled: ${conditions ? 'yes' : 'no'}`
+            : `… loading models${!wake.ready ? ' (wake)' : ''}${!sv.ready ? ' (TitaNet ~50MB, first time)' : ''}`}
       </div>
 
       {cue && (
         <div style={{ margin: '12px 0', padding: 18, borderRadius: 12, textAlign: 'center',
-          background: cue.rep.includes('speak now') ? '#fef2f2' : '#eff6ff',
-          border: `1px solid ${cue.rep.includes('speak now') ? '#fecaca' : '#bfdbfe'}` }}>
-          <div style={{ fontSize: 13, color: '#64748b' }}>{cue.rep}</div>
+          background: cue.live ? '#fef2f2' : '#eff6ff', border: `1px solid ${cue.live ? '#fecaca' : '#bfdbfe'}` }}>
+          <div style={{ fontSize: 13, color: '#64748b' }}>{cue.live ? '🔴 say it now' : 'get ready…'}</div>
           <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>“{cue.phrase}”</div>
         </div>
       )}
 
       <div style={{ display: 'flex', gap: 10, margin: '12px 0' }}>
-        <button style={btn} disabled={!sv.ready || busy} onClick={enroll}>Enroll my voice</button>
-        <button style={{ ...btn, background: '#16a34a', borderColor: '#16a34a' }} disabled={!sv.ready || busy || conditions === 0} onClick={verify}>Verify</button>
+        <button style={btn} disabled={!bothReady || busy} onClick={enroll}>Enroll my voice</button>
+        <button style={{ ...btn, background: '#16a34a', borderColor: '#16a34a' }} disabled={!bothReady || busy || conditions === 0} onClick={verify}>Verify</button>
         <button style={{ ...btn, background: '#fff', color: '#dc2626', borderColor: '#fca5a5' }} disabled={busy} onClick={() => { sv.clear(); setConditions(0); setResult(null); setStatus('cleared'); }}>Clear</button>
       </div>
 
@@ -186,7 +184,7 @@ function SpeakerVerifyDemo() {
   );
 }
 
-/** Guided enroll (phrase + chime cue + retry-on-silence + confirm chime), then on-device verify with a z-score. */
+/** Phrase-validated enroll (wake model must fire for the phrase) → on-device verify with a z-score. */
 export const Verify: StoryObj = {
   render: () => <SpeakerVerifyDemo />,
 };
