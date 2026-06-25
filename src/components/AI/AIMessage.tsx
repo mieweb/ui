@@ -270,6 +270,10 @@ function ContentBlock({
   }
 
   if (content.type === 'audio' && content.audioUrl) {
+    // Guard against `javascript:` URLs, mirroring the image/file blocks.
+    if (/^\s*javascript:/i.test(content.audioUrl)) {
+      return null;
+    }
     return (
       <AudioPlayer
         src={content.audioUrl}
@@ -277,6 +281,7 @@ function ContentBlock({
         variant="waveform"
         showTime
         showPlaybackRate
+        fallbackDuration={content.duration}
       />
     );
   }

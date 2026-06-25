@@ -6,6 +6,7 @@ import {
   type AIRenderTextContent,
 } from './index';
 import { successToolCall } from './storyData';
+import { getSampleAudio } from '../AudioPlayer/sampleAudio';
 
 // ============================================================================
 // AI Message Stories
@@ -32,6 +33,7 @@ const meta: Meta<typeof AIMessageDisplay> = {
           '| `code` | A syntax-styled code block |',
           '| `image` | A clickable image thumbnail |',
           '| `file` | A document card with icon, filename & size |',
+          '| `audio` | An inline waveform `AudioPlayer` for recorded clips |',
           '',
           '### Rich content: Markdown, images & Mermaid',
           'Text blocks are plain text by default. To render **Markdown, images, or Mermaid diagrams**,',
@@ -275,5 +277,36 @@ export const WithFileBlock: Story = {
       status: 'complete',
     };
     return <AIMessageDisplay message={message} />;
+  },
+};
+
+/**
+ * A user turn carrying a recorded audio clip, rendered inline as a waveform
+ * `AudioPlayer`. This is how a captured dictation plays back next to its
+ * transcription. `duration` (seconds) is passed through as the player's
+ * `fallbackDuration` so the time shows before audio metadata loads.
+ */
+export const WithAudioBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '9',
+      role: 'user',
+      content: [
+        {
+          type: 'audio',
+          audioUrl: getSampleAudio(),
+          text: 'Voice recording',
+          mimeType: 'audio/wav',
+          duration: 10,
+        },
+        {
+          type: 'text',
+          text: 'Patient reports mild headache for the past two days.',
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} userName="Dr. Jane" />;
   },
 };
