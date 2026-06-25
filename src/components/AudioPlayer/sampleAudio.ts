@@ -12,41 +12,52 @@
  * Generates a short, pleasant tone that plays locally without CORS issues.
  */
 export function createSampleAudioUrl(durationSec = 5, frequency = 440): string {
-  const audioContext = new (
+  const AudioContextCtor =
     window.AudioContext ||
     (window as typeof window & { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext
-  )();
-  const sampleRate = audioContext.sampleRate;
-  const numSamples = Math.floor(sampleRate * durationSec);
-
-  // Create stereo buffer
-  const buffer = audioContext.createBuffer(2, numSamples, sampleRate);
-
-  // Generate a pleasant tone with envelope
-  for (let channel = 0; channel < 2; channel++) {
-    const data = buffer.getChannelData(channel);
-    for (let i = 0; i < numSamples; i++) {
-      const t = i / sampleRate;
-      // Apply envelope (fade in/out)
-      const envelope =
-        Math.min(t * 4, 1) * Math.min((durationSec - t) * 4, 1) * 0.3;
-      // Generate tone with harmonics
-      const fundamental = Math.sin(2 * Math.PI * frequency * t);
-      const harmonic1 = Math.sin(2 * Math.PI * frequency * 2 * t) * 0.5;
-      const harmonic2 = Math.sin(2 * Math.PI * frequency * 3 * t) * 0.25;
-      data[i] = envelope * (fundamental + harmonic1 + harmonic2);
-    }
+      .webkitAudioContext;
+  if (!AudioContextCtor) {
+    throw new Error(
+      'Web Audio API is not available: AudioContext is undefined in this environment.',
+    );
   }
 
-  const wavBuffer = audioBufferToWav(buffer);
-  const blob = new Blob([wavBuffer], { type: 'audio/wav' });
-  return URL.createObjectURL(blob);
+  const audioContext = new AudioContextCtor();
+  try {
+    const sampleRate = audioContext.sampleRate;
+    const numSamples = Math.floor(sampleRate * durationSec);
+
+    // Create stereo buffer
+    const buffer = audioContext.createBuffer(2, numSamples, sampleRate);
+
+    // Generate a pleasant tone with envelope
+    for (let channel = 0; channel < 2; channel++) {
+      const data = buffer.getChannelData(channel);
+      for (let i = 0; i < numSamples; i++) {
+        const t = i / sampleRate;
+        // Apply envelope (fade in/out)
+        const envelope =
+          Math.min(t * 4, 1) * Math.min((durationSec - t) * 4, 1) * 0.3;
+        // Generate tone with harmonics
+        const fundamental = Math.sin(2 * Math.PI * frequency * t);
+        const harmonic1 = Math.sin(2 * Math.PI * frequency * 2 * t) * 0.5;
+        const harmonic2 = Math.sin(2 * Math.PI * frequency * 3 * t) * 0.25;
+        data[i] = envelope * (fundamental + harmonic1 + harmonic2);
+      }
+    }
+
+    const wavBuffer = audioBufferToWav(buffer);
+    const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+    return URL.createObjectURL(blob);
+  } finally {
+    // Release the audio context so resources aren't kept allocated (and don't
+    // accumulate across Storybook HMR reloads).
+    void audioContext.close();
+  }
 }
 
 /** Converts an AudioBuffer to a 16-bit PCM WAV ArrayBuffer. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function audioBufferToWav(buffer: any): ArrayBuffer {
+function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   const numChannels = buffer.numberOfChannels;
   const sampleRate = buffer.sampleRate;
   const format = 1; // PCM
