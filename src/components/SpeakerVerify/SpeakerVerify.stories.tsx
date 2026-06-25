@@ -34,7 +34,7 @@ const PHRASES = [
   { key: "ozwell-i'm-done", label: "ozwell I'm done" },
 ];
 const REPS = 3;
-const TIMEOUT_MS = 5000; // how long to wait for the phrase before showing "didn't catch that"
+const TIMEOUT_MS = 4000; // how long to wait for the phrase before "didn't catch that" (only bites on failure)
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
 function chime(freq: number, ms = 160) {
@@ -179,8 +179,12 @@ function SpeakerVerifyDemo() {
             </>
           ) : (
             <>
+              <style>{`@keyframes oz-pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
               <div style={{ fontSize: 13, color: '#64748b' }}>{cue.mode === 'live' ? '🔴 say it now' : 'get ready…'}</div>
               <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>“{cue.phrase}”</div>
+              {cue.mode === 'live' && (
+                <div style={{ fontSize: 12, color: '#dc2626', marginTop: 8, animation: 'oz-pulse 1s infinite' }}>● listening…</div>
+              )}
             </>
           )}
         </div>
