@@ -140,7 +140,7 @@ function VoiceSetup() {
     : phase === 'done' ? 'You’re all set'
     : phase === 'deny' ? 'Let’s try that again'
     : `“${phrase}”`;
-  const small = phase === 'intro' ? 'Tap Ozwell and say each phrase a few times — it learns your voice so it only responds to you. On-device.'
+  const small = phase === 'intro' ? 'Tap Ozwell and say each phrase a few times — it learns your voice so it only responds to you, privately on your device.'
     : phase === 'getready' ? 'Get ready…'
     : phase === 'speak' ? 'Now say it'
     : phase === 'gotit' ? 'Got it!'
@@ -199,7 +199,9 @@ function VoiceSetup() {
       )}
 
       <div style={{ marginTop: 34, minHeight: 48 }}>
-        {phase === 'intro' && !bothReady && <div style={{ font: '13px monospace', color: '#94a3b8' }}>loading models…</div>}
+        {phase === 'intro' && (sv.error || wake.error
+          ? <div style={{ fontSize: 13, color: '#dc2626' }}>couldn’t load models — check console</div>
+          : !bothReady ? <div style={{ font: '13px monospace', color: '#94a3b8' }}>loading…</div> : null)}
         {phase === 'done' && (
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button onClick={() => setPhase('intro')} style={{ font: '600 15px system-ui', padding: '12px 26px', borderRadius: 999, cursor: 'pointer', border: `1.5px solid ${OZ}`, background: 'transparent', color: OZ }}>Add another spot</button>
@@ -208,10 +210,6 @@ function VoiceSetup() {
         )}
       </div>
 
-      <div style={{ position: 'absolute', bottom: 22, fontSize: 12.5, color: '#9aa9bb', display: 'flex', alignItems: 'center', gap: 6, letterSpacing: 0.2 }}>
-        {sv.error || wake.error ? <span style={{ color: '#dc2626' }}>model error — check console</span>
-          : <><span style={{ fontSize: 13 }}>🔒</span> Private — your voice stays on your device</>}
-      </div>
     </div>
   );
 }
