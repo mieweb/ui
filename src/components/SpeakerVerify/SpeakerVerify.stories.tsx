@@ -84,7 +84,6 @@ function SpeakerVerifyDemo() {
   const resolveRef = React.useRef<((firedName: string) => void) | null>(null);
   const whatRef = React.useRef<Record<string, Float32Array[]>>({});
   const rollingRef = React.useRef<Rolling | null>(null);
-  const probsRef = React.useRef<Record<string, number>>({});
   const enrolledRef = React.useRef(false);
   const rowId = React.useRef(0);
 
@@ -94,7 +93,7 @@ function SpeakerVerifyDemo() {
       handleLiveFire(name); // idle → live gate readout
     },
   });
-  const wakeRef = React.useRef(wake); wakeRef.current = wake; probsRef.current = wake.probs;
+  const wakeRef = React.useRef(wake); wakeRef.current = wake;
 
   // keep a rolling recorder open off the detector's stream while mounted (retry until the stream exists)
   React.useEffect(() => {
@@ -126,11 +125,12 @@ function SpeakerVerifyDemo() {
     const roll = rollingRef.current;
     const samples = roll ? roll.snapshot() : new Float32Array(0);
     const emb = wakeRef.current.getLastEmbedding();
-    const base = probsRef.current[name] || 0;
+    const base = wakeRef.current.getLastProb();  // frozen fire confidence — a row only exists because it fired
     const enr = enrolledRef.current;
     const who = enr && samples.length && roll ? sv.verify(name, samples, roll.sampleRate) : null;
     const what = enr ? wakeRef.current.phraseCosine(name, emb) : null;
-    const pass = base >= 0.5 && (who ? who.pass : true) && (what != null ? what >= WHAT_THRESHOLD : true);
+    // verdict = the two REAL gates. "wake" isn't a gate — the fire itself IS the detection.
+    const pass = (who ? who.pass : true) && (what != null ? what >= WHAT_THRESHOLD : true);
     setLog((l) => [{ id: ++rowId.current, phrase: name, base, who, what, pass, t: new Date().toLocaleTimeString() }, ...l].slice(0, 6));
   }
 
@@ -182,7 +182,8 @@ function SpeakerVerifyDemo() {
     <div style={{ fontFamily: 'system-ui, sans-serif', width: 520, color: '#1f2733' }}>
       <h3 style={{ marginBottom: 2 }}>Two-gate verify <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 400 }}>· dev diagnostic</span></h3>
       <p style={{ color: '#64748b', fontSize: 13, marginTop: 2 }}>
-        Enroll once, then just talk — every phrase shows base · WHO · WHAT, colour-coded. (In the product this is invisible.)
+        Enroll once, then just talk — every phrase shows wake · WHO · WHAT, colour-coded. Verdict = WHO + WHAT
+        (the wake confidence is just the trigger). In the product this is all invisible.
       </p>
 
       <div style={{ font: '12px monospace', color: sv.error || wake.error ? '#dc2626' : bothReady ? '#16a34a' : '#d97706', marginBottom: 10 }}>
@@ -218,7 +219,7 @@ function SpeakerVerifyDemo() {
             {log.map((r) => (
               <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 10px', borderRadius: 8, fontSize: 13, background: r.pass ? '#f0fdf4' : '#fef2f2', border: `1px solid ${r.pass ? '#bbf7d0' : '#fecaca'}` }}>
                 <span style={{ fontWeight: 700, minWidth: 120 }}>{r.pass ? '✅' : '🔒'} “{lbl(r.phrase)}”</span>
-                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot(r.base >= 0.5 ? 'pass' : 'fail')} />base {r.base.toFixed(2)}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot('pass')} />wake {r.base.toFixed(2)}</span>
                 <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot(r.who ? (r.who.pass ? 'pass' : 'fail') : 'off')} />WHO {r.who ? r.who.score.toFixed(2) : '—'}</span>
                 <span style={{ fontVariantNumeric: 'tabular-nums', color: '#475569' }}><span style={dot(r.what != null ? (r.what >= WHAT_THRESHOLD ? 'pass' : 'fail') : 'off')} />WHAT {r.what != null ? r.what.toFixed(2) : '—'}</span>
               </div>

@@ -130,6 +130,7 @@ export class HeyBuddy {
         // N=1 = off (legacy single-frame). Live-tunable via window.__debounceFrames.
         this.debounceFrames = options.debounceFrames ?? 1;
         this._consec = {}; // per-phrase consecutive-detected-frame counter
+        this.lastWakeProb = 0; // peak fire confidence frozen at the last wake (the base level)
         this._peakProb = {}; // per-phrase peak probability within the current detection run
         this._peakEmb = {};  // per-phrase embedding window at that peak frame (used for the voiceprint)
         // The [16x96] embedding window at the moment a wake last fired — so the gate (runWakeGate)
@@ -330,6 +331,8 @@ export class HeyBuddy {
         this.lastWakeEmbedding = (this._peakEmb && this._peakEmb[name])
             ? this._peakEmb[name]
             : ((this.embeddingBuffer && this.embeddingBuffer.data) ? Float32Array.from(this.embeddingBuffer.data) : null);
+        // freeze the peak fire confidence too (the live prob spikes then drops, so reading it later is stale)
+        this.lastWakeProb = (this._peakProb && this._peakProb[name]) ? this._peakProb[name] : 0;
 
         for (let {names, callback} of this.detectedCallbacks) {
             if (Array.isArray(names) && names.includes(name) || names === name) {

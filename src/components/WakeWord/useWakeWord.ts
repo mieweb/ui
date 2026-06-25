@@ -38,6 +38,8 @@ export interface WakeWordControls {
   getStream: () => MediaStream | null;
   /** The frozen fire-frame embedding from the last wake — the WHAT-gate input (capture at enroll, check at verify). */
   getLastEmbedding: () => Float32Array | null;
+  /** The peak fire confidence (probability) of the last wake — frozen at the fire, so not stale. */
+  getLastProb: () => number;
   /** Store / check / clear a phrase's enrolled phrase-print templates (the WHAT gate). */
   setVoiceprint: (name: string, vectors: Float32Array[]) => void;
   hasVoiceprint: (name: string) => boolean;
@@ -137,6 +139,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
     ...state,
     getStream: () => hbRef.current?.batcher?.stream ?? null,
     getLastEmbedding: () => (hbRef.current?.lastWakeEmbedding ? Float32Array.from(hbRef.current.lastWakeEmbedding) : null),
+    getLastProb: () => hbRef.current?.lastWakeProb ?? 0,
     setVoiceprint: (name, vectors) => hbRef.current?.setVoiceprint(name, vectors),
     hasVoiceprint: (name) => hbRef.current?.hasVoiceprint(name) ?? false,
     clearVoiceprint: (name) => hbRef.current?.clearVoiceprint(name),
@@ -171,6 +174,7 @@ interface HeyBuddyInstance {
   onRecording(cb: (samples: Float32Array) => void): void;
   batcher?: { stream?: MediaStream };
   lastWakeEmbedding: Float32Array | null;        // frozen fire-frame embedding (the WHAT-gate input)
+  lastWakeProb: number;                          // frozen peak fire confidence (the base level)
   voiceprints: Record<string, Float32Array[]>;   // per-phrase enrolled phrase-print templates
   setVoiceprint(name: string, vectors: Float32Array[]): void;
   hasVoiceprint(name: string): boolean;
