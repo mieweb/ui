@@ -35,7 +35,7 @@ const PHRASES = [
 ];
 const REPS = 3;
 const TIMEOUT_MS = 4000;
-const WHAT_THRESHOLD = 0.3;  // common-mode-subtracted similarity sits lower than raw cosine — TUNE from the readout
+const WHAT_THRESHOLD = 0.8;  // raw-cosine gate (product value) — real phrases land ~0.85-0.94
 const VP_CAP = 18;
 const ROLL_SECONDS = 2.0;
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
@@ -74,6 +74,15 @@ function openRolling(stream: MediaStream): Rolling {
     snapshot: () => { const s = new Float32Array(total); let o = 0; for (const c of chunks) { s.set(c, o); o += c.length; } return s; },
     close: () => { try { proc.disconnect(); src.disconnect(); sink.disconnect(); } catch { /* ignore */ } void ctx.close(); },
   };
+}
+
+// WHAT templates persist to localStorage (WHO already does, via speaker-verify.js) — so they survive reloads
+const WHAT_KEY = 'ozwellWhatPrints';
+function saveWhat(map: Record<string, Float32Array[]>) {
+  try { localStorage.setItem(WHAT_KEY, JSON.stringify(Object.fromEntries(Object.entries(map).map(([k, v]) => [k, v.map((a) => Array.from(a))])))); } catch { /* ignore */ }
+}
+function loadWhat(): Record<string, Float32Array[]> {
+  try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
 }
 
 interface LogRow { id: number; phrase: string; base: number; who: VerifyResult | null; what: number | null; pass: boolean; t: string; }
@@ -119,6 +128,14 @@ function SpeakerVerifyDemo() {
   enrolledRef.current = enrolled;
 
   React.useEffect(() => { if (sv.ready) setConditions(sv.conditionCount('hey-ozwell')); }, [sv.ready]);
+
+  // restore persisted WHAT templates into the detector when it's ready (so they survive reloads, like WHO)
+  React.useEffect(() => {
+    if (!wake.ready) return;
+    const loaded = loadWhat();
+    whatRef.current = loaded;
+    for (const k in loaded) wakeRef.current.setVoiceprint(k, loaded[k]);
+  }, [wake.ready]);
 
   // every wake, while idle: score all three gates and add a colour-coded row
   function handleLiveFire(name: string) {

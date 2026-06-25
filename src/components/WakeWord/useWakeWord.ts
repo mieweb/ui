@@ -143,13 +143,24 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
     setVoiceprint: (name, vectors) => hbRef.current?.setVoiceprint(name, vectors),
     hasVoiceprint: (name) => hbRef.current?.hasVoiceprint(name) ?? false,
     clearVoiceprint: (name) => hbRef.current?.clearVoiceprint(name),
-    // Background-SUBTRACTED similarity: raw cosine pins ~0.9 for everything (a common-mode dominates
-    // speech embeddings), so it can't separate phrase from near-miss. voiceprintSimilarity subtracts the
-    // running common-mode so the score reflects CONTENT — that's what makes the WHAT gate actually discriminate.
+    // Raw cosine to the enrolled templates (max over them) — matches the product's gate: real phrases land
+    // ~0.85-0.94 and consistent, so a ~0.80 threshold passes them cleanly and rejects unrelated speech.
+    // (The subtracted variant separates more on paper but scores real phrases erratically — worse in practice.)
+    // NOTE: it CANNOT separate "ozwell X" variants — the fire-frame sits on the shared word; WHO + the wake
+    // model own that. WHAT's real job here is rejecting the doctor's own non-phrase stray speech.
     phraseCosine: (name, vec) => {
       const hb = hbRef.current;
       if (!hb || !vec || !hb.hasVoiceprint(name)) return null;
-      return hb.voiceprintSimilarity(name, vec);
+      const set = hb.voiceprints[name];
+      let qn = 0; for (let i = 0; i < vec.length; i++) qn += vec[i] * vec[i]; qn = Math.sqrt(qn) + 1e-9;
+      let best = -1;
+      for (const t of set) {
+        let d = 0, tn = 0;
+        for (let i = 0; i < vec.length; i++) { d += vec[i] * t[i]; tn += t[i] * t[i]; }
+        const c = d / (qn * (Math.sqrt(tn) + 1e-9));
+        if (c > best) best = c;
+      }
+      return best;
     },
   };
 }
