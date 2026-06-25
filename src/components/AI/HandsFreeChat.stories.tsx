@@ -82,27 +82,25 @@ function HandsFreeChat() {
   // INVISIBLE doctor-only gate, run on each wake. If enrolled, only the enrolled doctor (WHO) saying the
   // phrase (WHAT) passes — everyone else is silently ignored. If NOT enrolled yet, it's open (so the chat
   // works before you've set up your voice). Enrolled-but-can't-capture fails closed.
-  // Verify a wake INVISIBLY. whoOnly: gate on the SPEAKER only — used for STOP, where the run-on
-  // "ozwell i'm done" embeds differently from the enrolled isolated one (WHAT unreliable there) but
-  // WHO (text-independent) is robust. A coworker still fails WHO, so the stop stays doctor-only.
-  const verified = (name: string, whoOnly = false): boolean => {
+  // Verify a wake INVISIBLY against the enrolled prints: WHO (it's the doctor) AND WHAT (they actually
+  // said the phrase — WHAT is what stops a false fire on the doctor's OWN speech from triggering, since
+  // WHO can't tell the phrase from not-the-phrase when it's the same voice). Both gates, start and stop.
+  const verified = (name: string): boolean => {
     const roll = rollRef.current;
     const enrolled = svRef.current.conditionCount(name) > 0;
     if (!enrolled) return true;
     if (!roll) return false;
     const who = svRef.current.verify(name, roll.snapshot(), roll.sampleRate);
-    const what = whoOnly ? null : wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
+    const what = wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
     const ok = (who?.pass ?? false) && (what == null || what >= WHAT_THRESHOLD);
-    console.log(`[handsfree] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'}${whoOnly ? ' (who-only)' : ` · WHAT ${what?.toFixed(2) ?? '—'}`} → ${ok ? 'ACT' : 'ignore'}`);
+    console.log(`[handsfree] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} ${what != null ? (what >= WHAT_THRESHOLD ? '✓' : '✗') : ''} → ${ok ? 'ACT' : 'ignore'}`);
     return ok;
   };
 
   const wake = useWakeWord({
     onWake: (name) => {
-      // START — full doctor-only gate (don't begin a session for anyone but the enrolled doctor).
       if (name === 'hey-ozwell' && phaseRef.current === 'listening') { if (verified('hey-ozwell')) startDictation(); }
-      // STOP — gated on WHO only (your voice). Still doctor-only; reliable through the run-on phrasing.
-      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') { if (verified("ozwell-i'm-done", true)) stopDictation(); }
+      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') { if (verified("ozwell-i'm-done")) stopDictation(); }
     },
   });
   const wakeRef = React.useRef(wake);
