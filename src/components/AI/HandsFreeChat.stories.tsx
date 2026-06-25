@@ -18,6 +18,7 @@ import { AIChat } from './AIChat';
 import type { AIMessage } from './types';
 import { RecordButton } from '../RecordButton';
 import { useWakeWord } from '../WakeWord/useWakeWord';
+import { useSpeakerVerify } from '../SpeakerVerify/useSpeakerVerify';
 import { transcribeBlob, stripStopPhrase } from './whisperTranscribe';
 
 const meta: Meta = {
@@ -40,7 +41,28 @@ const mkMsg = (role: AIMessage['role'], text: string): AIMessage => ({
   id: `${role}-${++counter}`, role, content: [{ type: 'text', text }], timestamp: new Date(), status: 'complete',
 });
 
+// --- doctor-only gate: restore enrolled WHAT prints + a rolling recorder for the wake-utterance audio ---
+const WHAT_KEY = 'ozwellWhatPrints';
+const WHAT_THRESHOLD = 0.8;
+function loadWhat(): Record<string, Float32Array[]> {
+  try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
+}
+interface Roll { sampleRate: number; snapshot: () => Float32Array; close: () => void; }
+function openRolling(stream: MediaStream): Roll {
+  const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  const ctx = new Ctx(); const src = ctx.createMediaStreamSource(stream);
+  const proc = ctx.createScriptProcessor(4096, 1, 1); const sink = ctx.createGain(); sink.gain.value = 0;
+  const max = Math.round(ctx.sampleRate * 2);
+  let chunks: Float32Array[] = []; let total = 0;
+  proc.onaudioprocess = (e) => { chunks.push(Float32Array.from(e.inputBuffer.getChannelData(0))); total += e.inputBuffer.length; while (total > max && chunks.length > 1) { total -= chunks[0].length; chunks.shift(); } };
+  src.connect(proc); proc.connect(sink); sink.connect(ctx.destination);
+  return { sampleRate: ctx.sampleRate, snapshot: () => { const s = new Float32Array(total); let o = 0; for (const c of chunks) { s.set(c, o); o += c.length; } return s; }, close: () => { try { proc.disconnect(); src.disconnect(); sink.disconnect(); } catch { /* ignore */ } void ctx.close(); } };
+}
+
 function HandsFreeChat() {
+  const sv = useSpeakerVerify();
+  const svRef = React.useRef(sv); svRef.current = sv;
+  const rollRef = React.useRef<Roll | null>(null);
   const [messages, setMessages] = React.useState<AIMessage[]>([]);
   const [phase, setPhase] = React.useState<'listening' | 'dictating' | 'transcribing'>('listening');
   const recRef = React.useRef<MediaRecorder | null>(null);
@@ -57,15 +79,46 @@ function HandsFreeChat() {
       `Heard: “${t}”. Wire me to the Ozwell backend and I'd answer.`)]), 350);
   };
 
-  // hook must be declared before the handlers that read its getStream() — keep a ref to the handle
+  // INVISIBLE doctor-only gate, run on each wake. If enrolled, only the enrolled doctor (WHO) saying the
+  // phrase (WHAT) passes — everyone else is silently ignored. If NOT enrolled yet, it's open (so the chat
+  // works before you've set up your voice). Enrolled-but-can't-capture fails closed.
+  const verified = (name: string): boolean => {
+    const roll = rollRef.current;
+    const enrolled = svRef.current.conditionCount(name) > 0;
+    if (!enrolled) return true;
+    if (!roll) return false;
+    const who = svRef.current.verify(name, roll.snapshot(), roll.sampleRate);
+    const what = wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
+    const ok = (who?.pass ?? false) && (what == null || what >= WHAT_THRESHOLD);
+    if (!ok) console.log('[handsfree] wake ignored — not the enrolled doctor', name, who?.score?.toFixed(2), what?.toFixed(2));
+    return ok;
+  };
+
   const wake = useWakeWord({
     onWake: (name) => {
-      if (name === 'hey-ozwell' && phaseRef.current === 'listening') startDictation();
-      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') stopDictation();
+      if (name === 'hey-ozwell' && phaseRef.current === 'listening') { if (verified('hey-ozwell')) startDictation(); }
+      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') { if (verified("ozwell-i'm-done")) stopDictation(); }
     },
   });
   const wakeRef = React.useRef(wake);
   wakeRef.current = wake;
+
+  // restore enrolled WHAT prints into the detector + open a rolling recorder (2nd consumer of the shared
+  // stream) so the WHO gate has the wake-utterance audio. WHO prints auto-load from localStorage in speaker-verify.js.
+  React.useEffect(() => {
+    if (!wake.ready) return;
+    let cancelled = false, tries = 0;
+    const loaded = loadWhat();
+    for (const k in loaded) wakeRef.current.setVoiceprint(k, loaded[k]);
+    const tryOpen = () => {
+      if (cancelled || rollRef.current) return;
+      const stream = wakeRef.current.getStream();
+      if (stream) rollRef.current = openRolling(stream);
+      else if (tries++ < 40) window.setTimeout(tryOpen, 300);
+    };
+    tryOpen();
+    return () => { cancelled = true; rollRef.current?.close(); rollRef.current = null; };
+  }, [wake.ready]);
 
   function startDictation() {
     const stream = wakeRef.current.getStream(); // the listener's OWN stream — no second getUserMedia
@@ -95,12 +148,13 @@ function HandsFreeChat() {
     rec.stop();
   }
 
+  const locked = sv.ready && sv.conditionCount('hey-ozwell') > 0; // enrolled → doctor-only
   const banner =
     phase === 'dictating' ? '🎙️ Dictating… say “ozwell I’m done” to send'
       : phase === 'transcribing' ? '⏳ Transcribing on-device…'
         : wake.error ? `⚠️ ${wake.error}`
-          : wake.ready ? '● Listening for “hey ozwell”'
-            : '… loading wake-word models';
+          : wake.ready ? `● Listening for “hey ozwell”${locked ? '  ·  🔒 your voice only' : '  ·  set up your voice to lock it to you'}`
+            : '… loading models';
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
