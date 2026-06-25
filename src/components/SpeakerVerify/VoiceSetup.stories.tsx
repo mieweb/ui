@@ -163,7 +163,9 @@ function VoiceSetup() {
 
       <div style={{ position: 'relative', width: 260, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28 }}>
         {phase === 'speak' && [0, 0.7, 1.4].map((d, i) => (
-          <div key={i} style={{ position: 'absolute', left: '50%', top: '50%', width: 150, height: 150, borderRadius: '50%', border: `2px solid ${OZ}55`, animation: `oz-ring 2.1s ${d}s infinite ease-out` }} />
+          // backwards fill-mode: during the stagger delay, show the centered 0% keyframe (not the
+          // un-translated default, which bulged off to the lower-right).
+          <div key={i} style={{ position: 'absolute', left: '50%', top: '50%', width: 150, height: 150, borderRadius: '50%', border: `2px solid ${OZ}55`, animation: `oz-ring 2.1s ${d}s infinite ease-out backwards` }} />
         ))}
         <div ref={glowRef} style={{ position: 'absolute', left: '50%', top: '50%', width: 180, height: 180, transform: 'translate(-50%,-50%)', borderRadius: '50%',
           background: `radial-gradient(circle, ${OZ}66, transparent 68%)`, filter: 'blur(26px)', opacity: 0.4, pointerEvents: 'none' }} />
@@ -206,8 +208,9 @@ function VoiceSetup() {
         )}
       </div>
 
-      <div style={{ position: 'absolute', bottom: 18, font: '11px monospace', color: '#aebccb' }}>
-        {sv.error || wake.error ? 'model error — check console' : '🔒 on-device · audio never leaves the page'}
+      <div style={{ position: 'absolute', bottom: 22, fontSize: 12.5, color: '#9aa9bb', display: 'flex', alignItems: 'center', gap: 6, letterSpacing: 0.2 }}>
+        {sv.error || wake.error ? <span style={{ color: '#dc2626' }}>model error — check console</span>
+          : <><span style={{ fontSize: 13 }}>🔒</span> Private — your voice stays on your device</>}
       </div>
     </div>
   );
