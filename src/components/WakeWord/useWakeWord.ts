@@ -33,6 +33,19 @@ export interface WakeWordState {
   probs: Record<string, number>;
 }
 
+export interface WakeWordControls {
+  /** The detector's mic stream (so a host can add a 2nd consumer — never a 2nd getUserMedia). */
+  getStream: () => MediaStream | null;
+  /** The frozen fire-frame embedding from the last wake — the WHAT-gate input (capture at enroll, check at verify). */
+  getLastEmbedding: () => Float32Array | null;
+  /** Store / check / clear a phrase's enrolled phrase-print templates (the WHAT gate). */
+  setVoiceprint: (name: string, vectors: Float32Array[]) => void;
+  hasVoiceprint: (name: string) => boolean;
+  clearVoiceprint: (name: string) => void;
+  /** Raw cosine of an embedding to a phrase's templates (max over templates); null if not enrolled. */
+  phraseCosine: (name: string, vec: Float32Array | null) => number | null;
+}
+
 const ASSET = '/wakeword';
 const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
 
@@ -51,7 +64,7 @@ function ensureOrt(): Promise<void> {
   });
 }
 
-export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & { getStream: () => MediaStream | null } {
+export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWordControls {
   const { onWake, onUtterance, thresholds, enabled = true } = opts;
   const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
   // keep the latest callbacks without re-running the effect
@@ -119,7 +132,31 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & { getSt
 
   // getStream exposes the detector's mic stream so a host can add a second consumer (e.g. a
   // MediaRecorder for dictation) WITHOUT opening a second getUserMedia (which goes silent).
-  return { ...state, getStream: () => hbRef.current?.batcher?.stream ?? null };
+  // The voiceprint methods expose the WHAT gate (phrase-print over the wake model's own embedding).
+  return {
+    ...state,
+    getStream: () => hbRef.current?.batcher?.stream ?? null,
+    getLastEmbedding: () => (hbRef.current?.lastWakeEmbedding ? Float32Array.from(hbRef.current.lastWakeEmbedding) : null),
+    setVoiceprint: (name, vectors) => hbRef.current?.setVoiceprint(name, vectors),
+    hasVoiceprint: (name) => hbRef.current?.hasVoiceprint(name) ?? false,
+    clearVoiceprint: (name) => hbRef.current?.clearVoiceprint(name),
+    phraseCosine: (name, vec) => phraseCosine(hbRef.current, name, vec),
+  };
+}
+
+// raw cosine of an embedding to a phrase's enrolled templates, max over templates (the WHAT score)
+function phraseCosine(hb: HeyBuddyInstance | null, name: string, vec: Float32Array | null): number | null {
+  const set = hb?.voiceprints?.[name];
+  if (!set || !set.length || !vec) return null;
+  let qn = 0; for (let i = 0; i < vec.length; i++) qn += vec[i] * vec[i]; qn = Math.sqrt(qn) + 1e-9;
+  let best = -1;
+  for (const t of set) {
+    let d = 0, tn = 0;
+    for (let i = 0; i < vec.length; i++) { d += vec[i] * t[i]; tn += t[i] * t[i]; }
+    const c = d / (qn * (Math.sqrt(tn) + 1e-9));
+    if (c > best) best = c;
+  }
+  return best;
 }
 
 // minimal shapes for the vendored detector
@@ -133,4 +170,9 @@ interface HeyBuddyInstance {
   onDetected(name: string, cb: () => void): void;
   onRecording(cb: (samples: Float32Array) => void): void;
   batcher?: { stream?: MediaStream };
+  lastWakeEmbedding: Float32Array | null;        // frozen fire-frame embedding (the WHAT-gate input)
+  voiceprints: Record<string, Float32Array[]>;   // per-phrase enrolled phrase-print templates
+  setVoiceprint(name: string, vectors: Float32Array[]): void;
+  hasVoiceprint(name: string): boolean;
+  clearVoiceprint(name: string): void;
 }
