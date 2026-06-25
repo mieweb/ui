@@ -82,26 +82,27 @@ function HandsFreeChat() {
   // INVISIBLE doctor-only gate, run on each wake. If enrolled, only the enrolled doctor (WHO) saying the
   // phrase (WHAT) passes — everyone else is silently ignored. If NOT enrolled yet, it's open (so the chat
   // works before you've set up your voice). Enrolled-but-can't-capture fails closed.
-  const verified = (name: string): boolean => {
+  // Verify a wake INVISIBLY. whoOnly: gate on the SPEAKER only — used for STOP, where the run-on
+  // "ozwell i'm done" embeds differently from the enrolled isolated one (WHAT unreliable there) but
+  // WHO (text-independent) is robust. A coworker still fails WHO, so the stop stays doctor-only.
+  const verified = (name: string, whoOnly = false): boolean => {
     const roll = rollRef.current;
     const enrolled = svRef.current.conditionCount(name) > 0;
     if (!enrolled) return true;
     if (!roll) return false;
     const who = svRef.current.verify(name, roll.snapshot(), roll.sampleRate);
-    const what = wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
+    const what = whoOnly ? null : wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
     const ok = (who?.pass ?? false) && (what == null || what >= WHAT_THRESHOLD);
-    if (!ok) console.log('[handsfree] wake ignored — not the enrolled doctor', name, who?.score?.toFixed(2), what?.toFixed(2));
+    console.log(`[handsfree] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'}${whoOnly ? ' (who-only)' : ` · WHAT ${what?.toFixed(2) ?? '—'}`} → ${ok ? 'ACT' : 'ignore'}`);
     return ok;
   };
 
   const wake = useWakeWord({
     onWake: (name) => {
-      // START is the doctor-only gate (don't begin a session for anyone but the enrolled doctor).
+      // START — full doctor-only gate (don't begin a session for anyone but the enrolled doctor).
       if (name === 'hey-ozwell' && phaseRef.current === 'listening') { if (verified('hey-ozwell')) startDictation(); }
-      // STOP is NOT gated: the session is already the verified doctor's, and verifying mid-dictation is
-      // unreliable (the utterance is mixed with the dictation tail) — a missed stop is far worse than a
-      // coworker harmlessly ending a session you'd just resume. So "ozwell i'm done" always stops.
-      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') stopDictation();
+      // STOP — gated on WHO only (your voice). Still doctor-only; reliable through the run-on phrasing.
+      else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') { if (verified("ozwell-i'm-done", true)) stopDictation(); }
     },
   });
   const wakeRef = React.useRef(wake);
