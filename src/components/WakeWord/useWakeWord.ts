@@ -102,7 +102,9 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
           vadModelPath: `${ASSET}/silero-vad.onnx`,
           embeddingModelPath: `${ASSET}/speech-embedding.onnx`,
           spectrogramModelPath: `${ASSET}/mel-spectrogram.onnx`,
-          wakeWordThresholds: thresholds || { 'hey-ozwell': 0.5, "ozwell-i'm-done": 0.5 },
+          // hey-ozwell 0.8 (product value): a short phrase that false-fires at ~0.55 on junk ("yeah bro"),
+          // so 0.5 was too low — it let low-confidence misfires count as the phrase. done 0.5 (longer, safer).
+          wakeWordThresholds: thresholds || { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.5 },
           // The VAD reads low in this setup, so gate generously — the re-entrancy guard in HeyBuddy
           // keeps the wake model from overlap-crashing even if this lets it run most of the time.
           positiveVadThreshold: 0.05,
