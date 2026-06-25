@@ -202,7 +202,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "preinstall": "if [ -d .git ]; then git submodule update --init --recursive; fi",
+    "preinstall": "node -e \"try{if(require('fs').existsSync('.git'))require('child_process').execSync('git submodule update --init --recursive',{stdio:'inherit'})}catch(e){console.warn('[@mieweb/ui] submodule update skipped:',e.message)}\"",
     "dev": "tsup --watch",
     "prebuild": "npm run build:esheet",
     "build": "node --max-old-space-size=8192 ./node_modules/tsup/dist/cli-default.js && npm run build:css && npm run copy:brand-css && npm run copy:style-css && npm run copy:markdown-css && npm run copy:kerebron-css",
