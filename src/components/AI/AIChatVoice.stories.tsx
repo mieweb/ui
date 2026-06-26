@@ -64,7 +64,8 @@ function loadWhisper() {
     // makes Chrome shrink that quota); on a healthy machine / real deploy it caches once and reloads fast.
     // FALLBACK: base.en q8 — tiny (~75MB), always fits the cache, English-only.
     try {
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
+      // self-hosted LFS mirror so it can be cached (the onnx-community copy is on uncacheable HF Xet)
+      const pipe = await mod.pipeline('automatic-speech-recognition', 'jlocala/whisper-large-v3-turbo-ozwell', {
         device: 'webgpu',
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
       });

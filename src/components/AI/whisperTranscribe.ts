@@ -91,8 +91,11 @@ function loadWhisper(): Promise<Whisper> {
 
     console.log('[whisper] loading turbo…');
     // turbo (best accuracy) on WebGPU; falls back to base.en when turbo/WebGPU is unavailable.
+    // Self-hosted mirror of onnx-community/whisper-large-v3-turbo on classic LFS (real size headers),
+    // so the browser/SW can actually CACHE it — the onnx-community copy is on HF Xet storage, which
+    // Chrome refuses to cache (re-downloads ~1GB every open). See AI/MODEL-HOSTING.md.
     try {
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
+      const pipe = await mod.pipeline('automatic-speech-recognition', 'jlocala/whisper-large-v3-turbo-ozwell', {
         device: 'webgpu',
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
         progress_callback,
