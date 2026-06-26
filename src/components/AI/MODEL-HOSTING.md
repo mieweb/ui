@@ -36,20 +36,39 @@ built for this, already in our stack via Whisper + silero). Alternative: a
 URLs) — fully under our control, no LFS. Avoid jsDelivr for the 40 MB `.data`
 (per-file size limits).
 
-### Cutover steps (do when browser-testable)
+### Step 2 (parameterize the asset base) — ✅ DONE
 
-1. **Upload** the `sv-runtime/` bundle + `wakeword/*.onnx` to the chosen host.
-2. **Parameterize the asset base** instead of the hardcoded Storybook paths:
-   - `WakeWord/useWakeWord.ts` — the `ASSET = '/wakeword'` constant.
-   - `SpeakerVerify/lib/speaker-verify.js` — the `/sv-runtime/...` paths.
-   Default the base to the hosted URL; allow a prop/env override so local dev can
-   still point at `.storybook/public` if desired.
+The code no longer hardcodes the Storybook paths. Both loaders resolve a configurable base,
+**defaulting to the current local paths so the demo is unchanged**, overridable by one global:
+
+```js
+// a single base URL — wakeword/ and sv-runtime/ are expected directly under it:
+window.__ozwellAssets = 'https://huggingface.co/<user>/<repo>/resolve/main';
+// → wake models from <base>/wakeword/*, sherpa runtime + cohort from <base>/sv-runtime/*
+
+// or per-area, for full control:
+window.__ozwellAssets = { wakeword: 'https://…/wakeword', svRuntime: 'https://…/sv-runtime' };
+```
+
+- `WakeWord/useWakeWord.ts` — `resolveAssetBase()` reads the `assetBase` **prop** first, then the
+  global, then defaults to `/wakeword`. (Prop lets a host override per-mount.)
+- `SpeakerVerify/lib/speaker-verify.js` — `SV_DIR` reads the same global, defaults to `/sv-runtime`.
+
+Set the global **before** the components mount (e.g. in `.storybook/preview` or the host's entry).
+
+### Remaining cutover steps (do when browser-testable)
+
+1. **Upload** the `sv-runtime/` bundle + `wakeword/*.onnx` to the chosen host, preserving the
+   `wakeword/` and `sv-runtime/` directory names under one base.
+2. **Point the base** at the host — set `window.__ozwellAssets` (and, once verified, make the hosted
+   URL the default so it works without any runtime config).
 3. **Remove the binaries**: `git rm` the tracked files under
    `.storybook/public/{sv-runtime,wakeword}` (keep a tiny README pointer to the host).
 4. **Browser-test** the hosted fetch end-to-end: CORS headers, the WASM streaming
-   instantiate, and that wake + speaker + dictation all still load. This is the
-   step that must happen in a real browser — it's the whole reason the cutover is
-   deferred rather than done blind.
+   instantiate (correct `application/wasm` MIME on the host), and that wake + speaker + dictation all
+   still load. This is the step that must happen in a real browser — it's the whole reason the cutover
+   is deferred rather than done blind. (HuggingFace `resolve` URLs serve permissive CORS + correct MIME,
+   which is why it's the recommended host.)
 5. Re-measure first-load time from the CDN (cold vs warm) and note it.
 
 ## Not required for the local demo

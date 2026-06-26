@@ -22,6 +22,10 @@ export interface UseWakeWordOpts {
   thresholds?: Record<string, number>;
   /** Set false to not start listening. */
   enabled?: boolean;
+  /** Where the wake model files are served from. Default '/wakeword' (Storybook static dir). Set to a
+   *  hosted URL (e.g. a HuggingFace resolve URL) to fetch models remotely — see AI/MODEL-HOSTING.md.
+   *  Falls back to the global `window.__ozwellAssets` if this prop is omitted. */
+  assetBase?: string;
 }
 
 export interface WakeWordState {
@@ -48,8 +52,22 @@ export interface WakeWordControls {
   phraseCosine: (name: string, vec: Float32Array | null) => number | null;
 }
 
-const ASSET = '/wakeword';
+const DEFAULT_ASSET = '/wakeword';
 const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
+
+// Resolve where to fetch model files from. Order: explicit prop → global `window.__ozwellAssets`
+// (a base URL string, or { base, wakeword }) → the local Storybook path. Default keeps the demo
+// self-contained; set the global/prop to a hosted URL to move the ~6 MB of models off the repo.
+type AssetGlobal = string | { base?: string; wakeword?: string; svRuntime?: string };
+function resolveAssetBase(override?: string): string {
+  const strip = (s: string) => s.replace(/\/$/, '');
+  if (override) return strip(override);
+  const g = (window as unknown as { __ozwellAssets?: AssetGlobal }).__ozwellAssets;
+  if (typeof g === 'string') return `${strip(g)}/wakeword`;
+  if (g?.wakeword) return strip(g.wakeword);
+  if (g?.base) return `${strip(g.base)}/wakeword`;
+  return DEFAULT_ASSET;
+}
 
 // Load the SAME onnxruntime-web build the working demo uses (1.19.0), as a global `ort`.
 // The detector's onnx.js prefers a global `ort` over the bundled package — matching the demo's
@@ -67,7 +85,7 @@ function ensureOrt(): Promise<void> {
 }
 
 export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWordControls {
-  const { onWake, onUtterance, thresholds, enabled = true } = opts;
+  const { onWake, onUtterance, thresholds, enabled = true, assetBase } = opts;
   const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
   // keep the latest callbacks without re-running the effect
   const onWakeRef = React.useRef(onWake);
@@ -97,6 +115,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
         const { HeyBuddy } = (await import('./lib/hey-buddy.js')) as { HeyBuddy: new (o: unknown) => HeyBuddyInstance };
         if (cancelled) return;
 
+        const ASSET = resolveAssetBase(assetBase);
         const hb = new HeyBuddy({
           modelPath: [`${ASSET}/hey-ozwell.onnx`, `${ASSET}/ozwell-i'm-done.onnx`],
           vadModelPath: `${ASSET}/silero-vad.onnx`,
@@ -133,7 +152,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
 
     // NOTE: HeyBuddy has no stop() yet — the mic keeps running until page nav. Phase-2 TODO: add teardown.
     return () => { cancelled = true; };
-  }, [enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled, assetBase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // getStream exposes the detector's mic stream so a host can add a second consumer (e.g. a
   // MediaRecorder for dictation) WITHOUT opening a second getUserMedia (which goes silent).

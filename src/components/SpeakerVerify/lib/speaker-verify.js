@@ -17,7 +17,17 @@
   // Production runtime artifacts live in their OWN folder so they never clobber the
   // frozen feasibility proof in /sv-wasm (test.html + mic-test.html, kept for the
   // progression demo / YouTube short). This loads the single-threaded slim build.
-  const SV_DIR = "/sv-runtime";
+  // Where the sherpa runtime (.js glue + .wasm + .data) and the AS-norm cohort are served from.
+  // Default "/sv-runtime" (Storybook static dir). Set window.__ozwellAssets (a base URL string, or
+  // { base, svRuntime }) to fetch the ~50 MB off the repo from a host — see AI/MODEL-HOSTING.md.
+  const SV_DIR = (function () {
+    var g = (typeof window !== "undefined") ? window.__ozwellAssets : null;
+    var strip = function (s) { return String(s).replace(/\/$/, ""); };
+    if (typeof g === "string") return strip(g) + "/sv-runtime";
+    if (g && g.svRuntime) return strip(g.svRuntime);
+    if (g && g.base) return strip(g.base) + "/sv-runtime";
+    return "/sv-runtime";
+  })();
   const MODEL = "./nemo_en_titanet_small.onnx"; // preloaded into the WASM filesystem
   const LS_KEY = "ozwellDoctorVoiceprint";       // { centroid: number[], n: number }
   // Threshold from the spike's enroll-centroid distributions (genuine ~0.75 / impostor ~0.22).
