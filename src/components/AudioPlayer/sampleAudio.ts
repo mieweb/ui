@@ -18,7 +18,7 @@ export function createSampleAudioUrl(durationSec = 5, frequency = 440): string {
       .webkitAudioContext;
   if (!AudioContextCtor) {
     throw new Error(
-      'Web Audio API is not available: AudioContext is undefined in this environment.',
+      'Web Audio API is not available: AudioContext is undefined in this environment.'
     );
   }
 
