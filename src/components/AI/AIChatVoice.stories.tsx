@@ -51,7 +51,7 @@ function loadWhisper() {
       /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
     )) as {
       pipeline: (task: string, model: string, opts?: unknown) => Promise<never>;
-      env: { allowLocalModels: boolean; useBrowserCache: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
+      env: { allowLocalModels: boolean; useBrowserCache: boolean; remoteHost: string; remotePathTemplate: string; backends: { onnx: { wasm: { numThreads: number } } } };
     };
     mod.env.allowLocalModels = false;
     mod.env.useBrowserCache = true; // transformers.js streams the model to cache (the proven whisper-web path)
@@ -64,15 +64,20 @@ function loadWhisper() {
     // makes Chrome shrink that quota); on a healthy machine / real deploy it caches once and reloads fast.
     // FALLBACK: base.en q8 — tiny (~75MB), always fits the cache, English-only.
     try {
-      // self-hosted LFS mirror (size headers) so transformers.js's streaming cache can store it
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'jlocala/whisper-large-v3-turbo-ozwell', {
+      // turbo served from our Cloudflare R2 bucket (sends Content-Length, so it CACHES — HF Xet doesn't).
+      // See whisperTranscribe.ts / MODEL-HOSTING.md.
+      mod.env.remoteHost = 'https://pub-64db68afc2cb4e108ff06e7e583f09d1.r2.dev';
+      mod.env.remotePathTemplate = '{model}/'; // files at <R2>/whisper-turbo/<file>
+      const pipe = await mod.pipeline('automatic-speech-recognition', 'whisper-turbo', {
         device: 'webgpu',
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
       });
       isMultilingual = true;
       return pipe;
     } catch (e) {
-      console.warn('[voice] turbo unavailable (no WebGPU?) — falling back to base.en', e);
+      console.warn('[voice] turbo unavailable — falling back to base.en', e);
+      mod.env.remoteHost = 'https://huggingface.co'; // reset for the HF-hosted fallback
+      mod.env.remotePathTemplate = '{model}/resolve/{revision}/';
       try { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' }); }
       catch { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' }); } // WASM fallback
     }

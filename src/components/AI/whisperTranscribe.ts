@@ -33,7 +33,7 @@ function loadWhisper(): Promise<Whisper> {
       /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
     )) as {
       pipeline: (task: string, model: string, opts?: unknown) => Promise<Whisper>;
-      env: { allowLocalModels: boolean; useBrowserCache: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
+      env: { allowLocalModels: boolean; useBrowserCache: boolean; remoteHost: string; remotePathTemplate: string; backends: { onnx: { wasm: { numThreads: number } } } };
     };
     mod.env.allowLocalModels = false;
     // Use transformers.js's OWN cache — it STREAMS the model straight to the Cache API (how whisper-web
@@ -91,19 +91,28 @@ function loadWhisper(): Promise<Whisper> {
 
     console.log('[whisper] loading turbo…');
     // turbo (best accuracy) on WebGPU; falls back to base.en when turbo/WebGPU is unavailable.
-    // Loaded from a self-hosted LFS mirror (real size headers) so transformers.js's streaming cache can
-    // store it — the onnx-community copy is on HF Xet storage with no size header, which caches as 0 bytes.
+    // CACHING: turbo's weights are served from our Cloudflare R2 bucket, which sends a Content-Length
+    // header. HuggingFace's Xet storage does NOT, which breaks transformers.js's cache (it re-downloads
+    // ~1.3GB every cold open). With the size header, transformers.js streams the model into the Cache API
+    // and it loads once per device. Audio still never leaves the browser — R2 only hosts the model file.
+    // To repoint (e.g. a mieweb-owned bucket for the PR), change R2_HOST + the model path. See MODEL-HOSTING.md.
+    const R2_HOST = 'https://pub-64db68afc2cb4e108ff06e7e583f09d1.r2.dev';
     try {
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'jlocala/whisper-large-v3-turbo-ozwell', {
+      mod.env.remoteHost = R2_HOST;
+      mod.env.remotePathTemplate = '{model}/'; // files live at <R2_HOST>/whisper-turbo/<file>
+      const pipe = await mod.pipeline('automatic-speech-recognition', 'whisper-turbo', {
         device: 'webgpu',
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
         progress_callback,
       });
       isMultilingual = true;
-      console.log(`[whisper] ready (turbo / WebGPU, ${secs()}s)`);
+      console.log(`[whisper] ready (turbo / R2, ${secs()}s)`);
       return pipe;
     } catch (e) {
-      console.log(`[whisper] turbo/WebGPU unavailable (${e instanceof Error ? e.message : e}) → base.en fallback`);
+      // reset to HuggingFace so the base.en fallback loads from the right place
+      mod.env.remoteHost = 'https://huggingface.co';
+      mod.env.remotePathTemplate = '{model}/resolve/{revision}/';
+      console.log(`[whisper] turbo/R2 unavailable (${e instanceof Error ? e.message : e}) → base.en fallback`);
       return loadEnglish('Xenova/whisper-base.en');
     }
   })();
