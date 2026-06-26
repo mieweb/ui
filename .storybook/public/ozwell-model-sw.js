@@ -13,14 +13,13 @@
  * `redirected` flag, both of which a raw cache.put() chokes on. Then store + serve that. Everything
  * else (app JS, Storybook HMR) passes straight through, so it can't break the dev server.
  */
-const CACHE = 'ozwell-models-v3';
+const CACHE = 'ozwell-models-v4';
 
+// Cache ONLY the wake + speaker model files and the ONNX/sherpa WASM runtimes. Deliberately does NOT
+// touch the Whisper model files (.../whisper.../onnx/*.onnx) — transformers.js's own streaming cache
+// handles those (it stores the ~1.2GB turbo model efficiently; a buffered SW cache.put chokes on it).
 function isModelAsset(url) {
-  return (
-    (/huggingface\.co\//.test(url) && /\.(onnx|bin|json|txt)(\?|$)/.test(url)) ||
-    /\/(wakeword|sv-runtime)\//.test(url) ||
-    /\.(onnx|wasm|data)(\?|$)/.test(url)
-  );
+  return /\/(wakeword|sv-runtime)\//.test(url) || /\.(wasm|data)(\?|$)/.test(url);
 }
 
 self.addEventListener('install', () => self.skipWaiting());

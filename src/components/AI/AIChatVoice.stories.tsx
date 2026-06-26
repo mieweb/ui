@@ -54,7 +54,7 @@ function loadWhisper() {
       env: { allowLocalModels: boolean; useBrowserCache: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
     };
     mod.env.allowLocalModels = false;
-    mod.env.useBrowserCache = false; // SW is the single model cache; don't double-store the ~1GB model
+    mod.env.useBrowserCache = true; // transformers.js streams the model to cache (the proven whisper-web path)
     mod.env.backends.onnx.wasm.numThreads = 1; // plain page has no COOP/COEP headers
     // Ask the browser to KEEP our model cache. Without this the model may never be stored (if the
     // quota is tight) or get evicted, so it re-downloads on every reload. Best-effort; fine if false.
@@ -64,7 +64,8 @@ function loadWhisper() {
     // makes Chrome shrink that quota); on a healthy machine / real deploy it caches once and reloads fast.
     // FALLBACK: base.en q8 — tiny (~75MB), always fits the cache, English-only.
     try {
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
+      // self-hosted LFS mirror (size headers) so transformers.js's streaming cache can store it
+      const pipe = await mod.pipeline('automatic-speech-recognition', 'jlocala/whisper-large-v3-turbo-ozwell', {
         device: 'webgpu',
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
       });

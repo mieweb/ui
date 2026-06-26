@@ -36,10 +36,10 @@ function loadWhisper(): Promise<Whisper> {
       env: { allowLocalModels: boolean; useBrowserCache: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
     };
     mod.env.allowLocalModels = false;
-    // The model-cache service worker is our single cache layer. transformers.js's own Cache-API
-    // storage would keep a SECOND ~1GB copy of the model (and was the 0-byte/quota offender) — turn
-    // it off so we don't double-store and blow the quota.
-    mod.env.useBrowserCache = false;
+    // Use transformers.js's OWN cache — it STREAMS the model straight to the Cache API (how whisper-web
+    // caches this same 1.2GB turbo model). A hand-rolled SW that buffers the whole file in memory chokes
+    // on a file this large (QuotaExceeded); streaming + a size-header (LFS) host is the proven path.
+    mod.env.useBrowserCache = true;
     mod.env.backends.onnx.wasm.numThreads = 1;
     try { await navigator.storage?.persist?.(); } catch { /* best-effort */ }
     const t0 = performance.now();
@@ -91,12 +91,10 @@ function loadWhisper(): Promise<Whisper> {
 
     console.log('[whisper] loading turbo…');
     // turbo (best accuracy) on WebGPU; falls back to base.en when turbo/WebGPU is unavailable.
-    // NOTE on caching: the service worker caches this across opens via the Cache API. That works on a
-    // normal browser, but a MANAGED/enterprise Chrome (e.g. a locked-down work laptop) can cap Cache
-    // Storage so large entries fail cache.put with QuotaExceeded even with GBs free — there turbo
-    // re-downloads each open. Not a code bug; verify on an unmanaged browser. See AI/MODEL-HOSTING.md.
+    // Loaded from a self-hosted LFS mirror (real size headers) so transformers.js's streaming cache can
+    // store it — the onnx-community copy is on HF Xet storage with no size header, which caches as 0 bytes.
     try {
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
+      const pipe = await mod.pipeline('automatic-speech-recognition', 'jlocala/whisper-large-v3-turbo-ozwell', {
         device: 'webgpu',
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
         progress_callback,
