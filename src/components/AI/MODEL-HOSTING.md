@@ -79,22 +79,41 @@ Set the global **before** the components mount (e.g. in `.storybook/preview` or 
    which is why it's the recommended host.)
 5. Re-measure first-load time from the CDN (cold vs warm) and note it.
 
-## Runtime model caching (so models don't re-download every app open)
+## Runtime model caching (so models don't re-download every app open) — SOLVED 2026-06-26
 
-A service worker (`.storybook/public/ozwell-model-sw.js`, registered via `AI/modelCache.ts`) caches the
-model assets in the Cache API so a returning user loads them from disk instead of re-downloading. It
-rebuilds each response with an explicit `Content-Length` before `cache.put` (HuggingFace's Xet storage
-sends no size, which `cache.put` otherwise rejects). transformers.js's own cache is disabled
-(`env.useBrowserCache = false`) so the SW is the single cache layer (no double-storing the ~1 GB model).
+Models are cached across app opens so a returning user loads from disk, not the network:
 
-**Known limit — managed/enterprise Chrome caps Cache Storage.** On a locked-down work laptop, small
-files cache fine but **large entries (~250 MB+, i.e. the Whisper turbo weights) fail `cache.put` with a
-misleading `QuotaExceededError` even with GBs of quota free.** Verified: it happens regardless of the
-model host (onnx-community Xet *and* a self-hosted LFS mirror both failed identically), and only to the
-big files — so it's an org storage policy, not a code bug (`chrome://management` / `chrome://policy`).
-There, turbo re-downloads each open. On an unmanaged browser it caches normally. For locked-down
-*production* environments (some hospital machines), the robust answer is **server-side transcription**
-or a **native app that bundles the model** — a deliberate architecture choice, not a client cache fix.
+- **Wake + speaker models** (`jlocala/ozwell-voice-assets`, classic LFS, ~1–40 MB) — cached by a service
+  worker (`.storybook/public/ozwell-model-sw.js`, registered via `AI/modelCache.ts`). It intercepts those
+  requests and stores the full response in the Cache API. Reliable.
+- **Whisper turbo** (~1.3 GB) — hosted on **Cloudflare R2** and cached by transformers.js's own streaming
+  cache (`env.useBrowserCache = true`). `whisperTranscribe.ts` points `env.remoteHost` at the R2 bucket
+  (`pub-…r2.dev`, model id `whisper-turbo`, `remotePathTemplate '{model}/'`). Confirmed: loads once cold
+  (~85 s), then **~10 s from cache** on later opens. The SW deliberately does NOT touch the Whisper files.
+
+**Why R2 and not HuggingFace (the day-long diagnosis):** turbo's weights live on HuggingFace's newer
+**Xet** storage, whose download responses carry **NO `Content-Length`**. transformers.js can't
+stream-to-cache a body of unknown size → it caches a 0-byte entry → re-downloads ~1.3 GB every cold open.
+Ruled out: disk (77 GB free), quota (10 GB), Chrome policy (none). Self-hosting on HF didn't help — HF
+forces large files onto Xet even with `HF_HUB_DISABLE_XET=1` + `hf_xet` uninstalled ("stored with Xet" on
+the file page). **R2 sends `Content-Length`, so transformers.js's normal streaming cache just works** —
+exactly like base.en (classic LFS) always did. Audio still never leaves the browser; R2 only hosts the
+model file. (To repoint to a mieweb-owned bucket for the PR: change `R2_HOST` + the bucket path.)
+
+**Honest caveats (for the production architecture conversation with Doug):**
+- Caching is **load-dependent**, not perfectly deterministic. On a clean single session it's ~10 s; under
+  heavy local contention (several tabs loading 1.3 GB + GPU-compiling at once) a load can stretch to ~60 s.
+  Not eviction — just the machine busy. Smooths out in normal single-user use.
+- Browser cache for a **website** is best-effort: under real disk pressure the browser *can* evict the
+  cached model, forcing a one-time re-download. `navigator.storage.persist()` is requested but not
+  guaranteed for a site (only PWA-install / high engagement reliably persist).
+- A "corrupted" browser profile can also block caching — seen during this session on the dev profile after
+  hours of clear-site-data + a full disk + repeated failed 1 GB writes. A fresh profile (or fully clearing
+  the origin's site data) fixes it. **This was a dev artifact, not a production risk** — real users start clean.
+- **For uniform reliability across all hardware/locked-down machines, server-side transcription** (browser
+  sends audio to a HIPAA-compliant Whisper server) is the robust alternative — no client download, faster,
+  more accurate, but trades the on-device/PHI-stays-local story. This is a deliberate architecture choice,
+  not a fix for something broken: the on-device + R2 setup **works** and is fine for the demo.
 
 ## Not required for the local demo
 
