@@ -5,6 +5,8 @@
  * transcribeBlob(blob) — decode a recorded audio blob, downmix + resample to 16 kHz, run Whisper
  * fully in the browser, return the text. Audio never leaves the page (PHI-safe).
  */
+import { registerModelServiceWorker } from './modelCache';
+
 type Whisper = (input: Float32Array, opts: unknown) => Promise<{ text?: string }>;
 let pipePromise: Promise<Whisper> | null = null;
 let isMultilingual = false;
@@ -25,6 +27,7 @@ function whisperPref(): string | null {
 
 function loadWhisper(): Promise<Whisper> {
   if (pipePromise) return pipePromise;
+  registerModelServiceWorker(); // ensure the model cache SW is registered before the big download
   pipePromise = (async () => {
     const mod = (await import(
       /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
@@ -108,6 +111,7 @@ export function isWhisperLoaded(): boolean {
 /** Start loading the model NOW — e.g. on app open or during enrollment — so the first dictation
  *  doesn't pay the load. Safe to call repeatedly (loadWhisper is memoized; the load happens once). */
 export function warmWhisper(): void {
+  registerModelServiceWorker(); // cache the (large) model across app opens
   void loadWhisper();
 }
 

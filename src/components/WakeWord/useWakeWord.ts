@@ -11,6 +11,7 @@
  * Needs `onnxruntime-web` (pnpm add) and the VAD model at /wakeword/silero-vad.onnx.
  */
 import * as React from 'react';
+import { registerModelServiceWorker } from '../AI/modelCache';
 
 export interface UseWakeWordOpts {
   /** Fired with the phrase name ("hey-ozwell" | "ozwell-i'm-done") on a detection. */
@@ -112,6 +113,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
 
   React.useEffect(() => {
     if (!enabled) return;
+    registerModelServiceWorker(); // cache wake/speaker (and Whisper) models across app opens
     let cancelled = false;
 
     (async () => {

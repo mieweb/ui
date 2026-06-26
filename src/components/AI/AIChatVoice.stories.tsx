@@ -20,6 +20,7 @@ import * as React from 'react';
 import { AIChat } from './AIChat';
 import type { AIMessage } from './types';
 import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from './ozwellChat';
+import { registerModelServiceWorker } from './modelCache';
 
 const meta: Meta<typeof AIChat> = {
   title: 'Product/Feature Modules/AI/AIChat (Voice)',
@@ -120,7 +121,7 @@ function VoiceAIChat() {
 
   // preload Whisper as soon as the story opens, so it's loading in the background while you read/talk
   // instead of waiting for the first mic tap — the first transcription is then fast.
-  React.useEffect(() => { void loadWhisper(); }, []);
+  React.useEffect(() => { registerModelServiceWorker(); void loadWhisper(); }, []);
 
   const send = React.useCallback((text: string) => {
     const t = text.trim();
