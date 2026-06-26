@@ -9,6 +9,20 @@ type Whisper = (input: Float32Array, opts: unknown) => Promise<{ text?: string }
 let pipePromise: Promise<Whisper> | null = null;
 let isMultilingual = false;
 
+// Optional model override, read from the same ozwellConfig used by the chat. Set
+// `{ ..., whisper: 'base.en' }` to force the small (~75 MB) English model instead of the heavy turbo
+// one — much faster to download and runs even when browser storage is tight/over-quota (the turbo
+// model is hundreds of MB and stalls when it can't cache). Checks current → parent → top frame
+// (Storybook iframe) and localStorage.
+function whisperPref(): string | null {
+  const fromWin = (w?: Window | null): string | undefined => {
+    try { return (w as unknown as { __ozwell?: { whisper?: string } })?.__ozwell?.whisper; } catch { return undefined; }
+  };
+  const win = fromWin(window) || fromWin(window.parent) || fromWin(window.top);
+  if (win) return win;
+  try { return JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisper || null; } catch { return null; }
+}
+
 function loadWhisper(): Promise<Whisper> {
   if (pipePromise) return pipePromise;
   pipePromise = (async () => {
@@ -23,8 +37,28 @@ function loadWhisper(): Promise<Whisper> {
     try { await navigator.storage?.persist?.(); } catch { /* best-effort */ }
     const t0 = performance.now();
     const secs = () => ((performance.now() - t0) / 1000).toFixed(1);
-    console.log('[whisper] loading…');
-    // turbo (best accuracy) on WebGPU; falls back to base.en q8 when WebGPU is unavailable.
+
+    // base.en path (small, English-only) — shared by the explicit override and the turbo fallback.
+    const loadBaseEn = async (): Promise<Whisper> => {
+      try {
+        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' });
+        console.log(`[whisper] ready (base.en / WebGPU, ${secs()}s)`);
+        return pipe;
+      } catch {
+        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' });
+        console.log(`[whisper] ready (base.en / wasm, ${secs()}s)`);
+        return pipe;
+      }
+    };
+
+    const forceBase = (whisperPref() || '').toLowerCase().startsWith('base');
+    if (forceBase) {
+      console.log('[whisper] loading base.en (forced via ozwellConfig.whisper)…');
+      return loadBaseEn();
+    }
+
+    console.log('[whisper] loading turbo…');
+    // turbo (best accuracy) on WebGPU; falls back to base.en when turbo/WebGPU is unavailable.
     try {
       const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
         device: 'webgpu',
@@ -35,15 +69,7 @@ function loadWhisper(): Promise<Whisper> {
       return pipe;
     } catch (e) {
       console.log(`[whisper] turbo/WebGPU unavailable (${e instanceof Error ? e.message : e}) → base.en fallback`);
-      try {
-        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' });
-        console.log(`[whisper] ready (base.en / WebGPU, ${secs()}s)`);
-        return pipe;
-      } catch {
-        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' });
-        console.log(`[whisper] ready (base.en / wasm, ${secs()}s)`);
-        return pipe;
-      }
+      return loadBaseEn();
     }
   })();
   return pipePromise;
