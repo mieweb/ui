@@ -42,9 +42,14 @@ function loadWhisper(): Promise<Whisper> {
     // model file at 25% steps; "(cached)" loads emit no progress events, so silence here = fast cache hit.
     const seen: Record<string, number> = {};
     const progress_callback = (p: { status?: string; file?: string; progress?: number }) => {
-      if (p.status === 'progress' && p.file && typeof p.progress === 'number') {
+      if (!p.file) return;
+      // HuggingFace omits content-length on its redirect, so big files emit no numeric `progress` — log
+      // start + finish too, else the slow .onnx files download in apparent silence (looks frozen).
+      if (p.status === 'initiate') console.log(`[whisper] fetching ${p.file}… (${secs()}s)`);
+      else if (p.status === 'done') console.log(`[whisper] ✓ ${p.file} (${secs()}s)`);
+      else if (p.status === 'progress' && typeof p.progress === 'number') {
         const step = Math.floor(p.progress / 25) * 25; // 0/25/50/75/100
-        if (seen[p.file] !== step) { seen[p.file] = step; console.log(`[whisper] downloading ${p.file}: ${step}% (${secs()}s)`); }
+        if (seen[p.file] !== step) { seen[p.file] = step; console.log(`[whisper] ${p.file}: ${step}% (${secs()}s)`); }
       }
     };
 
