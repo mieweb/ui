@@ -31,7 +31,9 @@
     if (g && g.base) return strip(g.base) + "/sv-runtime";
     // localStorage fallback — shared across Storybook frames, survives reload (the reliable path).
     try { var ls = localStorage.getItem("ozwellAssetBase"); if (ls) return strip(ls) + "/sv-runtime"; } catch (e) { /* ignore */ }
-    return "/sv-runtime";
+    // Default host: the runtime was moved off the repo (see AI/MODEL-HOSTING.md) so a fresh clone
+    // fetches it from here with no config. Override via window.__ozwellAssets / localStorage.
+    return "https://huggingface.co/jlocala/ozwell-voice-assets/resolve/main/sv-runtime";
   })();
   const MODEL = "./nemo_en_titanet_small.onnx"; // preloaded into the WASM filesystem
   const LS_KEY = "ozwellDoctorVoiceprint";       // { centroid: number[], n: number }

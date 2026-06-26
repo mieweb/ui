@@ -52,7 +52,11 @@ export interface WakeWordControls {
   phraseCosine: (name: string, vec: Float32Array | null) => number | null;
 }
 
-const DEFAULT_ASSET = '/wakeword';
+// Default host for the wake model files. The binaries were moved off the repo (see AI/MODEL-HOSTING.md)
+// so a fresh clone fetches them from here with no config. Override via the `assetBase` prop,
+// window.__ozwellAssets, or localStorage['ozwellAssetBase'] (e.g. to point at a local copy).
+const DEFAULT_ASSET_BASE = 'https://huggingface.co/jlocala/ozwell-voice-assets/resolve/main';
+const DEFAULT_ASSET = `${DEFAULT_ASSET_BASE}/wakeword`;
 const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
 
 // Resolve where to fetch model files from. Order: explicit prop → global `window.__ozwellAssets`

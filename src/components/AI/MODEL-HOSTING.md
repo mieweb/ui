@@ -1,10 +1,18 @@
 # Voice model hosting — PR-readiness note
 
+> **✅ CUTOVER DONE.** The ~57 MB of model binaries have been removed from the repo and are now
+> hosted on HuggingFace: **https://huggingface.co/jlocala/ozwell-voice-assets**. Both loaders default
+> to that host (`DEFAULT_ASSET_BASE` in `WakeWord/useWakeWord.ts`; the `SV_DIR` default in
+> `SpeakerVerify/lib/speaker-verify.js`), so a fresh clone runs with no extra setup — wake, speaker,
+> and Whisper all fetch at runtime. Verified in-browser from HuggingFace (wake fires, enrollment
+> works, both "ready" lines). The history below is kept for context. (For an upstream PR, move the
+> host repo under a mieweb-owned org and update the two defaults.)
+
 The on-device voice components (WakeWord, SpeakerVerify, AIChat dictation) need
-model files at runtime. Today they're committed under `.storybook/public/` so the
-Storybook demo runs self-contained. **Before this branch can merge upstream into
-`mieweb/ui`, those binaries must move out of the repo.** This note records the
-state and the plan so the cutover is a deliberate, testable step — not a scramble.
+model files at runtime. They were committed under `.storybook/public/` so the
+Storybook demo ran self-contained. **Before this branch can merge upstream into
+`mieweb/ui`, those binaries had to move out of the repo** (now done). This note records the
+state and the plan so the cutover was a deliberate, testable step — not a scramble.
 
 ## Current state (on `feat/ozwell-voice`)
 
