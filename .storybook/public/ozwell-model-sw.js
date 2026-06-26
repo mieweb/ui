@@ -13,7 +13,7 @@
  * `redirected` flag, both of which a raw cache.put() chokes on. Then store + serve that. Everything
  * else (app JS, Storybook HMR) passes straight through, so it can't break the dev server.
  */
-const CACHE = 'ozwell-models-v2';
+const CACHE = 'ozwell-models-v3';
 
 function isModelAsset(url) {
   return (
@@ -53,10 +53,16 @@ self.addEventListener('fetch', (event) => {
       if (!resp || resp.status !== 200) return resp;
 
       // Rebuild a clean, cacheable Response: arrayBuffer() drains the (possibly no-content-length)
-      // stream fully, and new Response(buf) has no `redirected` flag — so cache.put() accepts it.
+      // stream fully, and new Response(buf) has no `redirected` flag. CRUCIAL: HF Xet responses
+      // declare NO size, and cache.put() refuses a body of unknown length with a (misleading)
+      // QuotaExceededError even when there's GBs free — so set Content-Length explicitly from the
+      // buffer we now hold. Use minimal headers to avoid carrying over any Xet header weirdness.
       try {
         const buf = await resp.arrayBuffer();
-        const headers = new Headers(resp.headers);
+        const headers = new Headers();
+        const ct = resp.headers.get('Content-Type');
+        if (ct) headers.set('Content-Type', ct);
+        headers.set('Content-Length', String(buf.byteLength));
         const cached = new Response(buf, { status: 200, statusText: 'OK', headers });
         await cache.put(req, cached.clone());
         console.log('[ozwell-sw] cached', req.url, `(${(buf.byteLength / 1e6).toFixed(1)} MB)`);
