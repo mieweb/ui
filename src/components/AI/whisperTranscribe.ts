@@ -38,23 +38,33 @@ function loadWhisper(): Promise<Whisper> {
     const t0 = performance.now();
     const secs = () => ((performance.now() - t0) / 1000).toFixed(1);
 
-    // base.en path (small, English-only) — shared by the explicit override and the turbo fallback.
-    const loadBaseEn = async (): Promise<Whisper> => {
+    // Small English-only models (load directly, skip the heavy turbo). q8 on WebGPU, WASM fallback.
+    const loadEnglish = async (modelId: string): Promise<Whisper> => {
       try {
-        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' });
-        console.log(`[whisper] ready (base.en / WebGPU, ${secs()}s)`);
+        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8' });
+        console.log(`[whisper] ready (${modelId} / WebGPU, ${secs()}s)`);
         return pipe;
       } catch {
-        const pipe = await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' });
-        console.log(`[whisper] ready (base.en / wasm, ${secs()}s)`);
+        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { dtype: 'q8' });
+        console.log(`[whisper] ready (${modelId} / wasm, ${secs()}s)`);
         return pipe;
       }
     };
 
-    const forceBase = (whisperPref() || '').toLowerCase().startsWith('base');
-    if (forceBase) {
-      console.log('[whisper] loading base.en (forced via ozwellConfig.whisper)…');
-      return loadBaseEn();
+    // Optional override: pick a lighter model than turbo via ozwellConfig.whisper.
+    //   'small.en' — best speed/accuracy balance on a modest machine (RECOMMENDED if turbo is slow)
+    //   'base.en'  — faster but hallucinates on unclear audio
+    //   'tiny.en'  — fastest, lowest accuracy
+    //   'turbo' or unset — the large multilingual turbo model (best accuracy, heaviest)
+    const SMALL_MODELS: Record<string, string> = {
+      tiny: 'Xenova/whisper-tiny.en', 'tiny.en': 'Xenova/whisper-tiny.en',
+      base: 'Xenova/whisper-base.en', 'base.en': 'Xenova/whisper-base.en',
+      small: 'Xenova/whisper-small.en', 'small.en': 'Xenova/whisper-small.en',
+    };
+    const pref = (whisperPref() || '').toLowerCase();
+    if (pref && pref !== 'turbo' && SMALL_MODELS[pref]) {
+      console.log(`[whisper] loading ${pref} (forced via ozwellConfig.whisper)…`);
+      return loadEnglish(SMALL_MODELS[pref]);
     }
 
     console.log('[whisper] loading turbo…');
@@ -69,7 +79,7 @@ function loadWhisper(): Promise<Whisper> {
       return pipe;
     } catch (e) {
       console.log(`[whisper] turbo/WebGPU unavailable (${e instanceof Error ? e.message : e}) → base.en fallback`);
-      return loadBaseEn();
+      return loadEnglish('Xenova/whisper-base.en');
     }
   })();
   return pipePromise;
