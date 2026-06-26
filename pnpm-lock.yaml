@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  datavis-ace: '=4.0.0-PRE.2'
+  datavis-ace: '=4.1.0'
   esbuild@<0.28.1: 0.28.1
   axios@>=1.0.0 <1.16.0: 1.16.0
   minimatch@>=10.0.0 <10.2.3: 10.2.3
@@ -32,8 +32,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       datavis-ace:
-        specifier: '=4.0.0-PRE.2'
-        version: 4.0.0-PRE.2
+        specifier: '=4.1.0'
+        version: 4.1.0
       dompurify:
         specifier: ^3.4.0
         version: 3.4.8
@@ -76,16 +76,16 @@ importers:
         version: 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/builder':
         specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@esheet/core':
         specifier: 0.0.3
         version: 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/fields':
         specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@esheet/renderer':
         specifier: 0.0.3
-        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+        version: 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@eslint/js':
         specifier: ^9.39.3
         version: 9.39.3
@@ -99,8 +99,8 @@ importers:
         specifier: 0.7.9
         version: 0.7.9
       '@mieweb/datavis':
-        specifier: '=0.0.0-PRE.4'
-        version: 0.0.0-PRE.4(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(redux@5.0.1)(typescript@5.9.3)(wavesurfer.js@7.12.1)
+        specifier: '=1.0.0-PRE.1'
+        version: 1.0.0-PRE.1(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(redux@5.0.1)(typescript@5.9.3)(wavesurfer.js@7.12.1)
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1040,10 +1040,10 @@ packages:
   '@mermaid-js/parser@1.1.1':
     resolution: {integrity: sha512-VuHdsYMK1bT6X2JbcAaWAhugTRvRBRyuZgd+c22swUeI9g/ntaxF7CY7dYarhZovofCbUNO0G7JesfmNtjYOCw==}
 
-  '@mieweb/datavis@0.0.0-PRE.4':
-    resolution: {integrity: sha512-3eDGsyzngYCbPdelZvaJl95GXn2/2xYqZVDm9hcKI8ND/hTr9zWiXMMPNHF14keaQlA+ZTx6u3OXplVwzYnl5g==}
+  '@mieweb/datavis@1.0.0-PRE.1':
+    resolution: {integrity: sha512-FvV9xOVdCNVV7kcgNHgtPpojtOE/dZOY+4Qq3ThmOU+HNthNM37Zh1MOy9tC8KV6Rjyuo9AcZuJhHMOeAlpuBQ==}
     peerDependencies:
-      datavis-ace: '=4.0.0-PRE.2'
+      datavis-ace: '=4.1.0'
       react: ^19.0.0
       react-dom: ^19.0.0
 
@@ -1054,7 +1054,7 @@ packages:
       '@ozwell/react': '>=0.1.0'
       ag-grid-community: '>=32.0.0'
       ag-grid-react: '>=32.0.0'
-      datavis-ace: '=4.0.0-PRE.2'
+      datavis-ace: '=4.1.0'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
       wavesurfer.js: '>=7.0.0'
@@ -1070,25 +1070,43 @@ packages:
       wavesurfer.js:
         optional: true
 
-  '@mieweb/ui@0.3.0-dev.85':
-    resolution: {integrity: sha512-q/QOJcjQnSdW4h2UoUKIeq2CXiWkFJwv2jn/rTKKgVbSEmV4yqfi6LhTspxNL8u54mxn6CYVGXDufWNq0Hjn6w==}
-    engines: {node: '>=20.0.0'}
+  '@mieweb/ui@0.6.1-dev.148':
+    resolution: {integrity: sha512-JJQDSEytjZN6hoz4O52om3p6AXilTxT8veCObz02fIMasZZxP5UCPCGHrMGPZqXWpbz1fOBf1b/YGw+k5577pw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      '@ozwell/react': '>=0.1.0'
+      '@kerebron/editor': '>=0.7.9'
+      '@kerebron/editor-kits': '>=0.7.9'
+      '@kerebron/wasm': '>=0.7.9'
+      '@mieweb/datavis': '=0.0.0-PRE.4'
       ag-grid-community: '>=32.0.0'
       ag-grid-react: '>=32.0.0'
-      datavis-ace: '=4.0.0-PRE.2'
+      datavis-ace: '=4.1.0'
+      js-yaml: '>=4.0.0'
+      mermaid: '>=10.0.0'
+      papaparse: '>=5.0.0'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
       wavesurfer.js: '>=7.0.0'
     peerDependenciesMeta:
-      '@ozwell/react':
+      '@kerebron/editor':
+        optional: true
+      '@kerebron/editor-kits':
+        optional: true
+      '@kerebron/wasm':
+        optional: true
+      '@mieweb/datavis':
         optional: true
       ag-grid-community:
         optional: true
       ag-grid-react:
         optional: true
       datavis-ace:
+        optional: true
+      js-yaml:
+        optional: true
+      mermaid:
+        optional: true
+      papaparse:
         optional: true
       wavesurfer.js:
         optional: true
@@ -2571,8 +2589,8 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
-  core-js@3.47.0:
-    resolution: {integrity: sha512-c3Q2VVkGAUyupsjRnaNX6u8Dq2vAdzm9iuPj5FW0fRxzlxgq9Q39MDq10IvmQSpLgHQNyQzQmOo6bgGHmH3NNg==}
+  core-js@3.49.0:
+    resolution: {integrity: sha512-es1U2+YTtzpwkxVLwAFdSpaIMyQaq0PBgm3YD1W3Qpsn1NAmO3KSgZfu+oGSWVu6NvLHoHCV/aYcsE5wiB7ALg==}
 
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
@@ -2792,8 +2810,8 @@ packages:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
 
-  datavis-ace@4.0.0-PRE.2:
-    resolution: {integrity: sha512-wz7voSTEepUsSyzfhWCtB7FQbbvCoajg4zBQa8X5eWWUc4qt+41wQcvqeShEQu4osOwwbMZTKcAfaU0cqwmo+A==}
+  datavis-ace@4.1.0:
+    resolution: {integrity: sha512-heaXzdklp3jiqGRoK7YjcklyPT/2aigEEGMSV8Is2Z58oqHf8/rFPmztXjKb5ZQSqn6ygyPtV+u/iwJjTkhoFg==}
 
   dayjs@1.11.21:
     resolution: {integrity: sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==}
@@ -3498,8 +3516,8 @@ packages:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
 
-  i18next@26.3.1:
-    resolution: {integrity: sha512-txQqd5EULsqEh9OJqRH15aCaOuy/nLJyhw5EHCSKLKJE1aBbb3Zve2+uQIxgWhPm1QqUQoWyQBm2kfmmIrzkcQ==}
+  i18next@26.3.2:
+    resolution: {integrity: sha512-QQkXAM1sPDHqhxMQuBeHVMUn6mJchF+wdpOoQerciLAFqO3ZYdxO0EUbeEhruyutnNwpUQIITDVzLjwnNL0T1w==}
     peerDependencies:
       typescript: ^5 || ^6
     peerDependenciesMeta:
@@ -4188,8 +4206,8 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  lucide-react@1.17.0:
-    resolution: {integrity: sha512-9FA9evdox/JQL5PT57fdA1x/yg8T7knJ98+zjTL3UfKza6pflQUUh3XtaQIHKvnsJw1lmsEyHVlt5jchYxOQ5w==}
+  lucide-react@1.21.0:
+    resolution: {integrity: sha512-reEZMXq8Qdd5jg5XYkQ5TR1fB/GiQ7ih4vcrthYDtgjSDwh0i6/YLiGjsWsIwgN49gpAnd4J2elSNzncMEEUUQ==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -4585,6 +4603,9 @@ packages:
   papaparse@5.5.3:
     resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
 
+  papaparse@5.5.4:
+    resolution: {integrity: sha512-SwzWD9gl/ElwYLCI0nUja1mFJzjq2D8ziShfNBa7zCHzkOozeOGDwHWQ+tvCzEZcewecWZ5U7kUopDnG+DFYEQ==}
+
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -4910,8 +4931,8 @@ packages:
     resolution: {integrity: sha512-YTUo+Flmw4ZXiWfQKGcwwc11KnoRAYgzAE2E7mXKCjSviTKShtxBsN6YUUBB2gtaBzKzeKunxhUwNHQuRryhWA==}
     engines: {node: '>= 4'}
 
-  recharts@3.8.1:
-    resolution: {integrity: sha512-mwzmO1s9sFL0TduUpwndxCUNoXsBw3u3E/0+A+cLcrSfQitSG62L32N69GhqUrrT5qKcAE3pCGVINC6pqkBBQg==}
+  recharts@3.9.0:
+    resolution: {integrity: sha512-dCEcE9y20c8H2tkVeByrAXhhnBJk6/QLbxKmn+dJUptOfc5NMjwRh1jo0vZPRLD+5dMrHrP+hPEsfbGBMfnf5Q==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -4973,8 +4994,8 @@ packages:
   require-main-filename@2.0.0:
     resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
 
-  reselect@5.1.1:
-    resolution: {integrity: sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==}
+  reselect@5.2.0:
+    resolution: {integrity: sha512-AgZ3UOZm3YndfrJ4OYjgrT7bmCm/1iqkjvEfH/oYjzh6PD2qw4QuT3jjnXIrpdt4MTpMXclMT3lXbmRY+XRakw==}
 
   resolve-cwd@3.0.0:
     resolution: {integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==}
@@ -6299,11 +6320,11 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/builder@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
+  '@esheet/builder@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
     dependencies:
       '@esheet/adapters': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/core': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+      '@esheet/fields': 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       js-yaml: 4.1.1
       react: 19.2.4
@@ -6332,10 +6353,10 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@esheet/fields@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
+  '@esheet/fields@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
     dependencies:
       '@esheet/core': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@mieweb/ui': 0.3.0-dev.108(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
+      '@mieweb/ui': 0.3.0-dev.108(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       sortablejs: 1.15.7
@@ -6350,11 +6371,11 @@ snapshots:
       - use-sync-external-store
       - wavesurfer.js
 
-  '@esheet/renderer@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
+  '@esheet/renderer@0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)':
     dependencies:
       '@esheet/adapters': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@esheet/core': 0.0.3(@types/react@19.2.14)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
-      '@esheet/fields': 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
+      '@esheet/fields': 0.0.3(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(immer@11.1.8)(use-sync-external-store@1.6.0(react@19.2.4))(wavesurfer.js@7.12.1)
       js-yaml: 4.1.1
     optionalDependencies:
       react: 19.2.4
@@ -6827,31 +6848,36 @@ snapshots:
     dependencies:
       '@chevrotain/types': 11.1.2
 
-  '@mieweb/datavis@0.0.0-PRE.4(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(redux@5.0.1)(typescript@5.9.3)(wavesurfer.js@7.12.1)':
+  '@mieweb/datavis@1.0.0-PRE.1(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(redux@5.0.1)(typescript@5.9.3)(wavesurfer.js@7.12.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@dnd-kit/utilities': 3.2.2(react@19.2.4)
-      '@mieweb/ui': 0.3.0-dev.85(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
-      datavis-ace: 4.0.0-PRE.2
-      i18next: 26.3.1(typescript@5.9.3)
-      lucide-react: 1.17.0(react@19.2.4)
+      '@mieweb/ui': 0.6.1-dev.148(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@mieweb/datavis@1.0.0-PRE.1(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(redux@5.0.1)(typescript@5.9.3)(wavesurfer.js@7.12.1))(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)
+      datavis-ace: 4.1.0
+      i18next: 26.3.2(typescript@5.9.3)
+      lucide-react: 1.21.0(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      react-i18next: 17.0.8(i18next@26.3.1(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      react-i18next: 17.0.8(i18next@26.3.2(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
       react-is: 18.3.1
-      recharts: 3.8.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react-is@18.3.1)(react@19.2.4)(redux@5.0.1)
+      recharts: 3.9.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react-is@18.3.1)(react@19.2.4)(redux@5.0.1)
     transitivePeerDependencies:
-      - '@ozwell/react'
+      - '@kerebron/editor'
+      - '@kerebron/editor-kits'
+      - '@kerebron/wasm'
       - '@types/react'
       - ag-grid-community
       - ag-grid-react
+      - js-yaml
+      - mermaid
+      - papaparse
       - react-native
       - redux
       - typescript
       - wavesurfer.js
 
-  '@mieweb/ui@0.3.0-dev.108(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
+  '@mieweb/ui@0.3.0-dev.108(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
     dependencies:
       '@swc/helpers': 0.5.19
       class-variance-authority: 0.7.1
@@ -6865,24 +6891,34 @@ snapshots:
     optionalDependencies:
       ag-grid-community: 35.1.0
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      datavis-ace: 4.0.0-PRE.2
+      datavis-ace: 4.1.0
       wavesurfer.js: 7.12.1
 
-  '@mieweb/ui@0.3.0-dev.85(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.0.0-PRE.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
+  '@mieweb/ui@0.6.1-dev.148(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@mieweb/datavis@1.0.0-PRE.1(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(redux@5.0.1)(typescript@5.9.3)(wavesurfer.js@7.12.1))(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(wavesurfer.js@7.12.1)':
     dependencies:
       '@swc/helpers': 0.5.19
       class-variance-authority: 0.7.1
       clsx: 2.1.1
+      dompurify: 3.4.8
       google-libphonenumber: 3.2.44
+      highlight.js: 11.11.1
       lucide-react: 0.562.0(react@19.2.4)
       luxon: 3.7.2
+      marked: 17.0.6
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       tailwind-merge: 2.6.1
     optionalDependencies:
+      '@kerebron/editor': 0.7.9
+      '@kerebron/editor-kits': 0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1))
+      '@kerebron/wasm': 0.7.9
+      '@mieweb/datavis': 1.0.0-PRE.1(@kerebron/editor-kits@0.7.9(svelte@5.56.3(@typescript-eslint/types@8.56.1)))(@kerebron/editor@0.7.9)(@kerebron/wasm@0.7.9)(@types/react@19.2.14)(ag-grid-community@35.1.0)(ag-grid-react@35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(datavis-ace@4.1.0)(js-yaml@4.1.1)(mermaid@11.15.0)(papaparse@5.5.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(redux@5.0.1)(typescript@5.9.3)(wavesurfer.js@7.12.1)
       ag-grid-community: 35.1.0
       ag-grid-react: 35.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      datavis-ace: 4.0.0-PRE.2
+      datavis-ace: 4.1.0
+      js-yaml: 4.1.1
+      mermaid: 11.15.0
+      papaparse: 5.5.3
       wavesurfer.js: 7.12.1
 
   '@mieweb/ychart@file:packages/ychart(@popperjs/core@2.11.8)':
@@ -7003,7 +7039,7 @@ snapshots:
       immer: 11.1.8
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
-      reselect: 5.1.1
+      reselect: 5.2.0
     optionalDependencies:
       react: 19.2.4
       react-redux: 9.3.0(@types/react@19.2.14)(react@19.2.4)(redux@5.0.1)
@@ -8362,7 +8398,7 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  core-js@3.47.0: {}
+  core-js@3.49.0: {}
 
   core-util-is@1.0.3: {}
 
@@ -8625,15 +8661,15 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.2
 
-  datavis-ace@4.0.0-PRE.2:
+  datavis-ace@4.1.0:
     dependencies:
       bignumber.js: 9.3.1
-      core-js: 3.47.0
+      core-js: 3.49.0
       es6-symbol: 3.1.4
       json-formatter-js: https://codeload.github.com/mieweb/json-formatter-js/tar.gz/503be5a8368ecdea777f8a7e98bda827391aa6ac
       moment: 2.30.1
       numeral: 2.0.6
-      papaparse: 5.5.3
+      papaparse: 5.5.4
       sprintf-js: 1.1.3
       underscore: 1.13.8
 
@@ -9508,7 +9544,7 @@ snapshots:
 
   human-signals@2.1.0: {}
 
-  i18next@26.3.1(typescript@5.9.3):
+  i18next@26.3.2(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
 
@@ -10363,7 +10399,7 @@ snapshots:
     dependencies:
       react: 19.2.4
 
-  lucide-react@1.17.0(react@19.2.4):
+  lucide-react@1.21.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
@@ -11023,6 +11059,8 @@ snapshots:
 
   papaparse@5.5.3: {}
 
+  papaparse@5.5.4: {}
+
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -11232,11 +11270,11 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
-  react-i18next@17.0.8(i18next@26.3.1(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3):
+  react-i18next@17.0.8(i18next@26.3.2(typescript@5.9.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3):
     dependencies:
       '@babel/runtime': 7.29.2
       html-parse-stringify: 3.0.1
-      i18next: 26.3.1(typescript@5.9.3)
+      i18next: 26.3.2(typescript@5.9.3)
       react: 19.2.4
       use-sync-external-store: 1.6.0(react@19.2.4)
     optionalDependencies:
@@ -11306,7 +11344,7 @@ snapshots:
       tiny-invariant: 1.3.3
       tslib: 2.8.1
 
-  recharts@3.8.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react-is@18.3.1)(react@19.2.4)(redux@5.0.1):
+  recharts@3.9.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react-is@18.3.1)(react@19.2.4)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.12.0(react-redux@9.3.0(@types/react@19.2.14)(react@19.2.4)(redux@5.0.1))(react@19.2.4)
       clsx: 2.1.1
@@ -11318,7 +11356,7 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       react-is: 18.3.1
       react-redux: 9.3.0(@types/react@19.2.14)(react@19.2.4)(redux@5.0.1)
-      reselect: 5.1.1
+      reselect: 5.2.0
       tiny-invariant: 1.3.3
       use-sync-external-store: 1.6.0(react@19.2.4)
       victory-vendor: 37.3.6
@@ -11431,7 +11469,7 @@ snapshots:
 
   require-main-filename@2.0.0: {}
 
-  reselect@5.1.1: {}
+  reselect@5.2.0: {}
 
   resolve-cwd@3.0.0:
     dependencies:
