@@ -51,9 +51,10 @@ function loadWhisper() {
       /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
     )) as {
       pipeline: (task: string, model: string, opts?: unknown) => Promise<never>;
-      env: { allowLocalModels: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
+      env: { allowLocalModels: boolean; useBrowserCache: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
     };
     mod.env.allowLocalModels = false;
+    mod.env.useBrowserCache = false; // SW is the single model cache; don't double-store the ~1GB model
     mod.env.backends.onnx.wasm.numThreads = 1; // plain page has no COOP/COEP headers
     // Ask the browser to KEEP our model cache. Without this the model may never be stored (if the
     // quota is tight) or get evicted, so it re-downloads on every reload. Best-effort; fine if false.

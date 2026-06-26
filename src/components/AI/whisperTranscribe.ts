@@ -33,9 +33,13 @@ function loadWhisper(): Promise<Whisper> {
       /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
     )) as {
       pipeline: (task: string, model: string, opts?: unknown) => Promise<Whisper>;
-      env: { allowLocalModels: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
+      env: { allowLocalModels: boolean; useBrowserCache: boolean; backends: { onnx: { wasm: { numThreads: number } } } };
     };
     mod.env.allowLocalModels = false;
+    // The model-cache service worker is our single cache layer. transformers.js's own Cache-API
+    // storage would keep a SECOND ~1GB copy of the model (and was the 0-byte/quota offender) — turn
+    // it off so we don't double-store and blow the quota.
+    mod.env.useBrowserCache = false;
     mod.env.backends.onnx.wasm.numThreads = 1;
     try { await navigator.storage?.persist?.(); } catch { /* best-effort */ }
     const t0 = performance.now();
