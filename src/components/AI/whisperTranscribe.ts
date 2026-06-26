@@ -38,14 +38,24 @@ function loadWhisper(): Promise<Whisper> {
     const t0 = performance.now();
     const secs = () => ((performance.now() - t0) / 1000).toFixed(1);
 
+    // Visible download progress, so the (1–2 min, one-time) turbo load isn't an opaque freeze. Logs each
+    // model file at 25% steps; "(cached)" loads emit no progress events, so silence here = fast cache hit.
+    const seen: Record<string, number> = {};
+    const progress_callback = (p: { status?: string; file?: string; progress?: number }) => {
+      if (p.status === 'progress' && p.file && typeof p.progress === 'number') {
+        const step = Math.floor(p.progress / 25) * 25; // 0/25/50/75/100
+        if (seen[p.file] !== step) { seen[p.file] = step; console.log(`[whisper] downloading ${p.file}: ${step}% (${secs()}s)`); }
+      }
+    };
+
     // Small English-only models (load directly, skip the heavy turbo). q8 on WebGPU, WASM fallback.
     const loadEnglish = async (modelId: string): Promise<Whisper> => {
       try {
-        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8' });
+        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8', progress_callback });
         console.log(`[whisper] ready (${modelId} / WebGPU, ${secs()}s)`);
         return pipe;
       } catch {
-        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { dtype: 'q8' });
+        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { dtype: 'q8', progress_callback });
         console.log(`[whisper] ready (${modelId} / wasm, ${secs()}s)`);
         return pipe;
       }
@@ -73,6 +83,7 @@ function loadWhisper(): Promise<Whisper> {
       const pipe = await mod.pipeline('automatic-speech-recognition', 'onnx-community/whisper-large-v3-turbo', {
         device: 'webgpu',
         dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
+        progress_callback,
       });
       isMultilingual = true;
       console.log(`[whisper] ready (turbo / WebGPU, ${secs()}s)`);
