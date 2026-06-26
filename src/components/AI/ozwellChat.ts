@@ -40,11 +40,19 @@ const DEFAULTS = {
   temperature: 0.7,
 };
 
+// Storybook renders each story in an IFRAME, so a console-set `window.__ozwell` usually lands on the
+// parent frame, not the story's. Check current → parent → top (all same-origin, so safe). localStorage
+// is shared across same-origin frames, so the localStorage form always works regardless of frame.
+function readWindowGlobal(): Partial<OzwellConfig> {
+  const get = (w?: Window | null): Partial<OzwellConfig> | undefined => {
+    try { return (w as unknown as { __ozwell?: Partial<OzwellConfig> })?.__ozwell; } catch { return undefined; }
+  };
+  return get(window) || get(window.parent) || get(window.top) || {};
+}
 function readRaw(): Partial<OzwellConfig> {
   let stored: Partial<OzwellConfig> = {};
   try { stored = JSON.parse(localStorage.getItem('ozwellConfig') || '{}'); } catch { /* ignore bad JSON */ }
-  const win = ((window as unknown as { __ozwell?: Partial<OzwellConfig> }).__ozwell) || {};
-  return { ...stored, ...win }; // window override wins over localStorage
+  return { ...stored, ...readWindowGlobal() }; // window override wins over localStorage
 }
 
 /** Resolve the effective config from runtime sources + defaults. */

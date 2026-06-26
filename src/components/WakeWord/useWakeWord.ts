@@ -59,10 +59,18 @@ const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
 // (a base URL string, or { base, wakeword }) → the local Storybook path. Default keeps the demo
 // self-contained; set the global/prop to a hosted URL to move the ~6 MB of models off the repo.
 type AssetGlobal = string | { base?: string; wakeword?: string; svRuntime?: string };
+// Storybook runs stories in an iframe; a console-set window.__ozwellAssets often lands on the parent
+// frame, so check current → parent → top (all same-origin).
+function readAssetGlobal(): AssetGlobal | undefined {
+  const get = (w?: Window | null): AssetGlobal | undefined => {
+    try { return (w as unknown as { __ozwellAssets?: AssetGlobal })?.__ozwellAssets; } catch { return undefined; }
+  };
+  return get(window) || get(window.parent) || get(window.top);
+}
 function resolveAssetBase(override?: string): string {
   const strip = (s: string) => s.replace(/\/$/, '');
   if (override) return strip(override);
-  const g = (window as unknown as { __ozwellAssets?: AssetGlobal }).__ozwellAssets;
+  const g = readAssetGlobal();
   if (typeof g === 'string') return `${strip(g)}/wakeword`;
   if (g?.wakeword) return strip(g.wakeword);
   if (g?.base) return `${strip(g.base)}/wakeword`;

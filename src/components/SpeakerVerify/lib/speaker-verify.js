@@ -21,7 +21,10 @@
   // Default "/sv-runtime" (Storybook static dir). Set window.__ozwellAssets (a base URL string, or
   // { base, svRuntime }) to fetch the ~50 MB off the repo from a host — see AI/MODEL-HOSTING.md.
   const SV_DIR = (function () {
-    var g = (typeof window !== "undefined") ? window.__ozwellAssets : null;
+    // Storybook runs in an iframe; a console-set window.__ozwellAssets often lands on the parent frame,
+    // so check current -> parent -> top (all same-origin).
+    var pick = function (w) { try { return w && w.__ozwellAssets; } catch (e) { return null; } };
+    var g = (typeof window !== "undefined") ? (pick(window) || pick(window.parent) || pick(window.top)) : null;
     var strip = function (s) { return String(s).replace(/\/$/, ""); };
     if (typeof g === "string") return strip(g) + "/sv-runtime";
     if (g && g.svRuntime) return strip(g.svRuntime);

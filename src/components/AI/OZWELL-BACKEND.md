@@ -26,12 +26,17 @@ new helper, exactly the seam a real host would wire to its own backend.
 Read at runtime from either source (the browser console is easiest for local testing):
 
 ```js
-// fastest — this tab only:
-window.__ozwell = { apiKey: 'YOUR_KEY' };
-
-// persistent across reloads:
+// RECOMMENDED in Storybook — survives reloads AND is shared across the story iframe:
 localStorage.setItem('ozwellConfig', JSON.stringify({ apiKey: 'YOUR_KEY' }));
+
+// also works (the loader checks current → parent → top frame):
+window.__ozwell = { apiKey: 'YOUR_KEY' };
 ```
+
+> Storybook renders each story inside an **iframe**. A console-set `window.__ozwell` lands on the
+> parent page, not the story's frame — the loader now checks parent/top to cope, but the
+> **localStorage form is the reliable one** because localStorage is shared across same-origin frames.
+> Reload the tab after setting it.
 
 Optional overrides in the same object: `baseURL`, `model` (default `gpt-4o-mini`), `system`,
 `temperature`. Convenience: `apiKey: 'ollama'` points `baseURL` at `http://localhost:11434`.
