@@ -79,6 +79,23 @@ Set the global **before** the components mount (e.g. in `.storybook/preview` or 
    which is why it's the recommended host.)
 5. Re-measure first-load time from the CDN (cold vs warm) and note it.
 
+## Runtime model caching (so models don't re-download every app open)
+
+A service worker (`.storybook/public/ozwell-model-sw.js`, registered via `AI/modelCache.ts`) caches the
+model assets in the Cache API so a returning user loads them from disk instead of re-downloading. It
+rebuilds each response with an explicit `Content-Length` before `cache.put` (HuggingFace's Xet storage
+sends no size, which `cache.put` otherwise rejects). transformers.js's own cache is disabled
+(`env.useBrowserCache = false`) so the SW is the single cache layer (no double-storing the ~1 GB model).
+
+**Known limit — managed/enterprise Chrome caps Cache Storage.** On a locked-down work laptop, small
+files cache fine but **large entries (~250 MB+, i.e. the Whisper turbo weights) fail `cache.put` with a
+misleading `QuotaExceededError` even with GBs of quota free.** Verified: it happens regardless of the
+model host (onnx-community Xet *and* a self-hosted LFS mirror both failed identically), and only to the
+big files — so it's an org storage policy, not a code bug (`chrome://management` / `chrome://policy`).
+There, turbo re-downloads each open. On an unmanaged browser it caches normally. For locked-down
+*production* environments (some hospital machines), the robust answer is **server-side transcription**
+or a **native app that bundles the model** — a deliberate architecture choice, not a client cache fix.
+
 ## Not required for the local demo
 
 The Storybook demo runs fine as-is with the committed assets. This work is purely
