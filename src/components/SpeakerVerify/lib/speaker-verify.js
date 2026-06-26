@@ -29,6 +29,8 @@
     if (typeof g === "string") return strip(g) + "/sv-runtime";
     if (g && g.svRuntime) return strip(g.svRuntime);
     if (g && g.base) return strip(g.base) + "/sv-runtime";
+    // localStorage fallback — shared across Storybook frames, survives reload (the reliable path).
+    try { var ls = localStorage.getItem("ozwellAssetBase"); if (ls) return strip(ls) + "/sv-runtime"; } catch (e) { /* ignore */ }
     return "/sv-runtime";
   })();
   const MODEL = "./nemo_en_titanet_small.onnx"; // preloaded into the WASM filesystem

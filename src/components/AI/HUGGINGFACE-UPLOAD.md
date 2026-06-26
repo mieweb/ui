@@ -72,12 +72,15 @@ Open these in a browser — each should download / 200:
 
 ### 6. Point the app at the host
 
-Set the base **before the components mount**. Easiest: add it to `.storybook/preview` (so every
-story uses it), or just test from the browser console first:
+Set the base, then **reload** (it's read when the components mount). Use localStorage — the reliable
+path (shared across the Storybook iframe, survives reload), same lesson as the backend key:
 
 ```js
-window.__ozwellAssets = 'https://huggingface.co/<you>/ozwell-voice-assets/resolve/main';
+localStorage.setItem('ozwellAssetBase', 'https://huggingface.co/<you>/ozwell-voice-assets/resolve/main');
+// then reload the tab
 ```
+
+(`window.__ozwellAssets = '<base>'` also works — the loader checks current → parent → top frame.)
 
 Then open the WakeWord / Hands-Free / VoiceSetup stories and confirm in the console:
 `[wake] models ready` and `[speaker] TitaNet ready` — i.e. wake, speaker, and dictation all load

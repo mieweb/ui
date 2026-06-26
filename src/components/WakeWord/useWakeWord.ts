@@ -74,6 +74,8 @@ function resolveAssetBase(override?: string): string {
   if (typeof g === 'string') return `${strip(g)}/wakeword`;
   if (g?.wakeword) return strip(g.wakeword);
   if (g?.base) return `${strip(g.base)}/wakeword`;
+  // localStorage fallback — shared across Storybook frames, survives reload (the reliable path).
+  try { const ls = localStorage.getItem('ozwellAssetBase'); if (ls) return `${strip(ls)}/wakeword`; } catch { /* ignore */ }
   return DEFAULT_ASSET;
 }
 
