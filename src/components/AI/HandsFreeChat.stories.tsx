@@ -20,6 +20,7 @@ import { RecordButton } from '../RecordButton';
 import { useWakeWord } from '../WakeWord/useWakeWord';
 import { useSpeakerVerify } from '../SpeakerVerify/useSpeakerVerify';
 import { transcribeBlob, stripStopPhrase, warmWhisper } from './whisperTranscribe';
+import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from './ozwellChat';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hands-Free Chat',
@@ -69,6 +70,9 @@ function HandsFreeChat() {
   const svRef = React.useRef(sv); svRef.current = sv;
   const rollRef = React.useRef<Roll | null>(null);
   const [messages, setMessages] = React.useState<AIMessage[]>([]);
+  const messagesRef = React.useRef(messages);
+  messagesRef.current = messages;
+  const [generating, setGenerating] = React.useState(false);
   const [phase, setPhase] = React.useState<'listening' | 'dictating' | 'transcribing'>('listening');
   const recRef = React.useRef<MediaRecorder | null>(null);
   const chunksRef = React.useRef<BlobPart[]>([]);
@@ -79,9 +83,26 @@ function HandsFreeChat() {
     const t = text.trim();
     if (!t) return;
     setMessages((m) => [...m, mkMsg('user', t)]);
-    // stand-in for the real Ozwell backend
-    window.setTimeout(() => setMessages((m) => [...m, mkMsg('assistant',
-      `Heard: “${t}”. Wire me to the Ozwell backend and I'd answer.`)]), 350);
+
+    // No Ozwell key configured → keep the canned reply, so hands-free still demos keyless.
+    // Configure with `window.__ozwell = { apiKey: '…' }` (or localStorage['ozwellConfig']).
+    if (!isOzwellConfigured()) {
+      window.setTimeout(() => setMessages((m) => [...m, mkMsg('assistant',
+        `Heard: “${t}”. Wire me to the Ozwell backend and I'd answer.`)]), 350);
+      return;
+    }
+
+    // Real Ozwell call — streamed into one assistant message (multi-turn: pass the conversation as history).
+    const history = [...toOzwellMessages(messagesRef.current), { role: 'user' as const, content: t }];
+    const id = `assistant-${++counter}`;
+    setMessages((m) => [...m, { id, role: 'assistant', content: [{ type: 'text', text: '' }], timestamp: new Date(), status: 'streaming' }]);
+    setGenerating(true);
+    const patch = (txt: string, status: AIMessage['status']) =>
+      setMessages((m) => m.map((msg) => (msg.id === id ? { ...msg, content: [{ type: 'text', text: txt }], status } : msg)));
+    askOzwellStream(history, (_d, full) => patch(full, 'streaming'))
+      .then((full) => patch(full || '(no response)', 'complete'))
+      .catch((e) => patch(`⚠️ ${e instanceof Error ? e.message : String(e)}`, 'error'))
+      .finally(() => setGenerating(false));
   };
 
   // INVISIBLE doctor-only gate, run on each wake. If enrolled, only the enrolled doctor (WHO) saying the
@@ -181,6 +202,7 @@ function HandsFreeChat() {
         <AIChat
           messages={messages}
           height="100%"
+          isGenerating={generating}
           title="Ozwell Assistant — hands-free"
           inputPlaceholder={phase === 'listening' ? 'Say “hey ozwell”, or type…' : banner}
           onSendMessage={send}
