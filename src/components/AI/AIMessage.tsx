@@ -277,7 +277,7 @@ function ContentBlock({
     return (
       <AudioPlayer
         src={content.audioUrl}
-        title={content.text}
+        title={content.text || 'Audio recording'}
         variant="waveform"
         showTime
         showPlaybackRate

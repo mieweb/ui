@@ -10,6 +10,10 @@
 /**
  * Creates a synthetic audio blob URL using the Web Audio API.
  * Generates a short, pleasant tone that plays locally without CORS issues.
+ *
+ * Returns a `blob:` URL created via `URL.createObjectURL`. Callers that use
+ * this outside the memoized getters below should call `URL.revokeObjectURL`
+ * when the URL is no longer needed to avoid leaking the underlying blob.
  */
 export function createSampleAudioUrl(durationSec = 5, frequency = 440): string {
   const AudioContextCtor =
