@@ -90,11 +90,11 @@ export class HeyBuddy {
         const wakeWordEmbeddingFrames = options.wakeWordEmbeddingFrames || 16;
 
         // Initialize shared models
-        this.vad = new SileroVAD(vadModelPath, this.targetSampleRate, options.positiveVadThreshold, options.negativeVadThreshold, options.negativeVadCount);
-        this.vad.test(this.debug);
+        this.vad = new SileroVAD(vadModelPath, targetSampleRate, options.positiveVadThreshold, options.negativeVadThreshold, options.negativeVadCount);
+        this.vad.test(this.debug).catch((e) => console.warn("[HeyBuddy] vad.test failed", e));
 
         this.spectrogram = new MelSpectrogram(spectrogramModelPath);
-        this.spectrogram.test(this.debug);
+        this.spectrogram.test(this.debug).catch((e) => console.warn("[HeyBuddy] spectrogram.test failed", e));
         this.spectrogramMelBins = spectrogramMelBins;
 
         this.embedding = new SpeechEmbedding(
@@ -103,7 +103,7 @@ export class HeyBuddy {
             embeddingWindowSize,
             embeddingWindowStride,
         );
-        this.embedding.test(this.debug);
+        this.embedding.test(this.debug).catch((e) => console.warn("[HeyBuddy] embedding.test failed", e));
         this.embeddingDim = embeddingDim;
         this.embeddingWindowSize = embeddingWindowSize;
         this.embeddingWindowStride = embeddingWindowStride;
@@ -146,7 +146,7 @@ export class HeyBuddy {
             let modelThreshold = this.wakeWordThresholds[modelName] ?? this.wakeWordThreshold;
             this.wakeWords[modelName] = new WakeWord(model, modelThreshold);
             this.wakeWords[modelName].name = modelName; // for per-phrase window.__baseThr override
-            this.wakeWords[modelName].test(this.debug);
+            this.wakeWords[modelName].test(this.debug).catch((e) => console.warn(`[HeyBuddy] ${modelName}.test failed`, e));
         }
 
         // Initialize state

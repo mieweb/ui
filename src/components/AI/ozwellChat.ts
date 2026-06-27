@@ -98,7 +98,9 @@ function buildRequest(messages: OzwellMessage[] | string, cfg: OzwellConfig, str
     url: `${cfg.baseURL.replace(/\/$/, '')}/v1/chat/completions`,
     headers: {
       'Content-Type': 'application/json',
-      ...(cfg.apiKey ? { Authorization: `Bearer ${cfg.apiKey}` } : {}),
+      // 'ollama' is a sentinel that points baseURL at the local Ollama server, not a real credential —
+      // don't send it as a Bearer token (some local OpenAI-compatible servers reject unexpected auth).
+      ...(cfg.apiKey && cfg.apiKey !== 'ollama' ? { Authorization: `Bearer ${cfg.apiKey}` } : {}),
     } as Record<string, string>,
     body: JSON.stringify({
       model: cfg.model,

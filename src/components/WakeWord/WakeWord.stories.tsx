@@ -5,7 +5,9 @@
  * This story is the bare listener with a live readout; the next step wires a verified wake to
  * the AIChat voice (hands-free), and Phase 2 adds the doctor-only speaker gate.
  *
- * Requires (one-time): `pnpm add onnxruntime-web`. All 5 models ship in .storybook/public/wakeword/.
+ * Needs the `onnxruntime-web` dependency (in package.json). The wake models are fetched at runtime from a
+ * hosted base — default is the HuggingFace asset host; override via the `assetBase` prop,
+ * `window.__ozwellAssets`, or `localStorage['ozwellAssetBase']`. See AI/MODEL-HOSTING.md.
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';

@@ -1,10 +1,12 @@
 /**
  * Registers the model-cache service worker (public/ozwell-model-sw.js).
  *
- * Why: transformers.js caches the Whisper turbo model as a 0-byte entry (HuggingFace omits
- * content-length on its newer storage → the progress-stream drains the body before caching), so
- * every app open re-downloads ~200MB. The service worker fetches the full file itself and serves a
- * complete copy on later opens — fixing turbo, wake, and speaker caching. See ozwell-model-sw.js.
+ * Why: cache the wake-word + speaker-verification model assets across app opens so a returning user
+ * loads them from disk instead of re-downloading. The service worker fetches the full file itself and
+ * serves a complete copy on later opens.
+ * NOTE: Whisper turbo caching is handled SEPARATELY by transformers.js (it streams the model into the
+ * Cache API, and the model is hosted on Cloudflare R2 which sends Content-Length) — the SW intentionally
+ * does NOT intercept the Whisper weight files. See ozwell-model-sw.js / AI/MODEL-HOSTING.md.
  *
  * Idempotent and best-effort: safe to call from multiple mount points; no-ops without SW support.
  * The SW intercepts on the NEXT load (it activates + claims after first registration), so the very
