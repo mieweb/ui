@@ -25,6 +25,59 @@ interface PendingAttachment {
   error?: string;
 }
 
+/**
+ * A candidate for the composer's `@mention` autocomplete. Generic so any
+ * surface (multi-party chat, agent picker, …) can supply its own list.
+ */
+export interface MentionOption {
+  /** Stable id (returned to the host so it can map a selection back). */
+  id: string;
+  /** Display name shown in the suggestion list. */
+  label: string;
+  /** Text inserted after `@` on selection. Defaults to the first word of `label`. */
+  value?: string;
+  /** Optional secondary text shown after the label. */
+  description?: string;
+  /** Optional leading node (e.g. an avatar). */
+  icon?: React.ReactNode;
+  /** Optional trailing meta text (e.g. a kind tag). */
+  meta?: string;
+}
+
+/**
+ * Find the active `@query` immediately before the caret, if any. The `@` must
+ * start the string or follow whitespace, and the token must contain no spaces
+ * or further `@`.
+ */
+function activeMentionQuery(
+  value: string,
+  caret: number
+): { query: string; start: number } | null {
+  const upToCaret = value.slice(0, caret);
+  const match = /(^|\s)@([^\s@]*)$/.exec(upToCaret);
+  if (!match) return null;
+  const query = match[2];
+  return { query, start: caret - query.length - 1 };
+}
+
+/**
+ * Whether a file satisfies one of the accepted `<input accept>` tokens.
+ * Supports `type/*` wildcards, exact `type/subtype` tokens, and `.ext`
+ * extension tokens (matched against the file name, mirroring the native
+ * `<input accept>` behavior used by the picker and drag-and-drop).
+ */
+function isFileAccepted(file: File, accepted: string[]): boolean {
+  if (!accepted || accepted.length === 0) return true;
+  const mime = file.type;
+  const name = file.name.toLowerCase();
+  return accepted.some((token) => {
+    if (token.startsWith('.')) return name.endsWith(token.toLowerCase());
+    if (token.endsWith('/*')) return mime.startsWith(token.slice(0, -1));
+    if (token.includes('/')) return mime === token;
+    return false;
+  });
+}
+
 // ============================================================================
 // Character Counter Component
 // ============================================================================
@@ -224,6 +277,11 @@ export interface MessageComposerProps {
   variant?: 'default' | 'minimal';
   /** Content to render inside the input wrapper (e.g. a mic button) */
   inputTrailing?: React.ReactNode;
+  /**
+   * Candidates for `@mention` autocomplete. When provided (non-empty), typing
+   * `@` opens a picker. Omit to disable mentions entirely (default).
+   */
+  mentionOptions?: MentionOption[];
   /** Additional class name */
   className?: string;
 }
@@ -268,6 +326,7 @@ const MessageComposer = React.forwardRef<
       onCancelReply,
       variant = 'default',
       inputTrailing,
+      mentionOptions,
       className,
     },
     ref
@@ -346,6 +405,64 @@ const MessageComposer = React.forwardRef<
       }
     }, [replyTo]);
 
+    // --- @mention autocomplete (opt-in via `mentionOptions`) ---
+    const mentionsEnabled = !!mentionOptions && mentionOptions.length > 0;
+    const [mention, setMention] = React.useState<{
+      query: string;
+      start: number;
+    } | null>(null);
+    const [mentionHighlight, setMentionHighlight] = React.useState(0);
+    const mentionListId = React.useId();
+    const mentionOptionId = (i: number) => `${mentionListId}-option-${i}`;
+
+    const mentionSuggestions = React.useMemo(() => {
+      if (!mention || !mentionOptions) return [];
+      const q = mention.query.toLowerCase();
+      return mentionOptions.filter((o) => o.label.toLowerCase().includes(q));
+    }, [mention, mentionOptions]);
+
+    const mentionMenuOpen =
+      mentionsEnabled && mention !== null && mentionSuggestions.length > 0;
+    // Clamp the highlight to the current suggestion range so the active option
+    // never points at a stale/out-of-range index (the list can shrink while the
+    // menu is open as the query narrows). The same clamped index drives
+    // `aria-activedescendant`, `aria-selected`, and the visual highlight so they
+    // can never disagree.
+    const clampedMentionHighlight = mentionMenuOpen
+      ? Math.min(mentionHighlight, mentionSuggestions.length - 1)
+      : -1;
+    const activeMentionOptionId = mentionMenuOpen
+      ? mentionOptionId(clampedMentionHighlight)
+      : undefined;
+
+    const syncMention = React.useCallback(
+      (value: string, caret: number) => {
+        if (!mentionsEnabled) return;
+        setMention(activeMentionQuery(value, caret));
+        setMentionHighlight(0);
+      },
+      [mentionsEnabled]
+    );
+
+    const insertMention = (option: MentionOption) => {
+      if (!mention) return;
+      const insertValue = option.value ?? option.label.split(' ')[0];
+      const before = content.slice(0, mention.start);
+      const after = content.slice(mention.start + 1 + mention.query.length);
+      const insert = `@${insertValue} `;
+      setContent(before + insert + after);
+      setMention(null);
+      // Restore caret just after the inserted mention.
+      const caret = before.length + insert.length;
+      requestAnimationFrame(() => {
+        const el = textareaRef.current;
+        if (el) {
+          el.focus();
+          el.setSelectionRange(caret, caret);
+        }
+      });
+    };
+
     const canSend =
       (content.trim().length > 0 || attachments.length > 0) &&
       content.length <= maxLength &&
@@ -379,6 +496,36 @@ const MessageComposer = React.forwardRef<
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // @mention menu navigation takes priority over send.
+      if (mentionMenuOpen) {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          setMentionHighlight((h) => (h + 1) % mentionSuggestions.length);
+          return;
+        }
+        if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          setMentionHighlight(
+            (h) =>
+              (h - 1 + mentionSuggestions.length) % mentionSuggestions.length
+          );
+          return;
+        }
+        if (event.key === 'Enter' || event.key === 'Tab') {
+          event.preventDefault();
+          // `mentionHighlight` can fall out of range if the list shrank while
+          // the menu was open; fall back to the first suggestion.
+          const chosen =
+            mentionSuggestions[mentionHighlight] ?? mentionSuggestions[0];
+          if (chosen) insertMention(chosen);
+          return;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          setMention(null);
+          return;
+        }
+      }
       // Send on Enter (without Shift)
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
@@ -414,6 +561,20 @@ const MessageComposer = React.forwardRef<
       });
 
       setAttachments((prev) => [...prev, ...newAttachments]);
+    };
+
+    // Paste-to-attach: route pasted files through the same path as the picker.
+    const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      if (!showAttachmentPicker || disabled) return;
+      const pasted = Array.from(event.clipboardData.items)
+        .filter((item) => item.kind === 'file')
+        .map((item) => item.getAsFile())
+        .filter((f): f is File => f !== null)
+        .filter((f) => isFileAccepted(f, acceptedFileTypes));
+      if (pasted.length === 0) return;
+      // We're attaching the file ourselves; don't also paste a blob/path.
+      event.preventDefault();
+      handleFilesSelected(pasted);
     };
 
     const handleRemoveAttachment = (attachmentId: string) => {
@@ -551,12 +712,70 @@ const MessageComposer = React.forwardRef<
 
             {/* Text input */}
             <div data-slot="composer-input-wrapper" className="relative flex-1">
+              {mentionMenuOpen && (
+                <ul
+                  id={mentionListId}
+                  role="listbox"
+                  aria-label="Mention"
+                  data-slot="composer-mention-list"
+                  className="absolute bottom-full left-0 z-10 mb-1 max-h-56 w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+                >
+                  {mentionSuggestions.map((option, i) => (
+                    <li key={option.id}>
+                      <button
+                        type="button"
+                        id={mentionOptionId(i)}
+                        role="option"
+                        aria-selected={i === clampedMentionHighlight}
+                        // onMouseDown (not onClick) so the textarea keeps focus.
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          insertMention(option);
+                        }}
+                        onMouseEnter={() => setMentionHighlight(i)}
+                        className={cn(
+                          'flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm',
+                          i === clampedMentionHighlight
+                            ? 'bg-primary-100 text-primary-900 dark:bg-primary-900/40 dark:text-primary-100'
+                            : 'text-neutral-700 dark:text-neutral-200'
+                        )}
+                      >
+                        {option.icon}
+                        <span className="min-w-0 flex-1 truncate">
+                          <span className="font-medium">{option.label}</span>
+                          {option.description && (
+                            <span className="ml-1 text-xs text-neutral-400">
+                              {option.description}
+                            </span>
+                          )}
+                        </span>
+                        {option.meta && (
+                          <span className="text-[10px] text-neutral-400">
+                            {option.meta}
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
               <textarea
                 ref={textareaRef}
                 data-slot="composer-input"
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={(e) => {
+                  setContent(e.target.value);
+                  syncMention(
+                    e.target.value,
+                    e.target.selectionStart ?? e.target.value.length
+                  );
+                }}
+                onClick={(e) => {
+                  const el = e.currentTarget;
+                  syncMention(el.value, el.selectionStart ?? el.value.length);
+                }}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 placeholder={placeholder}
                 disabled={disabled || isSending}
                 rows={1}
@@ -573,6 +792,18 @@ const MessageComposer = React.forwardRef<
                 )}
                 aria-label="Message"
                 aria-describedby={showCharacterCount ? 'char-count' : undefined}
+                {...(mentionsEnabled
+                  ? {
+                      role: 'combobox' as const,
+                      'aria-expanded': mentionMenuOpen,
+                      'aria-controls': mentionMenuOpen
+                        ? mentionListId
+                        : undefined,
+                      'aria-activedescendant': activeMentionOptionId,
+                      'aria-autocomplete': 'list' as const,
+                      'aria-haspopup': 'listbox' as const,
+                    }
+                  : {})}
               />
 
               {/* Trailing content (e.g. record button) */}

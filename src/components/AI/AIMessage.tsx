@@ -370,7 +370,7 @@ const messageVariants = cva('flex gap-3', {
 
 const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
   variants: {
-    role: {
+    variant: {
       user: 'bg-primary-800 text-white dark:bg-primary-800',
       assistant:
         'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
@@ -380,9 +380,52 @@ const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
     },
   },
   defaultVariants: {
-    role: 'assistant',
+    variant: 'assistant',
   },
 });
+
+export interface ChatBubbleProps
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof bubbleVariants> {
+  /** Show error styling (red border). */
+  hasError?: boolean;
+  /**
+   * Optional left-border accent color. Used by multi-participant surfaces
+   * (e.g. SuperChat) to tint a speaker's bubble; AI chat leaves it unset.
+   */
+  accent?: string;
+}
+
+/**
+ * The shared chat bubble shell. This is the single source of truth for how a
+ * chat message bubble looks across the library (AI chat, SuperChat, etc.).
+ * Presentational only — callers render their own content inside.
+ */
+const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
+  (
+    { className, variant, hasError, accent, style, children, ...props },
+    ref
+  ) => {
+    return (
+      <div
+        ref={ref}
+        data-slot="chat-bubble"
+        className={cn(
+          bubbleVariants({ variant }),
+          hasError && 'border border-red-300 dark:border-red-700',
+          className
+        )}
+        style={accent ? { borderLeft: `3px solid ${accent}`, ...style } : style}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+ChatBubble.displayName = 'ChatBubble';
 
 export interface AIMessageDisplayProps {
   /** The message to display */
@@ -467,13 +510,10 @@ export function AIMessageDisplay({
           message.role === 'user' && 'items-end'
         )}
       >
-        <div
+        <ChatBubble
           data-slot="ai-message-bubble"
-          className={cn(
-            bubbleVariants({ role: message.role }),
-            message.status === 'error' &&
-              'border border-red-300 dark:border-red-700'
-          )}
+          variant={message.role}
+          hasError={message.status === 'error'}
         >
           {hasContent ? (
             <div className="space-y-3">
@@ -494,7 +534,7 @@ export function AIMessageDisplay({
               <AITypingIndicator />
             </div>
           ) : null}
-        </div>
+        </ChatBubble>
 
         {showTimestamp && (
           <span
@@ -515,4 +555,4 @@ export function AIMessageDisplay({
   );
 }
 
-export { MessageAvatar, AITypingIndicator };
+export { MessageAvatar, AITypingIndicator, ChatBubble, bubbleVariants };

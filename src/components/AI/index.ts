@@ -41,7 +41,9 @@ export {
   AIMessageDisplay,
   MessageAvatar,
   AITypingIndicator,
+  ChatBubble,
   type AIMessageDisplayProps,
+  type ChatBubbleProps,
 } from './AIMessage';
 
 // AI Chat

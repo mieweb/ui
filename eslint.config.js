@@ -93,6 +93,13 @@ export default [
         IntersectionObserver: 'readonly',
         IntersectionObserverEntry: 'readonly',
         MutationObserver: 'readonly',
+        // IndexedDB
+        indexedDB: 'readonly',
+        IDBDatabase: 'readonly',
+        IDBObjectStore: 'readonly',
+        IDBTransactionMode: 'readonly',
+        IDBOpenDBRequest: 'readonly',
+        IDBRequest: 'readonly',
         // DOM types
         Element: 'readonly',
         Document: 'readonly',
