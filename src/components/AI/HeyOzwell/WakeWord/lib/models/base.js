@@ -1,6 +1,7 @@
 /** @module models/base */
 import { sleep } from "../helpers.js";
 import { ONNX } from "../onnx.js";
+import { getModelBytes } from "../opfs.js";
 
 /**
  * Base class for ONNX models
@@ -90,7 +91,10 @@ export class ONNXModel {
      * Initialize the model
      */
     async load() {
-        this.session = await ONNX.createInferenceSession(this.modelPath, this.sessionOptions);
+        // Model files live in OPFS (app-private, offline, versioned) per the storage breakdown — fetch the
+        // bytes ourselves (OPFS-first, network on miss) and hand ORT the bytes instead of the URL.
+        const bytes = await getModelBytes(this.modelPath);
+        this.session = await ONNX.createInferenceSession(bytes, this.sessionOptions);
     }
 
     /**

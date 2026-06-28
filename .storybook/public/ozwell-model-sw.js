@@ -15,11 +15,13 @@
  */
 const CACHE = 'ozwell-models-v4';
 
-// Cache ONLY the wake + speaker model files and the ONNX/sherpa WASM runtimes. Deliberately does NOT
-// touch the Whisper model files (.../whisper.../onnx/*.onnx) — transformers.js's own streaming cache
-// handles those (it stores the ~1.2GB turbo model efficiently; a buffered SW cache.put chokes on it).
+// Cache ONLY runtime assets: the speaker (sherpa) runtime files and the ONNX/sherpa WASM. Deliberately
+// does NOT touch:
+//   - the wake-word model .onnx files — those now live in OPFS (app-managed; see WakeWord/lib/opfs.js),
+//   - the Whisper model files — transformers.js's own streaming cache handles those (it stores the ~1.2GB
+//     turbo model efficiently; a buffered SW cache.put chokes on it).
 function isModelAsset(url) {
-  return /\/(wakeword|sv-runtime)\//.test(url) || /\.(wasm|data)(\?|$)/.test(url);
+  return /\/sv-runtime\//.test(url) || /\.(wasm|data)(\?|$)/.test(url);
 }
 
 self.addEventListener('install', () => self.skipWaiting());
