@@ -147,10 +147,10 @@ export async function askOzwellStream(
     const { done, value } = await reader.read();
     if (done) break;
     buf += decoder.decode(value, { stream: true });
-    const events = buf.split('\n\n'); // SSE events are separated by a blank line
+    const events = buf.split(/\r?\n\r?\n/); // SSE events are separated by a blank line (handle CRLF too)
     buf = events.pop() || ''; // keep the trailing partial event for the next chunk
     for (const ev of events) {
-      for (const line of ev.split('\n')) {
+      for (const line of ev.split(/\r?\n/)) {
         if (!line.startsWith('data:')) continue;
         const payload = line.slice(5).trim();
         if (payload === '[DONE]') return full;

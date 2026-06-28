@@ -103,8 +103,8 @@
     return idbOpen().then((db) => new Promise((resolve, reject) => {
       const tx = db.transaction(IDB_STORE, mode);
       const r = run(tx.objectStore(IDB_STORE));
-      tx.oncomplete = () => resolve(r && r.result);
-      tx.onerror = () => reject(tx.error);
+      tx.oncomplete = () => { resolve(r && r.result); db.close(); };
+      tx.onerror = () => { reject(tx.error); db.close(); };
     }));
   }
   const idbGet = (key) => idbReq("readonly", (s) => s.get(key));

@@ -77,7 +77,7 @@ function HandsFreeChat() {
   const chunksRef = React.useRef<BlobPart[]>([]);
   const phaseRef = React.useRef(phase);
   phaseRef.current = phase;
-  const [roomLevel, setRoomLevel] = React.useState(0); // drives the header octopus pulse // a stop-confirm is in flight (debounce repeat stop-wakes)
+  const [roomLevel, setRoomLevel] = React.useState(0); // drives the header octopus pulse
 
   const send = (text: string) => {
     const t = text.trim();
@@ -152,8 +152,7 @@ function HandsFreeChat() {
     return () => { cancelled = true; rollRef.current?.close(); rollRef.current = null; };
   }, [wake.ready]);
 
-  // preload models on open so the first dictation/stop doesn't pay the load. Gate (small, fast) FIRST so
-  // it isn't queued behind a slow turbo download — the stop-confirm has to be responsive.
+  // preload the dictation model on open, so the first "ozwell i'm done" doesn't wait on it.
   React.useEffect(() => { warmWhisper(); }, []);
 
   // Live room-volume for the header octopus pulse — a second analyser on the detector's shared stream

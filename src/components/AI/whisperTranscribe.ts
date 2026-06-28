@@ -187,6 +187,20 @@ export function warmStopGate(): void {
   void loadGate();
 }
 
+// Downmix all channels of a decoded buffer to mono (average), so stereo recordings don't lose half the
+// signal. Single-channel buffers pass through.
+function downmixToMono(audio: AudioBuffer): Float32Array {
+  if (audio.numberOfChannels <= 1) return audio.getChannelData(0);
+  const n = audio.length;
+  const out = new Float32Array(n);
+  for (let ch = 0; ch < audio.numberOfChannels; ch++) {
+    const data = audio.getChannelData(ch);
+    for (let i = 0; i < n; i++) out[i] += data[i];
+  }
+  for (let i = 0; i < n; i++) out[i] /= audio.numberOfChannels;
+  return out;
+}
+
 // Linear-resample mono audio to 16 kHz (what Whisper wants). Shared by the blob + raw-samples paths.
 function resampleTo16kMono(src: Float32Array, sampleRate: number): Float32Array {
   const ratio = 16000 / sampleRate;
@@ -207,7 +221,7 @@ export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<st
   const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctx();
   const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
-  let samples = resampleTo16kMono(audio.getChannelData(0), audio.sampleRate);
+  let samples = resampleTo16kMono(downmixToMono(audio), audio.sampleRate);
   void ctx.close();
   if (trimEndSeconds > 0) {
     const cut = Math.round(trimEndSeconds * 16000);
@@ -257,7 +271,7 @@ export async function transcribeGate(samples: Float32Array, sampleRate: number):
  *  standalone demo: handles Whisper's mishearings (Ozwell / As well / Also / Oswald / "I am done")
  *  including the bare word alone. Bare "as well" is NOT stripped (too common) unless joined to "i'm done". */
 export function stripStopPhrase(text: string): string {
-  const tail = /(?:\b(?:oz\s*well|all['’]?s?\s*well|as\s*well|also|oswald)\b\s*,?\s*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all['’]?s\s*well|also|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
+  const tail = /(?:\b(?:oz\s*well|all['’]?s?\s*well|as\s*well|also|oswald)\b\s*,?\s*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all['’]?s\s*well|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
   let prev: string | null = null;
   let t = text;
   while (t !== prev && t) { prev = t; t = t.replace(tail, '').replace(/[\s.,!?-]+$/, ''); }

@@ -123,7 +123,7 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
       setState((s) => (s.ready || s.error || s.speech ? { ready: false, error: null, speech: 0, probs: {} } : s));
       return;
     }
-    registerModelServiceWorker(); // cache wake/speaker (and Whisper) models across app opens
+    registerModelServiceWorker(); // SW caches the sherpa runtime + wasm; wake models use OPFS, Whisper uses transformers.js
     let cancelled = false;
 
     (async () => {

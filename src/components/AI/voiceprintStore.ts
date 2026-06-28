@@ -31,8 +31,8 @@ function idbGet<T>(key: string): Promise<T | undefined> {
     (db) =>
       new Promise<T | undefined>((resolve, reject) => {
         const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(key);
-        req.onsuccess = () => resolve(req.result as T | undefined);
-        req.onerror = () => reject(req.error);
+        req.onsuccess = () => { resolve(req.result as T | undefined); db.close(); };
+        req.onerror = () => { reject(req.error); db.close(); };
       }),
   );
 }
@@ -43,8 +43,8 @@ function idbSet(key: string, value: unknown): Promise<void> {
       new Promise<void>((resolve, reject) => {
         const tx = db.transaction(STORE, 'readwrite');
         tx.objectStore(STORE).put(value, key);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
+        tx.oncomplete = () => { resolve(); db.close(); };
+        tx.onerror = () => { reject(tx.error); db.close(); };
       }),
   );
 }
@@ -55,8 +55,8 @@ function idbDel(key: string): Promise<void> {
       new Promise<void>((resolve, reject) => {
         const tx = db.transaction(STORE, 'readwrite');
         tx.objectStore(STORE).delete(key);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
+        tx.oncomplete = () => { resolve(); db.close(); };
+        tx.onerror = () => { reject(tx.error); db.close(); };
       }),
   );
 }

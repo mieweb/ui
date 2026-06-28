@@ -100,6 +100,7 @@ export function HeyOzwellToggle({
       onPointerDown={startPress}
       onPointerUp={cancelPress}
       onPointerLeave={cancelPress}
+      onPointerCancel={cancelPress}
       className={cn(
         'relative inline-flex cursor-pointer items-center justify-center rounded-full',
         'transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800',
@@ -124,7 +125,8 @@ export function HeyOzwellToggle({
       />
       <img
         src={logoSrc}
-        alt="Ozwell"
+        alt=""
+        aria-hidden="true"
         draggable={false}
         style={{
           position: 'relative', width: size, height: size, userSelect: 'none',
