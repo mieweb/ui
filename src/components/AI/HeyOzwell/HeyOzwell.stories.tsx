@@ -25,6 +25,8 @@ import {
   transcribeServer,
   stripStopPhrase,
   warmWhisper,
+  subscribeDictationLoad,
+  getDictationLoad,
 } from '../whisperTranscribe';
 import {
   askOzwellStream,
@@ -162,6 +164,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const [messages, setMessages] = React.useState<AIMessage[]>([]);
   const [generating, setGenerating] = React.useState(false);
   const [phase, setPhase] = React.useState<Phase>('listening');
+  const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
 
   const messagesRef = React.useRef(messages);
   messagesRef.current = messages;
@@ -452,6 +455,14 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
           <p style={{ marginTop: 0 }}>
             Starting the on-device detector… (loading models)
           </p>
+        )}
+        {active && dictLoad.active && !dictLoad.done && (
+          <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+            <span>Loading transcription model… {Math.round(dictLoad.progress * 100)}%</span>
+            <span style={{ display: 'inline-block', width: 140, height: 6, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
+              <span style={{ display: 'block', height: '100%', width: `${Math.round(dictLoad.progress * 100)}%`, background: '#0BA0E0', transition: 'width .2s linear' }} />
+            </span>
+          </div>
         )}
         {wake.error && (
           <p style={{ marginTop: 0, color: '#dc2626' }}>

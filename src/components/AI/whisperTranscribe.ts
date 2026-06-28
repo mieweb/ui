@@ -91,17 +91,45 @@ function serialize<T>(fn: () => Promise<T>): Promise<T> {
 
 // Visible download progress, so a cold load isn't an opaque freeze. Logs each file at 25% steps;
 // "(cached)" loads emit no progress events, so silence = a fast cache hit.
-function progressLogger(label: string) {
+// --- dictation-model load progress, surfaced to the UI (the ~1.3GB turbo download is the slow one) ---
+export interface WhisperLoadState {
+  /** A load is in flight. */ active: boolean;
+  /** Overall fraction 0..1 (averaged over the model's files). */ progress: number;
+  /** The model is loaded. */ done: boolean;
+}
+let dictationLoad: WhisperLoadState = { active: false, progress: 0, done: false };
+const loadListeners = new Set<() => void>();
+function setDictationLoad(patch: Partial<WhisperLoadState>): void {
+  dictationLoad = { ...dictationLoad, ...patch };
+  loadListeners.forEach((l) => l());
+}
+/** Current dictation-model load state (for a progress indicator). */
+export function getDictationLoad(): WhisperLoadState { return dictationLoad; }
+/** Subscribe to dictation-model load changes; returns an unsubscribe. Pair with getDictationLoad in
+ *  React.useSyncExternalStore. */
+export function subscribeDictationLoad(cb: () => void): () => void {
+  loadListeners.add(cb);
+  return () => { loadListeners.delete(cb); };
+}
+
+function progressLogger(label: string, onProgress?: (frac: number) => void) {
   const t0 = performance.now();
   const secs = () => ((performance.now() - t0) / 1000).toFixed(1);
   const seen: Record<string, number> = {};
+  const frac: Record<string, number> = {}; // per-file fraction 0..1, averaged for the aggregate bar
+  const report = () => {
+    if (!onProgress) return;
+    const vals = Object.values(frac);
+    onProgress(vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0);
+  };
   const cb = (p: { status?: string; file?: string; progress?: number }) => {
     if (!p.file) return;
-    if (p.status === 'initiate') console.log(`[whisper:${label}] fetching ${p.file}… (${secs()}s)`);
-    else if (p.status === 'done') console.log(`[whisper:${label}] ✓ ${p.file} (${secs()}s)`);
+    if (p.status === 'initiate') { console.log(`[whisper:${label}] fetching ${p.file}… (${secs()}s)`); frac[p.file] = frac[p.file] ?? 0; report(); }
+    else if (p.status === 'done') { console.log(`[whisper:${label}] ✓ ${p.file} (${secs()}s)`); frac[p.file] = 1; report(); }
     else if (p.status === 'progress' && typeof p.progress === 'number') {
       const step = Math.floor(p.progress / 25) * 25; // 0/25/50/75/100
       if (seen[p.file] !== step) { seen[p.file] = step; console.log(`[whisper:${label}] ${p.file}: ${step}% (${secs()}s)`); }
+      frac[p.file] = p.progress / 100; report();
     }
   };
   return { cb, secs };
@@ -109,11 +137,11 @@ function progressLogger(label: string) {
 
 // Small English model (load directly, skip the heavy turbo). q8 on WebGPU, WASM fallback. Always pins the
 // host back to HuggingFace in case a turbo load left env pointed at R2.
-async function buildEnglish(modelId: string): Promise<Whisper> {
+async function buildEnglish(modelId: string, onProgress?: (frac: number) => void): Promise<Whisper> {
   const mod = await getTransformers();
   mod.env.remoteHost = HF_HOST;
   mod.env.remotePathTemplate = HF_PATH;
-  const { cb, secs } = progressLogger(modelId);
+  const { cb, secs } = progressLogger(modelId, onProgress);
   try {
     const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8', progress_callback: cb });
     console.log(`[whisper] ready (${modelId} / WebGPU, ${secs()}s)`);
@@ -126,9 +154,9 @@ async function buildEnglish(modelId: string): Promise<Whisper> {
 }
 
 // turbo (best accuracy, multilingual) on WebGPU, weights from R2.
-async function buildTurbo(): Promise<Whisper> {
+async function buildTurbo(onProgress?: (frac: number) => void): Promise<Whisper> {
   const mod = await getTransformers();
-  const { cb, secs } = progressLogger('turbo');
+  const { cb, secs } = progressLogger('turbo', onProgress);
   mod.env.remoteHost = R2_HOST;
   mod.env.remotePathTemplate = '{model}/'; // files live at <R2_HOST>/whisper-turbo/<file>
   const pipe = await mod.pipeline('automatic-speech-recognition', 'whisper-turbo', {
@@ -143,6 +171,8 @@ async function buildTurbo(): Promise<Whisper> {
 
 function loadWhisper(): Promise<Whisper> {
   if (pipePromise) return pipePromise;
+  setDictationLoad({ active: true, progress: 0, done: false });
+  const report = (frac: number) => setDictationLoad({ progress: frac });
   pipePromise = (async () => {
     // Optional override: pick a lighter model than turbo via ozwellConfig.whisper.
     //   'small.en' — best speed/accuracy balance on a modest machine (RECOMMENDED if turbo is slow)
@@ -150,16 +180,20 @@ function loadWhisper(): Promise<Whisper> {
     const pref = (whisperPref() || '').toLowerCase();
     if (pref && pref !== 'turbo' && SMALL_MODELS[pref]) {
       console.log(`[whisper] loading ${pref} (forced via ozwellConfig.whisper)…`);
-      return serialize(() => buildEnglish(SMALL_MODELS[pref]));
+      return serialize(() => buildEnglish(SMALL_MODELS[pref], report));
     }
     console.log('[whisper] loading turbo…');
     try {
-      return await serialize(() => buildTurbo());
+      return await serialize(() => buildTurbo(report));
     } catch (e) {
       console.log(`[whisper] turbo/R2 unavailable (${e instanceof Error ? e.message : e}) → base.en fallback`);
-      return serialize(() => buildEnglish('Xenova/whisper-base.en'));
+      return serialize(() => buildEnglish('Xenova/whisper-base.en', report));
     }
   })();
+  void pipePromise.then(
+    () => setDictationLoad({ active: false, progress: 1, done: true }),
+    () => setDictationLoad({ active: false }),
+  );
   return pipePromise;
 }
 
