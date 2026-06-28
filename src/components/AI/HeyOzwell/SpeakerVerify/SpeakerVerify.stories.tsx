@@ -13,7 +13,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { useSpeakerVerify, type VerifyResult } from './useSpeakerVerify';
 import { useWakeWord } from '../WakeWord/useWakeWord';
-import { loadWhatPrints } from '../../voiceprintStore';
+import { loadWhatPrints, clearWhatPrints } from '../../voiceprintStore';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Speaker Verify (dev diagnostic)',
@@ -200,7 +200,7 @@ function SpeakerVerifyDemo({ cosineThreshold, znormThreshold, useAsnorm }: SVArg
     finally { setBusy(false); }
   };
 
-  const clearAll = () => { sv.clear(); PHRASES.forEach((p) => wakeRef.current.clearVoiceprint(p.key)); whatRef.current = {}; setConditions(0); setLog([]); setStatus('cleared'); };
+  const clearAll = () => { sv.clear(); void clearWhatPrints(); PHRASES.forEach((p) => wakeRef.current.clearVoiceprint(p.key)); whatRef.current = {}; setConditions(0); setLog([]); setStatus('cleared'); };
 
   const btn: React.CSSProperties = { font: '14px system-ui', padding: '8px 14px', borderRadius: 8, cursor: busy ? 'default' : 'pointer', border: '1px solid #2563eb', background: '#2563eb', color: '#fff', opacity: busy ? 0.5 : 1 };
   const dot = (state: 'pass' | 'fail' | 'off') => ({ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', marginRight: 4, background: state === 'pass' ? '#16a34a' : state === 'fail' ? '#dc2626' : '#9ca3af' });

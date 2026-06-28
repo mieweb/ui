@@ -117,3 +117,7 @@ export function loadWhatPrints(): Promise<Record<string, Float32Array[]>> {
 export function saveWhatPrints(map: Record<string, Float32Array[]>): Promise<void> {
   return setVoiceprints(WHAT_KEY, map);
 }
+
+export function clearWhatPrints(): Promise<void> {
+  return clearVoiceprints(WHAT_KEY);
+}
