@@ -12,6 +12,7 @@
  */
 import * as React from 'react';
 import { registerModelServiceWorker } from '../../modelCache';
+import { getModelBytes } from './lib/opfs.js';
 
 export interface UseWakeWordOpts {
   /** Fired with the phrase name ("hey-ozwell" | "ozwell-i'm-done") on a detection. */
@@ -85,6 +86,51 @@ function resolveAssetBase(override?: string): string {
   // localStorage fallback — shared across Storybook frames, survives reload (the reliable path).
   try { const ls = localStorage.getItem('ozwellAssetBase'); if (ls) return `${strip(ls)}/wakeword`; } catch { /* ignore */ }
   return DEFAULT_ASSET;
+}
+
+// --- Pre-warm: fetch the wake model FILES into OPFS WITHOUT opening the mic, so the detector loads
+// instantly on the first enable and the UI can show a load ring on reload while the mic stays off. ---
+const WAKE_MODEL_FILES = ['hey-ozwell.onnx', "ozwell-i'm-done.onnx", 'silero-vad.onnx', 'speech-embedding.onnx', 'mel-spectrogram.onnx'];
+
+export interface WakeWarmState {
+  /** A pre-fetch is in flight. */ active: boolean;
+  /** Fraction of model files cached, 0..1. */ progress: number;
+  /** All files cached. */ done: boolean;
+}
+let wakeWarm: WakeWarmState = { active: false, progress: 0, done: false };
+const warmListeners = new Set<() => void>();
+function setWakeWarm(patch: Partial<WakeWarmState>): void {
+  wakeWarm = { ...wakeWarm, ...patch };
+  warmListeners.forEach((l) => l());
+}
+/** Current wake-model pre-fetch state (for a load ring). */
+export function getWakeWarm(): WakeWarmState { return wakeWarm; }
+/** Subscribe to pre-fetch changes; pair with getWakeWarm in React.useSyncExternalStore. */
+export function subscribeWakeWarm(cb: () => void): () => void {
+  warmListeners.add(cb);
+  return () => { warmListeners.delete(cb); };
+}
+
+let warmPromise: Promise<void> | null = null;
+/** Pre-fetch the wake model files into OPFS (no mic, no detector). Memoized — safe to call on mount.
+ *  After this resolves, enabling the detector loads from OPFS instantly. */
+export function warmWakeModels(assetBase?: string): Promise<void> {
+  if (warmPromise) return warmPromise;
+  const base = resolveAssetBase(assetBase);
+  setWakeWarm({ active: true, progress: 0, done: false });
+  warmPromise = (async () => {
+    let done = 0;
+    await Promise.all(WAKE_MODEL_FILES.map(async (f) => {
+      try { await getModelBytes(`${base}/${f}`); } catch (e) { console.warn('[wake] pre-warm failed for', f, e); }
+      done += 1;
+      setWakeWarm({ progress: done / WAKE_MODEL_FILES.length });
+    }));
+  })();
+  void warmPromise.then(
+    () => setWakeWarm({ active: false, progress: 1, done: true }),
+    () => setWakeWarm({ active: false }),
+  );
+  return warmPromise;
 }
 
 // Load the SAME onnxruntime-web build the working demo uses (1.19.0), as a global `ort`.

@@ -17,7 +17,7 @@ import * as React from 'react';
 import { AIChat } from '../AIChat';
 import type { AIMessage } from '../types';
 import { RecordButton } from '../../RecordButton';
-import { useWakeWord } from './WakeWord/useWakeWord';
+import { useWakeWord, warmWakeModels, subscribeWakeWarm, getWakeWarm } from './WakeWord/useWakeWord';
 import { HeyOzwellToggle } from './HeyOzwellToggle';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
 import { transcribeBlob, stripStopPhrase, warmWhisper } from '../whisperTranscribe';
@@ -78,6 +78,7 @@ function HandsFreeChat() {
   const phaseRef = React.useRef(phase);
   phaseRef.current = phase;
   const [roomLevel, setRoomLevel] = React.useState(0); // drives the header octopus pulse
+  const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
 
   const send = (text: string) => {
     const t = text.trim();
@@ -153,7 +154,7 @@ function HandsFreeChat() {
   }, [wake.ready]);
 
   // preload the dictation model on open, so the first "ozwell i'm done" doesn't wait on it.
-  React.useEffect(() => { warmWhisper(); }, []);
+  React.useEffect(() => { void warmWakeModels(); warmWhisper(); }, []);
 
   // Live room-volume for the header octopus pulse — a second analyser on the detector's shared stream
   // (no extra getUserMedia). Mirrors the Voice Setup / Demo pulse.
@@ -225,7 +226,7 @@ function HandsFreeChat() {
             room volume while listening. AIChat exposes no header-action slot, so it's a positioned overlay.
             Status now lives in the composer placeholder, so no separate bar. */}
         <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
-          <HeyOzwellToggle active={wake.ready} loading={!wake.ready && !wake.error} level={roomLevel} size={34} />
+          <HeyOzwellToggle active={wake.ready} loading={wakeWarm.active || (!wake.ready && !wake.error)} level={roomLevel} size={34} />
         </div>
         <AIChat
           messages={messages}

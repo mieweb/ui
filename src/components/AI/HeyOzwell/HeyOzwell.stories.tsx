@@ -19,7 +19,7 @@ import { HeyOzwellToggle, type HeyOzwellToggleProps } from './HeyOzwellToggle';
 import { FloatingAIChat } from '../AIChatModal';
 import { suggestedActions } from '../storyData';
 import type { AIMessage } from '../types';
-import { useWakeWord } from './WakeWord/useWakeWord';
+import { useWakeWord, warmWakeModels, subscribeWakeWarm, getWakeWarm } from './WakeWord/useWakeWord';
 import {
   transcribeBlob,
   transcribeServer,
@@ -165,6 +165,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const [generating, setGenerating] = React.useState(false);
   const [phase, setPhase] = React.useState<Phase>('listening');
   const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
+  const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
 
   const messagesRef = React.useRef(messages);
   messagesRef.current = messages;
@@ -247,11 +248,13 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   wakeRef.current = wake;
   const level = useRoomLevel(wake.getStream, wake.ready);
 
-  // Preload the dictation model when Ozwell turns on, so the first "ozwell I'm done"
-  // doesn't wait on the Whisper load.
+  // Pre-load on mount (before the user presses), mic stays off: pre-fetch the wake model FILES into OPFS
+  // (no detector/mic) so the octopus shows a load ring on reload and activates instantly, and warm the
+  // dictation model so its progress bar shows on reload too.
   React.useEffect(() => {
-    if (active) warmWhisper();
-  }, [active]);
+    void warmWakeModels();
+    warmWhisper();
+  }, []);
 
   function startDictation() {
     const stream = wakeRef.current.getStream(); // the listener's OWN stream — no second getUserMedia
@@ -361,7 +364,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
         <HeyOzwellToggle
           active={active}
           level={level}
-          loading={active && !wake.ready && !wake.error}
+          loading={wakeWarm.active || (active && !wake.ready && !wake.error)}
           onToggle={toggle}
           onOpenSettings={() => setSettingsOpen((v) => !v)}
           size={40}
@@ -456,7 +459,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
             Starting the on-device detector… (loading models)
           </p>
         )}
-        {active && dictLoad.active && !dictLoad.done && (
+        {dictLoad.active && !dictLoad.done && (
           <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
             <span>Loading transcription model… {Math.round(dictLoad.progress * 100)}%</span>
             <span style={{ display: 'inline-block', width: 140, height: 6, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
