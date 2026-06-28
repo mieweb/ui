@@ -253,10 +253,12 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
 
   // Header octopus load state, split into two rings so the slow transcription warm-up never makes the
   // octopus look unavailable:
-  //   primary ring  = wake detection (fast) — this is what actually gates usability → green flash when ready
+  //   primary ring  = wake-model pre-warm on load → green "ready" flash when it finishes
   //   secondary arc = transcription (the long pole) — background only; you can press + talk immediately and
   //                   the audio is captured and transcribed once it finishes.
-  const ozLoading = wakeWarm.active || (active && !wake.ready && !wake.error);
+  // Only the pre-warm drives the primary ring: clicking to activate already turns the octopus on/pulsing,
+  // so we don't re-show the ring (or re-flash green) for the brief detector start on click.
+  const ozLoading = wakeWarm.active;
   const ozProgress = wakeWarm.done ? 1 : wakeWarm.progress;
   const ozWarm = dictLoad.active && !dictLoad.done;
   const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress); // hold at 99 until compile done
