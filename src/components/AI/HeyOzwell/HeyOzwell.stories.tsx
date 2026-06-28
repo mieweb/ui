@@ -16,6 +16,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { HeyOzwellToggle, type HeyOzwellToggleProps } from './HeyOzwellToggle';
+import { ModelInfoList } from './ModelInfoList';
+import type { ModelStatus } from './modelManifest';
 import { FloatingAIChat } from '../AIChatModal';
 import { suggestedActions } from '../storyData';
 import type { AIMessage } from '../types';
@@ -161,6 +163,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const [active, setActive] = React.useState(false);
   const [chatOpen, setChatOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [modelsOpen, setModelsOpen] = React.useState(false);
   const [messages, setMessages] = React.useState<AIMessage[]>([]);
   const [generating, setGenerating] = React.useState(false);
   const [phase, setPhase] = React.useState<Phase>('listening');
@@ -179,6 +182,12 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const ozLoadLabel = ozWarm
     ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
     : wakeWarm.active ? 'Wake word…' : undefined;
+
+  // Live readiness for the "Models & versions" readout in the settings menu.
+  const modelStatus: Partial<Record<'wake' | 'transcription', ModelStatus>> = {
+    wake: wakeWarm.done || wake.ready ? 'ready' : ozLoading ? 'loading' : 'idle',
+    transcription: dictLoad.done ? 'ready' : dictLoad.active ? 'loading' : 'idle',
+  };
 
   const messagesRef = React.useRef(messages);
   messagesRef.current = messages;
@@ -403,7 +412,9 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
               top: 56,
               right: 18,
               zIndex: 61,
-              width: 252,
+              width: 290,
+              maxHeight: '80vh',
+              overflowY: 'auto',
               background: '#fff',
               border: '1px solid #e2e8f0',
               borderRadius: 12,
@@ -457,6 +468,23 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
                 gotoStory(`${HEY_OZWELL}/Wake Word`, 'Listener')();
               }}
             />
+            {/* Models & versions — collapsible readout of what's running, per model (Doug). */}
+            <button
+              type="button"
+              onClick={() => setModelsOpen((v) => !v)}
+              style={{
+                display: 'flex', alignItems: 'center', width: '100%', gap: 8,
+                padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer',
+                borderTop: '1px solid #f1f5f9', textAlign: 'left',
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Models &amp; versions</div>
+                <div style={{ fontSize: 11.5, color: '#94a3b8' }}>What you’re running · where it loads from</div>
+              </div>
+              <span aria-hidden="true" style={{ color: '#94a3b8', fontSize: 12, transform: modelsOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▸</span>
+            </button>
+            {modelsOpen && <ModelInfoList status={modelStatus} />}
           </div>
         </>
       )}
