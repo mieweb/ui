@@ -102,6 +102,20 @@ export function HeyOzwellToggle({
     wasLoading.current = loading;
   }, [loading]);
 
+  // Gracefully fade the secondary (transcription) arc out when it finishes — no green flash, since the
+  // single green "ready" signal belongs to wake detection. Just a soft completion so it doesn't hard-vanish.
+  const [warmFade, setWarmFade] = React.useState(false);
+  const wasWarm = React.useRef(warmActive);
+  React.useEffect(() => {
+    if (wasWarm.current && !warmActive) {
+      setWarmFade(true);
+      const t = window.setTimeout(() => setWarmFade(false), 500);
+      wasWarm.current = warmActive;
+      return () => window.clearTimeout(t);
+    }
+    wasWarm.current = warmActive;
+  }, [warmActive]);
+
   // Primary ring geometry — a circle stroked from 12 o'clock, filling clockwise with loadProgress (wake).
   const ringBox = size + 6; // inset -3 on each side
   const ringStroke = 2.5;
@@ -207,11 +221,15 @@ export function HeyOzwellToggle({
       )}
       {/* Secondary arc — thin + muted, OUTSIDE the primary ring. Background transcription warm only;
           the octopus is already usable, so this never implies "not ready". */}
-      {warmActive && (
+      {(warmActive || warmFade) && (
         <svg
           aria-hidden="true"
           width={warmBox} height={warmBox} viewBox={`0 0 ${warmBox} ${warmBox}`}
-          style={{ position: 'absolute', inset: -6, pointerEvents: 'none', transform: 'rotate(-90deg)' }}
+          style={{
+            position: 'absolute', inset: -6, pointerEvents: 'none', transform: 'rotate(-90deg)',
+            // Stays mounted from active → fade so the opacity transition actually fires (soft completion).
+            opacity: warmActive ? 1 : 0, transition: 'opacity .5s ease',
+          }}
         >
           {/* faint full track so the arc reads as a ring, not a stray mark */}
           <circle
@@ -222,7 +240,7 @@ export function HeyOzwellToggle({
           <circle
             cx={warmBox / 2} cy={warmBox / 2} r={warmR}
             fill="none" stroke={OZ} strokeWidth={warmStroke} strokeLinecap="round"
-            strokeDasharray={warmC} strokeDashoffset={warmC * (1 - wp)}
+            strokeDasharray={warmC} strokeDashoffset={warmC * (1 - (warmActive ? wp : 1))}
             style={{ opacity: 0.4, transition: 'stroke-dashoffset .2s linear' }}
           />
         </svg>
