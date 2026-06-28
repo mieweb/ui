@@ -170,25 +170,6 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
   const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
 
-  // Header octopus load state, split into two rings so the slow transcription warm-up never makes the
-  // octopus look unavailable:
-  //   primary ring  = wake detection (fast) — this is what actually gates usability → green flash when ready
-  //   secondary arc = transcription (the long pole) — background only; you can press + talk immediately and
-  //                   the audio is captured and transcribed once it finishes.
-  const ozLoading = wakeWarm.active || (active && !wake.ready && !wake.error);
-  const ozProgress = wakeWarm.done ? 1 : wakeWarm.progress;
-  const ozWarm = dictLoad.active && !dictLoad.done;
-  const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress); // hold at 99 until compile done
-  const ozLoadLabel = ozWarm
-    ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
-    : wakeWarm.active ? 'Wake word…' : undefined;
-
-  // Live readiness for the "Models & versions" readout in the settings menu.
-  const modelStatus: Partial<Record<'wake' | 'transcription', ModelStatus>> = {
-    wake: wakeWarm.done || wake.ready ? 'ready' : ozLoading ? 'loading' : 'idle',
-    transcription: dictLoad.done ? 'ready' : dictLoad.active ? 'loading' : 'idle',
-  };
-
   const messagesRef = React.useRef(messages);
   messagesRef.current = messages;
   const phaseRef = React.useRef(phase);
@@ -269,6 +250,25 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const wakeRef = React.useRef(wake);
   wakeRef.current = wake;
   const level = useRoomLevel(wake.getStream, wake.ready);
+
+  // Header octopus load state, split into two rings so the slow transcription warm-up never makes the
+  // octopus look unavailable:
+  //   primary ring  = wake detection (fast) — this is what actually gates usability → green flash when ready
+  //   secondary arc = transcription (the long pole) — background only; you can press + talk immediately and
+  //                   the audio is captured and transcribed once it finishes.
+  const ozLoading = wakeWarm.active || (active && !wake.ready && !wake.error);
+  const ozProgress = wakeWarm.done ? 1 : wakeWarm.progress;
+  const ozWarm = dictLoad.active && !dictLoad.done;
+  const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress); // hold at 99 until compile done
+  const ozLoadLabel = ozWarm
+    ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
+    : wakeWarm.active ? 'Wake word…' : undefined;
+
+  // Live readiness for the "Models & versions" readout in the settings menu.
+  const modelStatus: Partial<Record<'wake' | 'transcription', ModelStatus>> = {
+    wake: wakeWarm.done || wake.ready ? 'ready' : ozLoading ? 'loading' : 'idle',
+    transcription: dictLoad.done ? 'ready' : dictLoad.active ? 'loading' : 'idle',
+  };
 
   // Pre-load on mount (before the user presses), mic stays off: pre-fetch the wake model FILES into OPFS
   // (no detector/mic) so the octopus shows a load ring on reload and activates instantly, and warm the
