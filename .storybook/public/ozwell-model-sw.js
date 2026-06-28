@@ -63,12 +63,19 @@ self.addEventListener('fetch', (event) => {
         if (ct) headers.set('Content-Type', ct);
         headers.set('Content-Length', String(buf.byteLength));
         const cached = new Response(buf, { status: 200, statusText: 'OK', headers });
-        await cache.put(req, cached.clone());
-        console.log('[ozwell-sw] cached', req.url, `(${(buf.byteLength / 1e6).toFixed(1)} MB)`);
+        // Caching is best-effort: if cache.put fails we STILL hold the bytes, so serve them rather
+        // than re-downloading a (possibly GB-sized) file.
+        try {
+          await cache.put(req, cached.clone());
+          console.log('[ozwell-sw] cached', req.url, `(${(buf.byteLength / 1e6).toFixed(1)} MB)`);
+        } catch (e) {
+          console.warn('[ozwell-sw] cache put failed for', req.url, e);
+        }
         return cached;
       } catch (e) {
-        console.warn('[ozwell-sw] cache put failed for', req.url, e);
-        return fetch(req); // body was consumed; refetch so the app still gets the file
+        // arrayBuffer() drained/failed — the body is gone, so refetch to still serve the file.
+        console.warn('[ozwell-sw] buffering failed for', req.url, e);
+        return fetch(req);
       }
     })(),
   );

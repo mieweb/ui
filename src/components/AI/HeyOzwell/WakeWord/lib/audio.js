@@ -19,6 +19,7 @@ export class AudioBatcher {
         targetSampleRate=16000,
     ) {
         this.initialized = false;
+        this.initError = null;
         this.callbacks = [];
         this.batchSeconds = batchSeconds;
         this.batchIntervalSeconds = batchIntervalSeconds;
@@ -26,7 +27,12 @@ export class AudioBatcher {
         this.targetSampleRate = targetSampleRate;
         this.buffer = new Float32Array(this.batchSamples);
         this.buffer.fill(0);
-        this.initialize();
+        // initialize() is async (getUserMedia + worklet addModule); catch so a denied mic / failed
+        // worklet surfaces as a stored error instead of an unhandled promise rejection.
+        this.initialize().catch((e) => {
+            this.initError = e;
+            console.error("[AudioBatcher] initialization failed", e);
+        });
     }
 
     /**

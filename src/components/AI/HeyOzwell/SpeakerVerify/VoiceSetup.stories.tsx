@@ -188,14 +188,16 @@ function VoiceSetup() {
         ))}
         <div ref={glowRef} style={{ position: 'absolute', left: '50%', top: '50%', width: 180, height: 180, transform: 'translate(-50%,-50%)', borderRadius: '50%',
           background: `radial-gradient(circle, ${OZ}66, transparent 68%)`, filter: 'blur(26px)', opacity: 0.4, pointerEvents: 'none' }} />
-        {/* the octopus — tappable in intro, pulses with voice via the ref */}
-        <div
-          role={phase === 'intro' ? 'button' : undefined}
+        {/* the octopus — a real button so it's keyboard-accessible; tappable only in intro, pulses via the ref */}
+        <button
+          type="button"
+          disabled={!(phase === 'intro' && bothReady)}
           onClick={phase === 'intro' ? run : undefined}
           title={phase === 'intro' ? 'Tap to set up your voice' : undefined}
+          aria-label={phase === 'intro' ? 'Set up your voice' : 'Ozwell'}
           style={{ position: 'relative', width: 150, height: 150, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: phase === 'intro' && bothReady ? 'pointer' : 'default', animation: wrapAnim,
-            ...(phase === 'intro' && bothReady ? { borderRadius: '50%' } : {}) }}
+            border: 'none', background: 'transparent', padding: 0,
+            cursor: phase === 'intro' && bothReady ? 'pointer' : 'default', animation: wrapAnim }}
         >
           <div style={phase === 'intro' && bothReady ? { position: 'absolute', inset: 0, borderRadius: '50%', animation: 'oz-invite 2s infinite' } : undefined} />
           <img ref={octoRef} src="/ozwell/icon.svg" alt="Ozwell" draggable={false}
@@ -203,7 +205,7 @@ function VoiceSetup() {
           {(phase === 'gotit' || phase === 'done') && (
             <div style={{ position: 'absolute', right: -2, bottom: -2, width: 36, height: 36, borderRadius: '50%', background: '#16a34a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: '0 2px 10px #16a34a66' }}>✓</div>
           )}
-        </div>
+        </button>
       </div>
 
       <div key={big} style={{ fontSize: 32, fontWeight: 700, letterSpacing: -0.5, animation: 'oz-fade .35s ease', minHeight: 40, color: '#0f2233' }}>{big}</div>

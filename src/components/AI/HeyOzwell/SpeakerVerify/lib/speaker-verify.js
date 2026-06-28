@@ -140,7 +140,7 @@
     /** Verify a live utterance against the BEST of the phrase's condition-centroids. {score, pass, enrolled}. */
     verify(phrase, samples, sampleRate) {
       const cents = loadCentroids(phrase);
-      if (!cents.length) return { score: 0, pass: false, enrolled: false };
+      if (!cents.length) return { score: 0, znorm: null, pass: false, enrolled: false };
       const live = embed(samples, sampleRate);
       let score = -1;
       for (const c of cents) { const s = cosine(live, c); if (s > score) score = s; }
