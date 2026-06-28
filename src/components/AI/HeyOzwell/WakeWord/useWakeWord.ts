@@ -11,7 +11,7 @@
  * Needs `onnxruntime-web` (pnpm add) and the VAD model at /wakeword/silero-vad.onnx.
  */
 import * as React from 'react';
-import { registerModelServiceWorker } from '../AI/modelCache';
+import { registerModelServiceWorker } from '../../modelCache';
 
 export interface UseWakeWordOpts {
   /** Fired with the phrase name ("hey-ozwell" | "ozwell-i'm-done") on a detection. */
@@ -19,13 +19,16 @@ export interface UseWakeWordOpts {
   /** Fired with the CAPTURED audio of a wake utterance (the phrase the model just heard) + which phrase.
    *  Use for phrase-validated enrollment: the wake firing IS the proof it was actually the phrase. */
   onUtterance?: (name: string, samples: Float32Array) => void;
-  /** Per-phrase fire thresholds (0..1). Defaults to 0.5 each. */
+  /** Per-phrase fire thresholds (0..1). Default 0.8 (hey-ozwell) / 0.5 (ozwell I'm done). Updates apply
+   *  live (read per-frame). */
   thresholds?: Record<string, number>;
+  /** VAD gate (0..1): `positive` = speech-detect, `negative` = silence. Defaults 0.05 / 0.03. Live. */
+  vadThresholds?: { positive?: number; negative?: number };
   /** Set false to not start listening. */
   enabled?: boolean;
-  /** Where the wake model files are served from. Default '/wakeword' (Storybook static dir). Set to a
-   *  hosted URL (e.g. a HuggingFace resolve URL) to fetch models remotely — see AI/MODEL-HOSTING.md.
-   *  Falls back to the global `window.__ozwellAssets` if this prop is omitted. */
+  /** Base URL the wake model files are served from. Defaults to the hosted assets (DEFAULT_ASSET_BASE).
+   *  Override per-call here, or globally via `window.__ozwellAssets` / `localStorage['ozwellAssetBase']`
+   *  — see AI/MODEL-HOSTING.md. */
   assetBase?: string;
 }
 
@@ -100,7 +103,7 @@ function ensureOrt(): Promise<void> {
 }
 
 export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWordControls {
-  const { onWake, onUtterance, thresholds, enabled = true, assetBase } = opts;
+  const { onWake, onUtterance, thresholds, vadThresholds, enabled = true, assetBase } = opts;
   const [state, setState] = React.useState<WakeWordState>({ ready: false, error: null, speech: 0, probs: {} });
   // keep the latest callbacks without re-running the effect
   const onWakeRef = React.useRef(onWake);
@@ -112,7 +115,14 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
   const hbRef = React.useRef<HeyBuddyInstance | null>(null);
 
   React.useEffect(() => {
-    if (!enabled) return;
+    // Disabled: report not-ready so consumers re-init on the next enable. Critical now that we tear the
+    // mic down on disable — a host analyser keyed on `ready` (e.g. the volume pulse) must see ready flip
+    // false→true again to re-attach to the FRESH stream, not stay bound to the torn-down one. (Returns the
+    // same state object when already reset, so React bails out — no needless render.)
+    if (!enabled) {
+      setState((s) => (s.ready || s.error || s.speech ? { ready: false, error: null, speech: 0, probs: {} } : s));
+      return;
+    }
     registerModelServiceWorker(); // cache wake/speaker (and Whisper) models across app opens
     let cancelled = false;
 
@@ -142,8 +152,8 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
           wakeWordThresholds: thresholds || { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.5 },
           // The VAD reads low in this setup, so gate generously — the re-entrancy guard in HeyBuddy
           // keeps the wake model from overlap-crashing even if this lets it run most of the time.
-          positiveVadThreshold: 0.05,
-          negativeVadThreshold: 0.03,
+          positiveVadThreshold: vadThresholds?.positive ?? 0.05,
+          negativeVadThreshold: vadThresholds?.negative ?? 0.03,
         });
         hbRef.current = hb;
 
@@ -166,9 +176,32 @@ export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWor
       }
     })();
 
-    // NOTE: HeyBuddy has no stop() yet — the mic keeps running until page nav. Phase-2 TODO: add teardown.
-    return () => { cancelled = true; };
+    // Teardown on disable/unmount: release the mic so `enabled: false` actually frees it (the gray
+    // "off" state must mean the mic is off). HeyBuddy has no stop(), but its stream + AudioContext are
+    // reachable via the batcher — stop the tracks (ends mic access / the OS recording indicator) and
+    // close the context (tears down the audio graph). Re-enabling re-runs this effect → a fresh HeyBuddy
+    // (re-getUserMedia, no re-prompt after the first grant). Mirrors the ozwellai-api landing-page toggle.
+    return () => {
+      cancelled = true;
+      const b = hbRef.current?.batcher;
+      try { b?.stream?.getTracks().forEach((t) => t.stop()); } catch { /* ignore */ }
+      try { void b?.audioContext?.close(); } catch { /* ignore */ }
+      hbRef.current = null;
+    };
   }, [enabled, assetBase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Push threshold changes to the LIVE detector. HeyBuddy reads `wakeWordThresholds` and the VAD reads its
+  // speech/silence thresholds per-frame, so this takes effect immediately — no mic re-init. Re-applies when
+  // the detector becomes ready (state.ready) so values set before load aren't lost.
+  React.useEffect(() => {
+    const hb = hbRef.current;
+    if (!hb) return;
+    if (thresholds) hb.wakeWordThresholds = { ...thresholds };
+    if (vadThresholds && hb.vad) {
+      if (vadThresholds.positive != null) hb.vad.speechVadThreshold = vadThresholds.positive;
+      if (vadThresholds.negative != null) hb.vad.silenceVadThreshold = vadThresholds.negative;
+    }
+  }, [thresholds, vadThresholds, state.ready]);
 
   // getStream exposes the detector's mic stream so a host can add a second consumer (e.g. a
   // MediaRecorder for dictation) WITHOUT opening a second getUserMedia (which goes silent).
@@ -213,7 +246,9 @@ interface HeyBuddyInstance {
   onProcessed(cb: (r: ProcessedResult) => void): void;
   onDetected(name: string, cb: () => void): void;
   onRecording(cb: (samples: Float32Array) => void): void;
-  batcher?: { stream?: MediaStream };
+  batcher?: { stream?: MediaStream; audioContext?: { close(): Promise<void> } };
+  wakeWordThresholds: Record<string, number>;                              // per-phrase fire gate (live)
+  vad?: { speechVadThreshold: number; silenceVadThreshold: number };        // VAD speech/silence gate (live)
   lastWakeEmbedding: Float32Array | null;        // frozen fire-frame embedding (the WHAT-gate input)
   lastWakeProb: number;                          // frozen peak fire confidence (the base level)
   voiceprints: Record<string, Float32Array[]>;   // per-phrase enrolled phrase-print templates

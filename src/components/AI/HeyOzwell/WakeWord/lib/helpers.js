@@ -1,8 +1,8 @@
 /**
  * Check if an object is 'empty'.
  *
- * @param object $o The object to check.o
- * @return bool True if the object is empty.
+ * @param {*} o The object to check.
+ * @returns {boolean} True if the object is empty.
  */
 export let isEmpty = (o) => {
     return (

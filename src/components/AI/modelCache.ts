@@ -12,11 +12,11 @@
  * The SW intercepts on the NEXT load (it activates + claims after first registration), so the very
  * first visit still downloads normally; subsequent opens are cache hits.
  */
-let registered = false;
+const registered = new Set<string>();
 
 export function registerModelServiceWorker(swUrl = '/ozwell-model-sw.js'): void {
-  if (registered) return;
-  registered = true;
+  if (registered.has(swUrl)) return; // memoize per-URL, so a different swUrl isn't silently ignored
+  registered.add(swUrl);
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register(swUrl).then(
     () => console.log('[modelCache] model service worker registered'),

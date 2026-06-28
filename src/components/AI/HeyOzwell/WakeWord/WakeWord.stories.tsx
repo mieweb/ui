@@ -14,7 +14,7 @@ import * as React from 'react';
 import { useWakeWord } from './useWakeWord';
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/AI/Wake Word',
+  title: 'Product/Feature Modules/AI/Hey Ozwell/Wake Word',
   parameters: {
     layout: 'centered',
     docs: {
@@ -48,10 +48,28 @@ function Meter({ label, value, accent }: { label: string; value: number; accent:
   );
 }
 
-function WakeWordDemo() {
+interface WakeArgs {
+  heyOzwellThreshold: number;
+  doneThreshold: number;
+  speechVadThreshold: number;
+  silenceVadThreshold: number;
+}
+
+function WakeWordDemo({ heyOzwellThreshold, doneThreshold, speechVadThreshold, silenceVadThreshold }: WakeArgs) {
   const [log, setLog] = React.useState<{ name: string; t: string }[]>([]);
   const [flash, setFlash] = React.useState<string | null>(null);
+  // Memoize so the live-update effect in useWakeWord only fires when a value actually changes.
+  const thresholds = React.useMemo(
+    () => ({ 'hey-ozwell': heyOzwellThreshold, "ozwell-i'm-done": doneThreshold }),
+    [heyOzwellThreshold, doneThreshold],
+  );
+  const vadThresholds = React.useMemo(
+    () => ({ positive: speechVadThreshold, negative: silenceVadThreshold }),
+    [speechVadThreshold, silenceVadThreshold],
+  );
   const st = useWakeWord({
+    thresholds,
+    vadThresholds,
     onWake: (name) => {
       setLog((l) => [{ name, t: new Date().toLocaleTimeString() }, ...l].slice(0, 6));
       setFlash(name);
@@ -118,9 +136,33 @@ function WakeWordDemo() {
   );
 }
 
-/** The on-device listener with a live readout of speech + per-phrase wake probabilities. */
-export const Listener: StoryObj = {
-  render: () => <WakeWordDemo />,
+/** The on-device listener with a live readout of speech + per-phrase wake probabilities. The four
+ *  thresholds are live Controls — drag them and watch the bars / detections respond immediately. */
+export const Listener: StoryObj<WakeArgs> = {
+  args: { heyOzwellThreshold: 0.8, doneThreshold: 0.5, speechVadThreshold: 0.05, silenceVadThreshold: 0.03 },
+  argTypes: {
+    heyOzwellThreshold: {
+      name: '“hey ozwell” threshold',
+      control: { type: 'range', min: 0, max: 1, step: 0.01 },
+      description: 'Fire gate for hey-ozwell. Higher = fewer false fires but more misses.',
+    },
+    doneThreshold: {
+      name: '“ozwell I’m done” threshold',
+      control: { type: 'range', min: 0, max: 1, step: 0.01 },
+      description: 'Fire gate for the stop phrase.',
+    },
+    speechVadThreshold: {
+      name: 'VAD speech threshold',
+      control: { type: 'range', min: 0, max: 1, step: 0.01 },
+      description: 'Speech-detect gate — higher needs louder/clearer speech before the wake models run.',
+    },
+    silenceVadThreshold: {
+      name: 'VAD silence threshold',
+      control: { type: 'range', min: 0, max: 1, step: 0.01 },
+      description: 'Silence gate — when speech probability drops below this it’s treated as quiet.',
+    },
+  },
+  render: (args) => <WakeWordDemo {...args} />,
 };
 
 // --- Diagnostic: raw mic level, bypassing the detector entirely ---

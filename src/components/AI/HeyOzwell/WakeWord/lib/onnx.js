@@ -1,7 +1,7 @@
 /** @module onnx */
 import { sleep } from "./helpers.js";
 
-let initialized = false, Tensor, InferenceSession;
+let initialized = false, initError = null, Tensor, InferenceSession;
 
 if (typeof ort !== "undefined") {
     initialized = true;
@@ -23,6 +23,9 @@ if (typeof ort !== "undefined") {
         initialized = true;
         Tensor = module.Tensor;
         InferenceSession = module.InferenceSession;
+    }).catch((e) => {
+        // Surface a load failure (CSP/network/missing dep) instead of spinning forever below.
+        initError = e instanceof Error ? e : new Error(String(e));
     });
 }
 
@@ -36,6 +39,7 @@ export class ONNX {
      */
     static async waitForInitialization() {
         while (!initialized) {
+            if (initError) throw new Error("ONNX Runtime Web failed to load: " + initError.message);
             await sleep(10);
         }
     }

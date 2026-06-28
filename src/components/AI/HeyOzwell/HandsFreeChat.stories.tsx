@@ -14,16 +14,17 @@
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import { AIChat } from './AIChat';
-import type { AIMessage } from './types';
-import { RecordButton } from '../RecordButton';
-import { useWakeWord } from '../WakeWord/useWakeWord';
-import { useSpeakerVerify } from '../SpeakerVerify/useSpeakerVerify';
-import { transcribeBlob, stripStopPhrase, warmWhisper } from './whisperTranscribe';
-import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from './ozwellChat';
+import { AIChat } from '../AIChat';
+import type { AIMessage } from '../types';
+import { RecordButton } from '../../RecordButton';
+import { useWakeWord } from './WakeWord/useWakeWord';
+import { HeyOzwellToggle } from './HeyOzwellToggle';
+import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
+import { transcribeBlob, stripStopPhrase, warmWhisper } from '../whisperTranscribe';
+import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from '../ozwellChat';
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/AI/Hands-Free Chat',
+  title: 'Product/Feature Modules/AI/Hey Ozwell/Hands-Free Chat',
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -50,6 +51,7 @@ const WHAT_KEY = 'ozwellWhatPrints';
 // opening the door to the doctor's own non-phrase speech.
 const WHAT_THRESHOLDS: Record<string, number> = { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.75 };
 const whatThr = (name: string) => WHAT_THRESHOLDS[name] ?? 0.8;
+
 function loadWhat(): Record<string, Float32Array[]> {
   try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
 }
@@ -78,6 +80,7 @@ function HandsFreeChat() {
   const chunksRef = React.useRef<BlobPart[]>([]);
   const phaseRef = React.useRef(phase);
   phaseRef.current = phase;
+  const [roomLevel, setRoomLevel] = React.useState(0); // drives the header octopus pulse // a stop-confirm is in flight (debounce repeat stop-wakes)
 
   const send = (text: string) => {
     const t = text.trim();
@@ -150,8 +153,36 @@ function HandsFreeChat() {
     return () => { cancelled = true; rollRef.current?.close(); rollRef.current = null; };
   }, [wake.ready]);
 
-  // preload the dictation model on open, so the first "ozwell i'm done" doesn't wait on it
+  // preload models on open so the first dictation/stop doesn't pay the load. Gate (small, fast) FIRST so
+  // it isn't queued behind a slow turbo download — the stop-confirm has to be responsive.
   React.useEffect(() => { warmWhisper(); }, []);
+
+  // Live room-volume for the header octopus pulse — a second analyser on the detector's shared stream
+  // (no extra getUserMedia). Mirrors the Voice Setup / Demo pulse.
+  React.useEffect(() => {
+    if (!wake.ready) { setRoomLevel(0); return; }
+    let raf = 0, cancelled = false, tries = 0, smooth = 0;
+    let ctx: AudioContext | null = null;
+    const start = () => {
+      if (cancelled) return;
+      const stream = wakeRef.current.getStream();
+      if (!stream) { if (tries++ < 40) window.setTimeout(start, 300); return; }
+      const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctx = new Ctx();
+      const src = ctx.createMediaStreamSource(stream);
+      const an = ctx.createAnalyser(); an.fftSize = 512; src.connect(an);
+      const data = new Float32Array(an.fftSize);
+      const tick = () => {
+        an.getFloatTimeDomainData(data);
+        let peak = 0; for (let i = 0; i < data.length; i++) { const a = Math.abs(data[i]); if (a > peak) peak = a; }
+        smooth = smooth * 0.78 + peak * 0.22; setRoomLevel(smooth);
+        raf = requestAnimationFrame(tick);
+      };
+      tick();
+    };
+    start();
+    return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); void ctx?.close(); };
+  }, [wake.ready]);
 
   function startDictation() {
     const stream = wakeRef.current.getStream(); // the listener's OWN stream — no second getUserMedia
@@ -191,14 +222,13 @@ function HandsFreeChat() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{
-        padding: '10px 16px', font: '13px system-ui, sans-serif',
-        background: phase === 'dictating' ? '#7f1d1d' : '#0b1622',
-        color: phase === 'dictating' ? '#fecaca' : '#9fb6cc', transition: 'background .2s',
-      }}>
-        {banner}
-      </div>
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+        {/* Octopus in the chat header's top-right, aligned with the “Ozwell Assistant” title — pulses with
+            room volume while listening. AIChat exposes no header-action slot, so it's a positioned overlay.
+            Status now lives in the composer placeholder, so no separate bar. */}
+        <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
+          <HeyOzwellToggle active={wake.ready} level={roomLevel} size={34} />
+        </div>
         <AIChat
           messages={messages}
           height="100%"

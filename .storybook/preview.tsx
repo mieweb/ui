@@ -316,6 +316,9 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    // Show the story source in a "Code" panel tab (next to Controls). Note: for stories with a custom
+    // `render`, Storybook shows the render snippet/args, not the full component source.
+    docs: { codePanel: true },
     layout: 'padded',
     options: {
       storySort: {

@@ -1,0 +1,107 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as HeyOzwellStories from './HeyOzwell.stories';
+
+<Meta title="Product/Feature Modules/AI/Hey Ozwell/Overview" />
+
+# Hey Ozwell
+
+Hey Ozwell is the **voice entry point** for the assistant. Everything runs
+**on-device** — wake-word detection, speaker verification, and dictation all
+happen in the browser, and **audio never leaves the page**.
+
+This page documents how the UX works (issue #287). The controls below are live —
+click the octopus.
+
+## The flow
+
+1. **The Ozwell octopus lives in the top bar.** When Hey Ozwell is **off**, it's
+   gray and muted.
+2. **Click it to activate.** The octopus turns full colour and **pulses with the
+   room volume** — the same mic-reactive glow as the Voice Setup enrollment screen.
+3. **While active, the floating chat button appears** in the bottom-right corner.
+   This is the library's existing `FloatingAIChat` — the normal `AIChat`.
+4. **From there it behaves like Hands-Free Chat:** say **"hey ozwell"** to start
+   dictating, **"ozwell I'm done"** to transcribe on-device and send the message
+   to the assistant. (You can also open the chat and type.)
+5. **Turn Ozwell off** and the floating button disappears.
+
+So the header toggle gates the floating chat button: no floating button unless
+Ozwell is active in the header.
+
+### Options
+
+- **Auto-dictate on wake** (Controls panel) — ON, "hey ozwell" opens the chat *and*
+  starts dictating (hands-free). OFF, "hey ozwell" just **opens the chat and waits**,
+  for experimenting with more specific wake-word directions instead of always going
+  into transcription.
+- **Close chat on "I'm done"** (Controls panel) — after "ozwell I'm done" sends, also
+  close the chat popup, or leave it open to read the reply.
+- **Transcription** (Controls panel) — **browser** runs Whisper on-device (audio never
+  leaves the page — the PHI-safe default); **server** POSTs the audio to the OpenAI-compatible
+  `/v1/audio/transcriptions` endpoint (audio leaves the browser; falls back to on-device if
+  it fails). An experiment toggle for comparing the two.
+- **Ozwell settings** — **right-click or long-press** the octopus to open a settings
+  menu that links back to Voice enrollment (set up / re-enroll / add a condition) and
+  the wake-word / speaker-verify diagnostics.
+
+<Canvas of={HeyOzwellStories.Interactive} />
+
+### The header octopus across its states
+
+Off (gray) → active and quiet → active and hearing speech:
+
+<Canvas of={HeyOzwellStories.ToggleStates} />
+
+## How it's wired
+
+`HeyOzwellToggle` is **presentational** — it never opens the microphone itself.
+That matters because there is **one shared mic**: the wake-word detector opens
+`getUserMedia` once and everything else reads from it via `getStream()` (a second
+`getUserMedia` would silence the detector). So the host:
+
+- gates the detector on the toggle with `useWakeWord({ enabled: active })`,
+- feeds the live room volume as `level` (0..1) from an analyser on the detector's
+  **shared stream** — the same pulse source as Voice Setup,
+- on `onWake`, dictates ("hey ozwell" → record) and sends ("ozwell I'm done" →
+  transcribe + send), and renders the floating chat **only while active**.
+
+The dictation recorder attaches to the detector's **same** `getStream()` — never a
+second `getUserMedia`, which would silence the listener. This is the Hands-Free
+Chat wiring, driving the library `FloatingAIChat`:
+
+```tsx
+const wake = useWakeWord({
+  enabled: active,
+  onWake: (name) => {
+    if (name === 'hey-ozwell' && phase === 'listening') { setChatOpen(true); startDictation(); }
+    else if (name === "ozwell-i'm-done" && phase === 'dictating') { stopDictation(); } // → transcribe + send
+  },
+});
+
+// pulse from the SAME mic the detector opened — no second getUserMedia
+const level = useRoomLevel(wake.getStream, wake.ready);
+
+function startDictation() {
+  const rec = new MediaRecorder(wake.getStream()); // the listener's own stream
+  rec.ondataavailable = (e) => chunks.push(e.data);
+  rec.start();
+}
+function stopDictation() {
+  rec.onstop = async () => send(stripStopPhrase(await transcribeBlob(new Blob(chunks))));
+  rec.stop();
+}
+
+// header + the existing library floating chat, gated on `active`:
+<HeyOzwellToggle active={active} level={level} onToggle={setActive} />
+{active && (
+  <FloatingAIChat open={chatOpen} onOpenChange={setChatOpen} messages={messages} onSendMessage={send} />
+)}
+```
+
+## Related
+
+- **Voice Setup** — one-time speaker enrollment; the octopus-pulse pattern reused here.
+- **Wake Word** — the on-device "hey ozwell" detector that drives the pulse and wake.
+- **Hands-Free Chat** — the voice conversation flow.
+
+All live under *Product / Feature Modules / AI* in this sidebar.

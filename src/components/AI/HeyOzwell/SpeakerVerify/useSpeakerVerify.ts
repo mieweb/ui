@@ -27,6 +27,9 @@ export interface SpeakerVerifyHandle {
   verify: (phrase: string, samples: Float32Array, sampleRate: number) => VerifyResult | null;
   conditionCount: (phrase: string) => number;
   clear: () => void;
+  /** Tune the WHO gate live (read at verify-time): `cosine` threshold, `znorm` (AS-norm) threshold, and
+   *  `useAsnorm` = gate on the z-score vs the raw cosine. */
+  setGates: (g: { cosine?: number; znorm?: number; useAsnorm?: boolean }) => void;
 }
 
 interface SVApi {
@@ -35,6 +38,9 @@ interface SVApi {
   verify: (phrase: string, s: Float32Array, sr: number) => VerifyResult;
   conditionCount: (phrase: string) => number;
   clearEnrollment: () => void;
+  threshold: number;        // raw-cosine gate (default 0.45)
+  znormThreshold: number;   // z-score (AS-norm) gate (default 1.5)
+  useAsnorm: boolean;       // gate on z-score instead of raw cosine
 }
 
 export function useSpeakerVerify(): SpeakerVerifyHandle {
@@ -69,5 +75,12 @@ export function useSpeakerVerify(): SpeakerVerifyHandle {
     verify: (phrase, samples, sampleRate) => svRef.current?.verify(phrase, samples, sampleRate) ?? null,
     conditionCount: (phrase) => svRef.current?.conditionCount(phrase) ?? 0,
     clear: () => svRef.current?.clearEnrollment(),
+    setGates: (g) => {
+      const sv = svRef.current;
+      if (!sv) return;
+      if (g.cosine != null) sv.threshold = g.cosine;
+      if (g.znorm != null) sv.znormThreshold = g.znorm;
+      if (g.useAsnorm != null) sv.useAsnorm = g.useAsnorm;
+    },
   };
 }

@@ -54,6 +54,13 @@ export {
   type SuggestedActionsProps,
 } from './AIChat';
 
+// Hey Ozwell — the in-header voice toggle (octopus that pulses with room volume).
+// The floating chat button is the existing FloatingAIChat, shown while this is active.
+export {
+  HeyOzwellToggle,
+  type HeyOzwellToggleProps,
+} from './HeyOzwell/HeyOzwellToggle';
+
 // AI Chat Modal
 export {
   AIChatModal,

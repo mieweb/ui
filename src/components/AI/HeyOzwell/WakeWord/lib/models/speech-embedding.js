@@ -5,7 +5,7 @@ import { MelSpectrogram } from "./mel-spectrogram.js";
 
 /**
  * Speech Embedding model
- * get ths embeddings from a mel spectogram
+ * get the embeddings from a mel spectrogram
  * @extends ONNXModel
  */
 export class SpeechEmbedding extends ONNXModel {

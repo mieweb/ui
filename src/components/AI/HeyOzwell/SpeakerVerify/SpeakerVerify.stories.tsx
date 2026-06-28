@@ -15,7 +15,7 @@ import { useSpeakerVerify, type VerifyResult } from './useSpeakerVerify';
 import { useWakeWord } from '../WakeWord/useWakeWord';
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/AI/Speaker Verify (dev diagnostic)',
+  title: 'Product/Feature Modules/AI/Hey Ozwell/Speaker Verify (dev diagnostic)',
   parameters: {
     layout: 'centered',
     docs: {
@@ -87,8 +87,21 @@ function loadWhat(): Record<string, Float32Array[]> {
 
 interface LogRow { id: number; phrase: string; base: number; who: VerifyResult | null; what: number | null; pass: boolean; t: string; }
 
-function SpeakerVerifyDemo() {
+interface SVArgs {
+  cosineThreshold: number;
+  znormThreshold: number;
+  useAsnorm: boolean;
+}
+
+function SpeakerVerifyDemo({ cosineThreshold, znormThreshold, useAsnorm }: SVArgs) {
   const sv = useSpeakerVerify();
+
+  // Push the gate thresholds to the live verifier (read at verify-time, so changes apply on the next wake).
+  React.useEffect(() => {
+    if (!sv.ready) return;
+    sv.setGates({ cosine: cosineThreshold, znorm: znormThreshold, useAsnorm });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sv.ready, cosineThreshold, znormThreshold, useAsnorm]);
   const expectRef = React.useRef<string | null>(null);
   const resolveRef = React.useRef<((firedName: string) => void) | null>(null);
   const whatRef = React.useRef<Record<string, Float32Array[]>>({});
@@ -252,7 +265,31 @@ function SpeakerVerifyDemo() {
   );
 }
 
-/** Dev diagnostic: enroll once, then talk — live colour-coded base/WHO/WHAT readout per wake. */
-export const Verify: StoryObj = {
-  render: () => <SpeakerVerifyDemo />,
+/** Dev diagnostic: enroll once, then talk — live colour-coded base/WHO/WHAT readout per wake. The WHO-gate
+ *  thresholds are live Controls; changes apply on the next wake. */
+export const Verify: StoryObj<SVArgs> = {
+  args: { cosineThreshold: 0.45, znormThreshold: 1.5, useAsnorm: false },
+  argTypes: {
+    cosineThreshold: {
+      name: 'Cosine threshold (WHO)',
+      control: { type: 'range', min: 0, max: 1, step: 0.01 },
+      description:
+        'Raw cosine to the enrolled voiceprint must clear this to pass. ~0.45 default; lower for noisy rooms ' +
+        '(not below ~0.3 — impostors start leaking through).',
+    },
+    znormThreshold: {
+      name: 'Z-score threshold (AS-norm)',
+      control: { type: 'range', min: -1, max: 4, step: 0.1 },
+      description:
+        'How many standard deviations above the cohort the score must sit. Only gates when AS-norm is ON.',
+    },
+    useAsnorm: {
+      name: 'Gate on z-score (AS-norm)',
+      control: 'boolean',
+      description:
+        'OFF (default) gates on raw cosine. ON gates on the channel-invariant z-score instead — steadier ' +
+        'across rooms/mics once tuned.',
+    },
+  },
+  render: (args) => <SpeakerVerifyDemo {...args} />,
 };

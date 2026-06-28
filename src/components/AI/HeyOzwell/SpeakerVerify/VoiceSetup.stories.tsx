@@ -9,10 +9,10 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { useSpeakerVerify } from './useSpeakerVerify';
 import { useWakeWord } from '../WakeWord/useWakeWord';
-import { warmWhisper } from '../AI/whisperTranscribe';
+import { warmWhisper } from '../../whisperTranscribe';
 
 const meta: Meta = {
-  title: 'Product/Feature Modules/AI/Voice Setup',
+  title: 'Product/Feature Modules/AI/Hey Ozwell/Voice Setup',
   parameters: { layout: 'fullscreen', docs: { description: { component: 'On-device voice enrollment — tap the Ozwell octopus, it pulses as you talk. Apple-style, brand-aligned.' } } },
 };
 export default meta;

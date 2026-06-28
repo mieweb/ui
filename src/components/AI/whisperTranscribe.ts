@@ -4,11 +4,42 @@
  *
  * transcribeBlob(blob) — decode a recorded audio blob, downmix + resample to 16 kHz, run Whisper
  * fully in the browser, return the text. Audio never leaves the page (PHI-safe).
+ *
+ * transcribeGate(samples) — a SECOND, fast (base.en) model used only for the hands-free "stop-confirm"
+ * check (does the recent audio actually end with "done"?). Independent of the dictation model so the
+ * heavy turbo stays the final-transcription path. See HandsFreeChat's "pending stop + verify".
  */
 import { registerModelServiceWorker } from './modelCache';
+import { getOzwellConfig } from './ozwellChat';
 
 type Whisper = (input: Float32Array, opts: unknown) => Promise<{ text?: string }>;
-let pipePromise: Promise<Whisper> | null = null;
+type Mod = {
+  pipeline: (task: string, model: string, opts?: unknown) => Promise<Whisper>;
+  env: {
+    allowLocalModels: boolean;
+    useBrowserCache: boolean;
+    remoteHost: string;
+    remotePathTemplate: string;
+    backends: { onnx: { wasm: { numThreads: number } } };
+  };
+};
+
+const HF_HOST = 'https://huggingface.co';
+const HF_PATH = '{model}/resolve/{revision}/';
+// turbo's weights are served from our Cloudflare R2 bucket, which sends a Content-Length header so
+// transformers.js can stream it into the Cache API (HuggingFace Xet doesn't → re-downloads ~1.3GB each
+// open). To repoint (e.g. a mieweb-owned bucket for the PR) change R2_HOST + the path. See MODEL-HOSTING.md.
+const R2_HOST = 'https://pub-64db68afc2cb4e108ff06e7e583f09d1.r2.dev';
+
+const SMALL_MODELS: Record<string, string> = {
+  tiny: 'Xenova/whisper-tiny.en', 'tiny.en': 'Xenova/whisper-tiny.en',
+  base: 'Xenova/whisper-base.en', 'base.en': 'Xenova/whisper-base.en',
+  small: 'Xenova/whisper-small.en', 'small.en': 'Xenova/whisper-small.en',
+};
+const GATE_MODEL = 'Xenova/whisper-base.en'; // stop-confirm: fast + reliable on the single word "done"
+
+let pipePromise: Promise<Whisper> | null = null; // dictation model (turbo, or override)
+let gatePromise: Promise<Whisper> | null = null; // stop-confirm model (base.en), independent
 let isMultilingual = false;
 
 // Optional model override, read from the same ozwellConfig used by the chat. Set
@@ -25,16 +56,15 @@ function whisperPref(): string | null {
   try { return JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisper || null; } catch { return null; }
 }
 
-function loadWhisper(): Promise<Whisper> {
-  if (pipePromise) return pipePromise;
+// The transformers.js module, imported + configured once and shared by every model load.
+let modPromise: Promise<Mod> | null = null;
+function getTransformers(): Promise<Mod> {
+  if (modPromise) return modPromise;
   registerModelServiceWorker(); // ensure the model cache SW is registered before the big download
-  pipePromise = (async () => {
+  modPromise = (async () => {
     const mod = (await import(
       /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
-    )) as {
-      pipeline: (task: string, model: string, opts?: unknown) => Promise<Whisper>;
-      env: { allowLocalModels: boolean; useBrowserCache: boolean; remoteHost: string; remotePathTemplate: string; backends: { onnx: { wasm: { numThreads: number } } } };
-    };
+    )) as Mod;
     mod.env.allowLocalModels = false;
     // Use transformers.js's OWN cache — it STREAMS the model straight to the Cache API (how whisper-web
     // caches this same 1.2GB turbo model). A hand-rolled SW that buffers the whole file in memory chokes
@@ -42,92 +72,133 @@ function loadWhisper(): Promise<Whisper> {
     mod.env.useBrowserCache = true;
     mod.env.backends.onnx.wasm.numThreads = 1;
     try { await navigator.storage?.persist?.(); } catch { /* best-effort */ }
-    const t0 = performance.now();
-    const secs = () => ((performance.now() - t0) / 1000).toFixed(1);
+    return mod;
+  })();
+  return modPromise;
+}
 
-    // Visible download progress, so the (1–2 min, one-time) turbo load isn't an opaque freeze. Logs each
-    // model file at 25% steps; "(cached)" loads emit no progress events, so silence here = fast cache hit.
-    const seen: Record<string, number> = {};
-    const progress_callback = (p: { status?: string; file?: string; progress?: number }) => {
-      if (!p.file) return;
-      // HuggingFace omits content-length on its redirect, so big files emit no numeric `progress` — log
-      // start + finish too, else the slow .onnx files download in apparent silence (looks frozen).
-      if (p.status === 'initiate') console.log(`[whisper] fetching ${p.file}… (${secs()}s)`);
-      else if (p.status === 'done') console.log(`[whisper] ✓ ${p.file} (${secs()}s)`);
-      else if (p.status === 'progress' && typeof p.progress === 'number') {
-        const step = Math.floor(p.progress / 25) * 25; // 0/25/50/75/100
-        if (seen[p.file] !== step) { seen[p.file] = step; console.log(`[whisper] ${p.file}: ${step}% (${secs()}s)`); }
-      }
-    };
+// A model load mutates the SHARED env.remoteHost (turbo→R2, english→HF) and transformers.js reads it
+// per-file as it fetches. So a turbo load and a base.en gate load running CONCURRENTLY would clobber each
+// other mid-download (turbo's later files would fetch from HF, or base.en from R2 → 404). Serialize every
+// model load through one chain so their env mutations never overlap. (Warm the gate before turbo so the
+// fast model isn't stuck behind a slow turbo download — see HandsFreeChat.)
+let loadChain: Promise<unknown> = Promise.resolve();
+function serialize<T>(fn: () => Promise<T>): Promise<T> {
+  const run = loadChain.then(fn, fn);
+  loadChain = run.then(() => undefined, () => undefined);
+  return run;
+}
 
-    // Small English-only models (load directly, skip the heavy turbo). q8 on WebGPU, WASM fallback.
-    const loadEnglish = async (modelId: string): Promise<Whisper> => {
-      try {
-        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8', progress_callback });
-        console.log(`[whisper] ready (${modelId} / WebGPU, ${secs()}s)`);
-        return pipe;
-      } catch {
-        const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { dtype: 'q8', progress_callback });
-        console.log(`[whisper] ready (${modelId} / wasm, ${secs()}s)`);
-        return pipe;
-      }
-    };
+// Visible download progress, so a cold load isn't an opaque freeze. Logs each file at 25% steps;
+// "(cached)" loads emit no progress events, so silence = a fast cache hit.
+function progressLogger(label: string) {
+  const t0 = performance.now();
+  const secs = () => ((performance.now() - t0) / 1000).toFixed(1);
+  const seen: Record<string, number> = {};
+  const cb = (p: { status?: string; file?: string; progress?: number }) => {
+    if (!p.file) return;
+    if (p.status === 'initiate') console.log(`[whisper:${label}] fetching ${p.file}… (${secs()}s)`);
+    else if (p.status === 'done') console.log(`[whisper:${label}] ✓ ${p.file} (${secs()}s)`);
+    else if (p.status === 'progress' && typeof p.progress === 'number') {
+      const step = Math.floor(p.progress / 25) * 25; // 0/25/50/75/100
+      if (seen[p.file] !== step) { seen[p.file] = step; console.log(`[whisper:${label}] ${p.file}: ${step}% (${secs()}s)`); }
+    }
+  };
+  return { cb, secs };
+}
 
+// Small English model (load directly, skip the heavy turbo). q8 on WebGPU, WASM fallback. Always pins the
+// host back to HuggingFace in case a turbo load left env pointed at R2.
+async function buildEnglish(modelId: string): Promise<Whisper> {
+  const mod = await getTransformers();
+  mod.env.remoteHost = HF_HOST;
+  mod.env.remotePathTemplate = HF_PATH;
+  const { cb, secs } = progressLogger(modelId);
+  try {
+    const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { device: 'webgpu', dtype: 'q8', progress_callback: cb });
+    console.log(`[whisper] ready (${modelId} / WebGPU, ${secs()}s)`);
+    return pipe;
+  } catch {
+    const pipe = await mod.pipeline('automatic-speech-recognition', modelId, { dtype: 'q8', progress_callback: cb });
+    console.log(`[whisper] ready (${modelId} / wasm, ${secs()}s)`);
+    return pipe;
+  }
+}
+
+// turbo (best accuracy, multilingual) on WebGPU, weights from R2.
+async function buildTurbo(): Promise<Whisper> {
+  const mod = await getTransformers();
+  const { cb, secs } = progressLogger('turbo');
+  mod.env.remoteHost = R2_HOST;
+  mod.env.remotePathTemplate = '{model}/'; // files live at <R2_HOST>/whisper-turbo/<file>
+  const pipe = await mod.pipeline('automatic-speech-recognition', 'whisper-turbo', {
+    device: 'webgpu',
+    dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
+    progress_callback: cb,
+  });
+  isMultilingual = true;
+  console.log(`[whisper] ready (turbo / R2, ${secs()}s)`);
+  return pipe;
+}
+
+function loadWhisper(): Promise<Whisper> {
+  if (pipePromise) return pipePromise;
+  pipePromise = (async () => {
     // Optional override: pick a lighter model than turbo via ozwellConfig.whisper.
     //   'small.en' — best speed/accuracy balance on a modest machine (RECOMMENDED if turbo is slow)
-    //   'base.en'  — faster but hallucinates on unclear audio
-    //   'tiny.en'  — fastest, lowest accuracy
-    //   'turbo' or unset — the large multilingual turbo model (best accuracy, heaviest)
-    const SMALL_MODELS: Record<string, string> = {
-      tiny: 'Xenova/whisper-tiny.en', 'tiny.en': 'Xenova/whisper-tiny.en',
-      base: 'Xenova/whisper-base.en', 'base.en': 'Xenova/whisper-base.en',
-      small: 'Xenova/whisper-small.en', 'small.en': 'Xenova/whisper-small.en',
-    };
+    //   'base.en'/'tiny.en' — faster, lower accuracy · 'turbo'/unset — the large multilingual model
     const pref = (whisperPref() || '').toLowerCase();
     if (pref && pref !== 'turbo' && SMALL_MODELS[pref]) {
       console.log(`[whisper] loading ${pref} (forced via ozwellConfig.whisper)…`);
-      return loadEnglish(SMALL_MODELS[pref]);
+      return serialize(() => buildEnglish(SMALL_MODELS[pref]));
     }
-
     console.log('[whisper] loading turbo…');
-    // turbo (best accuracy) on WebGPU; falls back to base.en when turbo/WebGPU is unavailable.
-    // CACHING: turbo's weights are served from our Cloudflare R2 bucket, which sends a Content-Length
-    // header. HuggingFace's Xet storage does NOT, which breaks transformers.js's cache (it re-downloads
-    // ~1.3GB every cold open). With the size header, transformers.js streams the model into the Cache API
-    // and it loads once per device. Audio still never leaves the browser — R2 only hosts the model file.
-    // To repoint (e.g. a mieweb-owned bucket for the PR), change R2_HOST + the model path. See MODEL-HOSTING.md.
-    const R2_HOST = 'https://pub-64db68afc2cb4e108ff06e7e583f09d1.r2.dev';
     try {
-      mod.env.remoteHost = R2_HOST;
-      mod.env.remotePathTemplate = '{model}/'; // files live at <R2_HOST>/whisper-turbo/<file>
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'whisper-turbo', {
-        device: 'webgpu',
-        dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
-        progress_callback,
-      });
-      isMultilingual = true;
-      console.log(`[whisper] ready (turbo / R2, ${secs()}s)`);
-      return pipe;
+      return await serialize(() => buildTurbo());
     } catch (e) {
-      // reset to HuggingFace so the base.en fallback loads from the right place
-      mod.env.remoteHost = 'https://huggingface.co';
-      mod.env.remotePathTemplate = '{model}/resolve/{revision}/';
       console.log(`[whisper] turbo/R2 unavailable (${e instanceof Error ? e.message : e}) → base.en fallback`);
-      return loadEnglish('Xenova/whisper-base.en');
+      return serialize(() => buildEnglish('Xenova/whisper-base.en'));
     }
   })();
   return pipePromise;
+}
+
+// Independent fast model for the stop-confirm check (only needs to spot "done"). Separate from the
+// dictation pipe so the heavy turbo stays the final-transcription path. base.en ≈ 75 MB.
+function loadGate(): Promise<Whisper> {
+  if (gatePromise) return gatePromise;
+  console.log('[whisper] loading stop-confirm gate (base.en)…');
+  gatePromise = serialize(() => buildEnglish(GATE_MODEL));
+  return gatePromise;
 }
 
 export function isWhisperLoaded(): boolean {
   return pipePromise !== null;
 }
 
-/** Start loading the model NOW — e.g. on app open or during enrollment — so the first dictation
- *  doesn't pay the load. Safe to call repeatedly (loadWhisper is memoized; the load happens once). */
+/** Start loading the dictation model NOW so the first dictation doesn't pay the load. Memoized. */
 export function warmWhisper(): void {
-  registerModelServiceWorker(); // cache the (large) model across app opens
   void loadWhisper();
+}
+
+/** Start loading the stop-confirm gate model (base.en) NOW so the first "ozwell I'm done" confirm
+ *  doesn't wait on it. Warm this BEFORE warmWhisper so the small model isn't queued behind slow turbo. */
+export function warmStopGate(): void {
+  void loadGate();
+}
+
+// Linear-resample mono audio to 16 kHz (what Whisper wants). Shared by the blob + raw-samples paths.
+function resampleTo16kMono(src: Float32Array, sampleRate: number): Float32Array {
+  const ratio = 16000 / sampleRate;
+  const n = Math.round(src.length * ratio);
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = i / ratio;
+    const i0 = Math.floor(t);
+    const i1 = Math.min(i0 + 1, src.length - 1);
+    out[i] = src[i0] + (src[i1] - src[i0]) * (t - i0);
+  }
+  return out;
 }
 
 // trimEndSeconds: drop this many seconds off the END of the audio before transcribing (so Whisper
@@ -136,18 +207,8 @@ export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<st
   const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctx();
   const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
-  const src = audio.getChannelData(0);
-  const ratio = 16000 / audio.sampleRate;
-  const n = Math.round(src.length * ratio);
-  const mono = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const t = i / ratio;
-    const i0 = Math.floor(t);
-    const i1 = Math.min(i0 + 1, src.length - 1);
-    mono[i] = src[i0] + (src[i1] - src[i0]) * (t - i0);
-  }
+  let samples = resampleTo16kMono(audio.getChannelData(0), audio.sampleRate);
   void ctx.close();
-  let samples: Float32Array = mono;
   if (trimEndSeconds > 0) {
     const cut = Math.round(trimEndSeconds * 16000);
     if (samples.length > cut + 16000) samples = samples.subarray(0, samples.length - cut); // keep >=1s
@@ -156,6 +217,39 @@ export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<st
   const out = await pipe(samples, isMultilingual
     ? { chunk_length_s: 30, language: 'english', task: 'transcribe' }
     : { chunk_length_s: 30 });
+  return (out?.text ?? '').trim();
+}
+
+// Server-ASR model id (override via localStorage ozwellConfig.serverWhisper); defaults to the
+// OpenAI-compatible 'whisper-1'.
+function serverAsrModel(): string {
+  try { return JSON.parse(localStorage.getItem('ozwellConfig') || '{}').serverWhisper || 'whisper-1'; } catch { return 'whisper-1'; }
+}
+
+/** Server-side transcription: POST the recorded audio to the OpenAI-compatible /v1/audio/transcriptions
+ *  endpoint (same baseURL/apiKey as the chat). NOTE: audio LEAVES the browser — the on-device path
+ *  (transcribeBlob) is the PHI-safe default; this is the experiment alternative. Throws on HTTP error so
+ *  the caller can fall back to on-device. */
+export async function transcribeServer(blob: Blob): Promise<string> {
+  const cfg = getOzwellConfig();
+  const form = new FormData();
+  form.append('file', blob, 'audio.webm');
+  form.append('model', serverAsrModel());
+  const url = `${cfg.baseURL.replace(/\/$/, '')}/v1/audio/transcriptions`;
+  const headers: Record<string, string> = {};
+  if (cfg.apiKey && cfg.apiKey !== 'ollama') headers.Authorization = `Bearer ${cfg.apiKey}`;
+  const res = await fetch(url, { method: 'POST', headers, body: form });
+  if (!res.ok) throw new Error(`Server ASR ${res.status}: ${res.statusText}`);
+  const data = await res.json();
+  return (typeof data?.text === 'string' ? data.text : '').trim();
+}
+
+/** Stop-confirm gate: transcribe a short raw-sample window (e.g. the rolling recorder's last ~2s) with the
+ *  FAST model and return the text. Used to verify a "ozwell i'm done" wake actually ended with "done"
+ *  before committing the stop. Cheap — accuracy on the lone word "done" is all it needs. */
+export async function transcribeGate(samples: Float32Array, sampleRate: number): Promise<string> {
+  const pipe = await loadGate();
+  const out = await pipe(resampleTo16kMono(samples, sampleRate), { chunk_length_s: 30 });
   return (out?.text ?? '').trim();
 }
 
@@ -168,4 +262,12 @@ export function stripStopPhrase(text: string): string {
   let t = text;
   while (t !== prev && t) { prev = t; t = t.replace(tail, '').replace(/[\s.,!?-]+$/, ''); }
   return t.trim();
+}
+
+/** True if a transcript ENDS with a clear "done" stop ("…done" / "…I'm done" / "…all done" / "…well done"),
+ *  tolerating trailing punctuation. Deliberately STRICTER than stripStopPhrase: the stop-confirm gate must
+ *  NOT fire on a bare "ozwell" or a mid-sentence "done" — "we're almost done here" ends on "here", so no
+ *  match. Favors precision: a missed real stop just means "say it again"; a false stop loses dictation. */
+export function endsWithDone(text: string): boolean {
+  return /\b(?:i(?:['’]?m|\s+am)\s+|all\s+|well\s+)?done\b[\s.,!?-]*$/i.test(text);
 }

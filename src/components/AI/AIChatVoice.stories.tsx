@@ -11,16 +11,15 @@
  * AIChat already exposes. (The "assistant" reply here is a stand-in for the real
  * Ozwell backend — the point is the voice → text → message loop.)
  *
- * Transformers.js is loaded from a CDN at runtime, so there's no extra
- * dependency to install. If your Storybook blocks the CDN import, run
- * `pnpm add @huggingface/transformers` and swap the dynamic import for a static one.
+ * Transcription is handled by the shared `whisperTranscribe.ts` (on-device Whisper via
+ * Transformers.js) — the same module HandsFreeChat / the Hey Ozwell demo use.
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { AIChat } from './AIChat';
 import type { AIMessage } from './types';
 import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from './ozwellChat';
-import { registerModelServiceWorker } from './modelCache';
+import { transcribeBlob, warmWhisper } from './whisperTranscribe';
 
 const meta: Meta<typeof AIChat> = {
   title: 'Product/Feature Modules/AI/AIChat (Voice)',
@@ -41,73 +40,8 @@ const meta: Meta<typeof AIChat> = {
 export default meta;
 type Story = StoryObj<typeof AIChat>;
 
-// --- on-device transcription: Transformers.js (Whisper) loaded from CDN, no install ---
-let pipePromise: Promise<(input: Float32Array, opts: unknown) => Promise<{ text?: string }>> | null = null;
-let isMultilingual = false; // turbo is multilingual (needs language/task); base.en is English-only
-function loadWhisper() {
-  if (pipePromise) return pipePromise;
-  pipePromise = (async () => {
-    const mod = (await import(
-      /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
-    )) as {
-      pipeline: (task: string, model: string, opts?: unknown) => Promise<never>;
-      env: { allowLocalModels: boolean; useBrowserCache: boolean; remoteHost: string; remotePathTemplate: string; backends: { onnx: { wasm: { numThreads: number } } } };
-    };
-    mod.env.allowLocalModels = false;
-    mod.env.useBrowserCache = true; // transformers.js streams the model to cache (the proven whisper-web path)
-    mod.env.backends.onnx.wasm.numThreads = 1; // plain page has no COOP/COEP headers
-    // Ask the browser to KEEP our model cache. Without this the model may never be stored (if the
-    // quota is tight) or get evicted, so it re-downloads on every reload. Best-effort; fine if false.
-    try { await navigator.storage?.persist?.(); } catch { /* ignore */ }
-    // DEFAULT: large-v3-turbo on WebGPU — best accuracy. fp16 encoder + q4 decoder is the fast WebGPU
-    // recipe. It re-downloads each reload UNLESS the browser has the cache quota for it (a near-full disk
-    // makes Chrome shrink that quota); on a healthy machine / real deploy it caches once and reloads fast.
-    // FALLBACK: base.en q8 — tiny (~75MB), always fits the cache, English-only.
-    try {
-      // turbo served from our Cloudflare R2 bucket (sends Content-Length, so it CACHES — HF Xet doesn't).
-      // See whisperTranscribe.ts / MODEL-HOSTING.md.
-      mod.env.remoteHost = 'https://pub-64db68afc2cb4e108ff06e7e583f09d1.r2.dev';
-      mod.env.remotePathTemplate = '{model}/'; // files at <R2>/whisper-turbo/<file>
-      const pipe = await mod.pipeline('automatic-speech-recognition', 'whisper-turbo', {
-        device: 'webgpu',
-        dtype: { encoder_model: 'fp16', decoder_model_merged: 'q4' },
-      });
-      isMultilingual = true;
-      return pipe;
-    } catch (e) {
-      console.warn('[voice] turbo unavailable — falling back to base.en', e);
-      mod.env.remoteHost = 'https://huggingface.co'; // reset for the HF-hosted fallback
-      mod.env.remotePathTemplate = '{model}/resolve/{revision}/';
-      try { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { device: 'webgpu', dtype: 'q8' }); }
-      catch { return await mod.pipeline('automatic-speech-recognition', 'Xenova/whisper-base.en', { dtype: 'q8' }); } // WASM fallback
-    }
-  })();
-  return pipePromise;
-}
-
-async function transcribeBlob(blob: Blob): Promise<string> {
-  // The mic gives a compressed blob (webm/opus). Decode it, downmix to mono, resample to 16 kHz.
-  const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  const ctx = new Ctx();
-  const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
-  const src = audio.getChannelData(0);
-  const ratio = 16000 / audio.sampleRate;
-  const n = Math.round(src.length * ratio);
-  const mono = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const t = i / ratio;
-    const i0 = Math.floor(t);
-    const i1 = Math.min(i0 + 1, src.length - 1);
-    mono[i] = src[i0] + (src[i1] - src[i0]) * (t - i0); // linear resample
-  }
-  void ctx.close();
-  const pipe = await loadWhisper();
-  // turbo is multilingual → pin English; base.en is English-only → must NOT pass language/task.
-  const out = await pipe(mono, isMultilingual
-    ? { chunk_length_s: 30, language: 'english', task: 'transcribe' }
-    : { chunk_length_s: 30 });
-  return (out?.text ?? '').trim();
-}
+// On-device transcription uses the shared whisperTranscribe module — single source of truth for the model
+// host + caching behaviour (this story previously inlined its own copy). See ./whisperTranscribe.ts.
 
 let counter = 0;
 const mkMsg = (role: AIMessage['role'], text: string): AIMessage => ({
@@ -128,7 +62,7 @@ function VoiceAIChat() {
 
   // preload Whisper as soon as the story opens, so it's loading in the background while you read/talk
   // instead of waiting for the first mic tap — the first transcription is then fast.
-  React.useEffect(() => { registerModelServiceWorker(); void loadWhisper(); }, []);
+  React.useEffect(() => { warmWhisper(); }, []);
 
   const send = React.useCallback((text: string) => {
     const t = text.trim();
