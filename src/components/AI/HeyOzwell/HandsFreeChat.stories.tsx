@@ -225,7 +225,7 @@ function HandsFreeChat() {
             room volume while listening. AIChat exposes no header-action slot, so it's a positioned overlay.
             Status now lives in the composer placeholder, so no separate bar. */}
         <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
-          <HeyOzwellToggle active={wake.ready} level={roomLevel} size={34} />
+          <HeyOzwellToggle active={wake.ready} loading={!wake.ready && !wake.error} level={roomLevel} size={34} />
         </div>
         <AIChat
           messages={messages}

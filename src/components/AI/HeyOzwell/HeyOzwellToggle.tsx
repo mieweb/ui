@@ -29,6 +29,8 @@ export interface HeyOzwellToggleProps {
    * wake-word analyser (see Voice Setup). Ignored when inactive.
    */
   level?: number;
+  /** Show a spinning ring around the octopus while models load (e.g. on reload until wake is ready). */
+  loading?: boolean;
   /** Ozwell logo source. Defaults to the bundled Storybook public asset. */
   logoSrc?: string;
   /** Logo diameter in px. */
@@ -50,6 +52,7 @@ export function HeyOzwellToggle({
   active = false,
   onToggle,
   level = 0,
+  loading = false,
   logoSrc = '/ozwell/icon.svg',
   size = 36,
   className,
@@ -110,6 +113,18 @@ export function HeyOzwellToggle({
       )}
       style={{ width: size, height: size }}
     >
+      {/* Loading ring — a spinning arc while models load (gray octopus on reload). */}
+      {loading && (
+        <span
+          aria-hidden="true"
+          className="animate-spin"
+          style={{
+            position: 'absolute', inset: -3, borderRadius: '50%',
+            border: '2px solid transparent', borderTopColor: OZ,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
       {/* Volume glow — fades in only while active, scales with the room. */}
       <span
         aria-hidden="true"

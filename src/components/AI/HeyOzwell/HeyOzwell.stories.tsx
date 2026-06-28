@@ -358,6 +358,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
         <HeyOzwellToggle
           active={active}
           level={level}
+          loading={active && !wake.ready && !wake.error}
           onToggle={toggle}
           onOpenSettings={() => setSettingsOpen((v) => !v)}
           size={40}
