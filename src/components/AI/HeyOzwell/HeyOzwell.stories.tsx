@@ -413,13 +413,17 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
               right: 18,
               zIndex: 61,
               width: 290,
-              maxHeight: '80vh',
+              // Fit within the 460px demo frame (anchored at top:56) and scroll internally so the
+              // expanded "Models & versions" list is never cut off. overflowX hidden keeps the
+              // rounded corners clean without re-clobbering the vertical scroll (a plain
+              // `overflow: hidden` shorthand here would override overflowY back to hidden).
+              maxHeight: 392,
               overflowY: 'auto',
+              overflowX: 'hidden',
               background: '#fff',
               border: '1px solid #e2e8f0',
               borderRadius: 12,
               boxShadow: '0 10px 34px rgba(15,23,42,.14)',
-              overflow: 'hidden',
             }}
           >
             <div
