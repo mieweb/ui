@@ -87,16 +87,56 @@
   // audio). Per-phrase because on a ~1s clip a speaker embedding still carries a little of
   // WHAT was said, so the doctor's "hey ozwell" centroid scores their "ozwell i'm done"
   // too low. We enroll + gate each phrase against its own centroid. ---
-  function loadAll() {
+  // --- WHO-centroid persistence on IndexedDB (replaces localStorage; same db/store as voiceprintStore.ts).
+  // verify()/enroll() read these synchronously, so we keep an in-memory `_store` hydrated from IndexedDB on
+  // init (before ready() resolves) and write through on save. ---
+  const IDB_DB = "ozwell-voice", IDB_STORE = "voiceprints";
+  function idbOpen() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(IDB_DB, 1);
+      req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  function idbReq(mode, run) {
+    return idbOpen().then((db) => new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, mode);
+      const r = run(tx.objectStore(IDB_STORE));
+      tx.oncomplete = () => resolve(r && r.result);
+      tx.onerror = () => reject(tx.error);
+    }));
+  }
+  const idbGet = (key) => idbReq("readonly", (s) => s.get(key));
+  const idbPut = (key, v) => idbReq("readwrite", (s) => s.put(v, key));
+  const idbDel = (key) => idbReq("readwrite", (s) => s.delete(key));
+
+  let _store = null; // in-memory WHO map; hydrated from IndexedDB before ready() resolves
+  // Ignore the old single-centroid format ({centroid, n}) from earlier builds.
+  const normalizeWho = (o) => (o && Array.isArray(o.centroid)) ? {} : (o || {});
+
+  async function hydrateStore() {
     try {
-      const o = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {};
-      // Ignore the old single-centroid format ({centroid, n}) from earlier builds.
-      if (o && Array.isArray(o.centroid)) return {};
-      return o;
-    } catch (e) { return {}; }
+      let v = await idbGet(LS_KEY);
+      if (v === undefined) { // nothing in IndexedDB — migrate a legacy localStorage value once, then drop it
+        let raw = null; try { raw = localStorage.getItem(LS_KEY); } catch (e) { /* ignore */ }
+        if (raw != null) {
+          v = normalizeWho(JSON.parse(raw || "{}"));
+          await idbPut(LS_KEY, v);
+          try { localStorage.removeItem(LS_KEY); } catch (e) { /* ignore */ }
+        }
+      }
+      _store = v || {};
+    } catch (e) { _store = _store || {}; }
+  }
+  function loadAll() {
+    if (_store) return _store;
+    // Pre-hydration fallback (verify/enroll only run after ready(), which awaits hydrateStore).
+    try { return normalizeWho(JSON.parse(localStorage.getItem(LS_KEY) || "{}")); } catch (e) { return {}; }
   }
   function saveAll(obj) {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch (e) { console.warn("SV save failed", e); }
+    _store = obj;
+    idbPut(LS_KEY, obj).catch((e) => console.warn("SV save failed", e));
   }
   // Multi-condition: store a LIST of centroids per phrase (one per enroll session/condition) and verify
   // against the BEST match — so adding a rep "from across the room" or "with background" extends coverage
@@ -165,7 +205,7 @@
     // hasEnrollment(phrase) -> is that phrase enrolled; hasEnrollment() -> is anything enrolled.
     hasEnrollment: (phrase) => phrase ? !!loadAll()[phrase] : Object.keys(loadAll()).length > 0,
     enrolledPhrases: () => Object.keys(loadAll()),
-    clearEnrollment: () => { try { localStorage.removeItem(LS_KEY); } catch (e) {} },
+    clearEnrollment: () => { _store = {}; idbDel(LS_KEY).catch(() => {}); try { localStorage.removeItem(LS_KEY); } catch (e) { /* ignore */ } },
   };
 
   async function init() {
@@ -191,6 +231,7 @@
         const r = await fetch(SV_DIR + "/sv-cohort.json");
         if (r.ok) { cohort = (await r.json()).map((v) => Float32Array.from(v)); console.log("[SpeakerVerify] AS-norm cohort:", cohort.length); }
       } catch (e) { console.warn("[SpeakerVerify] cohort load failed (AS-norm off):", e); }
+      await hydrateStore(); // load enrolled WHO centroids from IndexedDB before reporting ready
       readyResolve(SpeakerVerify);
     } catch (e) {
       console.error("[SpeakerVerify] init failed:", e);
