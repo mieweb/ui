@@ -22,6 +22,7 @@ import { HeyOzwellToggle } from './HeyOzwellToggle';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
 import { transcribeBlob, stripStopPhrase, warmWhisper } from '../whisperTranscribe';
 import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from '../ozwellChat';
+import { loadWhatPrints } from '../voiceprintStore';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Hands-Free Chat',
@@ -44,7 +45,6 @@ const mkMsg = (role: AIMessage['role'], text: string): AIMessage => ({
 });
 
 // --- doctor-only gate: restore enrolled WHAT prints + a rolling recorder for the wake-utterance audio ---
-const WHAT_KEY = 'ozwellWhatPrints';
 // Per-phrase WHAT (phrase-print cosine) gate. Stop is a touch looser (0.75): the run-on
 // "…ozwell I'm done" at the dictation tail embeds slightly differently from the isolated enrolled
 // one, so it lands a bit lower than the clean start phrase — 0.75 catches legit stops without
@@ -52,9 +52,6 @@ const WHAT_KEY = 'ozwellWhatPrints';
 const WHAT_THRESHOLDS: Record<string, number> = { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.75 };
 const whatThr = (name: string) => WHAT_THRESHOLDS[name] ?? 0.8;
 
-function loadWhat(): Record<string, Float32Array[]> {
-  try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
-}
 interface Roll { sampleRate: number; snapshot: () => Float32Array; close: () => void; }
 function openRolling(stream: MediaStream): Roll {
   const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -141,8 +138,10 @@ function HandsFreeChat() {
   React.useEffect(() => {
     if (!wake.ready) return;
     let cancelled = false, tries = 0;
-    const loaded = loadWhat();
-    for (const k in loaded) wakeRef.current.setVoiceprint(k, loaded[k]);
+    void loadWhatPrints().then((loaded) => {
+      if (cancelled) return;
+      for (const k in loaded) wakeRef.current.setVoiceprint(k, loaded[k]);
+    });
     const tryOpen = () => {
       if (cancelled || rollRef.current) return;
       const stream = wakeRef.current.getStream();

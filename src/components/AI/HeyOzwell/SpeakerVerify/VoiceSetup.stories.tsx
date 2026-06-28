@@ -10,6 +10,7 @@ import * as React from 'react';
 import { useSpeakerVerify } from './useSpeakerVerify';
 import { useWakeWord } from '../WakeWord/useWakeWord';
 import { warmWhisper } from '../../whisperTranscribe';
+import { loadWhatPrints, saveWhatPrints } from '../../voiceprintStore';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Voice Setup',
@@ -25,7 +26,6 @@ const PHRASES = [
 const REPS = 3;
 const TIMEOUT_MS = 5000;
 const VP_CAP = 18;
-const WHAT_KEY = 'ozwellWhatPrints';
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
 function chime(freq: number, ms = 170) {
@@ -40,12 +40,7 @@ function chime(freq: number, ms = 170) {
     window.setTimeout(() => { void ctx.close(); }, ms + 120);
   } catch { /* no audio out */ }
 }
-function saveWhat(map: Record<string, Float32Array[]>) {
-  try { localStorage.setItem(WHAT_KEY, JSON.stringify(Object.fromEntries(Object.entries(map).map(([k, v]) => [k, v.map((a) => Array.from(a))])))); } catch { /* ignore */ }
-}
-function loadWhat(): Record<string, Float32Array[]> {
-  try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
-}
+// WHAT phrase-print templates persist via the shared voiceprint store (IndexedDB) — see ../../voiceprintStore.
 
 interface Rec { sampleRate: number; snapshot: () => Float32Array; close: () => void; }
 function openRolling(stream: MediaStream): Rec {
@@ -86,7 +81,7 @@ function VoiceSetup() {
   // preload the dictation model while the doctor enrolls — it gets the full ~30s of enrollment as a
   // head start, so the very first dictation in the chat afterwards is fast instead of waiting on the load.
   // Also restore any persisted WHAT templates so "Add another spot" appends to them across reloads.
-  React.useEffect(() => { warmWhisper(); whatRef.current = loadWhat(); }, []);
+  React.useEffect(() => { warmWhisper(); void loadWhatPrints().then((w) => { whatRef.current = w; }); }, []);
 
   React.useEffect(() => {
     if (!wake.ready) return;
@@ -148,7 +143,7 @@ function VoiceSetup() {
       const merged = [...prior, ...embs].slice(-VP_CAP);
       whatRef.current[ph.key] = merged; wakeRef.current.setVoiceprint(ph.key, merged);
     }
-    saveWhat(whatRef.current);
+    void saveWhatPrints(whatRef.current);
     setAdding(false);
     setPhase('done');
   };

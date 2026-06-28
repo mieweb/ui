@@ -13,6 +13,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
 import { useSpeakerVerify, type VerifyResult } from './useSpeakerVerify';
 import { useWakeWord } from '../WakeWord/useWakeWord';
+import { loadWhatPrints } from '../../voiceprintStore';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Speaker Verify (dev diagnostic)',
@@ -76,14 +77,7 @@ function openRolling(stream: MediaStream): Rolling {
   };
 }
 
-// WHAT templates persist to localStorage (WHO already does, via speaker-verify.js) — so they survive reloads
-const WHAT_KEY = 'ozwellWhatPrints';
-function saveWhat(map: Record<string, Float32Array[]>) {
-  try { localStorage.setItem(WHAT_KEY, JSON.stringify(Object.fromEntries(Object.entries(map).map(([k, v]) => [k, v.map((a) => Array.from(a))])))); } catch { /* ignore */ }
-}
-function loadWhat(): Record<string, Float32Array[]> {
-  try { const o = JSON.parse(localStorage.getItem(WHAT_KEY) || '{}'); const out: Record<string, Float32Array[]> = {}; for (const k in o) out[k] = (o[k] as number[][]).map((a) => Float32Array.from(a)); return out; } catch { return {}; }
-}
+// WHAT phrase-print templates persist via the shared voiceprint store (IndexedDB) — see ../../voiceprintStore.
 
 interface LogRow { id: number; phrase: string; base: number; who: VerifyResult | null; what: number | null; pass: boolean; t: string; }
 
@@ -145,9 +139,10 @@ function SpeakerVerifyDemo({ cosineThreshold, znormThreshold, useAsnorm }: SVArg
   // restore persisted WHAT templates into the detector when it's ready (so they survive reloads, like WHO)
   React.useEffect(() => {
     if (!wake.ready) return;
-    const loaded = loadWhat();
-    whatRef.current = loaded;
-    for (const k in loaded) wakeRef.current.setVoiceprint(k, loaded[k]);
+    void loadWhatPrints().then((loaded) => {
+      whatRef.current = loaded;
+      for (const k in loaded) wakeRef.current.setVoiceprint(k, loaded[k]);
+    });
   }, [wake.ready]);
 
   // every wake, while idle: score all three gates and add a colour-coded row
