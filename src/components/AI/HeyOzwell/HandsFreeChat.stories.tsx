@@ -164,8 +164,10 @@ function HandsFreeChat() {
     return () => { cancelled = true; rollRef.current?.close(); rollRef.current = null; };
   }, [wake.ready]);
 
-  // preload the dictation model on open, so the first "ozwell i'm done" doesn't wait on it.
-  React.useEffect(() => { void warmWakeModels(); warmWhisper(); }, []);
+  // Pre-load the small wake files on mount; warm the heavy transcription model only once the detector is
+  // up (wake.ready) so the ~1.3 GB download never starves wake startup. loadWhisper is idempotent.
+  React.useEffect(() => { void warmWakeModels(); }, []);
+  React.useEffect(() => { if (wake.ready) warmWhisper(); }, [wake.ready]);
 
   // Live room-volume for the header octopus pulse — a second analyser on the detector's shared stream
   // (no extra getUserMedia). Mirrors the Voice Setup / Demo pulse.

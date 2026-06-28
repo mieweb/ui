@@ -272,13 +272,18 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
     transcription: dictLoad.done ? 'ready' : dictLoad.active ? 'loading' : 'idle',
   };
 
-  // Pre-load on mount (before the user presses), mic stays off: pre-fetch the wake model FILES into OPFS
-  // (no detector/mic) so the octopus shows a load ring on reload and activates instantly, and warm the
-  // dictation model so its progress bar shows on reload too.
+  // Pre-load the small wake model FILES on mount (mic stays off) so the octopus is ready to listen the
+  // instant it's pressed and shows the green ready-flash on reload. Cheap (~3 MB into OPFS).
   React.useEffect(() => {
     void warmWakeModels();
-    warmWhisper();
   }, []);
+
+  // Warm the heavy (~1.3 GB) transcription model only once the user turns Ozwell ON — in the background,
+  // OFF the critical wake-start path. Activation must never be gated on the transcription download:
+  // recording is decoupled (you can talk before it's ready and the audio is transcribed once it loads).
+  React.useEffect(() => {
+    if (active) warmWhisper();
+  }, [active]);
 
   function startDictation() {
     const stream = wakeRef.current.getStream(); // the listener's OWN stream — no second getUserMedia
