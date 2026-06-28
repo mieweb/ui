@@ -18,6 +18,8 @@ import { cn } from '../../../utils/cn';
 
 /** Ozwell octopus blue — matches the Voice Setup glow. */
 const OZ = '#0BA0E0';
+/** Ready-green — flashes around the octopus the moment loading completes. */
+const READY_GREEN = '#10B981';
 
 export interface HeyOzwellToggleProps {
   /** Whether Hey Ozwell is on. Off → gray + muted; on → colour + volume pulse. */
@@ -29,8 +31,15 @@ export interface HeyOzwellToggleProps {
    * wake-word analyser (see Voice Setup). Ignored when inactive.
    */
   level?: number;
-  /** Show a spinning ring around the octopus while models load (e.g. on reload until wake is ready). */
+  /** Show a ring around the octopus while models load (e.g. on reload until wake + transcription are ready). */
   loading?: boolean;
+  /**
+   * Load progress, 0..1, for a determinate fill ring. When omitted while `loading`, the ring
+   * falls back to an indeterminate spin. When loading finishes, the ring flashes green briefly.
+   */
+  loadProgress?: number;
+  /** Optional status appended to the tooltip while loading, e.g. "Transcription 80%". */
+  loadLabel?: string;
   /** Ozwell logo source. Defaults to the bundled Storybook public asset. */
   logoSrc?: string;
   /** Logo diameter in px. */
@@ -53,6 +62,8 @@ export function HeyOzwellToggle({
   onToggle,
   level = 0,
   loading = false,
+  loadProgress,
+  loadLabel,
   logoSrc = '/ozwell/icon.svg',
   size = 36,
   className,
@@ -63,6 +74,27 @@ export function HeyOzwellToggle({
   const octoScale = 1 + Math.min(0.28, lv * 2.2);
   const glowOpacity = active ? 0.4 + Math.min(0.55, lv * 4) : 0;
   const glowScale = 1 + Math.min(0.7, lv * 3);
+
+  // Flash a full green ring for a beat when loading finishes, so the user gets a clear "ready" signal.
+  const [doneFlash, setDoneFlash] = React.useState(false);
+  const wasLoading = React.useRef(loading);
+  React.useEffect(() => {
+    if (wasLoading.current && !loading) {
+      setDoneFlash(true);
+      const t = window.setTimeout(() => setDoneFlash(false), 1500);
+      wasLoading.current = loading;
+      return () => window.clearTimeout(t);
+    }
+    wasLoading.current = loading;
+  }, [loading]);
+
+  // Determinate ring geometry — a circle stroked from 12 o'clock, filling clockwise with loadProgress.
+  const ringBox = size + 6; // inset -3 on each side
+  const ringStroke = 2.5;
+  const ringR = (ringBox - ringStroke) / 2;
+  const ringC = 2 * Math.PI * ringR;
+  const hasProgress = typeof loadProgress === 'number';
+  const p = hasProgress ? Math.max(0, Math.min(1, loadProgress as number)) : 0;
 
   // Long-press / right-click → settings. A fired long-press sets a flag so the click on press-release
   // doesn't ALSO toggle. Pointer events cover mouse + touch; contextmenu covers right-click.
@@ -90,6 +122,7 @@ export function HeyOzwellToggle({
   };
 
   const settingsHint = onOpenSettings ? ' · right-click for settings' : '';
+  const loadHint = loading && loadLabel ? ` · ${loadLabel}` : '';
 
   return (
     <button
@@ -97,7 +130,7 @@ export function HeyOzwellToggle({
       data-slot="hey-ozwell-toggle"
       aria-pressed={active}
       aria-label={active ? 'Hey Ozwell active — click to turn off' : 'Activate Hey Ozwell'}
-      title={(active ? 'Ozwell is listening — click to turn off' : 'Activate Ozwell') + settingsHint}
+      title={(loading ? 'Getting Ozwell ready' : active ? 'Ozwell is listening — click to turn off' : 'Activate Ozwell') + loadHint + settingsHint}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       onPointerDown={startPress}
@@ -113,8 +146,23 @@ export function HeyOzwellToggle({
       )}
       style={{ width: size, height: size }}
     >
-      {/* Loading ring — a spinning arc while models load (gray octopus on reload). */}
-      {loading && (
+      {/* Loading ring — a determinate fill while models load, then a green "ready" flash.
+          Falls back to an indeterminate spin if no progress is supplied. */}
+      {loading && hasProgress && (
+        <svg
+          aria-hidden="true"
+          width={ringBox} height={ringBox} viewBox={`0 0 ${ringBox} ${ringBox}`}
+          style={{ position: 'absolute', inset: -3, pointerEvents: 'none', transform: 'rotate(-90deg)' }}
+        >
+          <circle
+            cx={ringBox / 2} cy={ringBox / 2} r={ringR}
+            fill="none" stroke={OZ} strokeWidth={ringStroke} strokeLinecap="round"
+            strokeDasharray={ringC} strokeDashoffset={ringC * (1 - p)}
+            style={{ transition: 'stroke-dashoffset .2s linear' }}
+          />
+        </svg>
+      )}
+      {loading && !hasProgress && (
         <span
           aria-hidden="true"
           className="animate-spin"
@@ -122,6 +170,17 @@ export function HeyOzwellToggle({
             position: 'absolute', inset: -3, borderRadius: '50%',
             border: '2px solid transparent', borderTopColor: OZ,
             pointerEvents: 'none',
+          }}
+        />
+      )}
+      {/* Ready flash — full green ring for a beat once loading completes. */}
+      {!loading && doneFlash && (
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: -3, borderRadius: '50%',
+            border: `2.5px solid ${READY_GREEN}`, pointerEvents: 'none',
+            opacity: 0.95, transition: 'opacity .4s ease',
           }}
         />
       )}

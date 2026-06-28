@@ -20,7 +20,7 @@ import { RecordButton } from '../../RecordButton';
 import { useWakeWord, warmWakeModels, subscribeWakeWarm, getWakeWarm } from './WakeWord/useWakeWord';
 import { HeyOzwellToggle } from './HeyOzwellToggle';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
-import { transcribeBlob, stripStopPhrase, warmWhisper } from '../whisperTranscribe';
+import { transcribeBlob, stripStopPhrase, warmWhisper, getDictationLoad, subscribeDictationLoad } from '../whisperTranscribe';
 import { askOzwellStream, isOzwellConfigured, toOzwellMessages } from '../ozwellChat';
 import { loadWhatPrints } from '../voiceprintStore';
 
@@ -79,6 +79,13 @@ function HandsFreeChat() {
   phaseRef.current = phase;
   const [roomLevel, setRoomLevel] = React.useState(0); // drives the header octopus pulse
   const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
+  const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
+  // Fold overall readiness into the octopus ring: wake files are quick, transcription is the long pole.
+  const ozLoading = wakeWarm.active || dictLoad.active || (!wake.ready && !wake.error);
+  const ozProgress = 0.25 * (wakeWarm.done ? 1 : wakeWarm.progress) + 0.75 * (dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress));
+  const ozLoadLabel = dictLoad.active && !dictLoad.done
+    ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
+    : wakeWarm.active ? 'Wake word…' : undefined;
 
   const send = (text: string) => {
     const t = text.trim();
@@ -226,7 +233,7 @@ function HandsFreeChat() {
             room volume while listening. AIChat exposes no header-action slot, so it's a positioned overlay.
             Status now lives in the composer placeholder, so no separate bar. */}
         <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
-          <HeyOzwellToggle active={wake.ready} loading={wakeWarm.active || (!wake.ready && !wake.error)} level={roomLevel} size={34} />
+          <HeyOzwellToggle active={wake.ready} loading={ozLoading} loadProgress={ozProgress} loadLabel={ozLoadLabel} level={roomLevel} size={34} />
         </div>
         <AIChat
           messages={messages}

@@ -167,6 +167,17 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
   const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
 
+  // Overall "getting Ozwell ready" state, folded into the header octopus (the only thing visible when off).
+  // Wake files are quick; transcription is the long pole, so it dominates the ring fill. Hold the displayed
+  // progress at 99% until the model reports `done` (downloads finish a beat before the pipeline compiles).
+  const wakeP = wakeWarm.done ? 1 : wakeWarm.progress;
+  const dictP = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress);
+  const ozLoading = wakeWarm.active || dictLoad.active || (active && !wake.ready && !wake.error);
+  const ozProgress = 0.25 * wakeP + 0.75 * dictP;
+  const ozLoadLabel = dictLoad.active && !dictLoad.done
+    ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
+    : wakeWarm.active ? 'Wake word…' : undefined;
+
   const messagesRef = React.useRef(messages);
   messagesRef.current = messages;
   const phaseRef = React.useRef(phase);
@@ -364,7 +375,9 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
         <HeyOzwellToggle
           active={active}
           level={level}
-          loading={wakeWarm.active || (active && !wake.ready && !wake.error)}
+          loading={ozLoading}
+          loadProgress={ozProgress}
+          loadLabel={ozLoadLabel}
           onToggle={toggle}
           onOpenSettings={() => setSettingsOpen((v) => !v)}
           size={40}
@@ -459,14 +472,8 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
             Starting the on-device detector… (loading models)
           </p>
         )}
-        {dictLoad.active && !dictLoad.done && (
-          <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-            <span>Loading transcription model… {Math.round(dictLoad.progress * 100)}%</span>
-            <span style={{ display: 'inline-block', width: 140, height: 6, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
-              <span style={{ display: 'block', height: '100%', width: `${Math.round(dictLoad.progress * 100)}%`, background: '#0BA0E0', transition: 'width .2s linear' }} />
-            </span>
-          </div>
-        )}
+        {/* Transcription load is shown on the header octopus (ring + tooltip) rather than a body bar,
+            so the off-state surface stays clean. See ozLoading/ozProgress/ozLoadLabel above. */}
         {wake.error && (
           <p style={{ marginTop: 0, color: '#dc2626' }}>
             Wake word error: {wake.error}
