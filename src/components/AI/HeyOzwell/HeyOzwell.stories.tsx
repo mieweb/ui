@@ -167,14 +167,16 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
   const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
 
-  // Overall "getting Ozwell ready" state, folded into the header octopus (the only thing visible when off).
-  // Wake files are quick; transcription is the long pole, so it dominates the ring fill. Hold the displayed
-  // progress at 99% until the model reports `done` (downloads finish a beat before the pipeline compiles).
-  const wakeP = wakeWarm.done ? 1 : wakeWarm.progress;
-  const dictP = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress);
-  const ozLoading = wakeWarm.active || dictLoad.active || (active && !wake.ready && !wake.error);
-  const ozProgress = 0.25 * wakeP + 0.75 * dictP;
-  const ozLoadLabel = dictLoad.active && !dictLoad.done
+  // Header octopus load state, split into two rings so the slow transcription warm-up never makes the
+  // octopus look unavailable:
+  //   primary ring  = wake detection (fast) — this is what actually gates usability → green flash when ready
+  //   secondary arc = transcription (the long pole) — background only; you can press + talk immediately and
+  //                   the audio is captured and transcribed once it finishes.
+  const ozLoading = wakeWarm.active || (active && !wake.ready && !wake.error);
+  const ozProgress = wakeWarm.done ? 1 : wakeWarm.progress;
+  const ozWarm = dictLoad.active && !dictLoad.done;
+  const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress); // hold at 99 until compile done
+  const ozLoadLabel = ozWarm
     ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
     : wakeWarm.active ? 'Wake word…' : undefined;
 
@@ -377,6 +379,8 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
           level={level}
           loading={ozLoading}
           loadProgress={ozProgress}
+          warmActive={ozWarm}
+          warmProgress={ozWarmProgress}
           loadLabel={ozLoadLabel}
           onToggle={toggle}
           onOpenSettings={() => setSettingsOpen((v) => !v)}

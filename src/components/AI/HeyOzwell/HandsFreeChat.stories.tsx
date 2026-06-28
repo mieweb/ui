@@ -80,10 +80,13 @@ function HandsFreeChat() {
   const [roomLevel, setRoomLevel] = React.useState(0); // drives the header octopus pulse
   const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
   const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
-  // Fold overall readiness into the octopus ring: wake files are quick, transcription is the long pole.
-  const ozLoading = wakeWarm.active || dictLoad.active || (!wake.ready && !wake.error);
-  const ozProgress = 0.25 * (wakeWarm.done ? 1 : wakeWarm.progress) + 0.75 * (dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress));
-  const ozLoadLabel = dictLoad.active && !dictLoad.done
+  // Two rings: primary = wake detection (fast, gates usability); secondary = transcription warm (background,
+  // non-blocking — you can talk before it finishes and the audio is transcribed once it's ready).
+  const ozLoading = wakeWarm.active || (!wake.ready && !wake.error);
+  const ozProgress = wakeWarm.done ? 1 : wakeWarm.progress;
+  const ozWarm = dictLoad.active && !dictLoad.done;
+  const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress);
+  const ozLoadLabel = ozWarm
     ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
     : wakeWarm.active ? 'Wake word…' : undefined;
 
@@ -233,7 +236,7 @@ function HandsFreeChat() {
             room volume while listening. AIChat exposes no header-action slot, so it's a positioned overlay.
             Status now lives in the composer placeholder, so no separate bar. */}
         <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
-          <HeyOzwellToggle active={wake.ready} loading={ozLoading} loadProgress={ozProgress} loadLabel={ozLoadLabel} level={roomLevel} size={34} />
+          <HeyOzwellToggle active={wake.ready} loading={ozLoading} loadProgress={ozProgress} warmActive={ozWarm} warmProgress={ozWarmProgress} loadLabel={ozLoadLabel} level={roomLevel} size={34} />
         </div>
         <AIChat
           messages={messages}

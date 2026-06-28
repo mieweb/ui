@@ -31,14 +31,26 @@ export interface HeyOzwellToggleProps {
    * wake-word analyser (see Voice Setup). Ignored when inactive.
    */
   level?: number;
-  /** Show a ring around the octopus while models load (e.g. on reload until wake + transcription are ready). */
+  /**
+   * Whether the primary (wake-detection) ring is loading — this gates whether the octopus is
+   * actually usable. Fast: off → green flash → ready. Off-ramp keeps the octopus from looking
+   * "unavailable" for the slower transcription warm-up (see `warm*`).
+   */
   loading?: boolean;
   /**
-   * Load progress, 0..1, for a determinate fill ring. When omitted while `loading`, the ring
-   * falls back to an indeterminate spin. When loading finishes, the ring flashes green briefly.
+   * Wake-detection load progress, 0..1, for the primary determinate fill ring. When omitted
+   * while `loading`, the ring falls back to an indeterminate spin. Completion flashes green.
    */
   loadProgress?: number;
-  /** Optional status appended to the tooltip while loading, e.g. "Transcription 80%". */
+  /**
+   * Whether transcription is still warming in the background. Shows as a thin, muted secondary
+   * arc OUTSIDE the primary ring — purely informational, never implies the octopus isn't ready
+   * (you can press and talk immediately; audio is captured and transcribed once this finishes).
+   */
+  warmActive?: boolean;
+  /** Background transcription warm progress, 0..1, for the secondary arc. */
+  warmProgress?: number;
+  /** Optional status appended to the tooltip, e.g. "Transcription 80%". */
   loadLabel?: string;
   /** Ozwell logo source. Defaults to the bundled Storybook public asset. */
   logoSrc?: string;
@@ -63,6 +75,8 @@ export function HeyOzwellToggle({
   level = 0,
   loading = false,
   loadProgress,
+  warmActive = false,
+  warmProgress,
   loadLabel,
   logoSrc = '/ozwell/icon.svg',
   size = 36,
@@ -88,13 +102,20 @@ export function HeyOzwellToggle({
     wasLoading.current = loading;
   }, [loading]);
 
-  // Determinate ring geometry — a circle stroked from 12 o'clock, filling clockwise with loadProgress.
+  // Primary ring geometry — a circle stroked from 12 o'clock, filling clockwise with loadProgress (wake).
   const ringBox = size + 6; // inset -3 on each side
   const ringStroke = 2.5;
   const ringR = (ringBox - ringStroke) / 2;
   const ringC = 2 * Math.PI * ringR;
   const hasProgress = typeof loadProgress === 'number';
   const p = hasProgress ? Math.max(0, Math.min(1, loadProgress as number)) : 0;
+
+  // Secondary arc — thinner + muted, sits just OUTSIDE the primary, tracks the background transcription warm.
+  const warmBox = size + 12; // inset -6
+  const warmStroke = 1.5;
+  const warmR = (warmBox - warmStroke) / 2;
+  const warmC = 2 * Math.PI * warmR;
+  const wp = typeof warmProgress === 'number' ? Math.max(0, Math.min(1, warmProgress)) : 0;
 
   // Long-press / right-click → settings. A fired long-press sets a flag so the click on press-release
   // doesn't ALSO toggle. Pointer events cover mouse + touch; contextmenu covers right-click.
@@ -173,7 +194,7 @@ export function HeyOzwellToggle({
           }}
         />
       )}
-      {/* Ready flash — full green ring for a beat once loading completes. */}
+      {/* Ready flash — full green ring for a beat once the (wake) loading completes. */}
       {!loading && doneFlash && (
         <span
           aria-hidden="true"
@@ -183,6 +204,28 @@ export function HeyOzwellToggle({
             opacity: 0.95, transition: 'opacity .4s ease',
           }}
         />
+      )}
+      {/* Secondary arc — thin + muted, OUTSIDE the primary ring. Background transcription warm only;
+          the octopus is already usable, so this never implies "not ready". */}
+      {warmActive && (
+        <svg
+          aria-hidden="true"
+          width={warmBox} height={warmBox} viewBox={`0 0 ${warmBox} ${warmBox}`}
+          style={{ position: 'absolute', inset: -6, pointerEvents: 'none', transform: 'rotate(-90deg)' }}
+        >
+          {/* faint full track so the arc reads as a ring, not a stray mark */}
+          <circle
+            cx={warmBox / 2} cy={warmBox / 2} r={warmR}
+            fill="none" stroke={OZ} strokeWidth={warmStroke} strokeLinecap="round"
+            style={{ opacity: 0.12 }}
+          />
+          <circle
+            cx={warmBox / 2} cy={warmBox / 2} r={warmR}
+            fill="none" stroke={OZ} strokeWidth={warmStroke} strokeLinecap="round"
+            strokeDasharray={warmC} strokeDashoffset={warmC * (1 - wp)}
+            style={{ opacity: 0.4, transition: 'stroke-dashoffset .2s linear' }}
+          />
+        </svg>
       )}
       {/* Volume glow — fades in only while active, scales with the room. */}
       <span
