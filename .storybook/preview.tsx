@@ -14,6 +14,69 @@ import { ozwellBrand } from '../src/brands/ozwell';
 import { wagglelineBrand } from '../src/brands/waggleline';
 import { webchartBrand } from '../src/brands/webchart';
 import type { BrandConfig } from '../src/brands/types';
+import { collectLocoKeysFromElement, postLocoTextnodes } from '../src/utils/loco-live';
+
+const postedLiveSyncSignatures = new Set<string>();
+const locoScriptLoaders = new Map<string, Promise<void>>();
+const locoLiveInitKeys = new Set<string>();
+
+type LocoRuntime = {
+  init?: (config: { apiUrl: string; apiKey?: string }) => Promise<unknown> | unknown;
+  apply?: (lang: string) => Promise<unknown> | unknown;
+  restore?: () => Promise<unknown> | unknown;
+};
+
+async function ensureLocoRuntimeLoaded(serverUrl: string): Promise<LocoRuntime | null> {
+  if (typeof window === 'undefined') return null;
+
+  const runtime = (window as any).Loco as LocoRuntime | undefined;
+  if (runtime?.init) return runtime;
+
+  const serverBase = serverUrl.replace(/\/$/, '');
+  const scriptId = `loco-runtime-${serverBase}`;
+
+  let loader = locoScriptLoaders.get(scriptId);
+  if (!loader) {
+    loader = new Promise<void>((resolve, reject) => {
+      const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => reject(new Error('Failed to load Loco runtime script.')), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `${serverBase}/cdn/loco.js`;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Unable to load ${script.src}`));
+      document.head.appendChild(script);
+    });
+    locoScriptLoaders.set(scriptId, loader);
+  }
+
+  await loader;
+  return ((window as any).Loco as LocoRuntime | undefined) ?? null;
+}
+
+async function ensureLocoLiveInitialized(serverUrl: string, apiKey?: string): Promise<LocoRuntime | null> {
+  const runtime = await ensureLocoRuntimeLoaded(serverUrl);
+  if (!runtime?.init) return runtime;
+
+  const serverBase = serverUrl.replace(/\/$/, '');
+  const initKey = `${serverBase}|${apiKey || ''}`;
+  if (locoLiveInitKeys.has(initKey)) return runtime;
+
+  await Promise.resolve(
+    runtime.init({
+      apiUrl: serverBase,
+      apiKey,
+    }),
+  );
+  locoLiveInitKeys.add(initKey);
+  return runtime;
+}
 
 // Map of available brands
 const brands: Record<string, BrandConfig> = {
@@ -243,11 +306,98 @@ const withBrand: Decorator = (Story, context) => {
   );
 };
 
+const withLocoLiveSync: Decorator = (Story, context) => {
+  const locoMode = String(context.globals?.locoMode || 'package');
+  const locale = String(context.globals?.locale || 'en');
+  const configuredServer = String(context.globals?.locoServer || '').trim();
+  const configuredApiKey = String(context.globals?.locoApiKey || '').trim();
+  const serverFromEnv =
+    (import.meta.env?.VITE_LOCO_SERVER_URL as string | undefined)?.trim() ||
+    'http://localhost:6101';
+  const serverUrl = configuredServer || serverFromEnv;
+  const apiKey =
+    configuredApiKey ||
+    (import.meta.env?.VITE_LOCO_API_KEY as string | undefined)?.trim() ||
+    undefined;
+
+  useEffect(() => {
+    if (locoMode !== 'live') return;
+
+    const root = document.querySelector('[data-loco-scan-root="true"]') as HTMLElement | null;
+    if (!root) return;
+
+    const keys = collectLocoKeysFromElement(root);
+    if (keys.length === 0) return;
+
+    const signature = `${context.id}:${serverUrl}:${keys.map((entry) => entry.key).join('|')}`;
+    if (postedLiveSyncSignatures.has(signature)) return;
+    postedLiveSyncSignatures.add(signature);
+
+    void postLocoTextnodes({
+      serverUrl,
+      keys,
+      pageUrl: window.location.href,
+      apiKey,
+    }).catch((error) => {
+      console.warn(
+        '[loco-live-sync] Unable to post phrases to Loco. Check VITE_LOCO_SERVER_URL and VITE_LOCO_API_KEY.',
+        error,
+      );
+    });
+  }, [locoMode, serverUrl, apiKey, context.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // If switching back to package mode, undo live runtime translations.
+    if (locoMode !== 'live') {
+      const runtime = (window as any).Loco as LocoRuntime | undefined;
+      if (runtime?.restore) {
+        void Promise.resolve(runtime.restore()).catch(() => undefined);
+      }
+      return;
+    }
+
+    void (async () => {
+      const runtime = await ensureLocoLiveInitialized(serverUrl, apiKey);
+      if (!runtime || cancelled) return;
+
+      // Keep English as the baseline original text in Storybook.
+      if (locale === 'en') {
+        if (runtime.restore) {
+          await Promise.resolve(runtime.restore());
+        }
+        return;
+      }
+
+      if (runtime.apply) {
+        await Promise.resolve(runtime.apply(locale));
+      }
+    })().catch((error) => {
+      console.warn('[loco-live-sync] Unable to apply live locale with Loco runtime.', error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locoMode, locale, serverUrl, apiKey, context.id]);
+
+  return (
+    <div data-loco-scan-root="true">
+      <Story />
+    </div>
+  );
+};
+
 const preview: Preview = {
   initialGlobals: {
     brand: 'bluehive',
     theme: 'light',
     density: 'standard',
+    locale: 'en',
+    locoMode: 'package',
+    locoServer: 'http://localhost:6101',
+    locoApiKey: '82b6c1a44ec247dcb6c96fe0',
   },
   globalTypes: {
     brand: {
@@ -288,6 +438,32 @@ const preview: Preview = {
         items: [
           { value: 'standard', title: 'Standard' },
           { value: 'condensed', title: 'Condensed' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+    locale: {
+      name: 'Locale',
+      description: 'Locale used by i18n integration stories',
+      toolbar: {
+        icon: 'globe',
+        items: [
+          { value: 'en', title: 'English (en)' },
+          { value: 'fr', title: 'French (fr)' },
+          { value: 'zh-Hans', title: 'Chinese (zh-Hans)' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+    locoMode: {
+      name: 'Loco i18n',
+      description:
+        'Use Loco i18n package for preview or Loco Sync Text to post discovered phrases to Loco pending list.',
+      toolbar: {
+        icon: 'transfer',
+        items: [
+          { value: 'package', title: 'Loco i18n' },
+          { value: 'live', title: 'Loco Sync Text' },
         ],
         dynamicTitle: true,
       },
@@ -344,7 +520,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [withGitHubSource, withBrand],
+  decorators: [withGitHubSource, withBrand, withLocoLiveSync],
 };
 
 export default preview;
