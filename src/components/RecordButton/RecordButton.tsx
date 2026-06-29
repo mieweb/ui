@@ -239,9 +239,12 @@ function PulseRings({ variant }: { variant: RecordButtonVariant }) {
 
 function WaveformBars({ size }: { size: RecordButtonSize }) {
   const barHeight = size === 'sm' ? 'h-2' : size === 'md' ? 'h-3' : 'h-4';
-  // Intrinsic px fallback so bars still render if the consuming app's CSS
-  // build does not include these size utilities.
-  const barHeightPx = size === 'sm' ? 8 : size === 'md' ? 12 : 16;
+  // rem fallback (matching the Tailwind utility values: h-2/h-3/h-4) so the
+  // bars still render if the consuming app's CSS build does not include these
+  // size utilities. Using rem (not px) keeps scaling consistent with the
+  // utilities and lets condensed `!important` overrides still win.
+  const barHeightRem =
+    size === 'sm' ? '0.5rem' : size === 'md' ? '0.75rem' : '1rem';
 
   return (
     <div
@@ -256,8 +259,8 @@ function WaveformBars({ size }: { size: RecordButtonSize }) {
             barHeight
           )}
           style={{
-            width: 2,
-            height: barHeightPx,
+            width: '0.125rem',
+            height: barHeightRem,
             animationDelay: `${i * 0.1}s`,
           }}
         />
@@ -681,7 +684,9 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
           if (showWaveform) {
             return <WaveformBars size={size} />;
           }
-          return recordingIcon || <StopIcon className={iconSize} size={iconPx} />;
+          return (
+            recordingIcon || <StopIcon className={iconSize} size={iconPx} />
+          );
         case 'processing':
           return <LoadingSpinner className={iconSize} size={iconPx} />;
         case 'disabled':
