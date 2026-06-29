@@ -85,3 +85,32 @@ export const DerivedColumns: Story = {
     </DataVisNitroSource>
   ),
 };
+
+export const MinimalMode: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Minimal mode hides the title bar and instead overlays a floating hamburger button on the grid (partially transparent, fully opaque on hover). Opening it reveals a menu with the title bar actions (download, copy, refresh, show controls) plus the perspective dropdown and its buttons. Ideal for compact or embedded layouts where the full header would take up too much space. Use the "show controls" action in the menu to reveal the filter/group/pivot/aggregate panels.',
+      },
+    },
+  },
+  render: () => (
+    <DataVisNitroSource type="http" url="/sample-data.json">
+      <DataVisNitroGrid
+        title="Employees"
+        columns={[
+          'id',
+          'name',
+          'email',
+          'department',
+          'status',
+          'start_date',
+          'manager',
+        ]}
+        minimalMode
+        height="420px"
+      />
+    </DataVisNitroSource>
+  ),
+};
