@@ -15,6 +15,7 @@ import type {
 } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
 import { SparklesIcon, ChevronIcon } from './icons';
+import { AudioPlayer } from '../AudioPlayer';
 
 // ============================================================================
 // Avatar Component
@@ -265,6 +266,23 @@ function ContentBlock({
           {content.text}
         </code>
       </pre>
+    );
+  }
+
+  if (content.type === 'audio' && content.audioUrl) {
+    // Guard against `javascript:` URLs, mirroring the image/file blocks.
+    if (/^\s*javascript:/i.test(content.audioUrl)) {
+      return null;
+    }
+    return (
+      <AudioPlayer
+        src={content.audioUrl}
+        title={content.text || 'Audio recording'}
+        variant="waveform"
+        showTime
+        showPlaybackRate
+        fallbackDuration={content.duration}
+      />
     );
   }
 
