@@ -77,11 +77,19 @@ export interface RecordButtonProps extends Omit<
 // Icons
 // ============================================================================
 
-function MicIcon({ className }: { className?: string }) {
+function MicIcon({
+  className,
+  size = 20,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -97,11 +105,19 @@ function MicIcon({ className }: { className?: string }) {
   );
 }
 
-function MicOffIcon({ className }: { className?: string }) {
+function MicOffIcon({
+  className,
+  size = 20,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -120,11 +136,19 @@ function MicOffIcon({ className }: { className?: string }) {
   );
 }
 
-function StopIcon({ className }: { className?: string }) {
+function StopIcon({
+  className,
+  size = 20,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       fill="currentColor"
       className={className}
       aria-hidden="true"
@@ -134,11 +158,19 @@ function StopIcon({ className }: { className?: string }) {
   );
 }
 
-function CheckIcon({ className }: { className?: string }) {
+function CheckIcon({
+  className,
+  size = 20,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="2.5"
@@ -152,11 +184,19 @@ function CheckIcon({ className }: { className?: string }) {
   );
 }
 
-function LoadingSpinner({ className }: { className?: string }) {
+function LoadingSpinner({
+  className,
+  size = 20,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -199,6 +239,9 @@ function PulseRings({ variant }: { variant: RecordButtonVariant }) {
 
 function WaveformBars({ size }: { size: RecordButtonSize }) {
   const barHeight = size === 'sm' ? 'h-2' : size === 'md' ? 'h-3' : 'h-4';
+  // Intrinsic px fallback so bars still render if the consuming app's CSS
+  // build does not include these size utilities.
+  const barHeightPx = size === 'sm' ? 8 : size === 'md' ? 12 : 16;
 
   return (
     <div
@@ -213,6 +256,8 @@ function WaveformBars({ size }: { size: RecordButtonSize }) {
             barHeight
           )}
           style={{
+            width: 2,
+            height: barHeightPx,
             animationDelay: `${i * 0.1}s`,
           }}
         />
@@ -256,6 +301,16 @@ const iconSizes: Record<RecordButtonSize, string> = {
   sm: 'size-4',
   md: 'size-5',
   lg: 'size-6',
+};
+
+// Intrinsic px sizes mirroring `iconSizes`, applied as width/height attributes
+// so the icons render at the correct size even when a consuming app's CSS build
+// does not include the Tailwind size utilities (e.g. it only scans its own
+// source and not node_modules/@mieweb/ui).
+const iconPxSizes: Record<RecordButtonSize, number> = {
+  sm: 16,
+  md: 20,
+  lg: 24,
 };
 
 // ============================================================================
@@ -476,6 +531,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
     }, [disabled, controlledState, transcriptionState]);
 
     const iconSize = iconSizes[size];
+    const iconPx = iconPxSizes[size];
     const isRecording = effectiveState === 'recording';
     const isDisabled =
       effectiveState === 'disabled' || effectiveState === 'processing';
@@ -625,16 +681,16 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
           if (showWaveform) {
             return <WaveformBars size={size} />;
           }
-          return recordingIcon || <StopIcon className={iconSize} />;
+          return recordingIcon || <StopIcon className={iconSize} size={iconPx} />;
         case 'processing':
-          return <LoadingSpinner className={iconSize} />;
+          return <LoadingSpinner className={iconSize} size={iconPx} />;
         case 'disabled':
         case 'error':
-          return <MicOffIcon className={iconSize} />;
+          return <MicOffIcon className={iconSize} size={iconPx} />;
         case 'success':
-          return <CheckIcon className={iconSize} />;
+          return <CheckIcon className={iconSize} size={iconPx} />;
         default:
-          return idleIcon || <MicIcon className={iconSize} />;
+          return idleIcon || <MicIcon className={iconSize} size={iconPx} />;
       }
     };
 

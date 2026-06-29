@@ -5903,6 +5903,16 @@ body.condensed [data-slot='composer-input'] {
   border-radius: 1rem !important;
 }
 
+/* Trailing slot (e.g. record/mic button) – the standard view hard-codes a
+   44px height to match the comfortable textarea. In condensed the input row is
+   shorter, so track the wrapper height instead and keep the icon centered to
+   prevent the mic from drooping below and clipping past the input edge. */
+body.condensed [data-slot='composer-input-trailing'] {
+  height: 100% !important;
+  top: 0 !important;
+  bottom: 0 !important;
+}
+
 /* Send button – smaller */
 body.condensed [data-slot='composer-send-button'] {
   padding: 0.25rem !important;
