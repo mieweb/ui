@@ -71,31 +71,16 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
   // its header and wires where the settings items navigate. (For custom layouts, useHeyOzwell + the
   // parts give the same behavior; see the component source.)
   return (
-    <div
-      data-hey-ozwell-demo
-      style={{
-        position: 'relative',
-        height: 460,
-        fontFamily: 'system-ui, sans-serif',
-      }}
-    >
+    <div data-hey-ozwell-demo className="bg-background relative" style={{ height: 460 }}>
       {/* Pointer cursor on the floating chat trigger — scoped to THIS demo only (AIChatTrigger is a shared
           library component, so we don't change it globally). FloatingAIChat doesn't forward a className to
           its trigger, so target its data-slot within this wrapper. */}
       <style>{`[data-hey-ozwell-demo] [data-slot="ai-chat-trigger"]{cursor:pointer}`}</style>
 
       {/* Header bar — app name + the drop-in Hey Ozwell (octopus toggle + settings menu + floating chat) */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '12px 22px',
-          borderBottom: '1px solid #e2e8f0',
-          background: '#fff',
-        }}
-      >
-        <strong style={{ fontSize: 15, color: '#0f172a' }}>BlueHive EHR</strong>
-        <span style={{ flex: 1 }} />
+      <div className="border-border bg-background flex items-center border-b px-[22px] py-3">
+        <strong className="text-foreground text-[15px] font-bold">BlueHive EHR</strong>
+        <span className="flex-1" />
         <HeyOzwell
           autoDictateOnWake={autoDictateOnWake}
           closeChatOnDone={closeChatOnDone}
@@ -111,22 +96,13 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
 
       {/* Body — a faux app surface behind the floating chat. The octopus ring + chat placeholder now carry
           the live loading / listening / dictating feedback, so this stays a simple, static intro. */}
-      <div
-        style={{
-          padding: 28,
-          background: '#f8fafc',
-          height: '100%',
-          color: '#64748b',
-          fontSize: 14,
-        }}
-      >
-        <p style={{ marginTop: 0 }}>
+      <div className="bg-muted text-muted-foreground h-full p-7 text-sm">
+        <p className="mt-0">
           Click the gray octopus in the header to turn Ozwell on, then say{' '}
-          <b style={{ color: '#0f172a' }}>“hey ozwell”</b>.
+          <b className="text-foreground">“hey ozwell”</b>.
         </p>
-        <p style={{ marginTop: 14, fontSize: 12.5, color: '#64748b' }}>
-          Tip: <b>right-click</b> (or long-press) the octopus for Ozwell
-          settings.
+        <p className="text-muted-foreground mt-3.5 text-[12.5px]">
+          Tip: <b>right-click</b> (or long-press) the octopus for Ozwell settings.
         </p>
       </div>
     </div>

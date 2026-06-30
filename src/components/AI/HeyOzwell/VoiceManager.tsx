@@ -21,6 +21,9 @@ import { VoiceSetup } from './VoiceSetup';
 const OZ = 'var(--mieweb-ozwell, #0BA0E0)';
 /** Ozwell-accent fill for <Button> (overrides the primary variant's bg/text via tailwind-merge). */
 const ozBtn = 'bg-ozwell hover:bg-ozwell active:bg-ozwell text-ozwell-foreground hover:brightness-95 active:brightness-90';
+/** Soft destructive for repeated row actions (Remove): red text + border, transparent fill. The solid
+ *  danger variant stays for the one-off "Clear all". */
+const dangerOutline = 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive';
 
 export interface VoiceManagerProps {
   /** Octopus logo source, forwarded to the enrollment screen. */
@@ -159,7 +162,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
                     >
                       Rename
                     </Button>
-                    <Button size="sm" variant="danger" onClick={() => remove(v.id)}>Remove</Button>
+                    <Button size="sm" variant="outline" className={dangerOutline} onClick={() => remove(v.id)}>Remove</Button>
                   </>
                 )}
               </div>
