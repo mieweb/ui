@@ -26,9 +26,10 @@ export const Setup: StoryObj<typeof VoiceSetup> = {
   render: () => <VoiceSetup />,
 };
 
-/** "Add a condition" — starts directly in append mode (a new room/distance/background), so it adds to the
- *  existing voiceprint rather than requiring a fresh enroll first. This is what the settings menu opens. */
+/** "Add a voice" — starts directly in append mode, so it adds another authorized voice (an assistant, or
+ *  you under a new condition — mask, distance) to the existing voiceprint rather than requiring a fresh
+ *  enroll first. This is what the settings menu's "Add a voice" opens. */
 export const Add: StoryObj<typeof VoiceSetup> = {
-  name: 'Add a spot',
+  name: 'Add a voice',
   render: () => <VoiceSetup mode="add" />,
 };

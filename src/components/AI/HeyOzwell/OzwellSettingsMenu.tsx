@@ -29,7 +29,8 @@ export interface OzwellSettingsMenuProps {
   modelStatus?: Partial<Record<ModelStatusKey, ModelStatus>>;
   /** Set up or re-enroll the user's voice. Item hidden when omitted. */
   onVoiceEnrollment?: () => void;
-  /** Add a new room / distance / background condition. Item hidden when omitted. */
+  /** Add another authorized voice — an assistant, or you under a new condition (mask, distance,
+   *  background). Appended to the existing voiceprint. Item hidden when omitted. */
   onAddCondition?: () => void;
 }
 
@@ -102,7 +103,7 @@ export function OzwellSettingsMenu({
       )}
       {onAddCondition && (
         <DropdownItem onClick={act(onAddCondition)}>
-          <ItemLabel label="Add a condition" sub="New room / distance / background" />
+          <ItemLabel label="Add a voice" sub="An assistant, you in a mask, or you far away" />
         </DropdownItem>
       )}
       {/* Models & versions — collapsible readout of what's running, per model (Doug). A custom row

@@ -35,7 +35,7 @@ export function VoiceSetup({ mode = 'enroll', logoSrc = '/ozwell/icon.svg', onDo
   const big =
     phase === 'intro'
       ? adding
-        ? 'Add a spot'
+        ? 'Add a voice'
         : 'Meet Ozwell'
       : phase === 'done'
         ? 'You’re all set'
@@ -45,7 +45,7 @@ export function VoiceSetup({ mode = 'enroll', logoSrc = '/ozwell/icon.svg', onDo
   const small =
     phase === 'intro'
       ? adding
-        ? 'Tap Ozwell and say each phrase here too — a new room, distance, or background. It’s remembered alongside your other spots, not instead of them.'
+        ? 'Tap Ozwell and say each phrase a few times. This can be an assistant, you in a mask, or you across the room — it’s saved alongside your other voices, not instead of them.'
         : 'Tap Ozwell and say each phrase a few times — it learns your voice so it only responds to you, privately on your device.'
       : phase === 'getready'
         ? 'Get ready…'
