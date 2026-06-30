@@ -85,8 +85,10 @@ export {
 // WHO + WHAT prints). Both build on the primitives below.
 export { HandsFreeChat, type HandsFreeChatProps } from './HeyOzwell/HandsFreeChat';
 export { VoiceSetup, type VoiceSetupProps } from './HeyOzwell/VoiceSetup';
+export { VoiceManager, type VoiceManagerProps } from './HeyOzwell/VoiceManager';
 export {
   useVoiceSetup,
+  type UseVoiceSetupOptions,
   type UseVoiceSetupResult,
   type VoiceSetupPhase,
 } from './HeyOzwell/useVoiceSetup';
