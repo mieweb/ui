@@ -3,7 +3,7 @@
  * `<VoiceSetup>` component (and `useVoiceSetup` hook); this story just renders it.
  */
 import type { Meta, StoryObj } from '@storybook/react';
-import { VoiceSetup } from '../VoiceSetup';
+import { VoiceSetup } from './VoiceSetup';
 
 const meta: Meta<typeof VoiceSetup> = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Voice Setup',
