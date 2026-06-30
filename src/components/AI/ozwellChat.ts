@@ -44,6 +44,7 @@ const DEFAULTS = {
 // parent frame, not the story's. Check current → parent → top (all same-origin, so safe). localStorage
 // is shared across same-origin frames, so the localStorage form always works regardless of frame.
 function readWindowGlobal(): Partial<OzwellConfig> {
+  if (typeof window === 'undefined') return {}; // SSR / Node — no window
   const get = (w?: Window | null): Partial<OzwellConfig> | undefined => {
     try { return (w as unknown as { __ozwell?: Partial<OzwellConfig> })?.__ozwell; } catch { return undefined; }
   };

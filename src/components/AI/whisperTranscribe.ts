@@ -48,6 +48,7 @@ let isMultilingual = false;
 // model is hundreds of MB and stalls when it can't cache). Checks current → parent → top frame
 // (Storybook iframe) and localStorage.
 function whisperPref(): string | null {
+  if (typeof window === 'undefined') return null; // SSR / Node — no window/localStorage
   const fromWin = (w?: Window | null): string | undefined => {
     try { return (w as unknown as { __ozwell?: { whisper?: string } })?.__ozwell?.whisper; } catch { return undefined; }
   };

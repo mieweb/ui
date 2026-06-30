@@ -72,6 +72,7 @@ type AssetGlobal = string | { base?: string; wakeword?: string; svRuntime?: stri
 // Storybook runs stories in an iframe; a console-set window.__ozwellAssets often lands on the parent
 // frame, so check current → parent → top (all same-origin).
 function readAssetGlobal(): AssetGlobal | undefined {
+  if (typeof window === 'undefined') return undefined; // SSR / Node — no window
   const get = (w?: Window | null): AssetGlobal | undefined => {
     try { return (w as unknown as { __ozwellAssets?: AssetGlobal })?.__ozwellAssets; } catch { return undefined; }
   };
