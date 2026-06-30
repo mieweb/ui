@@ -43,12 +43,20 @@ interface SVApi {
   useAsnorm: boolean;       // gate on z-score instead of raw cosine
 }
 
-export function useSpeakerVerify(): SpeakerVerifyHandle {
+export interface UseSpeakerVerifyOpts {
+  /** Set false to skip loading the ~50 MB sherpa/TitaNet runtime (e.g. when the doctor-only gate is off).
+   *  Defaults to true so existing callers are unchanged. */
+  enabled?: boolean;
+}
+
+export function useSpeakerVerify(opts: UseSpeakerVerifyOpts = {}): SpeakerVerifyHandle {
+  const { enabled = true } = opts;
   const [ready, setReady] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const svRef = React.useRef<SVApi | null>(null);
 
   React.useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     (async () => {
       try {
@@ -66,7 +74,7 @@ export function useSpeakerVerify(): SpeakerVerifyHandle {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [enabled]);
 
   return {
     ready,

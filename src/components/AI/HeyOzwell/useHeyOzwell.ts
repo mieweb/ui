@@ -31,8 +31,17 @@ import {
   isOzwellConfigured,
   toOzwellMessages,
 } from '../ozwellChat';
+import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
+import { loadWhatPrints } from '../voiceprintStore';
+import { openRollingRecorder, type RollingRecorder } from './audio';
 
 export type HeyOzwellPhase = 'listening' | 'dictating' | 'transcribing';
+
+// Per-phrase WHAT (phrase-print cosine) gate. Stop is a touch looser (0.75): the run-on
+// "…ozwell I'm done" at the dictation tail embeds slightly differently from the isolated enrolled
+// one, so it lands lower than the clean start phrase. Mirrors the hands-free gate.
+const WHAT_THRESHOLDS: Record<string, number> = { 'hey-ozwell': 0.8, "ozwell-i'm-done": 0.75 };
+const whatThr = (name: string) => WHAT_THRESHOLDS[name] ?? 0.8;
 
 export interface UseHeyOzwellOptions {
   /** ON: "hey ozwell" opens the chat AND starts dictating. OFF: it just opens the chat and waits. */
@@ -49,6 +58,15 @@ export interface UseHeyOzwellOptions {
   onSend?: (text: string) => void;
   /** Wake-model asset base, forwarded to `useWakeWord`. */
   assetBase?: string;
+  /**
+   * Doctor-only gate. When true, each wake is verified INVISIBLY against the enrolled voiceprint —
+   * only the enrolled doctor (WHO) actually saying the phrase (WHAT) acts; everyone else is ignored.
+   * If nothing is enrolled yet it stays open (so the chat works before voice setup). Loads the ~50 MB
+   * speaker runtime only when enabled. Enroll via `useVoiceSetup`.
+   */
+  requireDoctor?: boolean;
+  /** Start listening immediately on mount instead of waiting for a click (e.g. an always-on surface). */
+  autoStart?: boolean;
 }
 
 /** Props to spread onto <HeyOzwellToggle>. */
@@ -95,6 +113,12 @@ export interface UseHeyOzwellResult {
   modelStatus: Partial<Record<ModelStatusKey, ModelStatus>>;
   /** Send a (typed or dictated) message through the active flow. */
   send: (text: string) => void;
+  /** Start recording dictation into the active turn (e.g. wire to a mic button). */
+  startDictation: () => void;
+  /** Stop dictation → transcribe → send (the "ozwell I'm done" action, also callable directly). */
+  stopDictation: () => void;
+  /** Doctor-only gate is on AND a voiceprint is enrolled, so only the enrolled doctor is acted on. */
+  locked: boolean;
   toggleProps: HeyOzwellToggleBindings;
   chatProps: HeyOzwellChatBindings;
 }
@@ -167,9 +191,11 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     transcription = 'browser',
     onSend,
     assetBase,
+    requireDoctor = false,
+    autoStart = false,
   } = options;
 
-  const [active, setActive] = React.useState(false);
+  const [active, setActive] = React.useState(autoStart);
   const [chatOpen, setChatOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [messages, setMessages] = React.useState<AIMessage[]>([]);
@@ -199,6 +225,34 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   // Holds the live detector so startDictation can reach its mic stream. Assigned after useWakeWord
   // runs below (onWake references startDictation, so the detector can't be created before it).
   const wakeRef = React.useRef<ReturnType<typeof useWakeWord> | null>(null);
+
+  // Doctor-only gate (loads the ~50 MB speaker runtime only when requireDoctor). A rolling recorder is
+  // the 2nd consumer of the shared stream, giving the WHO check the wake-utterance audio.
+  const sv = useSpeakerVerify({ enabled: requireDoctor });
+  const svRef = React.useRef(sv);
+  svRef.current = sv;
+  const rollRef = React.useRef<RollingRecorder | null>(null);
+
+  // Verify a wake INVISIBLY: WHO (it's the enrolled doctor) AND WHAT (they actually said the phrase —
+  // WHAT stops a false fire on the doctor's own non-phrase speech, since WHO can't tell the phrase from
+  // not-the-phrase in the same voice). Open (returns true) when the gate is off or nothing is enrolled;
+  // enrolled-but-can't-capture fails closed. Mirrors the hands-free gate.
+  const verified = React.useCallback((name: string): boolean => {
+    if (!requireDoctor) return true;
+    const svh = svRef.current;
+    const enrolled = svh.conditionCount(name) > 0;
+    if (!enrolled) return true;
+    const roll = rollRef.current;
+    if (!roll || !wakeRef.current) return false;
+    const who = svh.verify(name, roll.snapshot(), roll.sampleRate);
+    const what = wakeRef.current.phraseCosine(name, wakeRef.current.getLastEmbedding());
+    const thr = whatThr(name);
+    const ok = (who?.pass ?? false) && (what == null || what >= thr);
+    console.log(
+      `[hey-ozwell] ${name}: WHO ${who?.score?.toFixed(2)} ${who?.pass ? '✓' : '✗'} · WHAT ${what?.toFixed(2) ?? '—'} (≥${thr}) → ${ok ? 'ACT' : 'ignore'}`
+    );
+    return ok;
+  }, [requireDoctor]);
 
   // Send a (typed or dictated) message — append the user turn, then either a host-provided send, a
   // canned keyless reply, or a streamed Ozwell response.
@@ -321,17 +375,43 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     assetBase,
     onWake: (name) => {
       if (name === 'hey-ozwell' && phaseRef.current === 'listening') {
+        if (!verified('hey-ozwell')) return; // doctor-only gate (no-op when requireDoctor is off)
         // Always open the chat. Only DROP into dictation when auto-dictate is on; otherwise just
         // open and wait — the experiment surface for more specific wake-word directions.
         setChatOpen(true);
         if (autoDictateOnWake) startDictation();
       } else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') {
-        stopDictation();
+        if (verified("ozwell-i'm-done")) stopDictation();
       }
     },
   });
   wakeRef.current = wake;
   const level = useRoomLevel(wake.getStream, wake.ready);
+
+  // Doctor-only gate plumbing: once the detector is listening, restore enrolled WHAT prints into it and
+  // open the rolling recorder (2nd consumer of the shared stream) so the WHO check has audio to verify.
+  // Only when requireDoctor — otherwise neither the speaker runtime nor this recorder is created.
+  React.useEffect(() => {
+    if (!requireDoctor || !active || !wake.ready) return;
+    let cancelled = false;
+    let tries = 0;
+    void loadWhatPrints().then((loaded) => {
+      if (cancelled) return;
+      for (const k in loaded) wakeRef.current?.setVoiceprint(k, loaded[k]);
+    });
+    const tryOpen = () => {
+      if (cancelled || rollRef.current) return;
+      const stream = wakeRef.current?.getStream();
+      if (stream) rollRef.current = openRollingRecorder(stream);
+      else if (tries++ < 40) window.setTimeout(tryOpen, 300);
+    };
+    tryOpen();
+    return () => {
+      cancelled = true;
+      rollRef.current?.close();
+      rollRef.current = null;
+    };
+  }, [requireDoctor, active, wake.ready]);
 
   // Header octopus load state, split into two rings so the slow transcription warm-up never makes
   // the octopus look unavailable (primary ring = wake pre-warm; secondary arc = transcription).
@@ -344,6 +424,9 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     : wakeWarm.active
       ? 'Wake word…'
       : undefined;
+
+  // Doctor-only and a voiceprint is enrolled → only the enrolled doctor is acted on.
+  const locked = requireDoctor && sv.ready && sv.conditionCount('hey-ozwell') > 0;
 
   // Live readiness for the "Models & versions" readout in the settings menu.
   const modelStatus: Partial<Record<ModelStatusKey, ModelStatus>> = {
@@ -405,6 +488,9 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     error: wake.error,
     modelStatus,
     send,
+    startDictation,
+    stopDictation,
+    locked,
     toggleProps: {
       active,
       level,

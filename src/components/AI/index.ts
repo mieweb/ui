@@ -81,6 +81,67 @@ export {
   type ModelStatusKey,
 } from './HeyOzwell/modelManifest';
 
+// Hands-free chat surface + voice enrollment (full inline-chat composition; enrollment builds the
+// WHO + WHAT prints). Both build on the primitives below.
+export { HandsFreeChat, type HandsFreeChatProps } from './HeyOzwell/HandsFreeChat';
+export { VoiceSetup, type VoiceSetupProps } from './HeyOzwell/VoiceSetup';
+export {
+  useVoiceSetup,
+  type UseVoiceSetupResult,
+  type VoiceSetupPhase,
+} from './HeyOzwell/useVoiceSetup';
+
+// Voice primitives — the headless building blocks the components above compose. Exported so a host can
+// build a custom voice flow (or reuse one piece) instead of copying it.
+export {
+  useWakeWord,
+  warmWakeModels,
+  subscribeWakeWarm,
+  getWakeWarm,
+  type UseWakeWordOpts,
+  type WakeWordState,
+  type WakeWordControls,
+  type WakeWarmState,
+} from './HeyOzwell/WakeWord/useWakeWord';
+export {
+  useSpeakerVerify,
+  type UseSpeakerVerifyOpts,
+  type SpeakerVerifyHandle,
+  type VerifyResult,
+} from './HeyOzwell/SpeakerVerify/useSpeakerVerify';
+export {
+  transcribeBlob,
+  transcribeServer,
+  transcribeGate,
+  stripStopPhrase,
+  endsWithDone,
+  warmWhisper,
+  warmStopGate,
+  isWhisperLoaded,
+  getDictationLoad,
+  subscribeDictationLoad,
+  type WhisperLoadState,
+} from './whisperTranscribe';
+export {
+  askOzwell,
+  askOzwellStream,
+  isOzwellConfigured,
+  toOzwellMessages,
+  getOzwellConfig,
+  type OzwellMessage,
+  type OzwellConfig,
+  type AskOpts,
+} from './ozwellChat';
+export {
+  getVoiceprints,
+  setVoiceprints,
+  clearVoiceprints,
+  loadWhatPrints,
+  saveWhatPrints,
+  clearWhatPrints,
+} from './voiceprintStore';
+export { openRollingRecorder, chime, type RollingRecorder } from './HeyOzwell/audio';
+
 // AI Chat Modal
 export {
   AIChatModal,

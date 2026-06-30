@@ -14,6 +14,7 @@ import * as React from 'react';
 import { useSpeakerVerify, type VerifyResult } from './useSpeakerVerify';
 import { useWakeWord } from '../WakeWord/useWakeWord';
 import { loadWhatPrints, clearWhatPrints } from '../../voiceprintStore';
+import { openRollingRecorder, chime, type RollingRecorder } from '../audio';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Speaker Verify (dev diagnostic)',
@@ -38,45 +39,9 @@ const REPS = 3;
 const TIMEOUT_MS = 4000;
 const WHAT_THRESHOLD = 0.8;  // raw-cosine gate (product value) — real phrases land ~0.85-0.94
 const VP_CAP = 18;
-const ROLL_SECONDS = 2.0;
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
-function chime(freq: number, ms = 160) {
-  try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = new Ctx();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.frequency.value = freq; o.type = 'sine'; o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + ms / 1000);
-    o.start(); o.stop(ctx.currentTime + ms / 1000 + 0.02);
-    window.setTimeout(() => { void ctx.close(); }, ms + 120);
-  } catch { /* no audio out */ }
-}
-
-// rolling recorder: a 2nd consumer of the detector's stream, keeps the last ~ROLL_SECONDS of audio
-interface Rolling { sampleRate: number; snapshot: () => Float32Array; close: () => void; }
-function openRolling(stream: MediaStream): Rolling {
-  const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  const ctx = new Ctx();
-  const src = ctx.createMediaStreamSource(stream);
-  const proc = ctx.createScriptProcessor(4096, 1, 1);
-  const sink = ctx.createGain(); sink.gain.value = 0;
-  const max = Math.round(ctx.sampleRate * ROLL_SECONDS);
-  let chunks: Float32Array[] = []; let total = 0;
-  proc.onaudioprocess = (e) => {
-    chunks.push(Float32Array.from(e.inputBuffer.getChannelData(0))); total += e.inputBuffer.length;
-    while (total > max && chunks.length > 1) { total -= chunks[0].length; chunks.shift(); }
-  };
-  src.connect(proc); proc.connect(sink); sink.connect(ctx.destination);
-  return {
-    sampleRate: ctx.sampleRate,
-    snapshot: () => { const s = new Float32Array(total); let o = 0; for (const c of chunks) { s.set(c, o); o += c.length; } return s; },
-    close: () => { try { proc.disconnect(); src.disconnect(); sink.disconnect(); } catch { /* ignore */ } void ctx.close(); },
-  };
-}
-
+// chime + the rolling recorder (2nd consumer of the detector's stream, last ~2s) are shared from ../audio.
 // WHAT phrase-print templates persist via the shared voiceprint store (IndexedDB) — see ../../voiceprintStore.
 
 interface LogRow { id: number; phrase: string; base: number; who: VerifyResult | null; what: number | null; pass: boolean; t: string; }
@@ -99,7 +64,7 @@ function SpeakerVerifyDemo({ cosineThreshold, znormThreshold, useAsnorm }: SVArg
   const expectRef = React.useRef<string | null>(null);
   const resolveRef = React.useRef<((firedName: string) => void) | null>(null);
   const whatRef = React.useRef<Record<string, Float32Array[]>>({});
-  const rollingRef = React.useRef<Rolling | null>(null);
+  const rollingRef = React.useRef<RollingRecorder | null>(null);
   const enrolledRef = React.useRef(false);
   const rowId = React.useRef(0);
 
@@ -118,7 +83,7 @@ function SpeakerVerifyDemo({ cosineThreshold, znormThreshold, useAsnorm }: SVArg
     const tryOpen = () => {
       if (cancelled || rollingRef.current) return;
       const stream = wakeRef.current.getStream();
-      if (stream) rollingRef.current = openRolling(stream);
+      if (stream) rollingRef.current = openRollingRecorder(stream);
       else if (tries++ < 30) window.setTimeout(tryOpen, 300);
     };
     tryOpen();
