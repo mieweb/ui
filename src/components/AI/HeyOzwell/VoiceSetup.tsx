@@ -11,6 +11,12 @@ import { useVoiceSetup } from './useVoiceSetup';
 const OZ = '#0BA0E0'; // Ozwell octopus blue
 
 export interface VoiceSetupProps {
+  /**
+   * 'enroll' (default) = fresh first-time setup. 'add' = jump straight into appending a new condition
+   * (room/distance/background) to the existing voiceprint — what the settings menu's "Add a condition"
+   * uses, so the user doesn't have to re-do a full enroll first.
+   */
+  mode?: 'enroll' | 'add';
   /** Octopus logo source. */
   logoSrc?: string;
   /** Fired when the user taps "Done" after enrollment — host closes/advances the setup surface. */
@@ -18,8 +24,8 @@ export interface VoiceSetupProps {
 }
 
 /** On-device voice enrollment — tap the octopus, it pulses as you talk. Brand-aligned. */
-export function VoiceSetup({ logoSrc = '/ozwell/icon.svg', onDone }: VoiceSetupProps) {
-  const oz = useVoiceSetup();
+export function VoiceSetup({ mode = 'enroll', logoSrc = '/ozwell/icon.svg', onDone }: VoiceSetupProps) {
+  const oz = useVoiceSetup({ startAdding: mode === 'add' });
   const { phase, phrase, step, total, adding, level, ready, error } = oz;
 
   const octoScale = 1 + Math.min(0.32, level * 2.2);

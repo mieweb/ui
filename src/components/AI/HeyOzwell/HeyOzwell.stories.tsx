@@ -102,15 +102,12 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
           transcription={transcription}
           size={40}
           chatProps={{ suggestions: suggestedActions, userName: 'Dr. Jane' }}
-          // The settings items link to the sibling enrollment + diagnostic stories (reuse, no new UI).
-          // In a real app these would open the host's enrollment / diagnostics surfaces.
+          // The settings items link to the sibling enrollment stories (reuse, no new UI). In a real app
+          // these open the host's enrollment surfaces. "Add a condition" opens enrollment in append mode
+          // (a new room/distance) directly — not a fresh re-enroll. Diagnostics (wake-word test, speaker
+          // verify) are dev-only and intentionally NOT surfaced in the product settings menu.
           onVoiceEnrollment={gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Setup')}
-          onAddCondition={gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Setup')}
-          onTestDiagnostics={gotoStory(
-            `${HEY_OZWELL}/Speaker Verify (dev diagnostic)`,
-            'Verify'
-          )}
-          onWakeWordTest={gotoStory(`${HEY_OZWELL}/Wake Word`, 'Listener')}
+          onAddCondition={gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Add')}
         />
       </div>
 

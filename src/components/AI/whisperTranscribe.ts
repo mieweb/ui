@@ -192,7 +192,8 @@ function loadWhisper(): Promise<Whisper> {
   })();
   void pipePromise.then(
     () => setDictationLoad({ active: false, progress: 1, done: true }),
-    () => setDictationLoad({ active: false }),
+    // Clear the memoized promise on failure so a later call can retry (don't cache a rejection forever).
+    () => { pipePromise = null; setDictationLoad({ active: false }); },
   );
   return pipePromise;
 }
@@ -203,11 +204,14 @@ function loadGate(): Promise<Whisper> {
   if (gatePromise) return gatePromise;
   console.log('[whisper] loading stop-confirm gate (base.en)…');
   gatePromise = serialize(() => buildEnglish(GATE_MODEL));
+  // Clear on failure so a transient error (CSP/network) doesn't permanently break the stop-confirm gate.
+  void gatePromise.catch(() => { gatePromise = null; });
   return gatePromise;
 }
 
+/** True only once the dictation model has actually finished loading (not merely started, not rejected). */
 export function isWhisperLoaded(): boolean {
-  return pipePromise !== null;
+  return getDictationLoad().done;
 }
 
 /** Start loading the dictation model NOW so the first dictation doesn't pay the load. Memoized. */

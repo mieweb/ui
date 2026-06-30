@@ -27,6 +27,12 @@ const TIMEOUT_MS = 5000;
 const VP_CAP = 18;
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
+export interface UseVoiceSetupOptions {
+  /** Start directly in "add a condition" (append) mode instead of a fresh enroll — for the settings
+   *  menu's "Add a condition", which should append a new room/distance to the existing voiceprint. */
+  startAdding?: boolean;
+}
+
 export interface UseVoiceSetupResult {
   /** Both the speaker runtime and wake detector are loaded — enrollment can start. */
   ready: boolean;
@@ -48,7 +54,8 @@ export interface UseVoiceSetupResult {
   addAnotherSpot: () => void;
 }
 
-export function useVoiceSetup(): UseVoiceSetupResult {
+export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetupResult {
+  const { startAdding = false } = options;
   const sv = useSpeakerVerify();
   const expectRef = React.useRef<string | null>(null);
   const resolveRef = React.useRef<((n: string) => void) | null>(null);
@@ -68,7 +75,7 @@ export function useVoiceSetup(): UseVoiceSetupResult {
   const [phase, setPhase] = React.useState<VoiceSetupPhase>('intro');
   const [phrase, setPhrase] = React.useState('hey ozwell');
   const [step, setStep] = React.useState(0);
-  const [adding, setAdding] = React.useState(false);
+  const [adding, setAdding] = React.useState(startAdding);
   const total = PHRASES.length * REPS;
 
   // Preload the dictation model while enrolling (it gets the ~30s pass as a head start), and restore any

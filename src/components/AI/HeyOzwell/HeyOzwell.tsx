@@ -28,10 +28,6 @@ export interface HeyOzwellProps extends UseHeyOzwellOptions {
   onVoiceEnrollment?: () => void;
   /** Add a new room / distance / background condition. Settings item hidden when omitted. */
   onAddCondition?: () => void;
-  /** Open speaker-verify WHO/WHAT diagnostics. Settings item hidden when omitted. */
-  onTestDiagnostics?: () => void;
-  /** Open the wake-word detector test. Settings item hidden when omitted. */
-  onWakeWordTest?: () => void;
   /**
    * Extra props forwarded to the FloatingAIChat (e.g. `suggestions`, `userName`). The open state,
    * messages, placeholder and send handler are wired from the hook; anything here overrides them.
@@ -47,8 +43,6 @@ export function HeyOzwell({
   className,
   onVoiceEnrollment,
   onAddCondition,
-  onTestDiagnostics,
-  onWakeWordTest,
   chatProps,
   ...options
 }: HeyOzwellProps) {
@@ -73,8 +67,6 @@ export function HeyOzwell({
         modelStatus={oz.modelStatus}
         onVoiceEnrollment={onVoiceEnrollment}
         onAddCondition={onAddCondition}
-        onTestDiagnostics={onTestDiagnostics}
-        onWakeWordTest={onWakeWordTest}
       />
       {oz.active && <FloatingAIChat {...oz.chatProps} {...chatProps} />}
     </>

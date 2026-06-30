@@ -23,8 +23,9 @@ const CACHE = 'ozwell-models-v4';
 function isModelAsset(url) {
   // Narrow to the two runtime bundles we actually want cached: the sherpa speaker runtime (its .wasm/.data
   // live under /sv-runtime/) and onnxruntime-web's wasm. A bare *.wasm/*.data match was too broad — it
-  // would cache any unrelated third-party WASM/data and bloat the cache.
-  return /\/sv-runtime\//.test(url) || /onnxruntime-web\/.*\.(wasm|mjs|data)(\?|$)/.test(url);
+  // would cache any unrelated third-party WASM/data and bloat the cache. Match `onnxruntime-web` followed
+  // by `/` OR `@version` so jsDelivr's versioned path (…/onnxruntime-web@1.19.0/dist/*.wasm) is caught too.
+  return /\/sv-runtime\//.test(url) || /onnxruntime-web[@/].*\.(wasm|mjs|data)(\?|$)/.test(url);
 }
 
 self.addEventListener('install', () => self.skipWaiting());

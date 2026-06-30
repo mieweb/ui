@@ -1,5 +1,7 @@
 /**
- * Registers the model-cache service worker (public/ozwell-model-sw.js).
+ * Registers the model-cache service worker. In this repo the SW file lives at
+ * `.storybook/public/ozwell-model-sw.js` and is served at `/ozwell-model-sw.js` by Storybook only — a
+ * consumer that wants caching outside Storybook must serve/copy the SW at the `swUrl` path passed below.
  *
  * Why: cache the wake-word + speaker-verification model assets across app opens so a returning user
  * loads them from disk instead of re-downloading. The service worker fetches the full file itself and

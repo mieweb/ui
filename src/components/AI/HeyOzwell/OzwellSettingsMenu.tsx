@@ -31,10 +31,6 @@ export interface OzwellSettingsMenuProps {
   onVoiceEnrollment?: () => void;
   /** Add a new room / distance / background condition. Item hidden when omitted. */
   onAddCondition?: () => void;
-  /** Open speaker-verify WHO/WHAT diagnostics. Item hidden when omitted. */
-  onTestDiagnostics?: () => void;
-  /** Open the wake-word detector test (live probabilities). Item hidden when omitted. */
-  onWakeWordTest?: () => void;
 }
 
 /** A two-line label (title + muted sub) shared by the items. */
@@ -64,10 +60,19 @@ export function OzwellSettingsMenu({
   modelStatus,
   onVoiceEnrollment,
   onAddCondition,
-  onTestDiagnostics,
-  onWakeWordTest,
 }: OzwellSettingsMenuProps) {
   const [modelsOpen, setModelsOpen] = React.useState(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  // Show a bottom fade while there's more to scroll (the menu is height-capped so the expanded "Models &
+  // versions" list is otherwise cut off with no hint). Recompute on scroll + when the content grows.
+  const [hasMore, setHasMore] = React.useState(false);
+  const updateHasMore = React.useCallback(() => {
+    const el = scrollRef.current;
+    if (el) setHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4);
+  }, []);
+  React.useEffect(() => {
+    updateHasMore();
+  }, [modelsOpen, open, modelStatus, updateHasMore]);
 
   // Closing the menu after an action keeps parity with the old hand-rolled menu.
   const act = (fn?: () => void) => () => {
@@ -85,8 +90,10 @@ export function OzwellSettingsMenu({
       onOpenChange={onOpenChange}
       placement="bottom-end"
       width={290}
-      className="max-h-[392px] overflow-x-hidden overflow-y-auto"
+      className="overflow-hidden"
     >
+      {/* scroll container (height-capped) + a bottom fade overlay so it's clear there's more below */}
+      <div ref={scrollRef} onScroll={updateHasMore} className="max-h-[392px] overflow-x-hidden overflow-y-auto">
       <DropdownHeader title="⚙ Ozwell settings" />
       {onVoiceEnrollment && (
         <DropdownItem onClick={act(onVoiceEnrollment)}>
@@ -96,16 +103,6 @@ export function OzwellSettingsMenu({
       {onAddCondition && (
         <DropdownItem onClick={act(onAddCondition)}>
           <ItemLabel label="Add a condition" sub="New room / distance / background" />
-        </DropdownItem>
-      )}
-      {onTestDiagnostics && (
-        <DropdownItem onClick={act(onTestDiagnostics)}>
-          <ItemLabel label="Test & diagnostics" sub="Speaker-verify WHO/WHAT readout" />
-        </DropdownItem>
-      )}
-      {onWakeWordTest && (
-        <DropdownItem onClick={act(onWakeWordTest)}>
-          <ItemLabel label="Wake-word test" sub="Detector + live probabilities" />
         </DropdownItem>
       )}
       {/* Models & versions — collapsible readout of what's running, per model (Doug). A custom row
@@ -130,6 +127,16 @@ export function OzwellSettingsMenu({
         </span>
       </button>
       {modelsOpen && <ModelInfoList status={modelStatus} />}
+      </div>
+      {/* bottom fade — only while more content sits below the fold (cleared once scrolled to the end) */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          'pointer-events-none absolute inset-x-0 bottom-0 h-9 rounded-b-xl transition-opacity duration-150',
+          'bg-gradient-to-t from-white to-transparent dark:from-neutral-800',
+          hasMore ? 'opacity-100' : 'opacity-0'
+        )}
+      />
     </Dropdown>
   );
 }
