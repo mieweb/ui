@@ -54,12 +54,32 @@ export {
   type SuggestedActionsProps,
 } from './AIChat';
 
-// Hey Ozwell — the in-header voice toggle (octopus that pulses with room volume).
-// The floating chat button is the existing FloatingAIChat, shown while this is active.
+// Hey Ozwell — the voice entry point. <HeyOzwell> is the drop-in (octopus toggle + settings menu +
+// floating chat, wired end-to-end); useHeyOzwell is the headless core for custom layouts.
 export {
   HeyOzwellToggle,
   type HeyOzwellToggleProps,
 } from './HeyOzwell/HeyOzwellToggle';
+export { HeyOzwell, type HeyOzwellProps } from './HeyOzwell/HeyOzwell';
+export {
+  OzwellSettingsMenu,
+  type OzwellSettingsMenuProps,
+} from './HeyOzwell/OzwellSettingsMenu';
+export {
+  useHeyOzwell,
+  type UseHeyOzwellOptions,
+  type UseHeyOzwellResult,
+  type HeyOzwellPhase,
+  type HeyOzwellToggleBindings,
+  type HeyOzwellChatBindings,
+} from './HeyOzwell/useHeyOzwell';
+export { ModelInfoList, type ModelInfoListProps } from './HeyOzwell/ModelInfoList';
+export {
+  MODEL_MANIFEST,
+  type ModelInfo,
+  type ModelStatus,
+  type ModelStatusKey,
+} from './HeyOzwell/modelManifest';
 
 // AI Chat Modal
 export {

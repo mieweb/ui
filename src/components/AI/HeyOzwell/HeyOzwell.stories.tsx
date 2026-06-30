@@ -15,26 +15,9 @@
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
+import { HeyOzwell } from './HeyOzwell';
 import { HeyOzwellToggle, type HeyOzwellToggleProps } from './HeyOzwellToggle';
-import { ModelInfoList } from './ModelInfoList';
-import type { ModelStatus } from './modelManifest';
-import { FloatingAIChat } from '../AIChatModal';
 import { suggestedActions } from '../storyData';
-import type { AIMessage } from '../types';
-import { useWakeWord, warmWakeModels, subscribeWakeWarm, getWakeWarm } from './WakeWord/useWakeWord';
-import {
-  transcribeBlob,
-  transcribeServer,
-  stripStopPhrase,
-  warmWhisper,
-  subscribeDictationLoad,
-  getDictationLoad,
-} from '../whisperTranscribe';
-import {
-  askOzwellStream,
-  isOzwellConfigured,
-  toOzwellMessages,
-} from '../ozwellChat';
 
 const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Demo',
@@ -74,82 +57,6 @@ const gotoStory = (title: string, story: string) => () => {
   }
 };
 
-let counter = 0;
-const mkMsg = (role: AIMessage['role'], text: string): AIMessage => ({
-  id: `${role}-${++counter}`,
-  role,
-  content: [{ type: 'text', text }],
-  timestamp: new Date(),
-  status: 'complete',
-});
-
-type Phase = 'listening' | 'dictating' | 'transcribing';
-
-/**
- * Room-volume meter read from the wake-word detector's OWN mic stream — there is
- * one shared mic, so we attach a second analyser to `getStream()` rather than
- * opening another `getUserMedia` (which would silence the detector). Mirrors the
- * Voice Setup pulse.
- */
-function useRoomLevel(
-  getStream: () => MediaStream | null,
-  ready: boolean
-): number {
-  const [level, setLevel] = React.useState(0);
-  const getStreamRef = React.useRef(getStream);
-  getStreamRef.current = getStream;
-
-  React.useEffect(() => {
-    if (!ready) {
-      setLevel(0);
-      return;
-    }
-    let raf = 0;
-    let ctx: AudioContext | null = null;
-    let cancelled = false;
-    let tries = 0;
-    let smooth = 0;
-    const start = () => {
-      if (cancelled) return;
-      const stream = getStreamRef.current();
-      if (!stream) {
-        if (tries++ < 40) window.setTimeout(start, 300);
-        return;
-      }
-      const Ctx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      ctx = new Ctx();
-      const src = ctx.createMediaStreamSource(stream);
-      const an = ctx.createAnalyser();
-      an.fftSize = 512;
-      src.connect(an);
-      const data = new Float32Array(an.fftSize);
-      const tick = () => {
-        an.getFloatTimeDomainData(data);
-        let peak = 0;
-        for (let i = 0; i < data.length; i++) {
-          const a = Math.abs(data[i]);
-          if (a > peak) peak = a;
-        }
-        smooth = smooth * 0.78 + peak * 0.22;
-        setLevel(smooth);
-        raf = requestAnimationFrame(tick);
-      };
-      tick();
-    };
-    start();
-    return () => {
-      cancelled = true;
-      if (raf) cancelAnimationFrame(raf);
-      void ctx?.close();
-    };
-  }, [ready]);
-
-  return level;
-}
-
 interface DemoArgs {
   /** ON: "hey ozwell" opens the chat AND starts dictating. OFF: it just opens the chat and waits. */
   autoDictateOnWake: boolean;
@@ -160,210 +67,9 @@ interface DemoArgs {
 }
 
 function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
-  const [active, setActive] = React.useState(false);
-  const [chatOpen, setChatOpen] = React.useState(false);
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const [modelsOpen, setModelsOpen] = React.useState(false);
-  const [messages, setMessages] = React.useState<AIMessage[]>([]);
-  const [generating, setGenerating] = React.useState(false);
-  const [phase, setPhase] = React.useState<Phase>('listening');
-  const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
-  const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
-
-  const messagesRef = React.useRef(messages);
-  messagesRef.current = messages;
-  const phaseRef = React.useRef(phase);
-  phaseRef.current = phase;
-  const recRef = React.useRef<MediaRecorder | null>(null);
-  const chunksRef = React.useRef<Blob[]>([]);
-
-  // Send a (typed or dictated) message — same flow as Hands-Free Chat: append the
-  // user turn, then either a canned keyless reply or a streamed Ozwell response.
-  const send = (text: string) => {
-    const t = text.trim();
-    if (!t) return;
-    setMessages((m) => [...m, mkMsg('user', t)]);
-
-    if (!isOzwellConfigured()) {
-      window.setTimeout(
-        () =>
-          setMessages((m) => [
-            ...m,
-            mkMsg(
-              'assistant',
-              `Heard: “${t}”. Wire me to the Ozwell backend and I'd answer.`
-            ),
-          ]),
-        350
-      );
-      return;
-    }
-
-    const history = [
-      ...toOzwellMessages(messagesRef.current),
-      { role: 'user' as const, content: t },
-    ];
-    const id = `assistant-${++counter}`;
-    setMessages((m) => [
-      ...m,
-      {
-        id,
-        role: 'assistant',
-        content: [{ type: 'text', text: '' }],
-        timestamp: new Date(),
-        status: 'streaming',
-      },
-    ]);
-    setGenerating(true);
-    const patch = (txt: string, status: AIMessage['status']) =>
-      setMessages((m) =>
-        m.map((msg) =>
-          msg.id === id
-            ? { ...msg, content: [{ type: 'text', text: txt }], status }
-            : msg
-        )
-      );
-    askOzwellStream(history, (_d, full) => patch(full, 'streaming'))
-      .then((full) => patch(full || '(no response)', 'complete'))
-      .catch((e) =>
-        patch(`⚠️ ${e instanceof Error ? e.message : String(e)}`, 'error')
-      )
-      .finally(() => setGenerating(false));
-  };
-
-  const wake = useWakeWord({
-    enabled: active,
-    onWake: (name) => {
-      if (name === 'hey-ozwell' && phaseRef.current === 'listening') {
-        // Always open the chat. Only DROP into dictation when auto-dictate is on; otherwise just open and
-        // wait — the experiment surface for more specific wake-word directions.
-        setChatOpen(true);
-        if (autoDictateOnWake) startDictation();
-      } else if (
-        name === "ozwell-i'm-done" &&
-        phaseRef.current === 'dictating'
-      ) {
-        stopDictation();
-      }
-    },
-  });
-  const wakeRef = React.useRef(wake);
-  wakeRef.current = wake;
-  const level = useRoomLevel(wake.getStream, wake.ready);
-
-  // Header octopus load state, split into two rings so the slow transcription warm-up never makes the
-  // octopus look unavailable:
-  //   primary ring  = wake-model pre-warm on load → green "ready" flash when it finishes
-  //   secondary arc = transcription (the long pole) — background only; you can press + talk immediately and
-  //                   the audio is captured and transcribed once it finishes.
-  // Only the pre-warm drives the primary ring: clicking to activate already turns the octopus on/pulsing,
-  // so we don't re-show the ring (or re-flash green) for the brief detector start on click.
-  const ozLoading = wakeWarm.active;
-  const ozProgress = wakeWarm.done ? 1 : wakeWarm.progress;
-  const ozWarm = dictLoad.active && !dictLoad.done;
-  const ozWarmProgress = dictLoad.done ? 1 : Math.min(0.99, dictLoad.progress); // hold at 99 until compile done
-  const ozLoadLabel = ozWarm
-    ? `Transcription ${Math.min(99, Math.round(dictLoad.progress * 100))}%`
-    : wakeWarm.active ? 'Wake word…' : undefined;
-
-  // Live readiness for the "Models & versions" readout in the settings menu.
-  const modelStatus: Partial<Record<'wake' | 'transcription', ModelStatus>> = {
-    wake: wakeWarm.done || wake.ready ? 'ready' : ozLoading ? 'loading' : 'idle',
-    transcription: dictLoad.done ? 'ready' : dictLoad.active ? 'loading' : 'idle',
-  };
-
-  // Pre-load the small wake model FILES on mount (mic stays off) so the octopus is ready to listen the
-  // instant it's pressed and shows the green ready-flash on reload. Cheap (~3 MB into OPFS).
-  React.useEffect(() => {
-    void warmWakeModels();
-  }, []);
-
-  // Warm the heavy (~1.3 GB) transcription model only once the user turns Ozwell ON — in the background,
-  // OFF the critical wake-start path. Activation must never be gated on the transcription download:
-  // recording is decoupled (you can talk before it's ready and the audio is transcribed once it loads).
-  React.useEffect(() => {
-    if (active) warmWhisper();
-  }, [active]);
-
-  function startDictation() {
-    const stream = wakeRef.current.getStream(); // the listener's OWN stream — no second getUserMedia
-    if (!stream) return;
-    chunksRef.current = [];
-    let rec: MediaRecorder;
-    try {
-      rec = new MediaRecorder(stream);
-    } catch {
-      return;
-    }
-    rec.ondataavailable = (e) => {
-      if (e.data && e.data.size) chunksRef.current.push(e.data);
-    };
-    rec.start();
-    recRef.current = rec;
-    setPhase('dictating');
-  }
-
-  function stopDictation() {
-    const rec = recRef.current;
-    if (!rec) return;
-    setPhase('transcribing');
-    rec.onstop = async () => {
-      const blob = new Blob(chunksRef.current, {
-        type: rec.mimeType || 'audio/webm',
-      });
-      recRef.current = null;
-      try {
-        // Server mode posts the audio off-device; if it fails (no ASR endpoint, e.g. Ollama) fall back to
-        // on-device so the demo still works. Browser mode trims the spoken stop phrase from the audio.
-        let raw: string;
-        if (transcription === 'server') {
-          try {
-            raw = await transcribeServer(blob);
-          } catch (e) {
-            console.warn('[hey-ozwell] server ASR failed → on-device fallback', e);
-            raw = await transcribeBlob(blob, 1.0);
-          }
-        } else {
-          raw = await transcribeBlob(blob, 1.0);
-        }
-        const text = stripStopPhrase(raw);
-        if (text) send(text);
-        if (closeChatOnDone) setChatOpen(false);
-      } catch (e) {
-        console.error('[hey-ozwell] transcription failed', e);
-      }
-      setPhase('listening');
-    };
-    rec.stop();
-  }
-
-  const toggle = (next: boolean) => {
-    setActive(next);
-    if (!next) {
-      // Turning off: stop any dictation, close + reset.
-      try {
-        recRef.current?.stop();
-      } catch {
-        /* ignore */
-      }
-      recRef.current = null;
-      setChatOpen(false);
-      setSettingsOpen(false);
-      setPhase('listening');
-    }
-  };
-
-  const placeholder =
-    phase === 'dictating'
-      ? '🎙️ Dictating… say “ozwell I’m done” to send'
-      : phase === 'transcribing'
-        ? transcription === 'server'
-          ? '⏳ Transcribing on the server…'
-          : '⏳ Transcribing on-device…'
-        : autoDictateOnWake
-          ? 'Say “hey ozwell”, or type…'
-          : 'Say “hey ozwell” to open, then type…';
-
+  // The whole flow now lives in the shipped <HeyOzwell> drop-in — the host only places the octopus in
+  // its header and wires where the settings items navigate. (For custom layouts, useHeyOzwell + the
+  // parts give the same behavior; see the component source.)
   return (
     <div
       data-hey-ozwell-demo
@@ -378,7 +84,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
           its trigger, so target its data-slot within this wrapper. */}
       <style>{`[data-hey-ozwell-demo] [data-slot="ai-chat-trigger"]{cursor:pointer}`}</style>
 
-      {/* Header bar — app name + the octopus toggle */}
+      {/* Header bar — app name + the drop-in Hey Ozwell (octopus toggle + settings menu + floating chat) */}
       <div
         style={{
           display: 'flex',
@@ -390,117 +96,26 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
       >
         <strong style={{ fontSize: 15, color: '#0f172a' }}>BlueHive EHR</strong>
         <span style={{ flex: 1 }} />
-        <HeyOzwellToggle
-          active={active}
-          level={level}
-          loading={ozLoading}
-          loadProgress={ozProgress}
-          warmActive={ozWarm}
-          warmProgress={ozWarmProgress}
-          loadLabel={ozLoadLabel}
-          onToggle={toggle}
-          onOpenSettings={() => setSettingsOpen((v) => !v)}
+        <HeyOzwell
+          autoDictateOnWake={autoDictateOnWake}
+          closeChatOnDone={closeChatOnDone}
+          transcription={transcription}
           size={40}
+          chatProps={{ suggestions: suggestedActions, userName: 'Dr. Jane' }}
+          // The settings items link to the sibling enrollment + diagnostic stories (reuse, no new UI).
+          // In a real app these would open the host's enrollment / diagnostics surfaces.
+          onVoiceEnrollment={gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Setup')}
+          onAddCondition={gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Setup')}
+          onTestDiagnostics={gotoStory(
+            `${HEY_OZWELL}/Speaker Verify (dev diagnostic)`,
+            'Verify'
+          )}
+          onWakeWordTest={gotoStory(`${HEY_OZWELL}/Wake Word`, 'Listener')}
         />
       </div>
 
-      {/* Ozwell settings menu — opened by right-click / long-press on the octopus. Links to the sibling
-          enrollment + diagnostic stories (reuse, no new UI). */}
-      {settingsOpen && (
-        <>
-          <div
-            onClick={() => setSettingsOpen(false)}
-            style={{ position: 'fixed', inset: 0, zIndex: 60 }}
-            aria-hidden="true"
-          />
-          <div
-            style={{
-              position: 'absolute',
-              top: 56,
-              right: 18,
-              zIndex: 61,
-              width: 290,
-              // Fit within the 460px demo frame (anchored at top:56) and scroll internally so the
-              // expanded "Models & versions" list is never cut off. overflowX hidden keeps the
-              // rounded corners clean without re-clobbering the vertical scroll (a plain
-              // `overflow: hidden` shorthand here would override overflowY back to hidden).
-              maxHeight: 392,
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              background: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: 12,
-              boxShadow: '0 10px 34px rgba(15,23,42,.14)',
-            }}
-          >
-            <div
-              style={{
-                padding: '11px 14px',
-                fontWeight: 600,
-                fontSize: 13.5,
-                color: '#0f172a',
-                borderBottom: '1px solid #f1f5f9',
-              }}
-            >
-              ⚙ Ozwell settings
-            </div>
-            <SettingsItem
-              label="Voice enrollment"
-              sub="Set up or re-enroll your voice"
-              onClick={() => {
-                setSettingsOpen(false);
-                gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Setup')();
-              }}
-            />
-            <SettingsItem
-              label="Add a condition"
-              sub="New room / distance / background"
-              onClick={() => {
-                setSettingsOpen(false);
-                gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Setup')();
-              }}
-            />
-            <SettingsItem
-              label="Test & diagnostics"
-              sub="Speaker-verify WHO/WHAT readout"
-              onClick={() => {
-                setSettingsOpen(false);
-                gotoStory(
-                  `${HEY_OZWELL}/Speaker Verify (dev diagnostic)`,
-                  'Verify'
-                )();
-              }}
-            />
-            <SettingsItem
-              label="Wake-word test"
-              sub="Detector + live probabilities"
-              onClick={() => {
-                setSettingsOpen(false);
-                gotoStory(`${HEY_OZWELL}/Wake Word`, 'Listener')();
-              }}
-            />
-            {/* Models & versions — collapsible readout of what's running, per model (Doug). */}
-            <button
-              type="button"
-              onClick={() => setModelsOpen((v) => !v)}
-              style={{
-                display: 'flex', alignItems: 'center', width: '100%', gap: 8,
-                padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer',
-                borderTop: '1px solid #f1f5f9', textAlign: 'left',
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Models &amp; versions</div>
-                <div style={{ fontSize: 11.5, color: '#94a3b8' }}>What you’re running · where it loads from</div>
-              </div>
-              <span aria-hidden="true" style={{ color: '#94a3b8', fontSize: 12, transform: modelsOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▸</span>
-            </button>
-            {modelsOpen && <ModelInfoList status={modelStatus} />}
-          </div>
-        </>
-      )}
-
-      {/* Body — a faux app surface behind the floating chat */}
+      {/* Body — a faux app surface behind the floating chat. The octopus ring + chat placeholder now carry
+          the live loading / listening / dictating feedback, so this stays a simple, static intro. */}
       <div
         style={{
           padding: 28,
@@ -510,90 +125,16 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
           fontSize: 14,
         }}
       >
-        {active && !wake.ready && !wake.error && (
-          <p style={{ marginTop: 0 }}>
-            Starting the on-device detector… (loading models)
-          </p>
-        )}
-        {/* Transcription load is shown on the header octopus (ring + tooltip) rather than a body bar,
-            so the off-state surface stays clean. See ozLoading/ozProgress/ozLoadLabel above. */}
-        {wake.error && (
-          <p style={{ marginTop: 0, color: '#dc2626' }}>
-            Wake word error: {wake.error}
-          </p>
-        )}
-        {active && wake.ready && autoDictateOnWake && (
-          <p style={{ marginTop: 0 }}>
-            Listening — say <b style={{ color: '#0f172a' }}>“hey ozwell”</b> to
-            start dictating, then
-            <b style={{ color: '#0f172a' }}> “ozwell I’m done”</b> to transcribe
-            and send. Or open the floating chat and type.
-          </p>
-        )}
-        {active && wake.ready && !autoDictateOnWake && (
-          <p style={{ marginTop: 0 }}>
-            Listening — say <b style={{ color: '#0f172a' }}>“hey ozwell”</b> to{' '}
-            <b>open the chat</b> (no auto-recording). Then type, or experiment
-            with a more specific spoken command.
-          </p>
-        )}
-        {!active && (
-          <p style={{ marginTop: 0 }}>
-            Click the gray octopus in the header to turn Ozwell on.
-          </p>
-        )}
-        <p style={{ marginTop: 14, fontSize: 12.5, color: '#94a3b8' }}>
+        <p style={{ marginTop: 0 }}>
+          Click the gray octopus in the header to turn Ozwell on, then say{' '}
+          <b style={{ color: '#0f172a' }}>“hey ozwell”</b>.
+        </p>
+        <p style={{ marginTop: 14, fontSize: 12.5, color: '#64748b' }}>
           Tip: <b>right-click</b> (or long-press) the octopus for Ozwell
           settings.
         </p>
       </div>
-
-      {/* The normal AI chat (FloatingAIChat) — present ONLY while Ozwell is active */}
-      {active && (
-        <FloatingAIChat
-          open={chatOpen}
-          onOpenChange={setChatOpen}
-          messages={messages}
-          suggestions={suggestedActions}
-          userName="Dr. Jane"
-          isGenerating={generating}
-          inputPlaceholder={placeholder}
-          onSendMessage={send}
-        />
-      )}
     </div>
-  );
-}
-
-function SettingsItem({
-  label,
-  sub,
-  onClick,
-}: {
-  label: string;
-  sub: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        display: 'block',
-        width: '100%',
-        textAlign: 'left',
-        cursor: 'pointer',
-        padding: '10px 14px',
-        border: 'none',
-        borderTop: '1px solid #f1f5f9',
-        background: 'transparent',
-      }}
-    >
-      <div style={{ fontSize: 13.5, color: '#0f172a', fontWeight: 500 }}>
-        {label}
-      </div>
-      <div style={{ fontSize: 12, color: '#94a3b8' }}>{sub}</div>
-    </button>
   );
 }
 
