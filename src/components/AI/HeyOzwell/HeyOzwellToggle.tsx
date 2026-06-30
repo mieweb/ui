@@ -16,10 +16,12 @@
 import * as React from 'react';
 import { cn } from '../../../utils/cn';
 
-/** Ozwell octopus blue — matches the Voice Setup glow. */
-const OZ = '#0BA0E0';
-/** Ready-green — flashes around the octopus the moment loading completes. */
-const READY_GREEN = '#10B981';
+/** Ozwell octopus blue — the `ozwell` brand token (themeable; falls back to the octopus blue). */
+const OZ = 'var(--mieweb-ozwell, #0BA0E0)';
+/** Ready-green — the design-system success token; flashes the moment loading completes. */
+const READY_GREEN = 'var(--mieweb-success, #10B981)';
+/** Ozwell accent at `pct` opacity (glows/shadows) — themeable + dark-mode safe via color-mix. */
+const ozA = (pct: number) => `color-mix(in srgb, ${OZ} ${pct}%, transparent)`;
 
 export interface HeyOzwellToggleProps {
   /** Whether Hey Ozwell is on. Off → gray + muted; on → colour + volume pulse. */
@@ -253,7 +255,7 @@ export function HeyOzwellToggle({
           width: size * 1.7, height: size * 1.7,
           transform: `translate(-50%, -50%) scale(${glowScale.toFixed(3)})`,
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${OZ}88, transparent 68%)`,
+          background: `radial-gradient(circle, ${ozA(53)}, transparent 68%)`,
           filter: 'blur(8px)', opacity: glowOpacity,
           transition: 'opacity .15s linear', pointerEvents: 'none',
         }}
@@ -267,7 +269,7 @@ export function HeyOzwellToggle({
           position: 'relative', width: size, height: size, userSelect: 'none',
           transform: `scale(${octoScale.toFixed(3)})`,
           transition: 'transform .08s linear, filter .3s ease',
-          filter: active ? `drop-shadow(0 2px 8px ${OZ}66)` : 'grayscale(1) opacity(0.45)',
+          filter: active ? `drop-shadow(0 2px 8px ${ozA(40)})` : 'grayscale(1) opacity(0.45)',
         }}
       />
     </button>

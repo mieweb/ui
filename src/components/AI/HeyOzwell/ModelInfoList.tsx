@@ -3,16 +3,17 @@
  *
  * Presentational list of the on-device models (name · version · size · source) with a live status
  * dot. Rendered inside the Ozwell settings menu so people can see what they're running. Pure: the
- * host passes readiness per status key (computed from the wake / transcription load stores).
+ * host passes readiness per status key (computed from the wake / transcription load stores). Styled
+ * with design-system tokens (neutral / muted / success / ozwell) so it tracks theme + dark mode.
  */
 
 import * as React from 'react';
 import { MODEL_MANIFEST, type ModelStatus, type ModelStatusKey } from './modelManifest';
 
-const DOT: Record<ModelStatus, { color: string; label: string }> = {
-  ready: { color: '#10B981', label: 'ready' },
-  loading: { color: '#0BA0E0', label: 'loading' },
-  idle: { color: '#cbd5e1', label: 'not loaded' },
+const DOT: Record<ModelStatus, { dot: string; text: string; label: string }> = {
+  ready: { dot: 'bg-success', text: 'text-success', label: 'ready' },
+  loading: { dot: 'bg-ozwell animate-pulse', text: 'text-ozwell', label: 'loading' },
+  idle: { dot: 'bg-neutral-300 dark:bg-neutral-600', text: 'text-muted-foreground', label: 'not loaded' },
 };
 
 export interface ModelInfoListProps {
@@ -23,39 +24,29 @@ export interface ModelInfoListProps {
 /** The model · version · size · source rows with a status dot, for the settings menu. */
 export function ModelInfoList({ status }: ModelInfoListProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <div className="flex flex-col">
       {MODEL_MANIFEST.map((m) => {
         const st: ModelStatus = status?.[m.statusKey] ?? (m.statusKey === 'static' ? 'ready' : 'idle');
-        const dot = DOT[st];
+        const d = DOT[st];
         return (
-          <div key={m.id} style={{ padding: '8px 14px', borderTop: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span
-                aria-hidden="true"
-                style={{
-                  width: 8, height: 8, borderRadius: '50%', flex: '0 0 auto', background: dot.color,
-                  ...(st === 'loading' ? { animation: 'oz-pulse 1s ease-in-out infinite' } : {}),
-                }}
-              />
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: '#94a3b8' }}>
-                {m.role}
-              </span>
-              <span style={{ flex: 1 }} />
-              <span style={{ fontSize: 11, color: dot.color }} title={`Status: ${dot.label}`}>{dot.label}</span>
+          <div key={m.id} className="border-t border-neutral-100 px-3.5 py-2 dark:border-neutral-700">
+            <div className="flex items-center gap-2">
+              <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${d.dot}`} />
+              <span className="text-[9px] font-bold tracking-wide uppercase text-muted-foreground">{m.role}</span>
+              <span className="flex-1" />
+              <span className={`text-[11px] ${d.text}`} title={`Status: ${d.label}`}>{d.label}</span>
             </div>
-            <div style={{ fontSize: 12.5, fontWeight: 600, color: '#0f172a', marginTop: 2 }}>{m.label}</div>
-            <div style={{ fontSize: 11, color: '#64748b', marginTop: 1 }}>{m.variant}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+            <div className="mt-0.5 text-[12.5px] font-semibold text-neutral-900 dark:text-neutral-100">{m.label}</div>
+            <div className="mt-px text-[11px] text-neutral-600 dark:text-neutral-300">{m.variant}</div>
+            <div className="mt-0.5 text-[11px] text-muted-foreground">
               <span title="Pinned version">{m.version}</span>
               {' · '}
               <span title="Approx. download size">{m.approxSize}</span>
             </div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }} title="Loaded from">{m.source}</div>
+            <div className="mt-px text-[11px] text-muted-foreground" title="Loaded from">{m.source}</div>
           </div>
         );
       })}
-      {/* keyframes for the loading dot; scoped-ish via the unique animation name */}
-      <style>{`@keyframes oz-pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }`}</style>
     </div>
   );
 }

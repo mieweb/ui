@@ -3,17 +3,24 @@
  *
  * One home for voice enrollment: set up your voice, add another authorized voice (an assistant, or you
  * under a new condition), view your enrolled voices, rename or remove them, or clear everything. A real
- * exported surface built on `useSpeakerVerify` + `<VoiceSetup>` — not story-only code.
+ * exported surface built on `useSpeakerVerify` + `<VoiceSetup>` — not story-only code. Styled with the
+ * design-system tokens + shared <Button> so it tracks theme + dark mode; the Ozwell accent is the
+ * `ozwell` brand token.
  *
  * Voices are keyed by id in the speaker runtime (WHO); removing one revokes that person. The WHAT
  * phrase-prints are shared/speaker-independent, so they're left in place on per-voice removal.
  */
 import * as React from 'react';
+import { cn } from '../../../utils/cn';
+import { Button } from '../../Button';
+import { inputVariants } from '../../Input';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
 import { clearWhatPrints } from '../voiceprintStore';
 import { VoiceSetup } from './VoiceSetup';
 
-const OZ = '#0BA0E0';
+const OZ = 'var(--mieweb-ozwell, #0BA0E0)';
+/** Ozwell-accent fill for <Button> (overrides the primary variant's bg/text via tailwind-merge). */
+const ozBtn = 'bg-ozwell hover:bg-ozwell active:bg-ozwell text-ozwell-foreground hover:brightness-95 active:brightness-90';
 
 export interface VoiceManagerProps {
   /** Octopus logo source, forwarded to the enrollment screen. */
@@ -77,85 +84,48 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
     setTick((t) => t + 1);
   };
 
-  const btn = (variant: 'primary' | 'ghost' | 'danger', small = false): React.CSSProperties => ({
-    font: `600 ${small ? 13 : 15}px system-ui`,
-    padding: small ? '7px 14px' : '12px 26px',
-    borderRadius: 999,
-    cursor: 'pointer',
-    ...(variant === 'primary'
-      ? { border: 'none', color: '#fff', background: OZ, boxShadow: `0 8px 24px ${OZ}55` }
-      : variant === 'danger'
-        ? { border: '1.5px solid #fca5a5', background: 'transparent', color: '#dc2626' }
-        : { border: `1.5px solid ${OZ}`, background: 'transparent', color: OZ }),
-  });
-
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        color: '#1f2733',
-        textAlign: 'center',
-        padding: 24,
-        background: 'radial-gradient(900px 520px at 50% -5%, #e8f6fd 0%, #ffffff 58%)',
-      }}
-    >
+    <div className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center p-6 text-center">
       <img
         src={logoSrc ?? '/ozwell/icon.svg'}
         alt=""
         aria-hidden="true"
         draggable={false}
-        style={{ width: 84, height: 86, filter: `drop-shadow(0 8px 24px ${OZ}55)`, marginBottom: 18 }}
+        className="mb-[18px] h-[86px] w-[84px]"
+        style={{ filter: `drop-shadow(0 8px 24px color-mix(in srgb, ${OZ} 33%, transparent))` }}
       />
-      <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: -0.5, color: '#0f2233' }}>Your voice</div>
+      <h1 className="text-foreground text-3xl font-bold tracking-tight">Your voice</h1>
 
-      {!sv.ready && !sv.error && (
-        <div style={{ font: '13px monospace', color: '#94a3b8', marginTop: 16 }}>Loading…</div>
-      )}
+      {!sv.ready && !sv.error && <div className="text-muted-foreground mt-4 font-mono text-[13px]">Loading…</div>}
       {sv.error && (
-        <div style={{ fontSize: 13, color: '#dc2626', marginTop: 16 }}>
-          Couldn’t load the voice models — check the console.
-        </div>
+        <div className="text-destructive mt-4 text-[13px]">Couldn’t load the voice models — check the console.</div>
       )}
 
       {sv.ready && voices.length === 0 && (
         <>
-          <div style={{ fontSize: 15, color: '#5b6b7e', maxWidth: 440, marginTop: 10, lineHeight: 1.55 }}>
+          <p className="text-muted-foreground mt-2.5 max-w-[440px] leading-relaxed">
             Set up your voice so Ozwell only responds to you. You can add an assistant or extra conditions
             afterward.
-          </div>
-          <button type="button" style={{ ...btn('primary'), marginTop: 26 }} onClick={startFresh}>
+          </p>
+          <Button className={cn(ozBtn, 'mt-7')} onClick={startFresh}>
             Set up your voice
-          </button>
+          </Button>
         </>
       )}
 
       {sv.ready && voices.length > 0 && (
         <>
-          <div style={{ fontSize: 14.5, color: '#5b6b7e', marginTop: 8 }}>
+          <p className="text-muted-foreground mt-2 text-[14.5px]">
             Voices Ozwell will respond to. Add an assistant or another condition, rename, or remove.
-          </div>
+          </p>
 
-          <div style={{ width: '100%', maxWidth: 460, marginTop: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="mt-[22px] flex w-full max-w-[460px] flex-col gap-2.5">
             {voices.map((v) => (
               <div
                 key={v.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '12px 16px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 14,
-                  background: '#fff',
-                  textAlign: 'left',
-                }}
+                className="border-border bg-card flex items-center gap-3 rounded-2xl border px-4 py-3 text-left"
               >
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="min-w-0 flex-1">
                   {editingId === v.id ? (
                     <input
                       value={editLabel}
@@ -164,33 +134,32 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
                         if (e.key === 'Enter') saveRename(v.id);
                         if (e.key === 'Escape') setEditingId(null);
                       }}
-                      style={{ font: '600 15px system-ui', padding: '4px 8px', borderRadius: 8, border: `1.5px solid ${OZ}`, width: '100%' }}
+                      className={cn(inputVariants({ size: 'sm' }), 'font-semibold')}
                       aria-label="Voice name"
                     />
                   ) : (
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#0f2233', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {v.label}
-                    </div>
+                    <div className="text-foreground truncate font-semibold">{v.label}</div>
                   )}
-                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
+                  <div className="text-muted-foreground mt-0.5 text-xs">
                     {v.conditions} condition{v.conditions === 1 ? '' : 's'}
                   </div>
                 </div>
                 {editingId === v.id ? (
                   <>
-                    <button type="button" style={btn('primary', true)} onClick={() => saveRename(v.id)}>Save</button>
-                    <button type="button" style={btn('ghost', true)} onClick={() => setEditingId(null)}>Cancel</button>
+                    <Button size="sm" className={ozBtn} onClick={() => saveRename(v.id)}>Save</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
                   </>
                 ) : (
                   <>
-                    <button
-                      type="button"
-                      style={btn('ghost', true)}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-ozwell"
                       onClick={() => { setEditingId(v.id); setEditLabel(v.label); }}
                     >
                       Rename
-                    </button>
-                    <button type="button" style={btn('danger', true)} onClick={() => remove(v.id)}>Remove</button>
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={() => remove(v.id)}>Remove</Button>
                   </>
                 )}
               </div>
@@ -198,27 +167,27 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
           </div>
 
           {/* Add a voice — name it, then enroll (an assistant, or you under a new condition) */}
-          <div style={{ width: '100%', maxWidth: 460, marginTop: 18, display: 'flex', gap: 8 }}>
+          <div className="mt-[18px] flex w-full max-w-[460px] gap-2">
             <input
               value={addName}
               onChange={(e) => setAddName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') startAdd(); }}
               placeholder="Name a voice — an assistant, you in a mask…"
               aria-label="New voice name"
-              style={{ flex: 1, font: '14px system-ui', padding: '10px 14px', borderRadius: 999, border: '1.5px solid #cbd5e1' }}
+              className={cn(inputVariants({ size: 'sm' }), 'flex-1')}
             />
-            <button type="button" style={btn('primary', true)} onClick={startAdd}>Add a voice</button>
+            <Button size="sm" className={ozBtn} onClick={startAdd}>Add a voice</Button>
           </div>
 
-          <button type="button" style={{ ...btn('danger', true), marginTop: 18 }} onClick={clearAll}>
+          <Button size="sm" variant="danger" className="mt-[18px]" onClick={clearAll}>
             Clear all voices
-          </button>
+          </Button>
         </>
       )}
 
-      <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 26 }}>
+      <p className="text-muted-foreground mt-[26px] text-[12.5px]">
         Voiceprints stay on your device — they’re never uploaded.
-      </div>
+      </p>
     </div>
   );
 }

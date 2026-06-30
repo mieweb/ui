@@ -43,6 +43,11 @@
   --color-primary-950: var(--mieweb-primary-950);
   --color-primary-foreground: var(--mieweb-primary-foreground, #ffffff);
 
+  /* ── Ozwell brand accent (the "Hey Ozwell" octopus blue) ───────────── */
+  /* A sub-brand color distinct from the host app's primary; themeable via --mieweb-ozwell. */
+  --color-ozwell: var(--mieweb-ozwell, #0ba0e0);
+  --color-ozwell-foreground: var(--mieweb-ozwell-foreground, #ffffff);
+
   /* ── Secondary Color Scale ─────────────────────────────────────────── */
   --color-secondary: var(--mieweb-secondary-500, #6366f1);
   --color-secondary-50: var(--mieweb-secondary-50, #eef2ff);
