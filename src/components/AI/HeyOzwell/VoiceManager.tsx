@@ -14,6 +14,7 @@ import * as React from 'react';
 import { cn } from '../../../utils/cn';
 import { Button } from '../../Button';
 import { inputVariants } from '../../Input';
+import { AlertDialog } from '../../AlertDialog';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
 import { clearWhatPrints } from '../voiceprintStore';
 import { VoiceSetup } from './VoiceSetup';
@@ -44,6 +45,8 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
   const [addName, setAddName] = React.useState('');
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editLabel, setEditLabel] = React.useState('');
+  // Pending destructive confirmation (deleting a voiceprint is hard to undo + changes who's authorized).
+  const [confirm, setConfirm] = React.useState<{ type: 'remove'; id: string; label: string } | { type: 'clearAll' } | null>(null);
 
   // listVoices reads the store synchronously (cheap, in-memory) — read on every render so it reflects the
   // latest after enroll / remove / rename / clear (each of those bumps state, re-rendering this).
@@ -60,6 +63,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
           setTick((t) => t + 1);
           setInSetup(null);
         }}
+        onCancel={() => setInSetup(null)}
       />
     );
   }
@@ -162,7 +166,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
                     >
                       Rename
                     </Button>
-                    <Button size="sm" variant="outline" className={dangerOutline} onClick={() => remove(v.id)}>Remove</Button>
+                    <Button size="sm" variant="outline" className={dangerOutline} onClick={() => setConfirm({ type: 'remove', id: v.id, label: v.label })}>Remove</Button>
                   </>
                 )}
               </div>
@@ -182,7 +186,7 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
             <Button size="sm" className={ozBtn} onClick={startAdd}>Add a voice</Button>
           </div>
 
-          <Button size="sm" variant="danger" className="mt-[18px]" onClick={clearAll}>
+          <Button size="sm" variant="danger" className="mt-[18px]" onClick={() => setConfirm({ type: 'clearAll' })}>
             Clear all voices
           </Button>
         </>
@@ -191,6 +195,24 @@ export function VoiceManager({ logoSrc }: VoiceManagerProps) {
       <p className="text-muted-foreground mt-[26px] text-[12.5px]">
         Voiceprints stay on your device — they’re never uploaded.
       </p>
+
+      <AlertDialog
+        open={!!confirm}
+        onOpenChange={(o) => { if (!o) setConfirm(null); }}
+        variant="destructive"
+        title={confirm?.type === 'clearAll' ? 'Clear all voices?' : `Remove “${confirm?.type === 'remove' ? confirm.label : ''}”?`}
+        description={
+          confirm?.type === 'clearAll'
+            ? 'This deletes every enrolled voice. Ozwell will respond to anyone (no doctor-only gate) until you set up your voice again.'
+            : 'This revokes that voice — Ozwell will no longer respond to them. You can re-enroll later.'
+        }
+        actionLabel={confirm?.type === 'clearAll' ? 'Clear all' : 'Remove'}
+        onAction={() => {
+          if (confirm?.type === 'clearAll') clearAll();
+          else if (confirm?.type === 'remove') remove(confirm.id);
+          setConfirm(null);
+        }}
+      />
     </div>
   );
 }

@@ -57,6 +57,8 @@ export interface UseVoiceSetupResult {
   start: () => void;
   /** After "done", start another appended pass (a new room / distance / background). */
   addAnotherSpot: () => void;
+  /** Abort an in-progress pass and reset to intro — nothing is enrolled. */
+  cancel: () => void;
 }
 
 export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetupResult {
@@ -70,6 +72,7 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
   const resolveRef = React.useRef<((n: string) => void) | null>(null);
   const whatRef = React.useRef<Record<string, Float32Array[]>>({});
   const recRef = React.useRef<RollingRecorder | null>(null);
+  const abortRef = React.useRef(false); // set by cancel(); checked in the enroll loop to bail before enrolling
   const [level, setLevel] = React.useState(0);
 
   const wake = useWakeWord({
@@ -169,6 +172,7 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
 
   const start = React.useCallback(async () => {
     if (!bothReady || phase !== 'intro' || !recRef.current) return;
+    abortRef.current = false;
     const append = adding;
     let overall = 0;
     for (const ph of PHRASES) {
@@ -176,12 +180,14 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
       const embs: Float32Array[] = [];
       setPhrase(ph.label);
       while (clips.length < REPS) {
+        if (abortRef.current) return; // cancelled — stop without enrolling
         setStep(overall);
         setPhase('getready');
         chime(660);
         await delay(550);
         setPhase('speak');
         const w = await awaitWake(ph.key);
+        if (abortRef.current) return; // cancelled while waiting — bail before enroll
         const rec = recRef.current;
         if (!rec) break;
         const samples = rec.snapshot();
@@ -199,6 +205,7 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
           await delay(1500);
         }
       }
+      if (abortRef.current) return; // cancelled after the last rep — don't persist
       // append keeps prior conditions: WHO adds a new centroid, WHAT concatenates templates (capped).
       // voiceId/label group this enrollment under one voice (the doctor, or an added assistant).
       sv.enroll(ph.key, clips, { append, voiceId: enrollVoiceId, label });
@@ -217,6 +224,14 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
     setPhase('intro');
   }, []);
 
+  const cancel = React.useCallback(() => {
+    abortRef.current = true;
+    resolveRef.current?.('__cancelled__'); // unblock a pending awaitWake so the loop sees the abort
+    setPhase('intro');
+    setStep(0);
+    setAdding(false);
+  }, []);
+
   return {
     ready: bothReady,
     error: sv.error || wake.error,
@@ -228,5 +243,6 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
     level,
     start: () => void start(),
     addAnotherSpot,
+    cancel,
   };
 }

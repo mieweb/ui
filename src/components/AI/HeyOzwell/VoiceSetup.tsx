@@ -36,10 +36,12 @@ export interface VoiceSetupProps {
   logoSrc?: string;
   /** Fired when the user taps "Done" after enrollment — host closes/advances the setup surface. */
   onDone?: () => void;
+  /** Fired when the user cancels/backs out — host closes the setup surface. Shows a Cancel control. */
+  onCancel?: () => void;
 }
 
 /** On-device voice enrollment — tap the octopus, it pulses as you talk. Brand-aligned. */
-export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell/icon.svg', onDone }: VoiceSetupProps) {
+export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell/icon.svg', onDone, onCancel }: VoiceSetupProps) {
   const oz = useVoiceSetup({ startAdding: mode === 'add', voiceId, label });
   const { phase, phrase, step, total, adding, level, ready, error } = oz;
 
@@ -93,6 +95,20 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
         @keyframes oz-fade { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform: none } }
         @keyframes oz-invite { 0%,100% { box-shadow: 0 0 0 0 ${ozA(33)} } 50% { box-shadow: 0 0 0 14px ${ozA(0)} } }
       `}</style>
+
+      {onCancel && phase !== 'done' && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground absolute left-4 top-4"
+          onClick={() => {
+            oz.cancel();
+            onCancel();
+          }}
+        >
+          ← Cancel
+        </Button>
+      )}
 
       <div className="relative mb-7 flex h-[240px] w-[260px] items-center justify-center">
         {phase === 'speak' &&

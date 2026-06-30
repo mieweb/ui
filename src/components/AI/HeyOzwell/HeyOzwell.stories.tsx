@@ -64,9 +64,11 @@ interface DemoArgs {
   closeChatOnDone: boolean;
   /** Transcribe on-device (browser, PHI-safe) or POST audio to the server. */
   transcription: 'browser' | 'server';
+  /** Doctor-only gate: only the enrolled voice(s) act once enrolled (loads the speaker runtime). */
+  requireDoctor: boolean;
 }
 
-function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
+function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor }: DemoArgs) {
   // The whole flow now lives in the shipped <HeyOzwell> drop-in — the host only places the octopus in
   // its header and wires where the settings items navigate. (For custom layouts, useHeyOzwell + the
   // parts give the same behavior; see the component source.)
@@ -85,6 +87,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
           autoDictateOnWake={autoDictateOnWake}
           closeChatOnDone={closeChatOnDone}
           transcription={transcription}
+          requireDoctor={requireDoctor}
           size={40}
           chatProps={{ suggestions: suggestedActions, userName: 'Dr. Jane' }}
           // "Your voice" opens the central Voice Manager page (set up / add / rename / remove voices). In a
@@ -114,7 +117,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
  * long-press the octopus for Ozwell settings.
  */
 export const Interactive: StoryObj<DemoArgs> = {
-  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser' },
+  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false },
   argTypes: {
     autoDictateOnWake: {
       name: 'Auto-dictate on wake',
@@ -140,6 +143,13 @@ export const Interactive: StoryObj<DemoArgs> = {
         '**browser** — on-device Whisper; audio never leaves the page (the PHI-safe default). **server** — ' +
         'POST the audio to the OpenAI-compatible /v1/audio/transcriptions endpoint (same baseURL/apiKey as ' +
         'the chat). Audio LEAVES the browser; falls back to on-device if the endpoint fails. Experiment only.',
+    },
+    requireDoctor: {
+      name: 'Doctor-only gate',
+      control: 'boolean',
+      description:
+        'ON: only enrolled voice(s) act on a wake (loads the ~50 MB speaker runtime). Open until you enroll ' +
+        'via the settings menu → Your voice. OFF: any voice can wake it.',
     },
   },
   render: (args) => <Demo {...args} />,
