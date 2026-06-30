@@ -115,9 +115,20 @@ export interface AskOpts extends Partial<OzwellConfig> {
   signal?: AbortSignal;
 }
 
+/**
+ * Merge call-time opts over the runtime config. The `apiKey: 'ollama'` sentinel switches baseURL to the
+ * local Ollama server inside getOzwellConfig(); honor it when the caller passes it via opts too (without
+ * also passing a baseURL), so the request doesn't target the non-Ollama default.
+ */
+function resolveConfig(opts: AskOpts): OzwellConfig {
+  const cfg = { ...getOzwellConfig(), ...opts };
+  if (opts.apiKey === 'ollama' && !opts.baseURL) cfg.baseURL = OLLAMA_BASE;
+  return cfg;
+}
+
 /** One-shot (non-streaming) completion → the answer text. Throws on HTTP error. */
 export async function askOzwell(messages: OzwellMessage[] | string, opts: AskOpts = {}): Promise<string> {
-  const cfg = { ...getOzwellConfig(), ...opts };
+  const cfg = resolveConfig(opts);
   const req = buildRequest(messages, cfg, false);
   const res = await fetch(req.url, { method: 'POST', headers: req.headers, body: req.body, signal: opts.signal });
   if (!res.ok) throw new Error(`Ozwell API ${res.status}: ${res.statusText}`);
@@ -134,7 +145,7 @@ export async function askOzwellStream(
   onToken: (delta: string, full: string) => void,
   opts: AskOpts = {},
 ): Promise<string> {
-  const cfg = { ...getOzwellConfig(), ...opts };
+  const cfg = resolveConfig(opts);
   const req = buildRequest(messages, cfg, true);
   const res = await fetch(req.url, { method: 'POST', headers: req.headers, body: req.body, signal: opts.signal });
   if (!res.ok || !res.body) throw new Error(`Ozwell API ${res.status}: ${res.statusText}`);

@@ -21,7 +21,10 @@ const CACHE = 'ozwell-models-v4';
 //   - the Whisper model files — transformers.js's own streaming cache handles those (it stores the ~1.2GB
 //     turbo model efficiently; a buffered SW cache.put chokes on it).
 function isModelAsset(url) {
-  return /\/sv-runtime\//.test(url) || /\.(wasm|data)(\?|$)/.test(url);
+  // Narrow to the two runtime bundles we actually want cached: the sherpa speaker runtime (its .wasm/.data
+  // live under /sv-runtime/) and onnxruntime-web's wasm. A bare *.wasm/*.data match was too broad — it
+  // would cache any unrelated third-party WASM/data and bloat the cache.
+  return /\/sv-runtime\//.test(url) || /onnxruntime-web\/.*\.(wasm|mjs|data)(\?|$)/.test(url);
 }
 
 self.addEventListener('install', () => self.skipWaiting());

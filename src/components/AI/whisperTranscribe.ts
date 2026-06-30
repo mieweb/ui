@@ -254,9 +254,15 @@ function resampleTo16kMono(src: Float32Array, sampleRate: number): Float32Array 
 export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<string> {
   const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctx();
-  const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
-  let samples = resampleTo16kMono(downmixToMono(audio), audio.sampleRate);
-  void ctx.close();
+  // try/finally so a decode/read failure (corrupt/unsupported blob) still closes the context — otherwise
+  // a thrown decodeAudioData leaks the AudioContext, and they accumulate across retries.
+  let samples: Float32Array;
+  try {
+    const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
+    samples = resampleTo16kMono(downmixToMono(audio), audio.sampleRate);
+  } finally {
+    void ctx.close();
+  }
   if (trimEndSeconds > 0) {
     const cut = Math.round(trimEndSeconds * 16000);
     if (samples.length > cut + 16000) samples = samples.subarray(0, samples.length - cut); // keep >=1s
