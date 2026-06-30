@@ -24,10 +24,8 @@ export interface HeyOzwellProps extends UseHeyOzwellOptions {
   longPressMs?: number;
   /** Class name applied to the octopus toggle button. */
   className?: string;
-  /** Set up or re-enroll the user's voice. Settings item hidden when omitted. */
-  onVoiceEnrollment?: () => void;
-  /** Add a new room / distance / background condition. Settings item hidden when omitted. */
-  onAddCondition?: () => void;
+  /** Open the central voice page (set up / add / rename / remove authorized voices). Settings item hidden when omitted. */
+  onManageVoices?: () => void;
   /**
    * Extra props forwarded to the FloatingAIChat (e.g. `suggestions`, `userName`). The open state,
    * messages, placeholder and send handler are wired from the hook; anything here overrides them.
@@ -41,8 +39,7 @@ export function HeyOzwell({
   logoSrc,
   longPressMs,
   className,
-  onVoiceEnrollment,
-  onAddCondition,
+  onManageVoices,
   chatProps,
   ...options
 }: HeyOzwellProps) {
@@ -65,8 +62,7 @@ export function HeyOzwell({
         open={oz.settingsOpen}
         onOpenChange={oz.setSettingsOpen}
         modelStatus={oz.modelStatus}
-        onVoiceEnrollment={onVoiceEnrollment}
-        onAddCondition={onAddCondition}
+        onManageVoices={onManageVoices}
       />
       {oz.active && <FloatingAIChat {...oz.chatProps} {...chatProps} />}
     </>

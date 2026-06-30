@@ -102,12 +102,10 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription }: DemoArgs) {
           transcription={transcription}
           size={40}
           chatProps={{ suggestions: suggestedActions, userName: 'Dr. Jane' }}
-          // The settings items link to the sibling enrollment stories (reuse, no new UI). In a real app
-          // these open the host's enrollment surfaces. "Add a condition" opens enrollment in append mode
-          // (a new room/distance) directly — not a fresh re-enroll. Diagnostics (wake-word test, speaker
+          // "Your voice" opens the central Voice Manager page (set up / add / rename / remove voices). In a
+          // real app this opens the host's voice-management surface. Diagnostics (wake-word test, speaker
           // verify) are dev-only and intentionally NOT surfaced in the product settings menu.
-          onVoiceEnrollment={gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Setup')}
-          onAddCondition={gotoStory(`${HEY_OZWELL}/Voice Setup`, 'Add')}
+          onManageVoices={gotoStory(`${HEY_OZWELL}/Voice Manager`, 'Manage')}
         />
       </div>
 

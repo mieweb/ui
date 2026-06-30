@@ -27,11 +27,8 @@ export interface OzwellSettingsMenuProps {
   onOpenChange?: (open: boolean) => void;
   /** Live readiness per model for the "Models & versions" readout. */
   modelStatus?: Partial<Record<ModelStatusKey, ModelStatus>>;
-  /** Set up or re-enroll the user's voice. Item hidden when omitted. */
-  onVoiceEnrollment?: () => void;
-  /** Add another authorized voice — an assistant, or you under a new condition (mask, distance,
-   *  background). Appended to the existing voiceprint. Item hidden when omitted. */
-  onAddCondition?: () => void;
+  /** Open the central voice page (set up / add / rename / remove authorized voices). Item hidden when omitted. */
+  onManageVoices?: () => void;
 }
 
 /** A two-line label (title + muted sub) shared by the items. */
@@ -59,8 +56,7 @@ export function OzwellSettingsMenu({
   open,
   onOpenChange,
   modelStatus,
-  onVoiceEnrollment,
-  onAddCondition,
+  onManageVoices,
 }: OzwellSettingsMenuProps) {
   const [modelsOpen, setModelsOpen] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -96,14 +92,9 @@ export function OzwellSettingsMenu({
       {/* scroll container (height-capped) + a bottom fade overlay so it's clear there's more below */}
       <div ref={scrollRef} onScroll={updateHasMore} className="max-h-[392px] overflow-x-hidden overflow-y-auto">
       <DropdownHeader title="⚙ Ozwell settings" />
-      {onVoiceEnrollment && (
-        <DropdownItem onClick={act(onVoiceEnrollment)}>
-          <ItemLabel label="Voice enrollment" sub="Set up or re-enroll your voice" />
-        </DropdownItem>
-      )}
-      {onAddCondition && (
-        <DropdownItem onClick={act(onAddCondition)}>
-          <ItemLabel label="Add a voice" sub="An assistant, you in a mask, or you far away" />
+      {onManageVoices && (
+        <DropdownItem onClick={act(onManageVoices)}>
+          <ItemLabel label="Your voice" sub="Set up, add, or manage authorized voices" />
         </DropdownItem>
       )}
       {/* Models & versions — collapsible readout of what's running, per model (Doug). A custom row
