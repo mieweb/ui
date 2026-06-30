@@ -222,6 +222,8 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   phaseRef.current = phase;
   const recRef = React.useRef<MediaRecorder | null>(null);
   const chunksRef = React.useRef<Blob[]>([]);
+  // Aborts the in-flight streamed reply when a new send starts or Ozwell is toggled off.
+  const streamAbortRef = React.useRef<AbortController | null>(null);
   // Holds the live detector so startDictation can reach its mic stream. Assigned after useWakeWord
   // runs below (onWake references startDictation, so the detector can't be created before it).
   const wakeRef = React.useRef<ReturnType<typeof useWakeWord> | null>(null);
@@ -308,12 +310,19 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
               : msg
           )
         );
-      askOzwellStream(history, (_d, full) => patch(full, 'streaming'))
+      // Cancel any prior in-flight stream, then start this one with its own signal.
+      streamAbortRef.current?.abort();
+      const ac = new AbortController();
+      streamAbortRef.current = ac;
+      askOzwellStream(history, (_d, full) => patch(full, 'streaming'), { signal: ac.signal })
         .then((full) => patch(full || '(no response)', 'complete'))
-        .catch((e) =>
-          patch(`⚠️ ${e instanceof Error ? e.message : String(e)}`, 'error')
-        )
-        .finally(() => setGenerating(false));
+        .catch((e) => {
+          if ((e as Error)?.name === 'AbortError') return; // superseded/cancelled — not an error to show
+          patch(`⚠️ ${e instanceof Error ? e.message : String(e)}`, 'error');
+        })
+        .finally(() => {
+          if (streamAbortRef.current === ac) setGenerating(false); // only if not superseded
+        });
     },
     [mkMsg]
   );
@@ -449,13 +458,16 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   const toggle = React.useCallback((next: boolean) => {
     setActive(next);
     if (!next) {
-      // Turning off: stop any dictation, close + reset.
+      // Turning off: stop any dictation, abort an in-flight reply, close + reset.
       try {
         recRef.current?.stop();
       } catch {
         /* ignore */
       }
       recRef.current = null;
+      streamAbortRef.current?.abort();
+      streamAbortRef.current = null;
+      setGenerating(false);
       setChatOpen(false);
       setSettingsOpen(false);
       setPhase('listening');

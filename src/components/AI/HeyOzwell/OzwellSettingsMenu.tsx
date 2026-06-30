@@ -102,6 +102,7 @@ export function OzwellSettingsMenu({
           doesn't dismiss the whole menu. */}
       <button
         type="button"
+        role="menuitem"
         aria-expanded={modelsOpen}
         onClick={() => setModelsOpen((v) => !v)}
         className={itemClasses}

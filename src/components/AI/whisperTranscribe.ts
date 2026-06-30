@@ -56,15 +56,27 @@ function whisperPref(): string | null {
   try { return JSON.parse(localStorage.getItem('ozwellConfig') || '{}').whisper || null; } catch { return null; }
 }
 
+// Pinned to an EXACT validated version (a floating `@3` lets jsDelivr serve newer 3.x that can break at
+// runtime). Override the ESM URL for strict-CSP / offline / self-hosted setups via
+// `window.__ozwellTransformersUrl` or `localStorage['ozwellTransformersUrl']`.
+const DEFAULT_TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
+function transformersUrl(): string {
+  try {
+    const w = (window as unknown as { __ozwellTransformersUrl?: string }).__ozwellTransformersUrl;
+    if (w) return w;
+    const ls = localStorage.getItem('ozwellTransformersUrl');
+    if (ls) return ls;
+  } catch { /* ignore */ }
+  return DEFAULT_TRANSFORMERS_URL;
+}
+
 // The transformers.js module, imported + configured once and shared by every model load.
 let modPromise: Promise<Mod> | null = null;
 function getTransformers(): Promise<Mod> {
   if (modPromise) return modPromise;
   registerModelServiceWorker(); // ensure the model cache SW is registered before the big download
   modPromise = (async () => {
-    const mod = (await import(
-      /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3'
-    )) as Mod;
+    const mod = (await import(/* @vite-ignore */ transformersUrl())) as Mod;
     mod.env.allowLocalModels = false;
     // Use transformers.js's OWN cache — it STREAMS the model straight to the Cache API (how whisper-web
     // caches this same 1.2GB turbo model). A hand-rolled SW that buffers the whole file in memory chokes
@@ -297,7 +309,12 @@ export async function transcribeServer(blob: Blob): Promise<string> {
   const headers: Record<string, string> = {};
   if (cfg.apiKey && cfg.apiKey !== 'ollama') headers.Authorization = `Bearer ${cfg.apiKey}`;
   const res = await fetch(url, { method: 'POST', headers, body: form });
-  if (!res.ok) throw new Error(`Server ASR ${res.status}: ${res.statusText}`);
+  if (!res.ok) {
+    // statusText is often empty — include a short body snippet so the failure is actionable (the caller
+    // still catches this and falls back to on-device transcription).
+    const body = await res.text().catch(() => '');
+    throw new Error(`Server ASR ${res.status}: ${res.statusText || body.slice(0, 200) || 'request failed'}`);
+  }
   const data = await res.json();
   return (typeof data?.text === 'string' ? data.text : '').trim();
 }

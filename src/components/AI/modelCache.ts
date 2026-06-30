@@ -17,9 +17,11 @@
 const registered = new Set<string>();
 
 export function registerModelServiceWorker(swUrl = '/ozwell-model-sw.js'): void {
+  // Bail BEFORE memoizing if SW is unavailable (SSR / unsupported), so we don't mark the URL "registered"
+  // and then skip the real registration once running in a proper browser.
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
   if (registered.has(swUrl)) return; // memoize per-URL, so a different swUrl isn't silently ignored
   registered.add(swUrl);
-  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register(swUrl).then(
     () => console.log('[modelCache] model service worker registered'),
     (e) => console.warn('[modelCache] SW registration failed (models will still load, just not cached):', e),

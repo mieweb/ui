@@ -1,9 +1,10 @@
 /**
  * useWakeWord — a headless React hook around the on-device wake-word detector.
  *
- * Phase 1 (this file): DETECTION only. It loads the tiny wake models + the mel/embedding/VAD
- * front-end (all from `/wakeword/*`, served by Storybook's static dir) and fires `onWake(name)`
- * when it hears "hey ozwell" or "ozwell i'm done". Everything runs in the browser; audio stays local.
+ * Phase 1 (this file): DETECTION only. It loads the tiny wake models + the mel/embedding/VAD front-end
+ * (from `<assetBase>/wakeword/*`, defaulting to the hosted assets in `DEFAULT_ASSET_BASE` — override via
+ * the `assetBase` prop, `window.__ozwellAssets`, or `localStorage['ozwellAssetBase']`; see MODEL-HOSTING.md)
+ * and fires `onWake(name)` when it hears "hey ozwell" / "ozwell i'm done". All in-browser; audio stays local.
  *
  * Phase 2 (later): the WHO speaker gate (TitaNet) so only the enrolled doctor's voice triggers it.
  *
@@ -27,9 +28,9 @@ export interface UseWakeWordOpts {
   vadThresholds?: { positive?: number; negative?: number };
   /** Set false to not start listening. */
   enabled?: boolean;
-  /** Base URL the wake model files are served from. Defaults to the hosted assets (DEFAULT_ASSET_BASE).
-   *  Override per-call here, or globally via `window.__ozwellAssets` / `localStorage['ozwellAssetBase']`
-   *  — see AI/MODEL-HOSTING.md. */
+  /** ROOT base URL the wake model files are served from (`/wakeword/*` is appended). Defaults to the hosted
+   *  assets (`DEFAULT_ASSET_BASE`). Same shape as the string `window.__ozwellAssets` /
+   *  `localStorage['ozwellAssetBase']` override — see AI/MODEL-HOSTING.md. */
   assetBase?: string;
 }
 
@@ -78,7 +79,9 @@ function readAssetGlobal(): AssetGlobal | undefined {
 }
 function resolveAssetBase(override?: string): string {
   const strip = (s: string) => s.replace(/\/$/, '');
-  if (override) return strip(override);
+  // The `assetBase` prop is a ROOT base (same shape as the string `window.__ozwellAssets`), so append
+  // `/wakeword` like the global form does — otherwise passing a "…/resolve/main" base 404s on the models.
+  if (override) return `${strip(override)}/wakeword`;
   const g = readAssetGlobal();
   if (typeof g === 'string') return `${strip(g)}/wakeword`;
   if (g?.wakeword) return strip(g.wakeword);
@@ -112,11 +115,13 @@ export function subscribeWakeWarm(cb: () => void): () => void {
 }
 
 let warmPromise: Promise<void> | null = null;
-/** Pre-fetch the wake model files into OPFS (no mic, no detector). Memoized — safe to call on mount.
- *  After this resolves, enabling the detector loads from OPFS instantly. */
+let warmedBase: string | null = null;
+/** Pre-fetch the wake model files into OPFS (no mic, no detector). Memoized PER resolved base, so a host
+ *  that later repoints model hosting re-prefetches the new base instead of reusing the first pre-warm. */
 export function warmWakeModels(assetBase?: string): Promise<void> {
-  if (warmPromise) return warmPromise;
   const base = resolveAssetBase(assetBase);
+  if (warmPromise && warmedBase === base) return warmPromise;
+  warmedBase = base;
   setWakeWarm({ active: true, progress: 0, done: false });
   warmPromise = (async () => {
     let done = 0;
@@ -137,15 +142,24 @@ export function warmWakeModels(assetBase?: string): Promise<void> {
 // The detector's onnx.js prefers a global `ort` over the bundled package — matching the demo's
 // pinned version fixes the slow/choppy inference and behavior diffs the newer npm version caused.
 const ORT_URL = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.0/dist/ort.min.js';
+let ortPromise: Promise<void> | null = null;
 function ensureOrt(): Promise<void> {
   if (typeof (window as unknown as { ort?: unknown }).ort !== 'undefined') return Promise.resolve();
-  return new Promise<void>((resolve, reject) => {
+  if (ortPromise) return ortPromise; // dedupe: concurrent useWakeWord mounts share one <script> load
+  ortPromise = new Promise<void>((resolve) => {
     const s = document.createElement('script');
     s.src = ORT_URL;
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error('failed to load onnxruntime-web 1.19.0'));
+    // Best-effort: if the CDN is blocked (CSP/offline), don't hard-fail — lib/onnx.js falls back to the
+    // bundled onnxruntime-web ESM when `window.ort` is undefined.
+    s.onerror = () => {
+      console.warn('[wake] onnxruntime-web CDN load failed; using the bundled ESM fallback');
+      ortPromise = null; // allow a retry on a later mount
+      resolve();
+    };
     document.head.appendChild(s);
   });
+  return ortPromise;
 }
 
 export function useWakeWord(opts: UseWakeWordOpts = {}): WakeWordState & WakeWordControls {

@@ -149,6 +149,7 @@ export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell
           onClick={canStart ? oz.start : undefined}
           title={phase === 'intro' ? 'Tap to set up your voice' : undefined}
           aria-label={phase === 'intro' ? 'Set up your voice' : 'Ozwell'}
+          className="focus-visible:ring-ozwell rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           style={{
             position: 'relative',
             width: 150,

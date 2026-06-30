@@ -3,14 +3,15 @@
  *
  * Loads the custom single-threaded sherpa-onnx WASM build (in /sv-wasm/) that exports the
  * SpeakerEmbeddingExtractor C-API, runs TitaNet speaker embeddings fully in-browser, and
- * verifies a live utterance against an enrolled "doctor" centroid stored in localStorage.
+ * verifies a live utterance against enrolled per-voice centroids stored in IndexedDB (db `ozwell-voice`,
+ * migrated from the old localStorage format on first read).
  *
  * Proven in the /sv-wasm/ spike: a ~1s "hey ozwell" gives genuine cosine ~0.66 / impostor
  * ~0.30 (enroll-centroid: ~0.75 vs ~0.22, EER ~1.3%). This is a DIFFERENT axis from the
  * content voiceprint in hey-buddy.js: that BOOSTS the doctor's accented phrase (recall);
  * this BLOCKS a non-doctor's clean phrase (act/no-act). They compose.
  *
- * Load this as a classic <script> BEFORE index.js. Exposes window.SpeakerVerify.
+ * Loaded via dynamic import by the `useSpeakerVerify` hook (NOT a classic <script>). Exposes window.SpeakerVerify.
  * Audio in == Float32Array; pass its TRUE sample rate (sherpa resamples to 16k internally).
  */
 (function () {
@@ -274,6 +275,9 @@
   };
 
   async function init() {
+    // Save the existing Emscripten global so we can restore it — don't permanently clobber window.Module
+    // for any other emscripten bundle the host loads.
+    const prevModule = window.Module;
     try {
       // locateFile: the page is at "/" but the glue + .wasm/.data live in SV_DIR, so
       // tell emscripten exactly where to fetch them (otherwise it 404s and init hangs).
@@ -284,6 +288,7 @@
       await loadScript(SV_DIR + "/sherpa-onnx-wasm-main-speaker-diarization.js");
       await onRuntime;
       Module = window.Module;
+      window.Module = prevModule; // restore the global; we keep our own ref in `Module`
       const cfg = initSherpaOnnxSpeakerEmbeddingExtractorConfig(
         { model: MODEL, numThreads: 1, debug: 0, provider: "cpu" }, Module);
       handle = Module._SherpaOnnxCreateSpeakerEmbeddingExtractor(cfg.ptr);
@@ -299,6 +304,7 @@
       await hydrateStore(); // load enrolled WHO centroids from IndexedDB before reporting ready
       readyResolve(SpeakerVerify);
     } catch (e) {
+      window.Module = prevModule; // restore the global even on failure
       console.error("[SpeakerVerify] init failed:", e);
       readyReject(e);
     }
