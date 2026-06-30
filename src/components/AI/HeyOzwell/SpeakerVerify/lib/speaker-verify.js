@@ -138,16 +138,26 @@
     _store = obj;
     idbPut(LS_KEY, obj).catch((e) => console.warn("SV save failed", e));
   }
-  // Multi-condition: store a LIST of centroids per phrase (one per enroll session/condition) and verify
-  // against the BEST match — so adding a rep "from across the room" or "with background" extends coverage
-  // instead of blurring one averaged centroid. Backward-compatible with the old single-centroid format.
-  const SV_CENTROID_CAP = 6; // keep the most recent N conditions
-  function loadCentroids(phrase) {
-    const o = loadAll()[phrase];
-    if (!o) return [];
-    if (Array.isArray(o.centroids)) return o.centroids.map((c) => Float32Array.from(c)); // new multi format
-    if (Array.isArray(o.centroid)) return [Float32Array.from(o.centroid)];               // old single format
-    return [];
+  // Multi-VOICE, multi-condition: each phrase stores a map of voices, each with a LIST of condition
+  // centroids. Verify passes if ANY voice's ANY condition matches (so the doctor AND an enrolled
+  // assistant both wake it; adding "across the room"/"with background" extends a voice's coverage).
+  // Backward-compatible: legacy flat shapes ({centroids} / {centroid}) normalize to a default "You" voice.
+  const SV_CENTROID_CAP = 6;     // keep the most recent N conditions per voice
+  const DEFAULT_VOICE_ID = "you";
+  // Normalize any legacy per-phrase entry into { voices: { [id]: { label, createdAt, centroids:number[][] } } }.
+  function normPhrase(o) {
+    if (!o) return { voices: {} };
+    if (o.voices) return o;                                                            // already voice-keyed
+    if (Array.isArray(o.centroids)) return { voices: { [DEFAULT_VOICE_ID]: { label: "You", createdAt: 0, centroids: o.centroids } } };
+    if (Array.isArray(o.centroid))  return { voices: { [DEFAULT_VOICE_ID]: { label: "You", createdAt: 0, centroids: [o.centroid] } } };
+    return { voices: {} };
+  }
+  // Flat list of EVERY enrolled voice's centroids for a phrase (verify passes if any matches).
+  function allCentroids(phrase) {
+    const voices = normPhrase(loadAll()[phrase]).voices;
+    const out = [];
+    for (const id in voices) for (const c of (voices[id].centroids || [])) out.push(Float32Array.from(c));
+    return out;
   }
 
   const SpeakerVerify = {
@@ -162,24 +172,36 @@
     cohortSize: () => cohort.length,
     embeddingDim: () => dim,
 
-    /** Enroll the doctor for a phrase from N utterances → one condition-centroid. opts.append ADDS it as
-     *  another condition (multi-condition); otherwise it replaces. Capped to the most recent SV_CENTROID_CAP. */
+    /** Enroll a VOICE for a phrase from N utterances → one condition-centroid under opts.voiceId
+     *  (default "you"). opts.append ADDS it as another condition for that voice; otherwise it replaces
+     *  that voice's conditions. opts.label names the voice. Capped to the most recent SV_CENTROID_CAP. */
     enroll(phrase, utterances /* [{samples, sampleRate}] */, opts) {
       if (!handle) throw new Error("SpeakerVerify not ready");
+      const voiceId = (opts && opts.voiceId) || DEFAULT_VOICE_ID;
       const embs = utterances.map(u => embed(u.samples, u.sampleRate));
       const c = new Float32Array(dim);
       for (const e of embs) for (let i = 0; i < dim; i++) c[i] += e[i];
       for (let i = 0; i < dim; i++) c[i] /= embs.length;
       l2normalize(c);
-      const prev = (opts && opts.append) ? loadCentroids(phrase) : [];
+      const all = loadAll();
+      const entry = normPhrase(all[phrase]);
+      const prevVoice = entry.voices[voiceId];
+      const prev = (opts && opts.append && prevVoice && Array.isArray(prevVoice.centroids))
+        ? prevVoice.centroids.map((x) => Float32Array.from(x)) : [];
       const centroids = prev.concat([c]).slice(-SV_CENTROID_CAP).map((v) => Array.from(v));
-      const all = loadAll(); all[phrase] = { centroids }; saveAll(all);
-      return { n: embs.length, conditions: centroids.length };
+      entry.voices[voiceId] = {
+        // keep the existing label when appending; otherwise use the provided one (or a sensible default)
+        label: (prevVoice && opts && opts.append) ? prevVoice.label : ((opts && opts.label) || (voiceId === DEFAULT_VOICE_ID ? "You" : "Voice")),
+        createdAt: (prevVoice && prevVoice.createdAt) || Date.now(),
+        centroids,
+      };
+      all[phrase] = entry; saveAll(all);
+      return { n: embs.length, conditions: centroids.length, voiceId };
     },
 
-    /** Verify a live utterance against the BEST of the phrase's condition-centroids. {score, pass, enrolled}. */
+    /** Verify a live utterance against the BEST condition-centroid across ALL enrolled voices. */
     verify(phrase, samples, sampleRate) {
-      const cents = loadCentroids(phrase);
+      const cents = allCentroids(phrase);
       if (!cents.length) return { score: 0, znorm: null, pass: false, enrolled: false };
       const live = embed(samples, sampleRate);
       let score = -1;
@@ -199,11 +221,54 @@
       return { score, znorm, pass, enrolled: true };
     },
 
-    /** How many conditions are enrolled for a phrase (0 = none). */
-    conditionCount: (phrase) => loadCentroids(phrase).length,
+    /** How many conditions are enrolled for a phrase, across ALL voices (0 = none). */
+    conditionCount: (phrase) => allCentroids(phrase).length,
+
+    /** List enrolled voices aggregated across phrases: [{ id, label, createdAt, conditions }]. */
+    listVoices() {
+      const all = loadAll();
+      const acc = {};
+      for (const phrase in all) {
+        const voices = normPhrase(all[phrase]).voices;
+        for (const id in voices) {
+          const v = voices[id];
+          const conds = (v.centroids || []).length;
+          if (!acc[id]) acc[id] = { id, label: v.label || id, createdAt: v.createdAt || 0, conditions: conds };
+          else {
+            acc[id].conditions = Math.max(acc[id].conditions, conds);
+            if (v.label) acc[id].label = v.label;
+            if (v.createdAt && (!acc[id].createdAt || v.createdAt < acc[id].createdAt)) acc[id].createdAt = v.createdAt;
+          }
+        }
+      }
+      return Object.keys(acc).map((k) => acc[k]).sort((a, b) => a.createdAt - b.createdAt);
+    },
+
+    /** Remove a voice across all phrases — revokes that person's WHO match (the WHAT phrase-prints,
+     *  which are shared/speaker-independent, are left in voiceprintStore). */
+    removeVoice(voiceId) {
+      const all = loadAll();
+      let changed = false;
+      for (const phrase in all) {
+        const entry = normPhrase(all[phrase]);
+        if (entry.voices[voiceId]) { delete entry.voices[voiceId]; all[phrase] = entry; changed = true; }
+      }
+      if (changed) saveAll(all);
+    },
+
+    /** Rename a voice across all phrases. */
+    renameVoice(voiceId, label) {
+      const all = loadAll();
+      let changed = false;
+      for (const phrase in all) {
+        const entry = normPhrase(all[phrase]);
+        if (entry.voices[voiceId]) { entry.voices[voiceId].label = label; all[phrase] = entry; changed = true; }
+      }
+      if (changed) saveAll(all);
+    },
 
     // hasEnrollment(phrase) -> is that phrase enrolled; hasEnrollment() -> is anything enrolled.
-    hasEnrollment: (phrase) => phrase ? !!loadAll()[phrase] : Object.keys(loadAll()).length > 0,
+    hasEnrollment: (phrase) => phrase ? allCentroids(phrase).length > 0 : Object.keys(loadAll()).some((p) => allCentroids(p).length > 0),
     enrolledPhrases: () => Object.keys(loadAll()),
     clearEnrollment: () => { _store = {}; idbDel(LS_KEY).catch(() => {}); try { localStorage.removeItem(LS_KEY); } catch (e) { /* ignore */ } },
   };

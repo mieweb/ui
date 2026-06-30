@@ -110,6 +110,8 @@ export {
   type UseSpeakerVerifyOpts,
   type SpeakerVerifyHandle,
   type VerifyResult,
+  type VoiceInfo,
+  type EnrollOpts,
 } from './HeyOzwell/SpeakerVerify/useSpeakerVerify';
 export {
   transcribeBlob,

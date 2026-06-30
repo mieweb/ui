@@ -17,6 +17,10 @@ export interface VoiceSetupProps {
    * uses, so the user doesn't have to re-do a full enroll first.
    */
   mode?: 'enroll' | 'add';
+  /** Which voice to enroll — pass a fresh id (with `label`) to add a different person (an assistant). */
+  voiceId?: string;
+  /** Human label for the voice being enrolled (e.g., "Dr. Smith", "My MA"). */
+  label?: string;
   /** Octopus logo source. */
   logoSrc?: string;
   /** Fired when the user taps "Done" after enrollment — host closes/advances the setup surface. */
@@ -24,8 +28,8 @@ export interface VoiceSetupProps {
 }
 
 /** On-device voice enrollment — tap the octopus, it pulses as you talk. Brand-aligned. */
-export function VoiceSetup({ mode = 'enroll', logoSrc = '/ozwell/icon.svg', onDone }: VoiceSetupProps) {
-  const oz = useVoiceSetup({ startAdding: mode === 'add' });
+export function VoiceSetup({ mode = 'enroll', voiceId, label, logoSrc = '/ozwell/icon.svg', onDone }: VoiceSetupProps) {
+  const oz = useVoiceSetup({ startAdding: mode === 'add', voiceId, label });
   const { phase, phrase, step, total, adding, level, ready, error } = oz;
 
   const octoScale = 1 + Math.min(0.32, level * 2.2);

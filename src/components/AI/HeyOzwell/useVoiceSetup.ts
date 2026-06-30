@@ -28,9 +28,14 @@ const VP_CAP = 18;
 const delay = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
 export interface UseVoiceSetupOptions {
-  /** Start directly in "add a condition" (append) mode instead of a fresh enroll — for the settings
-   *  menu's "Add a condition", which should append a new room/distance to the existing voiceprint. */
+  /** Start directly in "add a voice" (append) mode instead of a fresh enroll — for the settings menu's
+   *  "Add a voice", which appends another authorized voice / condition to the existing voiceprints. */
   startAdding?: boolean;
+  /** Which voice this enrollment belongs to. Defaults to "you" (fresh) or a generated id (add mode).
+   *  Pass a fresh id to enroll a different person (an assistant). */
+  voiceId?: string;
+  /** Human label for the voice (e.g., "You", "Dr. Smith", "My MA"). */
+  label?: string;
 }
 
 export interface UseVoiceSetupResult {
@@ -55,7 +60,11 @@ export interface UseVoiceSetupResult {
 }
 
 export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetupResult {
-  const { startAdding = false } = options;
+  const { startAdding = false, voiceId, label } = options;
+  // Resolve the voice id once: the caller's, else "you" for a fresh enroll, else a fresh id (add mode).
+  const [enrollVoiceId] = React.useState(
+    () => voiceId || (startAdding ? `voice-${Date.now()}-${Math.floor(Math.random() * 1e4)}` : 'you')
+  );
   const sv = useSpeakerVerify();
   const expectRef = React.useRef<string | null>(null);
   const resolveRef = React.useRef<((n: string) => void) | null>(null);
@@ -191,7 +200,8 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
         }
       }
       // append keeps prior conditions: WHO adds a new centroid, WHAT concatenates templates (capped).
-      sv.enroll(ph.key, clips, { append });
+      // voiceId/label group this enrollment under one voice (the doctor, or an added assistant).
+      sv.enroll(ph.key, clips, { append, voiceId: enrollVoiceId, label });
       const prior = append ? whatRef.current[ph.key] || [] : [];
       const merged = [...prior, ...embs].slice(-VP_CAP);
       whatRef.current[ph.key] = merged;
@@ -200,7 +210,7 @@ export function useVoiceSetup(options: UseVoiceSetupOptions = {}): UseVoiceSetup
     void saveWhatPrints(whatRef.current);
     setAdding(false);
     setPhase('done');
-  }, [bothReady, phase, adding, sv]);
+  }, [bothReady, phase, adding, sv, enrollVoiceId, label]);
 
   const addAnotherSpot = React.useCallback(() => {
     setAdding(true);

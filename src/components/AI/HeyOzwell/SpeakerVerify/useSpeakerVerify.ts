@@ -12,20 +12,45 @@
 import * as React from 'react';
 
 export interface VerifyResult {
-  score: number;            // raw cosine to the enrolled centroid (max over conditions)
+  score: number;            // raw cosine to the enrolled centroid (max over voices × conditions)
   znorm: number | null;     // z-score vs the cohort (channel-invariant); null if cohort absent
   pass: boolean;
   enrolled: boolean;
+}
+
+/** An enrolled voice (the doctor, an assistant, or you under a condition), aggregated across phrases. */
+export interface VoiceInfo {
+  id: string;
+  label: string;
+  createdAt: number;        // ms epoch; 0 for migrated legacy enrollments
+  conditions: number;       // how many condition-centroids this voice has
+}
+
+/** Options for enrolling/appending a voice. */
+export interface EnrollOpts {
+  /** Append as another condition of the SAME voice (vs replace that voice's conditions). */
+  append?: boolean;
+  /** Which voice this enrollment belongs to (default "you"). Use a fresh id to add another person. */
+  voiceId?: string;
+  /** Human label for the voice (e.g., "You", "Dr. Smith", "My MA"). */
+  label?: string;
 }
 
 export interface SpeakerVerifyHandle {
   ready: boolean;
   error: string | null;
   /** Build/append a voiceprint for a phrase from recorded utterances (Float32 samples + their sample rate). */
-  enroll: (phrase: string, utterances: { samples: Float32Array; sampleRate: number }[], opts?: { append?: boolean }) => { n: number; conditions: number } | null;
-  /** Verify a live utterance against the enrolled voiceprint for a phrase. */
+  enroll: (phrase: string, utterances: { samples: Float32Array; sampleRate: number }[], opts?: EnrollOpts) => { n: number; conditions: number; voiceId: string } | null;
+  /** Verify a live utterance against the enrolled voiceprints (passes if ANY enrolled voice matches). */
   verify: (phrase: string, samples: Float32Array, sampleRate: number) => VerifyResult | null;
   conditionCount: (phrase: string) => number;
+  /** List enrolled voices (aggregated across phrases). */
+  listVoices: () => VoiceInfo[];
+  /** Remove a voice across all phrases (revokes that person). */
+  removeVoice: (voiceId: string) => void;
+  /** Rename a voice across all phrases. */
+  renameVoice: (voiceId: string, label: string) => void;
+  /** Clear ALL enrolled voices. */
   clear: () => void;
   /** Tune the WHO gate live (read at verify-time): `cosine` threshold, `znorm` (AS-norm) threshold, and
    *  `useAsnorm` = gate on the z-score vs the raw cosine. */
@@ -34,9 +59,12 @@ export interface SpeakerVerifyHandle {
 
 interface SVApi {
   ready: () => Promise<unknown>;
-  enroll: (phrase: string, u: { samples: Float32Array; sampleRate: number }[], opts?: { append?: boolean }) => { n: number; conditions: number };
+  enroll: (phrase: string, u: { samples: Float32Array; sampleRate: number }[], opts?: EnrollOpts) => { n: number; conditions: number; voiceId: string };
   verify: (phrase: string, s: Float32Array, sr: number) => VerifyResult;
   conditionCount: (phrase: string) => number;
+  listVoices: () => VoiceInfo[];
+  removeVoice: (voiceId: string) => void;
+  renameVoice: (voiceId: string, label: string) => void;
   clearEnrollment: () => void;
   threshold: number;        // raw-cosine gate (default 0.45)
   znormThreshold: number;   // z-score (AS-norm) gate (default 1.5)
@@ -82,6 +110,9 @@ export function useSpeakerVerify(opts: UseSpeakerVerifyOpts = {}): SpeakerVerify
     enroll: (phrase, utterances, opts) => svRef.current?.enroll(phrase, utterances, opts) ?? null,
     verify: (phrase, samples, sampleRate) => svRef.current?.verify(phrase, samples, sampleRate) ?? null,
     conditionCount: (phrase) => svRef.current?.conditionCount(phrase) ?? 0,
+    listVoices: () => svRef.current?.listVoices() ?? [],
+    removeVoice: (voiceId) => svRef.current?.removeVoice(voiceId),
+    renameVoice: (voiceId, label) => svRef.current?.renameVoice(voiceId, label),
     clear: () => svRef.current?.clearEnrollment(),
     setGates: (g) => {
       const sv = svRef.current;
