@@ -11,11 +11,13 @@
 import * as React from 'react';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
 import { transcribeSegments, decodeTo16kMono, warmWhisper } from '../whisperTranscribe';
+import { askOzwell, isOzwellConfigured } from '../ozwellChat';
 import {
   clusterEmbeddings,
   labelClusters,
   attributeSegments,
   mergeTurns,
+  inferSpeakerRoles,
   type DiarizedSegment,
 } from '../diarize';
 
@@ -30,6 +32,9 @@ export interface UseDiarizationOptions {
   identifyThreshold?: number;
   /** Collapse consecutive same-speaker segments into turns. Default true. */
   merge?: boolean;
+  /** After anchoring, ask Ozwell to infer roles (Patient / Caregiver / …) for the still-generic speakers.
+   *  Requires the chat backend to be configured; best-effort (keeps "Speaker N" on failure). Default false. */
+  inferRoles?: boolean;
 }
 
 export interface UseDiarizationResult {
@@ -52,7 +57,7 @@ function windowFor(samples: Float32Array, start: number, end: number): Float32Ar
 }
 
 export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizationResult {
-  const { threshold = 0.5, maxSpeakers, identifyThreshold = 0.45, merge = true } = options;
+  const { threshold = 0.5, maxSpeakers, identifyThreshold = 0.45, merge = true, inferRoles = false } = options;
   const sv = useSpeakerVerify(); // loads the TitaNet runtime
   const svRef = React.useRef(sv);
   svRef.current = sv;
@@ -120,9 +125,16 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
           if (match && match.score >= identifyThreshold) names[c] = match.label;
         }
 
-        // 5. attribute + (optionally) merge turns
+        // 5. attribute → (optionally) LLM role inference for unknowns → (optionally) merge turns
         const labels = labelClusters(segCluster, names);
         let out = attributeSegments(segments, segCluster, labels);
+        if (inferRoles && isOzwellConfigured()) {
+          try {
+            out = await inferSpeakerRoles(out, (p) => askOzwell(p));
+          } catch {
+            /* keep the generic "Speaker N" labels on any LLM failure */
+          }
+        }
         if (merge) out = mergeTurns(out);
         setResult(out);
         return out;
@@ -134,7 +146,7 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
         setBusy(false);
       }
     },
-    [threshold, maxSpeakers, identifyThreshold, merge]
+    [threshold, maxSpeakers, identifyThreshold, merge, inferRoles]
   );
 
   return { ready: sv.ready, busy, error, result, diarize };

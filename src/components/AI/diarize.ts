@@ -145,6 +145,58 @@ export function attributeSegments(
   });
 }
 
+/** Extract the first JSON object from an LLM reply (it may wrap it in prose / code fences). */
+function parseJsonMap(reply: string): Record<string, string> {
+  const match = reply.match(/\{[\s\S]*\}/);
+  if (!match) return {};
+  try {
+    const obj = JSON.parse(match[0]) as Record<string, unknown>;
+    const out: Record<string, string> = {};
+    for (const k in obj) if (typeof obj[k] === 'string') out[k] = obj[k] as string;
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export interface RoleInferenceOptions {
+  /** Candidate roles the model may assign. Default: a clinical-visit set. */
+  roles?: string[];
+  /** Which speaker labels to (re)infer — default the generic "Speaker N" ones, leaving enrolled names. */
+  isGeneric?: (speaker: string) => boolean;
+}
+
+/**
+ * Ask an LLM to infer the ROLE of each unknown speaker (patient / caregiver / clinician …) from what they
+ * say, and relabel them. Enrolled/named speakers are left untouched. `ask` is injected (e.g. askOzwell) so
+ * this stays pure + testable. Falls back to the input unchanged on any parse/LLM failure.
+ */
+export async function inferSpeakerRoles(
+  segments: DiarizedSegment[],
+  ask: (prompt: string) => Promise<string>,
+  opts: RoleInferenceOptions = {}
+): Promise<DiarizedSegment[]> {
+  const roles = opts.roles ?? ['Patient', 'Clinician', 'Caregiver', 'Nurse', 'Unknown'];
+  const isGeneric = opts.isGeneric ?? ((s) => /^Speaker \d+$/.test(s));
+  const toLabel = [...new Set(segments.map((s) => s.speaker))].filter(isGeneric);
+  if (!toLabel.length) return segments;
+
+  const transcript = segments.map((s) => `${s.speaker}: ${s.text}`).join('\n');
+  const prompt =
+    `You are labeling speakers in a medical-visit transcript. For EACH of these speaker tags: ` +
+    `${toLabel.join(', ')} — infer the most likely role from: ${roles.join(', ')}. ` +
+    `Reply with ONLY a JSON object mapping each tag to a role, e.g. {"Speaker 2":"Patient"}. ` +
+    `Do not relabel speakers that already have a name.\n\nTranscript:\n${transcript}`;
+
+  let map: Record<string, string> = {};
+  try {
+    map = parseJsonMap(await ask(prompt));
+  } catch {
+    return segments;
+  }
+  return segments.map((s) => (isGeneric(s.speaker) && map[s.speaker] ? { ...s, speaker: map[s.speaker] } : s));
+}
+
 /** Collapse consecutive same-speaker segments into turns — nicer for a scribe note. */
 export function mergeTurns(segments: DiarizedSegment[]): DiarizedSegment[] {
   const out: DiarizedSegment[] = [];

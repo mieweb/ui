@@ -141,11 +141,13 @@ export {
   labelClusters,
   attributeSegments,
   mergeTurns,
+  inferSpeakerRoles,
   cosine,
   centroid,
   type TranscriptSegment,
   type DiarizedSegment,
   type ClusterOptions,
+  type RoleInferenceOptions,
 } from './diarize';
 export {
   askOzwell,

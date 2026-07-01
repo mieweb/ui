@@ -6,6 +6,7 @@ import {
   labelClusters,
   attributeSegments,
   mergeTurns,
+  inferSpeakerRoles,
   type DiarizedSegment,
 } from './diarize';
 
@@ -76,5 +77,38 @@ describe('labelClusters / attributeSegments / mergeTurns', () => {
     expect(turns).toHaveLength(2);
     expect(turns[0]).toMatchObject({ speaker: 'Doctor', text: 'hello how are you', start: 0, end: 2 });
     expect(turns[1]).toMatchObject({ speaker: 'Speaker 2', text: 'fine thanks' });
+  });
+});
+
+describe('inferSpeakerRoles', () => {
+  const segs: DiarizedSegment[] = [
+    { start: 0, end: 1, text: 'what brings you in?', cluster: 0, speaker: 'Dr. Smith' },
+    { start: 1, end: 2, text: 'my knee has been hurting', cluster: 1, speaker: 'Speaker 2' },
+  ];
+
+  it('relabels generic speakers, leaves named ones', async () => {
+    let called = 0;
+    const ask = async () => { called++; return '{"Speaker 2":"Patient"}'; };
+    const out = await inferSpeakerRoles(segs, ask);
+    expect(called).toBe(1);
+    expect(out.map((s) => s.speaker)).toEqual(['Dr. Smith', 'Patient']);
+  });
+
+  it('parses JSON wrapped in prose / code fences', async () => {
+    const ask = async () => 'Sure —\n```json\n{"Speaker 2":"Caregiver"}\n```';
+    const out = await inferSpeakerRoles(segs, ask);
+    expect(out[1].speaker).toBe('Caregiver');
+  });
+
+  it('leaves segments unchanged on unparseable replies', async () => {
+    const out = await inferSpeakerRoles(segs, async () => 'no idea, sorry');
+    expect(out.map((s) => s.speaker)).toEqual(['Dr. Smith', 'Speaker 2']);
+  });
+
+  it('does not call the LLM when every speaker is already named', async () => {
+    let called = 0;
+    const named = segs.map((s) => ({ ...s, speaker: 'Dr. Smith' }));
+    await inferSpeakerRoles(named, async () => { called++; return '{}'; });
+    expect(called).toBe(0);
   });
 });
