@@ -138,8 +138,9 @@ export interface AIMessageContent {
     | 'thinking'
     | 'code'
     | 'image'
-    | 'file';
-  /** Text content */
+    | 'file'
+    | 'audio';
+  /** Text content (also used as the audio label for `audio` blocks) */
   text?: string;
   /** Tool call reference */
   toolCall?: MCPToolCall;
@@ -153,10 +154,14 @@ export interface AIMessageContent {
   name?: string;
   /** File size in bytes (for `file` blocks) */
   fileSize?: number;
-  /** MIME type (for `file` blocks) */
+  /** MIME type (for `file` and `audio` blocks) */
   mimeType?: string;
   /** Download/open URL (for `file` blocks) */
   fileUrl?: string;
+  /** Source URL for `audio` blocks */
+  audioUrl?: string;
+  /** Duration in seconds for `audio` blocks */
+  duration?: number;
 }
 
 /**

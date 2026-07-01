@@ -75,6 +75,7 @@ export default [
         MediaStream: 'readonly',
         MediaStreamConstraints: 'readonly',
         AudioContext: 'readonly',
+        AudioBuffer: 'readonly',
         AnalyserNode: 'readonly',
         Uint8Array: 'readonly',
         ArrayBuffer: 'readonly',
