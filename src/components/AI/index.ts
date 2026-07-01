@@ -54,6 +54,121 @@ export {
   type SuggestedActionsProps,
 } from './AIChat';
 
+// Hey Ozwell — the voice entry point. <HeyOzwell> is the drop-in (octopus toggle + settings menu +
+// floating chat, wired end-to-end); useHeyOzwell is the headless core for custom layouts.
+export {
+  HeyOzwellToggle,
+  type HeyOzwellToggleProps,
+} from './HeyOzwell/HeyOzwellToggle';
+export { HeyOzwell, type HeyOzwellProps } from './HeyOzwell/HeyOzwell';
+export {
+  OzwellSettingsMenu,
+  type OzwellSettingsMenuProps,
+} from './HeyOzwell/OzwellSettingsMenu';
+export {
+  useHeyOzwell,
+  type UseHeyOzwellOptions,
+  type UseHeyOzwellResult,
+  type HeyOzwellPhase,
+  type HeyOzwellToggleBindings,
+  type HeyOzwellChatBindings,
+} from './HeyOzwell/useHeyOzwell';
+export { ModelInfoList, type ModelInfoListProps } from './HeyOzwell/ModelInfoList';
+export {
+  MODEL_MANIFEST,
+  type ModelInfo,
+  type ModelStatus,
+  type ModelStatusKey,
+} from './HeyOzwell/modelManifest';
+
+// Hands-free chat surface + voice enrollment (full inline-chat composition; enrollment builds the
+// WHO + WHAT prints). Both build on the primitives below.
+export { HandsFreeChat, type HandsFreeChatProps } from './HeyOzwell/HandsFreeChat';
+export { VoiceSetup, type VoiceSetupProps } from './HeyOzwell/VoiceSetup';
+export { VoiceManager, type VoiceManagerProps } from './HeyOzwell/VoiceManager';
+export {
+  useVoiceSetup,
+  type UseVoiceSetupOptions,
+  type UseVoiceSetupResult,
+  type VoiceSetupPhase,
+} from './HeyOzwell/useVoiceSetup';
+
+// Voice primitives — the headless building blocks the components above compose. Exported so a host can
+// build a custom voice flow (or reuse one piece) instead of copying it.
+export {
+  useWakeWord,
+  warmWakeModels,
+  subscribeWakeWarm,
+  getWakeWarm,
+  type UseWakeWordOpts,
+  type WakeWordState,
+  type WakeWordControls,
+  type WakeWarmState,
+} from './HeyOzwell/WakeWord/useWakeWord';
+export {
+  useSpeakerVerify,
+  type UseSpeakerVerifyOpts,
+  type SpeakerVerifyHandle,
+  type VerifyResult,
+  type VoiceInfo,
+  type VoiceMatch,
+  type EnrollOpts,
+} from './HeyOzwell/SpeakerVerify/useSpeakerVerify';
+export {
+  transcribeBlob,
+  transcribeSegments,
+  decodeTo16kMono,
+  transcribeServer,
+  transcribeGate,
+  stripStopPhrase,
+  endsWithDone,
+  warmWhisper,
+  warmStopGate,
+  isWhisperLoaded,
+  getDictationLoad,
+  subscribeDictationLoad,
+  type WhisperLoadState,
+} from './whisperTranscribe';
+
+// Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
+export {
+  useDiarization,
+  type UseDiarizationOptions,
+  type UseDiarizationResult,
+} from './HeyOzwell/useDiarization';
+export {
+  clusterEmbeddings,
+  labelClusters,
+  attributeSegments,
+  mergeTurns,
+  inferSpeakerRoles,
+  cosine,
+  centroid,
+  type TranscriptSegment,
+  type DiarizedSegment,
+  type ClusterOptions,
+  type RoleInferenceOptions,
+} from './diarize';
+export {
+  askOzwell,
+  askOzwellStream,
+  isOzwellConfigured,
+  toOzwellMessages,
+  getOzwellConfig,
+  type OzwellMessage,
+  type OzwellConfig,
+  type AskOpts,
+} from './ozwellChat';
+export {
+  getVoiceprints,
+  setVoiceprints,
+  clearVoiceprints,
+  loadWhatPrints,
+  saveWhatPrints,
+  clearWhatPrints,
+} from './voiceprintStore';
+export { openRollingRecorder, chime, type RollingRecorder } from './HeyOzwell/audio';
+
 // AI Chat Modal
 export {
   AIChatModal,
