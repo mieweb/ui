@@ -234,7 +234,7 @@
     "@kerebron/editor": ">=0.7.9",
     "@kerebron/editor-kits": ">=0.7.9",
     "@kerebron/wasm": ">=0.7.9",
-    "@mieweb/datavis": "=1.0.0-PRE.1",
+    "@mieweb/datavis": "=1.1.0-PRE.1",
     "ag-grid-community": ">=32.0.0",
     "ag-grid-react": ">=32.0.0",
     "datavis-ace": "=4.1.0",
@@ -342,7 +342,7 @@
     "@kerebron/editor": "0.7.9",
     "@kerebron/editor-kits": "0.7.9",
     "@kerebron/wasm": "0.7.9",
-    "@mieweb/datavis": "=1.0.0-PRE.1",
+    "@mieweb/datavis": "=1.1.0-PRE.1",
     "@monaco-editor/react": "^4.7.0",
     "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^10.2.11",
@@ -417,18 +417,5 @@
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "datavis-ace": "=4.1.0",
-      "esbuild@<0.28.1": "0.28.1",
-      "axios@>=1.0.0 <1.16.0": "1.16.0",
-      "minimatch@>=10.0.0 <10.2.3": "10.2.3",
-      "minimatch@>=9.0.0 <9.0.7": "9.0.7",
-      "flatted@<3.4.2": "3.4.2",
-      "picomatch@>=4.0.0 <4.0.4": "4.0.4",
-      "uuid@<11.1.1": "11.1.1",
-      "dompurify@<3.4.0": "3.4.0"
-    }
   }
 }
