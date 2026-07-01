@@ -163,17 +163,61 @@ export const StreamingMessage: Story = {
   },
 };
 
-/** A collapsible reasoning ("thinking") block ahead of the final answer. */
-export const ThinkingBlock: Story = {
+/** Thinking pill while the model is actively reasoning — pulsing dot, "Thinking" label. */
+export const ThinkingActive: Story = {
   render: () => {
     const message: AIMessage = {
-      id: '5',
+      id: '5a',
+      role: 'assistant',
+      content: [
+        {
+          type: 'thinking',
+          text: 'The user wants to add a new patient. I should use the create_patient tool with the provided information. Validating date format and required fields...',
+          collapsed: false,
+        },
+      ],
+      timestamp: new Date(),
+      status: 'streaming',
+    };
+    return <AIMessageDisplay message={message} />;
+  },
+};
+
+/** Thinking pill after the model finished — "Thought" label, no dot, collapsed by default. */
+export const ThinkingComplete: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '5b',
       role: 'assistant',
       content: [
         {
           type: 'thinking',
           text: 'The user wants to add a new patient. I should use the create_patient tool with the provided information. I need to validate the date format and ensure all required fields are present.',
           collapsed: true,
+        },
+        {
+          type: 'text',
+          text: "I'll create a new patient record for John Smith.",
+        },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    return <AIMessageDisplay message={message} />;
+  },
+};
+
+/** Thinking pill expanded — user clicked to reveal reasoning content. */
+export const ThinkingExpanded: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '5c',
+      role: 'assistant',
+      content: [
+        {
+          type: 'thinking',
+          text: 'The user wants to add a new patient. I should use the create_patient tool with the provided information. I need to validate the date format and ensure all required fields are present.',
+          collapsed: false,
         },
         {
           type: 'text',
