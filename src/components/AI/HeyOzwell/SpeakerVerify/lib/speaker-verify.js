@@ -59,7 +59,7 @@
   }
 
   // --- speaker-embedding extraction over the WASM C-API (names confirmed from the build) ---
-  function embed(samples, sampleRate) {
+  function computeEmbedding(samples, sampleRate) {
     const M = Module;
     const stream = M._SherpaOnnxSpeakerEmbeddingExtractorCreateStream(handle);
     const ptr = M._malloc(samples.length * 4);
@@ -179,7 +179,7 @@
     enroll(phrase, utterances /* [{samples, sampleRate}] */, opts) {
       if (!handle) throw new Error("SpeakerVerify not ready");
       const voiceId = (opts && opts.voiceId) || DEFAULT_VOICE_ID;
-      const embs = utterances.map(u => embed(u.samples, u.sampleRate));
+      const embs = utterances.map(u => computeEmbedding(u.samples, u.sampleRate));
       const c = new Float32Array(dim);
       for (const e of embs) for (let i = 0; i < dim; i++) c[i] += e[i];
       for (let i = 0; i < dim; i++) c[i] /= embs.length;
@@ -204,7 +204,7 @@
     verify(phrase, samples, sampleRate) {
       const cents = allCentroids(phrase);
       if (!cents.length) return { score: 0, znorm: null, pass: false, enrolled: false };
-      const live = embed(samples, sampleRate);
+      const live = computeEmbedding(samples, sampleRate);
       let score = -1;
       for (const c of cents) { const s = cosine(live, c); if (s > score) score = s; }
       // AS-norm: z = how many std the raw score sits above the crowd's scores against this same live clip.
@@ -224,6 +224,36 @@
 
     /** How many conditions are enrolled for a phrase, across ALL voices (0 = none). */
     conditionCount: (phrase) => allCentroids(phrase).length,
+
+    /** TitaNet speaker embedding for a raw utterance (Float32 + true sample rate). For diarization /
+     *  clustering. Returns the L2-normalized embedding, or null if the runtime isn't ready. */
+    embed(samples, sampleRate) {
+      return handle ? computeEmbedding(samples, sampleRate) : null;
+    },
+
+    /** Best-matching ENROLLED voice for a live utterance, across all voices + phrases (text-independent,
+     *  so conversational audio works). Returns { voiceId, label, score } (max cosine) or null if nothing
+     *  enrolled / not ready. The caller applies a threshold to decide whether to trust the name. */
+    identify(samples, sampleRate) {
+      if (!handle) return null;
+      const live = computeEmbedding(samples, sampleRate);
+      const all = loadAll();
+      const best = {}; // voiceId -> { label, score }
+      for (const phrase in all) {
+        const voices = normPhrase(all[phrase]).voices;
+        for (const id in voices) {
+          for (const c of (voices[id].centroids || [])) {
+            const s = cosine(live, Float32Array.from(c));
+            if (!best[id] || s > best[id].score) best[id] = { label: voices[id].label, score: s };
+          }
+        }
+      }
+      let top = null;
+      for (const id in best) {
+        if (!top || best[id].score > top.score) top = { voiceId: id, label: best[id].label, score: best[id].score };
+      }
+      return top;
+    },
 
     /** List enrolled voices aggregated across phrases: [{ id, label, createdAt, conditions }]. */
     listVoices() {

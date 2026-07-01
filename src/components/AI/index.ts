@@ -111,10 +111,13 @@ export {
   type SpeakerVerifyHandle,
   type VerifyResult,
   type VoiceInfo,
+  type VoiceMatch,
   type EnrollOpts,
 } from './HeyOzwell/SpeakerVerify/useSpeakerVerify';
 export {
   transcribeBlob,
+  transcribeSegments,
+  decodeTo16kMono,
   transcribeServer,
   transcribeGate,
   stripStopPhrase,
@@ -126,6 +129,24 @@ export {
   subscribeDictationLoad,
   type WhisperLoadState,
 } from './whisperTranscribe';
+
+// Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
+export {
+  useDiarization,
+  type UseDiarizationOptions,
+  type UseDiarizationResult,
+} from './HeyOzwell/useDiarization';
+export {
+  clusterEmbeddings,
+  labelClusters,
+  attributeSegments,
+  mergeTurns,
+  cosine,
+  centroid,
+  type TranscriptSegment,
+  type DiarizedSegment,
+  type ClusterOptions,
+} from './diarize';
 export {
   askOzwell,
   askOzwellStream,

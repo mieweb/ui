@@ -26,6 +26,13 @@ export interface VoiceInfo {
   conditions: number;       // how many condition-centroids this voice has
 }
 
+/** Best-matching enrolled voice for an utterance (from `identify`). */
+export interface VoiceMatch {
+  voiceId: string;
+  label: string;
+  score: number; // max cosine to that voice's centroids
+}
+
 /** Options for enrolling/appending a voice. */
 export interface EnrollOpts {
   /** Append as another condition of the SAME voice (vs replace that voice's conditions). */
@@ -44,6 +51,10 @@ export interface SpeakerVerifyHandle {
   /** Verify a live utterance against the enrolled voiceprints (passes if ANY enrolled voice matches). */
   verify: (phrase: string, samples: Float32Array, sampleRate: number) => VerifyResult | null;
   conditionCount: (phrase: string) => number;
+  /** TitaNet speaker embedding for a raw utterance — for diarization/clustering. Null if not ready. */
+  embed: (samples: Float32Array, sampleRate: number) => Float32Array | null;
+  /** Best-matching enrolled voice for an utterance (text-independent). Null if nothing enrolled/not ready. */
+  identify: (samples: Float32Array, sampleRate: number) => VoiceMatch | null;
   /** List enrolled voices (aggregated across phrases). */
   listVoices: () => VoiceInfo[];
   /** Remove a voice across all phrases (revokes that person). */
@@ -62,6 +73,8 @@ interface SVApi {
   enroll: (phrase: string, u: { samples: Float32Array; sampleRate: number }[], opts?: EnrollOpts) => { n: number; conditions: number; voiceId: string };
   verify: (phrase: string, s: Float32Array, sr: number) => VerifyResult;
   conditionCount: (phrase: string) => number;
+  embed: (samples: Float32Array, sampleRate: number) => Float32Array | null;
+  identify: (samples: Float32Array, sampleRate: number) => VoiceMatch | null;
   listVoices: () => VoiceInfo[];
   removeVoice: (voiceId: string) => void;
   renameVoice: (voiceId: string, label: string) => void;
@@ -110,6 +123,8 @@ export function useSpeakerVerify(opts: UseSpeakerVerifyOpts = {}): SpeakerVerify
     enroll: (phrase, utterances, opts) => svRef.current?.enroll(phrase, utterances, opts) ?? null,
     verify: (phrase, samples, sampleRate) => svRef.current?.verify(phrase, samples, sampleRate) ?? null,
     conditionCount: (phrase) => svRef.current?.conditionCount(phrase) ?? 0,
+    embed: (samples, sampleRate) => svRef.current?.embed(samples, sampleRate) ?? null,
+    identify: (samples, sampleRate) => svRef.current?.identify(samples, sampleRate) ?? null,
     listVoices: () => svRef.current?.listVoices() ?? [],
     removeVoice: (voiceId) => svRef.current?.removeVoice(voiceId),
     renameVoice: (voiceId, label) => svRef.current?.renameVoice(voiceId, label),

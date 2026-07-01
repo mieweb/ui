@@ -11,8 +11,12 @@
  */
 import { registerModelServiceWorker } from './modelCache';
 import { getOzwellConfig } from './ozwellChat';
+import type { TranscriptSegment } from './diarize';
 
-type Whisper = (input: Float32Array, opts: unknown) => Promise<{ text?: string }>;
+type Whisper = (
+  input: Float32Array,
+  opts: unknown
+) => Promise<{ text?: string; chunks?: { timestamp: [number, number | null]; text?: string }[] }>;
 type Mod = {
   pipeline: (task: string, model: string, opts?: unknown) => Promise<Whisper>;
   env: {
@@ -268,18 +272,21 @@ function resampleTo16kMono(src: Float32Array, sampleRate: number): Float32Array 
 
 // trimEndSeconds: drop this many seconds off the END of the audio before transcribing (so Whisper
 // never hears the spoken stop phrase). Pair with stripStopPhrase as a text-level backstop.
-export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<string> {
+// Decode a recorded Blob → 16 kHz mono Float32 (what Whisper + TitaNet want). try/finally so a failed
+// decode still closes the AudioContext (they'd otherwise leak across retries).
+export async function decodeTo16kMono(blob: Blob): Promise<Float32Array> {
   const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctx();
-  // try/finally so a decode/read failure (corrupt/unsupported blob) still closes the context — otherwise
-  // a thrown decodeAudioData leaks the AudioContext, and they accumulate across retries.
-  let samples: Float32Array;
   try {
     const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
-    samples = resampleTo16kMono(downmixToMono(audio), audio.sampleRate);
+    return resampleTo16kMono(downmixToMono(audio), audio.sampleRate);
   } finally {
     void ctx.close();
   }
+}
+
+export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<string> {
+  let samples = await decodeTo16kMono(blob);
   if (trimEndSeconds > 0) {
     const cut = Math.round(trimEndSeconds * 16000);
     if (samples.length > cut + 16000) samples = samples.subarray(0, samples.length - cut); // keep >=1s
@@ -289,6 +296,26 @@ export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<st
     ? { chunk_length_s: 30, language: 'english', task: 'transcribe' }
     : { chunk_length_s: 30 });
   return (out?.text ?? '').trim();
+}
+
+/** Transcribe with timestamps → segments `[{ start, end, text }]`, for diarization (align speaker turns to
+ *  text). Returns 16 kHz-relative seconds. See `useDiarization`. */
+export async function transcribeSegments(blob: Blob): Promise<TranscriptSegment[]> {
+  const samples = await decodeTo16kMono(blob);
+  const pipe = await loadWhisper();
+  const out = await pipe(samples, {
+    chunk_length_s: 30,
+    return_timestamps: true,
+    ...(isMultilingual ? { language: 'english', task: 'transcribe' } : {}),
+  });
+  const chunks = out?.chunks ?? [];
+  return chunks
+    .map((c) => ({
+      start: c.timestamp?.[0] ?? 0,
+      end: c.timestamp?.[1] ?? c.timestamp?.[0] ?? 0,
+      text: (c.text ?? '').trim(),
+    }))
+    .filter((s) => s.text);
 }
 
 // Server-ASR model id (override via localStorage ozwellConfig.serverWhisper); defaults to the
