@@ -26,6 +26,9 @@ export {
   type SpinnerIconProps,
 } from './icons';
 
+// Collapsible Pill (shared primitive for thinking + tool display)
+export { CollapsiblePill, type CollapsiblePillProps } from './CollapsiblePill';
+
 // MCP Tool Call Display
 export {
   MCPToolCallDisplay,
