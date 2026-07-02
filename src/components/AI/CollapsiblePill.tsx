@@ -11,6 +11,8 @@ export interface CollapsiblePillProps {
   onOpenChange?: (open: boolean) => void;
   pillClassName?: string;
   className?: string;
+  /** Native tooltip shown on hover (e.g. "Show details") */
+  title?: string;
   children?: React.ReactNode;
 }
 
@@ -23,14 +25,17 @@ export function CollapsiblePill({
   onOpenChange,
   pillClassName,
   className,
+  title,
   children,
 }: CollapsiblePillProps) {
+  const isControlled = controlledOpen !== undefined;
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
-  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
 
   const toggle = () => {
     const next = !isOpen;
-    setInternalOpen(next);
+    // Only own the state when uncontrolled; a controlled consumer drives it.
+    if (!isControlled) setInternalOpen(next);
     onOpenChange?.(next);
   };
 
@@ -40,6 +45,7 @@ export function CollapsiblePill({
         type="button"
         onClick={toggle}
         aria-expanded={isOpen}
+        title={title}
         className={cn(
           'inline-flex items-center gap-1.5 border font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
           density === 'condensed'

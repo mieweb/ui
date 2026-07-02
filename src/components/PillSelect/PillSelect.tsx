@@ -55,9 +55,10 @@ export function PillSelect({
     setExpanded(false);
   }
 
-  const collapsedLabel = [label, selectedOption?.label ?? value]
-    .filter(Boolean)
-    .join(': ');
+  const hasOptions = options.length > 0;
+  const valuePart = selectedOption?.label ?? value;
+  const collapsedLabel =
+    label && valuePart ? `${label}: ${valuePart}` : label || valuePart;
 
   return (
     <div ref={ref} className={cn('inline-flex', className)}>
@@ -92,12 +93,12 @@ export function PillSelect({
       ) : (
         <button
           type="button"
-          disabled={disabled}
+          disabled={disabled || !hasOptions}
           onClick={() => setExpanded(true)}
           className={cn(
             'border-border bg-muted text-foreground inline-flex items-center rounded-full border px-3 py-0.5 text-sm transition-colors',
             'hover:bg-muted/80 focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
-            disabled && 'cursor-not-allowed opacity-50'
+            (disabled || !hasOptions) && 'cursor-not-allowed opacity-50'
           )}
         >
           {collapsedLabel}

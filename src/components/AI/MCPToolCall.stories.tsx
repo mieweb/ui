@@ -52,19 +52,26 @@ const meta: Meta<typeof MCPToolCallDisplay> = {
     },
     collapsible: {
       control: 'boolean',
-      description: 'Whether the technical details can be collapsed/expanded.',
+      description:
+        'Whether the raw parameters can be collapsed/expanded (the "Show details" toggle inside the box).',
       table: { defaultValue: { summary: 'true' } },
     },
     defaultCollapsed: {
       control: 'boolean',
       description:
-        'Initial collapsed state. `true` hides the technical details by default.',
+        'Initial state. `true` shows only the pill; the box (result + params) opens when the pill is clicked.',
       table: { defaultValue: { summary: 'true' } },
     },
     compact: {
       control: 'boolean',
       description:
         'Render a condensed single-line variant, ideal for dense lists.',
+    },
+    hidden: {
+      control: 'boolean',
+      description:
+        'Hide the whole tool-call display (mirrors the Ozwell widget debug flag).',
+      table: { defaultValue: { summary: 'false' } },
     },
     onLinkClick: {
       action: 'onLinkClick',
@@ -114,5 +121,28 @@ export const Compact: Story = {
     toolCall: successToolCall,
     compact: true,
     collapsible: false,
+  },
+};
+
+/**
+ * Pill only by default — the box (result + params) stays hidden until the pill
+ * is clicked. While running, the pill shows the input summary
+ * (e.g. "Creating patient · John Smith").
+ */
+export const PillOnly: Story = {
+  args: {
+    toolCall: pendingToolCall,
+    defaultCollapsed: true,
+  },
+};
+
+/**
+ * `hidden` turns the whole display off at once — the equivalent of the Ozwell
+ * widget's debug flag for toggling tool-call visibility.
+ */
+export const Hidden: Story = {
+  args: {
+    toolCall: successToolCall,
+    hidden: true,
   },
 };
