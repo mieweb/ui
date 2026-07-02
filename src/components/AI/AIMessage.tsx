@@ -296,6 +296,7 @@ function ContentBlock({
         src={content.videoUrl}
         controls
         preload="metadata"
+        aria-label={content.text || 'Video recording'}
         className="my-1 max-h-80 w-full rounded-lg bg-black"
       >
         {/* Recorded clips carry no caption track; present for a11y compliance. */}

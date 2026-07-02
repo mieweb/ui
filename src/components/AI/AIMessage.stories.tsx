@@ -321,16 +321,32 @@ export const WithAudioBlock: Story = {
  */
 const VideoBlockDemo: React.FC = () => {
   const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let active = true;
-    void getSampleVideo().then((url) => {
-      if (active) setVideoUrl(url);
-    });
+    void getSampleVideo().then(
+      (url) => {
+        if (active) setVideoUrl(url);
+      },
+      (err: unknown) => {
+        if (active) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Failed to generate sample video.'
+          );
+        }
+      }
+    );
     return () => {
       active = false;
     };
   }, []);
+
+  if (error) {
+    return <p className="text-destructive text-sm">{error}</p>;
+  }
 
   if (!videoUrl) {
     return (

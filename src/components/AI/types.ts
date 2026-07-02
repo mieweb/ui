@@ -141,7 +141,7 @@ export interface AIMessageContent {
     | 'file'
     | 'audio'
     | 'video';
-  /** Text content (also used as the audio label for `audio` blocks) */
+  /** Text content (also used as the label for `audio` and `video` blocks) */
   text?: string;
   /** Tool call reference */
   toolCall?: MCPToolCall;
@@ -155,7 +155,7 @@ export interface AIMessageContent {
   name?: string;
   /** File size in bytes (for `file` blocks) */
   fileSize?: number;
-  /** MIME type (for `file` and `audio` blocks) */
+  /** MIME type (for `file`, `audio`, and `video` blocks) */
   mimeType?: string;
   /** Download/open URL (for `file` blocks) */
   fileUrl?: string;

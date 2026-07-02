@@ -42,7 +42,36 @@ export function createSampleVideoUrl(durationSec = 3): Promise<string> {
     }
 
     const stream = canvas.captureStream(30);
-    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+
+    // Pick a container/codec the browser can actually record; fall back to the
+    // browser default when none of the preferred types are supported.
+    const preferredTypes = [
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm',
+      'video/mp4',
+    ];
+    const supportsIsTypeSupported =
+      typeof MediaRecorder.isTypeSupported === 'function';
+    const mimeType = supportsIsTypeSupported
+      ? preferredTypes.find((type) => MediaRecorder.isTypeSupported(type))
+      : undefined;
+
+    let recorder: MediaRecorder;
+    try {
+      recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+    } catch (err) {
+      stream.getTracks().forEach((track) => track.stop());
+      reject(
+        err instanceof Error
+          ? err
+          : new Error('MediaRecorder could not be created in this environment.')
+      );
+      return;
+    }
+
     const chunks: Blob[] = [];
 
     recorder.ondataavailable = (event) => {
@@ -54,7 +83,9 @@ export function createSampleVideoUrl(durationSec = 3): Promise<string> {
     };
     recorder.onstop = () => {
       stream.getTracks().forEach((track) => track.stop());
-      const blob = new Blob(chunks, { type: 'video/webm' });
+      const blob = new Blob(chunks, {
+        type: recorder.mimeType || 'video/webm',
+      });
       resolve(URL.createObjectURL(blob));
     };
 
