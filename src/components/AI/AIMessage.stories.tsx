@@ -7,6 +7,7 @@ import {
 } from './index';
 import { successToolCall } from './storyData';
 import { getSampleAudio } from '../AudioPlayer/sampleAudio';
+import { getSampleVideo } from '../AudioPlayer/sampleVideo';
 
 // ============================================================================
 // AI Message Stories
@@ -34,6 +35,7 @@ const meta: Meta<typeof AIMessageDisplay> = {
           '| `image` | A clickable image thumbnail |',
           '| `file` | A document card with icon, filename & size |',
           '| `audio` | An inline waveform `AudioPlayer` for recorded clips |',
+          '| `video` | An inline native `<video>` player for screen/video recordings |',
           '',
           '### Rich content: Markdown, images & Mermaid',
           'Text blocks are plain text by default. To render **Markdown, images, or Mermaid diagrams**,',
@@ -309,4 +311,54 @@ export const WithAudioBlock: Story = {
     };
     return <AIMessageDisplay message={message} userName="Dr. Jane" />;
   },
+};
+
+/**
+ * A user turn carrying a recorded screen/video clip, rendered inline as a native
+ * `<video>` player. This is how a captured screen recording plays back next to
+ * its transcription. The sample clip is generated locally via canvas +
+ * `MediaRecorder`, so the demo shows a brief loading state while it renders.
+ */
+const VideoBlockDemo: React.FC = () => {
+  const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let active = true;
+    void getSampleVideo().then((url) => {
+      if (active) setVideoUrl(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (!videoUrl) {
+    return (
+      <p className="text-muted-foreground text-sm">Generating sample video…</p>
+    );
+  }
+
+  const message: AIMessage = {
+    id: '10',
+    role: 'user',
+    content: [
+      {
+        type: 'video',
+        videoUrl,
+        text: 'Screen recording',
+        mimeType: 'video/webm',
+      },
+      {
+        type: 'text',
+        text: 'Walkthrough of the reported issue on the dashboard.',
+      },
+    ],
+    timestamp: new Date(),
+    status: 'complete',
+  };
+  return <AIMessageDisplay message={message} userName="Dr. Jane" />;
+};
+
+export const WithVideoBlock: Story = {
+  render: () => <VideoBlockDemo />,
 };

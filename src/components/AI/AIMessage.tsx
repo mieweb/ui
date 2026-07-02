@@ -286,6 +286,24 @@ function ContentBlock({
     );
   }
 
+  if (content.type === 'video' && content.videoUrl) {
+    // Guard against `javascript:` URLs, mirroring the audio/image/file blocks.
+    if (/^\s*javascript:/i.test(content.videoUrl)) {
+      return null;
+    }
+    return (
+      <video
+        src={content.videoUrl}
+        controls
+        preload="metadata"
+        className="my-1 max-h-80 w-full rounded-lg bg-black"
+      >
+        {/* Recorded clips carry no caption track; present for a11y compliance. */}
+        <track kind="captions" />
+      </video>
+    );
+  }
+
   if (content.type === 'image' && content.imageUrl) {
     const safeHref = /^\s*javascript:/i.test(content.imageUrl)
       ? undefined
