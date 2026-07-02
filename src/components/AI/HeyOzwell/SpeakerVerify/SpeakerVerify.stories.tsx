@@ -99,6 +99,9 @@ function SpeakerVerifyDemo({ cosineThreshold, znormThreshold, useAsnorm }: SVArg
   const enrolled = conditions > 0;
   enrolledRef.current = enrolled;
 
+  // Re-read the enrolled count when the runtime becomes ready (sv is a fresh handle each render; keying on
+  // sv.ready is intentional — including `sv` would re-run every render).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => { if (sv.ready) setConditions(sv.conditionCount('hey-ozwell')); }, [sv.ready]);
 
   // restore persisted WHAT templates into the detector when it's ready (so they survive reloads, like WHO)
