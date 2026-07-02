@@ -1,15 +1,15 @@
 /**
  * Hands-free voice chat — the composition of the voice primitives (wake + speaker-verify + dictation +
- * AIChat). The logic + UI now live in the shipped `<HandsFreeChat>` component (built on `useHeyOzwell`);
- * this story just renders it. Say "hey ozwell" to dictate, "ozwell I'm done" to send. One shared mic.
+ * AIChat). The logic + UI live in the shipped `<HandsFreeChat>` component (built on `useHeyOzwell`);
+ * this story just renders it and exposes its behavior props in the Controls panel. Say "hey ozwell" to
+ * dictate, "ozwell I'm done" to send. One shared mic.
  */
 import type { Meta, StoryObj } from '@storybook/react';
 import { HandsFreeChat } from './HandsFreeChat';
 import { suggestedActions } from '../storyData';
 
-const meta: Meta<typeof HandsFreeChat> = {
+const meta: Meta = {
   title: 'Product/Feature Modules/AI/Hey Ozwell/Hands-Free Chat',
-  component: HandsFreeChat,
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -17,14 +17,73 @@ const meta: Meta<typeof HandsFreeChat> = {
         component:
           'Composition of the voice primitives — wake-word + on-device speaker verify + on-device ' +
           'dictation + AIChat. Say **“hey ozwell”** to start dictating, **“ozwell I’m done”** to send. ' +
-          'Doctor-only by default; one shared mic; all on-device.',
+          'One shared mic. **Configuration is props-first** — the **Controls panel below is a live props ' +
+          'editor** (doctor-only gate, transcription mode, auto-dictate), which is exactly how a host ' +
+          'configures it when it mounts the component. **Transcribe on server** records the clip and ' +
+          'POSTs it to the server ASR model instead of transcribing on-device. Turn on **Built-in ' +
+          'settings menu** to also get the runtime octopus menu (long-press for those toggles + *Your ' +
+          'voice* enrollment) — off by default, since the runtime control UX is the host’s call.',
       },
     },
   },
 };
 export default meta;
 
-/** Say "hey ozwell" to dictate, "ozwell I'm done" to send. Wake + speaker-verify + dictation + AIChat. */
-export const HandsFree: StoryObj<typeof HandsFreeChat> = {
-  render: () => <HandsFreeChat userName="Dr. Jane" suggestions={suggestedActions} />,
+interface HandsFreeArgs {
+  /** Doctor-only gate: only the enrolled voice(s) act once enrolled (loads the speaker runtime). */
+  requireDoctor: boolean;
+  /** On-device (PHI-safe) vs. record the clip and POST it to the server ASR model. */
+  transcription: 'browser' | 'server';
+  /** ON: "hey ozwell" starts dictating hands-free. OFF: it just focuses the chat. */
+  autoDictateOnWake: boolean;
+  /** Opt in to the runtime octopus menu (toggles + Your-voice enrollment). Off by default. */
+  showSettingsMenu: boolean;
+}
+
+/** Say "hey ozwell" to dictate, "ozwell I'm done" to send. Use the Controls panel to configure it. */
+export const HandsFree: StoryObj<HandsFreeArgs> = {
+  args: {
+    requireDoctor: true,
+    transcription: 'browser',
+    autoDictateOnWake: true,
+    showSettingsMenu: false,
+  },
+  argTypes: {
+    requireDoctor: {
+      name: 'Your voice only (doctor gate)',
+      control: 'boolean',
+      description:
+        'Only the enrolled voice(s) trigger Ozwell once enrolled (loads the on-device speaker runtime).',
+    },
+    transcription: {
+      name: 'Transcribe on server',
+      control: 'radio',
+      options: ['browser', 'server'],
+      description:
+        'browser: on-device, PHI-safe (default). server: record the clip and POST it to the ' +
+        'OpenAI-compatible /v1/audio/transcriptions endpoint (uses the server ASR model).',
+    },
+    autoDictateOnWake: {
+      name: 'Auto-dictate on wake',
+      control: 'boolean',
+      description: 'ON: “hey ozwell” starts dictating hands-free. OFF: it just focuses the chat.',
+    },
+    showSettingsMenu: {
+      name: 'Built-in settings menu',
+      control: 'boolean',
+      description:
+        'Opt in to the runtime octopus menu (long-press for the toggles above + Your-voice enrollment, ' +
+        'left-click to turn Ozwell off/on). Off by default — the host owns the runtime control UX.',
+    },
+  },
+  render: (args) => (
+    <HandsFreeChat
+      userName="Dr. Jane"
+      suggestions={suggestedActions}
+      requireDoctor={args.requireDoctor}
+      transcription={args.transcription}
+      autoDictateOnWake={args.autoDictateOnWake}
+      showSettingsMenu={args.showSettingsMenu}
+    />
+  ),
 };
