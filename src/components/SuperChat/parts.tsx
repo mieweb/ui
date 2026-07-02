@@ -618,7 +618,7 @@ export const MessageRow = React.memo(function MessageRow({
             data-slot="superchat-bubble"
             variant={isSelf ? 'user' : 'assistant'}
             hasError={message.status === 'error'}
-            className="text-sm"
+            className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
           >
             {isEditing ? (
               <div
