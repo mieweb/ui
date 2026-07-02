@@ -116,6 +116,7 @@ export {
 } from './HeyOzwell/SpeakerVerify/useSpeakerVerify';
 export {
   transcribeBlob,
+  transcribeSamples,
   transcribeSegments,
   decodeTo16kMono,
   transcribeServer,

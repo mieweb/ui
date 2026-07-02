@@ -298,6 +298,16 @@ export async function transcribeBlob(blob: Blob, trimEndSeconds = 0): Promise<st
   return (out?.text ?? '').trim();
 }
 
+/** Transcribe raw mono samples (any sample rate) → text. For the live dictation caption, where we re-run
+ *  the growing utterance every couple seconds; the FINAL send still uses transcribeBlob. */
+export async function transcribeSamples(samples: Float32Array, sampleRate: number): Promise<string> {
+  const pipe = await loadWhisper();
+  const out = await pipe(resampleTo16kMono(samples, sampleRate), isMultilingual
+    ? { chunk_length_s: 30, language: 'english', task: 'transcribe' }
+    : { chunk_length_s: 30 });
+  return (out?.text ?? '').trim();
+}
+
 /** Transcribe with timestamps → segments `[{ start, end, text }]`, for diarization (align speaker turns to
  *  text). Returns 16 kHz-relative seconds. See `useDiarization`. */
 export async function transcribeSegments(blob: Blob): Promise<TranscriptSegment[]> {

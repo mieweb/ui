@@ -66,9 +66,11 @@ interface DemoArgs {
   transcription: 'browser' | 'server';
   /** Doctor-only gate: only the enrolled voice(s) act once enrolled (loads the speaker runtime). */
   requireDoctor: boolean;
+  /** Live caption: show recognized text in the composer as you dictate. */
+  liveTranscript: boolean;
 }
 
-function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor }: DemoArgs) {
+function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor, liveTranscript }: DemoArgs) {
   // The whole flow now lives in the shipped <HeyOzwell> drop-in — the host only places the octopus in
   // its header and wires where the settings items navigate. (For custom layouts, useHeyOzwell + the
   // parts give the same behavior; see the component source.)
@@ -88,6 +90,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
           closeChatOnDone={closeChatOnDone}
           transcription={transcription}
           requireDoctor={requireDoctor}
+          liveTranscript={liveTranscript}
           size={40}
           chatProps={{ suggestions: suggestedActions, userName: 'Dr. Jane' }}
           // "Your voice" opens the central Voice Manager page (set up / add / rename / remove voices). In a
@@ -117,7 +120,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
  * long-press the octopus for Ozwell settings.
  */
 export const Interactive: StoryObj<DemoArgs> = {
-  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false },
+  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false, liveTranscript: false },
   argTypes: {
     autoDictateOnWake: {
       name: 'Auto-dictate on wake',
@@ -150,6 +153,13 @@ export const Interactive: StoryObj<DemoArgs> = {
       description:
         'ON: only enrolled voice(s) act on a wake (loads the ~50 MB speaker runtime). Open until you enroll ' +
         'via the settings menu → Your voice. OFF: any voice can wake it.',
+    },
+    liveTranscript: {
+      name: 'Live caption',
+      control: 'boolean',
+      description:
+        'ON: while dictating, the recognized text streams into the composer as it’s heard (re-transcribes ' +
+        'the growing utterance ~every 2s; on-device/browser mode only). OFF: only a “Dictating…” hint.',
     },
   },
   render: (args) => <Demo {...args} />,

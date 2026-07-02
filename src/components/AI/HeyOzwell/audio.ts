@@ -17,7 +17,7 @@ export interface RollingRecorder {
  * detector's `getStream()`) — never a second getUserMedia, which would silence the detector. Used to
  * capture the wake-utterance audio for the speaker-verify (WHO) gate and for enrollment.
  */
-export function openRollingRecorder(stream: MediaStream): RollingRecorder {
+export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): RollingRecorder {
   const Ctx =
     window.AudioContext ||
     (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -26,7 +26,8 @@ export function openRollingRecorder(stream: MediaStream): RollingRecorder {
   const proc = ctx.createScriptProcessor(4096, 1, 1);
   const sink = ctx.createGain();
   sink.gain.value = 0;
-  const max = Math.round(ctx.sampleRate * 2);
+  // `maxSeconds = Infinity` → an unbounded accumulator (keeps the whole utterance, e.g. for live captions).
+  const max = maxSeconds === Infinity ? Infinity : Math.round(ctx.sampleRate * maxSeconds);
   let chunks: Float32Array[] = [];
   let total = 0;
   proc.onaudioprocess = (e) => {

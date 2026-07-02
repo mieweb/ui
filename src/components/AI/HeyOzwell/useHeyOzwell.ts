@@ -21,6 +21,7 @@ import {
 import {
   transcribeBlob,
   transcribeServer,
+  transcribeSamples,
   stripStopPhrase,
   warmWhisper,
   subscribeDictationLoad,
@@ -67,6 +68,10 @@ export interface UseHeyOzwellOptions {
   requireDoctor?: boolean;
   /** Start listening immediately on mount instead of waiting for a click (e.g. an always-on surface). */
   autoStart?: boolean;
+  /** Live caption: while dictating, re-transcribe the growing utterance every ~2s and show the recognized
+   *  text in the chat composer as it's heard (the final send still uses the full-clip transcription).
+   *  On-device only (browser transcription); costs extra compute during dictation. Default false. */
+  liveTranscript?: boolean;
 }
 
 /** Props to spread onto <HeyOzwellToggle>. */
@@ -193,6 +198,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     assetBase,
     requireDoctor = false,
     autoStart = false,
+    liveTranscript = false,
   } = options;
 
   const [active, setActive] = React.useState(autoStart);
@@ -224,6 +230,17 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   const chunksRef = React.useRef<Blob[]>([]);
   // Aborts the in-flight streamed reply when a new send starts or Ozwell is toggled off.
   const streamAbortRef = React.useRef<AbortController | null>(null);
+  // Live caption (opt-in): the recognized-so-far text + the accumulating recorder/timer that produce it.
+  const [liveText, setLiveText] = React.useState('');
+  const liveRecRef = React.useRef<RollingRecorder | null>(null);
+  const liveTimerRef = React.useRef<number | null>(null);
+  const stopLive = React.useCallback(() => {
+    if (liveTimerRef.current) window.clearInterval(liveTimerRef.current);
+    liveTimerRef.current = null;
+    liveRecRef.current?.close();
+    liveRecRef.current = null;
+    setLiveText('');
+  }, []);
   // Holds the live detector so startDictation can reach its mic stream. Assigned after useWakeWord
   // runs below (onWake references startDictation, so the detector can't be created before it).
   const wakeRef = React.useRef<ReturnType<typeof useWakeWord> | null>(null);
@@ -343,11 +360,32 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     rec.start();
     recRef.current = rec;
     setPhase('dictating');
-  }, []);
+
+    // Live caption (browser mode only): accumulate raw PCM off the SAME stream and re-transcribe the
+    // growing utterance every ~2s, showing the recognized text in the composer as it's heard. The final
+    // send still uses the full-clip transcribeBlob above.
+    if (liveTranscript && transcription === 'browser') {
+      setLiveText('');
+      liveRecRef.current = openRollingRecorder(stream, Infinity);
+      liveTimerRef.current = window.setInterval(async () => {
+        const acc = liveRecRef.current;
+        if (!acc) return;
+        const s = acc.snapshot();
+        if (s.length < acc.sampleRate * 0.6) return; // wait for ~0.6s of audio before the first pass
+        try {
+          const t = await transcribeSamples(s, acc.sampleRate);
+          if (liveRecRef.current) setLiveText(t); // still dictating
+        } catch {
+          /* transient — keep the last caption */
+        }
+      }, 2000);
+    }
+  }, [liveTranscript, transcription]);
 
   const stopDictation = React.useCallback(() => {
     const rec = recRef.current;
     if (!rec) return;
+    stopLive(); // tear down the live-caption loop; the final full-clip transcription follows
     setPhase('transcribing');
     rec.onstop = async () => {
       const blob = new Blob(chunksRef.current, {
@@ -377,7 +415,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       setPhase('listening');
     };
     rec.stop();
-  }, [transcription, closeChatOnDone, send]);
+  }, [transcription, closeChatOnDone, send, stopLive]);
 
   const wake = useWakeWord({
     enabled: active,
@@ -465,6 +503,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
         /* ignore */
       }
       recRef.current = null;
+      stopLive();
       streamAbortRef.current?.abort();
       streamAbortRef.current = null;
       setGenerating(false);
@@ -472,11 +511,13 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       setSettingsOpen(false);
       setPhase('listening');
     }
-  }, []);
+  }, [stopLive]);
 
   const inputPlaceholder =
     phase === 'dictating'
-      ? '🎙️ Dictating… say “ozwell I’m done” to send'
+      ? liveText
+        ? `🎙️ ${liveText}` // live caption — the recognized text so far
+        : '🎙️ Dictating… say “ozwell I’m done” to send'
       : phase === 'transcribing'
         ? transcription === 'server'
           ? '⏳ Transcribing on the server…'
