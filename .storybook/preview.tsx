@@ -248,6 +248,7 @@ const preview: Preview = {
     brand: 'bluehive',
     theme: 'light',
     density: 'standard',
+    locale: 'en',
   },
   globalTypes: {
     brand: {
@@ -288,6 +289,18 @@ const preview: Preview = {
         items: [
           { value: 'standard', title: 'Standard' },
           { value: 'condensed', title: 'Condensed' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+    locale: {
+      name: 'Language',
+      description: 'Locale for locale-aware components (e.g. CodeLookup shards)',
+      toolbar: {
+        icon: 'globe',
+        items: [
+          { value: 'en', title: '🇺🇸 English' },
+          { value: 'es', title: '🇪🇸 Español (sample)' },
         ],
         dynamicTitle: true,
       },

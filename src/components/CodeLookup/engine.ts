@@ -4,6 +4,10 @@
  * runs multi-word-prefix BM25-ish scoring with alias and typo support.
  *
  * Runs on the main thread or inside a worker (no DOM access).
+ *
+ * Full pipeline & design docs:
+ *   https://github.com/mieweb/ui/blob/main/src/components/CodeLookup/README.md
+ *   (local: ./README.md)
  */
 
 // =============================================================================
@@ -12,6 +16,8 @@
 
 export interface CodifyShard {
   domain: string;
+  /** BCP-47-ish locale the shard was built for ('en' when absent, v1) */
+  locale: string;
   docCount: number;
   tokenCount: number;
   codetypes: string[];
@@ -27,6 +33,8 @@ export interface CodifyShard {
   fullidOffsets: Uint32Array;
   docCodetype: Uint8Array;
   docLen: Uint8Array;
+  /** Usage prior per doc, log-quantized 0-255 (v2; null for v1 shards) */
+  docPrior: Uint8Array | null;
   // reusable per-query scratch buffers
   scoreBuf: Float32Array;
   maskBuf: Uint8Array;
@@ -64,16 +72,21 @@ export function normalize(s: string): string {
 
 const MAGIC = 0x4d434458; // 'MCDX'
 
+/** Weight of the usage prior on the final score (v2 shards). */
+const PRIOR_WEIGHT = 0.5;
+
 export function parseShard(buf: ArrayBuffer): CodifyShard {
   const view = new DataView(buf);
   if (view.getUint32(0, true) !== MAGIC) throw new Error('Bad shard magic');
-  if (view.getUint32(4, true) !== 1)
+  const version = view.getUint32(4, true);
+  if (version !== 1 && version !== 2)
     throw new Error('Unsupported shard version');
   const metaLen = view.getUint32(8, true);
   const meta = JSON.parse(
     new TextDecoder().decode(new Uint8Array(buf, 12, metaLen))
   ) as {
     domain: string;
+    locale?: string;
     docCount: number;
     tokenCount: number;
     codetypes: string[];
@@ -89,6 +102,7 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
   };
   return {
     domain: meta.domain,
+    locale: meta.locale ?? 'en',
     docCount: meta.docCount,
     tokenCount: meta.tokenCount,
     codetypes: meta.codetypes,
@@ -104,6 +118,7 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
     fullidOffsets: u32('fullidOffsets'),
     docCodetype: u8('docCodetype'),
     docLen: u8('docLen'),
+    docPrior: meta.sections.docPrior ? u8('docPrior') : null,
     scoreBuf: new Float32Array(meta.docCount),
     maskBuf: new Uint8Array(meta.docCount),
     aliasBuf: new Uint8Array(meta.docCount),
@@ -268,7 +283,11 @@ function searchShard(
     const d = s.touched[i];
     if (maskBuf[d] === fullMask) {
       const lenNorm = 1 / (1 + 0.25 * Math.max(0, s.docLen[d] - 1));
-      const score = scoreBuf[d] * (0.6 + 0.4 * lenNorm);
+      // usage prior: frequently-used codes surface above obscure ones with
+      // equal text relevance (docPrior is log-quantized usage, 0-255)
+      const prior = s.docPrior ? s.docPrior[d] / 255 : 0;
+      const score =
+        scoreBuf[d] * (0.6 + 0.4 * lenNorm) * (1 + PRIOR_WEIGHT * prior);
       pushResult(out, s, d, score, aliasBuf[d] === 1, limit * 3);
     }
     maskBuf[d] = 0;

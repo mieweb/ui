@@ -22,12 +22,19 @@ Quest/LabCorp orders).
   \`furosemide\`, \`a1c\` ↔ \`hba1c\`, \`tylenol\` ↔ \`acetaminophen\`…
 - **Typo fallback**: a token that matches nothing retries with edit-distance-1 candidates
   (\`congestve\`, \`furosemid\`).
+- **Usage priors**: frequently used codes (top-200 meds/diagnoses/procedures sample) rank
+  above rare ones with equal text relevance.
+- **Locales**: shards are built per locale under \`/codify/{locale}/\`; use the 🌐 Language
+  toolbar to switch. The \`es\` set is a curated sample (common diagnoses + med ingredients —
+  try *insuficiencia card*, *hta*, *paracetamol*).
+- **OPFS persistence**: shards are cached in the browser's origin-private file system and
+  refetched only when the served manifest changes.
 
-⚠️ Requires generated shards: \`node scripts/codify/extract.mjs && node scripts/codify/build-index.mjs\`
-(artifacts land in \`.storybook/public/codify/\`, gitignored).
+Shards are committed via git-lfs and served from \`.storybook/public/codify/{locale}/\`;
+rebuild with \`pnpm codify:build\` (pipeline lives in the \`packages/codify\` submodule).
 
-📖 Full architecture documentation — build pipeline, .mcdx binary format, scoring, aliases,
-typo handling, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/healthcare-clinical-components/src/components/CodeLookup/README.md).
+📖 Full architecture documentation — build pipeline, .mcdx binary format, scoring, priors,
+aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/healthcare-clinical-components/src/components/CodeLookup/README.md).
         `,
       },
     },
@@ -40,13 +47,20 @@ type Story = StoryObj<typeof CodeLookup>;
 
 function Template({
   domains,
+  locale,
 }: {
   domains?: ('condition' | 'med' | 'lab' | 'procedure' | 'vaccine')[];
+  locale?: string;
 }) {
   const [selected, setSelected] = useState<CodifyResult | null>(null);
   return (
     <div className="mx-auto max-w-2xl space-y-3">
-      <CodeLookup indexUrl="/codify" domains={domains} onSelect={setSelected} />
+      <CodeLookup
+        indexUrl="/codify"
+        locale={locale}
+        domains={domains}
+        onSelect={setSelected}
+      />
       {selected && (
         <pre className="bg-muted overflow-auto rounded-md p-3 text-xs">
           {JSON.stringify(selected, null, 2)}
@@ -57,15 +71,27 @@ function Template({
 }
 
 /** All domains (~81 MB of shards — loads in the background, then searches in ms). */
-export const AllDomains: Story = { render: () => <Template /> };
+export const AllDomains: Story = {
+  render: (_args, { globals }) => <Template locale={globals.locale} />,
+};
 
 /** Conditions only (ICD-10 + SNOMED, ~14 MB). Try "con hea fa", "chf", "lvhf". */
 export const ConditionsOnly: Story = {
-  render: () => <Template domains={['condition']} />,
+  render: (_args, { globals }) => (
+    <Template domains={['condition']} locale={globals.locale} />
+  ),
 };
 
 /** Medications only. Try "lasix" (shows furosemide too) or "tylenol". */
-export const MedsOnly: Story = { render: () => <Template domains={['med']} /> };
+export const MedsOnly: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['med']} locale={globals.locale} />
+  ),
+};
 
 /** Labs only. Try "a1c" or "cbc". */
-export const LabsOnly: Story = { render: () => <Template domains={['lab']} /> };
+export const LabsOnly: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['lab']} locale={globals.locale} />
+  ),
+};

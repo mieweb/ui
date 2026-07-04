@@ -1,5 +1,13 @@
 'use client';
 
+/**
+ * CodeLookup — offline medical-code autocomplete combobox.
+ *
+ * Full pipeline & design docs:
+ *   https://github.com/mieweb/ui/blob/main/src/components/CodeLookup/README.md
+ *   (local: ./README.md)
+ */
+
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Card, CardContent } from '../Card/Card';
@@ -27,8 +35,14 @@ export interface CodeLookupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   'className' | 'onSelect'
 > {
-  /** Base URL where manifest.json and the .mcdx shards are served */
+  /** Base URL where per-locale index directories are served */
   indexUrl: string;
+  /**
+   * Locale of the shard set to load: shards are fetched from
+   * `{indexUrl}/{locale}/manifest.json`. Non-en locales may be sample
+   * subsets (see README). Default: 'en'.
+   */
+  locale?: string;
   /** Domains to load & search (default: all in the manifest) */
   domains?: CodifyDomain[];
   /**
@@ -96,6 +110,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
   (
     {
       indexUrl,
+      locale = 'en',
       domains,
       searchDomains,
       onSelect,
@@ -184,11 +199,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       };
       worker.postMessage({
         type: 'load',
-        baseUrl: indexUrl,
+        baseUrl: `${indexUrl.replace(/\/+$/, '')}/${locale}`,
         domains: keyToDomains(domainsKey),
       });
       return () => worker.terminate();
-    }, [indexUrl, domainsKey]);
+    }, [indexUrl, locale, domainsKey]);
 
     // debounced search-as-you-type
     React.useEffect(() => {

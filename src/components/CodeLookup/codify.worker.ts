@@ -1,37 +1,189 @@
 /**
- * Web Worker for the offline code lookup: fetches .mcdx shards, holds the
- * parsed typed arrays, answers search queries off the UI thread.
+ * Web Worker for the offline code lookup: fetches .mcdx shards (with OPFS
+ * persistence), holds the parsed typed arrays, answers search queries off the
+ * UI thread.
  *
  * Messages in:
  *   { type: 'load', baseUrl: string, domains?: string[] }
  *   { type: 'search', id: number, query: string, limit?: number, domains?: string[] }
  * Messages out:
  *   { type: 'progress', domain, loadedBytes, totalBytes }
- *   { type: 'ready', domains: string[], docCount: number }
+ *   { type: 'ready', domains: string[], docCount: number, fromCache: boolean }
  *   { type: 'results', id, query, results, tookMs }
  *   { type: 'error', message }
+ *
+ * OPFS persistence: shards are cached under /codify-cache/<key>/ where <key>
+ * encodes the baseUrl (so /codify/en and /codify/es cache independently).
+ * The network manifest.json is always fetched first (no-cache); a cached
+ * shard is reused only when the manifest's `builtAt` and `bytes` match the
+ * manifest that was cached alongside it — any server-side rebuild invalidates
+ * and refetches. If the network is down, the cached manifest + shards serve
+ * as an offline fallback. Browsers without OPFS just fetch every time.
+ *
+ * Full pipeline & design docs:
+ *   https://github.com/mieweb/ui/blob/main/src/components/CodeLookup/README.md
+ *   (local: ./README.md)
  */
+/* global FileSystemDirectoryHandle */
 import { parseShard, searchShards, type CodifyShard } from './engine';
 
 const shards = new Map<string, CodifyShard>();
 
-interface Manifest {
-  shards: { domain: string; file: string; bytes: number; docCount: number }[];
+interface ManifestShard {
+  domain: string;
+  file: string;
+  bytes: number;
+  docCount: number;
 }
 
+interface Manifest {
+  version?: number;
+  locale?: string;
+  builtAt?: string;
+  shards: ManifestShard[];
+}
+
+// =============================================================================
+// OPFS cache
+// =============================================================================
+
+/** Directory-safe cache key for a baseUrl. */
+function cacheKey(baseUrl: string): string {
+  return encodeURIComponent(baseUrl.replace(/\/+$/, ''));
+}
+
+async function getCacheDir(
+  baseUrl: string,
+  create: boolean
+): Promise<FileSystemDirectoryHandle | null> {
+  try {
+    if (typeof navigator === 'undefined' || !navigator.storage?.getDirectory)
+      return null;
+    const root = await navigator.storage.getDirectory();
+    const cacheRoot = await root.getDirectoryHandle('codify-cache', { create });
+    return await cacheRoot.getDirectoryHandle(cacheKey(baseUrl), { create });
+  } catch {
+    return null; // OPFS unavailable (private mode, permissions, …)
+  }
+}
+
+async function readCachedFile(
+  dir: FileSystemDirectoryHandle,
+  name: string
+): Promise<ArrayBuffer | null> {
+  try {
+    const handle = await dir.getFileHandle(name);
+    const file = await handle.getFile();
+    return await file.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
+/** Minimal OPFS sync-access typing (lib.dom omits worker-only APIs). */
+interface SyncAccessHandle {
+  truncate(size: number): void;
+  write(buffer: Uint8Array, options?: { at: number }): number;
+  flush(): void;
+  close(): void;
+}
+
+async function writeCachedFile(
+  dir: FileSystemDirectoryHandle,
+  name: string,
+  buf: ArrayBuffer
+): Promise<void> {
+  try {
+    const handle = await dir.getFileHandle(name, { create: true });
+    // createSyncAccessHandle is the most widely supported OPFS write path in
+    // dedicated workers (Safari included).
+    const access = await (
+      handle as unknown as {
+        createSyncAccessHandle(): Promise<SyncAccessHandle>;
+      }
+    ).createSyncAccessHandle();
+    try {
+      access.truncate(0);
+      access.write(new Uint8Array(buf), { at: 0 });
+      access.flush();
+    } finally {
+      access.close();
+    }
+  } catch {
+    // best-effort cache; ignore quota/permission failures
+  }
+}
+
+async function readCachedManifest(
+  dir: FileSystemDirectoryHandle
+): Promise<Manifest | null> {
+  const buf = await readCachedFile(dir, 'manifest.json');
+  if (!buf) return null;
+  try {
+    return JSON.parse(new TextDecoder().decode(buf)) as Manifest;
+  } catch {
+    return null;
+  }
+}
+
+/** A cached shard is valid iff the cached manifest entry matches the fresh one. */
+function shardUnchanged(
+  fresh: Manifest,
+  cached: Manifest | null,
+  sh: ManifestShard
+): boolean {
+  if (!cached) return false;
+  if (fresh.builtAt !== cached.builtAt || fresh.version !== cached.version)
+    return false;
+  const prev = cached.shards.find((c) => c.domain === sh.domain);
+  return !!prev && prev.file === sh.file && prev.bytes === sh.bytes;
+}
+
+// =============================================================================
+// Loading
+// =============================================================================
+
 async function load(baseUrl: string, domains?: string[]) {
-  const manifest = (await (
-    await fetch(`${baseUrl}/manifest.json`)
-  ).json()) as Manifest;
+  const dir = await getCacheDir(baseUrl, true);
+  const cachedManifest = dir ? await readCachedManifest(dir) : null;
+
+  // Network-first manifest so a server-side rebuild is noticed immediately;
+  // fall back to the cached manifest for offline use.
+  let manifest: Manifest | null = null;
+  let offline = false;
+  try {
+    const res = await fetch(`${baseUrl}/manifest.json`, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`manifest: HTTP ${res.status}`);
+    manifest = (await res.json()) as Manifest;
+  } catch (err) {
+    if (cachedManifest) {
+      manifest = cachedManifest;
+      offline = true;
+    } else {
+      throw err;
+    }
+  }
+
   const wanted = manifest.shards.filter(
     (sh) => !domains || domains.includes(sh.domain)
   );
   const totalBytes = wanted.reduce((n, sh) => n + sh.bytes, 0);
   let loadedBytes = 0;
+  let anyFromNetwork = false;
+
   for (const sh of wanted) {
-    const res = await fetch(`${baseUrl}/${sh.file}`);
-    if (!res.ok) throw new Error(`Failed to fetch ${sh.file}: ${res.status}`);
-    const buf = await res.arrayBuffer();
+    let buf: ArrayBuffer | null = null;
+    const cacheable =
+      dir && (offline || shardUnchanged(manifest, cachedManifest, sh));
+    if (cacheable) buf = await readCachedFile(dir, sh.file);
+    if (!buf) {
+      if (offline) throw new Error(`Offline and ${sh.file} not cached`);
+      const res = await fetch(`${baseUrl}/${sh.file}`);
+      if (!res.ok) throw new Error(`Failed to fetch ${sh.file}: ${res.status}`);
+      buf = await res.arrayBuffer();
+      anyFromNetwork = true;
+      if (dir) await writeCachedFile(dir, sh.file, buf);
+    }
     shards.set(sh.domain, parseShard(buf));
     loadedBytes += sh.bytes;
     self.postMessage({
@@ -41,10 +193,23 @@ async function load(baseUrl: string, domains?: string[]) {
       totalBytes,
     });
   }
+
+  // Persist the manifest only after all shards it describes were cached, so a
+  // partially updated cache can never masquerade as fresh.
+  if (dir && !offline && anyFromNetwork) {
+    const bytes = new TextEncoder().encode(JSON.stringify(manifest));
+    await writeCachedFile(
+      dir,
+      'manifest.json',
+      bytes.buffer.slice(0, bytes.byteLength) as ArrayBuffer
+    );
+  }
+
   self.postMessage({
     type: 'ready',
     domains: [...shards.keys()],
     docCount: [...shards.values()].reduce((n, s) => n + s.docCount, 0),
+    fromCache: !anyFromNetwork,
   });
 }
 

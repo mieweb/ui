@@ -12,6 +12,5 @@ playwright-results/
 test-results/*.swp
 TODO.local.md
 RESTORE-OZWELL.local.md
-# Generated MedicalCodify offline-search artifacts (built by scripts/codify)
-scripts/codify/data/
-.storybook/public/codify/
+# MedicalCodify shards (.storybook/public/codify) are committed via git-lfs;
+# the extraction TSV + sqlite db live (gitignored) in packages/codify/data/

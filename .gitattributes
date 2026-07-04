@@ -1,0 +1,1 @@
+.storybook/public/codify/**/*.mcdx filter=lfs diff=lfs merge=lfs -text
