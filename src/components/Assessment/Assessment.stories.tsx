@@ -260,10 +260,17 @@ function InteractiveTemplate() {
             },
           ])
         }
-        renderOrderSearch={({ domains, placeholder, onPick, onFreeText }) => (
+        renderOrderSearch={({
+          domains,
+          preferDomains,
+          placeholder,
+          onPick,
+          onFreeText,
+        }) => (
           <CodeLookup
             indexUrl="/codify"
             searchDomains={domains as CodifyDomain[] | undefined}
+            preferDomains={preferDomains as CodifyDomain[] | undefined}
             onSelect={onPick}
             onFreeText={onFreeText}
             limit={10}

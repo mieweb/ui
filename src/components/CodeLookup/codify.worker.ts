@@ -307,12 +307,43 @@ self.onmessage = (e: MessageEvent) => {
     const active = msg.domains
       ? [...shards.values()].filter((s) => msg.domains.includes(s.domain))
       : [...shards.values()];
-    const results = searchShards(
-      active,
-      msg.query,
-      msg.limit ?? 20,
-      msg.collapse === true
-    );
+    const limit = msg.limit ?? 20;
+    const collapse = msg.collapse === true;
+    let results;
+    const prefer: string[] | undefined = msg.prefer;
+    if (prefer && prefer.length > 0) {
+      // Rank preferred domains ahead of the rest, in the order given — e.g.
+      // ['occupational', 'condition']: a surveillance-program hit (rare but
+      // high-value) outranks generic condition matches, and both outrank
+      // med/lab noise. Scores aren't comparable across shards, so each tier
+      // is searched separately and concatenated. Preferred matches get at
+      // least half the slots (more when the rest has few matches) without
+      // ever fully starving the rest.
+      const rest = active.filter((s) => !prefer.includes(s.domain));
+      const firstAll = prefer
+        .flatMap((domain) =>
+          searchShards(
+            active.filter((s) => s.domain === domain),
+            msg.query,
+            limit,
+            collapse
+          )
+        )
+        // a typo-corrected match isn't worth jumping the queue for ("chf"
+        // must not surface fuzzy "ch…" programs above the CHF alias hit)
+        .filter((r) => !r.viaFuzzy);
+      const restAll = searchShards(rest, msg.query, limit, collapse);
+      const firstCap =
+        restAll.length === 0
+          ? limit
+          : Math.max(Math.ceil(limit / 2), limit - restAll.length);
+      results = firstAll
+        .slice(0, firstCap)
+        .concat(restAll)
+        .slice(0, limit);
+    } else {
+      results = searchShards(active, msg.query, limit, collapse);
+    }
     self.postMessage({
       type: 'results',
       id: msg.id,

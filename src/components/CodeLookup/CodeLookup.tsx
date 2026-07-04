@@ -60,6 +60,12 @@ export interface CodeLookupProps extends Omit<
    * shards (e.g. an order-type filter). Default: all loaded domains.
    */
   searchDomains?: CodifyDomain[];
+  /**
+   * Rank matches from these domains ahead of the rest (still searched
+   * together). E.g. `['condition', 'occupational']` so an "add (auto)" box
+   * surfaces concerns before the many med/lab matches.
+   */
+  preferDomains?: CodifyDomain[];
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /**
@@ -139,6 +145,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       locale = 'en',
       domains,
       searchDomains,
+      preferDomains,
       programsUrl,
       onSelect,
       onFreeText,
@@ -184,6 +191,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     // explicitly empty array, which means "none"
     const domainsKey = domains ? domains.join(',') : null;
     const searchDomainsKey = searchDomains ? searchDomains.join(',') : null;
+    const preferDomainsKey = preferDomains ? preferDomains.join(',') : null;
 
     React.useEffect(() => {
       const worker = new Worker(
@@ -270,12 +278,13 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           query: q,
           limit,
           domains: keyToDomains(searchDomainsKey),
+          prefer: keyToDomains(preferDomainsKey),
           // one row per med family; variants live in the → drill-down
           collapse: true,
         });
       }, 40);
       return () => clearTimeout(t);
-    }, [query, status.state, limit, searchDomainsKey]);
+    }, [query, status.state, limit, searchDomainsKey, preferDomainsKey]);
 
     /** A row that can be drilled into (→) to list its family members */
     const isDrillable = (r: CodifyResult) => r.domain in DETAIL_NOUN;

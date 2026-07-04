@@ -179,6 +179,8 @@ export interface AssessmentProps extends Omit<
    */
   renderOrderSearch?: (args: {
     domains?: string[];
+    /** Rank results from these domains first (auto mode: concerns before orders) */
+    preferDomains?: string[];
     placeholder: string;
     onPick: (pick: OrderCodePick) => void;
     /** Present when free-text entry is supported in this context */
@@ -613,7 +615,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         readOnly || !onReorderItems
           ? undefined
           : (ids) => {
-              setAnnouncement('Assessment problems reordered');
+              setAnnouncement('Assessment concerns reordered');
               onReorderItems(ids);
             },
     });
@@ -991,15 +993,15 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             })}
           </ol>
 
-          {/* Unified add row: a dx pick adds a problem, anything else adds an
-              (unlinked) order — auto-detected from the coding system, or
-              forced via the mode dropdown. Free text asks (in auto mode). */}
+          {/* Unified add row: a dx/program pick adds a concern, anything else
+              adds an (unlinked) order — auto-detected from the coding system,
+              or forced via the mode dropdown. Free text asks (in auto mode). */}
           {!readOnly &&
             renderOrderSearch &&
             (onAddAssessment || onAddOrder) && (
               <div
                 role="form"
-                aria-label="Add problem or order"
+                aria-label="Add concern or order"
                 className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
               >
                 <select
@@ -1016,7 +1018,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 >
                   <option value="auto">Add (auto)</option>
                   {onAddAssessment && (
-                    <option value="problem">Add problem</option>
+                    <option value="problem">Add concern</option>
                   )}
                   {onAddOrder && <option value="order">Add order</option>}
                 </select>
@@ -1028,12 +1030,22 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                         : addMode === 'order'
                           ? ['med', 'lab', 'procedure', 'vaccine']
                           : undefined, // auto: everything — the pick decides
+                    // auto: concerns rank ahead of orders — surveillance
+                    // programs first (rare, high-value hits like "dot" or
+                    // "hearing"), then diagnoses, then meds/labs/procedures.
+                    // concern mode: programs still lead the diagnoses.
+                    preferDomains:
+                      addMode === 'auto'
+                        ? ['occupational', 'condition']
+                        : addMode === 'problem'
+                          ? ['occupational']
+                          : undefined,
                     placeholder:
                       addMode === 'problem'
                         ? 'Search diagnoses & programs… (try "chf" or "hearing conservation")'
                         : addMode === 'order'
                           ? 'Search medications, labs, imaging, procedures…'
-                          : 'Add problem or order… (a diagnosis or surveillance program becomes a problem; meds, labs & imaging become orders)',
+                          : 'Add concern or order… (a diagnosis or surveillance program becomes a concern; meds, labs & imaging become orders)',
                     onPick: (pick) => {
                       const asProblem =
                         addMode === 'problem' ||
@@ -1100,7 +1112,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                           setPendingFreeText(null);
                         }}
                       >
-                        Problem
+                        Concern
                       </Button>
                     )}
                     {onAddOrder && (
@@ -1135,12 +1147,12 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
           {/* Unlinked orders bucket — only takes space once something is in it */}
           {showPlan && unlinkedOrders.length > 0 && (
             <section
-              aria-label="Orders not linked to a problem"
+              aria-label="Orders not linked to a concern"
               className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-950"
             >
               <h4 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900 dark:text-amber-200">
                 <AlertCircleIcon size={14} />
-                Orders not linked to a problem
+                Orders not linked to a concern
               </h4>
               <ul className="mt-1">
                 {unlinkedOrders.map((order) => (

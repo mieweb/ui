@@ -45,6 +45,7 @@ export interface CodifyShard {
   scoreBuf: Float32Array;
   maskBuf: Uint8Array;
   aliasBuf: Uint8Array;
+  fuzzyBuf: Uint8Array;
   touched: Uint32Array;
 }
 
@@ -57,6 +58,8 @@ export interface CodifyResult {
   score: number;
   /** true when the match came (partly) from an alias token */
   viaAlias: boolean;
+  /** true when the match came (partly) from the edit-distance typo fallback */
+  viaFuzzy?: boolean;
 }
 
 // =============================================================================
@@ -267,6 +270,7 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
     scoreBuf: new Float32Array(meta.docCount),
     maskBuf: new Uint8Array(meta.docCount),
     aliasBuf: new Uint8Array(meta.docCount),
+    fuzzyBuf: new Uint8Array(meta.docCount),
     touched: new Uint32Array(meta.docCount),
   };
 }
@@ -406,7 +410,7 @@ function searchShard(
   limit: number,
   collapse = false
 ) {
-  const { scoreBuf, maskBuf, aliasBuf } = s;
+  const { scoreBuf, maskBuf, aliasBuf, fuzzyBuf } = s;
   const N = s.docCount;
   const fullMask = (1 << qTokens.length) - 1;
   let touchedCount = 0;
@@ -466,6 +470,7 @@ function searchShard(
         maskBuf[d] |= bit;
         scoreBuf[d] += alias ? w * 0.85 : w;
         if (alias) aliasBuf[d] = 1; // per-doc alias tracking for viaAlias
+        if (penalty < 1) fuzzyBuf[d] = 1; // typo-fallback tracking for viaFuzzy
       }
     }
   }
@@ -482,7 +487,10 @@ function searchShard(
   // beats "… Oral Solution [Brand]"); members stay reachable through the
   // drill-down (which searches uncollapsed).
   const fams = collapse
-    ? new Map<string, { best: number; d: number; len: number; alias: boolean }>()
+    ? new Map<
+        string,
+        { best: number; d: number; len: number; alias: boolean; fuzzy: boolean }
+      >()
     : null;
   for (let i = 0; i < touchedCount; i++) {
     const d = s.touched[i];
@@ -501,6 +509,7 @@ function searchShard(
         (1 + priorWeight * prior) *
         (leading ? LEAD_BONUS : 1);
       const alias = aliasBuf[d] === 1;
+      const fuzzy = fuzzyBuf[d] === 1;
       if (fams) {
         const labelLen = s.labelOffsets[d + 1] - s.labelOffsets[d];
         const label = td.decode(
@@ -520,26 +529,28 @@ function searchShard(
         const key = familyKey(s.domain, label, fullcode);
         const fam = fams.get(key);
         if (!fam) {
-          fams.set(key, { best: score, d, len: labelLen, alias });
+          fams.set(key, { best: score, d, len: labelLen, alias, fuzzy });
         } else {
           if (score > fam.best) fam.best = score;
           if (labelLen < fam.len && score >= 0.6 * fam.best) {
             fam.d = d;
             fam.len = labelLen;
             fam.alias = alias;
+            fam.fuzzy = fuzzy;
           }
         }
       } else {
-        pushResult(out, s, d, score, alias, limit * 3);
+        pushResult(out, s, d, score, alias, fuzzy, limit * 3);
       }
     }
     maskBuf[d] = 0;
     scoreBuf[d] = 0;
     aliasBuf[d] = 0;
+    fuzzyBuf[d] = 0;
   }
   if (fams) {
     for (const fam of fams.values()) {
-      pushResult(out, s, fam.d, fam.best, fam.alias, limit * 3);
+      pushResult(out, s, fam.d, fam.best, fam.alias, fam.fuzzy, limit * 3);
     }
   }
 }
@@ -550,6 +561,7 @@ function pushResult(
   d: number,
   score: number,
   viaAlias: boolean,
+  viaFuzzy: boolean,
   cap: number
 ) {
   // keep the array bounded: replace the current minimum once at capacity
@@ -575,5 +587,6 @@ function pushResult(
     domain: s.domain,
     score,
     viaAlias,
+    viaFuzzy,
   });
 }
