@@ -24,6 +24,11 @@ export interface CodeLookupProps
   indexUrl: string;
   /** Domains to load & search (default: all in the manifest) */
   domains?: CodifyDomain[];
+  /**
+   * Restrict searches to these domains at query time without reloading
+   * shards (e.g. an order-type filter). Default: all loaded domains.
+   */
+  searchDomains?: CodifyDomain[];
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /** Max results to show */
@@ -65,6 +70,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     {
       indexUrl,
       domains,
+      searchDomains,
       onSelect,
       limit = 15,
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
@@ -91,8 +97,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     /** Set when a pick writes the query — suppresses the follow-up auto-search */
     const skipSearchRef = React.useRef(false);
 
-    // domains is spread into a stable key so the effect doesn't need the array identity
+    // domains are spread into stable keys so effects don't need array identity
     const domainsKey = domains?.join(',') ?? '';
+    const searchDomainsKey = searchDomains?.join(',') ?? '';
 
     React.useEffect(() => {
       const worker = new Worker(new URL('./codify.worker.ts', import.meta.url), {
@@ -156,10 +163,16 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       }
       const t = setTimeout(() => {
         const id = ++searchIdRef.current;
-        workerRef.current?.postMessage({ type: 'search', id, query: q, limit });
+        workerRef.current?.postMessage({
+          type: 'search',
+          id,
+          query: q,
+          limit,
+          domains: searchDomainsKey ? searchDomainsKey.split(',') : undefined,
+        });
       }, 40);
       return () => clearTimeout(t);
-    }, [query, status.state, limit]);
+    }, [query, status.state, limit, searchDomainsKey]);
 
     /** A row that can be drilled into (→): medication names */
     const isDrillable = (r: CodifyResult) => r.domain === 'med';

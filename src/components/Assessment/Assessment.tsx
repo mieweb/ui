@@ -55,7 +55,36 @@ export interface AssessmentOrder {
   concernId?: string;
   /** Secondary display text, e.g. status or sig */
   detail?: string;
+  /** Coding from the code lookup, when the order was picked from it */
+  code?: { fullid: string; codetype: string; fullcode: string };
 }
+
+/** A code picked from a lookup (structurally matches CodifyResult). */
+export interface OrderCodePick {
+  fullid: string;
+  label: string;
+  codetype: string;
+  fullcode: string;
+}
+
+/** Infer the order type from the picked code's coding system. */
+export function orderTypeForCodetype(codetype: string): OrderType {
+  const ct = codetype.toUpperCase();
+  if (['RXNORM', 'FDB', 'FDB MEDNAME', 'NDC', 'CVX'].includes(ct)) {
+    return 'medication';
+  }
+  if (ct.startsWith('LOINC') || ct.endsWith('ORDER')) return 'lab';
+  return 'procedure'; // HCPCS, ICD10PCS, … (imaging is a manual choice)
+}
+
+/** Code-lookup domains to search for an order-type filter. */
+export const ORDER_TYPE_SEARCH_DOMAINS: Record<OrderType, string[]> = {
+  medication: ['med', 'vaccine'],
+  lab: ['lab'],
+  imaging: ['procedure'],
+  procedure: ['procedure'],
+  referral: ['procedure'],
+};
 
 /** One assessed problem this visit. */
 export interface AssessmentItem {
@@ -91,8 +120,19 @@ export interface AssessmentProps
    */
   onAddOrder?: (
     item: AssessmentItem,
-    order: { type: OrderType; display: string }
+    order: { type: OrderType; display: string; code?: AssessmentOrder['code'] }
   ) => void;
+  /**
+   * Render a code-lookup search for the add-order form (dependency-injected
+   * so the library build doesn't bundle the lookup's worker — pass e.g.
+   * a CodeLookup wired to your index). `domains` reflects the user's
+   * order-type filter ('auto' = undefined = search everything); call `onPick`
+   * with the chosen code. Omit to fall back to free-text order entry.
+   */
+  renderOrderSearch?: (args: {
+    domains?: string[];
+    onPick: (pick: OrderCodePick) => void;
+  }) => React.ReactNode;
   /** Called when an unlinked order is linked to a problem — also used when an
    * order is dragged onto another problem (re-link = move) */
   onLinkOrder?: (order: AssessmentOrder, concernId: string) => void;
@@ -302,17 +342,25 @@ function OrderRow({
   );
 }
 
-/** Inline per-problem order entry: type select + free-text display. */
+/** Inline per-problem order entry: type filter + code lookup (or free text). */
 function AddOrderForm({
   problemText,
   onSubmit,
   onCancel,
+  renderSearch,
 }: {
   problemText: string;
-  onSubmit: (order: { type: OrderType; display: string }) => void;
+  onSubmit: (order: {
+    type: OrderType;
+    display: string;
+    code?: AssessmentOrder['code'];
+  }) => void;
   onCancel: () => void;
+  renderSearch?: AssessmentProps['renderOrderSearch'];
 }) {
-  const [type, setType] = React.useState<OrderType>('medication');
+  const [type, setType] = React.useState<'auto' | OrderType>(
+    renderSearch ? 'auto' : 'medication'
+  );
   const [display, setDisplay] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -323,21 +371,33 @@ function AddOrderForm({
   const submit = () => {
     const text = display.trim();
     if (!text) return;
-    onSubmit({ type, display: text });
+    onSubmit({ type: type === 'auto' ? 'procedure' : type, display: text });
     setDisplay('');
     inputRef.current?.focus();
+  };
+
+  const handlePick = (pick: OrderCodePick) => {
+    onSubmit({
+      type: type === 'auto' ? orderTypeForCodetype(pick.codetype) : type,
+      display: pick.label,
+      code: {
+        fullid: pick.fullid,
+        codetype: pick.codetype,
+        fullcode: pick.fullcode,
+      },
+    });
   };
 
   return (
     <div
       role="form"
       aria-label={`Add order for ${problemText}`}
-      className="border-border bg-muted/40 mt-1.5 ml-2.5 flex flex-wrap items-center gap-1.5 rounded-md border border-dashed p-2"
+      className="border-border bg-muted/40 mt-1.5 ml-2.5 flex flex-wrap items-start gap-1.5 rounded-md border border-dashed p-2"
     >
       <select
-        aria-label="Order type"
+        aria-label="Order type filter"
         value={type}
-        onChange={(e) => setType(e.target.value as OrderType)}
+        onChange={(e) => setType(e.target.value as 'auto' | OrderType)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') onCancel();
         }}
@@ -346,39 +406,53 @@ function AddOrderForm({
           'focus:ring-ring focus:ring-2 focus:outline-none'
         )}
       >
+        {renderSearch && <option value="auto">Auto</option>}
         {(Object.keys(ORDER_TYPE_META) as OrderType[]).map((t) => (
           <option key={t} value={t}>
             {ORDER_TYPE_META[t].label}
           </option>
         ))}
       </select>
-      <input
-        ref={inputRef}
-        type="text"
-        value={display}
-        onChange={(e) => setDisplay(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') submit();
-          else if (e.key === 'Escape') onCancel();
-        }}
-        placeholder="e.g. lisinopril 10 mg tablet — 1 po daily"
-        aria-label="Order description"
-        className={cn(
-          'border-border bg-background text-foreground placeholder:text-muted-foreground',
-          'h-8 min-w-48 flex-1 rounded-md border px-2.5 text-sm',
-          'focus:ring-ring focus:ring-2 focus:outline-none'
-        )}
-      />
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={submit}
-        disabled={!display.trim()}
-        leftIcon={<PlusIcon size={12} />}
-        className="h-8"
-      >
-        Add
-      </Button>
+
+      {renderSearch ? (
+        <div className="min-w-64 flex-1">
+          {renderSearch({
+            domains:
+              type === 'auto' ? undefined : ORDER_TYPE_SEARCH_DOMAINS[type],
+            onPick: handlePick,
+          })}
+        </div>
+      ) : (
+        <>
+          <input
+            ref={inputRef}
+            type="text"
+            value={display}
+            onChange={(e) => setDisplay(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submit();
+              else if (e.key === 'Escape') onCancel();
+            }}
+            placeholder="e.g. lisinopril 10 mg tablet — 1 po daily"
+            aria-label="Order description"
+            className={cn(
+              'border-border bg-background text-foreground placeholder:text-muted-foreground',
+              'h-8 min-w-48 flex-1 rounded-md border px-2.5 text-sm',
+              'focus:ring-ring focus:ring-2 focus:outline-none'
+            )}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={submit}
+            disabled={!display.trim()}
+            leftIcon={<PlusIcon size={12} />}
+            className="h-8"
+          >
+            Add
+          </Button>
+        </>
+      )}
       <Button variant="ghost" size="sm" onClick={onCancel} className="h-8">
         Done
       </Button>
@@ -425,6 +499,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       onLinkOrder,
       onReorderItems,
       onReorderOrders,
+      renderOrderSearch,
       readOnly = false,
       className,
       'data-testid': dataTestId,
@@ -769,6 +844,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                       problemText={assertion.text}
                       onSubmit={(order) => onAddOrder(item, order)}
                       onCancel={() => setAddingFor(null)}
+                      renderSearch={renderOrderSearch}
                     />
                   )}
                 </li>

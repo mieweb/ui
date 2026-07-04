@@ -5,6 +5,7 @@ import {
   type AssessmentItem,
   type AssessmentOrder,
 } from './Assessment';
+import { CodeLookup, type CodifyDomain } from '../CodeLookup';
 import type { ConditionConcern } from '../ProblemList';
 
 const meta: Meta<typeof Assessment> = {
@@ -173,10 +174,24 @@ function InteractiveTemplate() {
               orderId: `O-${Date.now()}`,
               type: order.type,
               display: order.display,
+              detail: order.code
+                ? `${order.code.codetype} ${order.code.fullcode}`
+                : undefined,
+              code: order.code,
               concernId: item.concernId,
             },
           ])
         }
+        renderOrderSearch={({ domains, onPick }) => (
+          <CodeLookup
+            indexUrl="/codify"
+            searchDomains={domains as CodifyDomain[] | undefined}
+            onSelect={onPick}
+            limit={10}
+            placeholder='Search orders… (try "lasix", "a1c", "chest x")'
+            className="border-0 shadow-none"
+          />
+        )}
         onLinkOrder={(order, concernId) =>
           setOrders((prev) =>
             prev.map((o) =>
