@@ -309,6 +309,10 @@ self.onmessage = (e: MessageEvent) => {
       : [...shards.values()];
     const limit = msg.limit ?? 20;
     const collapse = msg.collapse === true;
+    const opts = {
+      boostCodetypes: msg.boostCodetypes as string[] | undefined,
+      billableOnly: msg.billableOnly === true,
+    };
     let results;
     const prefer: string[] | undefined = msg.prefer;
     if (prefer && prefer.length > 0) {
@@ -326,13 +330,14 @@ self.onmessage = (e: MessageEvent) => {
             active.filter((s) => s.domain === domain),
             msg.query,
             limit,
-            collapse
+            collapse,
+            opts
           )
         )
         // a typo-corrected match isn't worth jumping the queue for ("chf"
         // must not surface fuzzy "ch…" programs above the CHF alias hit)
         .filter((r) => !r.viaFuzzy);
-      const restAll = searchShards(rest, msg.query, limit, collapse);
+      const restAll = searchShards(rest, msg.query, limit, collapse, opts);
       const firstCap =
         restAll.length === 0
           ? limit
@@ -342,7 +347,7 @@ self.onmessage = (e: MessageEvent) => {
         .concat(restAll)
         .slice(0, limit);
     } else {
-      results = searchShards(active, msg.query, limit, collapse);
+      results = searchShards(active, msg.query, limit, collapse, opts);
     }
     self.postMessage({
       type: 'results',

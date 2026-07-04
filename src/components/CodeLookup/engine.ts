@@ -47,6 +47,8 @@ export interface CodifyShard {
   aliasBuf: Uint8Array;
   fuzzyBuf: Uint8Array;
   touched: Uint32Array;
+  /** Lazy cache: 1 = billable (leaf) ICD-10 code; see billableMask() */
+  billable?: Uint8Array;
 }
 
 export interface CodifyResult {
@@ -383,11 +385,62 @@ function topPriorTokens(
   return range;
 }
 
+export interface SearchOptions {
+  /** Collapse closely-related variants to one row per family */
+  collapse?: boolean;
+  /** Multiply matching docs' scores by CODETYPE_BOOST (e.g. ['ICD10'] so
+   * billing codes outrank SNOMED synonyms in an assessment context) */
+  boostCodetypes?: string[];
+  /** Conditions: only billable (leaf) ICD-10 codes — category roots and
+   * SNOMED entries are dropped. Other domains are unaffected. */
+  billableOnly?: boolean;
+}
+
+/** Score multiplier for boostCodetypes matches — high enough that a billable
+ * ICD-10 code outranks a shorter, leading-matched SNOMED synonym. */
+const CODETYPE_BOOST = 3;
+
+/**
+ * Lazily computed billable mask for a condition shard: an ICD-10 code is
+ * treated as billable when no other ICD-10 code extends it (leaf = valid at
+ * highest specificity — the standard CMS billability rule of thumb).
+ */
+export function billableMask(s: CodifyShard): Uint8Array {
+  if (s.billable) return s.billable;
+  const mask = new Uint8Array(s.docCount);
+  const icd = s.codetypes.indexOf('ICD10');
+  if (icd >= 0) {
+    const entries: { code: string; d: number }[] = [];
+    for (let d = 0; d < s.docCount; d++) {
+      if (s.docCodetype[d] !== icd) continue;
+      entries.push({
+        code: td.decode(
+          s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1])
+        ),
+        d,
+      });
+    }
+    entries.sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
+    for (let i = 0; i < entries.length; i++) {
+      const cur = entries[i];
+      const next = entries[i + 1];
+      const hasChild =
+        next !== undefined &&
+        next.code.length > cur.code.length &&
+        next.code.startsWith(cur.code);
+      if (!hasChild) mask[cur.d] = 1;
+    }
+  }
+  s.billable = mask;
+  return mask;
+}
+
 export function searchShards(
   shards: CodifyShard[],
   query: string,
   limit = 20,
-  collapse = false
+  collapse = false,
+  opts?: SearchOptions
 ): CodifyResult[] {
   const qTokens = normalize(query)
     .split(' ')
@@ -397,7 +450,7 @@ export function searchShards(
   const results: CodifyResult[] = [];
 
   for (const s of shards) {
-    searchShard(s, qTokens, results, limit, collapse);
+    searchShard(s, qTokens, results, limit, collapse, opts);
   }
   results.sort((a, b) => b.score - a.score);
   return results.slice(0, limit);
@@ -408,7 +461,8 @@ function searchShard(
   qTokens: string[],
   out: CodifyResult[],
   limit: number,
-  collapse = false
+  collapse = false,
+  opts?: SearchOptions
 ) {
   const { scoreBuf, maskBuf, aliasBuf, fuzzyBuf } = s;
   const N = s.docCount;
@@ -492,9 +546,20 @@ function searchShard(
         { best: number; d: number; len: number; alias: boolean; fuzzy: boolean }
       >()
     : null;
+  // billable filter: condition shard only (leaf ICD-10 codes)
+  const billable =
+    opts?.billableOnly && s.domain === 'condition' ? billableMask(s) : null;
+  // codetype boost: shard-local codetype indices to prefer (e.g. ICD10)
+  let boostIdx: Set<number> | null = null;
+  if (opts?.boostCodetypes) {
+    const idx = opts.boostCodetypes
+      .map((ct) => s.codetypes.indexOf(ct))
+      .filter((i) => i >= 0);
+    if (idx.length > 0) boostIdx = new Set(idx);
+  }
   for (let i = 0; i < touchedCount; i++) {
     const d = s.touched[i];
-    if (maskBuf[d] === fullMask) {
+    if (maskBuf[d] === fullMask && (!billable || billable[d] === 1)) {
       const lenNorm = 1 / (1 + 0.25 * Math.max(0, s.docLen[d] - 1));
       // usage prior: frequently-used codes surface above obscure ones with
       // equal text relevance (docPrior is log-quantized usage, 0-255)
@@ -507,7 +572,8 @@ function searchShard(
         scoreBuf[d] *
         (0.6 + 0.4 * lenNorm) *
         (1 + priorWeight * prior) *
-        (leading ? LEAD_BONUS : 1);
+        (leading ? LEAD_BONUS : 1) *
+        (boostIdx && boostIdx.has(s.docCodetype[d]) ? CODETYPE_BOOST : 1);
       const alias = aliasBuf[d] === 1;
       const fuzzy = fuzzyBuf[d] === 1;
       if (fams) {

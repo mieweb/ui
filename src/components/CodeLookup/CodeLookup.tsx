@@ -66,6 +66,16 @@ export interface CodeLookupProps extends Omit<
    * surfaces concerns before the many med/lab matches.
    */
   preferDomains?: CodifyDomain[];
+  /**
+   * Boost these coding systems within their domain — e.g. `['ICD10']` so
+   * billing codes outrank SNOMED synonyms in an assessment context.
+   */
+  preferCodetypes?: string[];
+  /**
+   * Conditions: only billable (leaf) ICD-10 codes — category roots (E11)
+   * and SNOMED entries are dropped. Other domains are unaffected.
+   */
+  billableOnly?: boolean;
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /**
@@ -146,6 +156,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       domains,
       searchDomains,
       preferDomains,
+      preferCodetypes,
+      billableOnly = false,
       programsUrl,
       onSelect,
       onFreeText,
@@ -178,6 +190,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const drillIdRef = React.useRef(0);
     /** Parent of the in-flight drill-down search (for family filtering) */
     const drillParentRef = React.useRef<CodifyResult | null>(null);
+    /** billableOnly for the stable openDrill callback */
+    const billableOnlyRef = React.useRef(billableOnly);
+    billableOnlyRef.current = billableOnly;
     /** Set when a pick writes the query — suppresses the follow-up auto-search */
     const skipSearchRef = React.useRef(false);
     // Per-instance element ids so multiple CodeLookups on a page don't break
@@ -192,6 +207,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const domainsKey = domains ? domains.join(',') : null;
     const searchDomainsKey = searchDomains ? searchDomains.join(',') : null;
     const preferDomainsKey = preferDomains ? preferDomains.join(',') : null;
+    const preferCodetypesKey = preferCodetypes
+      ? preferCodetypes.join(',')
+      : null;
 
     React.useEffect(() => {
       const worker = new Worker(
@@ -279,12 +297,22 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           limit,
           domains: keyToDomains(searchDomainsKey),
           prefer: keyToDomains(preferDomainsKey),
+          boostCodetypes: keyToDomains(preferCodetypesKey),
+          billableOnly,
           // one row per med family; variants live in the → drill-down
           collapse: true,
         });
       }, 40);
       return () => clearTimeout(t);
-    }, [query, status.state, limit, searchDomainsKey, preferDomainsKey]);
+    }, [
+      query,
+      status.state,
+      limit,
+      searchDomainsKey,
+      preferDomainsKey,
+      preferCodetypesKey,
+      billableOnly,
+    ]);
 
     /** A row that can be drilled into (→) to list its family members */
     const isDrillable = (r: CodifyResult) => r.domain in DETAIL_NOUN;
@@ -315,6 +343,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         query: familyTerm(parent.domain, parent.label) || parent.label,
         limit: 300,
         domains: [parent.domain],
+        billableOnly: billableOnlyRef.current,
       });
     }, []);
 

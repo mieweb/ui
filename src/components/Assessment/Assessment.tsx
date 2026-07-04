@@ -181,6 +181,10 @@ export interface AssessmentProps extends Omit<
     domains?: string[];
     /** Rank results from these domains first (auto mode: concerns before orders) */
     preferDomains?: string[];
+    /** Boost these coding systems (assessments prefer ICD-10 over SNOMED) */
+    preferCodetypes?: string[];
+    /** Restrict condition results to billable (leaf) ICD-10 codes */
+    billableOnly?: boolean;
     placeholder: string;
     onPick: (pick: OrderCodePick) => void;
     /** Present when free-text entry is supported in this context */
@@ -203,6 +207,12 @@ export interface AssessmentProps extends Omit<
   onReorderItems?: (concernIds: string[]) => void;
   /** Hide all controls (display only) */
   readOnly?: boolean;
+  /**
+   * Restrict concern searches to billable (leaf) ICD-10 codes — category
+   * roots (E11) and SNOMED synonyms are dropped. Forwarded to
+   * renderOrderSearch as `billableOnly`.
+   */
+  billableOnly?: boolean;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -576,6 +586,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       onReorderOrders,
       renderOrderSearch,
       readOnly = false,
+      billableOnly = false,
       className,
       'data-testid': dataTestId,
       ...props
@@ -1040,6 +1051,10 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                         : addMode === 'problem'
                           ? ['occupational']
                           : undefined,
+                    // assessments code in ICD-10: boost it over SNOMED
+                    preferCodetypes:
+                      addMode !== 'order' ? ['ICD10'] : undefined,
+                    billableOnly: addMode !== 'order' && billableOnly,
                     placeholder:
                       addMode === 'problem'
                         ? 'Search diagnoses & programs… (try "chf" or "hearing conservation")'

@@ -144,7 +144,11 @@ const sampleOrders: AssessmentOrder[] = [
   },
 ];
 
-function InteractiveTemplate() {
+function InteractiveTemplate({
+  billableOnly = false,
+}: {
+  billableOnly?: boolean;
+}) {
   const [concernList, setConcernList] = useState<ConditionConcern[]>(concerns);
   const [items, setItems] = useState<AssessmentItem[]>(sampleItems);
   const [orders, setOrders] = useState<AssessmentOrder[]>(sampleOrders);
@@ -197,6 +201,7 @@ function InteractiveTemplate() {
         concerns={concernList}
         items={items}
         orders={orders}
+        billableOnly={billableOnly}
         showPlan={showPlan}
         onShowPlanChange={setShowPlan}
         onAddAssessment={(pick) => {
@@ -263,6 +268,8 @@ function InteractiveTemplate() {
         renderOrderSearch={({
           domains,
           preferDomains,
+          preferCodetypes,
+          billableOnly,
           placeholder,
           onPick,
           onFreeText,
@@ -271,6 +278,8 @@ function InteractiveTemplate() {
             indexUrl="/codify"
             searchDomains={domains as CodifyDomain[] | undefined}
             preferDomains={preferDomains as CodifyDomain[] | undefined}
+            preferCodetypes={preferCodetypes}
+            billableOnly={billableOnly}
             onSelect={onPick}
             onFreeText={onFreeText}
             limit={10}
@@ -315,6 +324,13 @@ function InteractiveTemplate() {
  */
 export const Interactive: Story = {
   render: () => <InteractiveTemplate />,
+};
+
+/** Interactive with `billableOnly`: concern searches return only billable
+ * (leaf) ICD-10 codes — category roots (E11) and SNOMED synonyms are dropped.
+ * Try "diabetes" and compare with the plain Interactive story. */
+export const BillableOnly: Story = {
+  render: () => <InteractiveTemplate billableOnly />,
 };
 
 /** Assessment only — plan hidden. */

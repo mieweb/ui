@@ -1,5 +1,52 @@
 import { describe, it, expect } from 'vitest';
-import { normalize, familyTerm, familyKey } from './engine';
+import {
+  normalize,
+  familyTerm,
+  familyKey,
+  billableMask,
+  type CodifyShard,
+} from './engine';
+
+/** Minimal shard stub with just the fields billableMask() reads. */
+function shardWithCodes(entries: [codetype: string, code: string][]) {
+  const codetypes = [...new Set(entries.map(([ct]) => ct))];
+  const enc = new TextEncoder();
+  const offsets = new Uint32Array(entries.length + 1);
+  const parts: Uint8Array[] = [];
+  let off = 0;
+  for (let i = 0; i < entries.length; i++) {
+    const bytes = enc.encode(entries[i][1]);
+    parts.push(bytes);
+    offsets[i] = off;
+    off += bytes.length;
+  }
+  offsets[entries.length] = off;
+  const blob = new Uint8Array(off);
+  for (let i = 0; i < entries.length; i++) blob.set(parts[i], offsets[i]);
+  return {
+    docCount: entries.length,
+    codetypes,
+    docCodetype: new Uint8Array(
+      entries.map(([ct]) => codetypes.indexOf(ct))
+    ),
+    codeBlob: blob,
+    codeOffsets: offsets,
+  } as unknown as CodifyShard;
+}
+
+describe('billableMask', () => {
+  it('marks leaf ICD-10 codes billable, roots and SNOMED not', () => {
+    const s = shardWithCodes([
+      ['ICD10', 'E11'], // root — has children
+      ['ICD10', 'E11.621'], // leaf
+      ['ICD10', 'E11.9'], // leaf
+      ['ICD10', 'W21.31'], // has suffix children
+      ['ICD10', 'W21.31xA'], // leaf
+      ['SNOMED US', '73211009'], // not ICD-10
+    ]);
+    expect([...billableMask(s)]).toEqual([0, 1, 1, 0, 1, 0]);
+  });
+});
 
 describe('normalize', () => {
   it('lowercases, strips accents and punctuation', () => {
