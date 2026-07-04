@@ -126,6 +126,23 @@ async function readCachedManifest(
   }
 }
 
+/**
+ * Shards may be stored gzip-compressed (e.g. to stay under a static host's
+ * per-file size limit — Cloudflare Pages caps assets at 25 MiB). Detect the
+ * gzip magic (`1f 8b`, which never collides with the `MCDX` header) and
+ * transparently inflate before parsing. Cached buffers stay compressed, so the
+ * OPFS footprint stays small.
+ */
+async function maybeGunzip(buf: ArrayBuffer): Promise<ArrayBuffer> {
+  if (buf.byteLength < 2) return buf;
+  const head = new Uint8Array(buf, 0, 2);
+  if (head[0] !== 0x1f || head[1] !== 0x8b) return buf;
+  const stream = new Response(buf).body!.pipeThrough(
+    new DecompressionStream('gzip')
+  );
+  return await new Response(stream).arrayBuffer();
+}
+
 /** A cached shard is valid iff the cached manifest entry matches the fresh one. */
 function shardUnchanged(
   fresh: Manifest,
@@ -184,7 +201,7 @@ async function load(baseUrl: string, domains?: string[]) {
       anyFromNetwork = true;
       if (dir) await writeCachedFile(dir, sh.file, buf);
     }
-    shards.set(sh.domain, parseShard(buf));
+    shards.set(sh.domain, parseShard(await maybeGunzip(buf)));
     loadedBytes += sh.bytes;
     self.postMessage({
       type: 'progress',

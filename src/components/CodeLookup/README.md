@@ -72,6 +72,17 @@ database, source of truth: `/Volumes/Case/wcrc/rxdb`). The built `.mcdx`
 shards **are committed to this repo via git-lfs** and ship with Storybook
 (`.storybook/public/codify/{locale}/`).
 
+> **Deploy limit — gzip large shards.** The Storybook host (Cloudflare Pages)
+> rejects any asset over **25 MiB**, and the full `en/med.mcdx` build is ~34 MB.
+> Any shard exceeding the limit must be stored **gzip-compressed** (same
+> `.mcdx` filename) — the worker detects the gzip magic and inflates
+> transparently. After rebuilding, re-compress oversized shards and update the
+> manifest `bytes` to the compressed size, e.g.:
+>
+> ```sh
+> gzip -9 < med.mcdx > med.mcdx.gz && mv med.mcdx.gz med.mcdx   # ~34 MB → ~11 MB
+> ```
+
 ### extract.mjs
 Dumps `fullid, codetype, fullcode, label` for 12 codetypes via
 `docker exec … mysql --batch`. Tabs/newlines are stripped from labels so the TSV

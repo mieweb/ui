@@ -96,6 +96,7 @@ export default [
         Worker: 'readonly',
         fetch: 'readonly',
         Response: 'readonly',
+        DecompressionStream: 'readonly',
         MessageEvent: 'readonly',
         self: 'readonly',
         performance: 'readonly',
