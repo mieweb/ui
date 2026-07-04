@@ -33,8 +33,20 @@ import {
 } from './engine';
 
 const shards = new Map<string, CodifyShard>();
-/** CODETYPE|FULLCODE → order references (from order-sets.json, optional) */
-let orderSets: Record<string, string[]> | null = null;
+
+/** Program metadata (kind, periodicity, required orders) — see programs.json
+ * in mieweb/codify. Deployments may serve a custom URL via `programsUrl`. */
+export interface ProgramMeta {
+  kind?: 'surveillance' | 'fitness' | 'credential' | 'quality';
+  periodicityMonths?: number;
+  ageMin?: number;
+  ageMax?: number;
+  sex?: 'M' | 'F';
+  orders?: string[];
+}
+
+/** CODETYPE|FULLCODE → program metadata (from programs.json, optional) */
+let programs: Record<string, ProgramMeta> | null = null;
 
 interface ManifestShard {
   domain: string;
@@ -167,7 +179,11 @@ function shardUnchanged(
 // Loading
 // =============================================================================
 
-async function load(baseUrl: string, domains?: string[]) {
+async function load(
+  baseUrl: string,
+  domains?: string[],
+  programsUrl?: string
+) {
   const dir = await getCacheDir(baseUrl, true);
   const cachedManifest = dir ? await readCachedManifest(dir) : null;
 
@@ -229,28 +245,47 @@ async function load(baseUrl: string, domains?: string[]) {
     );
   }
 
-  // Optional order-sets sidecar (occupational programs → required orders).
-  // Network first, OPFS-cached for offline; absence is not an error.
+  // Optional programs sidecar (surveillance programs → required orders +
+  // kind/periodicity metadata). `programsUrl` lets a deployment override the
+  // index's copy with employer-specific protocols. Network first, OPFS-cached
+  // for offline; absence is not an error. Falls back to the legacy
+  // order-sets.json shape ({ sets: { key: [orders] } }).
   try {
-    let osBuf: ArrayBuffer | null = null;
-    if (!offline) {
-      const res = await fetch(`${baseUrl}/order-sets.json`, {
-        cache: 'no-cache',
-      });
-      if (res.ok) {
-        osBuf = await res.arrayBuffer();
-        if (dir) await writeCachedFile(dir, 'order-sets.json', osBuf);
+    const sources = programsUrl
+      ? [programsUrl]
+      : [`${baseUrl}/programs.json`, `${baseUrl}/order-sets.json`];
+    let parsed: {
+      programs?: Record<string, ProgramMeta>;
+      sets?: Record<string, string[]>;
+    } | null = null;
+    for (const url of sources) {
+      const cacheName = `programs-${cacheKey(url)}.json`;
+      let buf: ArrayBuffer | null = null;
+      if (!offline) {
+        try {
+          const res = await fetch(url, { cache: 'no-cache' });
+          if (res.ok) {
+            buf = await res.arrayBuffer();
+            if (dir) await writeCachedFile(dir, cacheName, buf);
+          }
+        } catch {
+          /* try cache below */
+        }
       }
+      if (!buf && dir) buf = await readCachedFile(dir, cacheName);
+      if (!buf) continue;
+      parsed = JSON.parse(new TextDecoder().decode(buf));
+      break;
     }
-    if (!osBuf && dir) osBuf = await readCachedFile(dir, 'order-sets.json');
-    if (osBuf) {
-      const parsed = JSON.parse(new TextDecoder().decode(osBuf)) as {
-        sets?: Record<string, string[]>;
-      };
-      orderSets = parsed.sets ?? null;
+    if (parsed?.programs) {
+      programs = parsed.programs;
+    } else if (parsed?.sets) {
+      programs = Object.fromEntries(
+        Object.entries(parsed.sets).map(([k, orders]) => [k, { orders }])
+      );
     }
   } catch {
-    orderSets = null;
+    programs = null;
   }
 
   self.postMessage({
@@ -264,7 +299,7 @@ async function load(baseUrl: string, domains?: string[]) {
 self.onmessage = (e: MessageEvent) => {
   const msg = e.data;
   if (msg.type === 'load') {
-    load(msg.baseUrl, msg.domains).catch((err) =>
+    load(msg.baseUrl, msg.domains, msg.programsUrl).catch((err) =>
       self.postMessage({ type: 'error', message: String(err?.message ?? err) })
     );
   } else if (msg.type === 'search') {
@@ -286,17 +321,21 @@ self.onmessage = (e: MessageEvent) => {
       tookMs: performance.now() - t0,
     });
   } else if (msg.type === 'orders') {
-    // Resolve an order set (e.g. an OSHA program's required orders) into
-    // labeled results from whichever shards are loaded.
+    // Resolve a program's order set (e.g. an OSHA program's required orders)
+    // into labeled results from whichever shards are loaded.
     const t0 = performance.now();
-    const keys = orderSets?.[msg.key] ?? [];
-    const results = findByCodes([...shards.values()], keys);
+    const program = programs?.[msg.key] ?? null;
+    const results = findByCodes([...shards.values()], program?.orders ?? []);
     self.postMessage({
       type: 'results',
       id: msg.id,
       query: msg.key,
       results,
+      program,
       tookMs: performance.now() - t0,
     });
+  } else if (msg.type === 'programs') {
+    // Full metadata map — used by the due-evaluation engine.
+    self.postMessage({ type: 'programs', id: msg.id, programs });
   }
 };

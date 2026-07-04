@@ -1,0 +1,145 @@
+{
+  "comment": "Health-surveillance program metadata. Keys are CODETYPE|FULLCODE of entries in the occupational (and later quality) shards. `orders` reference entries in the regular shards by CODETYPE|FULLCODE and are resolved at runtime for the drill-down / due engine. `kind`: surveillance (exposure monitoring) | fitness (fitness-for-duty qualification) | credential (certification exam) | quality (eCQM). `periodicityMonths` omitted = one-time / event-driven. `ageMin`/`ageMax`/`sex` gate applicability. Deployments can serve their own programs.json (employer-specific protocols) via CodeLookup's programsUrl prop. Supersedes order-sets.json (worker still falls back).",
+  "programs": {
+    "OSHA|1910.95": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["HCPCS|92551", "HCPCS|0209T", "LOINC|89015-2"]
+    },
+    "OSHA|1910.134": {
+      "kind": "fitness",
+      "orders": ["HCPCS|94150", "HCPCS|94014", "HCPCS|71020"]
+    },
+    "OSHA|1910.1025": {
+      "kind": "surveillance",
+      "periodicityMonths": 6,
+      "orders": [
+        "Quest Order|3058",
+        "Quest Order|22996",
+        "Quest Order|948",
+        "LabCorp Order|005009",
+        "LabCorp Order|003772"
+      ]
+    },
+    "OSHA|1926.62": {
+      "kind": "surveillance",
+      "periodicityMonths": 6,
+      "orders": [
+        "Quest Order|3058",
+        "Quest Order|22996",
+        "Quest Order|948",
+        "LabCorp Order|005009"
+      ]
+    },
+    "OSHA|1910.1001": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["HCPCS|71020", "HCPCS|94150", "HCPCS|94014"]
+    },
+    "OSHA|1910.1053": {
+      "kind": "surveillance",
+      "periodicityMonths": 36,
+      "orders": ["HCPCS|71020", "HCPCS|94150", "LabCorp Order|182873"]
+    },
+    "OSHA|1910.1028": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["LabCorp Order|005009", "LabCorp Order|007732"]
+    },
+    "OSHA|1910.1027": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": [
+        "LabCorp Order|085340",
+        "LabCorp Order|072249",
+        "Quest Order|38994",
+        "Quest Order|4944"
+      ]
+    },
+    "OSHA|1910.1026": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["HCPCS|71020", "HCPCS|94150"]
+    },
+    "OSHA|1910.1030": {
+      "kind": "surveillance",
+      "orders": [
+        "CVX|45",
+        "CVX|189",
+        "Quest Order|499",
+        "Quest Order|26526"
+      ]
+    },
+    "OSHA|1910.120": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": [
+        "LabCorp Order|005009",
+        "LabCorp Order|003772",
+        "HCPCS|94150",
+        "HCPCS|92551",
+        "HCPCS|99173"
+      ]
+    },
+    "OSHA|1910.1048": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["HCPCS|94150", "HCPCS|94014"]
+    },
+    "OSHA|1910.1052": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["LabCorp Order|005009"]
+    },
+    "OSHA|1910.1018": {
+      "kind": "surveillance",
+      "periodicityMonths": 6,
+      "orders": [
+        "LabCorp Order|007039",
+        "LabCorp Order|007245",
+        "HCPCS|71020"
+      ]
+    },
+    "OSHA|1910.1043": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["HCPCS|94150", "HCPCS|94014"]
+    },
+    "OSHA|1910.1045": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["LabCorp Order|005009", "HCPCS|71020"]
+    },
+    "OSHA|1910.1051": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["LabCorp Order|005009"]
+    },
+    "OSHA|1910.1096": {
+      "kind": "surveillance",
+      "periodicityMonths": 12,
+      "orders": ["LabCorp Order|005009"]
+    },
+    "FMCSA|391.41": {
+      "kind": "fitness",
+      "periodicityMonths": 24,
+      "orders": ["HCPCS|99173", "HCPCS|92551", "LabCorp Order|003772"]
+    },
+    "NFPA|1582": {
+      "kind": "fitness",
+      "periodicityMonths": 12,
+      "orders": [
+        "HCPCS|94150",
+        "HCPCS|92551",
+        "HCPCS|99173",
+        "LabCorp Order|005009",
+        "HCPCS|71020"
+      ]
+    },
+    "FAA|67": {
+      "kind": "fitness",
+      "periodicityMonths": 12,
+      "orders": ["HCPCS|99173", "HCPCS|92551", "LabCorp Order|003772"]
+    }
+  }
+}

@@ -48,6 +48,13 @@ export interface CodeLookupProps extends Omit<
   /** Domains to load & search (default: all in the manifest) */
   domains?: CodifyDomain[];
   /**
+   * Override the program-metadata sidecar URL (defaults to
+   * `{indexUrl}/{locale}/programs.json`). Lets a deployment serve
+   * employer-specific protocols — required orders, periodicity — without
+   * rebuilding shards. See mieweb/codify programs.json for the format.
+   */
+  programsUrl?: string;
+  /**
    * Restrict searches to these domains at query time without reloading
    * shards (e.g. an order-type filter). Default: all loaded domains.
    */
@@ -126,6 +133,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       locale = 'en',
       domains,
       searchDomains,
+      programsUrl,
       onSelect,
       onFreeText,
       limit = 15,
@@ -228,9 +236,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         type: 'load',
         baseUrl: `${indexUrl.replace(/\/+$/, '')}/${locale}`,
         domains: keyToDomains(domainsKey),
+        programsUrl,
       });
       return () => worker.terminate();
-    }, [indexUrl, locale, domainsKey]);
+    }, [indexUrl, locale, domainsKey, programsUrl]);
 
     // debounced search-as-you-type
     React.useEffect(() => {
