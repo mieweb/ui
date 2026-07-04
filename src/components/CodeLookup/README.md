@@ -8,8 +8,13 @@ Worker in single-digit milliseconds — no server round-trips, works offline.
 
 ## Source files
 
-The build pipeline and server-side lookup live in the **`packages/codify`
-submodule**; only the browser engine/component live here.
+The build pipeline and server-side lookup live in the **external
+[`mieweb/codify`](https://github.com/mieweb/codify) repo**, which is **not
+tracked here** (`packages/codify/` is gitignored). Only the browser
+engine/component live in this repo; the committed `.mcdx` shards under
+`.storybook/public/codify/` are the build output. Clone `codify` locally into
+`packages/codify/` (see [§1](#1-build-pipeline-external-codify-repo)) to
+regenerate them — the links below only resolve once it is present.
 
 | File | Role |
 |---|---|
@@ -43,12 +48,23 @@ submodule**; only the browser engine/component live here.
 └─────────────────────────────┘
 ```
 
-## 1. Build pipeline (`packages/codify`)
+## 1. Build pipeline (external `codify` repo)
+
+The `.mcdx` shards are committed to this repo (via git-lfs) and ship with
+Storybook, so **you only need this step when regenerating them** for testing.
+The pipeline is **not tracked here** — clone the external repo into
+`packages/codify/` (gitignored) first:
 
 ```sh
-pnpm codify:extract    # MariaDB (docker: wclocal-wcdb-1) → packages/codify/data/codify.tsv
-pnpm codify:build      # TSV → .storybook/public/codify/{en,es}/{domain}.mcdx + manifest.json
-pnpm codify:build:db   # TSV → packages/codify/data/codify.db (SQLite FTS5, for MCP)
+git clone https://github.com/mieweb/codify.git packages/codify
+```
+
+Then run its scripts directly with Node to rebuild the shards:
+
+```sh
+node packages/codify/scripts/extract.mjs      # MariaDB (docker: wclocal-wcdb-1) → packages/codify/data/codify.tsv
+node packages/codify/scripts/build-all.mjs    # TSV → .storybook/public/codify/{en,es}/{domain}.mcdx + manifest.json
+node packages/codify/scripts/build-sqlite.mjs # TSV → packages/codify/data/codify.db (SQLite FTS5, for MCP)
 ```
 
 The extracted TSV and SQLite db are gitignored (regenerated from the rxdb
@@ -214,7 +230,8 @@ In Storybook, the 🌐 **Language** toolbar global switches the locale for the
 
 ## 6. Server-side lookup (MCP)
 
-`packages/codify` also builds a **SQLite FTS5** database (`pnpm codify:build:db`)
+`packages/codify` also builds a **SQLite FTS5** database
+(`node packages/codify/scripts/build-sqlite.mjs`)
 from the same TSV + aliases + usage + translations, and wraps it in an MCP
 stdio server (`packages/codify/src/mcp-server.ts`) so agent loops can resolve
 names → codes quickly: `lookup_code` (BM25 adjusted by usage:
