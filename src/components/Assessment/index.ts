@@ -3,6 +3,7 @@ export {
   ORDER_TYPE_META,
   ORDER_TYPE_SEARCH_DOMAINS,
   orderTypeForCodetype,
+  isConditionCodetype,
   type AssessmentProps,
   type AssessmentItem,
   type AssessmentOrder,

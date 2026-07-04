@@ -77,6 +77,12 @@ export function orderTypeForCodetype(codetype: string): OrderType {
   return 'procedure'; // HCPCS, ICD10PCS, … (imaging is a manual choice)
 }
 
+/** Coding systems that represent a diagnosis/problem rather than an order. */
+export function isConditionCodetype(codetype: string): boolean {
+  const ct = codetype.toUpperCase();
+  return ct === 'ICD10' || ct === 'ICD9' || ct === 'SNOMED US';
+}
+
 /** Code-lookup domains to search for an order-type filter. */
 export const ORDER_TYPE_SEARCH_DOMAINS: Record<OrderType, string[]> = {
   medication: ['med', 'vaccine'],
@@ -534,7 +540,6 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     ref
   ) => {
     const [addingFor, setAddingFor] = React.useState<string | null>(null);
-    const [addingUnlinked, setAddingUnlinked] = React.useState(false);
     const [announcement, setAnnouncement] = React.useState('');
 
     const concernById = React.useMemo(
@@ -896,29 +901,46 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             })}
           </ol>
 
-          {/* Add a problem (dx code) to the assessment */}
-          {!readOnly && onAddAssessment && renderOrderSearch && (
-            <div
-              role="form"
-              aria-label="Add problem to assessment"
-              className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
-            >
-              <span className="text-muted-foreground shrink-0 text-xs font-semibold tracking-wide uppercase">
-                Add problem
-              </span>
-              <div className="min-w-64 flex-1">
-                {renderOrderSearch({
-                  domains: ['condition'],
-                  placeholder: 'Search diagnoses… (try "chf" or "atrial fib")',
-                  onPick: onAddAssessment,
-                })}
+          {/* Unified add row: a dx pick adds a problem, anything else adds an
+              (unlinked) order — the coding system decides automatically. */}
+          {!readOnly &&
+            renderOrderSearch &&
+            (onAddAssessment || onAddOrder) && (
+              <div
+                role="form"
+                aria-label="Add problem or order"
+                className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
+              >
+                <span className="text-muted-foreground shrink-0 text-xs font-semibold tracking-wide uppercase">
+                  Add
+                </span>
+                <div className="min-w-64 flex-1">
+                  {renderOrderSearch({
+                    domains: undefined, // everything — the pick decides
+                    placeholder:
+                      'Add problem or order… (a diagnosis becomes a problem; meds, labs & imaging become orders)',
+                    onPick: (pick) => {
+                      if (isConditionCodetype(pick.codetype) && onAddAssessment) {
+                        onAddAssessment(pick);
+                      } else {
+                        onAddOrder?.(null, {
+                          type: orderTypeForCodetype(pick.codetype),
+                          display: pick.label,
+                          code: {
+                            fullid: pick.fullid,
+                            codetype: pick.codetype,
+                            fullcode: pick.fullcode,
+                          },
+                        });
+                      }
+                    },
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Unlinked orders bucket */}
-          {showPlan &&
-            (unlinkedOrders.length > 0 || (!readOnly && onAddOrder)) && (
+          {/* Unlinked orders bucket — only takes space once something is in it */}
+          {showPlan && unlinkedOrders.length > 0 && (
             <section
               aria-label="Orders not linked to a problem"
               className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-950"
@@ -926,17 +948,6 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               <h4 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900 dark:text-amber-200">
                 <AlertCircleIcon size={14} />
                 Orders not linked to a problem
-                {!readOnly && onAddOrder && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setAddingUnlinked((v) => !v)}
-                    leftIcon={<PlusIcon size={12} />}
-                    className="ml-auto h-6 px-1.5 text-xs font-medium text-amber-900 dark:text-amber-200"
-                  >
-                    Add order
-                  </Button>
-                )}
               </h4>
               <ul className="mt-1">
                 {unlinkedOrders.map((order) => (
@@ -981,15 +992,6 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   </li>
                 ))}
               </ul>
-
-              {!readOnly && onAddOrder && addingUnlinked && (
-                <AddOrderForm
-                  problemText="no problem (unlinked)"
-                  onSubmit={(order) => onAddOrder(null, order)}
-                  onCancel={() => setAddingUnlinked(false)}
-                  renderSearch={renderOrderSearch}
-                />
-              )}
             </section>
           )}
         </CardContent>
