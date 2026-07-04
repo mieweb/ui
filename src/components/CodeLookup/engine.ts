@@ -35,6 +35,12 @@ export interface CodifyShard {
   docLen: Uint8Array;
   /** Usage prior per doc, log-quantized 0-255 (v2; null for v1 shards) */
   docPrior: Uint8Array | null;
+  /** Max usage prior among each token's postings (drives usage-aware prefix
+   * expansion; null for v1 shards) */
+  tokenPrior: Uint8Array | null;
+  /** First token id per doc (0xffffffff = none); drives the leading-prefix
+   * bonus. null when the shard predates the section. */
+  docFirstTok: Uint32Array | null;
   // reusable per-query scratch buffers
   scoreBuf: Float32Array;
   maskBuf: Uint8Array;
@@ -74,6 +80,12 @@ const MAGIC = 0x4d434458; // 'MCDX'
 
 /** Weight of the usage prior on the final score (v2 shards). */
 const PRIOR_WEIGHT = 0.5;
+/** Extra prior weight per typed character shortfall — leans on usage when the
+ * query is short/ambiguous, fading as the user types a specific term. */
+const SHORT_PRIOR_WEIGHT = 3;
+/** Multiplier for docs whose first token starts with the query (leading
+ * prefix), so "l" surfaces entries named l… over incidental l-word matches. */
+const LEAD_BONUS = 2.5;
 
 export function parseShard(buf: ArrayBuffer): CodifyShard {
   const view = new DataView(buf);
@@ -100,6 +112,31 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
     const [off, len] = meta.sections[name];
     return new Uint32Array(buf, off, len >>> 2);
   };
+  const postStart = u32('postStart');
+  const postings = u32('postings');
+  const docPrior = meta.sections.docPrior ? u8('docPrior') : null;
+
+  // Per-token max usage prior: the strongest usage signal reachable through a
+  // token. Used to pick expansions when a short prefix matches more tokens than
+  // MAX_EXPANSIONS, so common entries surface instead of the alphabetically
+  // first ones. Computed once (O(postings)); skipped for v1 shards.
+  let tokenPrior: Uint8Array | null = null;
+  if (docPrior) {
+    tokenPrior = new Uint8Array(meta.tokenCount);
+    for (let t = 0; t < meta.tokenCount; t++) {
+      let m = 0;
+      const end = postStart[t + 1];
+      for (let p = postStart[t]; p < end; p++) {
+        const pr = docPrior[postings[p] >>> 1];
+        if (pr > m) {
+          m = pr;
+          if (m === 255) break;
+        }
+      }
+      tokenPrior[t] = m;
+    }
+  }
+
   return {
     domain: meta.domain,
     locale: meta.locale ?? 'en',
@@ -108,8 +145,8 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
     codetypes: meta.codetypes,
     tokenBlob: u8('tokenBlob'),
     tokenOffsets: u32('tokenOffsets'),
-    postStart: u32('postStart'),
-    postings: u32('postings'),
+    postStart,
+    postings,
     labelBlob: u8('labelBlob'),
     labelOffsets: u32('labelOffsets'),
     codeBlob: u8('codeBlob'),
@@ -118,7 +155,9 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
     fullidOffsets: u32('fullidOffsets'),
     docCodetype: u8('docCodetype'),
     docLen: u8('docLen'),
-    docPrior: meta.sections.docPrior ? u8('docPrior') : null,
+    docPrior,
+    tokenPrior,
+    docFirstTok: meta.sections.docFirstTok ? u32('docFirstTok') : null,
     scoreBuf: new Float32Array(meta.docCount),
     maskBuf: new Uint8Array(meta.docCount),
     aliasBuf: new Uint8Array(meta.docCount),
@@ -208,6 +247,32 @@ function fuzzyCandidates(s: CodifyShard, q: string, max: number): number[] {
 const MAX_EXPANSIONS = 128;
 const MAX_QUERY_TOKENS = 8;
 
+/**
+ * Pick up to `max` token ids in [lo, hi) with the highest usage prior
+ * (tokenPrior), tie-broken by shorter token length. Lets a short prefix that
+ * matches more tokens than MAX_EXPANSIONS still expand the ones tied to
+ * popular docs instead of just the alphabetically-first tokens.
+ */
+function topPriorTokens(
+  s: CodifyShard,
+  lo: number,
+  hi: number,
+  max: number
+): number[] {
+  const tp = s.tokenPrior!;
+  const range: number[] = new Array(hi - lo);
+  for (let t = lo; t < hi; t++) range[t - lo] = t;
+  range.sort((a, b) => {
+    const d = tp[b] - tp[a];
+    if (d) return d;
+    const la = s.tokenOffsets[a + 1] - s.tokenOffsets[a];
+    const lb = s.tokenOffsets[b + 1] - s.tokenOffsets[b];
+    return la - lb;
+  });
+  if (range.length > max) range.length = max;
+  return range;
+}
+
 export function searchShards(
   shards: CodifyShard[],
   query: string,
@@ -237,11 +302,24 @@ function searchShard(
   const N = s.docCount;
   const fullMask = (1 << qTokens.length) - 1;
   let touchedCount = 0;
+  // Token range of the first query token — a doc whose first token falls in it
+  // "starts with" the query and earns the leading-prefix bonus.
+  let firstLo = 0;
+  let firstHi = 0;
+  const typedLen = qTokens.reduce((n, t) => n + t.length, 0);
+  // For very short (ambiguous) queries, compress the idf spread so a rare
+  // incidental token can't outweigh the usage + leading-prefix signals; the
+  // full idf returns as the user types a more specific term.
+  const idfDamp = Math.min(1, typedLen / 4);
 
   for (let qi = 0; qi < qTokens.length; qi++) {
     const q = qTokens[qi];
     const bit = 1 << qi;
     let [lo, hi] = prefixRange(s, q);
+    if (qi === 0) {
+      firstLo = lo;
+      firstHi = hi;
+    }
     let penalty = 1;
     let expansions: number[] | null = null;
     if (lo >= hi && q.length >= 3) {
@@ -250,6 +328,11 @@ function searchShard(
       if (expansions.length === 0) return; // AND semantics: token matched nothing
     } else if (lo >= hi) {
       return;
+    } else if (hi - lo > MAX_EXPANSIONS && s.tokenPrior) {
+      // Short/ambiguous prefix matches more tokens than we can score: expand
+      // the ones reaching the highest-usage docs so common entries surface
+      // (real prefix hits, so no penalty).
+      expansions = topPriorTokens(s, lo, hi, MAX_EXPANSIONS);
     }
 
     const count = expansions
@@ -259,9 +342,10 @@ function searchShard(
       const t = expansions ? expansions[e] : lo + e;
       const df = s.postStart[t + 1] - s.postStart[t];
       const idf = Math.log(1 + (N - df + 0.5) / (df + 0.5));
+      const idfEff = 1 + idfDamp * (idf - 1);
       const tLen = s.tokenOffsets[t + 1] - s.tokenOffsets[t];
       const completeness = q.length / tLen; // full-token typed > partial prefix
-      const w = idf * (0.5 + 0.5 * Math.min(1, completeness)) * penalty;
+      const w = idfEff * (0.5 + 0.5 * Math.min(1, completeness)) * penalty;
       const start = s.postStart[t];
       const end = s.postStart[t + 1];
       for (let p = start; p < end; p++) {
@@ -278,7 +362,11 @@ function searchShard(
     }
   }
 
-  // collect matches, then reset scratch buffers
+  // collect matches, then reset scratch buffers.
+  // Lean on usage when little has been typed (an ambiguous prefix matches many
+  // tokens); let text relevance dominate once the query is specific.
+  const priorWeight = PRIOR_WEIGHT + SHORT_PRIOR_WEIGHT / typedLen;
+  const firstTok = s.docFirstTok;
   for (let i = 0; i < touchedCount; i++) {
     const d = s.touched[i];
     if (maskBuf[d] === fullMask) {
@@ -286,8 +374,15 @@ function searchShard(
       // usage prior: frequently-used codes surface above obscure ones with
       // equal text relevance (docPrior is log-quantized usage, 0-255)
       const prior = s.docPrior ? s.docPrior[d] / 255 : 0;
+      // leading-prefix bonus: labels that *start with* the query (e.g. "l" →
+      // "lisinopril …") rank above incidental word matches ("… in LR-D5")
+      const leading =
+        firstTok && firstTok[d] >= firstLo && firstTok[d] < firstHi;
       const score =
-        scoreBuf[d] * (0.6 + 0.4 * lenNorm) * (1 + PRIOR_WEIGHT * prior);
+        scoreBuf[d] *
+        (0.6 + 0.4 * lenNorm) *
+        (1 + priorWeight * prior) *
+        (leading ? LEAD_BONUS : 1);
       pushResult(out, s, d, score, aliasBuf[d] === 1, limit * 3);
     }
     maskBuf[d] = 0;

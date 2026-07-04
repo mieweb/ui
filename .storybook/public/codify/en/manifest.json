@@ -1,40 +1,40 @@
 {
   "version": 2,
   "locale": "en",
-  "builtAt": "2026-07-04T13:11:54.061Z",
+  "builtAt": "2026-07-04T13:37:29.721Z",
   "shards": [
     {
       "domain": "condition",
       "file": "condition.mcdx",
-      "bytes": 4248997,
+      "bytes": 4289528,
       "docCount": 103088,
       "tokenCount": 8726
     },
     {
       "domain": "med",
       "file": "med.mcdx",
-      "bytes": 14700345,
+      "bytes": 15301251,
       "docCount": 381526,
       "tokenCount": 40153
     },
     {
       "domain": "lab",
       "file": "lab.mcdx",
-      "bytes": 8554039,
+      "bytes": 8820152,
       "docCount": 185261,
       "tokenCount": 22914
     },
     {
       "domain": "procedure",
       "file": "procedure.mcdx",
-      "bytes": 4106961,
+      "bytes": 4134390,
       "docCount": 99551,
       "tokenCount": 9809
     },
     {
       "domain": "vaccine",
       "file": "vaccine.mcdx",
-      "bytes": 22454,
+      "bytes": 23054,
       "docCount": 608,
       "tokenCount": 489
     }

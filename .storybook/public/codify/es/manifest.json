@@ -1,26 +1,26 @@
 {
   "version": 2,
   "locale": "es",
-  "builtAt": "2026-07-04T13:12:06.372Z",
+  "builtAt": "2026-07-04T13:37:40.530Z",
   "shards": [
     {
       "domain": "condition",
       "file": "condition.mcdx",
-      "bytes": 10163,
+      "bytes": 10461,
       "docCount": 170,
       "tokenCount": 369
     },
     {
       "domain": "med",
       "file": "med.mcdx",
-      "bytes": 7530,
+      "bytes": 8018,
       "docCount": 269,
       "tokenCount": 146
     },
     {
       "domain": "lab",
       "file": "lab.mcdx",
-      "bytes": 4572,
+      "bytes": 4844,
       "docCount": 143,
       "tokenCount": 107
     }
