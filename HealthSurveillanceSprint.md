@@ -32,15 +32,15 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - [x] Vitest unit tests for evaluation logic (12 passing)
 
 ## Phase 5 — HealthSurveillance component
-- [ ] Due list + Done list rendered from evaluateDue
-- [ ] Multi-select order picklist (checkboxes → "Add N orders", onOrderMany)
-- [ ] dueForOrder helper for ordering prompts/alerts
-- [ ] Assessment interop: picks carry program concern linkage
+- [x] Due list + Done list rendered from evaluateDue
+- [x] Multi-select order picklist (checkboxes → "Add N orders", onOrderMany)
+- [x] dueForOrder helper for ordering prompts/alerts
+- [x] Assessment interop: SurveillanceOrderPick carries programKey/programLabel for concernId linking
 
 ## Phase 6 — chart demo story
-- [ ] Sample patient history (55 F factory worker; noise + lead programs; CMS125/130 due)
-- [ ] Story panels: Due/Done list, Medications, Allergies, Conditions, Lab results
-- [ ] Assessment variant with program-as-concern + due orders
+- [x] Sample patient history (55 F factory worker; noise + lead + BBP programs; CMS measures)
+- [x] Story panels: Due/Done list, Medications, Allergies, Conditions, Lab results (ChartDemo)
+- [ ] Assessment variant with program-as-concern + due orders (follow-up: compose Assessment + HealthSurveillance in one story)
 
 ## Phase 7 — docs, tests, CI
 - [ ] READMEs: programs.json format, history schema, evaluate semantics
@@ -60,3 +60,8 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - 2026-07-04: Phase 4 done — PatientHistory types + pure due engine
   (evaluateProgram/evaluateDue/dueForOrder) with enrollment semantics for
   occupational vs quality; 12 unit tests passing.
+- 2026-07-04: Phases 5+6 done — HealthSurveillance component (due/done lists,
+  multi-select order picklist) + DueList/ChartDemo stories; browser-verified:
+  overdue lead & A1c, "Add 4 orders" batch linked to the lead program.
+  Note: an old shared browser tab had environmental /codify/* request
+  blocking — fresh tab works; not a product issue.
