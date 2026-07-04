@@ -13,11 +13,11 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - [x] Verify: MedicalSurveillance story drill unchanged
 
 ## Phase 2 — new regulated verticals
-- [ ] occupational.tsv: OPM GS-1811, USCG CG-719K, MSHA/NIOSH CWHSP, NRC Part 26, DOE HRP, USCIS I-693
-- [ ] build-index DOMAINS: OPM, USCG, MSHA, NIOSH, NRC, DOE, USCIS codetypes
-- [ ] programs.json entries with verified order codes
-- [ ] aliases: 1811, b-read, hrp, civil surgeon, mariner
-- [ ] Rebuild shards + browser verify
+- [x] occupational.tsv: OPM GS-1811, USCG CG-719K, MSHA/NIOSH CWHSP, NRC Part 26, DOE HRP, USCIS I-693 (+ DoDI 6130.03)
+- [x] build-index DOMAINS: OPM, USCG, MSHA, NIOSH, NRC, DOE, USCIS, DOD codetypes
+- [x] programs.json entries with verified order codes
+- [x] aliases: cwhsp, hrp, i693, mariner (1811 matches via label token)
+- [x] Rebuild shards + browser verify
 
 ## Phase 3 — eCQMs: quality domain
 - [ ] Curated quality.tsv (CMS measures: 122, 125, 130, 117, 147, 153, …)
@@ -52,3 +52,6 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - 2026-07-04: Phase 1 done — programs.json (kind/periodicity metadata) replaces
   order-sets.json; worker fallback + programsUrl override; 'programs' worker
   message for the due engine; verified lead drill resolves 5 orders.
+- 2026-07-04: Phase 2 done — 8 new verticals (29 programs total); GS-1811
+  drill resolves vision/audiometry/EKG/lipid/drug screen; hrp, i693, cwhsp,
+  mariner aliases verified in browser.

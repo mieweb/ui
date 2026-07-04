@@ -140,6 +140,60 @@
       "kind": "fitness",
       "periodicityMonths": 12,
       "orders": ["HCPCS|99173", "HCPCS|92551", "LabCorp Order|003772"]
+    },
+    "OPM|GS-1811": {
+      "kind": "fitness",
+      "periodicityMonths": 12,
+      "orders": [
+        "HCPCS|99173",
+        "HCPCS|92551",
+        "HCPCS|G0403",
+        "LabCorp Order|221010",
+        "LabCorp Order|790352"
+      ]
+    },
+    "USCG|46 CFR 10.302": {
+      "kind": "credential",
+      "periodicityMonths": 24,
+      "orders": ["HCPCS|99173", "HCPCS|92551", "LabCorp Order|790352"]
+    },
+    "MSHA|30 CFR 90": {
+      "kind": "surveillance",
+      "periodicityMonths": 60,
+      "orders": ["HCPCS|71020", "HCPCS|94150"]
+    },
+    "NIOSH|CWHSP": {
+      "kind": "surveillance",
+      "periodicityMonths": 60,
+      "orders": ["HCPCS|71020", "HCPCS|94150"]
+    },
+    "NRC|10 CFR 26": {
+      "kind": "fitness",
+      "periodicityMonths": 12,
+      "orders": ["LabCorp Order|790352", "LabCorp Order|790390"]
+    },
+    "DOE|10 CFR 712": {
+      "kind": "fitness",
+      "periodicityMonths": 12,
+      "orders": ["LabCorp Order|790352", "HCPCS|G0403"]
+    },
+    "USCIS|I-693": {
+      "kind": "credential",
+      "orders": [
+        "Quest Order|19453",
+        "Quest Order|17389",
+        "Quest Order|11362",
+        "CVX|45"
+      ]
+    },
+    "DOD|DoDI 6130.03": {
+      "kind": "fitness",
+      "orders": [
+        "HCPCS|99173",
+        "HCPCS|92551",
+        "LabCorp Order|003772",
+        "LabCorp Order|790352"
+      ]
     }
   }
 }

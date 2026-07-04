@@ -1,7 +1,7 @@
 {
   "version": 2,
   "locale": "en",
-  "builtAt": "2026-07-04T15:53:41.596Z",
+  "builtAt": "2026-07-04T16:01:21.633Z",
   "shards": [
     {
       "domain": "condition",
@@ -41,9 +41,9 @@
     {
       "domain": "occupational",
       "file": "occupational.mcdx",
-      "bytes": 1713,
-      "docCount": 21,
-      "tokenCount": 63
+      "bytes": 2508,
+      "docCount": 29,
+      "tokenCount": 99
     }
   ]
 }
