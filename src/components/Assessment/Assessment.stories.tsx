@@ -215,13 +215,13 @@ function InteractiveTemplate() {
             },
           ])
         }
-        renderOrderSearch={({ domains, onPick }) => (
+        renderOrderSearch={({ domains, placeholder, onPick }) => (
           <CodeLookup
             indexUrl="/codify"
             searchDomains={domains as CodifyDomain[] | undefined}
             onSelect={onPick}
             limit={10}
-            placeholder='Search orders… (try "lasix", "a1c", "chest x")'
+            placeholder={placeholder}
             bare
           />
         )}

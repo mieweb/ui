@@ -86,6 +86,16 @@ export const ORDER_TYPE_SEARCH_DOMAINS: Record<OrderType, string[]> = {
   referral: ['procedure'],
 };
 
+/** Context-specific search placeholder per order-type filter. */
+const ORDER_TYPE_PLACEHOLDERS: Record<'auto' | OrderType, string> = {
+  auto: 'Search medications, labs, imaging, procedures…',
+  medication: 'Search medications… (try "lasix")',
+  lab: 'Search labs… (try "a1c")',
+  imaging: 'Search imaging… (try "chest x")',
+  procedure: 'Search procedures…',
+  referral: 'Search referrals & consults…',
+};
+
 /** One assessed problem this visit. */
 export interface AssessmentItem {
   concernId: string;
@@ -129,14 +139,16 @@ export interface AssessmentProps
    */
   onAddAssessment?: (pick: OrderCodePick) => void;
   /**
-   * Render a code-lookup search for the add-order form (dependency-injected
-   * so the library build doesn't bundle the lookup's worker — pass e.g.
-   * a CodeLookup wired to your index). `domains` reflects the user's
-   * order-type filter ('auto' = undefined = search everything); call `onPick`
-   * with the chosen code. Omit to fall back to free-text order entry.
+   * Render a code-lookup search for the add-order / add-problem forms
+   * (dependency-injected so the library build doesn't bundle the lookup's
+   * worker — pass e.g. a CodeLookup wired to your index). `domains` reflects
+   * the user's order-type filter ('auto' = undefined = search everything) and
+   * `placeholder` is context-specific; call `onPick` with the chosen code.
+   * Omit to fall back to free-text order entry.
    */
   renderOrderSearch?: (args: {
     domains?: string[];
+    placeholder: string;
     onPick: (pick: OrderCodePick) => void;
   }) => React.ReactNode;
   /** Called when an unlinked order is linked to a problem — also used when an
@@ -426,6 +438,7 @@ function AddOrderForm({
           {renderSearch({
             domains:
               type === 'auto' ? undefined : ORDER_TYPE_SEARCH_DOMAINS[type],
+            placeholder: ORDER_TYPE_PLACEHOLDERS[type],
             onPick: handlePick,
           })}
         </div>
@@ -896,6 +909,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               <div className="min-w-64 flex-1">
                 {renderOrderSearch({
                   domains: ['condition'],
+                  placeholder: 'Search diagnoses… (try "chf" or "atrial fib")',
                   onPick: onAddAssessment,
                 })}
               </div>
