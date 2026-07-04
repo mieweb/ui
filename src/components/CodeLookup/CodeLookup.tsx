@@ -39,6 +39,11 @@ export interface CodeLookupProps
    * embedding in forms. Loading/error state shows in the placeholder.
    */
   bare?: boolean;
+  /**
+   * Clear the input after a selection so the next entry can be typed
+   * immediately (defaults to true in bare mode, false otherwise).
+   */
+  clearOnSelect?: boolean;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -80,6 +85,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       limit = 15,
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
+      clearOnSelect,
       className,
       'data-testid': dataTestId,
       ...props
@@ -207,8 +213,15 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       onSelect?.(r);
       setOpen(false);
       setDrill(null);
-      skipSearchRef.current = true;
-      setQuery(r.label);
+      setResults([]);
+      setActiveIndex(-1);
+      if (clearOnSelect ?? bare) {
+        // ready for the next entry
+        setQuery('');
+      } else {
+        skipSearchRef.current = true;
+        setQuery(r.label);
+      }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
