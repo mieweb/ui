@@ -30,7 +30,8 @@ export type CodifyDomain =
   | 'med'
   | 'lab'
   | 'procedure'
-  | 'vaccine';
+  | 'vaccine'
+  | 'occupational';
 
 export interface CodeLookupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -93,6 +94,7 @@ const DOMAIN_TEXT: Record<string, string> = {
   lab: 'text-amber-700 dark:text-amber-400',
   procedure: 'text-violet-700 dark:text-violet-400',
   vaccine: 'text-muted-foreground',
+  occupational: 'text-sky-700 dark:text-sky-400',
 };
 
 /** What the drill-down (→) shows, per domain. */
@@ -102,6 +104,7 @@ const DETAIL_NOUN: Record<string, string> = {
   lab: 'related tests',
   procedure: 'related codes',
   vaccine: 'related codes',
+  occupational: 'required orders',
 };
 
 // =============================================================================
@@ -195,20 +198,27 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             setOpen(true);
           } else if (msg.id === drillIdRef.current) {
             // family members: the parent's forms & strengths / specific
-            // codes / test variants, excluding the parent row itself
+            // codes / test variants, excluding the parent row itself.
+            // Occupational drills resolve a curated order set instead — the
+            // results already are the members, in curated order.
             const parent = drillParentRef.current;
-            const pKey = parent
-              ? familyKey(parent.domain, parent.label, parent.fullcode)
-              : '';
-            const members = (msg.results as CodifyResult[])
-              .filter(
-                (r) =>
-                  parent !== null &&
-                  r.domain === parent.domain &&
-                  r.fullid !== parent.fullid &&
-                  familyKey(r.domain, r.label, r.fullcode) === pKey
-              )
-              .sort((a, b) => a.label.localeCompare(b.label));
+            let members: CodifyResult[];
+            if (parent?.domain === 'occupational') {
+              members = msg.results as CodifyResult[];
+            } else {
+              const pKey = parent
+                ? familyKey(parent.domain, parent.label, parent.fullcode)
+                : '';
+              members = (msg.results as CodifyResult[])
+                .filter(
+                  (r) =>
+                    parent !== null &&
+                    r.domain === parent.domain &&
+                    r.fullid !== parent.fullid &&
+                    familyKey(r.domain, r.label, r.fullcode) === pKey
+                )
+                .sort((a, b) => a.label.localeCompare(b.label));
+            }
             setDrill((prev) => (prev ? { ...prev, results: members } : prev));
             setActiveIndex(members.length > 0 ? 0 : -1);
           }
@@ -258,11 +268,22 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const openDrill = React.useCallback((parent: CodifyResult) => {
       drillParentRef.current = parent;
       setDrill({ parent, results: null });
+      const id = --drillIdRef.current; // negative ids: never collide with searches
+      if (parent.domain === 'occupational') {
+        // Occupational programs drill into their curated order set (the
+        // orders that satisfy the surveillance requirement), resolved from
+        // whichever shards are loaded — load lab/procedure/vaccine alongside.
+        workerRef.current?.postMessage({
+          type: 'orders',
+          id,
+          key: `${parent.codetype}|${parent.fullcode}`,
+        });
+        return;
+      }
       // Search the family term uncollapsed and filter to the parent's family.
       // Aliases make Lasix → furosemide forms work because the parent row
       // already carries the canonical label. (Planned: condition drill-down
-      // will also surface suggested orders for the condition.)
-      const id = --drillIdRef.current; // negative ids: never collide with searches
+      // will also surface suggested orders for the condition via order-sets.)
       workerRef.current?.postMessage({
         type: 'search',
         id,

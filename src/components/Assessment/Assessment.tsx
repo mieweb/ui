@@ -90,10 +90,20 @@ export function orderTypeForCodetype(codetype: string): OrderType {
   return 'procedure'; // HCPCS, ICD10PCS, … (imaging is a manual choice)
 }
 
-/** Coding systems that represent a diagnosis/problem rather than an order. */
+/** Coding systems that represent a diagnosis/problem rather than an order.
+ * Occupational surveillance programs (OSHA/FMCSA/NFPA/FAA) are concerns too —
+ * a program joins the problem list and its required orders link under it. */
 export function isConditionCodetype(codetype: string): boolean {
   const ct = codetype.toUpperCase();
-  return ct === 'ICD10' || ct === 'ICD9' || ct === 'SNOMED US';
+  return (
+    ct === 'ICD10' ||
+    ct === 'ICD9' ||
+    ct === 'SNOMED US' ||
+    ct === 'OSHA' ||
+    ct === 'FMCSA' ||
+    ct === 'NFPA' ||
+    ct === 'FAA'
+  );
 }
 
 /** Code-lookup domains to search for an order-type filter. */
@@ -1014,16 +1024,16 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   {renderOrderSearch({
                     domains:
                       addMode === 'problem'
-                        ? ['condition']
+                        ? ['condition', 'occupational']
                         : addMode === 'order'
                           ? ['med', 'lab', 'procedure', 'vaccine']
                           : undefined, // auto: everything — the pick decides
                     placeholder:
                       addMode === 'problem'
-                        ? 'Search diagnoses… (try "chf" or "atrial fib")'
+                        ? 'Search diagnoses & programs… (try "chf" or "hearing conservation")'
                         : addMode === 'order'
                           ? 'Search medications, labs, imaging, procedures…'
-                          : 'Add problem or order… (a diagnosis becomes a problem; meds, labs & imaging become orders)',
+                          : 'Add problem or order… (a diagnosis or surveillance program becomes a problem; meds, labs & imaging become orders)',
                     onPick: (pick) => {
                       const asProblem =
                         addMode === 'problem' ||

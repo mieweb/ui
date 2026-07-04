@@ -25,9 +25,16 @@
  *   (local: ./README.md)
  */
 /* global FileSystemDirectoryHandle */
-import { parseShard, searchShards, type CodifyShard } from './engine';
+import {
+  parseShard,
+  searchShards,
+  findByCodes,
+  type CodifyShard,
+} from './engine';
 
 const shards = new Map<string, CodifyShard>();
+/** CODETYPE|FULLCODE → order references (from order-sets.json, optional) */
+let orderSets: Record<string, string[]> | null = null;
 
 interface ManifestShard {
   domain: string;
@@ -222,6 +229,30 @@ async function load(baseUrl: string, domains?: string[]) {
     );
   }
 
+  // Optional order-sets sidecar (occupational programs → required orders).
+  // Network first, OPFS-cached for offline; absence is not an error.
+  try {
+    let osBuf: ArrayBuffer | null = null;
+    if (!offline) {
+      const res = await fetch(`${baseUrl}/order-sets.json`, {
+        cache: 'no-cache',
+      });
+      if (res.ok) {
+        osBuf = await res.arrayBuffer();
+        if (dir) await writeCachedFile(dir, 'order-sets.json', osBuf);
+      }
+    }
+    if (!osBuf && dir) osBuf = await readCachedFile(dir, 'order-sets.json');
+    if (osBuf) {
+      const parsed = JSON.parse(new TextDecoder().decode(osBuf)) as {
+        sets?: Record<string, string[]>;
+      };
+      orderSets = parsed.sets ?? null;
+    }
+  } catch {
+    orderSets = null;
+  }
+
   self.postMessage({
     type: 'ready',
     domains: [...shards.keys()],
@@ -251,6 +282,19 @@ self.onmessage = (e: MessageEvent) => {
       type: 'results',
       id: msg.id,
       query: msg.query,
+      results,
+      tookMs: performance.now() - t0,
+    });
+  } else if (msg.type === 'orders') {
+    // Resolve an order set (e.g. an OSHA program's required orders) into
+    // labeled results from whichever shards are loaded.
+    const t0 = performance.now();
+    const keys = orderSets?.[msg.key] ?? [];
+    const results = findByCodes([...shards.values()], keys);
+    self.postMessage({
+      type: 'results',
+      id: msg.id,
+      query: msg.key,
       results,
       tookMs: performance.now() - t0,
     });

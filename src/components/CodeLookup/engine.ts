@@ -114,7 +114,67 @@ export function familyKey(
     // SNOMED: numeric concept id; synonyms share the code
     if (/^\d+$/.test(fullcode)) return 'condition:#s' + fullcode;
   }
+  // occupational surveillance programs never collapse into each other —
+  // 1910.1025 (general industry) and 1926.62 (construction) are distinct
+  if (domain === 'occupational') return 'occupational:#' + fullcode;
   return domain + ':' + familyTerm(domain, label);
+}
+
+/**
+ * Resolve `CODETYPE|FULLCODE` references (e.g. an occupational program's
+ * order set) into full results from the loaded shards, preserving the
+ * requested order. Unresolvable keys are silently skipped.
+ */
+export function findByCodes(
+  shards: CodifyShard[],
+  keys: string[]
+): CodifyResult[] {
+  const out: CodifyResult[] = [];
+  const remaining = new Set(keys);
+  for (const s of shards) {
+    if (remaining.size === 0) break;
+    // codetype indices of this shard that appear in any remaining key
+    const wanted = new Map<number, string>();
+    s.codetypes.forEach((ct, i) => {
+      for (const k of remaining) {
+        if (k.startsWith(ct + '|')) {
+          wanted.set(i, ct);
+          break;
+        }
+      }
+    });
+    if (wanted.size === 0) continue;
+    for (let d = 0; d < s.docCount && remaining.size > 0; d++) {
+      const ct = wanted.get(s.docCodetype[d]);
+      if (ct === undefined) continue;
+      const code = td.decode(
+        s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1])
+      );
+      const key = ct + '|' + code;
+      if (!remaining.has(key)) continue;
+      remaining.delete(key);
+      out.push({
+        fullid: td.decode(
+          s.fullidBlob.subarray(s.fullidOffsets[d], s.fullidOffsets[d + 1])
+        ),
+        label: td.decode(
+          s.labelBlob.subarray(s.labelOffsets[d], s.labelOffsets[d + 1])
+        ),
+        codetype: ct,
+        fullcode: code,
+        domain: s.domain,
+        score: 0,
+        viaAlias: false,
+      });
+    }
+  }
+  const pos = new Map(keys.map((k, i) => [k, i]));
+  out.sort(
+    (a, b) =>
+      (pos.get(a.codetype + '|' + a.fullcode) ?? 0) -
+      (pos.get(b.codetype + '|' + b.fullcode) ?? 0)
+  );
+  return out;
 }
 
 // =============================================================================
@@ -449,7 +509,7 @@ function searchShard(
           )
         );
         const fullcode =
-          s.domain === 'condition'
+          s.domain === 'condition' || s.domain === 'occupational'
             ? td.decode(
                 s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1])
               )

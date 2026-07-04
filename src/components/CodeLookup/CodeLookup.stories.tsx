@@ -47,9 +47,25 @@ type Story = StoryObj<typeof CodeLookup>;
 
 function Template({
   domains,
+  searchDomains,
   locale,
 }: {
-  domains?: ('condition' | 'med' | 'lab' | 'procedure' | 'vaccine')[];
+  domains?: (
+    | 'condition'
+    | 'med'
+    | 'lab'
+    | 'procedure'
+    | 'vaccine'
+    | 'occupational'
+  )[];
+  searchDomains?: (
+    | 'condition'
+    | 'med'
+    | 'lab'
+    | 'procedure'
+    | 'vaccine'
+    | 'occupational'
+  )[];
   locale?: string;
 }) {
   const [selected, setSelected] = useState<CodifyResult | null>(null);
@@ -59,6 +75,7 @@ function Template({
         indexUrl="/codify"
         locale={locale}
         domains={domains}
+        searchDomains={searchDomains}
         onSelect={setSelected}
       />
       {selected && (
@@ -120,5 +137,22 @@ export const Immunizations: Story = {
 export const Allergies: Story = {
   render: (_args, { globals }) => (
     <Template domains={['med']} locale={globals.locale} />
+  ),
+};
+
+/** Occupational medicine — OSHA medical surveillance programs plus DOT/FMCSA,
+ * NFPA 1582 and FAA exams. Searches only the `occupational` domain, but loads
+ * lab/procedure/vaccine shards too so the → drill-down can resolve each
+ * program's **required orders** (curated in codify's order-sets.json — blood
+ * lead & ZPP for 1910.1025, audiometry for 1910.95, HepB vaccine + titer for
+ * 1910.1030…). Programs can join the Assessment tool as concerns, with their
+ * orders linked under them. Try "osha", "lead", "hearing", "silica", "dot". */
+export const MedicalSurveillance: Story = {
+  render: (_args, { globals }) => (
+    <Template
+      domains={['occupational', 'lab', 'procedure', 'vaccine']}
+      searchDomains={['occupational']}
+      locale={globals.locale}
+    />
   ),
 };
