@@ -73,6 +73,51 @@ export function normalize(s: string): string {
 }
 
 // =============================================================================
+// Families — grouping of closely-related entries (a med's forms/strengths/
+// brands, a condition's specific billable codes, a lab's specimen/property
+// variants). Collapsed search shows one row per family; the drill-down (→)
+// lists the members.
+// =============================================================================
+
+/**
+ * The searchable text that identifies an entry's family: the ingredient /
+ * brand word for meds, the first two words otherwise (one word would merge
+ * "acute bronchitis" with "acute sinusitis"). Labs drop the LOINC property
+ * bracket ("Glucose [Mass/volume] in Serum" → glucose family).
+ */
+export function familyTerm(domain: string, label: string): string {
+  let text = label;
+  if (domain === 'lab') {
+    const br = text.indexOf('[');
+    if (br > 0) text = text.slice(0, br);
+  }
+  const words = normalize(text).split(' ').filter(Boolean);
+  // very short first words ("l" in "l norgest") always pull in the next word
+  const n = domain === 'med' && (words[0]?.length ?? 0) > 2 ? 1 : 2;
+  return words.slice(0, n).join(' ');
+}
+
+/**
+ * Family identity of an entry. Conditions group by code: ICD-10 codes by
+ * their root ("E11.621" and "E11" → the type-2-diabetes family), SNOMED
+ * synonyms by their shared concept id. Other entries group by `familyTerm`.
+ */
+export function familyKey(
+  domain: string,
+  label: string,
+  fullcode: string
+): string {
+  if (domain === 'condition') {
+    // ICD-10: letter + digit prefix; family = code root before the dot
+    if (/^[a-z]\d/i.test(fullcode))
+      return 'condition:#' + fullcode.split('.')[0];
+    // SNOMED: numeric concept id; synonyms share the code
+    if (/^\d+$/.test(fullcode)) return 'condition:#s' + fullcode;
+  }
+  return domain + ':' + familyTerm(domain, label);
+}
+
+// =============================================================================
 // Shard parsing
 // =============================================================================
 
@@ -86,8 +131,6 @@ const SHORT_PRIOR_WEIGHT = 3;
 /** Multiplier for docs whose first token starts with the query (leading
  * prefix), so "l" surfaces entries named l… over incidental l-word matches. */
 const LEAD_BONUS = 2.5;
-/** docFirstTok sentinel for docs with no tokens. */
-const NO_TOKEN = 0xffffffff;
 
 export function parseShard(buf: ArrayBuffer): CodifyShard {
   const view = new DataView(buf);
@@ -371,19 +414,14 @@ function searchShard(
   // tokens); let text relevance dominate once the query is specific.
   const priorWeight = PRIOR_WEIGHT + SHORT_PRIOR_WEIGHT / typedLen;
   const firstTok = s.docFirstTok;
-  // Collapse med product variants (forms, strengths, brands) to one row per
-  // family — keyed by the doc's first token (the ingredient / brand name) —
+  // Collapse closely-related variants to one row per family (see familyKey)
   // BEFORE the candidate cap, so a few popular families can't crowd every
   // other family out of the list. Families rank by their best-scoring member,
   // but the *shortest* nearly-as-good label represents them (the base name
-  // beats "… Oral Solution [Brand]"); variants stay reachable through the
-  // forms & strengths drill-down (which searches uncollapsed).
-  const doCollapse = collapse && s.domain === 'med' && firstTok !== null;
-  const fams = doCollapse
-    ? new Map<
-        number | string,
-        { best: number; d: number; len: number; alias: boolean }
-      >()
+  // beats "… Oral Solution [Brand]"); members stay reachable through the
+  // drill-down (which searches uncollapsed).
+  const fams = collapse
+    ? new Map<string, { best: number; d: number; len: number; alias: boolean }>()
     : null;
   for (let i = 0; i < touchedCount; i++) {
     const d = s.touched[i];
@@ -402,25 +440,21 @@ function searchShard(
         (1 + priorWeight * prior) *
         (leading ? LEAD_BONUS : 1);
       const alias = aliasBuf[d] === 1;
-      if (fams && firstTok) {
-        const ft = firstTok[d];
-        const ftLen =
-          ft === NO_TOKEN ? 0 : s.tokenOffsets[ft + 1] - s.tokenOffsets[ft];
+      if (fams) {
         const labelLen = s.labelOffsets[d + 1] - s.labelOffsets[d];
-        // very short first tokens ("l" in "L-Dopres") group unrelated meds —
-        // key those by the label's first word instead
-        const key: number | string =
-          ftLen > 2
-            ? ft
-            : td
-                .decode(
-                  s.labelBlob.subarray(
-                    s.labelOffsets[d],
-                    Math.min(s.labelOffsets[d + 1], s.labelOffsets[d] + 24)
-                  )
-                )
-                .split(/\s+/, 1)[0]
-                .toLowerCase();
+        const label = td.decode(
+          s.labelBlob.subarray(
+            s.labelOffsets[d],
+            Math.min(s.labelOffsets[d + 1], s.labelOffsets[d] + 64)
+          )
+        );
+        const fullcode =
+          s.domain === 'condition'
+            ? td.decode(
+                s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1])
+              )
+            : '';
+        const key = familyKey(s.domain, label, fullcode);
         const fam = fams.get(key);
         if (!fam) {
           fams.set(key, { best: score, d, len: labelLen, alias });

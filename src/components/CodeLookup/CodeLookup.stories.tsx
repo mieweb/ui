@@ -75,7 +75,10 @@ export const AllDomains: Story = {
   render: (_args, { globals }) => <Template locale={globals.locale} />,
 };
 
-/** Conditions only (ICD-10 + SNOMED, ~14 MB). Try "con hea fa", "chf", "lvhf". */
+/** Conditions only (ICD-10 + SNOMED, ~14 MB). Try "con hea fa", "chf", "lvhf".
+ * Results collapse to one row per condition family (ICD-10 code root); → lists
+ * the specific billable codes. Planned: the drill-down will also surface
+ * suggested orders (labs/procedures) for the condition. */
 export const ConditionsOnly: Story = {
   render: (_args, { globals }) => (
     <Template domains={['condition']} locale={globals.locale} />
@@ -89,9 +92,33 @@ export const MedsOnly: Story = {
   ),
 };
 
-/** Labs only. Try "a1c" or "cbc". */
+/** Labs only. Try "a1c" or "cbc". Results collapse per analyte family; → lists
+ * the specimen/property variants. */
 export const LabsOnly: Story = {
   render: (_args, { globals }) => (
     <Template domains={['lab']} locale={globals.locale} />
+  ),
+};
+
+/** Procedures only (ICD-10-PCS + HCPCS). Try "bypass coronary" or "mri". */
+export const ProceduresOnly: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['procedure']} locale={globals.locale} />
+  ),
+};
+
+/** Immunizations (CVX vaccine codes). Try "covid", "influenza", "mmr". */
+export const Immunizations: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['vaccine']} locale={globals.locale} />
+  ),
+};
+
+/** Allergy entry — searches medications as allergens (drug allergies). Food &
+ * environmental allergens are not in the dataset yet; pair with `onFreeText`
+ * for those. Try "penicillin", "sulfa", "codeine". */
+export const Allergies: Story = {
+  render: (_args, { globals }) => (
+    <Template domains={['med']} locale={globals.locale} />
   ),
 };

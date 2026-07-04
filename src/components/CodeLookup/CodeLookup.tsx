@@ -19,6 +19,7 @@ import {
   ChevronLeftIcon,
 } from '../Icons';
 import type { CodifyResult } from './engine';
+import { familyKey, familyTerm } from './engine';
 
 // =============================================================================
 // Types
@@ -94,6 +95,15 @@ const DOMAIN_TEXT: Record<string, string> = {
   vaccine: 'text-muted-foreground',
 };
 
+/** What the drill-down (→) shows, per domain. */
+const DETAIL_NOUN: Record<string, string> = {
+  med: 'forms & strengths',
+  condition: 'specific codes',
+  lab: 'related tests',
+  procedure: 'related codes',
+  vaccine: 'related codes',
+};
+
 // =============================================================================
 // CodeLookup
 // =============================================================================
@@ -142,6 +152,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const workerRef = React.useRef<Worker | null>(null);
     const searchIdRef = React.useRef(0);
     const drillIdRef = React.useRef(0);
+    /** Parent of the in-flight drill-down search (for family filtering) */
+    const drillParentRef = React.useRef<CodifyResult | null>(null);
     /** Set when a pick writes the query — suppresses the follow-up auto-search */
     const skipSearchRef = React.useRef(false);
     // Per-instance element ids so multiple CodeLookups on a page don't break
@@ -182,18 +194,23 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             setActiveIndex(-1);
             setOpen(true);
           } else if (msg.id === drillIdRef.current) {
-            // forms & strengths: detailed med entries (contain a number),
-            // excluding the name row itself, alphabetical
-            const forms = (msg.results as CodifyResult[])
+            // family members: the parent's forms & strengths / specific
+            // codes / test variants, excluding the parent row itself
+            const parent = drillParentRef.current;
+            const pKey = parent
+              ? familyKey(parent.domain, parent.label, parent.fullcode)
+              : '';
+            const members = (msg.results as CodifyResult[])
               .filter(
                 (r) =>
-                  r.domain === 'med' &&
-                  /\d/.test(r.label) &&
-                  (r.codetype === 'FDB' || r.codetype === 'RxNORM')
+                  parent !== null &&
+                  r.domain === parent.domain &&
+                  r.fullid !== parent.fullid &&
+                  familyKey(r.domain, r.label, r.fullcode) === pKey
               )
               .sort((a, b) => a.label.localeCompare(b.label));
-            setDrill((prev) => (prev ? { ...prev, results: forms } : prev));
-            setActiveIndex(forms.length > 0 ? 0 : -1);
+            setDrill((prev) => (prev ? { ...prev, results: members } : prev));
+            setActiveIndex(members.length > 0 ? 0 : -1);
           }
         }
       };
@@ -235,19 +252,23 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       return () => clearTimeout(t);
     }, [query, status.state, limit, searchDomainsKey]);
 
-    /** A row that can be drilled into (→): medication names */
-    const isDrillable = (r: CodifyResult) => r.domain === 'med';
+    /** A row that can be drilled into (→) to list its family members */
+    const isDrillable = (r: CodifyResult) => r.domain in DETAIL_NOUN;
 
     const openDrill = React.useCallback((parent: CodifyResult) => {
+      drillParentRef.current = parent;
       setDrill({ parent, results: null });
-      // Search the parent's name; aliases make Lasix → furosemide forms work.
+      // Search the family term uncollapsed and filter to the parent's family.
+      // Aliases make Lasix → furosemide forms work because the parent row
+      // already carries the canonical label. (Planned: condition drill-down
+      // will also surface suggested orders for the condition.)
       const id = --drillIdRef.current; // negative ids: never collide with searches
       workerRef.current?.postMessage({
         type: 'search',
         id,
-        query: parent.label,
-        limit: 200,
-        domains: ['med'],
+        query: familyTerm(parent.domain, parent.label) || parent.label,
+        limit: 300,
+        domains: [parent.domain],
       });
     }, []);
 
@@ -390,7 +411,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                   {drill.parent.label}
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  — forms & strengths
+                  — {DETAIL_NOUN[drill.parent.domain] ?? 'related codes'}
                   {drill.results === null ? '…' : ` (${drill.results.length})`}
                 </span>
               </div>
@@ -401,7 +422,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
               role="listbox"
               aria-label={
                 drill
-                  ? `Forms and strengths of ${drill.parent.label}`
+                  ? `${DETAIL_NOUN[drill.parent.domain] ?? 'related codes'} of ${drill.parent.label}`
                   : 'Code search results'
               }
               className="divide-border max-h-80 divide-y overflow-y-auto"
@@ -442,8 +463,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                     <button
                       type="button"
                       tabIndex={-1}
-                      aria-label={`Show forms and strengths of ${r.label}`}
-                      title="Forms & strengths (→)"
+                      aria-label={`Show ${DETAIL_NOUN[r.domain] ?? 'related codes'} of ${r.label}`}
+                      title={`${DETAIL_NOUN[r.domain] ?? 'Related codes'} (→)`}
                       onClick={() => openDrill(r)}
                       onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
                       className={cn(
@@ -463,7 +484,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 drill.results !== null &&
                 drill.results.length === 0 && (
                   <li className="text-muted-foreground px-3 py-2 text-sm">
-                    No dosed forms found — press ← to go back.
+                    No related entries found — press ← to go back.
                   </li>
                 )}
               {!drill && onFreeText && query.trim() !== '' && (
@@ -531,7 +552,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             {status.state === 'ready' && tookMs !== null && (
               <>
                 {results.length} results in {tookMs.toFixed(1)} ms (local) · ↑↓
-                navigate · → forms & strengths on meds · Enter selects
+                navigate · → drill into a row · Enter selects
               </>
             )}
             {status.state === 'error' && (
