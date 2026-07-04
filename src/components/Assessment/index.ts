@@ -10,4 +10,5 @@ export {
   type AssessmentAction,
   type OrderType,
   type OrderCodePick,
+  type AssessmentAddPick,
 } from './Assessment';

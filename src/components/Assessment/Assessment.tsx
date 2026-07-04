@@ -67,6 +67,13 @@ export interface OrderCodePick {
   fullcode: string;
 }
 
+/** What the unified add row hands back: a coded pick or free text. */
+export interface AssessmentAddPick {
+  label: string;
+  /** Absent for free-text entries */
+  code?: { fullid: string; codetype: string; fullcode: string };
+}
+
 /** Infer the order type from the picked code's coding system. */
 export function orderTypeForCodetype(codetype: string): OrderType {
   const ct = codetype.toUpperCase();
@@ -140,10 +147,10 @@ export interface AssessmentProps
     order: { type: OrderType; display: string; code?: AssessmentOrder['code'] }
   ) => void;
   /**
-   * Called when a diagnosis is picked to add a new problem to the assessment.
-   * Enables the "Add problem" search row (requires renderOrderSearch).
+   * Called when a diagnosis (coded or free text) is added as a new problem
+   * via the unified add row. Enables it together with renderOrderSearch.
    */
-  onAddAssessment?: (pick: OrderCodePick) => void;
+  onAddAssessment?: (pick: AssessmentAddPick) => void;
   /**
    * Render a code-lookup search for the add-order / add-problem forms
    * (dependency-injected so the library build doesn't bundle the lookup's
@@ -156,6 +163,8 @@ export interface AssessmentProps
     domains?: string[];
     placeholder: string;
     onPick: (pick: OrderCodePick) => void;
+    /** Present when free-text entry is supported in this context */
+    onFreeText?: (text: string) => void;
   }) => React.ReactNode;
   /** Called when an unlinked order is linked to a problem — also used when an
    * order is dragged onto another problem (re-link = move) */
@@ -540,6 +549,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     ref
   ) => {
     const [addingFor, setAddingFor] = React.useState<string | null>(null);
+    const [addMode, setAddMode] = React.useState<'auto' | 'problem' | 'order'>('auto');
+    /** Free text typed in auto mode — we must ask what it is before adding */
+    const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(null);
     const [announcement, setAnnouncement] = React.useState('');
 
     const concernById = React.useMemo(
@@ -902,7 +914,8 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
           </ol>
 
           {/* Unified add row: a dx pick adds a problem, anything else adds an
-              (unlinked) order — the coding system decides automatically. */}
+              (unlinked) order — auto-detected from the coding system, or
+              forced via the mode dropdown. Free text asks (in auto mode). */}
           {!readOnly &&
             renderOrderSearch &&
             (onAddAssessment || onAddOrder) && (
@@ -911,17 +924,51 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 aria-label="Add problem or order"
                 className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
               >
-                <span className="text-muted-foreground shrink-0 text-xs font-semibold tracking-wide uppercase">
-                  Add
-                </span>
+                <select
+                  aria-label="What to add"
+                  value={addMode}
+                  onChange={(e) => {
+                    setAddMode(e.target.value as typeof addMode);
+                    setPendingFreeText(null);
+                  }}
+                  className={cn(
+                    'border-border bg-background text-foreground h-10 rounded-md border px-1.5 text-sm',
+                    'focus:ring-ring focus:ring-2 focus:outline-none'
+                  )}
+                >
+                  <option value="auto">Add (auto)</option>
+                  {onAddAssessment && <option value="problem">Add problem</option>}
+                  {onAddOrder && <option value="order">Add order</option>}
+                </select>
                 <div className="min-w-64 flex-1">
                   {renderOrderSearch({
-                    domains: undefined, // everything — the pick decides
+                    domains:
+                      addMode === 'problem'
+                        ? ['condition']
+                        : addMode === 'order'
+                          ? ['med', 'lab', 'procedure', 'vaccine']
+                          : undefined, // auto: everything — the pick decides
                     placeholder:
-                      'Add problem or order… (a diagnosis becomes a problem; meds, labs & imaging become orders)',
+                      addMode === 'problem'
+                        ? 'Search diagnoses… (try "chf" or "atrial fib")'
+                        : addMode === 'order'
+                          ? 'Search medications, labs, imaging, procedures…'
+                          : 'Add problem or order… (a diagnosis becomes a problem; meds, labs & imaging become orders)',
                     onPick: (pick) => {
-                      if (isConditionCodetype(pick.codetype) && onAddAssessment) {
-                        onAddAssessment(pick);
+                      const asProblem =
+                        addMode === 'problem' ||
+                        (addMode === 'auto' &&
+                          isConditionCodetype(pick.codetype) &&
+                          Boolean(onAddAssessment));
+                      if (asProblem) {
+                        onAddAssessment?.({
+                          label: pick.label,
+                          code: {
+                            fullid: pick.fullid,
+                            codetype: pick.codetype,
+                            fullcode: pick.fullcode,
+                          },
+                        });
                       } else {
                         onAddOrder?.(null, {
                           type: orderTypeForCodetype(pick.codetype),
@@ -934,8 +981,67 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                         });
                       }
                     },
+                    onFreeText: (text) => {
+                      if (addMode === 'problem') {
+                        onAddAssessment?.({ label: text });
+                      } else if (addMode === 'order') {
+                        onAddOrder?.(null, { type: 'procedure', display: text });
+                      } else {
+                        setPendingFreeText(text); // auto: we have to ask
+                      }
+                    },
                   })}
                 </div>
+
+                {/* Free text in auto mode: ask what it is */}
+                {pendingFreeText !== null && (
+                  <div
+                    role="group"
+                    aria-label={`Add "${pendingFreeText}" as`}
+                    className="flex w-full flex-wrap items-center gap-1.5 pl-1"
+                  >
+                    <span className="text-muted-foreground text-sm">
+                      Add <span className="text-foreground font-medium">“{pendingFreeText}”</span> as:
+                    </span>
+                    {onAddAssessment && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          onAddAssessment({ label: pendingFreeText });
+                          setPendingFreeText(null);
+                        }}
+                      >
+                        Problem
+                      </Button>
+                    )}
+                    {onAddOrder && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          onAddOrder(null, {
+                            type: 'procedure',
+                            display: pendingFreeText,
+                          });
+                          setPendingFreeText(null);
+                        }}
+                      >
+                        Order
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setPendingFreeText(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 

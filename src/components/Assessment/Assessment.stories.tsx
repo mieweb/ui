@@ -172,14 +172,19 @@ function InteractiveTemplate() {
                   id: assertionId,
                   date: new Date().toISOString().slice(0, 10),
                   text: pick.label,
-                  verificationStatus: 'confirmed',
-                  coding: [
-                    {
-                      system: codetypeToSystem[pick.codetype] ?? pick.codetype,
-                      code: pick.fullcode,
-                      primary: true,
-                    },
-                  ],
+                  // free text arrives uncoded and unconfirmed
+                  verificationStatus: pick.code ? 'confirmed' : 'unconfirmed',
+                  coding: pick.code
+                    ? [
+                        {
+                          system:
+                            codetypeToSystem[pick.code.codetype] ??
+                            pick.code.codetype,
+                          code: pick.code.fullcode,
+                          primary: true,
+                        },
+                      ]
+                    : [],
                 },
               ],
             },
@@ -215,11 +220,12 @@ function InteractiveTemplate() {
             },
           ])
         }
-        renderOrderSearch={({ domains, placeholder, onPick }) => (
+        renderOrderSearch={({ domains, placeholder, onPick, onFreeText }) => (
           <CodeLookup
             indexUrl="/codify"
             searchDomains={domains as CodifyDomain[] | undefined}
             onSelect={onPick}
+            onFreeText={onFreeText}
             limit={10}
             placeholder={placeholder}
             bare

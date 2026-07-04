@@ -31,6 +31,11 @@ export interface CodeLookupProps
   searchDomains?: CodifyDomain[];
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
+  /**
+   * Allow free-text entry: called when the user presses Enter without a
+   * highlighted result, or clicks the "use as free text" footer row.
+   */
+  onFreeText?: (text: string) => void;
   /** Max results to show */
   limit?: number;
   placeholder?: string;
@@ -82,6 +87,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       domains,
       searchDomains,
       onSelect,
+      onFreeText,
       limit = 15,
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
@@ -224,6 +230,17 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       }
     };
 
+    const submitFreeText = () => {
+      const text = query.trim();
+      if (!text || !onFreeText) return;
+      onFreeText(text);
+      setOpen(false);
+      setDrill(null);
+      setResults([]);
+      setActiveIndex(-1);
+      if (clearOnSelect ?? bare) setQuery('');
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -247,6 +264,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       } else if (e.key === 'Enter' && activeIndex >= 0 && list[activeIndex]) {
         e.preventDefault();
         pick(list[activeIndex]);
+      } else if (e.key === 'Enter' && onFreeText && query.trim()) {
+        e.preventDefault();
+        submitFreeText();
       } else if (e.key === 'Escape') {
         e.preventDefault();
         if (drill) closeDrill();
@@ -295,7 +315,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             />
 
             {/* floating dropdown */}
-            {open && (drill || list.length > 0) && (
+            {open &&
+              (drill ||
+                list.length > 0 ||
+                (onFreeText && query.trim() !== '')) && (
               <div
                 role="presentation"
                 className={cn(
@@ -388,6 +411,20 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                   {drill && drill.results !== null && drill.results.length === 0 && (
                     <li className="text-muted-foreground px-3 py-2 text-sm">
                       No dosed forms found — press ← to go back.
+                    </li>
+                  )}
+                  {!drill && onFreeText && query.trim() !== '' && (
+                    <li role="presentation" className="border-border border-t">
+                      <button
+                        type="button"
+                        onClick={submitFreeText}
+                        className={cn(
+                          'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
+                          'focus:bg-muted/60 focus:outline-none'
+                        )}
+                      >
+                        Use “{query.trim()}” as free text…
+                      </button>
                     </li>
                   )}
                 </ul>
