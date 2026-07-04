@@ -34,6 +34,11 @@ export interface CodeLookupProps
   /** Max results to show */
   limit?: number;
   placeholder?: string;
+  /**
+   * Render just the search input + dropdown (no card, no status line) for
+   * embedding in forms. Loading/error state shows in the placeholder.
+   */
+  bare?: boolean;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -74,6 +79,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       onSelect,
       limit = 15,
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
+      bare = false,
       className,
       'data-testid': dataTestId,
       ...props
@@ -236,22 +242,20 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       }
     };
 
-    return (
-      <Card
-        ref={ref}
-        padding="none"
-        // Card clips overflow by default — the dropdown must escape it
-        className={cn('w-full overflow-visible', className)}
-        data-testid={dataTestId}
-        {...props}
-      >
-        <CardContent className="space-y-2 px-4 py-4">
-          <div className="relative">
-            <SearchIcon
-              size={16}
-              className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
-            />
-            <input
+    const effectivePlaceholder =
+      status.state === 'loading'
+        ? `Loading offline index… ${status.pct}%`
+        : status.state === 'error'
+          ? 'Code index unavailable'
+          : placeholder;
+
+    const searchBox = (
+      <div className="relative">
+        <SearchIcon
+          size={16}
+          className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
+        />
+        <input
               type="text"
               role="combobox"
               aria-expanded={open && list.length > 0}
@@ -265,11 +269,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 setQuery(e.target.value);
                 setDrill(null);
               }}
-              onKeyDown={handleKeyDown}
-              onFocus={() => list.length > 0 && setOpen(true)}
-              onBlur={() => setOpen(false)}
-              placeholder={placeholder}
-              disabled={status.state === 'error'}
+          onKeyDown={handleKeyDown}
+          onFocus={() => list.length > 0 && setOpen(true)}
+          onBlur={() => setOpen(false)}
+          placeholder={effectivePlaceholder}
+          disabled={status.state === 'error'}
               className={cn(
                 'border-border bg-background text-foreground placeholder:text-muted-foreground',
                 'h-10 w-full rounded-md border pr-3 pl-9 text-sm',
@@ -376,7 +380,33 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 </ul>
               </div>
             )}
-          </div>
+      </div>
+    );
+
+    if (bare) {
+      return (
+        <div
+          ref={ref}
+          className={cn('w-full', className)}
+          data-testid={dataTestId}
+          {...props}
+        >
+          {searchBox}
+        </div>
+      );
+    }
+
+    return (
+      <Card
+        ref={ref}
+        padding="none"
+        // Card clips overflow by default — the dropdown must escape it
+        className={cn('w-full overflow-visible', className)}
+        data-testid={dataTestId}
+        {...props}
+      >
+        <CardContent className="space-y-2 px-4 py-4">
+          {searchBox}
 
           {/* status line */}
           <div className="text-muted-foreground flex items-center gap-2 text-xs" aria-live="polite">

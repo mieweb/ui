@@ -392,7 +392,7 @@ function AddOrderForm({
     <div
       role="form"
       aria-label={`Add order for ${problemText}`}
-      className="border-border bg-muted/40 mt-1.5 ml-2.5 flex flex-wrap items-start gap-1.5 rounded-md border border-dashed p-2"
+      className="border-border bg-muted/40 mt-1.5 ml-2.5 flex flex-wrap items-center gap-1.5 rounded-md border border-dashed p-2"
     >
       <select
         aria-label="Order type filter"
@@ -402,7 +402,8 @@ function AddOrderForm({
           if (e.key === 'Escape') onCancel();
         }}
         className={cn(
-          'border-border bg-background text-foreground h-8 rounded-md border px-1.5 text-sm',
+          'border-border bg-background text-foreground rounded-md border px-1.5 text-sm',
+          renderSearch ? 'h-10' : 'h-8',
           'focus:ring-ring focus:ring-2 focus:outline-none'
         )}
       >
@@ -453,7 +454,12 @@ function AddOrderForm({
           </Button>
         </>
       )}
-      <Button variant="ghost" size="sm" onClick={onCancel} className="h-8">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onCancel}
+        className={renderSearch ? 'h-10' : 'h-8'}
+      >
         Done
       </Button>
     </div>

@@ -189,7 +189,7 @@ function InteractiveTemplate() {
             onSelect={onPick}
             limit={10}
             placeholder='Search orders… (try "lasix", "a1c", "chest x")'
-            className="border-0 shadow-none"
+            bare
           />
         )}
         onLinkOrder={(order, concernId) =>
