@@ -740,9 +740,14 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   key={item.concernId}
                   data-concern-id={item.concernId}
                   {...blockProps(item.concernId)}
+                  // While the add-order form is open, dragging must yield to
+                  // text selection/editing inside it.
+                  draggable={drag.enabled && addingFor !== item.concernId}
                   className={cn(
                     'group border-border/60 relative rounded-md border px-3 py-2',
-                    drag.enabled && 'cursor-grab active:cursor-grabbing',
+                    drag.enabled &&
+                      addingFor !== item.concernId &&
+                      'cursor-grab active:cursor-grabbing',
                     dragIndicatorClasses(drag, item.concernId),
                     orderOver?.type === 'concern' &&
                       orderOver.concernId === item.concernId &&
