@@ -236,7 +236,42 @@ In Storybook, the 🌐 **Language** toolbar global switches the locale for the
 > `new Worker(new URL(...))` pattern needs bundler configuration in the tsup
 > build. Storybook (Vite) handles it natively; see `Healthcare/CodeLookup`.
 
-## 6. Server-side lookup (MCP)
+## 6. Health surveillance — programs.json
+
+The **occupational** (OSHA/FMCSA/NFPA/FAA/OPM/USCG/MSHA/NIOSH/NRC/DOE/USCIS/
+DOD programs) and **quality** (CMS eCQM) domains form the *health
+surveillance* umbrella. Their shared metadata ships as a `programs.json`
+sidecar next to the shards (copied per locale by `build-index.mjs`):
+
+```jsonc
+{
+  "programs": {
+    "OSHA|1910.95": {
+      "kind": "surveillance",        // surveillance | fitness | credential | quality
+      "periodicityMonths": 12,        // omitted = one-time / event-driven
+      "orders": ["HCPCS|92551", "…"]  // CODETYPE|FULLCODE refs into the shards
+    },
+    "eCQM|CMS125": {
+      "kind": "quality",
+      "periodicityMonths": 24,
+      "sex": "F", "ageMin": 40, "ageMax": 74,
+      "orders": ["HCPCS|77057"]
+    }
+  }
+}
+```
+
+- The worker loads it network-first with OPFS caching (legacy
+  `order-sets.json` `{ sets: {…} }` still accepted) and resolves a program's
+  order refs against the loaded shards via `findByCodes()` for the → drill.
+- **`programsUrl` prop** overrides the sidecar URL so a deployment can serve
+  employer-specific protocols without rebuilding shards.
+- A `{ type: 'programs' }` worker message returns the full map — used by the
+  `HealthSurveillance` component's due engine
+  (`src/components/HealthSurveillance/`), which evaluates a `PatientHistory`
+  against these programs for due/overdue/pending/satisfied status.
+
+## 7. Server-side lookup (MCP)
 
 `packages/codify` also builds a **SQLite FTS5** database
 (`node packages/codify/scripts/build-sqlite.mjs`)
@@ -246,7 +281,7 @@ names → codes quickly: `lookup_code` (BM25 adjusted by usage:
 `bm25 − 0.5·ln(1+usage)`), `get_code`, and `medication_forms` (mirrors the UI
 drill-down). See `packages/codify/README.md` for client config.
 
-## 7. Known limits / production roadmap
+## 8. Known limits / production roadmap
 
 - **No concept grouping yet** — Lasix and furosemide appear as separate rows
   rather than one grouped concept; the plan is RXCUI grouping (RxNorm),

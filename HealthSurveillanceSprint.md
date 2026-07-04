@@ -43,9 +43,10 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - [ ] Assessment variant with program-as-concern + due orders (follow-up: compose Assessment + HealthSurveillance in one story)
 
 ## Phase 7 — docs, tests, CI
-- [ ] READMEs: programs.json format, history schema, evaluate semantics
-- [ ] Unit tests: findByCodes, familyKey domains
-- [ ] Lint/build green, commit
+- [x] CodeLookup README: programs.json format, programsUrl override, health-surveillance umbrella
+- [x] history/evaluate semantics documented inline + story autodocs
+- [x] Unit tests: familyKey/familyTerm/normalize (engine), due engine — 21 passing
+- [x] Lint + typecheck green, committed on clinical-components
 
 ## Progress log
 - 2026-07-04: Sprint file created; starting Phase 1.
@@ -65,3 +66,7 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
   overdue lead & A1c, "Add 4 orders" batch linked to the lead program.
   Note: an old shared browser tab had environmental /codify/* request
   blocking — fresh tab works; not a product issue.
+- 2026-07-04: Phase 7 done — README section, engine + due-engine tests (21
+  passing), lint/typecheck green. Follow-ups: Assessment+HealthSurveillance
+  composite story; dueForOrder badges inside the Assessment add-order flow;
+  allergy domain extract.
