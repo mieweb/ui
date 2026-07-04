@@ -8,6 +8,58 @@
 
 import type { PatientHistory } from './history';
 
+/**
+ * One entry in a program's order set:
+ * - `"CODETYPE|FULLCODE"` — a plain required order
+ * - `{ alt: [a, b] }` — mutually exclusive alternatives (one-of): a
+ *   colonoscopy OR a FIT satisfies colorectal screening
+ * - `{ key, after: […] }` — depends on completed prerequisites (Gantt edge):
+ *   the RMO's fitness-for-duty determination needs the panel results first,
+ *   and a program may carry several determinations (per panel / per SEG)
+ */
+export type ProgramOrder =
+  | string
+  | {
+      key?: string;
+      alt?: string[];
+      after?: string[];
+    };
+
+/** Normalized order entry: alternative keys + prerequisite keys. */
+export interface OrderSpec {
+  /** Alternatives — exactly one should be ordered */
+  keys: string[];
+  /** Order keys that must be completed before this one can be performed */
+  after: string[];
+}
+
+export function normalizeOrders(orders?: ProgramOrder[]): OrderSpec[] {
+  return (orders ?? [])
+    .map((o) =>
+      typeof o === 'string'
+        ? { keys: [o], after: [] }
+        : { keys: o.alt ?? (o.key ? [o.key] : []), after: o.after ?? [] }
+    )
+    .filter((s) => s.keys.length > 0);
+}
+
+/** Every key that can satisfy/appear in the program's order set. */
+export function flattenOrderKeys(orders?: ProgramOrder[]): string[] {
+  return normalizeOrders(orders).flatMap((s) => s.keys);
+}
+
+/** Keys of everything completed in the history (orders, procedures,
+ * immunizations) — used to unlock dependent orders. */
+export function completedKeys(history: PatientHistory): Set<string> {
+  const done = new Set<string>();
+  for (const o of history.orders) {
+    if (o.status === 'completed') done.add(o.key);
+  }
+  for (const p of history.procedures ?? []) done.add(p.key);
+  for (const i of history.immunizations ?? []) done.add(i.key);
+  return done;
+}
+
 /** Program metadata — mirrors programs.json (see mieweb/codify). */
 export interface ProgramMeta {
   kind?: 'surveillance' | 'fitness' | 'credential' | 'quality';
@@ -16,8 +68,9 @@ export interface ProgramMeta {
   ageMin?: number;
   ageMax?: number;
   sex?: 'M' | 'F';
-  /** Satisfying orders, CODETYPE|FULLCODE */
-  orders?: string[];
+  /** Satisfying orders — plain keys, one-of alternatives, or dependent
+   * entries (see ProgramOrder) */
+  orders?: ProgramOrder[];
 }
 
 export type ProgramsMap = Record<string, ProgramMeta>;
@@ -77,7 +130,7 @@ export function evaluateProgram(
     return { ...base, status: 'not-applicable' };
   }
 
-  const satisfying = new Set(program.orders ?? []);
+  const satisfying = new Set(flattenOrderKeys(program.orders));
   // Completions come from finished orders, procedures and immunizations —
   // whatever the source system recorded them as.
   const completions: string[] = [];
@@ -163,6 +216,6 @@ export function dueForOrder(orderKey: string, dueItems: DueItem[]): DueItem[] {
   return dueItems.filter(
     (i) =>
       (i.status === 'due' || i.status === 'overdue') &&
-      (i.program.orders ?? []).includes(orderKey)
+      flattenOrderKeys(i.program.orders).includes(orderKey)
   );
 }

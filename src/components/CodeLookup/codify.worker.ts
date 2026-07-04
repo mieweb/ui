@@ -42,7 +42,16 @@ export interface ProgramMeta {
   ageMin?: number;
   ageMax?: number;
   sex?: 'M' | 'F';
-  orders?: string[];
+  /** Plain keys, one-of alternatives ({ alt }) or dependent entries
+   * ({ key, after }) — see HealthSurveillance/evaluate.ts ProgramOrder */
+  orders?: (string | { key?: string; alt?: string[]; after?: string[] })[];
+}
+
+/** Every resolvable key in an order set (alternatives flattened). */
+function orderKeys(program: ProgramMeta | null): string[] {
+  return (program?.orders ?? []).flatMap((o) =>
+    typeof o === 'string' ? [o] : (o.alt ?? (o.key ? [o.key] : []))
+  );
 }
 
 /** CODETYPE|FULLCODE → program metadata (from programs.json, optional) */
@@ -361,7 +370,7 @@ self.onmessage = (e: MessageEvent) => {
     // into labeled results from whichever shards are loaded.
     const t0 = performance.now();
     const program = programs?.[msg.key] ?? null;
-    const results = findByCodes([...shards.values()], program?.orders ?? []);
+    const results = findByCodes([...shards.values()], orderKeys(program));
     self.postMessage({
       type: 'results',
       id: msg.id,

@@ -4,11 +4,20 @@
     "OSHA|1910.95": {
       "kind": "surveillance",
       "periodicityMonths": 12,
-      "orders": ["HCPCS|92551", "HCPCS|0209T", "LOINC|89015-2"]
+      "orders": [
+        { "alt": ["HCPCS|92551", "HCPCS|0209T", "LOINC|89015-2"] }
+      ]
     },
     "OSHA|1910.134": {
       "kind": "fitness",
-      "orders": ["HCPCS|94150", "HCPCS|94014", "HCPCS|71020"]
+      "orders": [
+        { "alt": ["HCPCS|94150", "HCPCS|94014"] },
+        "HCPCS|71020",
+        {
+          "key": "LOINC|85216-0",
+          "after": ["HCPCS|94150", "HCPCS|71020"]
+        }
+      ]
     },
     "OSHA|1910.1025": {
       "kind": "surveillance",
@@ -146,10 +155,19 @@
       "periodicityMonths": 12,
       "orders": [
         "HCPCS|99173",
-        "HCPCS|92551",
+        { "alt": ["HCPCS|92551", "HCPCS|0209T"] },
         "HCPCS|G0403",
         "LabCorp Order|221010",
-        "LabCorp Order|790352"
+        "LabCorp Order|790352",
+        {
+          "key": "LOINC|85216-0",
+          "after": [
+            "HCPCS|99173",
+            "HCPCS|G0403",
+            "LabCorp Order|221010",
+            "LabCorp Order|790352"
+          ]
+        }
       ]
     },
     "USCG|46 CFR 10.302": {
@@ -223,7 +241,7 @@
       "periodicityMonths": 120,
       "ageMin": 45,
       "ageMax": 75,
-      "orders": ["HCPCS|44388", "LabCorp Order|182949"]
+      "orders": [{ "alt": ["HCPCS|44388", "LabCorp Order|182949"] }]
     },
     "eCQM|CMS117": {
       "kind": "quality",

@@ -70,3 +70,11 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
   passing), lint/typecheck green. Follow-ups: Assessment+HealthSurveillance
   composite story; dueForOrder badges inside the Assessment add-order flow;
   allergy domain extract.
+- 2026-07-04: Post-sprint: Assessment "Add concern" wording; concerns rank
+  first in auto (preferDomains tiers + viaFuzzy guard); ICD-10 boosted over
+  SNOMED (boostCodetypes); billableOnly leaf-ICD-10 filter + story.
+- 2026-07-04: Structured program orders — { alt } one-of groups (colonoscopy
+  OR FIT, mutually exclusive checkboxes) and { key, after } dependencies
+  (RMO fitness-for-duty determination blocked until panel results complete;
+  supports multiple determinations per panel/SEG). Due-list picklist renders
+  dependency lanes with disabled "after …" entries; 26 tests green.

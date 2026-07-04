@@ -4,6 +4,9 @@ import {
   evaluateDue,
   dueForOrder,
   isApplicable,
+  normalizeOrders,
+  flattenOrderKeys,
+  completedKeys,
   type ProgramsMap,
 } from './evaluate';
 import type { PatientHistory } from './history';
@@ -190,5 +193,83 @@ describe('dueForOrder', () => {
       'OSHA|1910.95',
     ]);
     expect(dueForOrder('HCPCS|77057', items)).toEqual([]);
+  });
+});
+
+describe('structured orders — alternatives & dependencies', () => {
+  const colorectal = {
+    kind: 'quality' as const,
+    periodicityMonths: 120,
+    // one-of: colonoscopy OR FIT
+    orders: [{ alt: ['HCPCS|44388', 'LabCorp Order|182949'] }],
+  };
+  const ffd = {
+    kind: 'fitness' as const,
+    periodicityMonths: 12,
+    orders: [
+      'HCPCS|99173',
+      { alt: ['HCPCS|92551', 'HCPCS|0209T'] },
+      // RMO determination depends on completed results (Gantt edge)
+      { key: 'LOINC|85216-0', after: ['HCPCS|99173'] },
+    ],
+  };
+
+  it('normalizeOrders handles strings, alt groups and dependencies', () => {
+    expect(normalizeOrders(ffd.orders)).toEqual([
+      { keys: ['HCPCS|99173'], after: [] },
+      { keys: ['HCPCS|92551', 'HCPCS|0209T'], after: [] },
+      { keys: ['LOINC|85216-0'], after: ['HCPCS|99173'] },
+    ]);
+    expect(flattenOrderKeys(colorectal.orders)).toEqual([
+      'HCPCS|44388',
+      'LabCorp Order|182949',
+    ]);
+  });
+
+  it('either alternative satisfies the program', () => {
+    const item = evaluateProgram(
+      'eCQM|CMS130',
+      colorectal,
+      {
+        ...basePatient,
+        orders: [
+          {
+            key: 'LabCorp Order|182949', // FIT, not colonoscopy
+            status: 'completed',
+            date: '2026-01-01',
+          },
+        ],
+      },
+      NOW
+    );
+    expect(item.status).toBe('satisfied');
+  });
+
+  it('completedKeys unlocks dependent orders from any completion source', () => {
+    const done = completedKeys({
+      ...basePatient,
+      orders: [{ key: 'HCPCS|99173', status: 'completed', date: '2026-06-01' }],
+      procedures: [{ key: 'HCPCS|G0403', date: '2026-06-01' }],
+      immunizations: [{ key: 'CVX|88', date: '2025-10-01' }],
+    });
+    expect(done.has('HCPCS|99173')).toBe(true);
+    expect(done.has('HCPCS|G0403')).toBe(true);
+    expect(done.has('CVX|88')).toBe(true);
+    expect(done.has('LOINC|85216-0')).toBe(false);
+  });
+
+  it('a dependent completion satisfies like any other', () => {
+    const item = evaluateProgram(
+      'OPM|GS-1811',
+      ffd,
+      {
+        ...basePatient,
+        orders: [
+          { key: 'LOINC|85216-0', status: 'completed', date: '2026-05-01' },
+        ],
+      },
+      NOW
+    );
+    expect(item.status).toBe('satisfied');
   });
 });

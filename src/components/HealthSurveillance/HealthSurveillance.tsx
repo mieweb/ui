@@ -24,7 +24,8 @@ import {
   ChevronRightIcon,
   ClipboardListIcon,
 } from '../Icons';
-import { evaluateDue, type DueItem, type ProgramsMap } from './evaluate';
+import { evaluateDue, normalizeOrders, completedKeys } from './evaluate';
+import type { DueItem, OrderSpec, ProgramsMap } from './evaluate';
 import type { PatientHistory } from './history';
 
 // =============================================================================
@@ -150,24 +151,51 @@ export const HealthSurveillance = React.forwardRef<
     const [expanded, setExpanded] = React.useState<string | null>(null);
     const [checked, setChecked] = React.useState<Set<string>>(new Set());
 
+    /** Everything already completed — unlocks dependent orders. */
+    const completedSet = React.useMemo(() => completedKeys(history), [history]);
+
+    /** Dependency level per spec (0 = no prerequisites — crude Gantt lane). */
+    const specLevel = (spec: OrderSpec, specs: OrderSpec[]): number => {
+      let level = 0;
+      let cur = spec.after;
+      const guard = new Set<OrderSpec>();
+      while (cur.length > 0 && level < 8) {
+        level++;
+        const parents = specs.filter(
+          (p) => !guard.has(p) && p.keys.some((k) => cur.includes(k))
+        );
+        parents.forEach((p) => guard.add(p));
+        cur = parents.flatMap((p) => p.after);
+      }
+      return level;
+    };
+
+    /** Prerequisites not yet completed in the history. */
+    const unmetAfter = (spec: OrderSpec) =>
+      spec.after.filter((k) => !completedSet.has(k));
+
     const toggleExpand = (item: DueItem) => {
       if (expanded === item.key) {
         setExpanded(null);
         return;
       }
       setExpanded(item.key);
-      // preselect every order that isn't already pending
-      setChecked(
-        new Set(
-          (item.program.orders ?? []).filter(
-            (o) => !item.pendingKeys.includes(o)
-          )
-        )
-      );
+      // preselect: first alternative of every actionable entry — skip
+      // already-pending orders and entries blocked by unmet prerequisites
+      const specs = normalizeOrders(item.program.orders);
+      const pre = new Set<string>();
+      for (const spec of specs) {
+        if (unmetAfter(spec).length > 0) continue; // blocked (Gantt: later lane)
+        const first = spec.keys.find((k) => !item.pendingKeys.includes(k));
+        if (first && !spec.keys.some((k) => item.pendingKeys.includes(k)))
+          pre.add(first);
+      }
+      setChecked(pre);
     };
 
     const picksFor = (item: DueItem): SurveillanceOrderPick[] =>
-      (item.program.orders ?? [])
+      normalizeOrders(item.program.orders)
+        .flatMap((s) => s.keys)
         .filter((o) => checked.has(o))
         .map((o) => ({
           key: o,
@@ -179,8 +207,8 @@ export const HealthSurveillance = React.forwardRef<
     const renderItem = (item: DueItem) => {
       const badge = STATUS_BADGE[item.status];
       const isOpen = expanded === item.key;
-      const orders = item.program.orders ?? [];
-      const canOrder = Boolean(onOrder || onOrderMany) && orders.length > 0;
+      const specs = normalizeOrders(item.program.orders);
+      const canOrder = Boolean(onOrder || onOrderMany) && specs.length > 0;
       const due = fmtDate(item.dueDate);
       const last = fmtDate(item.lastCompleted);
       return (
@@ -224,23 +252,56 @@ export const HealthSurveillance = React.forwardRef<
           </div>
           {isOpen && (
             <div className="bg-muted/40 space-y-1.5 px-9 py-2">
-              {orders.map((o) => (
-                <Checkbox
-                  key={o}
-                  size="sm"
-                  label={orderLabel(o)}
-                  description={
-                    item.pendingKeys.includes(o) ? 'already pending' : undefined
-                  }
-                  checked={checked.has(o)}
-                  onChange={(e) => {
-                    const next = new Set(checked);
-                    if (e.target.checked) next.add(o);
-                    else next.delete(o);
-                    setChecked(next);
-                  }}
-                />
-              ))}
+              {specs.map((spec, si) => {
+                const level = specLevel(spec, specs);
+                const blocked = unmetAfter(spec);
+                const isAlt = spec.keys.length > 1;
+                return (
+                  <div
+                    key={si}
+                    className={cn(level > 0 && 'border-border border-l-2')}
+                    style={
+                      level > 0 ? { marginLeft: (level - 1) * 16 + 2 } : undefined
+                    }
+                  >
+                    {isAlt && (
+                      <div className="text-muted-foreground pl-1 text-[11px] font-medium tracking-wide uppercase">
+                        one of
+                      </div>
+                    )}
+                    <div className={cn('space-y-1', level > 0 && 'pl-3')}>
+                      {spec.keys.map((o) => (
+                        <Checkbox
+                          key={o}
+                          size="sm"
+                          label={orderLabel(o)}
+                          description={
+                            blocked.length > 0
+                              ? `after ${blocked.map(orderLabel).join(', ')}`
+                              : item.pendingKeys.includes(o)
+                                ? 'already pending'
+                                : undefined
+                          }
+                          disabled={blocked.length > 0}
+                          checked={checked.has(o)}
+                          onChange={(e) => {
+                            const next = new Set(checked);
+                            if (e.target.checked) {
+                              // alternatives are mutually exclusive: checking
+                              // one unchecks its siblings
+                              for (const sib of spec.keys) next.delete(sib);
+                              next.add(o);
+                            } else {
+                              next.delete(o);
+                            }
+                            setChecked(next);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
               <div className="flex items-center gap-2 pt-1">
                 <Button
                   size="sm"

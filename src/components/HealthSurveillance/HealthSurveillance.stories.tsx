@@ -50,6 +50,7 @@ const PROGRAM_LABELS: Record<string, string> = {
   'OSHA|1910.95': 'Hearing conservation (OSHA 1910.95)',
   'OSHA|1910.1025': 'Lead surveillance (OSHA 1910.1025)',
   'OSHA|1910.1030': 'Bloodborne pathogens / hep B (OSHA 1910.1030)',
+  'OSHA|1910.134': 'Respirator medical clearance (OSHA 1910.134)',
   'eCQM|CMS122': 'Diabetes: A1c control (CMS122)',
   'eCQM|CMS124': 'Cervical cancer screening (CMS124)',
   'eCQM|CMS125': 'Breast cancer screening (CMS125)',
@@ -77,9 +78,18 @@ const ORDER_LABELS: Record<string, string> = {
   'LabCorp Order|182949': 'Occult blood, fecal (FIT)',
   'LabCorp Order|009100': 'Pap smear',
   'CVX|88': 'Influenza vaccine',
+  'HCPCS|94150': 'Spirometry (vital capacity)',
+  'HCPCS|94014': 'Spirometry (patient recorded)',
+  'HCPCS|71020': 'Chest X-ray',
+  'LOINC|85216-0': 'Fitness-for-duty determination (RMO)',
 };
 
-const ENROLLED = ['OSHA|1910.95', 'OSHA|1910.1025', 'OSHA|1910.1030'];
+const ENROLLED = [
+  'OSHA|1910.95',
+  'OSHA|1910.1025',
+  'OSHA|1910.1030',
+  'OSHA|1910.134',
+];
 
 const HISTORY: PatientHistory = {
   age: 55,
