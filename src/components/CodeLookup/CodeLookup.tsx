@@ -227,7 +227,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       <Card
         ref={ref}
         padding="none"
-        className={cn('w-full', className)}
+        // Card clips overflow by default — the dropdown must escape it
+        className={cn('w-full overflow-visible', className)}
         data-testid={dataTestId}
         {...props}
       >
