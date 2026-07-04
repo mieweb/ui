@@ -741,18 +741,21 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               const linkedOrders = orders.filter(
                 (o) => o.concernId === item.concernId
               );
+              const bp = blockProps(item.concernId);
+              const formOpen = addingFor === item.concernId;
               return (
                 <li
                   key={item.concernId}
                   data-concern-id={item.concernId}
-                  {...blockProps(item.concernId)}
-                  // While the add-order form is open, dragging must yield to
-                  // text selection/editing inside it.
-                  draggable={drag.enabled && addingFor !== item.concernId}
+                  {...bp}
+                  // While the add-order form is open the block body must yield
+                  // to text selection/editing — the header row (below) stays a
+                  // drag handle so the block can still be moved.
+                  draggable={drag.enabled && !formOpen}
                   className={cn(
                     'group border-border/60 relative rounded-md border px-3 py-2',
                     drag.enabled &&
-                      addingFor !== item.concernId &&
+                      !formOpen &&
                       'cursor-grab active:cursor-grabbing',
                     dragIndicatorClasses(drag, item.concernId),
                     orderOver?.type === 'concern' &&
@@ -760,7 +763,16 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                       'ring-primary-400 bg-primary-50/50 dark:bg-primary-950/50 ring-2'
                   )}
                 >
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <div
+                    className={cn(
+                      'flex flex-wrap items-center gap-x-2 gap-y-1',
+                      drag.enabled && formOpen && 'cursor-grab active:cursor-grabbing'
+                    )}
+                    // Header row remains a drag source while the form is open
+                    draggable={drag.enabled && formOpen}
+                    onDragStart={formOpen ? bp.onDragStart : undefined}
+                    onDragEnd={formOpen ? bp.onDragEnd : undefined}
+                  >
                     {drag.enabled && (
                       <GripVerticalIcon
                         size={14}
