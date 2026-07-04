@@ -114,14 +114,20 @@ export interface AssessmentProps
   /** Called when a row action is clicked */
   onAction?: (item: AssessmentItem, action: AssessmentAction) => void;
   /**
-   * Called when a new order is created from the inline per-problem form.
-   * Enables the "Add order" affordance — the new order should come back in
-   * via `orders` with `concernId` set to the item's concern.
+   * Called when a new order is created from the inline order form.
+   * Enables the "Add order" affordances — `item` is null when the order is
+   * added from the unlinked bucket. The new order should come back in via
+   * `orders` (with `concernId` set to the item's concern when linked).
    */
   onAddOrder?: (
-    item: AssessmentItem,
+    item: AssessmentItem | null,
     order: { type: OrderType; display: string; code?: AssessmentOrder['code'] }
   ) => void;
+  /**
+   * Called when a diagnosis is picked to add a new problem to the assessment.
+   * Enables the "Add problem" search row (requires renderOrderSearch).
+   */
+  onAddAssessment?: (pick: OrderCodePick) => void;
   /**
    * Render a code-lookup search for the add-order form (dependency-injected
    * so the library build doesn't bundle the lookup's worker — pass e.g.
@@ -502,6 +508,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       onShowPlanChange,
       onAction,
       onAddOrder,
+      onAddAssessment,
       onLinkOrder,
       onReorderItems,
       onReorderOrders,
@@ -514,6 +521,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     ref
   ) => {
     const [addingFor, setAddingFor] = React.useState<string | null>(null);
+    const [addingUnlinked, setAddingUnlinked] = React.useState(false);
     const [announcement, setAnnouncement] = React.useState('');
 
     const concernById = React.useMemo(
@@ -875,8 +883,28 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
             })}
           </ol>
 
+          {/* Add a problem (dx code) to the assessment */}
+          {!readOnly && onAddAssessment && renderOrderSearch && (
+            <div
+              role="form"
+              aria-label="Add problem to assessment"
+              className="border-border bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border border-dashed p-2"
+            >
+              <span className="text-muted-foreground shrink-0 text-xs font-semibold tracking-wide uppercase">
+                Add problem
+              </span>
+              <div className="min-w-64 flex-1">
+                {renderOrderSearch({
+                  domains: ['condition'],
+                  onPick: onAddAssessment,
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Unlinked orders bucket */}
-          {showPlan && unlinkedOrders.length > 0 && (
+          {showPlan &&
+            (unlinkedOrders.length > 0 || (!readOnly && onAddOrder)) && (
             <section
               aria-label="Orders not linked to a problem"
               className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-950"
@@ -884,6 +912,17 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               <h4 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900 dark:text-amber-200">
                 <AlertCircleIcon size={14} />
                 Orders not linked to a problem
+                {!readOnly && onAddOrder && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAddingUnlinked((v) => !v)}
+                    leftIcon={<PlusIcon size={12} />}
+                    className="ml-auto h-6 px-1.5 text-xs font-medium text-amber-900 dark:text-amber-200"
+                  >
+                    Add order
+                  </Button>
+                )}
               </h4>
               <ul className="mt-1">
                 {unlinkedOrders.map((order) => (
@@ -928,6 +967,15 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   </li>
                 ))}
               </ul>
+
+              {!readOnly && onAddOrder && addingUnlinked && (
+                <AddOrderForm
+                  problemText="no problem (unlinked)"
+                  onSubmit={(order) => onAddOrder(null, order)}
+                  onCancel={() => setAddingUnlinked(false)}
+                  renderSearch={renderOrderSearch}
+                />
+              )}
             </section>
           )}
         </CardContent>

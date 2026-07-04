@@ -141,18 +141,51 @@ const sampleOrders: AssessmentOrder[] = [
 ];
 
 function InteractiveTemplate() {
+  const [concernList, setConcernList] = useState<ConditionConcern[]>(concerns);
   const [items, setItems] = useState<AssessmentItem[]>(sampleItems);
   const [orders, setOrders] = useState<AssessmentOrder[]>(sampleOrders);
   const [showPlan, setShowPlan] = useState(true);
 
+  const codetypeToSystem: Record<string, string> = {
+    ICD10: 'ICD-10-CM',
+    'SNOMED US': 'SNOMED',
+  };
+
   return (
     <div className="mx-auto max-w-3xl">
       <Assessment
-        concerns={concerns}
+        concerns={concernList}
         items={items}
         orders={orders}
         showPlan={showPlan}
         onShowPlanChange={setShowPlan}
+        onAddAssessment={(pick) => {
+          const concernId = `C-${Date.now()}`;
+          const assertionId = `A-${Date.now()}`;
+          setConcernList((prev) => [
+            ...prev,
+            {
+              concernId,
+              clinicalStatus: 'active',
+              assertions: [
+                {
+                  id: assertionId,
+                  date: new Date().toISOString().slice(0, 10),
+                  text: pick.label,
+                  verificationStatus: 'confirmed',
+                  coding: [
+                    {
+                      system: codetypeToSystem[pick.codetype] ?? pick.codetype,
+                      code: pick.fullcode,
+                      primary: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ]);
+          setItems((prev) => [...prev, { concernId, assertionId }]);
+        }}
         onReorderItems={(ids) =>
           setItems((prev) =>
             [...prev].sort(
@@ -178,7 +211,7 @@ function InteractiveTemplate() {
                 ? `${order.code.codetype} ${order.code.fullcode}`
                 : undefined,
               code: order.code,
-              concernId: item.concernId,
+              concernId: item?.concernId, // null item = unlinked order
             },
           ])
         }
