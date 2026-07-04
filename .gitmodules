@@ -4,6 +4,3 @@
 [submodule "packages/ychart"]
 	path = packages/ychart
 	url = https://github.com/mieweb/ychart.git
-[submodule "packages/codify"]
-	path = packages/codify
-	url = https://github.com/mieweb/codify.git
