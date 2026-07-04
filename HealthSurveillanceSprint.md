@@ -27,9 +27,9 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - [x] Rebuild shards + browser verify
 
 ## Phase 4 — PatientHistory + due engine
-- [ ] history.ts: PatientHistory types (orders w/ status, observations, procedures, conditions, allergies, age, sex)
-- [ ] evaluate.ts: evaluateDue(history, programs) → due/overdue/pending/satisfied/not-applicable
-- [ ] Vitest unit tests for evaluation logic
+- [x] history.ts: PatientHistory types (orders w/ status, observations, procedures, conditions, allergies, age, sex)
+- [x] evaluate.ts: evaluateDue(history, programs) → due/overdue/pending/satisfied/not-applicable
+- [x] Vitest unit tests for evaluation logic (12 passing)
 
 ## Phase 5 — HealthSurveillance component
 - [ ] Due list + Done list rendered from evaluateDue
@@ -57,3 +57,6 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
   mariner aliases verified in browser.
 - 2026-07-04: Phase 3 done — quality domain (eCQM codetype, 8 CMS measures)
   with age/sex/periodicity metadata; CMS130 drill resolves colonoscopy + FIT.
+- 2026-07-04: Phase 4 done — PatientHistory types + pure due engine
+  (evaluateProgram/evaluateDue/dueForOrder) with enrollment semantics for
+  occupational vs quality; 12 unit tests passing.
