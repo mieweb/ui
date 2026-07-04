@@ -25,6 +25,7 @@ import {
   dragIndicatorClasses,
   type UseDragReorderReturn,
 } from '../../hooks/useDragReorder';
+import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
 
 // =============================================================================
 // Types — shared condition (concern/assertion) model
@@ -765,7 +766,8 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
     ref
   ) => {
     const [draft, setDraft] = React.useState('');
-    const [announcement, setAnnouncement] = React.useState('');
+    // clears-then-sets so repeated identical messages re-announce
+    const [announcement, setAnnouncement] = useLiveAnnouncement();
 
     const submitDraft = () => {
       const text = draft.trim();
@@ -798,7 +800,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
         );
         onReorder(ids);
       },
-      [concerns, onReorder, readOnly]
+      [concerns, onReorder, readOnly, setAnnouncement]
     );
 
     const handleAction = React.useCallback(

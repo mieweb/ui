@@ -34,6 +34,7 @@ import {
   dragIndicatorClasses,
   reorderIds,
 } from '../../hooks/useDragReorder';
+import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
 
 // =============================================================================
 // Types
@@ -577,7 +578,8 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(
       null
     );
-    const [announcement, setAnnouncement] = React.useState('');
+    // clears-then-sets so repeated identical messages re-announce
+    const [announcement, setAnnouncement] = useLiveAnnouncement();
 
     const concernById = React.useMemo(
       () => new Map(concerns.map((c) => [c.concernId, c])),

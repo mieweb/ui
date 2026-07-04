@@ -27,6 +27,7 @@ import {
   dragIndicatorClasses,
   type UseDragReorderReturn,
 } from '../../hooks/useDragReorder';
+import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
 
 // =============================================================================
 // Types
@@ -399,7 +400,8 @@ export const MedicationList = React.forwardRef<
     },
     ref
   ) => {
-    const [announcement, setAnnouncement] = React.useState('');
+    // clears-then-sets so repeated identical messages re-announce
+    const [announcement, setAnnouncement] = useLiveAnnouncement();
 
     const handleStatusChange = React.useCallback(
       (medication: Medication, status: MedicationStatus) => {
@@ -408,7 +410,7 @@ export const MedicationList = React.forwardRef<
         );
         onStatusChange?.(medication, status);
       },
-      [onStatusChange]
+      [onStatusChange, setAnnouncement]
     );
 
     const groups = GROUP_ORDER.map((status) => ({
@@ -457,7 +459,7 @@ export const MedicationList = React.forwardRef<
         );
         onReorder(ids);
       },
-      [medications, onReorder, readOnly]
+      [medications, onReorder, readOnly, setAnnouncement]
     );
 
     return (

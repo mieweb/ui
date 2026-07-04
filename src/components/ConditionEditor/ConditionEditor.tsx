@@ -316,15 +316,20 @@ export function ConditionEditor({
     onSave?.({
       text: text.trim(),
       // write the trimmed values back — whitespace in codes breaks equality
-      // checks downstream
-      coding: coding
-        .filter((c) => c.code.trim())
-        .map((c) => ({
-          ...c,
-          code: c.code.trim(),
-          display: c.display?.trim() || undefined,
-          mappedFrom: c.mappedFrom?.trim() || undefined,
-        })),
+      // checks downstream. A field marked explicitly unknown must not carry a
+      // value (e.g. one seeded from the prior assertion): value + "unknown"
+      // would be contradictory, so unknown wins and the value is dropped.
+      coding:
+        fields.coding?.known === false
+          ? []
+          : coding
+              .filter((c) => c.code.trim())
+              .map((c) => ({
+                ...c,
+                code: c.code.trim(),
+                display: c.display?.trim() || undefined,
+                mappedFrom: c.mappedFrom?.trim() || undefined,
+              })),
       verificationStatus: verification,
       changeType:
         mode === 'refine'
@@ -333,11 +338,13 @@ export function ConditionEditor({
             : 'refinement'
           : MODE_META[mode].changeType,
       supersedes: prior?.id,
-      severity,
+      severity: fields.severity?.known === false ? undefined : severity,
       onset:
-        onsetDate || onsetFuzzy
-          ? { date: onsetDate || undefined, fuzzy: onsetFuzzy || undefined }
-          : undefined,
+        fields.onset?.known === false
+          ? undefined
+          : onsetDate || onsetFuzzy
+            ? { date: onsetDate || undefined, fuzzy: onsetFuzzy || undefined }
+            : undefined,
       uncertainty,
       note: note.trim() || undefined,
     });

@@ -67,6 +67,11 @@ type Status =
   | { state: 'ready'; docCount: number }
   | { state: 'error'; message: string };
 
+/** Inverse of the domains-array → key encoding ('' = explicitly none). */
+function keyToDomains(key: string | null): string[] | undefined {
+  return key === null ? undefined : key === '' ? [] : key.split(',');
+}
+
 const DOMAIN_TEXT: Record<string, string> = {
   condition: 'text-primary-600 dark:text-primary-400',
   med: 'text-emerald-700 dark:text-emerald-400',
@@ -130,9 +135,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const resultsId = `${baseId}-results`;
     const optionId = (i: number) => `${baseId}-option-${i}`;
 
-    // domains are spread into stable keys so effects don't need array identity
-    const domainsKey = domains?.join(',') ?? '';
-    const searchDomainsKey = searchDomains?.join(',') ?? '';
+    // domain keys keep effects stable without array identity; null means the
+    // prop wasn't provided (search/load everything) — distinct from an
+    // explicitly empty array, which means "none"
+    const domainsKey = domains ? domains.join(',') : null;
+    const searchDomainsKey = searchDomains ? searchDomains.join(',') : null;
 
     React.useEffect(() => {
       const worker = new Worker(
@@ -178,7 +185,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       worker.postMessage({
         type: 'load',
         baseUrl: indexUrl,
-        domains: domainsKey ? domainsKey.split(',') : undefined,
+        domains: keyToDomains(domainsKey),
       });
       return () => worker.terminate();
     }, [indexUrl, domainsKey]);
@@ -205,7 +212,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           id,
           query: q,
           limit,
-          domains: searchDomainsKey ? searchDomainsKey.split(',') : undefined,
+          domains: keyToDomains(searchDomainsKey),
         });
       }, 40);
       return () => clearTimeout(t);

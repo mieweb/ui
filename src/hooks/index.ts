@@ -30,3 +30,4 @@ export {
   type UseDragReorderReturn,
   type DragOverState,
 } from './useDragReorder';
+export { useLiveAnnouncement } from './useLiveAnnouncement';

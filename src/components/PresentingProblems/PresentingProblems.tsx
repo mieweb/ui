@@ -23,6 +23,7 @@ import {
   useDragReorder,
   dragIndicatorClasses,
 } from '../../hooks/useDragReorder';
+import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
 
 // =============================================================================
 // Types
@@ -207,7 +208,8 @@ export const PresentingProblems = React.forwardRef<
     ref
   ) => {
     const [draft, setDraft] = React.useState('');
-    const [announcement, setAnnouncement] = React.useState('');
+    // clears-then-sets so repeated identical messages re-announce
+    const [announcement, setAnnouncement] = useLiveAnnouncement();
     const scopeMeta = SCOPE_META[scope];
     const ScopeIcon = scopeMeta.icon;
 
