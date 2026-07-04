@@ -86,6 +86,8 @@ const SHORT_PRIOR_WEIGHT = 3;
 /** Multiplier for docs whose first token starts with the query (leading
  * prefix), so "l" surfaces entries named l… over incidental l-word matches. */
 const LEAD_BONUS = 2.5;
+/** docFirstTok sentinel for docs with no tokens. */
+const NO_TOKEN = 0xffffffff;
 
 export function parseShard(buf: ArrayBuffer): CodifyShard {
   const view = new DataView(buf);
@@ -286,51 +288,19 @@ export function searchShards(
   if (qTokens.length === 0) return [];
   const results: CodifyResult[] = [];
 
-  // Collapsing dedupes many variants per family, so gather a wider candidate
-  // pool to still fill `limit` with distinct families.
-  const perShard = collapse ? limit * 4 : limit;
   for (const s of shards) {
-    searchShard(s, qTokens, results, perShard);
+    searchShard(s, qTokens, results, limit, collapse);
   }
   results.sort((a, b) => b.score - a.score);
-  if (!collapse) return results.slice(0, limit);
-
-  // Collapse med product variants (forms, strengths, brands) to one row per
-  // family — keyed by the first word of the label (the ingredient / brand
-  // name) — so the list shows the most popular families first. Families are
-  // ordered by their best-scoring member, but the *shortest* nearly-as-good
-  // label represents the family (the base name beats "… Oral Solution
-  // [Brand]"); the variants stay reachable through the forms & strengths
-  // drill-down.
-  const rep = new Map<string, CodifyResult>();
-  const bestScore = new Map<string, number>();
-  const order: string[] = [];
-  for (const r of results) {
-    const key =
-      r.domain === 'med'
-        ? 'med|' + r.label.split(/\s+/, 1)[0].toLowerCase()
-        : r.fullid; // other domains: unique per result (no collapsing)
-    const cur = rep.get(key);
-    if (!cur) {
-      // results are sorted by score desc, so the first member is the best
-      rep.set(key, r);
-      bestScore.set(key, r.score);
-      order.push(key);
-    } else if (
-      r.label.length < cur.label.length &&
-      r.score >= 0.6 * (bestScore.get(key) as number)
-    ) {
-      rep.set(key, r);
-    }
-  }
-  return order.slice(0, limit).map((k) => rep.get(k) as CodifyResult);
+  return results.slice(0, limit);
 }
 
 function searchShard(
   s: CodifyShard,
   qTokens: string[],
   out: CodifyResult[],
-  limit: number
+  limit: number,
+  collapse = false
 ) {
   const { scoreBuf, maskBuf, aliasBuf } = s;
   const N = s.docCount;
@@ -401,6 +371,20 @@ function searchShard(
   // tokens); let text relevance dominate once the query is specific.
   const priorWeight = PRIOR_WEIGHT + SHORT_PRIOR_WEIGHT / typedLen;
   const firstTok = s.docFirstTok;
+  // Collapse med product variants (forms, strengths, brands) to one row per
+  // family — keyed by the doc's first token (the ingredient / brand name) —
+  // BEFORE the candidate cap, so a few popular families can't crowd every
+  // other family out of the list. Families rank by their best-scoring member,
+  // but the *shortest* nearly-as-good label represents them (the base name
+  // beats "… Oral Solution [Brand]"); variants stay reachable through the
+  // forms & strengths drill-down (which searches uncollapsed).
+  const doCollapse = collapse && s.domain === 'med' && firstTok !== null;
+  const fams = doCollapse
+    ? new Map<
+        number | string,
+        { best: number; d: number; len: number; alias: boolean }
+      >()
+    : null;
   for (let i = 0; i < touchedCount; i++) {
     const d = s.touched[i];
     if (maskBuf[d] === fullMask) {
@@ -417,11 +401,49 @@ function searchShard(
         (0.6 + 0.4 * lenNorm) *
         (1 + priorWeight * prior) *
         (leading ? LEAD_BONUS : 1);
-      pushResult(out, s, d, score, aliasBuf[d] === 1, limit * 3);
+      const alias = aliasBuf[d] === 1;
+      if (fams && firstTok) {
+        const ft = firstTok[d];
+        const ftLen =
+          ft === NO_TOKEN ? 0 : s.tokenOffsets[ft + 1] - s.tokenOffsets[ft];
+        const labelLen = s.labelOffsets[d + 1] - s.labelOffsets[d];
+        // very short first tokens ("l" in "L-Dopres") group unrelated meds —
+        // key those by the label's first word instead
+        const key: number | string =
+          ftLen > 2
+            ? ft
+            : td
+                .decode(
+                  s.labelBlob.subarray(
+                    s.labelOffsets[d],
+                    Math.min(s.labelOffsets[d + 1], s.labelOffsets[d] + 24)
+                  )
+                )
+                .split(/\s+/, 1)[0]
+                .toLowerCase();
+        const fam = fams.get(key);
+        if (!fam) {
+          fams.set(key, { best: score, d, len: labelLen, alias });
+        } else {
+          if (score > fam.best) fam.best = score;
+          if (labelLen < fam.len && score >= 0.6 * fam.best) {
+            fam.d = d;
+            fam.len = labelLen;
+            fam.alias = alias;
+          }
+        }
+      } else {
+        pushResult(out, s, d, score, alias, limit * 3);
+      }
     }
     maskBuf[d] = 0;
     scoreBuf[d] = 0;
     aliasBuf[d] = 0;
+  }
+  if (fams) {
+    for (const fam of fams.values()) {
+      pushResult(out, s, fam.d, fam.best, fam.alias, limit * 3);
+    }
   }
 }
 
