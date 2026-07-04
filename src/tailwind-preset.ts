@@ -78,6 +78,12 @@ export const miewebUISafelist = [
   'focus:ring-success/20',
   'focus:ring-destructive/20',
   'opacity-0',
+  // Drag & drop (useDragReorder / dragIndicatorClasses)
+  'opacity-40',
+  'cursor-grab',
+  'active:cursor-grabbing',
+  'shadow-[inset_0_2px_0_0_var(--color-primary-500,#3b82f6)]',
+  'shadow-[inset_0_-2px_0_0_var(--color-primary-500,#3b82f6)]',
   'group-hover:opacity-100',
   'focus:opacity-100',
   // Markdown SurveyBlock

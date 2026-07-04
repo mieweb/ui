@@ -30,6 +30,7 @@ export interface CodifyShard {
   // reusable per-query scratch buffers
   scoreBuf: Float32Array;
   maskBuf: Uint8Array;
+  aliasBuf: Uint8Array;
   touched: Uint32Array;
 }
 
@@ -66,7 +67,8 @@ const MAGIC = 0x4d434458; // 'MCDX'
 export function parseShard(buf: ArrayBuffer): CodifyShard {
   const view = new DataView(buf);
   if (view.getUint32(0, true) !== MAGIC) throw new Error('Bad shard magic');
-  if (view.getUint32(4, true) !== 1) throw new Error('Unsupported shard version');
+  if (view.getUint32(4, true) !== 1)
+    throw new Error('Unsupported shard version');
   const metaLen = view.getUint32(8, true);
   const meta = JSON.parse(
     new TextDecoder().decode(new Uint8Array(buf, 12, metaLen))
@@ -104,6 +106,7 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
     docLen: u8('docLen'),
     scoreBuf: new Float32Array(meta.docCount),
     maskBuf: new Uint8Array(meta.docCount),
+    aliasBuf: new Uint8Array(meta.docCount),
     touched: new Uint32Array(meta.docCount),
   };
 }
@@ -115,7 +118,9 @@ export function parseShard(buf: ArrayBuffer): CodifyShard {
 const td = new TextDecoder();
 
 function tokenAt(s: CodifyShard, i: number): string {
-  return td.decode(s.tokenBlob.subarray(s.tokenOffsets[i], s.tokenOffsets[i + 1]));
+  return td.decode(
+    s.tokenBlob.subarray(s.tokenOffsets[i], s.tokenOffsets[i + 1])
+  );
 }
 
 /** First token index whose token is >= q (lexicographic). */
@@ -193,7 +198,10 @@ export function searchShards(
   query: string,
   limit = 20
 ): CodifyResult[] {
-  const qTokens = normalize(query).split(' ').filter(Boolean).slice(0, MAX_QUERY_TOKENS);
+  const qTokens = normalize(query)
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, MAX_QUERY_TOKENS);
   if (qTokens.length === 0) return [];
   const results: CodifyResult[] = [];
 
@@ -210,11 +218,10 @@ function searchShard(
   out: CodifyResult[],
   limit: number
 ) {
-  const { scoreBuf, maskBuf } = s;
+  const { scoreBuf, maskBuf, aliasBuf } = s;
   const N = s.docCount;
   const fullMask = (1 << qTokens.length) - 1;
   let touchedCount = 0;
-  let aliasSeen = false;
 
   for (let qi = 0; qi < qTokens.length; qi++) {
     const q = qTokens[qi];
@@ -230,7 +237,9 @@ function searchShard(
       return;
     }
 
-    const count = expansions ? expansions.length : Math.min(hi - lo, MAX_EXPANSIONS);
+    const count = expansions
+      ? expansions.length
+      : Math.min(hi - lo, MAX_EXPANSIONS);
     for (let e = 0; e < count; e++) {
       const t = expansions ? expansions[e] : lo + e;
       const df = s.postStart[t + 1] - s.postStart[t];
@@ -249,7 +258,7 @@ function searchShard(
         if (maskBuf[d] === 0) s.touched[touchedCount++] = d;
         maskBuf[d] |= bit;
         scoreBuf[d] += alias ? w * 0.85 : w;
-        if (alias) aliasSeen = true;
+        if (alias) aliasBuf[d] = 1; // per-doc alias tracking for viaAlias
       }
     }
   }
@@ -260,10 +269,11 @@ function searchShard(
     if (maskBuf[d] === fullMask) {
       const lenNorm = 1 / (1 + 0.25 * Math.max(0, s.docLen[d] - 1));
       const score = scoreBuf[d] * (0.6 + 0.4 * lenNorm);
-      pushResult(out, s, d, score, aliasSeen, limit * 3);
+      pushResult(out, s, d, score, aliasBuf[d] === 1, limit * 3);
     }
     maskBuf[d] = 0;
     scoreBuf[d] = 0;
+    aliasBuf[d] = 0;
   }
 }
 
@@ -285,10 +295,16 @@ function pushResult(
     out.splice(minI, 1);
   }
   out.push({
-    fullid: td.decode(s.fullidBlob.subarray(s.fullidOffsets[d], s.fullidOffsets[d + 1])),
-    label: td.decode(s.labelBlob.subarray(s.labelOffsets[d], s.labelOffsets[d + 1])),
+    fullid: td.decode(
+      s.fullidBlob.subarray(s.fullidOffsets[d], s.fullidOffsets[d + 1])
+    ),
+    label: td.decode(
+      s.labelBlob.subarray(s.labelOffsets[d], s.labelOffsets[d + 1])
+    ),
     codetype: s.codetypes[s.docCodetype[d]],
-    fullcode: td.decode(s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1])),
+    fullcode: td.decode(
+      s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1])
+    ),
     domain: s.domain,
     score,
     viaAlias,

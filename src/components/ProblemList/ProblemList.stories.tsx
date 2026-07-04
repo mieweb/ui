@@ -78,7 +78,11 @@ const diabetesConcern: ConditionConcern = {
       supersedes: 'A-1',
       coding: [
         { system: 'ICD-10-CM', code: 'E11.9' },
-        { system: 'SNOMED', code: '44054006', display: 'Type 2 diabetes mellitus' },
+        {
+          system: 'SNOMED',
+          code: '44054006',
+          display: 'Type 2 diabetes mellitus',
+        },
       ],
       note: 'Refuted 2023 — C-peptide and antibody testing indicated type 1.',
     },
@@ -91,7 +95,11 @@ const diabetesConcern: ConditionConcern = {
       supersedes: 'A-2',
       coding: [
         { system: 'ICD-10-CM', code: 'E10.9' },
-        { system: 'SNOMED', code: '46635009', display: 'Type 1 diabetes mellitus' },
+        {
+          system: 'SNOMED',
+          code: '46635009',
+          display: 'Type 1 diabetes mellitus',
+        },
       ],
     },
     {
@@ -142,7 +150,11 @@ const sampleConcerns: ConditionConcern[] = [
       },
     ],
     relationships: [
-      { type: 'caused-by', concernId: 'C-8', display: 'Cerebrovascular disease' },
+      {
+        type: 'caused-by',
+        concernId: 'C-8',
+        display: 'Cerebrovascular disease',
+      },
     ],
   },
   {
@@ -209,7 +221,10 @@ function InteractiveTemplate() {
     concern?: ConditionConcern;
   } | null>(null);
 
-  const handleAction = (concern: ConditionConcern, action: ProblemListAction) => {
+  const handleAction = (
+    concern: ConditionConcern,
+    action: ProblemListAction
+  ) => {
     if (
       action === 'refine' ||
       action === 'revise' ||

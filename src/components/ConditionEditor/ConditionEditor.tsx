@@ -14,7 +14,12 @@ import {
   ModalBody,
   ModalFooter,
 } from '../Modal';
-import { PlusIcon, TrashIcon, AlertTriangleIcon, HelpCircleIcon } from '../Icons';
+import {
+  PlusIcon,
+  TrashIcon,
+  AlertTriangleIcon,
+  HelpCircleIcon,
+} from '../Icons';
 import {
   currentAssertion,
   type ConcernRelationship,
@@ -32,7 +37,12 @@ import {
 // =============================================================================
 
 /** What the editor is doing. Determines the resulting changeType / operation. */
-export type ConditionEditorMode = 'add' | 'observe' | 'refine' | 'revise' | 'relate';
+export type ConditionEditorMode =
+  | 'add'
+  | 'observe'
+  | 'refine'
+  | 'revise'
+  | 'relate';
 
 /** Draft assertion returned by onSave — id/date assignment is the caller's job. */
 export type ConditionAssertionDraft = Omit<ConditionAssertion, 'id' | 'date'>;
@@ -84,7 +94,10 @@ const VERIFICATION_OPTIONS: { value: VerificationStatus; label: string }[] = [
   { value: 'confirmed', label: 'Confirmed' },
 ];
 
-const RELATIONSHIP_OPTIONS: { value: ConcernRelationship['type']; label: string }[] = [
+const RELATIONSHIP_OPTIONS: {
+  value: ConcernRelationship['type'];
+  label: string;
+}[] = [
   { value: 'caused-by', label: 'Caused by' },
   { value: 'evolved-from', label: 'Evolved from' },
   { value: 'differential-sibling', label: 'Differential sibling' },
@@ -125,7 +138,9 @@ function FieldFlag({
         type="button"
         aria-pressed={unknown}
         onClick={() =>
-          onChange(unknown ? undefined : { known: false, reason: 'asked-unknown' })
+          onChange(
+            unknown ? undefined : { known: false, reason: 'asked-unknown' }
+          )
         }
         className={cn(
           'rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors',
@@ -184,7 +199,9 @@ function ObservationHistory({ concern }: { concern?: ConditionConcern }) {
             </span>
             <span className="text-foreground flex-1">{o.text}</span>
             {o.author && (
-              <span className="text-muted-foreground text-xs">— {o.author}</span>
+              <span className="text-muted-foreground text-xs">
+                — {o.author}
+              </span>
             )}
           </li>
         ))}
@@ -229,8 +246,10 @@ export function ConditionEditor({
 
   const [text, setText] = React.useState('');
   const [coding, setCoding] = React.useState<ConditionCoding[]>([]);
-  const [verification, setVerification] = React.useState<VerificationStatus>('confirmed');
-  const [severity, setSeverity] = React.useState<ConditionAssertion['severity']>();
+  const [verification, setVerification] =
+    React.useState<VerificationStatus>('confirmed');
+  const [severity, setSeverity] =
+    React.useState<ConditionAssertion['severity']>();
   const [onsetDate, setOnsetDate] = React.useState('');
   const [onsetFuzzy, setOnsetFuzzy] = React.useState('');
   const [note, setNote] = React.useState('');
@@ -238,16 +257,22 @@ export function ConditionEditor({
   const [fields, setFields] = React.useState<
     Partial<Record<UncertainConditionField, FieldUncertainty>>
   >({});
-  const [relType, setRelType] = React.useState<ConcernRelationship['type']>('caused-by');
+  const [relType, setRelType] =
+    React.useState<ConcernRelationship['type']>('caused-by');
   const [relTarget, setRelTarget] = React.useState('');
   const [observation, setObservation] = React.useState('');
 
-  // Seed from the prior assertion whenever the dialog opens
+  // Seed from the prior assertion whenever the dialog opens (or the mode /
+  // concern changes while open — stale values must not carry over)
   React.useEffect(() => {
     if (!open) return;
     setText(prior?.text ?? '');
     setCoding(prior?.coding ?? []);
-    setVerification(mode === 'add' ? 'unconfirmed' : (prior?.verificationStatus ?? 'confirmed'));
+    setVerification(
+      mode === 'add'
+        ? 'unconfirmed'
+        : (prior?.verificationStatus ?? 'confirmed')
+    );
     setSeverity(prior?.severity);
     setOnsetDate(prior?.onset?.date ?? '');
     setOnsetFuzzy(prior?.onset?.fuzzy ?? '');
@@ -257,16 +282,16 @@ export function ConditionEditor({
     setRelType('caused-by');
     setRelTarget('');
     setObservation('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, mode, prior]);
 
-  const setField = (field: UncertainConditionField) => (f: FieldUncertainty | undefined) =>
-    setFields((prev) => {
-      const next = { ...prev };
-      if (f) next[field] = f;
-      else delete next[field];
-      return next;
-    });
+  const setField =
+    (field: UncertainConditionField) => (f: FieldUncertainty | undefined) =>
+      setFields((prev) => {
+        const next = { ...prev };
+        if (f) next[field] = f;
+        else delete next[field];
+        return next;
+      });
 
   const updateCoding = (i: number, patch: Partial<ConditionCoding>) =>
     setCoding((prev) => prev.map((c, j) => (j === i ? { ...c, ...patch } : c)));
@@ -290,7 +315,16 @@ export function ConditionEditor({
       Object.keys(fields).length > 0 ? { fields } : undefined;
     onSave?.({
       text: text.trim(),
-      coding: coding.filter((c) => c.code.trim()),
+      // write the trimmed values back — whitespace in codes breaks equality
+      // checks downstream
+      coding: coding
+        .filter((c) => c.code.trim())
+        .map((c) => ({
+          ...c,
+          code: c.code.trim(),
+          display: c.display?.trim() || undefined,
+          mappedFrom: c.mappedFrom?.trim() || undefined,
+        })),
       verificationStatus: verification,
       changeType:
         mode === 'refine'
@@ -318,7 +352,12 @@ export function ConditionEditor({
         : !text.trim();
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} size="lg" className={className}>
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      size="lg"
+      className={className}
+    >
       <ModalHeader>
         <ModalTitle>
           {MODE_META[mode].title}
@@ -334,9 +373,10 @@ export function ConditionEditor({
             >
               <AlertTriangleIcon size={16} />
               <span>
-                Revising marks the prior assertion <strong>refuted</strong> (it was
-                never true) — history is preserved on the timeline. Use{' '}
-                <em>Refine</em> instead if the prior was correct but less specific.
+                Revising marks the prior assertion <strong>refuted</strong> (it
+                was never true) — history is preserved on the timeline. Use{' '}
+                <em>Refine</em> instead if the prior was correct but less
+                specific.
               </span>
             </div>
           )}
@@ -347,7 +387,9 @@ export function ConditionEditor({
                 label="Relationship"
                 options={RELATIONSHIP_OPTIONS}
                 value={relType}
-                onValueChange={(v) => setRelType(v as ConcernRelationship['type'])}
+                onValueChange={(v) =>
+                  setRelType(v as ConcernRelationship['type'])
+                }
               />
               <Select
                 label="Related problem"
@@ -422,7 +464,11 @@ export function ConditionEditor({
                     onClick={() =>
                       setCoding((prev) => [
                         ...prev,
-                        { system: 'SNOMED', code: '', primary: prev.length === 0 },
+                        {
+                          system: 'SNOMED',
+                          code: '',
+                          primary: prev.length === 0,
+                        },
                       ])
                     }
                     leftIcon={<PlusIcon size={12} />}
@@ -441,7 +487,10 @@ export function ConditionEditor({
                   <div key={i} className="flex flex-wrap items-center gap-1.5">
                     <Select
                       aria-label={`Coding system ${i + 1}`}
-                      options={CODING_SYSTEMS.map((s) => ({ value: s, label: s }))}
+                      options={CODING_SYSTEMS.map((s) => ({
+                        value: s,
+                        label: s,
+                      }))}
                       value={c.system}
                       onValueChange={(v) => updateCoding(i, { system: v })}
                       className="w-32"
@@ -449,14 +498,18 @@ export function ConditionEditor({
                     <Input
                       aria-label={`Code ${i + 1}`}
                       value={c.code}
-                      onChange={(e) => updateCoding(i, { code: e.target.value })}
+                      onChange={(e) =>
+                        updateCoding(i, { code: e.target.value })
+                      }
                       placeholder="Code"
                       className="w-28 font-mono"
                     />
                     <Input
                       aria-label={`Display ${i + 1}`}
                       value={c.display ?? ''}
-                      onChange={(e) => updateCoding(i, { display: e.target.value })}
+                      onChange={(e) =>
+                        updateCoding(i, { display: e.target.value })
+                      }
                       placeholder="Display"
                       className="min-w-32 flex-1"
                     />
@@ -562,7 +615,9 @@ export function ConditionEditor({
                     value={onsetFuzzy}
                     onChange={(e) => setOnsetFuzzy(e.target.value)}
                     disabled={fields.onset?.known === false}
-                    placeholder={'Fuzzy — "since her twenties", "~3 months ago"'}
+                    placeholder={
+                      'Fuzzy — "since her twenties", "~3 months ago"'
+                    }
                     className="min-w-48 flex-1"
                   />
                 </div>
@@ -583,7 +638,9 @@ export function ConditionEditor({
                     Uncertainty recorded:{' '}
                     {Object.entries(fields)
                       .map(([k, f]) =>
-                        f?.known === false ? `${k} unknown` : `${k} ${f?.confidence ?? 'soft'}`
+                        f?.known === false
+                          ? `${k} unknown`
+                          : `${k} ${f?.confidence ?? 'soft'}`
                       )
                       .join(', ')}
                   </span>

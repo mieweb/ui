@@ -210,6 +210,7 @@ function MedicationRow({
   actions,
   readOnly,
   drag,
+  onMove,
   onStatusChange,
   onAction,
 }: {
@@ -217,19 +218,54 @@ function MedicationRow({
   actions: MedicationAction[];
   readOnly: boolean;
   drag: UseDragReorderReturn;
+  /** Keyboard equivalent of drag reordering (Alt+↑/↓) */
+  onMove?: (medication: Medication, dir: -1 | 1) => void;
   onStatusChange?: (medication: Medication, status: MedicationStatus) => void;
   onAction?: (medication: Medication, action: MedicationAction) => void;
 }) {
+  const handleRowKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      onMove?.(medication, e.key === 'ArrowUp' ? -1 : 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const list = e.currentTarget.closest('ul');
+      if (!list) return;
+      const rows = Array.from(
+        list.querySelectorAll<HTMLElement>('li[data-medication-id]')
+      );
+      const i = rows.indexOf(e.currentTarget as HTMLElement);
+      rows[
+        e.key === 'ArrowUp'
+          ? Math.max(0, i - 1)
+          : Math.min(rows.length - 1, i + 1)
+      ]?.focus();
+    }
+  };
+
   return (
+    // Rows are focus stops when reordering is enabled so drag & drop has a
+    // keyboard equivalent (Alt+↑/↓) — 508.
+    /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
     <li
       data-medication-id={medication.id}
+      tabIndex={drag.enabled ? 0 : undefined}
+      onKeyDown={drag.enabled ? handleRowKeyDown : undefined}
+      aria-label={
+        drag.enabled
+          ? `${medication.name}. Alt plus arrow keys to reorder.`
+          : undefined
+      }
       {...drag.rowProps(medication.id)}
       className={cn(
         'group border-border/60 relative flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 border-b px-1 py-2',
+        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
         drag.enabled && 'cursor-grab active:cursor-grabbing',
         dragIndicatorClasses(drag, medication.id)
       )}
     >
+      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
       {drag.enabled ? (
         <GripVerticalIcon
           size={14}
@@ -389,9 +425,40 @@ export const MedicationList = React.forwardRef<
     );
     const drag = useDragReorder({
       ids: medications.map((m) => m.id),
-      onReorder: readOnly ? undefined : onReorder,
+      onReorder:
+        readOnly || !onReorder
+          ? undefined
+          : (ids) => {
+              // announce pointer drops too, not just keyboard moves
+              setAnnouncement('Medication list reordered');
+              onReorder(ids);
+            },
       canDropOn: (dragged, target) => statusOf(dragged) === statusOf(target),
     });
+
+    /** Keyboard equivalent of dragging a row: swap within the status group. */
+    const moveMedication = React.useCallback(
+      (medication: Medication, dir: -1 | 1) => {
+        if (readOnly || !onReorder) return;
+        const ids = medications.map((m) => m.id);
+        const from = ids.indexOf(medication.id);
+        let to = from + dir;
+        while (
+          to >= 0 &&
+          to < medications.length &&
+          medications[to].status !== medication.status
+        ) {
+          to += dir;
+        }
+        if (to < 0 || to >= medications.length) return;
+        [ids[from], ids[to]] = [ids[to], ids[from]];
+        setAnnouncement(
+          `${medication.name} moved ${dir === -1 ? 'up' : 'down'}`
+        );
+        onReorder(ids);
+      },
+      [medications, onReorder, readOnly]
+    );
 
     return (
       <Card
@@ -424,6 +491,7 @@ export const MedicationList = React.forwardRef<
                       actions={actions}
                       readOnly={readOnly}
                       drag={drag}
+                      onMove={moveMedication}
                       onStatusChange={handleStatusChange}
                       onAction={onAction}
                     />

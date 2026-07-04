@@ -70,91 +70,96 @@ function InteractiveTemplate() {
   const [meds, setMeds] = useState<Medication[]>(sampleMedications);
   const [log, setLog] = useState<string[]>([]);
 
-    const handleStatusChange = (med: Medication, status: MedicationStatus) => {
-      setMeds((prev) =>
-        prev.map((m) => (m.id === med.id ? { ...m, status } : m))
-      );
-      setLog((prev) => [
-        `${med.name} → ${MEDICATION_STATUS_LABELS[status]}`,
-        ...prev.slice(0, 4),
-      ]);
-    };
-
-    const handleAction = (med: Medication, action: MedicationAction) => {
-      setMeds((prev) => {
-        switch (action) {
-          case 'remove':
-            return prev.filter((m) => m.id !== med.id);
-          case 'correct': {
-            const name = window.prompt('Correct medication name:', med.name);
-            return name
-              ? prev.map((m) => (m.id === med.id ? { ...m, name } : m))
-              : prev;
-          }
-          case 'note': {
-            const note = window.prompt('Note:', med.note ?? '');
-            return note !== null
-              ? prev.map((m) =>
-                  m.id === med.id ? { ...m, note: note || undefined } : m
-                )
-              : prev;
-          }
-          case 'add-task': {
-            const task = window.prompt('Task:', med.task ?? '');
-            return task !== null
-              ? prev.map((m) =>
-                  m.id === med.id ? { ...m, task: task || undefined } : m
-                )
-              : prev;
-          }
-          case 'move-up':
-          case 'move-down': {
-            const group = prev.filter((m) => m.status === med.status);
-            const gi = group.findIndex((m) => m.id === med.id);
-            const swap = group[gi + (action === 'move-up' ? -1 : 1)];
-            if (!swap) return prev;
-            const next = [...prev];
-            const i = next.findIndex((m) => m.id === med.id);
-            const j = next.findIndex((m) => m.id === swap.id);
-            [next[i], next[j]] = [next[j], next[i]];
-            return next;
-          }
-          default:
-            return prev;
-        }
-      });
-      setLog((prev) => [`${med.name}: ${action}`, ...prev.slice(0, 4)]);
-    };
-
-    return (
-      <div className="space-y-4">
-        <MedicationList
-          medications={meds}
-          onStatusChange={handleStatusChange}
-          onAction={handleAction}
-          onReorder={(ids) =>
-            setMeds((prev) =>
-              [...prev].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
-            )
-          }
-          quickAddOptions={['atorvastatin 20 mg tablet', 'metformin 500 mg tablet']}
-          onQuickAdd={(name) =>
-            setMeds((prev) => [
-              ...prev,
-              { id: `new-${Date.now()}`, name, status: 'unreconciled' },
-            ])
-          }
-          onAddOther={() => setLog((prev) => ['Open medication search…', ...prev])}
-        />
-        {log.length > 0 && (
-          <div className="text-muted-foreground rounded border p-2 font-mono text-xs">
-            {log.map((line, i) => (
-              <div key={i}>{line}</div>
-            ))}
-          </div>
-        )}
-      </div>
+  const handleStatusChange = (med: Medication, status: MedicationStatus) => {
+    setMeds((prev) =>
+      prev.map((m) => (m.id === med.id ? { ...m, status } : m))
     );
+    setLog((prev) => [
+      `${med.name} → ${MEDICATION_STATUS_LABELS[status]}`,
+      ...prev.slice(0, 4),
+    ]);
+  };
+
+  const handleAction = (med: Medication, action: MedicationAction) => {
+    setMeds((prev) => {
+      switch (action) {
+        case 'remove':
+          return prev.filter((m) => m.id !== med.id);
+        case 'correct': {
+          const name = window.prompt('Correct medication name:', med.name);
+          return name
+            ? prev.map((m) => (m.id === med.id ? { ...m, name } : m))
+            : prev;
+        }
+        case 'note': {
+          const note = window.prompt('Note:', med.note ?? '');
+          return note !== null
+            ? prev.map((m) =>
+                m.id === med.id ? { ...m, note: note || undefined } : m
+              )
+            : prev;
+        }
+        case 'add-task': {
+          const task = window.prompt('Task:', med.task ?? '');
+          return task !== null
+            ? prev.map((m) =>
+                m.id === med.id ? { ...m, task: task || undefined } : m
+              )
+            : prev;
+        }
+        case 'move-up':
+        case 'move-down': {
+          const group = prev.filter((m) => m.status === med.status);
+          const gi = group.findIndex((m) => m.id === med.id);
+          const swap = group[gi + (action === 'move-up' ? -1 : 1)];
+          if (!swap) return prev;
+          const next = [...prev];
+          const i = next.findIndex((m) => m.id === med.id);
+          const j = next.findIndex((m) => m.id === swap.id);
+          [next[i], next[j]] = [next[j], next[i]];
+          return next;
+        }
+        default:
+          return prev;
+      }
+    });
+    setLog((prev) => [`${med.name}: ${action}`, ...prev.slice(0, 4)]);
+  };
+
+  return (
+    <div className="space-y-4">
+      <MedicationList
+        medications={meds}
+        onStatusChange={handleStatusChange}
+        onAction={handleAction}
+        onReorder={(ids) =>
+          setMeds((prev) =>
+            [...prev].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
+          )
+        }
+        quickAddOptions={[
+          'atorvastatin 20 mg tablet',
+          'metformin 500 mg tablet',
+        ]}
+        onQuickAdd={(name) =>
+          setMeds((prev) => [
+            ...prev,
+            { id: `new-${Date.now()}`, name, status: 'unreconciled' },
+          ])
+        }
+        onAddOther={() =>
+          setLog((prev) => ['Open medication search…', ...prev])
+        }
+      />
+      {log.length > 0 && (
+        <div className="text-muted-foreground rounded border p-2 font-mono text-xs">
+          {log.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export const Interactive: Story = {

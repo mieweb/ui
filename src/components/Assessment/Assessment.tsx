@@ -40,7 +40,12 @@ import {
 // =============================================================================
 
 /** Order categories that can nest under an assessed problem. */
-export type OrderType = 'medication' | 'lab' | 'imaging' | 'procedure' | 'referral';
+export type OrderType =
+  | 'medication'
+  | 'lab'
+  | 'imaging'
+  | 'procedure'
+  | 'referral';
 
 /**
  * An order placed this visit. Links to a problem via concernId (durable
@@ -120,8 +125,10 @@ export interface AssessmentItem {
 /** Row actions on an assessed problem. */
 export type AssessmentAction = 'refine' | 'revise' | 'add-order';
 
-export interface AssessmentProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'className' | 'title'> {
+export interface AssessmentProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'className' | 'title'
+> {
   /** Concerns addressed this visit (with their assertion history) */
   concerns: ConditionConcern[];
   /** Assessment entries — one per assessed concern (controlled) */
@@ -249,7 +256,10 @@ interface OrderControls {
   /** Re-link to another problem (Alt+←/→, menu) */
   moveToProblem?: (order: AssessmentOrder, concernId: string) => void;
   /** The problem before/after the order's current one, if any */
-  adjacentProblem: (order: AssessmentOrder, dir: -1 | 1) => { concernId: string; label: string } | null;
+  adjacentProblem: (
+    order: AssessmentOrder,
+    dir: -1 | 1
+  ) => { concernId: string; label: string } | null;
   /** All problems (for the Move to… menu) */
   targets: { concernId: string; label: string }[];
 }
@@ -272,16 +282,25 @@ function OrderRow({
       controls.moveWithin?.(order, e.key === 'ArrowUp' ? -1 : 1);
     } else if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
       e.preventDefault();
-      const adj = controls.adjacentProblem(order, e.key === 'ArrowLeft' ? -1 : 1);
+      const adj = controls.adjacentProblem(
+        order,
+        e.key === 'ArrowLeft' ? -1 : 1
+      );
       if (adj) controls.moveToProblem?.(order, adj.concernId);
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       // Roving focus between order rows in the same plan
       e.preventDefault();
       const list = e.currentTarget.closest('ul');
       if (!list) return;
-      const rows = Array.from(list.querySelectorAll<HTMLElement>('li[data-order-id]'));
+      const rows = Array.from(
+        list.querySelectorAll<HTMLElement>('li[data-order-id]')
+      );
       const i = rows.indexOf(e.currentTarget as HTMLElement);
-      rows[e.key === 'ArrowUp' ? Math.max(0, i - 1) : Math.min(rows.length - 1, i + 1)]?.focus();
+      rows[
+        e.key === 'ArrowUp'
+          ? Math.max(0, i - 1)
+          : Math.min(rows.length - 1, i + 1)
+      ]?.focus();
     }
   };
 
@@ -361,7 +380,9 @@ function OrderRow({
                       <DropdownItem
                         key={t.concernId}
                         icon={<LinkIcon size={14} />}
-                        onClick={() => controls.moveToProblem?.(order, t.concernId)}
+                        onClick={() =>
+                          controls.moveToProblem?.(order, t.concernId)
+                        }
                       >
                         Move to: {t.label}
                       </DropdownItem>
@@ -549,9 +570,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     ref
   ) => {
     const [addingFor, setAddingFor] = React.useState<string | null>(null);
-    const [addMode, setAddMode] = React.useState<'auto' | 'problem' | 'order'>('auto');
+    const [addMode, setAddMode] = React.useState<'auto' | 'problem' | 'order'>(
+      'auto'
+    );
     /** Free text typed in auto mode — we must ask what it is before adding */
-    const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(null);
+    const [pendingFreeText, setPendingFreeText] = React.useState<string | null>(
+      null
+    );
     const [announcement, setAnnouncement] = React.useState('');
 
     const concernById = React.useMemo(
@@ -559,7 +584,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       [concerns]
     );
 
-    const assertionOf = (item: AssessmentItem): ConditionAssertion | undefined =>
+    const assertionOf = (
+      item: AssessmentItem
+    ): ConditionAssertion | undefined =>
       concernById
         .get(item.concernId)
         ?.assertions.find((a) => a.id === item.assertionId);
@@ -570,7 +597,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
 
     const drag = useDragReorder({
       ids: items.map((i) => i.concernId),
-      onReorder: readOnly ? undefined : onReorderItems,
+      onReorder:
+        readOnly || !onReorderItems
+          ? undefined
+          : (ids) => {
+              setAnnouncement('Assessment problems reordered');
+              onReorderItems(ids);
+            },
     });
 
     // ---- Keyboard + menu equivalents for order drag & drop (508) ----
@@ -579,7 +612,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         concernById
           .get(concernId)
           ?.assertions.find((a) =>
-            items.some((i) => i.concernId === concernId && i.assertionId === a.id)
+            items.some(
+              (i) => i.concernId === concernId && i.assertionId === a.id
+            )
           )?.text ?? concernId,
       [concernById, items]
     );
@@ -633,7 +668,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     // problem by dropping on its block (re-link) or between its orders. ----
     const orderDragEnabled =
       !readOnly && Boolean(onReorderOrders || onLinkOrder);
-    const [draggingOrderId, setDraggingOrderId] = React.useState<string | null>(null);
+    const [draggingOrderId, setDraggingOrderId] = React.useState<string | null>(
+      null
+    );
     const [orderOver, setOrderOver] = React.useState<OrderDrag['over']>(null);
 
     const resetOrderDrag = () => {
@@ -642,12 +679,26 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     };
 
     /** Drop `dragged` relative to `target` (another order row). */
-    const dropOnOrder = (dragged: AssessmentOrder, target: AssessmentOrder, after: boolean) => {
+    const dropOnOrder = (
+      dragged: AssessmentOrder,
+      target: AssessmentOrder,
+      after: boolean
+    ) => {
       if (dragged.concernId !== target.concernId && target.concernId) {
         onLinkOrder?.(dragged, target.concernId); // move to the other problem
+        setAnnouncement(
+          `${dragged.display} moved to ${problemLabel(target.concernId)}`
+        );
+      } else {
+        setAnnouncement(`${dragged.display} reordered`);
       }
       onReorderOrders?.(
-        reorderIds(orders.map((o) => o.orderId), dragged.orderId, target.orderId, after)
+        reorderIds(
+          orders.map((o) => o.orderId),
+          dragged.orderId,
+          target.orderId,
+          after
+        )
       );
     };
 
@@ -670,7 +721,8 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 resetOrderDrag();
               },
               onDragOver: (e) => {
-                if (!draggingOrderId || draggingOrderId === order.orderId) return;
+                if (!draggingOrderId || draggingOrderId === order.orderId)
+                  return;
                 e.preventDefault();
                 e.stopPropagation();
                 e.dataTransfer.dropEffect = 'move';
@@ -695,7 +747,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     };
 
     /** Problem blocks double as drop targets for orders (move-to-problem). */
-    const blockProps = (concernId: string): React.HTMLAttributes<HTMLElement> => {
+    const blockProps = (
+      concernId: string
+    ): React.HTMLAttributes<HTMLElement> => {
       const itemProps = drag.rowProps(concernId);
       if (!orderDragEnabled) return itemProps;
       return {
@@ -714,7 +768,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         onDragLeave: (e) => {
           if (draggingOrderId) {
             setOrderOver((prev) =>
-              prev?.type === 'concern' && prev.concernId === concernId ? null : prev
+              prev?.type === 'concern' && prev.concernId === concernId
+                ? null
+                : prev
             );
             return;
           }
@@ -723,12 +779,16 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
         onDrop: (e) => {
           // An order drop on the block moves the order to this problem; any
           // other payload (a problem-block drag) falls through to item reorder.
-          const payload = draggingOrderId ?? e.dataTransfer.getData('text/plain');
+          const payload =
+            draggingOrderId ?? e.dataTransfer.getData('text/plain');
           const dragged = orders.find((o) => o.orderId === payload);
           if (dragged) {
             e.preventDefault();
             if (dragged.concernId !== concernId) {
               onLinkOrder?.(dragged, concernId);
+              setAnnouncement(
+                `${dragged.display} moved to ${problemLabel(concernId)}`
+              );
             }
             resetOrderDrag();
             return;
@@ -804,7 +864,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   <div
                     className={cn(
                       'flex flex-wrap items-center gap-x-2 gap-y-1',
-                      drag.enabled && formOpen && 'cursor-grab active:cursor-grabbing'
+                      drag.enabled &&
+                        formOpen &&
+                        'cursor-grab active:cursor-grabbing'
                     )}
                     // Header row remains a drag source while the form is open
                     draggable={drag.enabled && formOpen}
@@ -847,7 +909,11 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                           (action) => {
                             const meta = ACTION_META[action];
                             const Icon = meta.icon;
-                            if (action === 'add-order' && !onAddOrder && !onAction)
+                            if (
+                              action === 'add-order' &&
+                              !onAddOrder &&
+                              !onAction
+                            )
                               return null;
                             return (
                               <Tooltip key={action} content={meta.label}>
@@ -937,7 +1003,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                   )}
                 >
                   <option value="auto">Add (auto)</option>
-                  {onAddAssessment && <option value="problem">Add problem</option>}
+                  {onAddAssessment && (
+                    <option value="problem">Add problem</option>
+                  )}
                   {onAddOrder && <option value="order">Add order</option>}
                 </select>
                 <div className="min-w-64 flex-1">
@@ -985,7 +1053,10 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                       if (addMode === 'problem') {
                         onAddAssessment?.({ label: text });
                       } else if (addMode === 'order') {
-                        onAddOrder?.(null, { type: 'procedure', display: text });
+                        onAddOrder?.(null, {
+                          type: 'procedure',
+                          display: text,
+                        });
                       } else {
                         setPendingFreeText(text); // auto: we have to ask
                       }
@@ -1001,7 +1072,11 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     className="flex w-full flex-wrap items-center gap-1.5 pl-1"
                   >
                     <span className="text-muted-foreground text-sm">
-                      Add <span className="text-foreground font-medium">“{pendingFreeText}”</span> as:
+                      Add{' '}
+                      <span className="text-foreground font-medium">
+                        “{pendingFreeText}”
+                      </span>{' '}
+                      as:
                     </span>
                     {onAddAssessment && (
                       <Button
@@ -1057,45 +1132,14 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               </h4>
               <ul className="mt-1">
                 {unlinkedOrders.map((order) => (
-                  <li
+                  // Same row component as linked orders: focusable, Alt+arrow
+                  // keyboard moves, and the Move menu (508 parity with drag)
+                  <OrderRow
                     key={order.orderId}
-                    data-order-id={order.orderId}
-                    {...orderDrag.rowProps(order)}
-                    className={cn(
-                      'flex flex-wrap items-center gap-2 py-1',
-                      orderDrag.enabled && 'cursor-grab active:cursor-grabbing',
-                      draggingOrderId === order.orderId && 'opacity-40'
-                    )}
-                  >
-                    {orderDrag.enabled && (
-                      <GripVerticalIcon
-                        size={12}
-                        aria-hidden
-                        className="text-muted-foreground/40 shrink-0"
-                      />
-                    )}
-                    <OrderContent order={order} />
-                    {!readOnly && onLinkOrder && items.length > 0 && (
-                      <span className="ml-auto flex flex-wrap items-center gap-1">
-                        {items.map((item) => {
-                          const assertion = assertionOf(item);
-                          if (!assertion) return null;
-                          return (
-                            <Button
-                              key={item.concernId}
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onLinkOrder(order, item.concernId)}
-                              leftIcon={<LinkIcon size={11} />}
-                              className="border-border h-auto rounded-full border px-2 py-0.5 text-xs"
-                            >
-                              {assertion.text}
-                            </Button>
-                          );
-                        })}
-                      </span>
-                    )}
-                  </li>
+                    order={order}
+                    drag={orderDrag}
+                    controls={orderControls}
+                  />
                 ))}
               </ul>
             </section>

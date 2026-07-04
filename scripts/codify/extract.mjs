@@ -3,7 +3,9 @@
  * Extract MedicalCodify_search rows from the rxdb MariaDB into a TSV.
  *
  * Usage:
- *   node scripts/codify/extract.mjs [--container wclocal-wcdb-1] [--out scripts/codify/data/codify.tsv]
+ *   RXDB_MYSQL_PASSWORD=... node scripts/codify/extract.mjs \
+ *     [--container wclocal-wcdb-1] [--user root] [--password <pw>] \
+ *     [--out scripts/codify/data/codify.tsv]
  *
  * Requires the WebChart local docker stack to be running. Produces a
  * tab-separated file: fullid \t codetype \t fullcode \t label
@@ -20,6 +22,20 @@ const opt = (name, dflt) => {
 
 const container = opt('container', 'wclocal-wcdb-1');
 const out = opt('out', 'scripts/codify/data/codify.tsv');
+const user = opt('user', 'root');
+// Never hardcode credentials: read from --password, RXDB_MYSQL_PASSWORD, or
+// MYSQL_PWD, and pass it to mysql via the environment (not argv, which would
+// leak through process listings).
+const password = opt(
+  'password',
+  process.env.RXDB_MYSQL_PASSWORD ?? process.env.MYSQL_PWD
+);
+if (!password) {
+  console.error(
+    'Missing database password. Set RXDB_MYSQL_PASSWORD (or MYSQL_PWD), or pass --password <pw>.'
+  );
+  process.exit(1);
+}
 
 const CODETYPES = [
   'RxNORM',
@@ -50,10 +66,11 @@ const child = spawn(
   'docker',
   [
     'exec',
+    '-e',
+    'MYSQL_PWD',
     container,
     'mysql',
-    '-uroot',
-    '-ppmg2bhok',
+    `-u${user}`,
     '-D',
     'rxdb_utf8',
     '--batch',
@@ -62,7 +79,10 @@ const child = spawn(
     '-e',
     sql,
   ],
-  { stdio: ['ignore', 'pipe', 'inherit'] }
+  {
+    stdio: ['ignore', 'pipe', 'inherit'],
+    env: { ...process.env, MYSQL_PWD: password },
+  }
 );
 
 let bytes = 0;

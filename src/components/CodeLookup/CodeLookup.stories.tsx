@@ -38,7 +38,11 @@ typo handling, drill-down — in [src/components/CodeLookup/README.md](https://g
 export default meta;
 type Story = StoryObj<typeof CodeLookup>;
 
-function Template({ domains }: { domains?: ('condition' | 'med' | 'lab' | 'procedure' | 'vaccine')[] }) {
+function Template({
+  domains,
+}: {
+  domains?: ('condition' | 'med' | 'lab' | 'procedure' | 'vaccine')[];
+}) {
   const [selected, setSelected] = useState<CodifyResult | null>(null);
   return (
     <div className="mx-auto max-w-2xl space-y-3">

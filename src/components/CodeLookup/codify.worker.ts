@@ -20,7 +20,9 @@ interface Manifest {
 }
 
 async function load(baseUrl: string, domains?: string[]) {
-  const manifest = (await (await fetch(`${baseUrl}/manifest.json`)).json()) as Manifest;
+  const manifest = (await (
+    await fetch(`${baseUrl}/manifest.json`)
+  ).json()) as Manifest;
   const wanted = manifest.shards.filter(
     (sh) => !domains || domains.includes(sh.domain)
   );
@@ -32,7 +34,12 @@ async function load(baseUrl: string, domains?: string[]) {
     const buf = await res.arrayBuffer();
     shards.set(sh.domain, parseShard(buf));
     loadedBytes += sh.bytes;
-    self.postMessage({ type: 'progress', domain: sh.domain, loadedBytes, totalBytes });
+    self.postMessage({
+      type: 'progress',
+      domain: sh.domain,
+      loadedBytes,
+      totalBytes,
+    });
   }
   self.postMessage({
     type: 'ready',

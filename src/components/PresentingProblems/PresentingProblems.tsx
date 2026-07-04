@@ -6,7 +6,13 @@ import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
 import { Tooltip } from '../Tooltip';
 import { Card, CardHeader, CardContent } from '../Card/Card';
-import { PlusIcon, InfoIcon, EyeIcon, ClipboardCheckIcon, GripVerticalIcon } from '../Icons';
+import {
+  PlusIcon,
+  InfoIcon,
+  EyeIcon,
+  ClipboardCheckIcon,
+  GripVerticalIcon,
+} from '../Icons';
 import {
   CodingChips,
   currentAssertion,
@@ -35,8 +41,10 @@ export interface PresentingEntry {
   comments?: string;
 }
 
-export interface PresentingProblemsProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'className' | 'title'> {
+export interface PresentingProblemsProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'className' | 'title'
+> {
   /** Patient-level concerns to select from */
   patientConcerns: ConditionConcern[];
   /** Encounter-scoped references (controlled) */
@@ -88,7 +96,11 @@ const RELEVANCE_ORDER: ProblemRelevance[] = [
 
 const SCOPE_META: Record<
   EncounterScope,
-  { label: string; description: string; icon: React.ComponentType<{ size?: number | string }> }
+  {
+    label: string;
+    description: string;
+    icon: React.ComponentType<{ size?: number | string }>;
+  }
 > = {
   'problem-focused': {
     label: 'Problem-focused encounter',
@@ -195,6 +207,7 @@ export const PresentingProblems = React.forwardRef<
     ref
   ) => {
     const [draft, setDraft] = React.useState('');
+    const [announcement, setAnnouncement] = React.useState('');
     const scopeMeta = SCOPE_META[scope];
     const ScopeIcon = scopeMeta.icon;
 
@@ -217,27 +230,88 @@ export const PresentingProblems = React.forwardRef<
 
     const drag = useDragReorder({
       ids: selected.map((c) => c.concernId),
-      onReorder: readOnly ? undefined : onReorder,
+      onReorder:
+        readOnly || !onReorder
+          ? undefined
+          : (ids) => {
+              setAnnouncement('Relevant problems reordered');
+              onReorder(ids);
+            },
     });
 
-    const renderRow = (concern: ConditionConcern, outOfScope: boolean) => {
+    /** Keyboard equivalent of dragging a selected row (Alt+↑/↓). */
+    const moveSelected = (concern: ConditionConcern, dir: -1 | 1) => {
+      if (readOnly || !onReorder) return;
+      const ids = selected.map((c) => c.concernId);
+      const from = ids.indexOf(concern.concernId);
+      const to = from + dir;
+      if (to < 0 || to >= ids.length) return;
+      [ids[from], ids[to]] = [ids[to], ids[from]];
+      const current = currentAssertion(concern);
+      setAnnouncement(
+        `${current?.text ?? concern.concernId} moved ${dir === -1 ? 'up' : 'down'}`
+      );
+      onReorder(ids);
+    };
+
+    const renderRow = (
+      concern: ConditionConcern,
+      inUnselectedPool: boolean
+    ) => {
       const current = currentAssertion(concern);
       if (!current) return null;
       const relevance = relevanceOf(concern.concernId);
       const entry = presenting.find((p) => p.concernId === concern.concernId);
-      const draggable = !outOfScope && drag.enabled;
+      const draggable = !inUnselectedPool && drag.enabled;
+      // Unselected problems are only "out of scope" in a problem-focused
+      // encounter; a comprehensive visit reviews everything.
+      const outOfScope = inUnselectedPool && scope === 'problem-focused';
+
+      const handleRowKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+          e.preventDefault();
+          moveSelected(concern, e.key === 'ArrowUp' ? -1 : 1);
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          const list = e.currentTarget.closest('ul');
+          if (!list) return;
+          const rows = Array.from(
+            list.querySelectorAll<HTMLElement>('li[data-concern-id]')
+          );
+          const i = rows.indexOf(e.currentTarget as HTMLElement);
+          rows[
+            e.key === 'ArrowUp'
+              ? Math.max(0, i - 1)
+              : Math.min(rows.length - 1, i + 1)
+          ]?.focus();
+        }
+      };
+
       return (
+        // Selected rows are focus stops so drag reordering has a keyboard
+        // equivalent (Alt+↑/↓) — 508.
+        /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
         <li
           key={concern.concernId}
           data-concern-id={concern.concernId}
+          tabIndex={draggable ? 0 : undefined}
+          onKeyDown={draggable ? handleRowKeyDown : undefined}
+          aria-label={
+            draggable
+              ? `${current.text}. Alt plus arrow keys to reorder.`
+              : undefined
+          }
           {...(draggable ? drag.rowProps(concern.concernId) : {})}
           className={cn(
             'border-border/60 flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 border-b px-1 py-2',
+            'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
             outOfScope && 'opacity-60',
             draggable && 'cursor-grab active:cursor-grabbing',
             draggable && dragIndicatorClasses(drag, concern.concernId)
           )}
         >
+          {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
           {draggable ? (
             <GripVerticalIcon
               size={14}
@@ -250,10 +324,16 @@ export const PresentingProblems = React.forwardRef<
           <span className="text-foreground font-medium">{current.text}</span>
           <CodingChips coding={current.coding} />
           {entry?.comments && (
-            <span className="text-muted-foreground text-xs">{entry.comments}</span>
+            <span className="text-muted-foreground text-xs">
+              {entry.comments}
+            </span>
           )}
-          {outOfScope && scope === 'problem-focused' && (
-            <Badge variant="outline" size="sm" className="text-muted-foreground">
+          {outOfScope && (
+            <Badge
+              variant="outline"
+              size="sm"
+              className="text-muted-foreground"
+            >
               out of scope
             </Badge>
           )}
@@ -310,7 +390,9 @@ export const PresentingProblems = React.forwardRef<
               Relevant this visit
             </h4>
             {selected.length > 0 ? (
-              <ul className="mt-1">{selected.map((c) => renderRow(c, false))}</ul>
+              <ul className="mt-1">
+                {selected.map((c) => renderRow(c, false))}
+              </ul>
             ) : (
               <p className="text-muted-foreground mt-2 text-sm">
                 No problems selected yet.
@@ -324,7 +406,9 @@ export const PresentingProblems = React.forwardRef<
               <h4 className="border-border text-muted-foreground border-b pb-1 text-sm font-semibold tracking-wide uppercase">
                 From patient problem list
               </h4>
-              <ul className="mt-1">{unselected.map((c) => renderRow(c, true))}</ul>
+              <ul className="mt-1">
+                {unselected.map((c) => renderRow(c, true))}
+              </ul>
             </section>
           )}
 
@@ -365,7 +449,8 @@ export const PresentingProblems = React.forwardRef<
               <label
                 className={cn(
                   'flex items-center gap-2 text-sm',
-                  scope === 'problem-focused' && 'text-muted-foreground opacity-60'
+                  scope === 'problem-focused' &&
+                    'text-muted-foreground opacity-60'
                 )}
               >
                 <input
@@ -385,6 +470,11 @@ export const PresentingProblems = React.forwardRef<
             </div>
           )}
         </CardContent>
+
+        {/* Reorder announcements for screen readers */}
+        <div aria-live="polite" className="sr-only">
+          {announcement}
+        </div>
       </Card>
     );
   }

@@ -117,7 +117,11 @@ export interface ConditionAssertion {
 
 /** Relationship between two concerns. */
 export interface ConcernRelationship {
-  type: 'caused-by' | 'evolved-from' | 'differential-sibling' | 'complication-of';
+  type:
+    | 'caused-by'
+    | 'evolved-from'
+    | 'differential-sibling'
+    | 'complication-of';
   /** concernId of the related concern */
   concernId: string;
   /** Display name of the related concern */
@@ -146,7 +150,11 @@ export interface ConditionConcern {
   observations?: ConditionObservation[];
   relationships?: ConcernRelationship[];
   /** Where the concern came from */
-  source?: 'ehrProblemList' | 'patientReported' | 'manuallyAdded' | 'claimsHistory';
+  source?:
+    | 'ehrProblemList'
+    | 'patientReported'
+    | 'manuallyAdded'
+    | 'claimsHistory';
 }
 
 /** Row actions on a concern. */
@@ -160,8 +168,10 @@ export type ProblemListAction =
   | 'move-up'
   | 'move-down';
 
-export interface ProblemListProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'className' | 'title'> {
+export interface ProblemListProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'className' | 'title'
+> {
   /** Patient-level concerns (controlled) */
   concerns: ConditionConcern[];
   /** Header title (pass null to hide) */
@@ -193,11 +203,16 @@ export interface ProblemListProps
 // Constants
 // =============================================================================
 
-const GROUP_ORDER: { key: string; label: string; statuses: ConcernStatus[] }[] = [
-  { key: 'active', label: 'Active', statuses: ['active', 'recurrence', 'relapse'] },
-  { key: 'inactive', label: 'Inactive', statuses: ['inactive', 'remission'] },
-  { key: 'resolved', label: 'Resolved', statuses: ['resolved'] },
-];
+const GROUP_ORDER: { key: string; label: string; statuses: ConcernStatus[] }[] =
+  [
+    {
+      key: 'active',
+      label: 'Active',
+      statuses: ['active', 'recurrence', 'relapse'],
+    },
+    { key: 'inactive', label: 'Inactive', statuses: ['inactive', 'remission'] },
+    { key: 'resolved', label: 'Resolved', statuses: ['resolved'] },
+  ];
 
 /**
  * Grouping key for a concern. Unconfirmed concerns (current assertion not yet
@@ -256,7 +271,10 @@ const ACTION_META: Record<
 
 const VERIFICATION_BADGE: Record<
   VerificationStatus,
-  { label: string; variant: 'default' | 'secondary' | 'success' | 'warning' | 'outline' }
+  {
+    label: string;
+    variant: 'default' | 'secondary' | 'success' | 'warning' | 'outline';
+  }
 > = {
   unconfirmed: { label: 'Unconfirmed', variant: 'outline' },
   provisional: { label: 'Provisional', variant: 'warning' },
@@ -276,7 +294,10 @@ export function currentAssertion(
 ): ConditionAssertion | undefined {
   for (let i = concern.assertions.length - 1; i >= 0; i--) {
     const a = concern.assertions[i];
-    if (a.verificationStatus !== 'refuted' && a.verificationStatus !== 'entered-in-error') {
+    if (
+      a.verificationStatus !== 'refuted' &&
+      a.verificationStatus !== 'entered-in-error'
+    ) {
       return a;
     }
   }
@@ -291,7 +312,9 @@ export function currentAssertion(
 export function toolbarKeyNav(e: React.KeyboardEvent<HTMLElement>) {
   if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
   const buttons = Array.from(
-    e.currentTarget.querySelectorAll<HTMLButtonElement>('button:not([disabled])')
+    e.currentTarget.querySelectorAll<HTMLButtonElement>(
+      'button:not([disabled])'
+    )
   );
   const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
   if (i === -1 || buttons.length === 0) return;
@@ -399,14 +422,18 @@ export function CodingChips({ coding }: { coding?: ConditionCoding[] }) {
  * Full concern background for a hover/long-press tooltip: assertion history,
  * coding background, and recent observations.
  */
-export function concernHistoryContent(concern: ConditionConcern): React.ReactNode {
+export function concernHistoryContent(
+  concern: ConditionConcern
+): React.ReactNode {
   return (
     <span className="flex max-w-xs flex-col gap-1">
       <span className="font-semibold">History</span>
       {[...concern.assertions].reverse().map((a) => (
         <span key={a.id}>
           {a.date} — {a.text}
-          {a.changeType ? ` (${CHANGE_TYPE_LABELS[a.changeType].toLowerCase()})` : ''}
+          {a.changeType
+            ? ` (${CHANGE_TYPE_LABELS[a.changeType].toLowerCase()})`
+            : ''}
           {a.verificationStatus === 'refuted' ? ' — refuted' : ''}
         </span>
       ))}
@@ -439,7 +466,11 @@ export function concernHistoryContent(concern: ConditionConcern): React.ReactNod
 }
 
 /** Badge summarizing an assertion's uncertainty block (§4 of the design doc). */
-export function UncertaintyBadge({ uncertainty }: { uncertainty?: Uncertainty }) {
+export function UncertaintyBadge({
+  uncertainty,
+}: {
+  uncertainty?: Uncertainty;
+}) {
   if (!uncertainty) return null;
   const fieldEntries = Object.entries(uncertainty.fields ?? {}) as Array<
     [UncertainConditionField, FieldUncertainty]
@@ -479,7 +510,7 @@ function AssertionTimeline({ concern }: { concern: ConditionConcern }) {
           <li key={a.id} className="relative text-sm">
             <span
               aria-hidden
-              className="bg-border absolute top-1.5 -left-5.25 h-2 w-2 rounded-full"
+              className="bg-border absolute top-1.5 -left-5 h-2 w-2 rounded-full"
             />
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="text-muted-foreground text-xs tabular-nums">
@@ -548,9 +579,15 @@ function ConcernRow({
       e.preventDefault();
       const list = e.currentTarget.closest('ul');
       if (!list) return;
-      const rows = Array.from(list.querySelectorAll<HTMLElement>('li[data-concern-id]'));
+      const rows = Array.from(
+        list.querySelectorAll<HTMLElement>('li[data-concern-id]')
+      );
       const i = rows.indexOf(e.currentTarget as HTMLElement);
-      rows[e.key === 'ArrowUp' ? Math.max(0, i - 1) : Math.min(rows.length - 1, i + 1)]?.focus();
+      rows[
+        e.key === 'ArrowUp'
+          ? Math.max(0, i - 1)
+          : Math.min(rows.length - 1, i + 1)
+      ]?.focus();
     } else if ((e.key === 'Enter' || e.key === ' ') && hasHistory) {
       e.preventDefault();
       setExpanded((v) => !v);
@@ -620,7 +657,11 @@ function ConcernRow({
             aria-expanded={expanded}
             leftIcon={<HistoryIcon size={12} />}
             rightIcon={
-              expanded ? <ChevronUpIcon size={12} /> : <ChevronDownIcon size={12} />
+              expanded ? (
+                <ChevronUpIcon size={12} />
+              ) : (
+                <ChevronDownIcon size={12} />
+              )
             }
             className="text-muted-foreground h-auto px-1.5 py-0.5 text-xs"
           >
@@ -736,7 +777,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
     /** Swap with the adjacent concern in the same group, then report the full order. */
     const moveConcern = React.useCallback(
       (concern: ConditionConcern, dir: -1 | 1) => {
-        if (!onReorder) return;
+        if (!onReorder || readOnly) return;
         const groupKey = concernGroupKey(concern);
         const ids = concerns.map((c) => c.concernId);
         const from = ids.indexOf(concern.concernId);
@@ -757,7 +798,7 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
         );
         onReorder(ids);
       },
-      [concerns, onReorder]
+      [concerns, onReorder, readOnly]
     );
 
     const handleAction = React.useCallback(
@@ -780,7 +821,14 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
     );
     const drag = useDragReorder({
       ids: concerns.map((c) => c.concernId),
-      onReorder: readOnly ? undefined : onReorder,
+      onReorder:
+        readOnly || !onReorder
+          ? undefined
+          : (newIds) => {
+              // announce pointer drops too, not just keyboard moves
+              setAnnouncement('Problem list reordered');
+              onReorder(newIds);
+            },
       canDropOn: (dragged, target) => groupOf(dragged) === groupOf(target),
     });
 
@@ -828,14 +876,16 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
                       concern={concern}
                       actions={actions}
                       readOnly={readOnly}
-                      canReorder={Boolean(onReorder)}
+                      canReorder={drag.enabled}
                       drag={drag}
                       onAction={handleAction}
                     />
                   ))}
                 </ul>
               ) : (
-                <p className="text-muted-foreground mt-2 text-sm">{emptyMessage}</p>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  {emptyMessage}
+                </p>
               )}
             </section>
           ))}

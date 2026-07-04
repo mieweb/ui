@@ -16,10 +16,17 @@ import type { CodifyResult } from './engine';
 // Types
 // =============================================================================
 
-export type CodifyDomain = 'condition' | 'med' | 'lab' | 'procedure' | 'vaccine';
+export type CodifyDomain =
+  | 'condition'
+  | 'med'
+  | 'lab'
+  | 'procedure'
+  | 'vaccine';
 
-export interface CodeLookupProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'className' | 'onSelect'> {
+export interface CodeLookupProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'className' | 'onSelect'
+> {
   /** Base URL where manifest.json and the .mcdx shards are served */
   indexUrl: string;
   /** Domains to load & search (default: all in the manifest) */
@@ -98,7 +105,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     },
     ref
   ) => {
-    const [status, setStatus] = React.useState<Status>({ state: 'loading', pct: 0 });
+    const [status, setStatus] = React.useState<Status>({
+      state: 'loading',
+      pct: 0,
+    });
     const [query, setQuery] = React.useState('');
     const [results, setResults] = React.useState<CodifyResult[]>([]);
     const [tookMs, setTookMs] = React.useState<number | null>(null);
@@ -114,20 +124,31 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const drillIdRef = React.useRef(0);
     /** Set when a pick writes the query — suppresses the follow-up auto-search */
     const skipSearchRef = React.useRef(false);
+    // Per-instance element ids so multiple CodeLookups on a page don't break
+    // aria-controls / aria-activedescendant relationships.
+    const baseId = React.useId();
+    const resultsId = `${baseId}-results`;
+    const optionId = (i: number) => `${baseId}-option-${i}`;
 
     // domains are spread into stable keys so effects don't need array identity
     const domainsKey = domains?.join(',') ?? '';
     const searchDomainsKey = searchDomains?.join(',') ?? '';
 
     React.useEffect(() => {
-      const worker = new Worker(new URL('./codify.worker.ts', import.meta.url), {
-        type: 'module',
-      });
+      const worker = new Worker(
+        new URL('./codify.worker.ts', import.meta.url),
+        {
+          type: 'module',
+        }
+      );
       workerRef.current = worker;
       worker.onmessage = (e: MessageEvent) => {
         const msg = e.data;
         if (msg.type === 'progress') {
-          setStatus({ state: 'loading', pct: Math.round((msg.loadedBytes / msg.totalBytes) * 100) });
+          setStatus({
+            state: 'loading',
+            pct: Math.round((msg.loadedBytes / msg.totalBytes) * 100),
+          });
         } else if (msg.type === 'ready') {
           setStatus({ state: 'ready', docCount: msg.docCount });
         } else if (msg.type === 'error') {
@@ -149,9 +170,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                   (r.codetype === 'FDB' || r.codetype === 'RxNORM')
               )
               .sort((a, b) => a.label.localeCompare(b.label));
-            setDrill((prev) =>
-              prev ? { ...prev, results: forms } : prev
-            );
+            setDrill((prev) => (prev ? { ...prev, results: forms } : prev));
             setActiveIndex(forms.length > 0 ? 0 : -1);
           }
         }
@@ -282,6 +301,13 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           ? 'Code index unavailable'
           : placeholder;
 
+    // Single source of truth for dropdown visibility — also drives aria-expanded
+    const dropdownOpen =
+      open &&
+      (Boolean(drill) ||
+        list.length > 0 ||
+        Boolean(onFreeText && query.trim() !== ''));
+
     const searchBox = (
       <div className="relative">
         <SearchIcon
@@ -289,147 +315,150 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           className="text-muted-foreground absolute top-5 left-3 -translate-y-1/2"
         />
         <input
-              type="text"
-              role="combobox"
-              aria-expanded={open && list.length > 0}
-              aria-controls="code-lookup-results"
-              aria-activedescendant={
-                activeIndex >= 0 ? `code-lookup-option-${activeIndex}` : undefined
-              }
-              aria-label="Search medical codes"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setDrill(null);
-              }}
+          type="text"
+          role="combobox"
+          aria-expanded={dropdownOpen}
+          aria-controls={resultsId}
+          aria-activedescendant={
+            activeIndex >= 0 ? optionId(activeIndex) : undefined
+          }
+          aria-label="Search medical codes"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setDrill(null);
+          }}
           onKeyDown={handleKeyDown}
           onFocus={() => list.length > 0 && setOpen(true)}
           onBlur={() => setOpen(false)}
           placeholder={effectivePlaceholder}
           disabled={status.state === 'error'}
-              className={cn(
-                'border-border bg-background text-foreground placeholder:text-muted-foreground',
-                'h-10 w-full rounded-md border pr-3 pl-9 text-sm',
-                'focus:ring-ring focus:ring-2 focus:outline-none'
-              )}
-            />
+          className={cn(
+            'border-border bg-background text-foreground placeholder:text-muted-foreground',
+            'h-10 w-full rounded-md border pr-3 pl-9 text-sm',
+            'focus:ring-ring focus:ring-2 focus:outline-none'
+          )}
+        />
 
-            {/* floating dropdown */}
-            {open &&
-              (drill ||
-                list.length > 0 ||
-                (onFreeText && query.trim() !== '')) && (
-              <div
-                role="presentation"
-                className={cn(
-                  'bg-card border-border absolute top-11 right-0 left-0 z-20',
-                  'overflow-hidden rounded-md border shadow-lg'
-                )}
-                // keep input focus when clicking inside the dropdown
-                onMouseDown={(e) => e.preventDefault()}
-              >
-                {drill && (
-                  <div className="border-border bg-muted/50 flex items-center gap-1.5 border-b px-2 py-1.5">
-                    <button
-                      type="button"
-                      onClick={closeDrill}
-                      aria-label="Back to search results"
-                      className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
-                    >
-                      <ChevronLeftIcon size={14} />
-                      Back
-                    </button>
-                    <span className="text-foreground text-xs font-semibold">
-                      {drill.parent.label}
-                    </span>
-                    <span className="text-muted-foreground text-xs">
-                      — forms & strengths
-                      {drill.results === null
-                        ? '…'
-                        : ` (${drill.results.length})`}
-                    </span>
-                  </div>
-                )}
-
-                <ul
-                  id="code-lookup-results"
-                  role="listbox"
-                  aria-label={
-                    drill
-                      ? `Forms and strengths of ${drill.parent.label}`
-                      : 'Code search results'
-                  }
-                  className="divide-border max-h-80 divide-y overflow-y-auto"
+        {/* floating dropdown */}
+        {dropdownOpen && (
+          <div
+            role="presentation"
+            className={cn(
+              'bg-card border-border absolute top-11 right-0 left-0 z-20',
+              'overflow-hidden rounded-md border shadow-lg'
+            )}
+            // keep input focus when clicking inside the dropdown
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {drill && (
+              <div className="border-border bg-muted/50 flex items-center gap-1.5 border-b px-2 py-1.5">
+                <button
+                  type="button"
+                  onClick={closeDrill}
+                  aria-label="Back to search results"
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
                 >
-                  {list.map((r, i) => (
-                    <li key={r.fullid} role="presentation" className="flex items-stretch">
-                      <button
-                        type="button"
-                        id={`code-lookup-option-${i}`}
-                        role="option"
-                        aria-selected={i === activeIndex}
-                        onClick={() => pick(r)}
-                        onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
-                        className={cn(
-                          'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-left text-sm',
-                          'hover:bg-muted/60 focus:bg-muted/60 focus:outline-none',
-                          i === activeIndex && 'bg-muted/60'
-                        )}
-                      >
-                        <span className="text-foreground min-w-0 flex-1 truncate">
-                          {r.label}
-                        </span>
-                        <span
-                          className={cn(
-                            'text-muted-foreground shrink-0 text-[11px] whitespace-nowrap',
-                            DOMAIN_TEXT[r.domain]
-                          )}
-                        >
-                          {r.codetype}{' '}
-                          <span className="font-mono">{r.fullcode}</span>
-                        </span>
-                      </button>
-                      {!drill && isDrillable(r) && (
-                        <button
-                          type="button"
-                          tabIndex={-1}
-                          aria-label={`Show forms and strengths of ${r.label}`}
-                          title="Forms & strengths (→)"
-                          onClick={() => openDrill(r)}
-                          onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
-                          className={cn(
-                            'text-muted-foreground hover:text-foreground shrink-0 px-1.5',
-                            'hover:bg-muted/60 focus:outline-none',
-                            i === activeIndex ? 'bg-muted/60 opacity-100' : 'opacity-40'
-                          )}
-                        >
-                          <ChevronRightIcon size={14} />
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                  {drill && drill.results !== null && drill.results.length === 0 && (
-                    <li className="text-muted-foreground px-3 py-2 text-sm">
-                      No dosed forms found — press ← to go back.
-                    </li>
-                  )}
-                  {!drill && onFreeText && query.trim() !== '' && (
-                    <li role="presentation" className="border-border border-t">
-                      <button
-                        type="button"
-                        onClick={submitFreeText}
-                        className={cn(
-                          'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
-                          'focus:bg-muted/60 focus:outline-none'
-                        )}
-                      >
-                        Use “{query.trim()}” as free text…
-                      </button>
-                    </li>
-                  )}
-                </ul>
+                  <ChevronLeftIcon size={14} />
+                  Back
+                </button>
+                <span className="text-foreground text-xs font-semibold">
+                  {drill.parent.label}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  — forms & strengths
+                  {drill.results === null ? '…' : ` (${drill.results.length})`}
+                </span>
               </div>
             )}
+
+            <ul
+              id={resultsId}
+              role="listbox"
+              aria-label={
+                drill
+                  ? `Forms and strengths of ${drill.parent.label}`
+                  : 'Code search results'
+              }
+              className="divide-border max-h-80 divide-y overflow-y-auto"
+            >
+              {list.map((r, i) => (
+                <li
+                  key={r.fullid}
+                  role="presentation"
+                  className="flex items-stretch"
+                >
+                  <button
+                    type="button"
+                    id={optionId(i)}
+                    role="option"
+                    aria-selected={i === activeIndex}
+                    onClick={() => pick(r)}
+                    onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
+                    className={cn(
+                      'flex min-w-0 flex-1 items-baseline gap-2 px-3 py-1.5 text-left text-sm',
+                      'hover:bg-muted/60 focus:bg-muted/60 focus:outline-none',
+                      i === activeIndex && 'bg-muted/60'
+                    )}
+                  >
+                    <span className="text-foreground min-w-0 flex-1 truncate">
+                      {r.label}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-muted-foreground shrink-0 text-[11px] whitespace-nowrap',
+                        DOMAIN_TEXT[r.domain]
+                      )}
+                    >
+                      {r.codetype}{' '}
+                      <span className="font-mono">{r.fullcode}</span>
+                    </span>
+                  </button>
+                  {!drill && isDrillable(r) && (
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label={`Show forms and strengths of ${r.label}`}
+                      title="Forms & strengths (→)"
+                      onClick={() => openDrill(r)}
+                      onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
+                      className={cn(
+                        'text-muted-foreground hover:text-foreground shrink-0 px-1.5',
+                        'hover:bg-muted/60 focus:outline-none',
+                        i === activeIndex
+                          ? 'bg-muted/60 opacity-100'
+                          : 'opacity-40'
+                      )}
+                    >
+                      <ChevronRightIcon size={14} />
+                    </button>
+                  )}
+                </li>
+              ))}
+              {drill &&
+                drill.results !== null &&
+                drill.results.length === 0 && (
+                  <li className="text-muted-foreground px-3 py-2 text-sm">
+                    No dosed forms found — press ← to go back.
+                  </li>
+                )}
+              {!drill && onFreeText && query.trim() !== '' && (
+                <li role="presentation" className="border-border border-t">
+                  <button
+                    type="button"
+                    onClick={submitFreeText}
+                    className={cn(
+                      'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
+                      'focus:bg-muted/60 focus:outline-none'
+                    )}
+                  >
+                    Use “{query.trim()}” as free text…
+                  </button>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
     );
 
@@ -459,7 +488,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           {searchBox}
 
           {/* status line */}
-          <div className="text-muted-foreground flex items-center gap-2 text-xs" aria-live="polite">
+          <div
+            className="text-muted-foreground flex items-center gap-2 text-xs"
+            aria-live="polite"
+          >
             {status.state === 'loading' && (
               <>
                 <LoaderIcon size={12} className="animate-spin" />
@@ -467,7 +499,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
               </>
             )}
             {status.state === 'ready' && tookMs === null && (
-              <>Offline index ready — {status.docCount.toLocaleString()} entries.</>
+              <>
+                Offline index ready — {status.docCount.toLocaleString()}{' '}
+                entries.
+              </>
             )}
             {status.state === 'ready' && tookMs !== null && (
               <>
@@ -480,7 +515,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 <AlertCircleIcon size={12} />
                 Index unavailable: {status.message}. Run{' '}
                 <code className="font-mono">
-                  node scripts/codify/extract.mjs && node scripts/codify/build-index.mjs
+                  node scripts/codify/extract.mjs && node
+                  scripts/codify/build-index.mjs
                 </code>
               </span>
             )}

@@ -10,6 +10,9 @@ export function reorderIds(
   after: boolean
 ): string[] {
   if (draggedId === targetId) return ids;
+  // Ignore drags that originate outside this list (stale payloads would
+  // otherwise be inserted as unknown ids).
+  if (!ids.includes(draggedId)) return ids;
   const without = ids.filter((i) => i !== draggedId);
   const idx = without.indexOf(targetId);
   if (idx === -1) return ids;
@@ -64,10 +67,14 @@ export function useDragReorder({
   canDropOn,
 }: UseDragReorderOptions): UseDragReorderReturn {
   const [draggingId, setDraggingId] = React.useState<string | null>(null);
+  // dragover can fire before the dragstart state update is visible, so the
+  // authoritative dragged id lives in a ref (set synchronously)
+  const draggingRef = React.useRef<string | null>(null);
   const [over, setOver] = React.useState<DragOverState | null>(null);
   const enabled = Boolean(onReorder);
 
   const reset = React.useCallback(() => {
+    draggingRef.current = null;
     setDraggingId(null);
     setOver(null);
   }, []);
@@ -80,13 +87,21 @@ export function useDragReorder({
         onDragStart: (e) => {
           e.dataTransfer.effectAllowed = 'move';
           e.dataTransfer.setData('text/plain', id);
+          draggingRef.current = id;
           setDraggingId(id);
         },
         onDragEnd: reset,
         onDragOver: (e) => {
-          const dragged = draggingId;
-          if (!dragged || dragged === id) return;
-          if (canDropOn && !canDropOn(dragged, id)) return;
+          const dragged = draggingRef.current;
+          if (
+            !dragged ||
+            dragged === id ||
+            (canDropOn && !canDropOn(dragged, id))
+          ) {
+            // hovering an invalid target: clear any stale indicator
+            setOver((prev) => (prev ? null : prev));
+            return;
+          }
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
           const r = e.currentTarget.getBoundingClientRect();
@@ -100,7 +115,8 @@ export function useDragReorder({
         },
         onDrop: (e) => {
           e.preventDefault();
-          const dragged = draggingId ?? e.dataTransfer.getData('text/plain');
+          const dragged =
+            draggingRef.current ?? e.dataTransfer.getData('text/plain');
           reset();
           if (!dragged || dragged === id) return;
           if (canDropOn && !canDropOn(dragged, id)) return;
@@ -110,7 +126,7 @@ export function useDragReorder({
         },
       };
     },
-    [enabled, draggingId, ids, onReorder, canDropOn, reset]
+    [enabled, ids, onReorder, canDropOn, reset]
   );
 
   return { enabled, draggingId, over, rowProps };

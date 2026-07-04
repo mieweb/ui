@@ -92,7 +92,11 @@ const patientConcerns: ConditionConcern[] = [
   },
 ];
 
-function InteractiveTemplate({ scope: initialScope }: { scope: EncounterScope }) {
+function InteractiveTemplate({
+  scope: initialScope,
+}: {
+  scope: EncounterScope;
+}) {
   const [scope, setScope] = useState<EncounterScope>(initialScope);
   const [concerns, setConcerns] = useState<ConditionConcern[]>(patientConcerns);
   const [presenting, setPresenting] = useState<PresentingEntry[]>([
@@ -131,13 +135,18 @@ function InteractiveTemplate({ scope: initialScope }: { scope: EncounterScope })
         ],
       },
     ]);
-    setPresenting((prev) => [...prev, { concernId: id, relevance: 'addressed' }]);
+    setPresenting((prev) => [
+      ...prev,
+      { concernId: id, relevance: 'addressed' },
+    ]);
   };
 
   return (
     <div className="mx-auto max-w-3xl space-y-3">
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-muted-foreground font-medium">Encounter type:</span>
+        <span className="text-muted-foreground font-medium">
+          Encounter type:
+        </span>
         {(['problem-focused', 'comprehensive'] as const).map((s) => (
           <label key={s} className="flex items-center gap-1">
             <input
@@ -190,7 +199,11 @@ export const ReadOnly: Story = {
     patientConcerns,
     presenting: [
       { concernId: 'C-42', relevance: 'addressed' },
-      { concernId: 'C-11', relevance: 'relevant-history', comments: 'stable on lisinopril' },
+      {
+        concernId: 'C-11',
+        relevance: 'relevant-history',
+        comments: 'stable on lisinopril',
+      },
     ],
     scope: 'problem-focused',
     readOnly: true,
