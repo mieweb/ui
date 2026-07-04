@@ -228,6 +228,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           query: q,
           limit,
           domains: keyToDomains(searchDomainsKey),
+          // one row per med family; variants live in the → drill-down
+          collapse: true,
         });
       }, 40);
       return () => clearTimeout(t);

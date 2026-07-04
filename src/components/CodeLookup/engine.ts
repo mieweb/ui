@@ -276,7 +276,8 @@ function topPriorTokens(
 export function searchShards(
   shards: CodifyShard[],
   query: string,
-  limit = 20
+  limit = 20,
+  collapse = false
 ): CodifyResult[] {
   const qTokens = normalize(query)
     .split(' ')
@@ -285,11 +286,44 @@ export function searchShards(
   if (qTokens.length === 0) return [];
   const results: CodifyResult[] = [];
 
+  // Collapsing dedupes many variants per family, so gather a wider candidate
+  // pool to still fill `limit` with distinct families.
+  const perShard = collapse ? limit * 4 : limit;
   for (const s of shards) {
-    searchShard(s, qTokens, results, limit);
+    searchShard(s, qTokens, results, perShard);
   }
   results.sort((a, b) => b.score - a.score);
-  return results.slice(0, limit);
+  if (!collapse) return results.slice(0, limit);
+
+  // Collapse med product variants (forms, strengths, brands) to one row per
+  // family — keyed by the first word of the label (the ingredient / brand
+  // name) — so the list shows the most popular families first. Families are
+  // ordered by their best-scoring member, but the *shortest* nearly-as-good
+  // label represents the family (the base name beats "… Oral Solution
+  // [Brand]"); the variants stay reachable through the forms & strengths
+  // drill-down.
+  const rep = new Map<string, CodifyResult>();
+  const bestScore = new Map<string, number>();
+  const order: string[] = [];
+  for (const r of results) {
+    const key =
+      r.domain === 'med'
+        ? 'med|' + r.label.split(/\s+/, 1)[0].toLowerCase()
+        : r.fullid; // other domains: unique per result (no collapsing)
+    const cur = rep.get(key);
+    if (!cur) {
+      // results are sorted by score desc, so the first member is the best
+      rep.set(key, r);
+      bestScore.set(key, r.score);
+      order.push(key);
+    } else if (
+      r.label.length < cur.label.length &&
+      r.score >= 0.6 * (bestScore.get(key) as number)
+    ) {
+      rep.set(key, r);
+    }
+  }
+  return order.slice(0, limit).map((k) => rep.get(k) as CodifyResult);
 }
 
 function searchShard(

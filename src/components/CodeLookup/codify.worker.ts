@@ -241,7 +241,12 @@ self.onmessage = (e: MessageEvent) => {
     const active = msg.domains
       ? [...shards.values()].filter((s) => msg.domains.includes(s.domain))
       : [...shards.values()];
-    const results = searchShards(active, msg.query, msg.limit ?? 20);
+    const results = searchShards(
+      active,
+      msg.query,
+      msg.limit ?? 20,
+      msg.collapse === true
+    );
     self.postMessage({
       type: 'results',
       id: msg.id,
