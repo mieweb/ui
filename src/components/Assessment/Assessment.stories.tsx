@@ -6,7 +6,11 @@ import {
   type AssessmentOrder,
 } from './Assessment';
 import { CodeLookup, type CodifyDomain } from '../CodeLookup';
-import type { ConditionConcern } from '../ProblemList';
+import {
+  ConditionEditor,
+  type ConditionAssertionDraft,
+} from '../ConditionEditor';
+import type { ConditionAssertion, ConditionConcern } from '../ProblemList';
 
 const meta: Meta<typeof Assessment> = {
   title: 'Healthcare/Assessment',
@@ -145,10 +149,46 @@ function InteractiveTemplate() {
   const [items, setItems] = useState<AssessmentItem[]>(sampleItems);
   const [orders, setOrders] = useState<AssessmentOrder[]>(sampleOrders);
   const [showPlan, setShowPlan] = useState(true);
+  const [editor, setEditor] = useState<{
+    mode: 'refine' | 'revise';
+    concern: ConditionConcern;
+  } | null>(null);
 
   const codetypeToSystem: Record<string, string> = {
     ICD10: 'ICD-10-CM',
     'SNOMED US': 'SNOMED',
+  };
+
+  /** Refine/revise: append the new assertion and point the visit item at it. */
+  const handleEditorSave = (draft: ConditionAssertionDraft) => {
+    const target = editor?.concern;
+    if (!target) return;
+    const newAssertion: ConditionAssertion = {
+      ...draft,
+      id: `A-${Date.now()}`,
+      date: new Date().toISOString().slice(0, 10),
+    };
+    setConcernList((prev) =>
+      prev.map((c) => {
+        if (c.concernId !== target.concernId) return c;
+        const assertions =
+          draft.changeType === 'revision'
+            ? c.assertions.map((a) =>
+                a.id === draft.supersedes
+                  ? { ...a, verificationStatus: 'refuted' as const }
+                  : a
+              )
+            : c.assertions;
+        return { ...c, assertions: [...assertions, newAssertion] };
+      })
+    );
+    setItems((prev) =>
+      prev.map((i) =>
+        i.concernId === target.concernId
+          ? { ...i, assertionId: newAssertion.id }
+          : i
+      )
+    );
   };
 
   return (
@@ -238,9 +278,21 @@ function InteractiveTemplate() {
             )
           )
         }
-        onAction={(item, action) =>
-          console.log('assessment action', action, item.concernId)
-        }
+        onAction={(item, action) => {
+          if (action === 'refine' || action === 'revise') {
+            const concern = concernList.find(
+              (c) => c.concernId === item.concernId
+            );
+            if (concern) setEditor({ mode: action, concern });
+          }
+        }}
+      />
+      <ConditionEditor
+        mode={editor?.mode ?? 'refine'}
+        open={editor !== null}
+        onOpenChange={(open) => !open && setEditor(null)}
+        concern={editor?.concern}
+        onSave={handleEditorSave}
       />
     </div>
   );
