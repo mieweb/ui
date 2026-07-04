@@ -25,6 +25,9 @@ Quest/LabCorp orders).
 
 ⚠️ Requires generated shards: \`node scripts/codify/extract.mjs && node scripts/codify/build-index.mjs\`
 (artifacts land in \`.storybook/public/codify/\`, gitignored).
+
+📖 Full architecture documentation — build pipeline, .mcdx binary format, scoring, aliases,
+typo handling, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/healthcare-clinical-components/src/components/CodeLookup/README.md).
         `,
       },
     },
