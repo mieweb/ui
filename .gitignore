@@ -12,3 +12,6 @@ playwright-results/
 test-results/*.swp
 TODO.local.md
 RESTORE-OZWELL.local.md
+# Generated MedicalCodify offline-search artifacts (built by scripts/codify)
+scripts/codify/data/
+.storybook/public/codify/
