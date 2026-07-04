@@ -31,7 +31,8 @@ export type CodifyDomain =
   | 'lab'
   | 'procedure'
   | 'vaccine'
-  | 'occupational';
+  | 'occupational'
+  | 'quality';
 
 export interface CodeLookupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -102,6 +103,7 @@ const DOMAIN_TEXT: Record<string, string> = {
   procedure: 'text-violet-700 dark:text-violet-400',
   vaccine: 'text-muted-foreground',
   occupational: 'text-sky-700 dark:text-sky-400',
+  quality: 'text-rose-700 dark:text-rose-400',
 };
 
 /** What the drill-down (→) shows, per domain. */
@@ -112,7 +114,11 @@ const DETAIL_NOUN: Record<string, string> = {
   procedure: 'related codes',
   vaccine: 'related codes',
   occupational: 'required orders',
+  quality: 'measure orders',
 };
+
+/** Domains whose drill-down resolves a curated program order set. */
+const PROGRAM_DOMAINS = new Set(['occupational', 'quality']);
 
 // =============================================================================
 // CodeLookup
@@ -211,7 +217,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             // results already are the members, in curated order.
             const parent = drillParentRef.current;
             let members: CodifyResult[];
-            if (parent?.domain === 'occupational') {
+            if (parent && PROGRAM_DOMAINS.has(parent.domain)) {
               members = msg.results as CodifyResult[];
             } else {
               const pKey = parent
@@ -278,10 +284,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       drillParentRef.current = parent;
       setDrill({ parent, results: null });
       const id = --drillIdRef.current; // negative ids: never collide with searches
-      if (parent.domain === 'occupational') {
-        // Occupational programs drill into their curated order set (the
-        // orders that satisfy the surveillance requirement), resolved from
-        // whichever shards are loaded — load lab/procedure/vaccine alongside.
+      if (PROGRAM_DOMAINS.has(parent.domain)) {
+        // Programs (occupational surveillance, quality measures) drill into
+        // their curated order set (the orders that satisfy the requirement),
+        // resolved from whichever shards are loaded — load lab/procedure/
+        // vaccine alongside.
         workerRef.current?.postMessage({
           type: 'orders',
           id,

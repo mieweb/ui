@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { CodeLookup } from './CodeLookup';
+import { CodeLookup, type CodifyDomain } from './CodeLookup';
 import type { CodifyResult } from './engine';
 
 const meta: Meta<typeof CodeLookup> = {
@@ -50,22 +50,8 @@ function Template({
   searchDomains,
   locale,
 }: {
-  domains?: (
-    | 'condition'
-    | 'med'
-    | 'lab'
-    | 'procedure'
-    | 'vaccine'
-    | 'occupational'
-  )[];
-  searchDomains?: (
-    | 'condition'
-    | 'med'
-    | 'lab'
-    | 'procedure'
-    | 'vaccine'
-    | 'occupational'
-  )[];
+  domains?: CodifyDomain[];
+  searchDomains?: CodifyDomain[];
   locale?: string;
 }) {
   const [selected, setSelected] = useState<CodifyResult | null>(null);
@@ -152,6 +138,22 @@ export const MedicalSurveillance: Story = {
     <Template
       domains={['occupational', 'lab', 'procedure', 'vaccine']}
       searchDomains={['occupational']}
+      locale={globals.locale}
+    />
+  ),
+};
+
+/** CMS eCQM quality measures — the other half of the **health surveillance**
+ * umbrella (occupational programs + quality measures share the programs.json
+ * metadata: kind, periodicity, age/sex gates, satisfying orders). The →
+ * drill-down resolves each measure's orders (mammography for CMS125,
+ * colonoscopy/FIT for CMS130, flu vaccine for CMS147…). Try "breast",
+ * "colorectal", "a1c", "flu". */
+export const QualityMeasures: Story = {
+  render: (_args, { globals }) => (
+    <Template
+      domains={['quality', 'lab', 'procedure', 'vaccine']}
+      searchDomains={['quality']}
       locale={globals.locale}
     />
   ),

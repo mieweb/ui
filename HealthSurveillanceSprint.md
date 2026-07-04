@@ -20,11 +20,11 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - [x] Rebuild shards + browser verify
 
 ## Phase 3 — eCQMs: quality domain
-- [ ] Curated quality.tsv (CMS measures: 122, 125, 130, 117, 147, 153, …)
-- [ ] programs.json quality entries with age/sex/periodicity criteria
-- [ ] Engine: quality families keyed by measure id; component color + noun
-- [ ] QualityMeasures story
-- [ ] Rebuild shards + browser verify
+- [x] Curated quality.tsv (CMS measures: 122, 124, 125, 130, 117, 147, 127, 153)
+- [x] programs.json quality entries with age/sex/periodicity criteria
+- [x] Engine: quality families keyed by measure id; component color + noun
+- [x] QualityMeasures story
+- [x] Rebuild shards + browser verify
 
 ## Phase 4 — PatientHistory + due engine
 - [ ] history.ts: PatientHistory types (orders w/ status, observations, procedures, conditions, allergies, age, sex)
@@ -55,3 +55,5 @@ PR #299) and mieweb/codify (`packages/codify`, branch `main`).
 - 2026-07-04: Phase 2 done — 8 new verticals (29 programs total); GS-1811
   drill resolves vision/audiometry/EKG/lipid/drug screen; hrp, i693, cwhsp,
   mariner aliases verified in browser.
+- 2026-07-04: Phase 3 done — quality domain (eCQM codetype, 8 CMS measures)
+  with age/sex/periodicity metadata; CMS130 drill resolves colonoscopy + FIT.

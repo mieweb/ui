@@ -194,6 +194,59 @@
         "LabCorp Order|003772",
         "LabCorp Order|790352"
       ]
+    },
+    "eCQM|CMS122": {
+      "kind": "quality",
+      "periodicityMonths": 12,
+      "ageMin": 18,
+      "ageMax": 75,
+      "orders": ["LabCorp Order|001453", "Quest Order|16320"]
+    },
+    "eCQM|CMS124": {
+      "kind": "quality",
+      "periodicityMonths": 36,
+      "sex": "F",
+      "ageMin": 21,
+      "ageMax": 64,
+      "orders": ["LabCorp Order|009100"]
+    },
+    "eCQM|CMS125": {
+      "kind": "quality",
+      "periodicityMonths": 24,
+      "sex": "F",
+      "ageMin": 40,
+      "ageMax": 74,
+      "orders": ["HCPCS|77057"]
+    },
+    "eCQM|CMS130": {
+      "kind": "quality",
+      "periodicityMonths": 120,
+      "ageMin": 45,
+      "ageMax": 75,
+      "orders": ["HCPCS|44388", "LabCorp Order|182949"]
+    },
+    "eCQM|CMS117": {
+      "kind": "quality",
+      "ageMax": 2,
+      "orders": ["CVX|03", "CVX|120", "CVX|45"]
+    },
+    "eCQM|CMS147": {
+      "kind": "quality",
+      "periodicityMonths": 12,
+      "orders": ["CVX|88"]
+    },
+    "eCQM|CMS127": {
+      "kind": "quality",
+      "ageMin": 65,
+      "orders": ["CVX|133"]
+    },
+    "eCQM|CMS153": {
+      "kind": "quality",
+      "periodicityMonths": 12,
+      "sex": "F",
+      "ageMin": 16,
+      "ageMax": 24,
+      "orders": ["Quest Order|11363"]
     }
   }
 }

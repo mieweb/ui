@@ -114,9 +114,10 @@ export function familyKey(
     // SNOMED: numeric concept id; synonyms share the code
     if (/^\d+$/.test(fullcode)) return 'condition:#s' + fullcode;
   }
-  // occupational surveillance programs never collapse into each other —
-  // 1910.1025 (general industry) and 1926.62 (construction) are distinct
-  if (domain === 'occupational') return 'occupational:#' + fullcode;
+  // occupational surveillance programs and quality measures never collapse
+  // into each other — each program/measure is its own family (keyed by code)
+  if (domain === 'occupational' || domain === 'quality')
+    return domain + ':#' + fullcode;
   return domain + ':' + familyTerm(domain, label);
 }
 
@@ -509,7 +510,9 @@ function searchShard(
           )
         );
         const fullcode =
-          s.domain === 'condition' || s.domain === 'occupational'
+          s.domain === 'condition' ||
+          s.domain === 'occupational' ||
+          s.domain === 'quality'
             ? td.decode(
                 s.codeBlob.subarray(s.codeOffsets[d], s.codeOffsets[d + 1])
               )

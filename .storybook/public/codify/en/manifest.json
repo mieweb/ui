@@ -1,7 +1,7 @@
 {
   "version": 2,
   "locale": "en",
-  "builtAt": "2026-07-04T16:01:21.633Z",
+  "builtAt": "2026-07-04T16:04:51.814Z",
   "shards": [
     {
       "domain": "condition",
@@ -44,6 +44,13 @@
       "bytes": 2508,
       "docCount": 29,
       "tokenCount": 99
+    },
+    {
+      "domain": "quality",
+      "file": "quality.mcdx",
+      "bytes": 827,
+      "docCount": 8,
+      "tokenCount": 27
     }
   ]
 }
