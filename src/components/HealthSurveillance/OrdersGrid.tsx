@@ -32,11 +32,9 @@ import {
 import {
   ORDER_COLUMNS,
   ORDER_CONTROL_FIELDS,
-  SELECT_COLUMN,
-  makeOrderCellFormatter,
+  formatOrderCell,
   useOrderRowsUrl,
   OrdersGroupPresets,
-  OrdersSelectionBar,
 } from './ordersGridShared';
 import type { PatientHistory } from './history';
 import type { ProgramsMap } from './evaluate';
@@ -91,45 +89,60 @@ function OrdersGridInner({
   'data-testid'?: string;
 }) {
   const url = useOrderRowsUrl(rows);
-  const [selectedIdx, setSelectedIdx] = React.useState<Set<number>>(
-    () => new Set()
-  );
 
-  // reset selection whenever the row set changes
-  React.useEffect(() => setSelectedIdx(new Set()), [rows]);
-
-  const toggle = React.useCallback(
-    (i: number) =>
-      setSelectedIdx((prev) => {
-        const next = new Set(prev);
-        if (next.has(i)) next.delete(i);
-        else next.add(i);
-        return next;
-      }),
-    []
-  );
-
-  const selected = React.useMemo(
-    () =>
-      Array.from(selectedIdx)
-        .map((i) => rows[i])
-        .filter(Boolean),
-    [selectedIdx, rows]
-  );
-
-  const formatCell = React.useMemo(
-    () => makeOrderCellFormatter((i) => selectedIdx.has(i), toggle),
-    [selectedIdx, toggle]
-  );
+  // Mass operations over the native checkbox selection. The palette hands
+  // each callback the selected rows' data (OrderRow-shaped after the
+  // object-URL round trip); each operation applies only to eligible rows:
+  // 'available' can be ordered, pending unprocessed (no requisition yet)
+  // can be bundled into a requisition or cancelled.
+  const operations = React.useMemo(() => {
+    const asOrderRows = (sel: unknown[]) => sel as OrderRow[];
+    const ops: {
+      label: string;
+      callback: (ctx: { rows: unknown[] }) => void;
+    }[] = [];
+    if (onOrderRows) {
+      ops.push({
+        label: 'Order',
+        callback: ({ rows: sel }) => {
+          const eligible = asOrderRows(sel).filter(
+            (r) => r.status === 'available'
+          );
+          if (eligible.length > 0) onOrderRows(eligible);
+        },
+      });
+    }
+    if (onRequisition) {
+      ops.push({
+        label: 'Create requisition',
+        callback: ({ rows: sel }) => {
+          const eligible = asOrderRows(sel).filter(
+            (r) => r.status === 'pending' && !r.requisitionId
+          );
+          if (eligible.length > 0) onRequisition(eligible);
+        },
+      });
+    }
+    if (onCancel) {
+      ops.push({
+        label: 'Cancel',
+        callback: ({ rows: sel }) => {
+          const eligible = asOrderRows(sel).filter(
+            (r) => r.status === 'pending' && !r.requisitionId
+          );
+          if (eligible.length > 0) onCancel(eligible);
+        },
+      });
+    }
+    return ops;
+  }, [onOrderRows, onRequisition, onCancel]);
 
   const columns = React.useMemo(
-    () => [
-      SELECT_COLUMN,
-      ...ORDER_COLUMNS.map(({ field, header }) => ({
+    () =>
+      ORDER_COLUMNS.map(({ field, header }) => ({
         field: field as string,
         header,
       })),
-    ],
     []
   );
 
@@ -140,22 +153,25 @@ function OrdersGridInner({
       className={cn('flex flex-col gap-2', className)}
     >
       <DataVisNitroSource type="http" url={url}>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <OrdersGroupPresets />
-          <OrdersSelectionBar
-            selected={selected}
-            onOrder={onOrderRows}
-            onRequisition={onRequisition}
-            onCancel={onCancel}
-          />
-        </div>
+        <OrdersGroupPresets />
         <DataVisNitroGrid
           title={title}
           height={height}
           columns={columns}
           controlFields={ORDER_CONTROL_FIELDS}
-          features={{ stickyHeaders: true }}
-          formatCell={formatCell}
+          operations={operations}
+          // 'checkbox' selection ships in @mieweb/datavis > 1.1.0 (native
+          // leading checkbox column + tri-state select-all header); the
+          // published typings still say `boolean`, hence the cast.
+          features={
+            {
+              rowSelection: 'checkbox',
+              stickyHeaders: true,
+            } as unknown as React.ComponentProps<
+              typeof DataVisNitroGrid
+            >['features']
+          }
+          formatCell={formatOrderCell}
         />
       </DataVisNitroSource>
     </div>

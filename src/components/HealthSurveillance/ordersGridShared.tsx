@@ -10,15 +10,15 @@
  *   cells.
  * - {@link OrdersGroupPresets} — one-click "group by" chips driving
  *   `view.setGroup()` through {@link DataVisNitroContext}.
- * - {@link OrdersSelectionBar} — mass-operation bar for the current
- *   multi-selection (order / bundle into requisition / cancel).
+ *
+ * Row selection and mass operations are native NITRO features:
+ * `features.rowSelection: 'checkbox'` + the `operations` palette.
  */
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
-import { Checkbox } from '../Checkbox';
 import { DataVisNitroContext } from '../DataVisNITRO';
 import type { OrderRow, OrderRowStatus } from './orderRows';
 
@@ -53,17 +53,12 @@ export const ORDER_CONTROL_FIELDS = ORDER_COLUMNS.filter(
 // useOrderRowsUrl
 // =============================================================================
 
-/** Serialize rows into an object-URL `{ typeInfo, data }` source. Each row
- * gains a `_row` index so checkbox cells can map back to the source row
- * (underscore fields are treated as internal by the engine). */
+/** Serialize rows into an object-URL `{ typeInfo, data }` source. */
 export function useOrderRowsUrl(rows: OrderRow[]): string {
   const url = React.useMemo(() => {
     const payload = {
-      typeInfo: [
-        ...ORDER_COLUMNS.map(({ field, type }) => ({ field, type })),
-        { field: '_row', type: 'number' },
-      ],
-      data: rows.map((r, i) => ({ ...r, _row: i })),
+      typeInfo: ORDER_COLUMNS.map(({ field, type }) => ({ field, type })),
+      data: rows,
     };
     const blob = new Blob([JSON.stringify(payload)], {
       type: 'application/json',
@@ -105,39 +100,6 @@ export function formatOrderCell(
     return <OrderStatusBadge status={value as OrderRowStatus} />;
   }
   return value as React.ReactNode;
-}
-
-/** The synthetic checkbox column prepended to the grid. */
-export const SELECT_COLUMN = { field: '_sel', header: '', width: 40 };
-
-/**
- * Cell formatter with a leading selection-checkbox column. Data rows carry a
- * `_row` index (see {@link useOrderRowsUrl}); group/summary rows don't, and
- * render no checkbox.
- */
-export function makeOrderCellFormatter(
-  isSelected: (rowIndex: number) => boolean,
-  onToggle: (rowIndex: number) => void
-) {
-  return function formatCell(
-    value: unknown,
-    row: unknown,
-    column: { field: string }
-  ): React.ReactNode {
-    if (column.field === SELECT_COLUMN.field) {
-      const idx = (row as Record<string, unknown> | null)?._row;
-      if (typeof idx !== 'number') return null;
-      return (
-        <Checkbox
-          aria-label="Select order"
-          checked={isSelected(idx)}
-          onChange={() => onToggle(idx)}
-          onClick={(e) => e.stopPropagation()}
-        />
-      );
-    }
-    return formatOrderCell(value, row, column);
-  };
 }
 
 // =============================================================================
@@ -204,88 +166,6 @@ export function OrdersGroupPresets({
           {p.label}
         </Button>
       ))}
-    </div>
-  );
-}
-
-// =============================================================================
-// Selection action bar
-// =============================================================================
-
-export interface OrdersSelectionBarProps {
-  /** Currently selected rows (already mapped from row numbers) */
-  selected: OrderRow[];
-  /** Place the selected available orders */
-  onOrder?: (rows: OrderRow[]) => void;
-  /** Bundle the selected pending unprocessed orders into a requisition */
-  onRequisition?: (rows: OrderRow[]) => void;
-  /** Cancel the selected pending unprocessed orders */
-  onCancel?: (rows: OrderRow[]) => void;
-  className?: string;
-}
-
-/**
- * Mass operations over the current selection. Only eligible rows count:
- * `available` rows can be ordered; `pending` rows without a requisition
- * ("unprocessed") can be bundled into a requisition or cancelled.
- */
-export function OrdersSelectionBar({
-  selected,
-  onOrder,
-  onRequisition,
-  onCancel,
-  className,
-}: OrdersSelectionBarProps) {
-  const orderable = selected.filter((r) => r.status === 'available');
-  const unprocessed = selected.filter(
-    (r) => r.status === 'pending' && !r.requisitionId
-  );
-
-  if (!onOrder && !onRequisition && !onCancel) return null;
-
-  return (
-    <div
-      data-slot="orders-selection-bar"
-      className={cn(
-        'flex flex-wrap items-center gap-2 text-sm',
-        className
-      )}
-    >
-      <span className="text-muted-foreground text-xs">
-        {selected.length} selected
-      </span>
-      {onOrder && (
-        <Button
-          type="button"
-          size="sm"
-          disabled={orderable.length === 0}
-          onClick={() => onOrder(orderable)}
-        >
-          Order ({orderable.length})
-        </Button>
-      )}
-      {onRequisition && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={unprocessed.length === 0}
-          onClick={() => onRequisition(unprocessed)}
-        >
-          Create requisition ({unprocessed.length})
-        </Button>
-      )}
-      {onCancel && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={unprocessed.length === 0}
-          onClick={() => onCancel(unprocessed)}
-        >
-          Cancel ({unprocessed.length})
-        </Button>
-      )}
     </div>
   );
 }

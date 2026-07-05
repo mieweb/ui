@@ -12,7 +12,5 @@ export {
 } from './components/HealthSurveillance/OrdersGrid';
 export {
   OrdersGroupPresets,
-  OrdersSelectionBar,
   type GroupPreset,
-  type OrdersSelectionBarProps,
 } from './components/HealthSurveillance/ordersGridShared';
