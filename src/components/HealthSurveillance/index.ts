@@ -13,6 +13,13 @@ export {
   type ProgramMeta,
   type ProgramsMap,
 } from './evaluate';
+export {
+  buildChartOrderRows,
+  buildEncounterOrderRows,
+  type OrderRow,
+  type OrderRowStatus,
+  type OrderRowsOptions,
+} from './orderRows';
 export type {
   PatientHistory,
   HistoryOrder,

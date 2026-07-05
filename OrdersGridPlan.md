@@ -19,17 +19,17 @@ yet implemented). Grouping presets use `DataVisNitroContext` →
 
 ## Phase 1 — Data model + flatten engine
 
-- [ ] `history.ts`: optional `provider?`, `requisitionId?`, `encounterId?` on
+- [x] `history.ts`: optional `provider?`, `requisitionId?`, `encounterId?` on
       `HistoryOrder` (requisition = routing document; encounter = visit)
-- [ ] `orderRows.ts`: `OrderRow` type + `buildChartOrderRows(history, programs,
+- [x] `orderRows.ts`: `OrderRow` type + `buildChartOrderRows(history, programs,
       opts)` — one row per history order **plus** one row per orderable
       due-list order key; reason resolved by reverse program lookup;
       per-order status `completed | pending | available | blocked`
-- [ ] `buildEncounterOrderRows(history, programs, { encounterId, … })` —
+- [x] `buildEncounterOrderRows(history, programs, { encounterId, … })` —
       current-encounter subset + actionable due-list rows
-- [ ] Unit tests for both builders (alt groups, blocked deps, provider /
+- [x] Unit tests for both builders (alt groups, blocked deps, provider /
       requisition / encounter passthrough)
-- [ ] Commit
+- [x] Commit
 
 ## Phase 2 — Shared grid infrastructure
 

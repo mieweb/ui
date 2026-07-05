@@ -21,6 +21,13 @@ export interface HistoryOrder {
   status: 'completed' | 'pending';
   /** Completion date for completed orders; order date for pending ones */
   date: IsoDate;
+  /** Ordering/performing provider display name (e.g. "Dr. Patel") */
+  provider?: string;
+  /** Requisition the order was bundled into — the document routing a batch
+   * of encounter orders to a provider/referral (e.g. "REQ-2024-0117") */
+  requisitionId?: string;
+  /** Encounter (visit) the order was placed in (e.g. "ENC-2024-0117") */
+  encounterId?: string;
 }
 
 export interface HistoryObservation {
