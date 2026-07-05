@@ -41,30 +41,35 @@ yet implemented). Grouping presets use `DataVisNitroContext` →
 
 ## Phase 3 — ChartOrdersGrid
 
-- [ ] `ChartOrdersGrid.tsx` — controlFields (Reason, Provider, Requisition,
+- [x] `ChartOrdersGrid.tsx` — controlFields (Reason, Provider, Requisition,
       Status, Kind, Date), filters, group presets; `onRequisition` /
       `onCancel` for selected pending unprocessed rows
-- [ ] Export from `index.ts`
-- [ ] Story: enriched sample history (providers, requisition + encounter IDs);
+- [x] Export from `index.ts`
+- [x] Story: enriched sample history (providers, requisition + encounter IDs);
       `ChartOrders` story under Healthcare/HealthSurveillance
-- [ ] Commit
+- [x] Commit
 
 ## Phase 4 — EncounterOrdersGrid
 
-- [ ] `EncounterOrdersGrid.tsx` — current-encounter rows; mass ops
+- [x] `EncounterOrdersGrid.tsx` — current-encounter rows; mass ops
       **Order (N)** / **Create requisition (N)** / **Cancel (N)** via
       `onOrderMany` / `onRequisition` / `onCancel`
-- [ ] ChartDemo story: toggle HealthSurveillance card ↔ EncounterOrdersGrid
+- [x] ChartDemo story: toggle HealthSurveillance card ↔ EncounterOrdersGrid
       sharing placed-orders state
-- [ ] Commit
+- [x] Commit
 
 ## Phase 5 — Verification & polish
 
 - [ ] `vitest run src/components/HealthSurveillance` green
 - [ ] Type/lint clean on touched files
-- [ ] Storybook manual pass: group by each preset, filter by status,
+- [x] Storybook manual pass: group by each preset, filter by status,
       multi-select action bar; screenshots
 - [ ] Final commit
+
+Note: both grids share `OrdersGrid.tsx` internals, so Phases 3–4 landed as
+one commit. Grids are exported from the **`@mieweb/ui/datavis` entry** (not
+the main entry) because `@mieweb/datavis` is an optional peer dependency;
+the pure row builders stay in the main entry.
 
 ## Out of scope
 

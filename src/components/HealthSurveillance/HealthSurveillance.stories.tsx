@@ -4,10 +4,13 @@ import {
   HealthSurveillance,
   type SurveillanceOrderPick,
 } from './HealthSurveillance';
+import { ChartOrdersGrid, EncounterOrdersGrid } from './OrdersGrid';
+import type { OrderRow } from './orderRows';
 import type { ProgramsMap } from './evaluate';
 import type { PatientHistory } from './history';
 import { Card, CardHeader, CardContent } from '../Card/Card';
 import { Badge } from '../Badge/Badge';
+import { Button } from '../Button';
 
 const meta: Meta<typeof HealthSurveillance> = {
   title: 'Healthcare/HealthSurveillance',
@@ -147,6 +150,73 @@ const HISTORY: PatientHistory = {
   ],
 };
 
+// -----------------------------------------------------------------------------
+// Grid sample data — the same chart with provider / requisition / encounter
+// context on each order, plus this visit's pending unprocessed orders
+// -----------------------------------------------------------------------------
+
+/** Today's visit. */
+const ENCOUNTER_ID = 'ENC-2026-0704';
+
+const GRID_HISTORY: PatientHistory = {
+  ...HISTORY,
+  orders: [
+    {
+      key: 'HCPCS|92551',
+      label: 'Pure tone hearing test, air',
+      status: 'completed',
+      date: '2025-11-02',
+      provider: 'Dr. Alvarez (Audiology)',
+      requisitionId: 'REQ-2025-1102',
+      encounterId: 'ENC-2025-1102',
+    },
+    {
+      key: 'Quest Order|3058',
+      label: 'Lead, blood (OSHA)',
+      status: 'completed',
+      date: '2025-11-02',
+      provider: 'Dr. Alvarez (Audiology)',
+      requisitionId: 'REQ-2025-1102',
+      encounterId: 'ENC-2025-1102',
+    },
+    {
+      key: 'LabCorp Order|001453',
+      label: 'Hemoglobin A1c',
+      status: 'completed',
+      date: '2025-05-01',
+      provider: 'Dr. Gupta (Internal Med)',
+      requisitionId: 'REQ-2025-0501',
+      encounterId: 'ENC-2025-0501',
+    },
+    {
+      key: 'LabCorp Order|009100',
+      label: 'Pap smear',
+      status: 'completed',
+      date: '2024-09-12',
+      provider: 'Dr. Okafor (OB/GYN)',
+      requisitionId: 'REQ-2024-0912',
+      encounterId: 'ENC-2024-0912',
+    },
+    // this visit — pending, not yet bundled into a requisition
+    {
+      key: 'LabCorp Order|182949',
+      label: 'Occult blood, fecal (FIT)',
+      status: 'pending',
+      date: '2026-07-04',
+      provider: 'Dr. Gupta (Internal Med)',
+      encounterId: ENCOUNTER_ID,
+    },
+    {
+      key: 'HCPCS|94150',
+      label: 'Spirometry (vital capacity)',
+      status: 'pending',
+      date: '2026-07-04',
+      provider: 'Dr. Gupta (Internal Med)',
+      encounterId: ENCOUNTER_ID,
+    },
+  ],
+};
+
 /** Fetch the served programs.json (same sidecar the CodeLookup worker uses). */
 function usePrograms(): ProgramsMap | null {
   const [programs, setPrograms] = useState<ProgramsMap | null>(null);
@@ -218,11 +288,20 @@ function Panel({
 }
 
 /** Full chart demo: due list beside medications, allergies, conditions and
- * lab results — the context a clinician has while working the due list. */
+ * lab results — the context a clinician has while working the due list.
+ * Toggle between the compact due-list card and the encounter-orders grid. */
 function ChartDemoView() {
   const programs = usePrograms();
   const [placed, setPlaced] = useState<SurveillanceOrderPick[]>([]);
+  const [view, setView] = useState<'due' | 'grid'>('due');
   if (!programs) return <div className="text-sm">Loading programs…</div>;
+  const rowPicks = (rows: OrderRow[]): SurveillanceOrderPick[] =>
+    rows.map((r) => ({
+      key: r.orderKey,
+      label: r.order,
+      programKey: r.reasonKey,
+      programLabel: r.reason || r.reasonKey,
+    }));
   return (
       <div className="mx-auto max-w-6xl">
         <div className="mb-3 flex items-baseline gap-3">
@@ -230,18 +309,49 @@ function ChartDemoView() {
           <span className="text-muted-foreground text-sm">
             55 F · assembly technician · enrolled: noise, lead, BBP
           </span>
+          <span className="ml-auto flex gap-1">
+            <Button
+              size="sm"
+              variant={view === 'due' ? 'primary' : 'outline'}
+              onClick={() => setView('due')}
+            >
+              Due list
+            </Button>
+            <Button
+              size="sm"
+              variant={view === 'grid' ? 'primary' : 'outline'}
+              onClick={() => setView('grid')}
+            >
+              Encounter orders
+            </Button>
+          </span>
         </div>
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           <div className="space-y-3 lg:col-span-2">
-            <HealthSurveillance
-              history={HISTORY}
-              programs={programs}
-              enrolledKeys={ENROLLED}
-              programLabels={PROGRAM_LABELS}
-              orderLabels={ORDER_LABELS}
-              now={NOW}
-              onOrderMany={(picks) => setPlaced((p) => [...p, ...picks])}
-            />
+            {view === 'due' ? (
+              <HealthSurveillance
+                history={GRID_HISTORY}
+                programs={programs}
+                enrolledKeys={ENROLLED}
+                programLabels={PROGRAM_LABELS}
+                orderLabels={ORDER_LABELS}
+                now={NOW}
+                onOrderMany={(picks) => setPlaced((p) => [...p, ...picks])}
+              />
+            ) : (
+              <EncounterOrdersGrid
+                history={GRID_HISTORY}
+                programs={programs}
+                encounterId={ENCOUNTER_ID}
+                enrolledKeys={ENROLLED}
+                programLabels={PROGRAM_LABELS}
+                orderLabels={ORDER_LABELS}
+                now={NOW}
+                onOrderRows={(rows) =>
+                  setPlaced((p) => [...p, ...rowPicks(rows)])
+                }
+              />
+            )}
             <Panel title={`Orders this visit (${placed.length})`}>
               {placed.length === 0 ? (
                 <span className="text-muted-foreground text-sm">
@@ -323,3 +433,105 @@ function ChartDemoView() {
 }
 
 export const ChartDemo: Story = { render: () => <ChartDemoView /> };
+
+// -----------------------------------------------------------------------------
+// Orders grids (NITRO / DataVis)
+// -----------------------------------------------------------------------------
+
+/** Chart-wide order history — group by reason, provider, requisition, status,
+ * or date via the preset chips, or open the grid's own controls to
+ * filter/group/pivot freely. Selecting pending unprocessed rows enables the
+ * requisition/cancel mass operations. */
+function ChartOrdersDemo() {
+  const programs = usePrograms();
+  const [log, setLog] = useState<string[]>([]);
+  if (!programs) return <div className="text-sm">Loading programs…</div>;
+  return (
+    <div className="mx-auto max-w-6xl space-y-3">
+      <ChartOrdersGrid
+        history={GRID_HISTORY}
+        programs={programs}
+        enrolledKeys={ENROLLED}
+        programLabels={PROGRAM_LABELS}
+        orderLabels={ORDER_LABELS}
+        now={NOW}
+        onRequisition={(rows) =>
+          setLog((l) => [
+            ...l,
+            `Requisition created for: ${rows.map((r) => r.order).join(', ')}`,
+          ])
+        }
+        onCancel={(rows) =>
+          setLog((l) => [
+            ...l,
+            `Cancelled: ${rows.map((r) => r.order).join(', ')}`,
+          ])
+        }
+      />
+      {log.length > 0 && (
+        <Card padding="sm">
+          <div className="text-sm font-semibold">Actions</div>
+          <ul className="mt-1 space-y-0.5 text-sm">
+            {log.map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+export const ChartOrders: Story = { render: () => <ChartOrdersDemo /> };
+
+/** The current encounter's orders with mass operations — place available
+ * due-list orders, bundle pending unprocessed ones into a requisition, or
+ * cancel them. */
+function EncounterOrdersDemo() {
+  const programs = usePrograms();
+  const [log, setLog] = useState<string[]>([]);
+  if (!programs) return <div className="text-sm">Loading programs…</div>;
+  return (
+    <div className="mx-auto max-w-6xl space-y-3">
+      <EncounterOrdersGrid
+        history={GRID_HISTORY}
+        programs={programs}
+        encounterId={ENCOUNTER_ID}
+        enrolledKeys={ENROLLED}
+        programLabels={PROGRAM_LABELS}
+        orderLabels={ORDER_LABELS}
+        now={NOW}
+        onOrderRows={(rows) =>
+          setLog((l) => [
+            ...l,
+            `Ordered: ${rows.map((r) => r.order).join(', ')}`,
+          ])
+        }
+        onRequisition={(rows) =>
+          setLog((l) => [
+            ...l,
+            `Requisition created for: ${rows.map((r) => r.order).join(', ')}`,
+          ])
+        }
+        onCancel={(rows) =>
+          setLog((l) => [
+            ...l,
+            `Cancelled: ${rows.map((r) => r.order).join(', ')}`,
+          ])
+        }
+      />
+      {log.length > 0 && (
+        <Card padding="sm">
+          <div className="text-sm font-semibold">Actions</div>
+          <ul className="mt-1 space-y-0.5 text-sm">
+            {log.map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+export const EncounterOrders: Story = { render: () => <EncounterOrdersDemo /> };
