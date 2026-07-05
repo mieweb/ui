@@ -33,11 +33,11 @@ yet implemented). Grouping presets use `DataVisNitroContext` →
 
 ## Phase 2 — Shared grid infrastructure
 
-- [ ] `useNitroRowsUrl` hook — rows → `{ typeInfo, data }` object-URL with
+- [x] `useNitroRowsUrl` hook — rows → `{ typeInfo, data }` object-URL with
       dates typed `date` (revoked on change/unmount)
-- [ ] `OrdersGridChrome` internals: status-badge `formatCell`, group-preset
+- [x] `OrdersGridChrome` internals: status-badge `formatCell`, group-preset
       chips (context + `setGroup`/`clearGroup`), selection action bar
-- [ ] Commit
+- [x] Commit
 
 ## Phase 3 — ChartOrdersGrid
 
