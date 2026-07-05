@@ -60,11 +60,19 @@ yet implemented). Grouping presets use `DataVisNitroContext` →
 
 ## Phase 5 — Verification & polish
 
-- [ ] `vitest run src/components/HealthSurveillance` green
-- [ ] Type/lint clean on touched files
+- [x] `vitest run src/components/HealthSurveillance` green (21 tests)
+- [x] Type/lint clean on touched files
 - [x] Storybook manual pass: group by each preset, filter by status,
       multi-select action bar; screenshots
-- [ ] Final commit
+- [x] Final commit
+
+Verified in-browser on the EncounterOrders/ChartOrders stories: group-by
+reason and provider presets, row multiselect (pending unprocessed row →
+Create requisition (1)/Cancel (1) enabled, Order (0) disabled), requisition
+callback log. Known quirk: the ChartDemo story page exhibits a continuous
+layout instability that defeats Playwright's actionability checks (affects
+pre-existing elements too, e.g. the due-item expander) — needs a separate
+investigation; the due-list ↔ grid toggle there should be exercised by hand.
 
 Note: both grids share `OrdersGrid.tsx` internals, so Phases 3–4 landed as
 one commit. Grids are exported from the **`@mieweb/ui/datavis` entry** (not
