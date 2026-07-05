@@ -18,6 +18,7 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
+import { Checkbox } from '../Checkbox';
 import { DataVisNitroContext } from '../DataVisNITRO';
 import type { OrderRow, OrderRowStatus } from './orderRows';
 
@@ -52,12 +53,17 @@ export const ORDER_CONTROL_FIELDS = ORDER_COLUMNS.filter(
 // useOrderRowsUrl
 // =============================================================================
 
-/** Serialize rows into an object-URL `{ typeInfo, data }` source. */
+/** Serialize rows into an object-URL `{ typeInfo, data }` source. Each row
+ * gains a `_row` index so checkbox cells can map back to the source row
+ * (underscore fields are treated as internal by the engine). */
 export function useOrderRowsUrl(rows: OrderRow[]): string {
   const url = React.useMemo(() => {
     const payload = {
-      typeInfo: ORDER_COLUMNS.map(({ field, type }) => ({ field, type })),
-      data: rows,
+      typeInfo: [
+        ...ORDER_COLUMNS.map(({ field, type }) => ({ field, type })),
+        { field: '_row', type: 'number' },
+      ],
+      data: rows.map((r, i) => ({ ...r, _row: i })),
     };
     const blob = new Blob([JSON.stringify(payload)], {
       type: 'application/json',
@@ -99,6 +105,39 @@ export function formatOrderCell(
     return <OrderStatusBadge status={value as OrderRowStatus} />;
   }
   return value as React.ReactNode;
+}
+
+/** The synthetic checkbox column prepended to the grid. */
+export const SELECT_COLUMN = { field: '_sel', header: '', width: 40 };
+
+/**
+ * Cell formatter with a leading selection-checkbox column. Data rows carry a
+ * `_row` index (see {@link useOrderRowsUrl}); group/summary rows don't, and
+ * render no checkbox.
+ */
+export function makeOrderCellFormatter(
+  isSelected: (rowIndex: number) => boolean,
+  onToggle: (rowIndex: number) => void
+) {
+  return function formatCell(
+    value: unknown,
+    row: unknown,
+    column: { field: string }
+  ): React.ReactNode {
+    if (column.field === SELECT_COLUMN.field) {
+      const idx = (row as Record<string, unknown> | null)?._row;
+      if (typeof idx !== 'number') return null;
+      return (
+        <Checkbox
+          aria-label="Select order"
+          checked={isSelected(idx)}
+          onChange={() => onToggle(idx)}
+          onClick={(e) => e.stopPropagation()}
+        />
+      );
+    }
+    return formatOrderCell(value, row, column);
+  };
 }
 
 // =============================================================================

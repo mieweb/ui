@@ -32,7 +32,8 @@ import {
 import {
   ORDER_COLUMNS,
   ORDER_CONTROL_FIELDS,
-  formatOrderCell,
+  SELECT_COLUMN,
+  makeOrderCellFormatter,
   useOrderRowsUrl,
   OrdersGroupPresets,
   OrdersSelectionBar,
@@ -90,14 +91,45 @@ function OrdersGridInner({
   'data-testid'?: string;
 }) {
   const url = useOrderRowsUrl(rows);
-  const [selected, setSelected] = React.useState<OrderRow[]>([]);
+  const [selectedIdx, setSelectedIdx] = React.useState<Set<number>>(
+    () => new Set()
+  );
+
+  // reset selection whenever the row set changes
+  React.useEffect(() => setSelectedIdx(new Set()), [rows]);
+
+  const toggle = React.useCallback(
+    (i: number) =>
+      setSelectedIdx((prev) => {
+        const next = new Set(prev);
+        if (next.has(i)) next.delete(i);
+        else next.add(i);
+        return next;
+      }),
+    []
+  );
+
+  const selected = React.useMemo(
+    () =>
+      Array.from(selectedIdx)
+        .map((i) => rows[i])
+        .filter(Boolean),
+    [selectedIdx, rows]
+  );
+
+  const formatCell = React.useMemo(
+    () => makeOrderCellFormatter((i) => selectedIdx.has(i), toggle),
+    [selectedIdx, toggle]
+  );
 
   const columns = React.useMemo(
-    () =>
-      ORDER_COLUMNS.map(({ field, header }) => ({
+    () => [
+      SELECT_COLUMN,
+      ...ORDER_COLUMNS.map(({ field, header }) => ({
         field: field as string,
         header,
       })),
+    ],
     []
   );
 
@@ -122,15 +154,8 @@ function OrdersGridInner({
           height={height}
           columns={columns}
           controlFields={ORDER_CONTROL_FIELDS}
-          features={{ rowSelection: true, stickyHeaders: true }}
-          formatCell={formatOrderCell}
-          onSelectionChange={(sel) =>
-            setSelected(
-              Array.from(sel.selectedRows)
-                .map((n) => rows[n])
-                .filter(Boolean)
-            )
-          }
+          features={{ stickyHeaders: true }}
+          formatCell={formatCell}
         />
       </DataVisNitroSource>
     </div>
