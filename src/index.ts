@@ -177,6 +177,7 @@ export * from './components/Toast';
 export * from './components/Toggle';
 export * from './components/Tooltip';
 export * from './components/UserAvatar';
+export * from './components/UserBadge';
 export * from './components/VisuallyHidden';
 // WebChartReportViewer exports DateRange which conflicts with DateRangePicker
 export {

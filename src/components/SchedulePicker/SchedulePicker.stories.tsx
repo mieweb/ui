@@ -129,6 +129,11 @@ const meta = {
       control: 'boolean',
       description: 'Whether to show time picker (shows after date is selected)',
     },
+    allowCustomDate: {
+      control: 'boolean',
+      description:
+        'Show a calendar trigger at the end of the strip for picking dates beyond the visible range',
+    },
     // Hide internal props
     dates: { table: { disable: true } },
     times: { table: { disable: true } },
@@ -174,6 +179,16 @@ export const MoreDates: Story = {
   args: {
     ...Default.args,
     dateCount: 21,
+  },
+};
+
+export const WithCalendarPicker: Story = {
+  args: {
+    ...Default.args,
+    dateCount: 14,
+    allowCustomDate: true,
+    customDateLabel: 'More dates',
+    minDate: new Date(),
   },
 };
 

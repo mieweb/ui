@@ -8,6 +8,7 @@ import type {
   TypingState,
 } from './types';
 import { MessageBubble } from './MessageBubble';
+import { useReadReceipts } from './hooks';
 
 // ============================================================================
 // Utility Functions
@@ -402,6 +403,14 @@ export interface MessageListProps {
   onRetryMessage?: (messageId: string) => void;
   /** Callback when an attachment is clicked */
   onAttachmentClick?: (attachment: MessageAttachment, message: Message) => void;
+  /**
+   * Called when an unread incoming message scrolls into view (via
+   * IntersectionObserver) — use to send read receipts. Only messages from
+   * other senders whose `status` is not already `'read'` are observed.
+   */
+  onReadReceipt?: (messageId: string) => void;
+  /** IntersectionObserver threshold for read receipts (default 0.5). */
+  readReceiptThreshold?: number;
   /** Custom empty state */
   emptyState?: React.ReactNode;
   /** Custom timestamp formatter */
@@ -442,6 +451,8 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
       onLoadMore,
       onRetryMessage,
       onAttachmentClick,
+      onReadReceipt,
+      readReceiptThreshold = 0.5,
       emptyState,
       formatTimestamp,
       className,
@@ -453,6 +464,14 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
     const bottomRef = React.useRef<HTMLDivElement>(null);
     const [isUserScrolled, setIsUserScrolled] = React.useState(false);
     const prevMessageCountRef = React.useRef(messages.length);
+
+    // Read receipts — observe unread incoming messages as they scroll into view.
+    const { observeMessage } = useReadReceipts({
+      messages,
+      currentUserId: currentUser.id,
+      onMarkRead: onReadReceipt,
+      threshold: readReceiptThreshold,
+    });
 
     // Combine refs
     React.useImperativeHandle(ref, () => scrollContainerRef.current!);
@@ -585,6 +604,11 @@ const MessageList = React.forwardRef<HTMLDivElement, MessageListProps>(
                 return (
                   <div
                     key={message.id}
+                    ref={
+                      onReadReceipt
+                        ? (el) => observeMessage(el, message)
+                        : undefined
+                    }
                     className={cn(
                       'transition-opacity duration-200',
                       isSameGroup ? 'mt-0.5' : 'mt-3',
