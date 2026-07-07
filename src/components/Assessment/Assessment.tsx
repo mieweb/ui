@@ -363,7 +363,7 @@ function OrderRow({
       )}
       <OrderContent order={order} />
       {interactive && (
-        <span className="ml-auto opacity-40 transition-opacity group-hover/order:opacity-100 focus-within:opacity-100">
+        <span className="pointer-coarse:opacity-100 ml-auto opacity-40 transition-opacity group-hover/order:opacity-100 focus-within:opacity-100">
           <Dropdown
             trigger={
               <Button
@@ -924,8 +924,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                         aria-label={`Actions for ${assertion.text}`}
                         onKeyDown={toolbarKeyNav}
                         className={cn(
-                          'bg-card border-border absolute top-1.5 right-1.5 z-10 flex items-center gap-0.5 rounded-md border p-0.5 shadow-sm',
-                          'pointer-events-none opacity-0 transition-opacity',
+                          'z-10 ml-auto flex items-center gap-0.5 transition-opacity',
+                          // Hover-capable (fine pointer) devices: floating
+                          // overlay, hidden until hover or keyboard focus.
+                          // Touch devices can't hover, so the toolbar stays
+                          // in flow and always visible.
+                          'pointer-fine:bg-card pointer-fine:border-border pointer-fine:absolute pointer-fine:top-1.5 pointer-fine:right-1.5 pointer-fine:rounded-md pointer-fine:border pointer-fine:p-0.5 pointer-fine:shadow-sm',
+                          'pointer-fine:pointer-events-none pointer-fine:opacity-0',
                           'group-hover:pointer-events-auto group-hover:opacity-100',
                           'focus-within:pointer-events-auto focus-within:opacity-100'
                         )}

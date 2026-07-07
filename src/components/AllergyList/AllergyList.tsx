@@ -302,8 +302,12 @@ function AllergyRow({
           role="toolbar"
           aria-label={`Actions for ${allergy.allergen}`}
           className={cn(
-            'bg-card border-border absolute top-1/2 right-0 z-10 flex -translate-y-1/2 items-center gap-0.5 rounded-md border p-0.5 shadow-sm',
-            'pointer-events-none opacity-0 transition-opacity',
+            'z-10 ml-auto flex items-center gap-0.5 transition-opacity',
+            // Hover-capable (fine pointer) devices: floating overlay, hidden
+            // until hover or keyboard focus. Touch devices can't hover, so the
+            // toolbar stays in flow and always visible.
+            'pointer-fine:bg-card pointer-fine:border-border pointer-fine:absolute pointer-fine:top-1/2 pointer-fine:right-0 pointer-fine:-translate-y-1/2 pointer-fine:rounded-md pointer-fine:border pointer-fine:p-0.5 pointer-fine:shadow-sm',
+            'pointer-fine:pointer-events-none pointer-fine:opacity-0',
             'group-hover:pointer-events-auto group-hover:opacity-100',
             'focus-within:pointer-events-auto focus-within:opacity-100'
           )}
