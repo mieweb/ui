@@ -321,7 +321,6 @@ export function MedicationEditor({
                 id="med-name"
                 value={draft.name}
                 onChange={(e) => patch({ name: e.target.value })}
-                placeholder="e.g. lisinopril 10 mg tablet"
               />
             </div>
           )}
@@ -332,7 +331,6 @@ export function MedicationEditor({
                 id="med-strength"
                 value={draft.strength ?? ''}
                 onChange={(e) => patch({ strength: e.target.value })}
-                placeholder="10 mg"
               />
             </div>
             <div className="space-y-1.5">
@@ -351,7 +349,6 @@ export function MedicationEditor({
                       (FORM_TO_UNIT[normalized] ?? normalized) || undefined,
                   });
                 }}
-                placeholder="tablet"
               />
             </div>
           </div>
@@ -372,7 +369,6 @@ export function MedicationEditor({
                 inputMode="decimal"
                 value={draft.quantity ?? ''}
                 onChange={(e) => patch({ quantity: e.target.value })}
-                placeholder="30"
               />
             </div>
             <div className="space-y-1.5">
@@ -382,7 +378,6 @@ export function MedicationEditor({
                 inputMode="numeric"
                 value={draft.daysSupply ?? ''}
                 onChange={(e) => patch({ daysSupply: e.target.value })}
-                placeholder="30"
               />
             </div>
             <div className="space-y-1.5">
@@ -392,7 +387,6 @@ export function MedicationEditor({
                 inputMode="numeric"
                 value={draft.refills ?? ''}
                 onChange={(e) => patch({ refills: e.target.value })}
-                placeholder="0"
               />
             </div>
           </div>
@@ -421,7 +415,6 @@ export function MedicationEditor({
               value={draft.sig ?? ''}
               onChange={(e) => handleSigChange(e.target.value)}
               rows={2}
-              placeholder="1 tablet by mouth daily"
             />
             <p className="text-muted-foreground text-xs" aria-live="polite">
               {draft.route || draft.frequency || draft.prn ? (
@@ -471,7 +464,6 @@ export function MedicationEditor({
               id="med-indication"
               value={draft.indication ?? ''}
               onChange={(e) => patch({ indication: e.target.value })}
-              placeholder="e.g. Essential hypertension"
             />
           </div>
           <div className="space-y-1.5">
