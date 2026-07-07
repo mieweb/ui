@@ -15,6 +15,8 @@ export {
 
 export {
   MedicationEditor,
+  parseMedicationLabel,
+  parseSig,
   type MedicationEditorProps,
   type CodeLookupConfig,
   type MedicationLookupProps,

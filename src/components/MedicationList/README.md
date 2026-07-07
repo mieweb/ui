@@ -87,17 +87,30 @@ different medication reseeds the draft.
 |---|---|---|
 | Medication (search/name) | `name` | DrugDescription |
 | — code (auto from lookup) | `code {system, code, display}` | DrugCoded / ProductCode / DrugDBCode |
-| Strength | `strength` | Strength + StrengthUnitOfMeasure |
-| Dose form | `doseForm` | DrugCoded/FormCode |
-| Quantity / Unit | `quantity`, `quantityUnit` | Quantity/Value + QuantityUnitOfMeasure |
+| Strength (auto from label) | `strength` | Strength + StrengthUnitOfMeasure |
+| Dose form (auto from label) | `doseForm` | DrugCoded/FormCode |
+| Quantity | `quantity` | Quantity/Value |
+| — unit (auto from dose form) | `quantityUnit` | Quantity/QuantityUnitOfMeasure |
 | Days supply | `daysSupply` | DaysSupply |
 | Refills | `refills` | NumberOfRefills |
-| Substitution | `substitution` (`'0'`/`'1'`) | Substitutions (DAW) |
+| Substitution (radio) | `substitution` (`'0'`/`'1'`) | Substitutions (DAW) |
 | Sig | `sig` | Sig/SigText |
-| Route / Frequency / PRN | `route`, `frequency`, `prn` | Sig structured elements |
+| — route/frequency/PRN (auto from sig) | `route`, `frequency`, `prn` | Sig structured elements |
 | Start / End date | `startDate`, `endDate` | WrittenDate / EffectiveDate |
 | Indication | `indication` | Diagnosis/Primary |
 | Pharmacy notes | `pharmacyNotes` | Note |
+
+Derived fields ("auto"):
+
+- Picking a coded result parses the label — "lisinopril 20 mg tablet" fills
+  `strength: "20 mg"`, `doseForm: "tablet"`, and `quantityUnit: "tablet"`
+  (via `parseMedicationLabel`, exported).
+- The quantity unit always follows the dose form (tablet → tablet, solution →
+  milliliter, …) — there is no separate unit control.
+- Route, frequency, and PRN are parsed live from the sig text (via
+  `parseSig`, exported): "1 tablet by mouth daily as needed" derives
+  `route: oral`, `frequency: Once daily`, `prn: true`, shown under the
+  sig field.
 
 All fields are optional on `Medication` — a bare `{ id, name, status }`
 renders fine everywhere.

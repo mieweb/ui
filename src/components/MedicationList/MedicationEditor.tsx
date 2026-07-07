@@ -50,8 +50,7 @@ import { Button } from '../Button';
 import { Input } from '../Input';
 import { Textarea } from '../Textarea';
 import { Label } from '../Label';
-import { Select } from '../Select';
-import { Checkbox } from '../Checkbox';
+import { RadioGroup, Radio } from '../Radio';
 import { DateInput } from '../DateInput';
 import type { Medication } from './MedicationList';
 
@@ -106,53 +105,114 @@ export interface MedicationEditorProps {
 }
 
 // =============================================================================
-// NCPDP option lists (pragmatic common subsets)
+// Parsers — drug label → strength/form, sig → route/frequency/PRN
 // =============================================================================
 
-const QUANTITY_UNITS = [
-  'Tablet',
-  'Capsule',
-  'Each',
-  'Milliliter',
-  'Gram',
-  'Unit',
-  'Patch',
-  'Suppository',
-  'Spray',
-  'Drop',
-].map((u) => ({ value: u.toLowerCase(), label: u }));
-
-const ROUTES = [
-  'Oral',
-  'Sublingual',
-  'Topical',
-  'Subcutaneous',
-  'Intramuscular',
-  'Intravenous',
-  'Inhalation',
-  'Ophthalmic',
-  'Otic',
-  'Nasal',
-  'Rectal',
-  'Transdermal',
-].map((r) => ({ value: r.toLowerCase(), label: r }));
-
-const FREQUENCIES = [
-  'Once daily',
-  'Twice daily',
-  'Three times daily',
-  'Four times daily',
-  'Every morning',
-  'Every bedtime',
-  'Every other day',
-  'Weekly',
-  'As needed',
-].map((f) => ({ value: f, label: f }));
-
-const SUBSTITUTION_OPTIONS = [
-  { value: '0', label: '0 — Substitution permitted' },
-  { value: '1', label: '1 — Dispense as written (DAW)' },
+const DOSE_FORMS = [
+  'tablet',
+  'capsule',
+  'solution',
+  'suspension',
+  'syrup',
+  'cream',
+  'ointment',
+  'gel',
+  'patch',
+  'suppository',
+  'spray',
+  'drops',
+  'inhaler',
+  'injection',
+  'lozenge',
+  'powder',
+  'film',
 ];
+
+/** Quantity unit implied by each dose form (NCPDP QuantityUnitOfMeasure). */
+const FORM_TO_UNIT: Record<string, string> = {
+  tablet: 'tablet',
+  capsule: 'capsule',
+  solution: 'milliliter',
+  suspension: 'milliliter',
+  syrup: 'milliliter',
+  cream: 'gram',
+  ointment: 'gram',
+  gel: 'gram',
+  patch: 'patch',
+  suppository: 'suppository',
+  spray: 'spray',
+  drops: 'milliliter',
+  inhaler: 'each',
+  injection: 'milliliter',
+  lozenge: 'each',
+  powder: 'gram',
+  film: 'each',
+};
+
+/**
+ * Parse strength + dose form out of a coded drug label,
+ * e.g. "lisinopril 20 mg tablet" → { strength: '20 mg', doseForm: 'tablet' }.
+ */
+export function parseMedicationLabel(label: string): {
+  strength?: string;
+  doseForm?: string;
+} {
+  const lower = label.toLowerCase();
+  const strengthMatch = lower.match(
+    /(\d+(?:\.\d+)?(?:\s*\/\s*\d+(?:\.\d+)?)?)\s*(mg\/ml|mcg\/ml|mg|mcg|g|ml|units?|%|meq)\b/
+  );
+  const doseForm = DOSE_FORMS.find((f) => lower.includes(f));
+  return {
+    strength: strengthMatch
+      ? `${strengthMatch[1].replace(/\s+/g, '')} ${strengthMatch[2]}`
+      : undefined,
+    doseForm,
+  };
+}
+
+const SIG_ROUTES: [RegExp, string][] = [
+  [/\bby mouth\b|\boral(ly)?\b|\bpo\b/, 'oral'],
+  [/\bsublingual(ly)?\b|\bunder the tongue\b|\bsl\b/, 'sublingual'],
+  [/\bsubcutaneous(ly)?\b|\bsubq\b|\bsc\b|\bsq\b/, 'subcutaneous'],
+  [/\bintramuscular(ly)?\b|\bim\b/, 'intramuscular'],
+  [/\bintravenous(ly)?\b|\biv\b/, 'intravenous'],
+  [/\binhal(e|ation|ed)\b|\bpuffs?\b|\bnebuliz/, 'inhalation'],
+  [/\beyes?\b|\bophthalmic\b/, 'ophthalmic'],
+  [/\bears?\b|\botic\b/, 'otic'],
+  [/\bnostrils?\b|\bnasal(ly)?\b|\bintranasal/, 'nasal'],
+  [/\brectal(ly)?\b|\bpr\b/, 'rectal'],
+  [/\btransdermal\b|\bto (the )?skin\b|\bapply\b|\btopical(ly)?\b/, 'topical'],
+];
+
+// Order matters: specific patterns must precede the bare-"daily" fallback
+// ("twice daily" must not match Once daily's \bdaily\b).
+const SIG_FREQUENCIES: [RegExp, string][] = [
+  [/\bevery other day\b|\bqod\b/, 'Every other day'],
+  [/\btwice (a |per )?day\b|\btwice daily\b|\bbid\b/, 'Twice daily'],
+  [/\b(three times|3 times)( a| per)? day\b|\b(three times|3 times) daily\b|\btid\b/, 'Three times daily'],
+  [/\b(four times|4 times)( a| per)? day\b|\b(four times|4 times) daily\b|\bqid\b/, 'Four times daily'],
+  [/\bevery morning\b|\bqam\b/, 'Every morning'],
+  [/\b(at )?bedtime\b|\bqhs\b|\bat night\b/, 'Every bedtime'],
+  [/\bweekly\b|\bonce a week\b|\bevery week\b/, 'Weekly'],
+  [/\bonce (a |per )?day\b|\bonce daily\b|\bdaily\b|\bevery day\b|\bqd\b/, 'Once daily'],
+];
+
+/**
+ * Derive route / frequency / PRN from free-text sig,
+ * e.g. "1 tablet by mouth daily as needed" →
+ * { route: 'oral', frequency: 'Once daily', prn: true }.
+ */
+export function parseSig(sig: string): {
+  route?: string;
+  frequency?: string;
+  prn: boolean;
+} {
+  const lower = sig.toLowerCase();
+  const route = SIG_ROUTES.find(([re]) => re.test(lower))?.[1];
+  const frequency = SIG_FREQUENCIES.find(([re]) => re.test(lower))?.[1];
+  const prn = /\bas needed\b|\bprn\b/.test(lower);
+  return { route, frequency, prn };
+}
 
 function newId(): string {
   return `med-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -181,10 +241,19 @@ export function MedicationEditor({
   // NOTE: draft state is seeded once per mount — give the editor a `key`
   // (e.g. the medication id) so a different target remounts it.
 
+  // Focus the medication search / name input when the dialog opens.
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const input = bodyRef.current?.querySelector('input');
+    input?.focus();
+  }, []);
+
   const patch = (p: Partial<Medication>) =>
     setDraft((prev) => ({ ...prev, ...p }));
 
   const handleCodeSelect = (result: MedicationLookupResult) => {
+    // Populate strength / dose form / quantity unit from the coded label.
+    const { strength, doseForm } = parseMedicationLabel(result.label);
     patch({
       name: result.label,
       code: {
@@ -192,7 +261,18 @@ export function MedicationEditor({
         code: result.fullcode,
         display: result.label,
       },
+      ...(strength && { strength }),
+      ...(doseForm && {
+        doseForm,
+        quantityUnit: FORM_TO_UNIT[doseForm] ?? doseForm,
+      }),
     });
+  };
+
+  const handleSigChange = (sig: string) => {
+    // Route / frequency / PRN are derived from the sig text.
+    const { route, frequency, prn } = parseSig(sig);
+    patch({ sig, route, frequency, prn: prn || undefined });
   };
 
   const canSave = draft.name.trim().length > 0;
@@ -208,6 +288,7 @@ export function MedicationEditor({
         <ModalClose />
       </ModalHeader>
       <ModalBody className="space-y-5">
+        <div ref={bodyRef} className="contents">
         {/* ——— Medication + coding ——— */}
         <section className="space-y-3" aria-label="Medication">
           {codeLookup ? (
@@ -259,7 +340,17 @@ export function MedicationEditor({
               <Input
                 id="med-form"
                 value={draft.doseForm ?? ''}
-                onChange={(e) => patch({ doseForm: e.target.value })}
+                onChange={(e) => {
+                  const doseForm = e.target.value;
+                  const normalized = doseForm.toLowerCase().trim();
+                  // Quantity unit follows the dose form (tablet → tablet,
+                  // solution → milliliter, …)
+                  patch({
+                    doseForm,
+                    quantityUnit:
+                      (FORM_TO_UNIT[normalized] ?? normalized) || undefined,
+                  });
+                }}
                 placeholder="tablet"
               />
             </div>
@@ -271,9 +362,11 @@ export function MedicationEditor({
           <h4 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             Dispensing
           </h4>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="med-qty">Quantity</Label>
+              <Label htmlFor="med-qty">
+                Quantity{draft.quantityUnit ? ` (${draft.quantityUnit}s)` : ''}
+              </Label>
               <Input
                 id="med-qty"
                 inputMode="decimal"
@@ -282,14 +375,6 @@ export function MedicationEditor({
                 placeholder="30"
               />
             </div>
-            <Select
-              label="Unit"
-              options={QUANTITY_UNITS}
-              value={draft.quantityUnit}
-              onValueChange={(v) => patch({ quantityUnit: v })}
-              placeholder="Unit"
-              size="md"
-            />
             <div className="space-y-1.5">
               <Label htmlFor="med-days">Days supply</Label>
               <Input
@@ -311,13 +396,17 @@ export function MedicationEditor({
               />
             </div>
           </div>
-          <Select
+          <RadioGroup
+            name="med-substitution"
             label="Substitution"
-            options={SUBSTITUTION_OPTIONS}
-            value={draft.substitution}
+            value={draft.substitution ?? '0'}
             onValueChange={(v) => patch({ substitution: v as '0' | '1' })}
-            placeholder="0 — Substitution permitted"
-          />
+            orientation="horizontal"
+            size="sm"
+          >
+            <Radio value="0" label="Substitution permitted" />
+            <Radio value="1" label="Dispense as written (DAW)" />
+          </RadioGroup>
         </section>
 
         {/* ——— Directions ——— */}
@@ -330,32 +419,27 @@ export function MedicationEditor({
             <Textarea
               id="med-sig"
               value={draft.sig ?? ''}
-              onChange={(e) => patch({ sig: e.target.value })}
+              onChange={(e) => handleSigChange(e.target.value)}
               rows={2}
               placeholder="1 tablet by mouth daily"
             />
+            <p className="text-muted-foreground text-xs" aria-live="polite">
+              {draft.route || draft.frequency || draft.prn ? (
+                <>
+                  Derived:{' '}
+                  {[
+                    draft.route && `route ${draft.route}`,
+                    draft.frequency && draft.frequency.toLowerCase(),
+                    draft.prn && 'PRN (as needed)',
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </>
+              ) : (
+                'Route, frequency, and PRN are derived from the directions'
+              )}
+            </p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Select
-              label="Route"
-              options={ROUTES}
-              value={draft.route}
-              onValueChange={(v) => patch({ route: v })}
-              placeholder="Route"
-            />
-            <Select
-              label="Frequency"
-              options={FREQUENCIES}
-              value={draft.frequency}
-              onValueChange={(v) => patch({ frequency: v })}
-              placeholder="Frequency"
-            />
-          </div>
-          <Checkbox
-            label="PRN (as needed)"
-            checked={draft.prn ?? false}
-            onChange={(e) => patch({ prn: e.target.checked })}
-          />
         </section>
 
         {/* ——— Dates & context ——— */}
@@ -400,6 +484,7 @@ export function MedicationEditor({
             />
           </div>
         </section>
+        </div>
       </ModalBody>
       <ModalFooter>
         <Button variant="secondary" onClick={onClose}>
