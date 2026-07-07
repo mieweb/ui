@@ -66,17 +66,44 @@ const meta: Meta<typeof EsheetRenderer> = {
     docs: {
       description: {
         component: `
-The \`medicationList\` custom eSheet field type, backed by the \`MedicationList\` component.
+The \`medicationList\` **custom eSheet field type** — medication
+reconciliation as a form question, backed by \`MedicationReconciliation\`
+(see *Healthcare/MedicationList* for the standalone component).
+
+### Setup (once, at module load, before the builder/renderer mounts)
 
 \`\`\`tsx
 import { registerMedicationListFieldType } from '@mieweb/ui/esheet';
+import { CodeLookup } from '…/CodeLookup'; // optional — offline RxNorm/FDB coding
 
-registerMedicationListFieldType(); // once, before rendering
+registerMedicationListFieldType({
+  codeLookup: { component: CodeLookup, indexUrl: '/codify' },
+});
 \`\`\`
 
-Hover a row to reconcile; Correct / Notes / Add Task open modals; Move Up/Down
-reorders; quick-add pills and "Other…" add medications. All state persists to
-the field response as JSON.
+### Field definition
+
+\`\`\`jsonc
+{
+  "id": "meds",
+  "fieldType": "medicationList",
+  "question": "Presenting medications",       // rendered as the card title
+  "medications": [ /* seed list, shown until a response exists */ ],
+  "quickAddOptions": ["aspirin 81 mg tablet"] // quick-add pills
+}
+\`\`\`
+
+### Behavior to know about
+
+- The response persists as JSON in \`response.answer\`:
+  \`{ "medications": […] }\` — statuses, corrections, notes, tasks,
+  ordering, additions, removals all round-trip
+- Interactive **only in fill-out mode** (preview + enabled); read-only on
+  the builder canvas or when conditionally disabled
+- Requires \`@esheet/core\` ≥ the custom-field schema fix
+  ([mieweb/eSheet#91](https://github.com/mieweb/eSheet/pull/91)) — older
+  cores reject custom field types at validation with
+  "Invalid form definition"
         `,
       },
     },
@@ -89,5 +116,19 @@ type Story = StoryObj<typeof EsheetRenderer>;
 export const InRenderer: Story = {
   args: {
     formDataInput: SAMPLE_FORM,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+The field running inside the **real \`EsheetRenderer\`** (fill-out mode) —
+not a mock: the form definition above is validated by \`@esheet/core\`, the
+field component is resolved from the registry, and every interaction writes
+through the form store via \`onResponse\`. This is exactly what a deployed
+eSheet form does, so use this story to sanity-check the integration after
+changing the field, the component, or the eSheet packages.
+        `,
+      },
+    },
   },
 };

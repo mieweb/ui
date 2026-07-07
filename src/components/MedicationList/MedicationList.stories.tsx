@@ -18,11 +18,22 @@ const meta: Meta<typeof MedicationList> = {
     docs: {
       description: {
         component: `
-Presenting-medications list with **medication reconciliation**.
+Presenting-medications list with **medication reconciliation** — review a
+patient's medications during an encounter and record whether they're
+actually taking each one. Medications group themselves by status
+(Unreconciled → Taking as Directed → Not Taking as Directed → Not Taking →
+Unknown); hover or keyboard-focus a row to reveal the action toolbar.
 
-- Medications group themselves by reconciliation status (Unreconciled, Taking as Directed, Not Taking as Directed, Not Taking, Unknown).
-- Hover (or keyboard-focus) a row to reveal the status buttons and other row actions.
-- Fully controlled: pass \`medications\` and handle \`onStatusChange\` / \`onAction\`.
+### Which layer do I use?
+
+| Component | Use when | Story |
+|---|---|---|
+| \`MedicationReconciliation\` | You want the whole workflow working out of the box — dialogs, NCPDP editor, add/remove/reorder | **Interactive**, **Reconciliation** |
+| \`MedicationList\` | You need full control of the data flow and will supply your own dialogs/editor | **Headless**, **Default**, and the variant stories |
+| \`registerMedicationListFieldType()\` | The list is a question inside an eSheet form | *eSheet/MedicationListField* |
+
+Start with \`MedicationReconciliation\` unless you have a reason not to.
+Full docs: [README](https://github.com/mieweb/ui/blob/main/src/components/MedicationList/README.md).
         `,
       },
     },
@@ -101,6 +112,28 @@ function InteractiveTemplate() {
 
 export const Interactive: Story = {
   render: () => <InteractiveTemplate />,
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Start here.** The complete reconciliation workflow using
+\`MedicationReconciliation\` — the component most apps should reach for.
+Everything works without writing any handler code:
+
+- **Status buttons** (👍 🤘 👎 ?) move the row to the matching group
+- **Correct** and **Other…** open the NCPDP \`MedicationEditor\`; the drug
+  search codes against RxNorm/FDB offline (try typing "lisinopril 20") and
+  auto-fills strength, dose form, and quantity unit
+- **Notes / Add Task** open small dialogs; their text appears under the row
+- **Drag** a row (or Move Up/Down, or Alt+↑/↓) to reorder within a group
+- Every mutation surfaces through \`onChange\` (logged below the list)
+
+\`codeLookup\` is dependency-injected (\`{ component: CodeLookup, indexUrl }\`)
+because CodeLookup's Web Worker keeps it out of the main library bundle.
+        `,
+      },
+    },
+  },
 };
 
 /**
@@ -163,6 +196,26 @@ function HeadlessTemplate() {
 
 export const Headless: Story = {
   render: () => <HeadlessTemplate />,
+  parameters: {
+    docs: {
+      description: {
+        story: `
+The **presentational \`MedicationList\` layer by itself** — use this only
+when you need to own the data flow (your own editor, server round-trips per
+action, custom dialogs). It renders and reports; it never mutates:
+
+- \`onStatusChange\` / \`onAction\` / \`onReorder\` / \`onQuickAdd\` /
+  \`onAddOther\` fire with the row and intent — the log below shows each one
+- Nothing happens unless *you* update \`medications\` (here only status,
+  remove, reorder, and quick-add are wired; Correct/Notes/Add Task just log,
+  which is exactly what you'd see if you forgot to handle them)
+
+If you find yourself reimplementing the dialogs, switch to
+\`MedicationReconciliation\` (see **Interactive**).
+        `,
+      },
+    },
+  },
 };
 
 /** Static list matching the WebChart "Presenting medications" screen. */
@@ -170,6 +223,20 @@ export const Default: Story = {
   args: {
     medications: sampleMedications,
     quickAddOptions: ['atorvastatin 20 mg tablet'],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+The default presentation with no handlers wired — what you get from just
+\`<MedicationList medications={…}/>\`. Mirrors the WebChart "Presenting
+medications" screen this component reproduces. Buttons render but do
+nothing: pair with handlers (see **Headless**) or use
+\`MedicationReconciliation\`. Use the Controls panel to experiment with
+props.
+        `,
+      },
+    },
   },
 };
 
@@ -180,6 +247,19 @@ export const FullyReconciled: Story = {
       m.status === 'unreconciled' ? { ...m, status: 'taking' as const } : m
     ),
   },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+The "done" state: when no medication is left \`unreconciled\`, the
+Unreconciled group stays visible with a ✓ completion message
+(customizable via \`reconciledMessage\`) so clinicians can confirm at a
+glance that the review is finished — an empty group disappearing would be
+ambiguous.
+        `,
+      },
+    },
+  },
 };
 
 /** Read-only (no hover actions). */
@@ -187,6 +267,18 @@ export const ReadOnly: Story = {
   args: {
     medications: sampleMedications,
     readOnly: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+\`readOnly\` removes every action affordance (toolbars, quick-add, drag) —
+for chart summaries, printouts, or when the viewer lacks permission to
+reconcile. The eSheet field uses this automatically outside fill-out mode
+(e.g. on the builder canvas).
+        `,
+      },
+    },
   },
 };
 
@@ -208,6 +300,18 @@ export const Flags: Story = {
       },
     ],
   },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Per-row safety flags: \`expired: true\` renders a red **EXPIRED** marker
+(the medication's end date has passed); \`discontinuedDate\` renders
+"Discontinued on: *date*". These are display-only — deriving them (e.g.
+comparing \`endDate\` to today) is the host's responsibility.
+        `,
+      },
+    },
+  },
 };
 
 /** Limit the row actions shown. */
@@ -215,6 +319,19 @@ export const LimitedActions: Story = {
   args: {
     medications: sampleMedications,
     actions: ['correct', 'remove'],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `
+The \`actions\` prop controls which non-status buttons each row offers —
+here only Correct and Remove. Trim to what your context supports: e.g. the
+eSheet field omits \`open\`/\`refill\` because a form has no EHR to open or
+refill against. Status buttons are always shown (hide everything with
+\`readOnly\`).
+        `,
+      },
+    },
   },
 };
 
@@ -233,4 +350,18 @@ export const Reconciliation: StoryObj<typeof MedicationReconciliation> = {
       onChange={(meds) => console.log('medications changed', meds)}
     />
   ),
+  parameters: {
+    docs: {
+      description: {
+        story: `
+\`MedicationReconciliation\` **without** \`codeLookup\` — for apps that
+can't ship the codify index (or don't need coding). The editor's drug
+search degrades to a plain medication name input; everything else (NCPDP
+fields, sig parsing, dialogs, reordering) works identically. Uncontrolled
+here via \`defaultMedications\`; changes surface in the browser console
+through \`onChange\`.
+        `,
+      },
+    },
+  },
 };
