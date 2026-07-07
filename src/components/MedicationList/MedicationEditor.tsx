@@ -77,6 +77,8 @@ export interface MedicationLookupProps {
   bare?: boolean;
   clearOnSelect?: boolean;
   placeholder?: string;
+  initialQuery?: string;
+  initialSearch?: boolean;
   onSelect?: (result: MedicationLookupResult) => void;
   onFreeText?: (text: string) => void;
 }
@@ -215,6 +217,23 @@ export function parseSig(sig: string): {
 }
 
 /**
+ * Derive the label-parsed Medication fields — strength, dose form, and the
+ * form-implied quantity unit — from a drug display label,
+ * e.g. "lisinopril 10 mg tablet" → { strength: '10 mg', doseForm: 'tablet',
+ * quantityUnit: 'tablet' }.
+ */
+export function labelToMedicationFields(label: string): Partial<Medication> {
+  const { strength, doseForm } = parseMedicationLabel(label);
+  return {
+    ...(strength && { strength }),
+    ...(doseForm && {
+      doseForm,
+      quantityUnit: FORM_TO_UNIT[doseForm] ?? doseForm,
+    }),
+  };
+}
+
+/**
  * Derive Medication fields from a CodeLookup pick: name, code reference,
  * and — parsed from the label — strength, dose form, and quantity unit.
  * Used by the editor and by inline add-search flows.
@@ -222,7 +241,6 @@ export function parseSig(sig: string): {
 export function lookupToMedicationFields(
   result: MedicationLookupResult
 ): Partial<Medication> {
-  const { strength, doseForm } = parseMedicationLabel(result.label);
   return {
     name: result.label,
     code: {
@@ -230,11 +248,7 @@ export function lookupToMedicationFields(
       code: result.fullcode,
       display: result.label,
     },
-    ...(strength && { strength }),
-    ...(doseForm && {
-      doseForm,
-      quantityUnit: FORM_TO_UNIT[doseForm] ?? doseForm,
-    }),
+    ...labelToMedicationFields(result.label),
   };
 }
 
@@ -312,6 +326,12 @@ export function MedicationEditor({
                 bare
                 clearOnSelect={false}
                 placeholder="Search RxNorm / FDB — e.g. lisinopril"
+                // Seed the search box with the medication name. Editing an
+                // uncoded medication also runs the search immediately so the
+                // closest coded matches are offered (a pick fills coding,
+                // strength, and dose form); coded ones just show their name.
+                initialQuery={medication?.name || undefined}
+                initialSearch={medication ? !medication.code : undefined}
                 onSelect={handleCodeSelect}
                 onFreeText={(text) =>
                   patch({ name: text, code: undefined })

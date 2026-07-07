@@ -79,6 +79,19 @@ export interface CodeLookupProps extends Omit<
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /**
+   * Seed the search box with this query on mount. By default the search
+   * runs as soon as the index is ready and the results open — lets an
+   * editor opened on an uncoded entry immediately offer the closest coded
+   * matches. Only read once (remount — e.g. via key — to reseed).
+   */
+  initialQuery?: string;
+  /**
+   * Whether the seeded `initialQuery` searches on mount (default true).
+   * Pass false to just prefill the box — e.g. an already-coded entry whose
+   * name should be visible without the results dropdown popping open.
+   */
+  initialSearch?: boolean;
+  /**
    * Allow free-text entry: called when the user presses Enter without a
    * highlighted result, or clicks the "use as free text" footer row.
    */
@@ -161,6 +174,8 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       programsUrl,
       onSelect,
       onFreeText,
+      initialQuery,
+      initialSearch = true,
       limit = 15,
       placeholder = 'Search conditions, meds, labs… (try "con hea fa", "chf", "lasix")',
       bare = false,
@@ -175,7 +190,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       state: 'loading',
       pct: 0,
     });
-    const [query, setQuery] = React.useState('');
+    const [query, setQuery] = React.useState(initialQuery ?? '');
     const [results, setResults] = React.useState<CodifyResult[]>([]);
     const [tookMs, setTookMs] = React.useState<number | null>(null);
     const [activeIndex, setActiveIndex] = React.useState(-1);
@@ -193,8 +208,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     /** billableOnly for the stable openDrill callback */
     const billableOnlyRef = React.useRef(billableOnly);
     billableOnlyRef.current = billableOnly;
-    /** Set when a pick writes the query — suppresses the follow-up auto-search */
-    const skipSearchRef = React.useRef(false);
+    /** Set when a pick writes the query — suppresses the follow-up auto-search.
+     * Starts set when a seeded initialQuery should not search on mount. */
+    const skipSearchRef = React.useRef(Boolean(initialQuery) && !initialSearch);
     // Per-instance element ids so multiple CodeLookups on a page don't break
     // aria-controls / aria-activedescendant relationships.
     const baseId = React.useId();
@@ -445,6 +461,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
           aria-label="Search medical codes"
           value={query}
           onChange={(e) => {
+            // User edits always search — clear any pending suppression
+            // (unconsumed initialSearch=false seed, or a pick's write-back).
+            skipSearchRef.current = false;
             setQuery(e.target.value);
             setDrill(null);
           }}

@@ -21,6 +21,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   MoreVerticalIcon,
+  TrashIcon,
 } from '../Icons';
 import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import {
@@ -63,6 +64,18 @@ export interface AssessmentOrder {
   detail?: string;
   /** Coding from the code lookup, when the order was picked from it */
   code?: { fullid: string; codetype: string; fullcode: string };
+  /** Urgency — routine when omitted */
+  priority?: 'routine' | 'urgent' | 'stat';
+  /** When to perform/collect, e.g. 'in 3 months', 'next visit' */
+  timing?: string;
+  /** Why the order is placed (diagnosis / reason) */
+  indication?: string;
+  /** Notes to the performing party (lab, radiology, consultant) */
+  notes?: string;
+  /** Imaging/procedure: body site, e.g. 'chest, PA and lateral', 'left knee' */
+  bodySite?: string;
+  /** Referral: target specialty or provider */
+  referTo?: string;
 }
 
 /** A code picked from a lookup (structurally matches CodifyResult). */
@@ -194,6 +207,25 @@ export interface AssessmentProps extends Omit<
    * order is dragged onto another problem (re-link = move) */
   onLinkOrder?: (order: AssessmentOrder, concernId: string) => void;
   /**
+   * Called when the user chooses Edit on an order, before the built-in
+   * inline form opens. Return true to take over editing — e.g. open a
+   * `MedicationEditor` for medication orders — and feed the change back in
+   * via `orders`. Anything falsy falls through to the inline display/detail
+   * form (when `onEditOrder` is set).
+   */
+  onEditOrderStart?: (order: AssessmentOrder) => boolean | void;
+  /**
+   * Called with the edited display/detail when an order's inline edit is
+   * saved — enables the Edit action on every order row (any type).
+   * Persist and feed the change back in via `orders`.
+   */
+  onEditOrder?: (
+    order: AssessmentOrder,
+    changes: { display: string; detail?: string }
+  ) => void;
+  /** Called when an order is removed — enables the Remove action on order rows */
+  onRemoveOrder?: (order: AssessmentOrder) => void;
+  /**
    * Called with the full new order-id sequence after an order is dragged to a
    * new position — enables drag & drop reordering of orders within a plan.
    * Orders render in `orders` array order per problem; persist and feed back.
@@ -256,7 +288,16 @@ function OrderContent({ order }: { order: AssessmentOrder }) {
         <Icon size={14} />
       </Tooltip>
       <span className="text-foreground">{order.display}</span>
+      {order.priority && order.priority !== 'routine' && (
+        <Badge
+          variant={order.priority === 'stat' ? 'danger' : 'warning'}
+          size="sm"
+        >
+          {order.priority}
+        </Badge>
+      )}
       {order.detail && <span className="text-xs">{order.detail}</span>}
+      {order.timing && <span className="text-xs">{order.timing}</span>}
     </span>
   );
 }
@@ -278,6 +319,15 @@ interface OrderControls {
   moveWithin?: (order: AssessmentOrder, dir: -1 | 1) => void;
   /** Re-link to another problem (Alt+←/→, menu) */
   moveToProblem?: (order: AssessmentOrder, concernId: string) => void;
+  /** Take over editing before the inline form opens (returns true = handled) */
+  editStart?: (order: AssessmentOrder) => boolean | void;
+  /** Save an inline edit of the order's display/detail (menu: Edit) */
+  edit?: (
+    order: AssessmentOrder,
+    changes: { display: string; detail?: string }
+  ) => void;
+  /** Remove the order (menu: Remove) */
+  remove?: (order: AssessmentOrder) => void;
   /** The problem before/after the order's current one, if any */
   adjacentProblem: (
     order: AssessmentOrder,
@@ -296,7 +346,47 @@ function OrderRow({
   drag: OrderDrag;
   controls?: OrderControls;
 }) {
-  const interactive = Boolean(controls?.moveWithin || controls?.moveToProblem);
+  const interactive = Boolean(
+    controls?.moveWithin ||
+      controls?.moveToProblem ||
+      controls?.edit ||
+      controls?.editStart ||
+      controls?.remove
+  );
+  const canEdit = Boolean(controls?.edit || controls?.editStart);
+  const [editing, setEditing] = React.useState<{
+    display: string;
+    detail: string;
+  } | null>(null);
+  // Controlled so picking an item closes the menu (it otherwise only closes
+  // on outside click/Escape — it would linger behind an editor modal).
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  const pick = (fn: () => void) => () => {
+    setMenuOpen(false);
+    fn();
+  };
+
+  const beginEdit = () => {
+    // A takeover handler (e.g. MedicationEditor for medication orders) wins;
+    // otherwise fall back to the inline display/detail form.
+    if (controls?.editStart?.(order)) return;
+    if (controls?.edit) {
+      setEditing({ display: order.display, detail: order.detail ?? '' });
+    }
+  };
+
+  const saveEdit = () => {
+    if (!editing) return;
+    const display = editing.display.trim();
+    if (display) {
+      controls?.edit?.(order, {
+        display,
+        detail: editing.detail.trim() || undefined,
+      });
+    }
+    setEditing(null);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.target !== e.currentTarget || !controls) return;
@@ -333,18 +423,18 @@ function OrderRow({
     /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
     <li
       data-order-id={order.orderId}
-      tabIndex={interactive ? 0 : undefined}
-      onKeyDown={interactive ? handleKeyDown : undefined}
+      tabIndex={interactive && !editing ? 0 : undefined}
+      onKeyDown={interactive && !editing ? handleKeyDown : undefined}
       aria-label={
-        interactive
+        interactive && !editing
           ? `${order.display}. Alt plus up or down to reorder; Alt plus left or right to move to another problem.`
           : undefined
       }
-      {...drag.rowProps(order)}
+      {...(editing ? {} : drag.rowProps(order))}
       className={cn(
         'group/order flex items-center gap-1.5 py-1',
         'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none',
-        drag.enabled && 'cursor-grab active:cursor-grabbing',
+        drag.enabled && !editing && 'cursor-grab active:cursor-grabbing',
         drag.draggingId === order.orderId && 'opacity-40',
         drag.over?.type === 'order' &&
           drag.over.id === order.orderId &&
@@ -354,66 +444,164 @@ function OrderRow({
       )}
     >
       {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
-      {drag.enabled && (
+      {drag.enabled && !editing && (
         <GripVerticalIcon
           size={12}
           aria-hidden
           className="text-muted-foreground/40 shrink-0"
         />
       )}
-      <OrderContent order={order} />
-      {interactive && (
-        <span className="pointer-coarse:opacity-100 ml-auto opacity-40 transition-opacity group-hover/order:opacity-100 focus-within:opacity-100">
-          <Dropdown
-            trigger={
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={`Move ${order.display}`}
-                className="h-6 w-6"
-              >
-                <MoreVerticalIcon size={13} />
-              </Button>
+      {editing ? (
+        <div
+          role="form"
+          aria-label={`Edit order ${order.display}`}
+          className="flex flex-1 flex-wrap items-center gap-1.5"
+        >
+          <input
+            type="text"
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            value={editing.display}
+            onChange={(e) =>
+              setEditing((prev) =>
+                prev ? { ...prev, display: e.target.value } : prev
+              )
             }
-            placement="bottom-end"
-          >
-            {controls?.moveWithin && (
-              <>
-                <DropdownItem
-                  icon={<ChevronUpIcon size={14} />}
-                  onClick={() => controls.moveWithin?.(order, -1)}
-                >
-                  Move up
-                </DropdownItem>
-                <DropdownItem
-                  icon={<ChevronDownIcon size={14} />}
-                  onClick={() => controls.moveWithin?.(order, 1)}
-                >
-                  Move down
-                </DropdownItem>
-              </>
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveEdit();
+              else if (e.key === 'Escape') setEditing(null);
+            }}
+            aria-label="Order description"
+            className={cn(
+              'border-border bg-background text-foreground',
+              'h-7 min-w-40 flex-1 rounded-md border px-2 text-sm',
+              'focus:ring-ring focus:ring-2 focus:outline-none'
             )}
-            {controls?.moveToProblem &&
-              controls.targets.some((t) => t.concernId !== order.concernId) && (
-                <>
-                  {controls.moveWithin && <DropdownSeparator />}
-                  {controls.targets
-                    .filter((t) => t.concernId !== order.concernId)
-                    .map((t) => (
-                      <DropdownItem
-                        key={t.concernId}
-                        icon={<LinkIcon size={14} />}
-                        onClick={() =>
-                          controls.moveToProblem?.(order, t.concernId)
-                        }
-                      >
-                        Move to: {t.label}
-                      </DropdownItem>
-                    ))}
-                </>
-              )}
-          </Dropdown>
-        </span>
+          />
+          <input
+            type="text"
+            value={editing.detail}
+            onChange={(e) =>
+              setEditing((prev) =>
+                prev ? { ...prev, detail: e.target.value } : prev
+              )
+            }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveEdit();
+              else if (e.key === 'Escape') setEditing(null);
+            }}
+            placeholder="detail (sig, timing…)"
+            aria-label="Order detail"
+            className={cn(
+              'border-border bg-background text-foreground placeholder:text-muted-foreground',
+              'h-7 w-40 rounded-md border px-2 text-xs',
+              'focus:ring-ring focus:ring-2 focus:outline-none'
+            )}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={saveEdit}
+            disabled={!editing.display.trim()}
+            className="h-7 text-xs"
+          >
+            Save
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditing(null)}
+            className="h-7 text-xs"
+          >
+            Cancel
+          </Button>
+        </div>
+      ) : (
+        <>
+          <OrderContent order={order} />
+          {interactive && (
+            <span className="pointer-coarse:opacity-100 ml-auto opacity-40 transition-opacity group-hover/order:opacity-100 focus-within:opacity-100">
+              <Dropdown
+                open={menuOpen}
+                onOpenChange={setMenuOpen}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Actions for ${order.display}`}
+                    className="h-6 w-6"
+                  >
+                    <MoreVerticalIcon size={13} />
+                  </Button>
+                }
+                placement="bottom-end"
+              >
+                {canEdit && (
+                  <DropdownItem
+                    icon={<PencilIcon size={14} />}
+                    onClick={pick(beginEdit)}
+                  >
+                    Edit
+                  </DropdownItem>
+                )}
+                {controls?.moveWithin && (
+                  <>
+                    {canEdit && <DropdownSeparator />}
+                    <DropdownItem
+                      icon={<ChevronUpIcon size={14} />}
+                      onClick={pick(() => controls.moveWithin?.(order, -1))}
+                    >
+                      Move up
+                    </DropdownItem>
+                    <DropdownItem
+                      icon={<ChevronDownIcon size={14} />}
+                      onClick={pick(() => controls.moveWithin?.(order, 1))}
+                    >
+                      Move down
+                    </DropdownItem>
+                  </>
+                )}
+                {controls?.moveToProblem &&
+                  controls.targets.some(
+                    (t) => t.concernId !== order.concernId
+                  ) && (
+                    <>
+                      {(controls.moveWithin || canEdit) && (
+                        <DropdownSeparator />
+                      )}
+                      {controls.targets
+                        .filter((t) => t.concernId !== order.concernId)
+                        .map((t) => (
+                          <DropdownItem
+                            key={t.concernId}
+                            icon={<LinkIcon size={14} />}
+                            onClick={pick(() =>
+                              controls.moveToProblem?.(order, t.concernId)
+                            )}
+                          >
+                            Move to: {t.label}
+                          </DropdownItem>
+                        ))}
+                    </>
+                  )}
+                {controls?.remove && (
+                  <>
+                    {(canEdit ||
+                      controls.moveWithin ||
+                      controls.moveToProblem) && <DropdownSeparator />}
+                    <DropdownItem
+                      variant="danger"
+                      icon={<TrashIcon size={14} />}
+                      onClick={pick(() => controls.remove?.(order))}
+                    >
+                      Remove
+                    </DropdownItem>
+                  </>
+                )}
+              </Dropdown>
+            </span>
+          )}
+        </>
       )}
     </li>
   );
@@ -582,6 +770,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       onAddOrder,
       onAddAssessment,
       onLinkOrder,
+      onEditOrderStart,
+      onEditOrder,
+      onRemoveOrder,
       onReorderItems,
       onReorderOrders,
       renderOrderSearch,
@@ -674,6 +865,19 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 setAnnouncement(
                   `${order.display} moved to ${problemLabel(concernId)}`
                 );
+              }
+            : undefined,
+          edit: onEditOrder
+            ? (order, changes) => {
+                onEditOrder(order, changes);
+                setAnnouncement(`${changes.display} updated`);
+              }
+            : undefined,
+          editStart: onEditOrderStart,
+          remove: onRemoveOrder
+            ? (order) => {
+                onRemoveOrder(order);
+                setAnnouncement(`${order.display} removed`);
               }
             : undefined,
           adjacentProblem: (order, dir) => {

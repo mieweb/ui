@@ -10,6 +10,7 @@ import {
   ConditionEditor,
   type ConditionAssertionDraft,
 } from '../ConditionEditor';
+import { OrderEditor } from '../OrderEditor';
 import type { ConditionAssertion, ConditionConcern } from '../ProblemList';
 
 const meta: Meta<typeof Assessment> = {
@@ -116,7 +117,7 @@ const sampleOrders: AssessmentOrder[] = [
     orderId: 'O-3',
     type: 'lab',
     display: 'Hemoglobin A1c',
-    detail: 'in 3 months',
+    timing: 'in 3 months',
     concernId: 'C-42',
   },
   {
@@ -130,6 +131,8 @@ const sampleOrders: AssessmentOrder[] = [
     type: 'medication',
     display: 'lisinopril 10 mg tablet',
     detail: '1 tablet po daily',
+    // properly coded (picked from the codify index)
+    code: { fullid: 'FDB244899', codetype: 'FDB', fullcode: '244899' },
     concernId: 'C-11',
   },
   {
@@ -157,6 +160,10 @@ function InteractiveTemplate({
     mode: 'refine' | 'revise';
     concern: ConditionConcern;
   } | null>(null);
+  /** Order being edited in the OrderEditor modal (morphs by order type) */
+  const [orderEditing, setOrderEditing] = useState<AssessmentOrder | null>(
+    null
+  );
 
   const codetypeToSystem: Record<string, string> = {
     ICD10: 'ICD-10-CM',
@@ -294,6 +301,25 @@ function InteractiveTemplate({
             )
           )
         }
+        onEditOrderStart={(order) => {
+          // Every order type edits in the OrderEditor — it morphs into the
+          // MedicationEditor (full NCPDP prescription) for medications and
+          // into the lab/imaging/procedure/referral editors otherwise.
+          setOrderEditing(order);
+          return true;
+        }}
+        onEditOrder={(order, changes) =>
+          setOrders((prev) =>
+            prev.map((o) =>
+              o.orderId === order.orderId
+                ? { ...o, display: changes.display, detail: changes.detail }
+                : o
+            )
+          )
+        }
+        onRemoveOrder={(order) =>
+          setOrders((prev) => prev.filter((o) => o.orderId !== order.orderId))
+        }
         onAction={(item, action) => {
           if (action === 'refine' || action === 'revise') {
             const concern = concernList.find(
@@ -310,6 +336,20 @@ function InteractiveTemplate({
         concern={editor?.concern}
         onSave={handleEditorSave}
       />
+      {orderEditing && (
+        <OrderEditor
+          key={orderEditing.orderId}
+          open
+          order={orderEditing}
+          codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
+          onClose={() => setOrderEditing(null)}
+          onSave={(saved) =>
+            setOrders((prev) =>
+              prev.map((o) => (o.orderId === saved.orderId ? saved : o))
+            )
+          }
+        />
+      )}
     </div>
   );
 }

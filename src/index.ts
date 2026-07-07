@@ -90,6 +90,7 @@ export {
   type OrderListProps,
   type OrderListTab,
 } from './components/OrderList';
+export * from './components/OrderEditor';
 export * from './components/OrderLookupForm';
 export * from './components/OrderSidebar';
 export * from './components/PageHeader';
