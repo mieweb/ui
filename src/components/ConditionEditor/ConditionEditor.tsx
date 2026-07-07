@@ -47,6 +47,14 @@ export type ConditionEditorMode =
 /** Draft assertion returned by onSave — id/date assignment is the caller's job. */
 export type ConditionAssertionDraft = Omit<ConditionAssertion, 'id' | 'date'>;
 
+/** A code picked from an injected lookup (structurally matches CodifyResult). */
+export interface ConditionCodePick {
+  fullid: string;
+  label: string;
+  codetype: string;
+  fullcode: string;
+}
+
 export interface ConditionEditorProps {
   /** Editor operation */
   mode: ConditionEditorMode;
@@ -64,6 +72,19 @@ export interface ConditionEditorProps {
   onRelate?: (relationship: ConcernRelationship) => void;
   /** Called with a quick progress note (mode 'observe', or the observation box in other modes) */
   onAddObservation?: (text: string) => void;
+  /**
+   * Render a code-lookup search for the coding section (dependency-injected
+   * so the library build doesn't bundle the lookup's worker — pass e.g. a
+   * `CodeLookup` wired to your index, the same pattern as Assessment's
+   * `renderOrderSearch`). Picking a result appends a coding row and fills an
+   * empty problem name; free text fills the problem name. Omit for manual
+   * code entry only.
+   */
+  renderCodeSearch?: (args: {
+    placeholder: string;
+    onPick: (pick: ConditionCodePick) => void;
+    onFreeText: (text: string) => void;
+  }) => React.ReactNode;
   /** Additional CSS classes for the dialog content */
   className?: string;
   /** Test ID for testing */
@@ -106,6 +127,15 @@ const RELATIONSHIP_OPTIONS: {
 
 const SEVERITIES = ['mild', 'moderate', 'severe'] as const;
 const CONFIDENCES = ['low', 'medium', 'high'] as const;
+
+/** Map an index codetype (e.g. 'ICD10') onto the ConditionCoding system. */
+function systemForCodetype(codetype: string): string {
+  const ct = codetype.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (ct === 'ICD10' || ct === 'ICD10CM') return 'ICD-10-CM';
+  if (ct === 'ICD11') return 'ICD-11';
+  if (ct === 'SNOMED' || ct === 'SNOMEDCT') return 'SNOMED';
+  return codetype;
+}
 
 // =============================================================================
 // Field uncertainty affordance (§4.1 three-state rule)
@@ -239,6 +269,7 @@ export function ConditionEditor({
   onSave,
   onRelate,
   onAddObservation,
+  renderCodeSearch,
   className,
   'data-testid': dataTestId,
 }: ConditionEditorProps) {
@@ -295,6 +326,32 @@ export function ConditionEditor({
 
   const updateCoding = (i: number, patch: Partial<ConditionCoding>) =>
     setCoding((prev) => prev.map((c, j) => (j === i ? { ...c, ...patch } : c)));
+
+  /** A pick from the injected lookup — appends a coding row, fills an empty
+   * name, and clears a contradictory "coding unknown" flag. */
+  const handleCodePick = (pick: ConditionCodePick) => {
+    const system = systemForCodetype(pick.codetype);
+    setCoding((prev) =>
+      prev.some((c) => c.system === system && c.code === pick.fullcode)
+        ? prev
+        : [
+            ...prev,
+            {
+              system,
+              code: pick.fullcode,
+              display: pick.label,
+              primary: prev.length === 0,
+            },
+          ]
+    );
+    setText((prev) => prev || pick.label);
+    setFields((prev) => {
+      if (prev.coding?.known !== false) return prev;
+      const next = { ...prev };
+      delete next.coding;
+      return next;
+    });
+  };
 
   const handleSave = () => {
     if (mode === 'relate') {
@@ -431,14 +488,37 @@ export function ConditionEditor({
                 <ObservationHistory concern={concern} />
               )}
 
-              {/* Capture-first: name is the only required field */}
-              <Input
-                label="Problem name"
-                required
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="e.g. Type 1 diabetes mellitus with neuropathy"
-              />
+              {/* Capture-first: name is the only required field. In add mode
+                  with an injected lookup, name + coding are ONE input — pick
+                  a code (sets both) or enter free text (name only). */}
+              {mode === 'add' && renderCodeSearch && !text.trim() ? (
+                <div className="space-y-1">
+                  <span className="text-foreground block text-sm font-medium">
+                    Problem name
+                    <span className="text-destructive ml-1" aria-hidden="true">
+                      *
+                    </span>
+                  </span>
+                  {renderCodeSearch({
+                    placeholder:
+                      'Search conditions — or type a name and press Enter…',
+                    onPick: handleCodePick,
+                    onFreeText: (t) => setText(t.trim()),
+                  })}
+                  <p className="text-muted-foreground text-xs">
+                    Picking a code fills the name and coding together; free
+                    text is fine — codes can be added any time.
+                  </p>
+                </div>
+              ) : (
+                <Input
+                  label="Problem name"
+                  required
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="e.g. Type 1 diabetes mellitus with neuropathy"
+                />
+              )}
 
               {mode === 'refine' && (
                 <label className="flex items-center gap-2 text-sm">
@@ -484,6 +564,15 @@ export function ConditionEditor({
                     Add code
                   </Button>
                 </legend>
+                {renderCodeSearch && !(mode === 'add' && !text.trim()) && (
+                  <div className="max-w-md">
+                    {renderCodeSearch({
+                      placeholder: 'Search codes — ICD-10-CM / SNOMED…',
+                      onPick: handleCodePick,
+                      onFreeText: (t) => setText((prev) => prev || t),
+                    })}
+                  </div>
+                )}
                 {coding.length === 0 && (
                   <p className="text-muted-foreground text-xs">
                     Optional — a name-only problem is valid. Codes can be added
