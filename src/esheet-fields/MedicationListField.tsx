@@ -40,8 +40,17 @@ export interface MedicationListFieldValue {
 function parseValue(answer: string | undefined): MedicationListFieldValue {
   if (!answer) return { medications: [] };
   try {
-    const parsed = JSON.parse(answer) as MedicationListFieldValue;
-    return { medications: parsed.medications ?? [] };
+    // shape-guarded: valid JSON like `null` or `[]` must degrade safely
+    const parsed: unknown = JSON.parse(answer);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return { medications: [] };
+    }
+    const { medications } = parsed as { medications?: unknown };
+    return {
+      medications: Array.isArray(medications)
+        ? (medications as Medication[])
+        : [],
+    };
   } catch {
     return { medications: [] };
   }

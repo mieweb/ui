@@ -165,9 +165,14 @@ async function maybeGunzip(buf: ArrayBuffer): Promise<ArrayBuffer> {
   if (buf.byteLength < 2) return buf;
   const head = new Uint8Array(buf, 0, 2);
   if (head[0] !== 0x1f || head[1] !== 0x8b) return buf;
-  const stream = new Response(buf).body!.pipeThrough(
-    new DecompressionStream('gzip')
-  );
+  if (typeof DecompressionStream === 'undefined') {
+    throw new Error(
+      'shard is gzip-compressed but this browser lacks DecompressionStream — serve the .mcdx shards uncompressed for this browser'
+    );
+  }
+  const body = new Response(buf).body;
+  if (!body) throw new Error('could not stream shard for gzip decompression');
+  const stream = body.pipeThrough(new DecompressionStream('gzip'));
   return await new Response(stream).arrayBuffer();
 }
 

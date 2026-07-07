@@ -491,9 +491,12 @@ export function OrderEditor({
         medication={order ? orderToMedication(order) : undefined}
         codeLookup={
           codeLookup && {
-            // MedicationLookupProps is a narrowing of OrderLookupProps
-            // (domains ['med'] ⊂ OrderSearchDomain[]) — same component fits.
-            component: codeLookup.component,
+            // MedicationLookupProps narrows OrderLookupProps (domains ['med']
+            // ⊂ OrderSearchDomain[]), so the same component fits — but
+            // ComponentType is invariant over props, hence the cast.
+            component: codeLookup.component as React.ComponentType<
+              import('../MedicationList/MedicationEditor').MedicationLookupProps
+            >,
             indexUrl: codeLookup.indexUrl,
             locale: codeLookup.locale,
           }

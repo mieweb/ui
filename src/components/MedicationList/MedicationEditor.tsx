@@ -160,8 +160,10 @@ export function parseMedicationLabel(label: string): {
   doseForm?: string;
 } {
   const lower = label.toLowerCase();
+  // bounded quantifiers keep the match linear-time on adversarial inputs
+  // (unbounded \d+ groups backtrack polynomially on long digit runs)
   const strengthMatch = lower.match(
-    /(\d+(?:\.\d+)?(?:\s*\/\s*\d+(?:\.\d+)?)?)\s*(mg\/ml|mcg\/ml|mg|mcg|g|ml|units?|%|meq)\b/
+    /(\d{1,7}(?:\.\d{1,4})?(?:\s{0,4}\/\s{0,4}\d{1,7}(?:\.\d{1,4})?)?)\s{0,4}(mg\/ml|mcg\/ml|mg|mcg|g|ml|units?|%|meq)\b/
   );
   const doseForm = DOSE_FORMS.find((f) => lower.includes(f));
   return {

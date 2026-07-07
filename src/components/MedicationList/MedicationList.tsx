@@ -441,10 +441,15 @@ export const MedicationList = React.forwardRef<
     })).filter((g) => g.items.length > 0 || g.status === 'unreconciled');
 
     // Drag & drop reordering, restricted to the same status group (a cross-
-    // group drop would silently imply a reconciliation change).
-    const statusOf = React.useCallback(
-      (id: string) => medications.find((m) => m.id === id)?.status,
+    // group drop would silently imply a reconciliation change). Precomputed
+    // map — dragover fires too frequently for a linear scan per event.
+    const statusById = React.useMemo(
+      () => new Map(medications.map((m) => [m.id, m.status] as const)),
       [medications]
+    );
+    const statusOf = React.useCallback(
+      (id: string) => statusById.get(id),
+      [statusById]
     );
     const drag = useDragReorder({
       ids: medications.map((m) => m.id),

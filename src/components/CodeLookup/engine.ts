@@ -364,6 +364,11 @@ const MAX_QUERY_TOKENS = 8;
  * (tokenPrior), tie-broken by shorter token length. Lets a short prefix that
  * matches more tokens than MAX_EXPANSIONS still expand the ones tied to
  * popular docs instead of just the alphabetically-first tokens.
+ *
+ * Runs per keystroke on ranges that can span most of the dictionary, so it
+ * uses a bounded min-heap selection (O(n log max)) instead of sorting the
+ * whole range (O(n log n)). The result is ordered best-first — scoring lets
+ * the first expansion that reaches a doc win, so order matters.
  */
 function topPriorTokens(
   s: CodifyShard,
@@ -372,17 +377,55 @@ function topPriorTokens(
   max: number
 ): number[] {
   const tp = s.tokenPrior!;
-  const range: number[] = new Array(hi - lo);
-  for (let t = lo; t < hi; t++) range[t - lo] = t;
-  range.sort((a, b) => {
-    const d = tp[b] - tp[a];
-    if (d) return d;
-    const la = s.tokenOffsets[a + 1] - s.tokenOffsets[a];
-    const lb = s.tokenOffsets[b + 1] - s.tokenOffsets[b];
-    return la - lb;
-  });
-  if (range.length > max) range.length = max;
-  return range;
+  const len = (t: number) => s.tokenOffsets[t + 1] - s.tokenOffsets[t];
+  /** true when token a ranks above token b */
+  const above = (a: number, b: number) => {
+    const d = tp[a] - tp[b];
+    return d !== 0 ? d > 0 : len(a) < len(b);
+  };
+  const n = hi - lo;
+  if (n <= max) {
+    const range: number[] = new Array(n);
+    for (let t = lo; t < hi; t++) range[t - lo] = t;
+    range.sort((a, b) => (above(a, b) ? -1 : 1));
+    return range;
+  }
+  // min-heap of the best `max` tokens seen so far; the root is the worst of
+  // the kept set, evicted whenever a better token comes along
+  const heap: number[] = [];
+  const siftUp = (start: number) => {
+    let i = start;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (!above(heap[p], heap[i])) break; // parent already ranks lower
+      [heap[p], heap[i]] = [heap[i], heap[p]];
+      i = p;
+    }
+  };
+  const siftDown = () => {
+    let i = 0;
+    for (;;) {
+      const l = 2 * i + 1;
+      const r = l + 1;
+      let lowest = i;
+      if (l < heap.length && above(heap[lowest], heap[l])) lowest = l;
+      if (r < heap.length && above(heap[lowest], heap[r])) lowest = r;
+      if (lowest === i) break;
+      [heap[lowest], heap[i]] = [heap[i], heap[lowest]];
+      i = lowest;
+    }
+  };
+  for (let t = lo; t < hi; t++) {
+    if (heap.length < max) {
+      heap.push(t);
+      siftUp(heap.length - 1);
+    } else if (above(t, heap[0])) {
+      heap[0] = t;
+      siftDown();
+    }
+  }
+  heap.sort((a, b) => (above(a, b) ? -1 : 1));
+  return heap;
 }
 
 export interface SearchOptions {
@@ -478,6 +521,19 @@ function searchShard(
   // full idf returns as the user types a more specific term.
   const idfDamp = Math.min(1, typedLen / 4);
 
+  // AND semantics: a token with no match aborts the shard. Earlier tokens may
+  // already have written into the scratch buffers — they must be wiped or the
+  // *next* query on this shard scores against stale state.
+  const bail = () => {
+    for (let i = 0; i < touchedCount; i++) {
+      const d = s.touched[i];
+      maskBuf[d] = 0;
+      scoreBuf[d] = 0;
+      aliasBuf[d] = 0;
+      fuzzyBuf[d] = 0;
+    }
+  };
+
   for (let qi = 0; qi < qTokens.length; qi++) {
     const q = qTokens[qi];
     const bit = 1 << qi;
@@ -491,9 +547,9 @@ function searchShard(
     if (lo >= hi && q.length >= 3) {
       expansions = fuzzyCandidates(s, q, 8);
       penalty = 0.6; // typo correction is worth less than a real prefix hit
-      if (expansions.length === 0) return; // AND semantics: token matched nothing
+      if (expansions.length === 0) return bail(); // token matched nothing
     } else if (lo >= hi) {
-      return;
+      return bail();
     } else if (hi - lo > MAX_EXPANSIONS && s.tokenPrior) {
       // Short/ambiguous prefix matches more tokens than we can score: expand
       // the ones reaching the highest-usage docs so common entries surface

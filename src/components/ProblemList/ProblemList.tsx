@@ -367,7 +367,11 @@ export function CodingChips({ coding }: { coding?: ConditionCoding[] }) {
         </span>
       }
     >
-      <span className="text-muted-foreground text-xs whitespace-nowrap">
+      {/* focusable so the coding provenance is reachable by keyboard */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+      <span tabIndex={0}
+        className="text-muted-foreground focus-visible:ring-ring rounded text-xs whitespace-nowrap focus-visible:ring-2 focus-visible:outline-none"
+      >
         ({label || 'coded'})
       </span>
     </Tooltip>
@@ -757,13 +761,16 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
     );
 
     // Drag & drop reordering, restricted to the same group (a cross-group
-    // drop would silently imply a status change).
-    const groupOf = React.useCallback(
-      (id: string) => {
-        const c = concerns.find((x) => x.concernId === id);
-        return c ? concernGroupKey(c) : undefined;
-      },
+    // drop would silently imply a status change). Precomputed map — dragover
+    // fires too frequently for a linear concern scan per event.
+    const groupById = React.useMemo(
+      () =>
+        new Map(concerns.map((c) => [c.concernId, concernGroupKey(c)] as const)),
       [concerns]
+    );
+    const groupOf = React.useCallback(
+      (id: string) => groupById.get(id),
+      [groupById]
     );
     const drag = useDragReorder({
       ids: concerns.map((c) => c.concernId),
@@ -790,7 +797,13 @@ export const ProblemList = React.forwardRef<HTMLDivElement, ProblemListProps>(
         label,
         items: concerns.filter((c) => concernGroupKey(c) === key),
       })),
-    ].filter((g) => g.items.length > 0 || g.key === 'active');
+      // Active stays visible as the empty state only when nothing is recorded
+      // at all — an empty Active section next to populated groups would
+      // misleadingly read "No problems recorded".
+    ].filter(
+      (g) =>
+        g.items.length > 0 || (g.key === 'active' && concerns.length === 0)
+    );
 
     return (
       <Card

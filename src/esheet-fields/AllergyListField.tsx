@@ -30,10 +30,18 @@ export interface AllergyListFieldValue {
 function parseValue(answer: string | undefined): AllergyListFieldValue {
   if (!answer) return { allergies: [] };
   try {
-    const parsed = JSON.parse(answer) as AllergyListFieldValue;
+    // shape-guarded: valid JSON like `null` or `[]` must degrade safely
+    const parsed: unknown = JSON.parse(answer);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return { allergies: [] };
+    }
+    const { allergies, noKnownAllergies } = parsed as Partial<
+      Record<keyof AllergyListFieldValue, unknown>
+    >;
     return {
-      allergies: parsed.allergies ?? [],
-      noKnownAllergies: parsed.noKnownAllergies,
+      allergies: Array.isArray(allergies) ? (allergies as Allergy[]) : [],
+      noKnownAllergies:
+        typeof noKnownAllergies === 'boolean' ? noKnownAllergies : undefined,
     };
   } catch {
     return { allergies: [] };

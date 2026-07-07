@@ -8,9 +8,9 @@ Worker in single-digit milliseconds — no server round-trips, works offline.
 
 ## Source files
 
-The build pipeline and server-side lookup live in the **external
-[`mieweb/codify`](https://github.com/mieweb/codify) repo**, which is **not
-tracked here** (`packages/codify/` is gitignored). Only the browser
+The build pipeline and server-side lookup live in an **external `codify`
+repo** (private / not yet published — ask the MIE team for access), which is
+**not tracked here** (`packages/codify/` is gitignored). Only the browser
 engine/component live in this repo; the committed `.mcdx` shards under
 `.storybook/public/codify/` are the build output. Clone `codify` locally into
 `packages/codify/` (see [§1](#1-build-pipeline-external-codify-repo)) to
@@ -52,11 +52,12 @@ regenerate them — the links below only resolve once it is present.
 
 The `.mcdx` shards are committed to this repo (via git-lfs) and ship with
 Storybook, so **you only need this step when regenerating them** for testing.
-The pipeline is **not tracked here** — clone the external repo into
-`packages/codify/` (gitignored) first:
+The pipeline is **not tracked here** — clone the external repo (private / not
+yet published; ask the MIE team for the location) into `packages/codify/`
+(gitignored) first:
 
 ```sh
-git clone https://github.com/mieweb/codify.git packages/codify
+git clone <codify-repo-url> packages/codify
 ```
 
 Then run its scripts directly with Node to rebuild the shards:

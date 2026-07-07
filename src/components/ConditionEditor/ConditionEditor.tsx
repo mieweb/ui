@@ -327,6 +327,10 @@ export function ConditionEditor({
   const updateCoding = (i: number, patch: Partial<ConditionCoding>) =>
     setCoding((prev) => prev.map((c, j) => (j === i ? { ...c, ...patch } : c)));
 
+  // Coding explicitly marked unknown: handleSave() drops the codes, so the
+  // coding inputs disable to keep the UI and the saved output consistent.
+  const codingUnknown = fields.coding?.known === false;
+
   /** A pick from the injected lookup — appends a coding row, fills an empty
    * name, and clears a contradictory "coding unknown" flag. */
   const handleCodePick = (pick: ConditionCodePick) => {
@@ -548,6 +552,7 @@ export function ConditionEditor({
                   <Button
                     variant="ghost"
                     size="sm"
+                    disabled={codingUnknown}
                     onClick={() =>
                       setCoding((prev) => [
                         ...prev,
@@ -589,6 +594,7 @@ export function ConditionEditor({
                       }))}
                       value={c.system}
                       onValueChange={(v) => updateCoding(i, { system: v })}
+                      disabled={codingUnknown}
                       className="w-32"
                     />
                     <Input
@@ -598,6 +604,7 @@ export function ConditionEditor({
                         updateCoding(i, { code: e.target.value })
                       }
                       placeholder="Code"
+                      disabled={codingUnknown}
                       className="w-28 font-mono"
                     />
                     <Input
@@ -607,6 +614,7 @@ export function ConditionEditor({
                         updateCoding(i, { display: e.target.value })
                       }
                       placeholder="Display"
+                      disabled={codingUnknown}
                       className="min-w-32 flex-1"
                     />
                     <label className="flex items-center gap-1 text-xs">
@@ -614,6 +622,7 @@ export function ConditionEditor({
                         type="radio"
                         name="primary-coding"
                         checked={Boolean(c.primary)}
+                        disabled={codingUnknown}
                         onChange={() =>
                           setCoding((prev) =>
                             prev.map((cc, j) => ({ ...cc, primary: j === i }))

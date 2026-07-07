@@ -348,7 +348,9 @@ export function AllergyManager({
           ])
         }
         onFreeText={(text) =>
-          commit([...allergies, { id: newId(), allergen: text }])
+          // this search bar is explicitly for drug allergens — free-text
+          // entries carry type 'drug' like the coded path
+          commit([...allergies, { id: newId(), allergen: text, type: 'drug' }])
         }
       />
     ) : undefined;

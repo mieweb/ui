@@ -95,11 +95,19 @@ export interface DueItem {
   pendingKeys: string[];
 }
 
-/** Add months to an ISO date, returning an ISO date (YYYY-MM-DD). */
+/** Add months to an ISO date, returning an ISO date (YYYY-MM-DD).
+ * Computed in UTC (a local-time Date would shift the day in non-UTC zones)
+ * with the day-of-month clamped (Jan 31 + 1 month → Feb 28/29, not Mar 2/3). */
 function addMonths(iso: string, months: number): string {
-  const d = new Date(iso);
-  d.setMonth(d.getMonth() + months);
-  return d.toISOString().slice(0, 10);
+  const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
+  const total = m - 1 + months;
+  const ty = y + Math.floor(total / 12);
+  const tm = ((total % 12) + 12) % 12;
+  // day 0 of the next month = last day of the target month
+  const lastDay = new Date(Date.UTC(ty, tm + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(ty, tm, Math.min(d, lastDay)))
+    .toISOString()
+    .slice(0, 10);
 }
 
 /** Is the patient inside the program's age/sex gates? */

@@ -287,6 +287,8 @@ function OrderContent({ order }: { order: AssessmentOrder }) {
       <Tooltip content={meta.label}>
         <Icon size={14} />
       </Tooltip>
+      {/* the tooltip is pointer-only — give non-pointer users the label */}
+      <span className="sr-only">{meta.label}</span>
       <span className="text-foreground">{order.display}</span>
       {order.priority && order.priority !== 'routine' && (
         <Badge
@@ -687,6 +689,14 @@ function AddOrderForm({
               type === 'auto' ? undefined : ORDER_TYPE_SEARCH_DOMAINS[type],
             placeholder: ORDER_TYPE_PLACEHOLDERS[type],
             onPick: handlePick,
+            onFreeText: (text) => {
+              const t = text.trim();
+              if (!t) return;
+              onSubmit({
+                type: type === 'auto' ? 'procedure' : type,
+                display: t,
+              });
+            },
           })}
         </div>
       ) : (
@@ -900,9 +910,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
     const [draggingOrderId, setDraggingOrderId] = React.useState<string | null>(
       null
     );
+    // dragover/drop can fire before the dragstart state update is visible, so
+    // the authoritative dragged id lives in a ref (set synchronously)
+    const draggingOrderRef = React.useRef<string | null>(null);
     const [orderOver, setOrderOver] = React.useState<OrderDrag['over']>(null);
 
     const resetOrderDrag = () => {
+      draggingOrderRef.current = null;
       setDraggingOrderId(null);
       setOrderOver(null);
     };
@@ -943,6 +957,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 e.stopPropagation(); // don't start a problem-block drag
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', order.orderId);
+                draggingOrderRef.current = order.orderId;
                 setDraggingOrderId(order.orderId);
               },
               onDragEnd: (e) => {
@@ -950,8 +965,8 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 resetOrderDrag();
               },
               onDragOver: (e) => {
-                if (!draggingOrderId || draggingOrderId === order.orderId)
-                  return;
+                const dragged = draggingOrderRef.current;
+                if (!dragged || dragged === order.orderId) return;
                 e.preventDefault();
                 e.stopPropagation();
                 e.dataTransfer.dropEffect = 'move';
@@ -961,7 +976,8 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
               },
               onDrop: (e) => {
                 const draggedId =
-                  draggingOrderId ?? e.dataTransfer.getData('text/plain');
+                  draggingOrderRef.current ??
+                  e.dataTransfer.getData('text/plain');
                 const dragged = orders.find((o) => o.orderId === draggedId);
                 if (!dragged || dragged.orderId === order.orderId) return;
                 e.preventDefault();
@@ -984,8 +1000,9 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       return {
         ...itemProps,
         onDragOver: (e) => {
-          if (draggingOrderId) {
-            const dragged = orders.find((o) => o.orderId === draggingOrderId);
+          const draggingOrder = draggingOrderRef.current;
+          if (draggingOrder) {
+            const dragged = orders.find((o) => o.orderId === draggingOrder);
             if (dragged?.concernId === concernId) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
@@ -995,7 +1012,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
           itemProps.onDragOver?.(e);
         },
         onDragLeave: (e) => {
-          if (draggingOrderId) {
+          if (draggingOrderRef.current) {
             setOrderOver((prev) =>
               prev?.type === 'concern' && prev.concernId === concernId
                 ? null
@@ -1009,7 +1026,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
           // An order drop on the block moves the order to this problem; any
           // other payload (a problem-block drag) falls through to item reorder.
           const payload =
-            draggingOrderId ?? e.dataTransfer.getData('text/plain');
+            draggingOrderRef.current ?? e.dataTransfer.getData('text/plain');
           const dragged = orders.find((o) => o.orderId === payload);
           if (dragged) {
             e.preventDefault();

@@ -17,7 +17,6 @@ import {
   MedicationList,
   type Medication,
   type MedicationAction,
-  type MedicationStatus,
 } from './MedicationList';
 import {
   Modal,

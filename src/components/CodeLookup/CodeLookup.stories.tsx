@@ -31,7 +31,9 @@ Quest/LabCorp orders).
   refetched only when the served manifest changes.
 
 Shards are committed via git-lfs and served from \`.storybook/public/codify/{locale}/\`;
-rebuild with \`pnpm codify:build\` (pipeline lives in the \`packages/codify\` submodule).
+to rebuild them, clone the external \`codify\` pipeline repo (private / not yet published)
+into \`packages/codify/\` (gitignored) and run its build scripts — see the CodeLookup README
+for the exact commands.
 
 📖 Full architecture documentation — build pipeline, .mcdx binary format, scoring, priors,
 aliases, locales, drill-down — in [src/components/CodeLookup/README.md](https://github.com/mieweb/ui/blob/healthcare-clinical-components/src/components/CodeLookup/README.md).

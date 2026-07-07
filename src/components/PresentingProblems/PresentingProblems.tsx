@@ -213,8 +213,15 @@ export const PresentingProblems = React.forwardRef<
     const scopeMeta = SCOPE_META[scope];
     const ScopeIcon = scopeMeta.icon;
 
+    // Precomputed — relevanceOf runs for every patient concern on render;
+    // a presenting.find() inside that loop is O(N×M) on large problem lists.
+    const relevanceById = React.useMemo(
+      () =>
+        new Map(presenting.map((p) => [p.concernId, p.relevance] as const)),
+      [presenting]
+    );
     const relevanceOf = (concernId: string): ProblemRelevance | null =>
-      presenting.find((p) => p.concernId === concernId)?.relevance ?? null;
+      relevanceById.get(concernId) ?? null;
 
     const submitDraft = () => {
       const text = draft.trim();

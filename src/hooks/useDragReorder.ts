@@ -99,7 +99,7 @@ export function useDragReorder({
             (canDropOn && !canDropOn(dragged, id))
           ) {
             // hovering an invalid target: clear any stale indicator
-            setOver((prev) => (prev ? null : prev));
+            setOver(null);
             return;
           }
           e.preventDefault();

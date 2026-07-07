@@ -228,6 +228,15 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       : null;
 
     React.useEffect(() => {
+      // A new worker starts from scratch — reset all search state so a stale
+      // "ready" status (from the previous worker) can't trigger searches
+      // against the still-loading index or show leftover results.
+      setStatus({ state: 'loading', pct: 0 });
+      setResults([]);
+      setTookMs(null);
+      setActiveIndex(-1);
+      setOpen(false);
+      setDrill(null);
       const worker = new Worker(
         new URL('./codify.worker.ts', import.meta.url),
         {
@@ -532,6 +541,10 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                     id={optionId(i)}
                     role="option"
                     aria-selected={i === activeIndex}
+                    // focus stays on the input (aria-activedescendant); a
+                    // tabbable option would be unmounted by the input's
+                    // onBlur closing the dropdown, dropping focus
+                    tabIndex={-1}
                     onClick={() => pick(r)}
                     onMouseMove={() => activeIndex !== i && setActiveIndex(i)}
                     className={cn(
@@ -585,6 +598,9 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
                 <li role="presentation" className="border-border border-t">
                   <button
                     type="button"
+                    // outside the tab order for the same reason as the
+                    // options — focus is managed on the input
+                    tabIndex={-1}
                     onClick={submitFreeText}
                     className={cn(
                       'text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full px-3 py-1.5 text-left text-sm italic',
@@ -652,11 +668,11 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             {status.state === 'error' && (
               <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
                 <AlertCircleIcon size={12} />
-                Index unavailable: {status.message}. Run{' '}
+                Index unavailable: {status.message}. See{' '}
                 <code className="font-mono">
-                  node scripts/codify/extract.mjs && node
-                  scripts/codify/build-index.mjs
-                </code>
+                  src/components/CodeLookup/README.md
+                </code>{' '}
+                to rebuild the index.
               </span>
             )}
           </div>
