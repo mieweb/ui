@@ -50,6 +50,16 @@ describe('clusterEmbeddings', () => {
     expect(new Set(labels).size).toBe(1);
   });
 
+  it('default threshold (0.65) merges same-speaker variation that 0.5 would over-split', () => {
+    // two embeddings from one voice that drifted apart: cosine 0.4 → distance 0.6.
+    const v1 = f(1, 0);
+    const v2 = f(0.4, Math.sqrt(1 - 0.16));
+    // the old 0.5 default left them as two "speakers" (0.6 > 0.5) — the over-splitting bug.
+    expect(new Set(clusterEmbeddings([v1, v2], { threshold: 0.5 })).size).toBe(2);
+    // the current default (0.65) merges them back into one (0.6 ≤ 0.65).
+    expect(new Set(clusterEmbeddings([v1, v2])).size).toBe(1);
+  });
+
   it('handles empty + single inputs', () => {
     expect(clusterEmbeddings([])).toEqual([]);
     expect(clusterEmbeddings([f(1, 0)])).toEqual([0]);

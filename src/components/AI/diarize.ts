@@ -21,8 +21,9 @@ export interface DiarizedSegment extends TranscriptSegment {
 }
 
 export interface ClusterOptions {
-  /** Merge clusters while their cosine DISTANCE (1 − cosine) is ≤ this. Lower = more speakers. Default 0.5
-   *  (i.e. merge when cosine similarity ≥ 0.5), tuned to TitaNet's same/different-speaker margins. */
+  /** Merge clusters while their cosine DISTANCE (1 − cosine) is ≤ this. Higher = fewer speakers (merges
+   *  more). Default 0.65 (merge when cosine similarity ≥ 0.35) — biased toward NOT over-splitting one
+   *  person into several, which is the common failure on short/varied segments. */
   threshold?: number;
   /** Hard cap on speaker count — keep merging past `threshold` until at most this many clusters remain. */
   maxSpeakers?: number;
@@ -64,7 +65,7 @@ export function centroid(vectors: Float32Array[]): Float32Array {
  * per input embedding.
  */
 export function clusterEmbeddings(embeddings: Float32Array[], opts: ClusterOptions = {}): number[] {
-  const { threshold = 0.5, maxSpeakers = Infinity } = opts;
+  const { threshold = 0.65, maxSpeakers = Infinity } = opts;
   const n = embeddings.length;
   if (n === 0) return [];
   if (n === 1) return [0];

@@ -1,10 +1,24 @@
-# Speaker diarization — plan (mieweb/ui, Hey Ozwell)
+# Speaker diarization — plan + status (mieweb/ui, Hey Ozwell)
 
 "Who spoke when" for a clinical visit, so the ambient-scribe transcript reads
 `Doctor: … / Patient: … / Speaker 3: …` instead of one undifferentiated blob. A visit isn't always
 1-on-1 — there may be a patient, a parent/caregiver, a nurse, or another MA in the room — so this must
 handle a **variable, unknown number of speakers**, name the ones we know, and stay **on-device** (PHI
 never leaves the browser).
+
+## Status — what shipped (Phases 1–2 done)
+- **`diarize.ts`** — pure clustering + attribution core (agglomerative, average-linkage, cosine), unit-tested.
+- **`useDiarization`** — batch hook wiring Whisper-timestamps → TitaNet embed → cluster → anchor → attribute,
+  with optional LLM role inference. Tunable: `threshold` (default **0.65**), `maxSpeakers`,
+  `minSegmentSeconds` (default **1.0**), `enabled`.
+- **`useVisitScribe` + `<VisitScribe>`** — the product surface: record the room → speaker-labeled transcript,
+  with a live rough transcript toggle and (behind "Advanced") a merge-threshold + speaker-cap + **Re-analyze**
+  the same clip without re-recording.
+- **Conversation mode** (`useHeyOzwell` / `<HandsFreeChat>`) — on "done", diarize the dictation clip and send a
+  speaker-labeled transcript to the assistant instead of a flat blob.
+- **Defaults tuned for over-splitting:** the merge threshold moved 0.5 → **0.65** and a **1.0s minimum
+  segment** was added, because short/varied segments were splitting one person into several speakers.
+- **Still pending:** Phase 3 (overlap-aware pyannote WASM), and moving model hosting off personal accounts.
 
 ## We already have the hard parts
 Diarization = segment → embed → cluster → (optionally) identify → align to a transcript. We ship every
@@ -49,10 +63,13 @@ You can't voiceprint a patient you've never met, so combine:
 Combination: **anchor the known → LLM-guess the unknown roles → let the doctor correct.**
 
 ## Design decisions
-- **Batch, not streaming.** Process at visit end (or in chunks). A scribe needs an accurate note, not live
-  labels; batch clustering is far more accurate.
-- **Auto speaker count.** Agglomerative clustering with a cosine-distance threshold (+ optional
-  `maxSpeakers` cap) — never hardcode 2.
+- **Batch for the labels, live for feedback.** Speaker attribution is computed at visit end (batch is far
+  more accurate). A separate live rough transcript can stream while recording, but it's unlabeled — labels
+  need the whole clip.
+- **Auto speaker count.** Agglomerative clustering with a cosine-distance threshold (default **0.65**, +
+  optional `maxSpeakers` cap) — never hardcode 2. The threshold is exposed for tuning: higher = fewer
+  speakers. A **minimum segment length** (default 1.0s) keeps brief interjections from spawning phantom
+  speakers — the main over-splitting cause on real audio.
 - **On-device vs. server (the real fork).** On-device (TitaNet + JS clustering, what we have) keeps PHI
   local — the differentiator — but trails server SOTA (pyannote + faster-whisper / WhisperX). We push
   on-device and treat the accuracy gap as a known tradeoff.
@@ -60,9 +77,10 @@ Combination: **anchor the known → LLM-guess the unknown roles → let the doct
   messy. A dedicated pyannote-segmentation WASM (Phase 3) improves this.
 
 ## Phasing
-1. **MVP (this work, no new WASM):** Whisper segments → TitaNet per-segment embed → JS cluster → anchor to
-   enrolled voices → attributed transcript. Doctor (and enrolled staff) named; others `Speaker N`.
-2. **LLM role inference + manual relabel** for the unknown speakers.
+1. ✅ **MVP (no new WASM):** Whisper segments → TitaNet per-segment embed → JS cluster → anchor to enrolled
+   voices → attributed transcript. Doctor (and enrolled staff) named; others `Speaker N`. Surfaced in
+   `<VisitScribe>` + conversation mode.
+2. ✅ **LLM role inference** for the unknown speakers (manual relabel via VoiceManager rename).
 3. **Accuracy upgrade:** build the sherpa-onnx *speaker-diarization* WASM (same recipe as the speaker-verify
    build, on the os.mieweb.org container) — pyannote segmentation for better boundaries + overlap handling —
    and swap it in behind the same `diarize()` interface.

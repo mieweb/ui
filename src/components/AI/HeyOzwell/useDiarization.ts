@@ -24,10 +24,14 @@ import {
 const SR = 16000; // decodeTo16kMono / transcribeSegments work in 16 kHz seconds
 
 export interface UseDiarizationOptions {
-  /** Cluster merge cutoff (cosine distance). Lower → more speakers. Default 0.5. */
+  /** Cluster merge cutoff (cosine distance). Higher → fewer speakers (merges more). Default 0.65. */
   threshold?: number;
-  /** Hard cap on detected speakers. */
+  /** Hard cap on detected speakers — forces merging down to at most this many. Unset = auto. */
   maxSpeakers?: number;
+  /** Minimum segment length (seconds) to trust for a speaker embedding — shorter segments are attributed
+   *  to a neighbor instead of forming their own (noisy) cluster. Raising this cuts phantom speakers from
+   *  brief interjections. Default 1.0. */
+  minSegmentSeconds?: number;
   /** Min cosine to name a cluster from an enrolled voice (else it stays "Speaker N"). Default 0.45. */
   identifyThreshold?: number;
   /** Collapse consecutive same-speaker segments into turns. Default true. */
@@ -35,6 +39,9 @@ export interface UseDiarizationOptions {
   /** After anchoring, ask Ozwell to infer roles (Patient / Caregiver / …) for the still-generic speakers.
    *  Requires the chat backend to be configured; best-effort (keeps "Speaker N" on failure). Default false. */
   inferRoles?: boolean;
+  /** Load the ~50 MB speaker runtime + warm Whisper. Set false to keep it dormant until it's needed
+   *  (e.g. a host feature that's off). Default true. */
+  enabled?: boolean;
 }
 
 export interface UseDiarizationResult {
@@ -57,8 +64,8 @@ function windowFor(samples: Float32Array, start: number, end: number): Float32Ar
 }
 
 export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizationResult {
-  const { threshold = 0.5, maxSpeakers, identifyThreshold = 0.45, merge = true, inferRoles = false } = options;
-  const sv = useSpeakerVerify(); // loads the TitaNet runtime
+  const { threshold = 0.65, maxSpeakers, identifyThreshold = 0.45, merge = true, inferRoles = false, enabled = true, minSegmentSeconds = 1.0 } = options;
+  const sv = useSpeakerVerify({ enabled }); // loads the TitaNet runtime (only when enabled)
   const svRef = React.useRef(sv);
   svRef.current = sv;
 
@@ -66,10 +73,11 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
   const [error, setError] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<DiarizedSegment[] | null>(null);
 
-  // Warm Whisper up front so the first diarize() isn't gated on the ~1.3 GB download.
+  // Warm Whisper up front so the first diarize() isn't gated on the ~1.3 GB download (only when enabled,
+  // so a dormant instance doesn't pull the model early).
   React.useEffect(() => {
-    warmWhisper();
-  }, []);
+    if (enabled) warmWhisper();
+  }, [enabled]);
 
   const diarize = React.useCallback(
     async (blob: Blob): Promise<DiarizedSegment[]> => {
@@ -89,7 +97,7 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
         const windows = segments.map((s) => windowFor(samples, s.start, s.end));
         const embedded: { idx: number; emb: Float32Array }[] = [];
         for (let i = 0; i < segments.length; i++) {
-          const emb = windows[i].length >= SR * 0.4 ? svh.embed(windows[i], SR) : null;
+          const emb = windows[i].length >= SR * minSegmentSeconds ? svh.embed(windows[i], SR) : null;
           if (emb) embedded.push({ idx: i, emb });
         }
         if (!embedded.length) throw new Error('no embeddable segments (runtime not ready?)');
@@ -146,7 +154,7 @@ export function useDiarization(options: UseDiarizationOptions = {}): UseDiarizat
         setBusy(false);
       }
     },
-    [threshold, maxSpeakers, identifyThreshold, merge, inferRoles]
+    [threshold, maxSpeakers, identifyThreshold, merge, inferRoles, minSegmentSeconds]
   );
 
   return { ready: sv.ready, busy, error, result, diarize };
