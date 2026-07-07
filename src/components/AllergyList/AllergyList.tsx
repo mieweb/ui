@@ -8,11 +8,17 @@ import { Tooltip } from '../Tooltip';
 import { Card, CardHeader, CardContent } from '../Card/Card';
 import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
 import {
+  useDragReorder,
+  dragIndicatorClasses,
+  type UseDragReorderReturn,
+} from '../../hooks/useDragReorder';
+import {
   PencilIcon,
   StickyNoteIcon,
   BanIcon,
   PlusIcon,
   AlertCircleIcon,
+  GripVerticalIcon,
 } from '../Icons';
 
 // =============================================================================
@@ -83,6 +89,12 @@ export interface AllergyListProps extends Omit<
   actions?: AllergyAction[];
   /** Called when a row action is clicked */
   onAction?: (allergy: Allergy, action: AllergyAction) => void;
+  /**
+   * Called with the full new id order after a drag/keyboard reorder.
+   * Omit to disable reordering. Drops are restricted to the same
+   * category group.
+   */
+  onReorder?: (allergyIds: string[]) => void;
   /** Custom add UI (e.g. an inline CodeLookup search) */
   addSearch?: React.ReactNode;
   /** Called when the "Add allergy" button is clicked (omit to hide) */
@@ -163,19 +175,70 @@ function AllergyRow({
   allergy,
   actions,
   readOnly,
+  drag,
+  onMove,
   onAction,
 }: {
   allergy: Allergy;
   actions: AllergyAction[];
   readOnly: boolean;
+  drag: UseDragReorderReturn;
+  /** Keyboard equivalent of drag reordering (Alt+↑/↓) */
+  onMove?: (allergy: Allergy, dir: -1 | 1) => void;
   onAction?: (allergy: Allergy, action: AllergyAction) => void;
 }) {
+  const handleRowKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      onMove?.(allergy, e.key === 'ArrowUp' ? -1 : 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const list = e.currentTarget.closest('ul');
+      if (!list) return;
+      const rows = Array.from(
+        list.querySelectorAll<HTMLElement>('li[data-allergy-id]')
+      );
+      const i = rows.indexOf(e.currentTarget as HTMLElement);
+      rows[
+        e.key === 'ArrowUp'
+          ? Math.max(0, i - 1)
+          : Math.min(rows.length - 1, i + 1)
+      ]?.focus();
+    }
+  };
+
   return (
+    // Rows are focus stops when reordering is enabled so drag & drop has a
+    // keyboard equivalent (Alt+↑/↓) — 508.
+    /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */
     <li
       data-allergy-id={allergy.id}
-      className="group border-border/60 relative flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 border-b px-1 py-2"
+      tabIndex={drag.enabled ? 0 : undefined}
+      onKeyDown={drag.enabled ? handleRowKeyDown : undefined}
+      aria-label={
+        drag.enabled
+          ? `${allergy.allergen}. Alt plus arrow keys to reorder.`
+          : undefined
+      }
+      {...drag.rowProps(allergy.id)}
+      className={cn(
+        'group border-border/60 relative flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 border-b px-1 py-2',
+        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+        drag.enabled && 'cursor-grab active:cursor-grabbing',
+        dragIndicatorClasses(drag, allergy.id)
+      )}
     >
-      <span className="text-muted-foreground/60 select-none">•</span>
+      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+      {drag.enabled ? (
+        <GripVerticalIcon
+          size={14}
+          aria-hidden
+          className="text-muted-foreground/50 shrink-0"
+        />
+      ) : (
+        <span className="text-muted-foreground/60 select-none">•</span>
+      )}
       <span
         className={cn(
           'text-foreground font-medium',
@@ -272,6 +335,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
       title = 'Allergies',
       actions = DEFAULT_ACTIONS,
       onAction,
+      onReorder,
       addSearch,
       onAdd,
       readOnly = false,
@@ -281,7 +345,7 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
     },
     ref
   ) => {
-    const [announcement] = useLiveAnnouncement();
+    const [announcement, setAnnouncement] = useLiveAnnouncement();
 
     const groups = TYPE_ORDER.map((type) => ({
       type,
@@ -290,6 +354,45 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
     })).filter((g) => g.items.length > 0);
 
     const empty = allergies.length === 0;
+
+    // Drag & drop reordering, restricted to the same category group.
+    const typeOf = React.useCallback(
+      (id: string) => allergies.find((a) => a.id === id)?.type ?? 'other',
+      [allergies]
+    );
+    const drag = useDragReorder({
+      ids: allergies.map((a) => a.id),
+      onReorder:
+        readOnly || !onReorder
+          ? undefined
+          : (ids) => {
+              setAnnouncement('Allergy list reordered');
+              onReorder(ids);
+            },
+      canDropOn: (dragged, target) => typeOf(dragged) === typeOf(target),
+    });
+
+    /** Keyboard equivalent of dragging a row: swap within the category. */
+    const moveAllergy = React.useCallback(
+      (allergy: Allergy, dir: -1 | 1) => {
+        if (readOnly || !onReorder) return;
+        const ids = allergies.map((a) => a.id);
+        const from = ids.indexOf(allergy.id);
+        let to = from + dir;
+        while (
+          to >= 0 &&
+          to < allergies.length &&
+          (allergies[to].type ?? 'other') !== (allergy.type ?? 'other')
+        ) {
+          to += dir;
+        }
+        if (to < 0 || to >= allergies.length) return;
+        [ids[from], ids[to]] = [ids[to], ids[from]];
+        setAnnouncement(`${allergy.allergen} moved ${dir === -1 ? 'up' : 'down'}`);
+        onReorder(ids);
+      },
+      [allergies, onReorder, readOnly, setAnnouncement]
+    );
 
     return (
       <Card
@@ -351,6 +454,8 @@ export const AllergyList = React.forwardRef<HTMLDivElement, AllergyListProps>(
                       allergy={allergy}
                       actions={actions}
                       readOnly={readOnly}
+                      drag={drag}
+                      onMove={moveAllergy}
                       onAction={onAction}
                     />
                   ))}

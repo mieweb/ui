@@ -108,6 +108,11 @@ function AllergyEditor({
 
   const canSave = draft.allergen.trim().length > 0;
 
+  // CodeLookup's shards cover drugs (RxNorm/FDB — the 'med' domain); food
+  // and environmental allergens have no shard, so the search only renders
+  // for drug-type allergies and other types use a plain text input.
+  const isDrug = (draft.type ?? 'drug') === 'drug';
+
   return (
     <Modal open onOpenChange={(o) => !o && onClose()} size="md">
       <ModalHeader>
@@ -116,7 +121,21 @@ function AllergyEditor({
       </ModalHeader>
       <ModalBody className="space-y-4">
         <div ref={bodyRef} className="contents">
-          {codeLookup ? (
+          <Select
+            label="Type"
+            options={TYPE_OPTIONS}
+            value={draft.type ?? 'drug'}
+            onValueChange={(v) => {
+              const type = v as AllergyType;
+              // A drug code is wrong on a non-drug allergen.
+              patch({
+                type,
+                ...(type !== 'drug' && { code: undefined }),
+              });
+            }}
+          />
+
+          {isDrug && codeLookup ? (
             <div className="space-y-1.5">
               <Label htmlFor="alg-search">Allergen</Label>
               <codeLookup.component
@@ -125,7 +144,7 @@ function AllergyEditor({
                 domains={['med']}
                 bare
                 clearOnSelect={false}
-                placeholder="Search allergens — e.g. penicillin"
+                placeholder="Search drug allergens — e.g. penicillin"
                 onSelect={(result) =>
                   patch({
                     allergen: result.label,
@@ -158,13 +177,6 @@ function AllergyEditor({
               />
             </div>
           )}
-
-          <Select
-            label="Type"
-            options={TYPE_OPTIONS}
-            value={draft.type ?? 'drug'}
-            onValueChange={(v) => patch({ type: v as AllergyType })}
-          />
 
           <div className="space-y-1.5">
             <Label htmlFor="alg-reaction">Reaction</Label>
@@ -305,7 +317,7 @@ export function AllergyManager({
         domains={['med']}
         bare
         clearOnSelect
-        placeholder="Search allergens to add"
+        placeholder="Search drug allergens to add — use Add allergy… for food/environmental"
         onSelect={(result) =>
           commit([
             ...allergies,
@@ -335,6 +347,11 @@ export function AllergyManager({
         onNoKnownAllergiesChange={onNoKnownAllergiesChange}
         title={title}
         onAction={handleAction}
+        onReorder={(ids) =>
+          commit(
+            [...allergies].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
+          )
+        }
         addSearch={addSearch}
         onAdd={() => setDialog({ kind: 'add' })}
         readOnly={readOnly}
