@@ -15,6 +15,7 @@ import {
   AllergyList,
   type Allergy,
   type AllergyAction,
+  type AllergyKind,
   type AllergySeverity,
   type AllergyType,
 } from './AllergyList';
@@ -121,6 +122,19 @@ function AllergyEditor({
       </ModalHeader>
       <ModalBody className="space-y-4">
         <div ref={bodyRef} className="contents">
+          <RadioGroup
+            name="alg-kind"
+            label="Mechanism"
+            description="A true immune-mediated allergy, or a non-immune intolerance (e.g. GI upset)"
+            value={draft.kind ?? 'allergy'}
+            onValueChange={(v) => patch({ kind: v as AllergyKind })}
+            orientation="horizontal"
+            size="sm"
+          >
+            <Radio value="allergy" label="Allergy" />
+            <Radio value="intolerance" label="Intolerance" />
+          </RadioGroup>
+
           <Select
             label="Type"
             options={TYPE_OPTIONS}

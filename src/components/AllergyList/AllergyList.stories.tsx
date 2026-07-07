@@ -52,6 +52,14 @@ const sampleAllergies: Allergy[] = [
     severity: 'mild',
   },
   {
+    id: '5',
+    allergen: 'erythromycin',
+    type: 'drug',
+    kind: 'intolerance',
+    reaction: 'GI upset',
+    severity: 'mild',
+  },
+  {
     id: '3',
     allergen: 'peanuts',
     type: 'food',
@@ -86,10 +94,13 @@ export const Interactive: StoryObj<typeof AllergyManager> = {
         story: `
 **Start here.** \`AllergyManager\` with everything wired:
 
-- Hover/focus a row for **Correct / Notes / Remove**
-- **Correct** and **Add allergy…** open the editor: allergen search codes
-  against RxNorm/FDB (drug shard), type select, reaction, severity radio,
-  onset date, note
+- Hover/focus a row for **Correct / Notes / Remove**; drag by the grip to
+  reorder within a category
+- **Correct** and **Add allergy…** open the editor: **Allergy vs
+  Intolerance** mechanism radio (an intolerance mislabeled as an allergy
+  causes unnecessary avoidance of first-line drugs — intolerances get a
+  gray badge), type-driven allergen input (Drug → coded RxNorm/FDB search;
+  Food/Environmental → free text), reaction, severity radio, onset, note
 - Severity renders as a colored badge (severe = red, moderate = amber);
   inactive entries strike through
 - Every change surfaces through \`onChange\` (browser console)

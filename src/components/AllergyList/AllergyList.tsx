@@ -28,6 +28,14 @@ import {
 /** Allergy category (FHIR AllergyIntolerance.category). */
 export type AllergyType = 'drug' | 'food' | 'environmental' | 'other';
 
+/**
+ * Mechanism distinction (FHIR AllergyIntolerance.type): a true
+ * immune-mediated allergy vs a non-immune intolerance (e.g. GI upset).
+ * The distinction matters clinically — an intolerance mislabeled as an
+ * allergy causes unnecessary avoidance of first-line drugs.
+ */
+export type AllergyKind = 'allergy' | 'intolerance';
+
 /** Reaction severity (FHIR reaction.severity). */
 export type AllergySeverity = 'mild' | 'moderate' | 'severe';
 
@@ -51,6 +59,8 @@ export interface Allergy {
   allergen: string;
   /** Category — groups the list */
   type?: AllergyType;
+  /** Allergy vs intolerance (FHIR AllergyIntolerance.type; default 'allergy') */
+  kind?: AllergyKind;
   /** Reaction description, e.g. "hives" */
   reaction?: string;
   /** Reaction severity — drives the badge color */
@@ -258,6 +268,11 @@ function AllergyRow({
       {allergy.severity && (
         <Badge variant={SEVERITY_BADGE[allergy.severity]} size="sm">
           {allergy.severity}
+        </Badge>
+      )}
+      {allergy.kind === 'intolerance' && (
+        <Badge variant="secondary" size="sm">
+          intolerance
         </Badge>
       )}
       {allergy.reaction && (

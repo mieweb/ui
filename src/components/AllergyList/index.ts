@@ -5,6 +5,7 @@ export {
   type Allergy,
   type AllergyCode,
   type AllergyType,
+  type AllergyKind,
   type AllergySeverity,
   type AllergyAction,
 } from './AllergyList';
