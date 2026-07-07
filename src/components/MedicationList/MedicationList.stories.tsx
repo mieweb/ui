@@ -64,93 +64,28 @@ const sampleMedications: Medication[] = [
 ];
 
 /**
- * Fully interactive reconciliation flow. Click a status button on a row and
- * watch the medication move to the matching group. Drag a row (or use the
- * move actions) to reorder within a group.
+ * The full reconciliation experience — `MedicationReconciliation` with the
+ * NCPDP MedicationEditor and offline RxNorm/FDB coding. Correct / Add open
+ * the prescription editor; Notes / Add Task open dialogs; rows drag or move
+ * within their group; every change is reported through `onChange`.
  */
 function InteractiveTemplate() {
-  const [meds, setMeds] = useState<Medication[]>(sampleMedications);
   const [log, setLog] = useState<string[]>([]);
-
-  const handleStatusChange = (med: Medication, status: MedicationStatus) => {
-    setMeds((prev) =>
-      prev.map((m) => (m.id === med.id ? { ...m, status } : m))
-    );
-    setLog((prev) => [
-      `${med.name} → ${MEDICATION_STATUS_LABELS[status]}`,
-      ...prev.slice(0, 4),
-    ]);
-  };
-
-  const handleAction = (med: Medication, action: MedicationAction) => {
-    setMeds((prev) => {
-      switch (action) {
-        case 'remove':
-          return prev.filter((m) => m.id !== med.id);
-        case 'correct': {
-          const name = window.prompt('Correct medication name:', med.name);
-          return name
-            ? prev.map((m) => (m.id === med.id ? { ...m, name } : m))
-            : prev;
-        }
-        case 'note': {
-          const note = window.prompt('Note:', med.note ?? '');
-          return note !== null
-            ? prev.map((m) =>
-                m.id === med.id ? { ...m, note: note || undefined } : m
-              )
-            : prev;
-        }
-        case 'add-task': {
-          const task = window.prompt('Task:', med.task ?? '');
-          return task !== null
-            ? prev.map((m) =>
-                m.id === med.id ? { ...m, task: task || undefined } : m
-              )
-            : prev;
-        }
-        case 'move-up':
-        case 'move-down': {
-          const group = prev.filter((m) => m.status === med.status);
-          const gi = group.findIndex((m) => m.id === med.id);
-          const swap = group[gi + (action === 'move-up' ? -1 : 1)];
-          if (!swap) return prev;
-          const next = [...prev];
-          const i = next.findIndex((m) => m.id === med.id);
-          const j = next.findIndex((m) => m.id === swap.id);
-          [next[i], next[j]] = [next[j], next[i]];
-          return next;
-        }
-        default:
-          return prev;
-      }
-    });
-    setLog((prev) => [`${med.name}: ${action}`, ...prev.slice(0, 4)]);
-  };
 
   return (
     <div className="space-y-4">
-      <MedicationList
-        medications={meds}
-        onStatusChange={handleStatusChange}
-        onAction={handleAction}
-        onReorder={(ids) =>
-          setMeds((prev) =>
-            [...prev].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
-          )
-        }
+      <MedicationReconciliation
+        defaultMedications={sampleMedications}
         quickAddOptions={[
           'atorvastatin 20 mg tablet',
           'metformin 500 mg tablet',
         ]}
-        onQuickAdd={(name) =>
-          setMeds((prev) => [
-            ...prev,
-            { id: `new-${Date.now()}`, name, status: 'unreconciled' },
+        codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
+        onChange={(meds) =>
+          setLog((prev) => [
+            `onChange — ${meds.length} medications`,
+            ...prev.slice(0, 4),
           ])
-        }
-        onAddOther={() =>
-          setLog((prev) => ['Open medication search…', ...prev])
         }
       />
       {log.length > 0 && (
@@ -166,6 +101,68 @@ function InteractiveTemplate() {
 
 export const Interactive: Story = {
   render: () => <InteractiveTemplate />,
+};
+
+/**
+ * The presentational `MedicationList` layer by itself — fully controlled,
+ * no built-in dialogs. Every callback just logs; wire your own handlers
+ * (or use `MedicationReconciliation`, demonstrated in Interactive, for the
+ * batteries-included behavior).
+ */
+function HeadlessTemplate() {
+  const [meds, setMeds] = useState<Medication[]>(sampleMedications);
+  const [log, setLog] = useState<string[]>([]);
+
+  const handleStatusChange = (med: Medication, status: MedicationStatus) => {
+    setMeds((prev) =>
+      prev.map((m) => (m.id === med.id ? { ...m, status } : m))
+    );
+    setLog((prev) => [
+      `${med.name} → ${MEDICATION_STATUS_LABELS[status]}`,
+      ...prev.slice(0, 4),
+    ]);
+  };
+
+  const handleAction = (med: Medication, action: MedicationAction) => {
+    if (action === 'remove') {
+      setMeds((prev) => prev.filter((m) => m.id !== med.id));
+    }
+    setLog((prev) => [`onAction: ${med.name}: ${action}`, ...prev.slice(0, 4)]);
+  };
+
+  return (
+    <div className="space-y-4">
+      <MedicationList
+        medications={meds}
+        onStatusChange={handleStatusChange}
+        onAction={handleAction}
+        onReorder={(ids) =>
+          setMeds((prev) =>
+            [...prev].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
+          )
+        }
+        quickAddOptions={['atorvastatin 20 mg tablet']}
+        onQuickAdd={(name) =>
+          setMeds((prev) => [
+            ...prev,
+            { id: `new-${Date.now()}`, name, status: 'unreconciled' },
+          ])
+        }
+        onAddOther={() => setLog((prev) => ['onAddOther', ...prev])}
+      />
+      {log.length > 0 && (
+        <div className="text-muted-foreground rounded border p-2 font-mono text-xs">
+          {log.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export const Headless: Story = {
+  render: () => <HeadlessTemplate />,
 };
 
 /** Static list matching the WebChart "Presenting medications" screen. */
@@ -222,14 +219,8 @@ export const LimitedActions: Story = {
 };
 
 /**
- * `MedicationReconciliation` — the batteries-included standalone component.
- * Owns all interaction (status changes, the NCPDP MedicationEditor for
- * Correct / Add, Notes / Add Task modals, reordering, removal). Uncontrolled
- * here; pass `medications` + `onChange` for controlled usage. This same
- * component powers the eSheet `medicationList` question type.
- *
- * With `codeLookup` wired, Correct / Add Medication code the drug against
- * RxNorm/FDB offline (type "lisinopril" in the editor's search box).
+ * `MedicationReconciliation` in uncontrolled mode without CodeLookup — the
+ * editor falls back to a plain medication name input.
  */
 export const Reconciliation: StoryObj<typeof MedicationReconciliation> = {
   render: () => (
@@ -239,7 +230,6 @@ export const Reconciliation: StoryObj<typeof MedicationReconciliation> = {
         'atorvastatin 20 mg tablet',
         'metformin 500 mg tablet',
       ]}
-      codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
       onChange={(meds) => console.log('medications changed', meds)}
     />
   ),
