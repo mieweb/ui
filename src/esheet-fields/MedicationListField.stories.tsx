@@ -4,9 +4,13 @@ import {
   registerMedicationListFieldType,
   type FormDefinition,
 } from '../esheet';
+import { CodeLookup } from '../components/CodeLookup';
 
 // Register the custom field type once, before any story renders.
-registerMedicationListFieldType();
+// CodeLookup wiring gives the medication editor offline RxNorm/FDB coding.
+registerMedicationListFieldType({
+  codeLookup: { component: CodeLookup, indexUrl: '/codify' },
+});
 
 const SAMPLE_FORM = {
   id: 'med-rec-demo',

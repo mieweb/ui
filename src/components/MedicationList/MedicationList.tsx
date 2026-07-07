@@ -41,13 +41,29 @@ export type MedicationStatus =
   | 'not-taking'
   | 'unknown';
 
-/** A single medication in the presenting-medications list. */
+/** Coding-system reference for a medication (RxNorm / FDB / NDC …). */
+export interface MedicationCode {
+  /** Coding system, e.g. 'RxNORM', 'FDB', 'NDC' */
+  system: string;
+  /** Code within the system */
+  code: string;
+  /** Human-readable label the code was selected under */
+  display?: string;
+}
+
+/**
+ * A single medication in the presenting-medications list.
+ *
+ * Prescription-detail fields follow the NCPDP SCRIPT NewRx
+ * `MedicationPrescribed` composite — see the README for the field mapping.
+ * All are optional: a bare `{ id, name, status }` renders fine.
+ */
 export interface Medication {
   /** Stable unique id */
   id: string;
-  /** Display name, e.g. "lisinopril 10 mg tablet" */
+  /** Display name, e.g. "lisinopril 10 mg tablet" (NCPDP DrugDescription) */
   name: string;
-  /** Patient-friendly instructions (sig), shown in gray after the name */
+  /** Patient-friendly instructions (NCPDP Sig / Directions) */
   sig?: string;
   /** Current reconciliation status */
   status: MedicationStatus;
@@ -59,6 +75,40 @@ export interface Medication {
   note?: string;
   /** Follow-up task attached to the medication */
   task?: string;
+
+  // —— Coding (NCPDP DrugCoded) ——
+  /** Code reference (RxNorm / FDB / NDC) */
+  code?: MedicationCode;
+
+  // —— NCPDP SCRIPT NewRx prescription fields ——
+  /** Strength, e.g. "10 mg" (Strength + StrengthUnitOfMeasure) */
+  strength?: string;
+  /** Dose form, e.g. "tablet" (DrugCoded/FormCode) */
+  doseForm?: string;
+  /** Quantity dispensed (Quantity/Value) */
+  quantity?: string;
+  /** Quantity unit of measure (Quantity/QuantityUnitOfMeasure) */
+  quantityUnit?: string;
+  /** Days supply (DaysSupply) */
+  daysSupply?: string;
+  /** Route of administration, e.g. "oral" */
+  route?: string;
+  /** Administration frequency, e.g. "Twice daily" */
+  frequency?: string;
+  /** As-needed flag (PRN) */
+  prn?: boolean;
+  /** Number of refills (NumberOfRefills) */
+  refills?: string;
+  /** Substitution / DAW: '0' permitted, '1' dispense as written */
+  substitution?: '0' | '1';
+  /** Start / written date (ISO yyyy-mm-dd) */
+  startDate?: string;
+  /** End date (ISO yyyy-mm-dd) */
+  endDate?: string;
+  /** Indication / diagnosis the medication treats */
+  indication?: string;
+  /** Note to pharmacy (Note) */
+  pharmacyNotes?: string;
 }
 
 /** Non-status row actions revealed on hover. */
@@ -277,6 +327,14 @@ function MedicationRow({
         <span className="text-muted-foreground/60 select-none">•</span>
       )}
       <span className="text-foreground font-medium">{medication.name}</span>
+      {medication.code && (
+        <span
+          className="text-muted-foreground/70 text-xs"
+          title={medication.code.display}
+        >
+          {medication.code.system} {medication.code.code}
+        </span>
+      )}
       {medication.sig && (
         <span className="text-muted-foreground text-sm">{medication.sig}</span>
       )}

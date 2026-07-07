@@ -25,6 +25,7 @@ import type { FieldComponentProps } from '@esheet/core';
 import { registerCustomFieldTypes } from '@esheet/fields';
 import {
   MedicationReconciliation,
+  type CodeLookupConfig,
   type Medication,
 } from '../components/MedicationList';
 
@@ -56,7 +57,11 @@ export function MedicationListField({
   isPreview,
   isEnabled,
   onResponse,
-}: FieldComponentProps): React.JSX.Element {
+  codeLookup,
+}: FieldComponentProps & {
+  /** CodeLookup wiring — supplied via registerMedicationListFieldType() */
+  codeLookup?: CodeLookupConfig;
+}): React.JSX.Element {
   const definition = field.definition as {
     question?: string;
     medications?: Medication[];
@@ -77,6 +82,7 @@ export function MedicationListField({
       }
       title={definition.question ?? 'Presenting medications'}
       quickAddOptions={definition.quickAddOptions}
+      codeLookup={codeLookup}
       readOnly={!(isPreview && isEnabled)}
     />
   );
@@ -89,8 +95,22 @@ export function MedicationListField({
 /**
  * Register the `medicationList` field type with eSheet.
  * Call once before rendering EsheetBuilder or EsheetRenderer.
+ *
+ * @param options.codeLookup — wire the offline RxNorm/FDB CodeLookup into the
+ * medication editor (Correct / Add Medication):
+ * ```tsx
+ * import { CodeLookup } from '…/CodeLookup';
+ * registerMedicationListFieldType({
+ *   codeLookup: { component: CodeLookup, indexUrl: '/codify' },
+ * });
+ * ```
  */
-export function registerMedicationListFieldType(): void {
+export function registerMedicationListFieldType(options?: {
+  codeLookup?: CodeLookupConfig;
+}): void {
+  const Field = (props: FieldComponentProps) => (
+    <MedicationListField {...props} codeLookup={options?.codeLookup} />
+  );
   registerCustomFieldTypes({
     medicationList: {
       label: 'Medication Reconciliation',
@@ -106,7 +126,7 @@ export function registerMedicationListFieldType(): void {
           'metformin 500 mg tablet',
         ],
       },
-      component: MedicationListField,
+      component: Field,
     },
   });
 }

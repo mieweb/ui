@@ -28,9 +28,12 @@ import {
   ModalFooter,
 } from '../Modal';
 import { Button } from '../Button';
-import { Input } from '../Input';
 import { Textarea } from '../Textarea';
 import { Label } from '../Label';
+import {
+  MedicationEditor,
+  type CodeLookupConfig,
+} from './MedicationEditor';
 
 // =============================================================================
 // Types
@@ -63,6 +66,17 @@ export interface MedicationReconciliationProps {
    * (e.g. 'open', 'refill' when included in `actions`).
    */
   onAction?: (medication: Medication, action: MedicationAction) => void;
+  /**
+   * CodeLookup wiring for the medication editor (Correct / Add Medication):
+   * pass the CodeLookup component + shard location to enable RxNorm/FDB
+   * coding. Omit for a plain-text medication name input.
+   *
+   * ```tsx
+   * import { CodeLookup } from '@mieweb/ui/…/CodeLookup';
+   * <MedicationReconciliation codeLookup={{ component: CodeLookup, indexUrl: '/codify' }} … />
+   * ```
+   */
+  codeLookup?: CodeLookupConfig;
   /** Hide all action buttons (display only) */
   readOnly?: boolean;
   /** Message shown when the Unreconciled group is empty */
@@ -88,45 +102,26 @@ type DialogState =
   | { kind: 'add' }
   | null;
 
+/** Small note / task dialog. Correct + Add use the full MedicationEditor. */
 function MedicationDialog({
   dialog,
   onClose,
   onSave,
 }: {
-  dialog: Exclude<DialogState, null>;
+  dialog: { kind: 'note' | 'add-task'; medication: Medication };
   onClose: () => void;
   onSave: (fields: Record<string, string>) => void;
 }) {
-  const [form, setForm] = React.useState<Record<string, string>>(() => {
-    if (dialog.kind === 'correct') {
-      return {
-        name: dialog.medication.name,
-        sig: dialog.medication.sig ?? '',
-      } as Record<string, string>;
-    }
-    if (dialog.kind === 'note')
-      return { note: dialog.medication.note ?? '' } as Record<string, string>;
-    if (dialog.kind === 'add-task')
-      return { task: dialog.medication.task ?? '' } as Record<string, string>;
-    return { name: '', sig: '' } as Record<string, string>;
-  });
-
-  const titles: Record<string, string> = {
-    correct: 'Correct Medication',
-    note: 'Medication Notes',
-    'add-task': 'Add Task',
-    add: 'Add Medication',
-  };
+  const [form, setForm] = React.useState<Record<string, string>>(() =>
+    dialog.kind === 'note'
+      ? ({ note: dialog.medication.note ?? '' } as Record<string, string>)
+      : ({ task: dialog.medication.task ?? '' } as Record<string, string>)
+  );
 
   const set =
     (key: string) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
-
-  const canSave =
-    dialog.kind === 'correct' || dialog.kind === 'add'
-      ? form.name.trim().length > 0
-      : true;
 
   const handleSave = () => {
     onSave(form);
@@ -136,38 +131,16 @@ function MedicationDialog({
   return (
     <Modal open onOpenChange={(open) => !open && onClose()} size="md">
       <ModalHeader>
-        <ModalTitle>{titles[dialog.kind]}</ModalTitle>
+        <ModalTitle>
+          {dialog.kind === 'note' ? 'Medication Notes' : 'Add Task'}
+        </ModalTitle>
         <ModalClose />
       </ModalHeader>
       <ModalBody className="space-y-4">
-        {dialog.kind !== 'add' && (
-          <p className="text-muted-foreground text-sm">
-            {dialog.medication.name}
-          </p>
-        )}
-        {(dialog.kind === 'correct' || dialog.kind === 'add') && (
-          <>
-            <div className="space-y-1.5">
-              <Label htmlFor="med-name">Medication</Label>
-              <Input
-                id="med-name"
-                value={form.name}
-                onChange={set('name')}
-                placeholder="e.g. lisinopril 10 mg tablet"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="med-sig">Instructions (sig)</Label>
-              <Input
-                id="med-sig"
-                value={form.sig}
-                onChange={set('sig')}
-                placeholder="e.g. 1 tablet by mouth daily"
-              />
-            </div>
-          </>
-        )}
-        {dialog.kind === 'note' && (
+        <p className="text-muted-foreground text-sm">
+          {dialog.medication.name}
+        </p>
+        {dialog.kind === 'note' ? (
           <div className="space-y-1.5">
             <Label htmlFor="med-note">Note</Label>
             <Textarea
@@ -177,8 +150,7 @@ function MedicationDialog({
               rows={4}
             />
           </div>
-        )}
-        {dialog.kind === 'add-task' && (
+        ) : (
           <div className="space-y-1.5">
             <Label htmlFor="med-task">Task</Label>
             <Textarea
@@ -195,9 +167,7 @@ function MedicationDialog({
         <Button variant="secondary" onClick={onClose}>
           Cancel
         </Button>
-        <Button onClick={handleSave} disabled={!canSave}>
-          Save
-        </Button>
+        <Button onClick={handleSave}>Save</Button>
       </ModalFooter>
     </Modal>
   );
@@ -230,6 +200,7 @@ export function MedicationReconciliation({
   quickAddOptions,
   actions = MANAGED_ACTIONS,
   onAction,
+  codeLookup,
   readOnly = false,
   reconciledMessage,
   className,
@@ -298,12 +269,6 @@ export function MedicationReconciliation({
   const handleDialogSave = (form: Record<string, string>) => {
     if (!dialog) return;
     switch (dialog.kind) {
-      case 'correct':
-        patchMedication(dialog.medication.id, {
-          name: form.name.trim(),
-          sig: form.sig.trim() || undefined,
-        });
-        break;
       case 'note':
         patchMedication(dialog.medication.id, {
           note: form.note.trim() || undefined,
@@ -314,9 +279,18 @@ export function MedicationReconciliation({
           task: form.task.trim() || undefined,
         });
         break;
-      case 'add':
-        addMedication(form.name.trim(), form.sig.trim());
-        break;
+    }
+  };
+
+  /** Correct + Add flow through the full NCPDP MedicationEditor. */
+  const editorOpen = dialog?.kind === 'correct' || dialog?.kind === 'add';
+  const editorTarget = dialog?.kind === 'correct' ? dialog.medication : undefined;
+
+  const handleEditorSave = (med: Medication) => {
+    if (dialog?.kind === 'correct') {
+      commit(medications.map((m) => (m.id === med.id ? med : m)));
+    } else {
+      commit([...medications, { ...med, status: 'unreconciled' }]);
     }
   };
 
@@ -336,14 +310,22 @@ export function MedicationReconciliation({
         className={className}
         data-testid={dataTestId}
       />
-      {dialog && (
+      {dialog && (dialog.kind === 'note' || dialog.kind === 'add-task') && (
         <MedicationDialog
-          key={
-            dialog.kind + ('medication' in dialog ? dialog.medication.id : '')
-          }
+          key={dialog.kind + dialog.medication.id}
           dialog={dialog}
           onClose={() => setDialog(null)}
           onSave={handleDialogSave}
+        />
+      )}
+      {editorOpen && (
+        <MedicationEditor
+          key={editorTarget?.id ?? 'add'}
+          open
+          medication={editorTarget}
+          codeLookup={codeLookup}
+          onClose={() => setDialog(null)}
+          onSave={handleEditorSave}
         />
       )}
     </>

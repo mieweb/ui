@@ -8,6 +8,7 @@ import {
   type MedicationStatus,
 } from './MedicationList';
 import { MedicationReconciliation } from './MedicationReconciliation';
+import { CodeLookup } from '../CodeLookup';
 
 const meta: Meta<typeof MedicationList> = {
   title: 'Healthcare/MedicationList',
@@ -222,10 +223,13 @@ export const LimitedActions: Story = {
 
 /**
  * `MedicationReconciliation` — the batteries-included standalone component.
- * Owns all interaction (status changes, Correct / Notes / Add Task modals,
- * reordering, removal, adding). Uncontrolled here; pass `medications` +
- * `onChange` for controlled usage. This same component powers the eSheet
- * `medicationList` question type.
+ * Owns all interaction (status changes, the NCPDP MedicationEditor for
+ * Correct / Add, Notes / Add Task modals, reordering, removal). Uncontrolled
+ * here; pass `medications` + `onChange` for controlled usage. This same
+ * component powers the eSheet `medicationList` question type.
+ *
+ * With `codeLookup` wired, Correct / Add Medication code the drug against
+ * RxNorm/FDB offline (type "lisinopril" in the editor's search box).
  */
 export const Reconciliation: StoryObj<typeof MedicationReconciliation> = {
   render: () => (
@@ -235,6 +239,7 @@ export const Reconciliation: StoryObj<typeof MedicationReconciliation> = {
         'atorvastatin 20 mg tablet',
         'metformin 500 mg tablet',
       ]}
+      codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
       onChange={(meds) => console.log('medications changed', meds)}
     />
   ),
