@@ -125,7 +125,8 @@ Everything works without writing any handler code:
   search codes against RxNorm/FDB offline (try typing "lisinopril 20") and
   auto-fills strength, dose form, and quantity unit
 - **Notes / Add Task** open small dialogs; their text appears under the row
-- **Drag** a row (or Move Up/Down, or Alt+↑/↓) to reorder within a group
+- **Drag** a row by its grip to reorder within its status group (same
+  interaction as Assessment); Alt+↑/↓ is the keyboard equivalent
 - Every mutation surfaces through \`onChange\` (logged below the list)
 
 \`codeLookup\` is dependency-injected (\`{ component: CodeLookup, indexUrl }\`)
@@ -329,6 +330,43 @@ here only Correct and Remove. Trim to what your context supports: e.g. the
 eSheet field omits \`open\`/\`refill\` because a form has no EHR to open or
 refill against. Status buttons are always shown (hide everything with
 \`readOnly\`).
+        `,
+      },
+    },
+  },
+};
+
+/**
+ * Start from nothing and build the list quickly.
+ */
+export const Empty: StoryObj<typeof MedicationReconciliation> = {
+  render: () => (
+    <MedicationReconciliation
+      defaultMedications={[]}
+      quickAddOptions={[
+        'aspirin 81 mg tablet',
+        'atorvastatin 20 mg tablet',
+        'lisinopril 10 mg tablet',
+        'metformin 500 mg tablet',
+        'omeprazole 20 mg capsule',
+      ]}
+      codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
+      onChange={(meds) => console.log('medications changed', meds)}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Rapid entry from an empty list** — the intake / new-patient workflow.
+Starts with zero medications ("No medications recorded."):
+
+- **Quick-add pills** append common medications with one click — curate
+  \`quickAddOptions\` to your clinic's top prescriptions for fastest entry
+- **Other…** opens the editor with the CodeLookup search focused: type,
+  pick a coded result (strength/form auto-fill), Save — three actions per
+  medication
+- New entries land in **Unreconciled**, ready for the reconciliation pass
         `,
       },
     },

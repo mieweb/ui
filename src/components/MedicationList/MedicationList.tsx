@@ -152,6 +152,8 @@ export interface MedicationListProps extends Omit<
   readOnly?: boolean;
   /** Message shown when the Unreconciled group is empty */
   reconciledMessage?: string;
+  /** Message shown when the medication list has no entries at all */
+  emptyMessage?: string;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -185,8 +187,6 @@ const DEFAULT_ACTIONS: MedicationAction[] = [
   'add-task',
   'note',
   'remove',
-  'move-up',
-  'move-down',
 ];
 
 const ACTION_META: Record<
@@ -452,6 +452,7 @@ export const MedicationList = React.forwardRef<
       onAddOther,
       readOnly = false,
       reconciledMessage = 'All medications reconciled.',
+      emptyMessage = 'No medications recorded.',
       className,
       'data-testid': dataTestId,
       ...props
@@ -557,6 +558,10 @@ export const MedicationList = React.forwardRef<
                     />
                   ))}
                 </ul>
+              ) : medications.length === 0 ? (
+                <p className="text-muted-foreground mt-2 text-sm">
+                  {emptyMessage}
+                </p>
               ) : (
                 <p className="text-muted-foreground mt-2 flex items-center gap-1.5 text-sm">
                   <Badge variant="success" size="sm">

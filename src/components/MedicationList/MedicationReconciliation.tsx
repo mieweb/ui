@@ -44,8 +44,6 @@ const MANAGED_ACTIONS: MedicationAction[] = [
   'add-task',
   'note',
   'remove',
-  'move-up',
-  'move-down',
 ];
 
 export interface MedicationReconciliationProps {
@@ -81,6 +79,8 @@ export interface MedicationReconciliationProps {
   readOnly?: boolean;
   /** Message shown when the Unreconciled group is empty */
   reconciledMessage?: string;
+  /** Message shown when the medication list has no entries at all */
+  emptyMessage?: string;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -203,6 +203,7 @@ export function MedicationReconciliation({
   codeLookup,
   readOnly = false,
   reconciledMessage,
+  emptyMessage,
   className,
   'data-testid': dataTestId,
 }: MedicationReconciliationProps): React.JSX.Element {
@@ -303,10 +304,18 @@ export function MedicationReconciliation({
         actions={actions}
         onStatusChange={(med, status) => patchMedication(med.id, { status })}
         onAction={handleAction}
+        onReorder={(ids) =>
+          commit(
+            [...medications].sort(
+              (a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)
+            )
+          )
+        }
         quickAddOptions={quickAddOptions}
         onQuickAdd={(name) => addMedication(name)}
         onAddOther={() => setDialog({ kind: 'add' })}
         reconciledMessage={reconciledMessage}
+        emptyMessage={emptyMessage}
         className={className}
         data-testid={dataTestId}
       />
