@@ -66,7 +66,9 @@ export function getOzwellConfig(): OzwellConfig {
     apiKey,
     model: c.model || DEFAULTS.model,
     system: c.system ?? DEFAULTS.system,
-    temperature: c.temperature ?? DEFAULTS.temperature,
+    // Coerce: temperature set via console/localStorage often arrives as a string; a string in the request
+    // body can be rejected by OpenAI-compatible servers. Fall back to the default if it's not a real number.
+    temperature: Number.isFinite(Number(c.temperature)) ? Number(c.temperature) : DEFAULTS.temperature,
   };
 }
 

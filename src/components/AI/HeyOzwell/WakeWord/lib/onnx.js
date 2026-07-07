@@ -74,4 +74,8 @@ export class ONNX {
 ONNX.waitForInitialization().then(() => {
     ONNX.createTensor = (dtype, data, dims) => new Tensor(dtype, data, dims);
     ONNX.createInferenceSession = (model, options = {}) => InferenceSession.create(model, options);
+}).catch(() => {
+    // Initialization can fail (CSP / offline / dynamic-import error). Swallow it here so it doesn't become
+    // an unhandled rejection at load — the static methods await waitForInitialization() and surface the
+    // real error to actual callers.
 });

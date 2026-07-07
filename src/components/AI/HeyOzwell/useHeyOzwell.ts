@@ -412,9 +412,9 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       liveTimerRef.current = window.setInterval(async () => {
         const acc = liveRecRef.current;
         if (!acc || liveBusyRef.current) return;
-        const all = acc.snapshot();
-        const tail = all.subarray(liveCursorRef.current, all.length);
-        if (tail.length < acc.sampleRate * 0.4) return; // need ~0.4s of fresh audio
+        const fresh = acc.totalSamples() - liveCursorRef.current;
+        if (fresh < acc.sampleRate * 0.4) return; // need ~0.4s of fresh audio
+        const tail = acc.snapshotFrom(liveCursorRef.current); // only the un-committed tail (O(tail), not O(total))
         liveBusyRef.current = true;
         try {
           const t = (await transcribeSamples(tail, acc.sampleRate)).trim();
@@ -423,7 +423,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
           setLiveText(committed ? (t ? `${committed} ${t}` : committed) : t);
           if (tail.length >= acc.sampleRate * 8 && t) {
             liveCommittedRef.current = committed ? `${committed} ${t}` : t;
-            liveCursorRef.current = all.length;
+            liveCursorRef.current += tail.length;
           }
         } catch {
           /* transient — keep the last caption */

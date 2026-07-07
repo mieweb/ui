@@ -66,8 +66,9 @@ const DEFAULT_ASSET = `${DEFAULT_ASSET_BASE}/wakeword`;
 const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
 
 // Resolve where to fetch model files from. Order: explicit prop → global `window.__ozwellAssets`
-// (a base URL string, or { base, wakeword }) → the local Storybook path. Default keeps the demo
-// self-contained; set the global/prop to a hosted URL to move the ~6 MB of models off the repo.
+// (a base URL string, or { base, wakeword }) → `DEFAULT_ASSET` (the hosted HuggingFace base above). The
+// default fetches the ~6 MB of models from the hosted repo so a fresh clone runs with no config; override
+// the prop/global to point elsewhere (a local copy or a mieweb-owned host).
 type AssetGlobal = string | { base?: string; wakeword?: string; svRuntime?: string };
 // Storybook runs stories in an iframe; a console-set window.__ozwellAssets often lands on the parent
 // frame, so check current → parent → top (all same-origin).

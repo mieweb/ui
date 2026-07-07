@@ -137,20 +137,32 @@ export function useVisitScribe(options: UseVisitScribeOptions = {}): UseVisitScr
     timerRef.current = window.setInterval(() => setElapsedMs(Date.now() - startedAtRef.current), 250);
 
     // Live transcript: accumulate raw PCM off the SAME stream (2nd consumer, not a 2nd getUserMedia) and
-    // transcribe each new ~7s window as it fills, appending. Gated on the live toggle at tick time.
+    // transcribe each new ~7s window as it fills, appending. The accumulator is opened LAZILY — only while
+    // the live toggle is on (so it costs nothing when off, and turning it on mid-recording captures from
+    // that point). Reads only the fresh tail each tick (snapshotFrom) so it's O(new audio), not O(total).
     setLiveText('');
     liveCursorRef.current = 0;
     liveBusyRef.current = false;
-    liveRecRef.current = openRollingRecorder(stream, Infinity);
     liveTimerRef.current = window.setInterval(async () => {
-      if (!liveOnRef.current || liveBusyRef.current) return;
+      if (!liveOnRef.current) {
+        // toggled off (or never on) — drop any accumulator so it doesn't sit growing unused
+        if (liveRecRef.current) {
+          liveRecRef.current.close();
+          liveRecRef.current = null;
+          liveCursorRef.current = 0;
+        }
+        return;
+      }
+      if (!liveRecRef.current) {
+        liveRecRef.current = openRollingRecorder(stream, Infinity); // open on first tick after the toggle turns on
+        liveCursorRef.current = 0;
+      }
+      if (liveBusyRef.current) return;
       const acc = liveRecRef.current;
-      if (!acc) return;
-      const all = acc.snapshot();
-      const fresh = all.length - liveCursorRef.current;
+      const fresh = acc.totalSamples() - liveCursorRef.current;
       if (fresh < acc.sampleRate * LIVE_CHUNK_SECONDS) return; // wait for a full window
-      const window = all.subarray(liveCursorRef.current, all.length);
-      liveCursorRef.current = all.length;
+      const window = acc.snapshotFrom(liveCursorRef.current);
+      liveCursorRef.current += window.length;
       liveBusyRef.current = true;
       try {
         const text = (await transcribeSamples(window, acc.sampleRate)).trim();

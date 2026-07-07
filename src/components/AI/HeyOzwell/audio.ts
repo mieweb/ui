@@ -6,8 +6,14 @@
 export interface RollingRecorder {
   /** The AudioContext sample rate the snapshot is captured at. */
   sampleRate: number;
-  /** The last ~2s of mono audio as Float32 samples. */
+  /** The last ~2s of mono audio as Float32 samples (copies the whole retained buffer). */
   snapshot: () => Float32Array;
+  /** Total samples captured so far (cheap; no copy). For an unbounded accumulator this grows with the
+   *  recording — pair with `snapshotFrom` to read only new audio without re-copying everything. */
+  totalSamples: () => number;
+  /** Copy only the samples from absolute index `startSample` to the end — O(new audio), not O(total).
+   *  Lets a live loop read just the fresh tail each tick instead of the whole accumulator (avoids O(n²)). */
+  snapshotFrom: (startSample: number) => Float32Array;
   /** Tear down the audio graph + context. */
   close: () => void;
 }
@@ -51,6 +57,24 @@ export function openRollingRecorder(stream: MediaStream, maxSeconds = 2): Rollin
         o += c.length;
       }
       return s;
+    },
+    totalSamples: () => total,
+    snapshotFrom: (startSample: number) => {
+      const start = Math.max(0, Math.min(startSample, total));
+      const out = new Float32Array(total - start);
+      let pos = 0; // absolute sample index at the start of the current chunk
+      let o = 0;
+      for (const c of chunks) {
+        const chunkEnd = pos + c.length;
+        if (chunkEnd > start) {
+          const from = Math.max(0, start - pos);
+          const slice = from === 0 ? c : c.subarray(from);
+          out.set(slice, o);
+          o += slice.length;
+        }
+        pos = chunkEnd;
+      }
+      return out;
     },
     close: () => {
       try {

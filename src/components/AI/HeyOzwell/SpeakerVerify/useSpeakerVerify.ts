@@ -5,7 +5,8 @@
  *
  * A SEPARATE primitive from the wake word: this verifies WHO is speaking (text-independent speaker match),
  * graded as a z-score against a cohort of other voices so the threshold holds across rooms. Enrollment +
- * verification share one data contract — the per-phrase voiceprint centroid, persisted in localStorage.
+ * verification share one data contract — the per-phrase voiceprint centroid, persisted in IndexedDB (with a
+ * one-time migration off the old localStorage location).
  *
  * Assets (~50 MB) live in .storybook/public/sv-runtime/ (the sherpa WASM/data + the 500-voice cohort).
  */

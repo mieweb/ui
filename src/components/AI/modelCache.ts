@@ -24,6 +24,11 @@ export function registerModelServiceWorker(swUrl = '/ozwell-model-sw.js'): void 
   registered.add(swUrl);
   navigator.serviceWorker.register(swUrl).then(
     () => console.log('[modelCache] model service worker registered'),
-    (e) => console.warn('[modelCache] SW registration failed (models will still load, just not cached):', e),
+    (e) => {
+      // Un-memoize on failure (404 in local dev, transient offline/CSP) so a later call can retry this
+      // session instead of caching staying disabled until a full reload.
+      registered.delete(swUrl);
+      console.warn('[modelCache] SW registration failed (models will still load, just not cached):', e);
+    },
   );
 }
