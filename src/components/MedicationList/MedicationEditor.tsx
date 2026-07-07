@@ -214,6 +214,30 @@ export function parseSig(sig: string): {
   return { route, frequency, prn };
 }
 
+/**
+ * Derive Medication fields from a CodeLookup pick: name, code reference,
+ * and — parsed from the label — strength, dose form, and quantity unit.
+ * Used by the editor and by inline add-search flows.
+ */
+export function lookupToMedicationFields(
+  result: MedicationLookupResult
+): Partial<Medication> {
+  const { strength, doseForm } = parseMedicationLabel(result.label);
+  return {
+    name: result.label,
+    code: {
+      system: result.codetype,
+      code: result.fullcode,
+      display: result.label,
+    },
+    ...(strength && { strength }),
+    ...(doseForm && {
+      doseForm,
+      quantityUnit: FORM_TO_UNIT[doseForm] ?? doseForm,
+    }),
+  };
+}
+
 function newId(): string {
   return `med-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -253,20 +277,7 @@ export function MedicationEditor({
 
   const handleCodeSelect = (result: MedicationLookupResult) => {
     // Populate strength / dose form / quantity unit from the coded label.
-    const { strength, doseForm } = parseMedicationLabel(result.label);
-    patch({
-      name: result.label,
-      code: {
-        system: result.codetype,
-        code: result.fullcode,
-        display: result.label,
-      },
-      ...(strength && { strength }),
-      ...(doseForm && {
-        doseForm,
-        quantityUnit: FORM_TO_UNIT[doseForm] ?? doseForm,
-      }),
-    });
+    patch(lookupToMedicationFields(result));
   };
 
   const handleSigChange = (sig: string) => {

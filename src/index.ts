@@ -11,6 +11,7 @@ export * from './components/Address';
 export * from './components/AI';
 export * from './components/Alert';
 export * from './components/AlertDialog';
+export * from './components/AllergyList';
 export * from './components/AppHeader';
 export * from './components/Assessment';
 export * from './components/AudioPlayer';

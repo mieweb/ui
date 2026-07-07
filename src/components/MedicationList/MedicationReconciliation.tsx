@@ -32,6 +32,7 @@ import { Textarea } from '../Textarea';
 import { Label } from '../Label';
 import {
   MedicationEditor,
+  lookupToMedicationFields,
   type CodeLookupConfig,
 } from './MedicationEditor';
 
@@ -75,6 +76,13 @@ export interface MedicationReconciliationProps {
    * ```
    */
   codeLookup?: CodeLookupConfig;
+  /**
+   * Render an inline CodeLookup search bar in the add-medication section
+   * (requires `codeLookup`). Picks add immediately as Unreconciled — the
+   * fastest entry path, and non-leading (no suggested medications), which
+   * makes it the right choice for patient-facing intake.
+   */
+  inlineAddSearch?: boolean;
   /** Hide all action buttons (display only) */
   readOnly?: boolean;
   /** Message shown when the Unreconciled group is empty */
@@ -201,6 +209,7 @@ export function MedicationReconciliation({
   actions = MANAGED_ACTIONS,
   onAction,
   codeLookup,
+  inlineAddSearch = false,
   readOnly = false,
   reconciledMessage,
   emptyMessage,
@@ -295,6 +304,31 @@ export function MedicationReconciliation({
     }
   };
 
+  /** Inline CodeLookup add bar — picks/free text land in Unreconciled. */
+  const addSearch =
+    inlineAddSearch && codeLookup && !readOnly ? (
+      <codeLookup.component
+        indexUrl={codeLookup.indexUrl}
+        locale={codeLookup.locale}
+        domains={['med']}
+        bare
+        clearOnSelect
+        placeholder="Search medications to add"
+        onSelect={(result) =>
+          commit([
+            ...medications,
+            {
+              id: newId(),
+              name: result.label,
+              status: 'unreconciled',
+              ...lookupToMedicationFields(result),
+            },
+          ])
+        }
+        onFreeText={(text) => addMedication(text)}
+      />
+    ) : undefined;
+
   return (
     <>
       <MedicationList
@@ -314,6 +348,7 @@ export function MedicationReconciliation({
         quickAddOptions={quickAddOptions}
         onQuickAdd={(name) => addMedication(name)}
         onAddOther={() => setDialog({ kind: 'add' })}
+        addSearch={addSearch}
         reconciledMessage={reconciledMessage}
         emptyMessage={emptyMessage}
         className={className}

@@ -154,6 +154,12 @@ export interface MedicationListProps extends Omit<
   reconciledMessage?: string;
   /** Message shown when the medication list has no entries at all */
   emptyMessage?: string;
+  /**
+   * Custom add UI (e.g. an inline CodeLookup search) rendered in the
+   * add-medication section, before any quick-add pills. Use for
+   * patient-facing entry where suggested medications would be leading.
+   */
+  addSearch?: React.ReactNode;
   /** Additional CSS classes */
   className?: string;
   /** Test ID for testing */
@@ -453,6 +459,7 @@ export const MedicationList = React.forwardRef<
       readOnly = false,
       reconciledMessage = 'All medications reconciled.',
       emptyMessage = 'No medications recorded.',
+      addSearch,
       className,
       'data-testid': dataTestId,
       ...props
@@ -573,33 +580,38 @@ export const MedicationList = React.forwardRef<
             </section>
           ))}
 
-          {!readOnly && (quickAddOptions?.length || onAddOther) && (
-            <div className="flex flex-wrap items-center gap-1.5">
+          {!readOnly && (addSearch || quickAddOptions?.length || onAddOther) && (
+            <div className="space-y-2">
               <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                 Add medication
               </span>
-              {quickAddOptions?.map((name) => (
-                <Button
-                  key={name}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onQuickAdd?.(name)}
-                  leftIcon={<PlusIcon size={12} />}
-                  className="border-border h-auto rounded-full border px-2.5 py-1 text-xs"
-                >
-                  {name}
-                </Button>
-              ))}
-              {onAddOther && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onAddOther}
-                  leftIcon={<PlusIcon size={12} />}
-                  className="h-auto rounded-full px-2.5 py-1 text-xs"
-                >
-                  Other…
-                </Button>
+              {addSearch}
+              {(quickAddOptions?.length || onAddOther) && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {quickAddOptions?.map((name) => (
+                    <Button
+                      key={name}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onQuickAdd?.(name)}
+                      leftIcon={<PlusIcon size={12} />}
+                      className="border-border h-auto rounded-full border px-2.5 py-1 text-xs"
+                    >
+                      {name}
+                    </Button>
+                  ))}
+                  {onAddOther && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={onAddOther}
+                      leftIcon={<PlusIcon size={12} />}
+                      className="h-auto rounded-full px-2.5 py-1 text-xs"
+                    >
+                      Other…
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           )}

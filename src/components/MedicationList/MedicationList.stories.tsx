@@ -337,19 +337,14 @@ refill against. Status buttons are always shown (hide everything with
 };
 
 /**
- * Start from nothing and build the list quickly.
+ * Start from nothing and build the list quickly — without leading the
+ * patient.
  */
 export const Empty: StoryObj<typeof MedicationReconciliation> = {
   render: () => (
     <MedicationReconciliation
       defaultMedications={[]}
-      quickAddOptions={[
-        'aspirin 81 mg tablet',
-        'atorvastatin 20 mg tablet',
-        'lisinopril 10 mg tablet',
-        'metformin 500 mg tablet',
-        'omeprazole 20 mg capsule',
-      ]}
+      inlineAddSearch
       codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
       onChange={(meds) => console.log('medications changed', meds)}
     />
@@ -358,15 +353,21 @@ export const Empty: StoryObj<typeof MedicationReconciliation> = {
     docs: {
       description: {
         story: `
-**Rapid entry from an empty list** — the intake / new-patient workflow.
-Starts with zero medications ("No medications recorded."):
+**Patient-facing rapid entry from an empty list** (intake / new patient).
+Starts at "No medications recorded." with **no suggested medications** —
+quick-add pills would *lead the patient*, so this variant omits
+\`quickAddOptions\` entirely and uses \`inlineAddSearch\` instead:
 
-- **Quick-add pills** append common medications with one click — curate
-  \`quickAddOptions\` to your clinic's top prescriptions for fastest entry
-- **Other…** opens the editor with the CodeLookup search focused: type,
-  pick a coded result (strength/form auto-fill), Save — three actions per
-  medication
-- New entries land in **Unreconciled**, ready for the reconciliation pass
+- Type in the always-visible search bar, pick a coded result — the
+  medication is added to **Unreconciled** immediately (name, RxNorm/FDB
+  code, strength, dose form all captured); the input clears for the next
+  one. Free text (Enter) works for anything not found
+- Then record *how they're taking it*: hover/tap the new row and hit
+  👍 / 🤘 / 👎 / ? — two interactions per medication total
+- "Other…" is still there for entries needing full prescription detail
+
+For clinician-facing quick picks, add \`quickAddOptions\` back — see
+**Interactive**.
         `,
       },
     },

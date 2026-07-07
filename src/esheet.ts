@@ -28,3 +28,8 @@ export {
   registerMedicationListFieldType,
   type MedicationListFieldValue,
 } from './esheet-fields/MedicationListField';
+export {
+  AllergyListField,
+  registerAllergyListFieldType,
+  type AllergyListFieldValue,
+} from './esheet-fields/AllergyListField';
