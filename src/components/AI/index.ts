@@ -132,6 +132,14 @@ export {
   type WhisperLoadState,
 } from './whisperTranscribe';
 
+// Visit Scribe — ambient-visit surface: record a multi-person encounter → speaker-labeled transcript.
+export { VisitScribe, type VisitScribeProps } from './HeyOzwell/VisitScribe';
+export {
+  useVisitScribe,
+  type UseVisitScribeOptions,
+  type UseVisitScribeResult,
+} from './HeyOzwell/useVisitScribe';
+
 // Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
 export {
   useDiarization,
