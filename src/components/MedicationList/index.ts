@@ -6,3 +6,8 @@ export {
   type MedicationStatus,
   type MedicationAction,
 } from './MedicationList';
+
+export {
+  MedicationReconciliation,
+  type MedicationReconciliationProps,
+} from './MedicationReconciliation';

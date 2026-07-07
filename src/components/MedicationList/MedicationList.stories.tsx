@@ -7,6 +7,7 @@ import {
   type MedicationAction,
   type MedicationStatus,
 } from './MedicationList';
+import { MedicationReconciliation } from './MedicationReconciliation';
 
 const meta: Meta<typeof MedicationList> = {
   title: 'Healthcare/MedicationList',
@@ -217,4 +218,24 @@ export const LimitedActions: Story = {
     medications: sampleMedications,
     actions: ['correct', 'remove'],
   },
+};
+
+/**
+ * `MedicationReconciliation` — the batteries-included standalone component.
+ * Owns all interaction (status changes, Correct / Notes / Add Task modals,
+ * reordering, removal, adding). Uncontrolled here; pass `medications` +
+ * `onChange` for controlled usage. This same component powers the eSheet
+ * `medicationList` question type.
+ */
+export const Reconciliation: StoryObj<typeof MedicationReconciliation> = {
+  render: () => (
+    <MedicationReconciliation
+      defaultMedications={sampleMedications}
+      quickAddOptions={[
+        'atorvastatin 20 mg tablet',
+        'metformin 500 mg tablet',
+      ]}
+      onChange={(meds) => console.log('medications changed', meds)}
+    />
+  ),
 };
