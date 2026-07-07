@@ -33,6 +33,7 @@ import {
   toOzwellMessages,
 } from '../ozwellChat';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
+import { useDiarization, type UseDiarizationOptions } from './useDiarization';
 import { loadWhatPrints } from '../voiceprintStore';
 import { openRollingRecorder, type RollingRecorder } from './audio';
 
@@ -72,6 +73,15 @@ export interface UseHeyOzwellOptions {
    *  text in the chat composer as it's heard (the final send still uses the full-clip transcription).
    *  On-device only (browser transcription); costs extra compute during dictation. Default false. */
   liveTranscript?: boolean;
+  /**
+   * Conversation mode: on "done", DIARIZE the captured clip (who-said-what) and send a speaker-labeled
+   * transcript instead of a flat one — so the assistant gets "Dr. Jane: … / Patient: …" for a multi-person
+   * room. On-device (loads the ~50 MB speaker runtime); slower than plain transcription, and it overrides
+   * server transcription (diarization needs the audio locally). Default false.
+   */
+  conversationMode?: boolean;
+  /** Diarization tuning for conversation mode (threshold, maxSpeakers, minSegmentSeconds, inferRoles). */
+  diarizationOptions?: Omit<UseDiarizationOptions, 'enabled'>;
 }
 
 /** Props to spread onto <HeyOzwellToggle>. */
@@ -124,6 +134,9 @@ export interface UseHeyOzwellResult {
   stopDictation: () => void;
   /** Doctor-only gate is on AND a voiceprint is enrolled, so only the enrolled doctor is acted on. */
   locked: boolean;
+  /** Live-caption text recognized so far during dictation (empty unless `liveTranscript` is on). Host can
+   *  render it in the composer as it's spoken; the final send still uses the full-clip transcription. */
+  liveText: string;
   toggleProps: HeyOzwellToggleBindings;
   chatProps: HeyOzwellChatBindings;
 }
@@ -199,6 +212,8 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     requireDoctor = false,
     autoStart = false,
     liveTranscript = false,
+    conversationMode = false,
+    diarizationOptions,
   } = options;
 
   const [active, setActive] = React.useState(autoStart);
@@ -231,14 +246,22 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   // Aborts the in-flight streamed reply when a new send starts or Ozwell is toggled off.
   const streamAbortRef = React.useRef<AbortController | null>(null);
   // Live caption (opt-in): the recognized-so-far text + the accumulating recorder/timer that produce it.
+  // `committed` is finalized text; the loop only re-transcribes the growing TAIL since the cursor, so
+  // per-pass work stays bounded (near-real-time) instead of re-running the whole clip each tick.
   const [liveText, setLiveText] = React.useState('');
   const liveRecRef = React.useRef<RollingRecorder | null>(null);
   const liveTimerRef = React.useRef<number | null>(null);
+  const liveCommittedRef = React.useRef('');
+  const liveCursorRef = React.useRef(0);
+  const liveBusyRef = React.useRef(false);
   const stopLive = React.useCallback(() => {
     if (liveTimerRef.current) window.clearInterval(liveTimerRef.current);
     liveTimerRef.current = null;
     liveRecRef.current?.close();
     liveRecRef.current = null;
+    liveCommittedRef.current = '';
+    liveCursorRef.current = 0;
+    liveBusyRef.current = false;
     setLiveText('');
   }, []);
   // Holds the live detector so startDictation can reach its mic stream. Assigned after useWakeWord
@@ -251,6 +274,12 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   const svRef = React.useRef(sv);
   svRef.current = sv;
   const rollRef = React.useRef<RollingRecorder | null>(null);
+
+  // Conversation mode: diarize the dictation clip on send. Loads the speaker runtime only when on
+  // (shares the window.SpeakerVerify singleton with the doctor gate, so no double-load).
+  const diar = useDiarization({ ...diarizationOptions, enabled: conversationMode });
+  const diarRef = React.useRef(diar);
+  diarRef.current = diar;
 
   // Verify a wake INVISIBLY: WHO (it's the enrolled doctor) AND WHAT (they actually said the phrase —
   // WHAT stops a false fire on the doctor's own non-phrase speech, since WHO can't tell the phrase from
@@ -361,24 +390,39 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     recRef.current = rec;
     setPhase('dictating');
 
-    // Live caption (browser mode only): accumulate raw PCM off the SAME stream and re-transcribe the
-    // growing utterance every ~2s, showing the recognized text in the composer as it's heard. The final
-    // send still uses the full-clip transcribeBlob above.
+    // Live caption (browser mode only): accumulate raw PCM off the SAME stream and re-transcribe just the
+    // recent TAIL frequently (~0.8s), so the text fills into the composer almost as it's spoken. Once the
+    // tail grows past ~8s it's committed (frozen into `committed`) and the cursor advances, keeping each
+    // pass cheap regardless of how long the utterance runs. The final send still re-transcribes the whole
+    // clip at full quality (transcribeBlob above), so this preview never affects the sent text.
     if (liveTranscript && transcription === 'browser') {
       setLiveText('');
+      liveCommittedRef.current = '';
+      liveCursorRef.current = 0;
+      liveBusyRef.current = false;
       liveRecRef.current = openRollingRecorder(stream, Infinity);
       liveTimerRef.current = window.setInterval(async () => {
         const acc = liveRecRef.current;
-        if (!acc) return;
-        const s = acc.snapshot();
-        if (s.length < acc.sampleRate * 0.6) return; // wait for ~0.6s of audio before the first pass
+        if (!acc || liveBusyRef.current) return;
+        const all = acc.snapshot();
+        const tail = all.subarray(liveCursorRef.current, all.length);
+        if (tail.length < acc.sampleRate * 0.4) return; // need ~0.4s of fresh audio
+        liveBusyRef.current = true;
         try {
-          const t = await transcribeSamples(s, acc.sampleRate);
-          if (liveRecRef.current) setLiveText(t); // still dictating
+          const t = (await transcribeSamples(tail, acc.sampleRate)).trim();
+          if (!liveRecRef.current) return; // stopped mid-pass
+          const committed = liveCommittedRef.current;
+          setLiveText(committed ? (t ? `${committed} ${t}` : committed) : t);
+          if (tail.length >= acc.sampleRate * 8 && t) {
+            liveCommittedRef.current = committed ? `${committed} ${t}` : t;
+            liveCursorRef.current = all.length;
+          }
         } catch {
           /* transient — keep the last caption */
+        } finally {
+          liveBusyRef.current = false;
         }
-      }, 2000);
+      }, 800);
     }
   }, [liveTranscript, transcription]);
 
@@ -393,20 +437,29 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       });
       recRef.current = null;
       try {
-        // Server mode posts the audio off-device; if it fails (no ASR endpoint, e.g. Ollama) fall
-        // back to on-device so the flow still works. Browser mode trims the spoken stop phrase.
-        let raw: string;
-        if (transcription === 'server') {
+        let text: string;
+        if (conversationMode && diarRef.current.ready) {
+          // Conversation mode: diarize the clip → labeled turns ("Dr. Jane: … / Patient: …") so the
+          // assistant gets who-said-what. Strip the trailing stop phrase off the joined transcript; fall
+          // back to plain transcription if diarization yields nothing.
+          const turns = await diarRef.current.diarize(blob);
+          const joined = turns.map((t) => `${t.speaker}: ${t.text}`).join('\n');
+          text = stripStopPhrase(joined) || stripStopPhrase(await transcribeBlob(blob, 1.0));
+        } else if (transcription === 'server') {
+          // Server mode posts the audio off-device; if it fails (no ASR endpoint, e.g. Ollama) fall
+          // back to on-device so the flow still works.
+          let raw: string;
           try {
             raw = await transcribeServer(blob);
           } catch (e) {
             console.warn('[hey-ozwell] server ASR failed → on-device fallback', e);
             raw = await transcribeBlob(blob, 1.0);
           }
+          text = stripStopPhrase(raw);
         } else {
-          raw = await transcribeBlob(blob, 1.0);
+          // Browser mode trims the spoken stop phrase.
+          text = stripStopPhrase(await transcribeBlob(blob, 1.0));
         }
-        const text = stripStopPhrase(raw);
         if (text) send(text);
         if (closeChatOnDone) setChatOpen(false);
       } catch (e) {
@@ -415,7 +468,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       setPhase('listening');
     };
     rec.stop();
-  }, [transcription, closeChatOnDone, send, stopLive]);
+  }, [transcription, conversationMode, closeChatOnDone, send, stopLive]);
 
   const wake = useWakeWord({
     enabled: active,
@@ -519,9 +572,11 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
         ? `🎙️ ${liveText}` // live caption — the recognized text so far
         : '🎙️ Dictating… say “ozwell I’m done” to send'
       : phase === 'transcribing'
-        ? transcription === 'server'
-          ? '⏳ Transcribing on the server…'
-          : '⏳ Transcribing on-device…'
+        ? conversationMode
+          ? '⏳ Writing who-said-what…'
+          : transcription === 'server'
+            ? '⏳ Transcribing on the server…'
+            : '⏳ Transcribing on-device…'
         : autoDictateOnWake
           ? 'Say “hey ozwell”, or type…'
           : 'Say “hey ozwell” to open, then type…';
@@ -544,6 +599,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     startDictation,
     stopDictation,
     locked,
+    liveText,
     toggleProps: {
       active,
       level,

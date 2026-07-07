@@ -37,11 +37,12 @@ export interface HandsFreeChatProps {
   transcription?: 'browser' | 'server';
   /** Doctor-only gate — only the enrolled voice(s) act. Default true. Initial value; menu can flip it. */
   requireDoctor?: boolean;
-  /** Live caption — show recognized text in the composer as you dictate (on-device only). Initial value.
-   *  NOTE: currently shelved from the runtime UI — it re-transcribes the whole clip every ~2s (not true
-   *  streaming ASR), so it lags on slower machines. The prop + implementation stay for a later streaming
-   *  fix; there's intentionally no settings-menu toggle for it yet. */
+  /** Live caption — fill the message box with recognized words as you dictate (on-device only). Initial value. */
   liveTranscript?: boolean;
+  /** Conversation mode — on "done", diarize the clip and send a speaker-labeled transcript ("Dr. Jane: … /
+   *  Patient: …") so the assistant knows who said what in a multi-person room. On-device; slower than plain
+   *  transcription and overrides server transcription. Initial value; menu can flip it. Default false. */
+  conversationMode?: boolean;
   /** Auto-dictate — "hey ozwell" starts dictating hands-free. Default true. Initial value. */
   autoDictateOnWake?: boolean;
   /**
@@ -62,7 +63,8 @@ export function HandsFreeChat({
   logoSrc,
   transcription: transcriptionProp = 'browser',
   requireDoctor: requireDoctorProp = true,
-  liveTranscript = false, // shelved from the runtime UI (see prop doc) — configurable, no menu toggle
+  liveTranscript: liveTranscriptProp = false,
+  conversationMode: conversationModeProp = false,
   autoDictateOnWake: autoDictateProp = true,
   showSettingsMenu = false,
 }: HandsFreeChatProps) {
@@ -73,19 +75,31 @@ export function HandsFreeChat({
   const [transcription, setTranscription] = React.useState(transcriptionProp);
   const [requireDoctor, setRequireDoctor] = React.useState(requireDoctorProp);
   const [autoDictate, setAutoDictate] = React.useState(autoDictateProp);
+  const [live, setLive] = React.useState(liveTranscriptProp);
+  const [conversation, setConversation] = React.useState(conversationModeProp);
   const [voicesOpen, setVoicesOpen] = React.useState(false);
+  // The composer's typed text (controlled), so we can push the live caption into the box while dictating.
+  const [typed, setTyped] = React.useState('');
   React.useEffect(() => setTranscription(transcriptionProp), [transcriptionProp]);
   React.useEffect(() => setRequireDoctor(requireDoctorProp), [requireDoctorProp]);
   React.useEffect(() => setAutoDictate(autoDictateProp), [autoDictateProp]);
+  React.useEffect(() => setLive(liveTranscriptProp), [liveTranscriptProp]);
+  React.useEffect(() => setConversation(conversationModeProp), [conversationModeProp]);
 
   const oz = useHeyOzwell({
     autoStart: true, // always listening while mounted
     autoDictateOnWake: autoDictate,
     requireDoctor,
     transcription,
-    liveTranscript,
+    liveTranscript: live,
+    conversationMode: conversation,
   });
   const { phase, ready, error, locked } = oz;
+
+  // While dictating with live caption on, the recognized text fills the composer box; otherwise it shows
+  // whatever the user typed. The final send always uses the full-clip transcription, not this preview.
+  const dictatingLive = phase === 'dictating' && live && transcription === 'browser';
+  const composerValue = dictatingLive ? oz.liveText : typed;
 
   const toggles: OzwellSettingToggle[] = [
     {
@@ -96,11 +110,27 @@ export function HandsFreeChat({
       onChange: setRequireDoctor,
     },
     {
+      id: 'conversation',
+      label: 'Conversation mode',
+      sub: 'Label who said what — send a speaker-tagged transcript for a multi-person room',
+      checked: conversation,
+      onChange: setConversation,
+    },
+    {
       id: 'server',
       label: 'Transcribe on server',
       sub: 'Send the audio to the server ASR model instead of on-device',
       checked: transcription === 'server',
+      disabled: conversation, // conversation mode diarizes on-device, overriding server transcription
       onChange: (c) => setTranscription(c ? 'server' : 'browser'),
+    },
+    {
+      id: 'live',
+      label: 'Live caption',
+      sub: 'Fill the box with words as you speak (on-device dictation only)',
+      checked: live,
+      disabled: transcription === 'server', // preview runs on the on-device model
+      onChange: setLive,
     },
     {
       id: 'auto',
@@ -164,6 +194,12 @@ export function HandsFreeChat({
           inputPlaceholder={placeholder}
           onSendMessage={oz.send}
           composerProps={{
+            // Controlled input: normally the user's typed text; while dictating with live caption on, the
+            // recognized-so-far text fills the box. Typing is ignored during the live overlay (hands-free).
+            value: composerValue,
+            onValueChange: (v) => {
+              if (!dictatingLive) setTyped(v);
+            },
             // The composer's OWN mic button, driven by our shared stream (controlled mode disables its
             // internal recorder). So the built-in mic and "hey ozwell" both do the same thing — one mic.
             inputTrailing: (

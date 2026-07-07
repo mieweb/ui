@@ -36,6 +36,10 @@ interface HandsFreeArgs {
   transcription: 'browser' | 'server';
   /** ON: "hey ozwell" starts dictating hands-free. OFF: it just focuses the chat. */
   autoDictateOnWake: boolean;
+  /** Fill the box with recognized words as you speak (on-device dictation). */
+  liveTranscript: boolean;
+  /** Diarize the clip on "done" and send a speaker-labeled transcript (who said what). */
+  conversationMode: boolean;
   /** Opt in to the runtime octopus menu (toggles + Your-voice enrollment). Off by default. */
   showSettingsMenu: boolean;
 }
@@ -46,6 +50,8 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
     requireDoctor: true,
     transcription: 'browser',
     autoDictateOnWake: true,
+    liveTranscript: false,
+    conversationMode: false,
     showSettingsMenu: false,
   },
   argTypes: {
@@ -68,6 +74,20 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
       control: 'boolean',
       description: 'ON: “hey ozwell” starts dictating hands-free. OFF: it just focuses the chat.',
     },
+    liveTranscript: {
+      name: 'Live caption',
+      control: 'boolean',
+      description:
+        'Fill the box with recognized words as you speak (on-device dictation only). The final send ' +
+        'still re-transcribes the whole clip at full quality, so this preview never affects the result.',
+    },
+    conversationMode: {
+      name: 'Conversation mode',
+      control: 'boolean',
+      description:
+        'On “done”, diarize the clip and send a speaker-labeled transcript ("Dr. Jane: … / Patient: …") ' +
+        'so the assistant knows who said what in a multi-person room. On-device; overrides server transcription.',
+    },
     showSettingsMenu: {
       name: 'Built-in settings menu',
       control: 'boolean',
@@ -83,6 +103,8 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
       requireDoctor={args.requireDoctor}
       transcription={args.transcription}
       autoDictateOnWake={args.autoDictateOnWake}
+      liveTranscript={args.liveTranscript}
+      conversationMode={args.conversationMode}
       showSettingsMenu={args.showSettingsMenu}
     />
   ),
