@@ -105,6 +105,9 @@ export interface HeyOzwellChatBindings {
   isGenerating: boolean;
   inputPlaceholder: string;
   onSendMessage: (text: string) => void;
+  /** Controlled composer wiring — fills the box with the live caption while dictating, else the typed
+   *  text. Spread onto the chat; a host adding its own composerProps should merge (not replace) this. */
+  composerProps: { value: string; onValueChange: (v: string) => void };
 }
 
 export interface UseHeyOzwellResult {
@@ -222,6 +225,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   const [messages, setMessages] = React.useState<AIMessage[]>([]);
   const [generating, setGenerating] = React.useState(false);
   const [phase, setPhase] = React.useState<HeyOzwellPhase>('listening');
+  const [typed, setTyped] = React.useState(''); // controlled composer text, so live caption can fill the box
   const dictLoad = React.useSyncExternalStore(subscribeDictationLoad, getDictationLoad); // transcription model load
   const wakeWarm = React.useSyncExternalStore(subscribeWakeWarm, getWakeWarm); // wake-model pre-fetch (no mic)
 
@@ -310,6 +314,7 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     (text: string) => {
       const t = text.trim();
       if (!t) return;
+      setTyped(''); // clear the composer on send (typed or dictated)
       setMessages((m) => [...m, mkMsg('user', t)]);
 
       if (onSendRef.current) {
@@ -566,11 +571,14 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     }
   }, [stopLive]);
 
+  // Controlled composer value: fill the box with the live caption while dictating (browser + liveTranscript);
+  // otherwise the user's typed text. Typing is ignored during the live overlay (hands-free dictation).
+  const dictatingLive = phase === 'dictating' && liveTranscript && transcription === 'browser';
+  const composerValue = dictatingLive ? liveText : typed;
+
   const inputPlaceholder =
     phase === 'dictating'
-      ? liveText
-        ? `🎙️ ${liveText}` // live caption — the recognized text so far
-        : '🎙️ Dictating… say “ozwell I’m done” to send'
+      ? '🎙️ Dictating… say “ozwell I’m done” to send' // recognized text fills the box itself
       : phase === 'transcribing'
         ? conversationMode
           ? '⏳ Writing who-said-what…'
@@ -618,6 +626,12 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
       isGenerating: generating,
       inputPlaceholder,
       onSendMessage: send,
+      composerProps: {
+        value: composerValue,
+        onValueChange: (v: string) => {
+          if (!dictatingLive) setTyped(v); // ignore typing while the live caption owns the box
+        },
+      },
     },
   };
 }

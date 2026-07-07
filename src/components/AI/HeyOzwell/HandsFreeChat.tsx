@@ -78,8 +78,6 @@ export function HandsFreeChat({
   const [live, setLive] = React.useState(liveTranscriptProp);
   const [conversation, setConversation] = React.useState(conversationModeProp);
   const [voicesOpen, setVoicesOpen] = React.useState(false);
-  // The composer's typed text (controlled), so we can push the live caption into the box while dictating.
-  const [typed, setTyped] = React.useState('');
   React.useEffect(() => setTranscription(transcriptionProp), [transcriptionProp]);
   React.useEffect(() => setRequireDoctor(requireDoctorProp), [requireDoctorProp]);
   React.useEffect(() => setAutoDictate(autoDictateProp), [autoDictateProp]);
@@ -95,11 +93,6 @@ export function HandsFreeChat({
     conversationMode: conversation,
   });
   const { phase, ready, error, locked } = oz;
-
-  // While dictating with live caption on, the recognized text fills the composer box; otherwise it shows
-  // whatever the user typed. The final send always uses the full-clip transcription, not this preview.
-  const dictatingLive = phase === 'dictating' && live && transcription === 'browser';
-  const composerValue = dictatingLive ? oz.liveText : typed;
 
   const toggles: OzwellSettingToggle[] = [
     {
@@ -194,12 +187,9 @@ export function HandsFreeChat({
           inputPlaceholder={placeholder}
           onSendMessage={oz.send}
           composerProps={{
-            // Controlled input: normally the user's typed text; while dictating with live caption on, the
-            // recognized-so-far text fills the box. Typing is ignored during the live overlay (hands-free).
-            value: composerValue,
-            onValueChange: (v) => {
-              if (!dictatingLive) setTyped(v);
-            },
+            // Controlled input (value/onValueChange) comes from the hook — it fills the box with the live
+            // caption while dictating, else the typed text. We only add the mic button here.
+            ...oz.chatProps.composerProps,
             // The composer's OWN mic button, driven by our shared stream (controlled mode disables its
             // internal recorder). So the built-in mic and "hey ozwell" both do the same thing — one mic.
             inputTrailing: (

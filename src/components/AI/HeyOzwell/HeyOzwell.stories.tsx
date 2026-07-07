@@ -66,11 +66,13 @@ interface DemoArgs {
   transcription: 'browser' | 'server';
   /** Doctor-only gate: only the enrolled voice(s) act once enrolled (loads the speaker runtime). */
   requireDoctor: boolean;
-  /** Live caption: show recognized text in the composer as you dictate. */
+  /** Live caption: recognized words fill the composer box as you dictate. */
   liveTranscript: boolean;
+  /** Conversation mode: diarize the clip on "done" and send a speaker-labeled transcript (who said what). */
+  conversationMode: boolean;
 }
 
-function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor, liveTranscript }: DemoArgs) {
+function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor, liveTranscript, conversationMode }: DemoArgs) {
   // The whole flow now lives in the shipped <HeyOzwell> drop-in — the host only places the octopus in
   // its header and wires where the settings items navigate. (For custom layouts, useHeyOzwell + the
   // parts give the same behavior; see the component source.)
@@ -91,6 +93,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
           transcription={transcription}
           requireDoctor={requireDoctor}
           liveTranscript={liveTranscript}
+          conversationMode={conversationMode}
           size={40}
           chatProps={{ suggestions: suggestedActions, userName: 'Dr. Jane' }}
           // "Your voice" opens the central Voice Manager page (set up / add / rename / remove voices). In a
@@ -120,7 +123,7 @@ function Demo({ autoDictateOnWake, closeChatOnDone, transcription, requireDoctor
  * long-press the octopus for Ozwell settings.
  */
 export const Interactive: StoryObj<DemoArgs> = {
-  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false, liveTranscript: false },
+  args: { autoDictateOnWake: false, closeChatOnDone: false, transcription: 'browser', requireDoctor: false, liveTranscript: false, conversationMode: false },
   argTypes: {
     autoDictateOnWake: {
       name: 'Auto-dictate on wake',
@@ -158,8 +161,16 @@ export const Interactive: StoryObj<DemoArgs> = {
       name: 'Live caption',
       control: 'boolean',
       description:
-        'ON: while dictating, the recognized text streams into the composer as it’s heard (re-transcribes ' +
-        'the growing utterance ~every 2s; on-device/browser mode only). OFF: only a “Dictating…” hint.',
+        'ON: while dictating, the recognized words fill the composer box in near-real-time (on-device / ' +
+        'browser mode only). The final send still uses the full-clip transcription. OFF: a “Dictating…” hint.',
+    },
+    conversationMode: {
+      name: 'Conversation mode',
+      control: 'boolean',
+      description:
+        'ON: on “ozwell I’m done”, diarize the clip and send a speaker-labeled transcript ("Dr. Jane: … / ' +
+        'Patient: …") so the assistant knows who said what in a multi-person room. On-device; overrides server ' +
+        'transcription. Enroll voices (settings → Your voice) to see real names instead of “Speaker N”.',
     },
   },
   render: (args) => <Demo {...args} />,
