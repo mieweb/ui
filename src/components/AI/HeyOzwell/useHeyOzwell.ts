@@ -23,6 +23,9 @@ import {
   transcribeServer,
   transcribeSamples,
   stripStopPhrase,
+  transcribeGate,
+  endsWithDone,
+  warmStopGate,
   warmWhisper,
   subscribeDictationLoad,
   getDictationLoad,
@@ -475,6 +478,33 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
     rec.stop();
   }, [transcription, conversationMode, closeChatOnDone, send, stopLive]);
 
+  // Stop-confirm gate: the "ozwell i'm done" wake fires on "ozwell" — early, before the phrase finishes —
+  // so it can false-stop on "Ozwell is …". On a verified stop-wake, DON'T stop immediately: keep recording
+  // ~850ms, then fast-transcribe the last ~2s and only commit the stop if it actually ended with "done".
+  // Fail-safe to stopping if the gate can't run (no rolling recorder / transcribe error), so a missing gate
+  // never traps dictation. Favors precision — a missed stop is "say it again"; a false stop loses dictation.
+  const confirmingStopRef = React.useRef(false);
+  const confirmThenStop = React.useCallback(() => {
+    if (confirmingStopRef.current) return;
+    const roll = rollRef.current;
+    if (!roll) {
+      stopDictation(); // no audio window to confirm from → fail-safe stop
+      return;
+    }
+    confirmingStopRef.current = true;
+    window.setTimeout(async () => {
+      try {
+        const text = await transcribeGate(roll.snapshot(), roll.sampleRate);
+        if (endsWithDone(text)) stopDictation();
+        // else: false stop (e.g. "Ozwell is great") — stay dictating, ignore the wake.
+      } catch {
+        stopDictation(); // gate unavailable → fail-safe stop
+      } finally {
+        confirmingStopRef.current = false;
+      }
+    }, 850);
+  }, [stopDictation]);
+
   const wake = useWakeWord({
     enabled: active,
     assetBase,
@@ -486,24 +516,26 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
         setChatOpen(true);
         if (autoDictateOnWake) startDictation();
       } else if (name === "ozwell-i'm-done" && phaseRef.current === 'dictating') {
-        if (verified("ozwell-i'm-done")) stopDictation();
+        if (verified("ozwell-i'm-done")) confirmThenStop();
       }
     },
   });
   wakeRef.current = wake;
   const level = useRoomLevel(wake.getStream, wake.ready);
 
-  // Doctor-only gate plumbing: once the detector is listening, restore enrolled WHAT prints into it and
-  // open the rolling recorder (2nd consumer of the shared stream) so the WHO check has audio to verify.
-  // Only when requireDoctor — otherwise neither the speaker runtime nor this recorder is created.
+  // Rolling recorder: a 2nd consumer of the shared mic stream (last ~2s), used by BOTH the stop-confirm
+  // gate (every mode) and the doctor WHO check. Opened whenever the detector is listening. The enrolled
+  // WHAT phrase-prints are restored into the detector only when the doctor gate is on.
   React.useEffect(() => {
-    if (!requireDoctor || !active || !wake.ready) return;
+    if (!active || !wake.ready) return;
     let cancelled = false;
     let tries = 0;
-    void loadWhatPrints().then((loaded) => {
-      if (cancelled) return;
-      for (const k in loaded) wakeRef.current?.setVoiceprint(k, loaded[k]);
-    });
+    if (requireDoctor) {
+      void loadWhatPrints().then((loaded) => {
+        if (cancelled) return;
+        for (const k in loaded) wakeRef.current?.setVoiceprint(k, loaded[k]);
+      });
+    }
     const tryOpen = () => {
       if (cancelled || rollRef.current) return;
       const stream = wakeRef.current?.getStream();
@@ -548,7 +580,10 @@ export function useHeyOzwell(options: UseHeyOzwellOptions = {}): UseHeyOzwellRes
   // Warm the heavy (~1.3 GB) transcription model only once Ozwell is turned ON — in the background,
   // OFF the critical wake-start path. Activation must never be gated on the transcription download.
   React.useEffect(() => {
-    if (active) warmWhisper();
+    if (active) {
+      warmWhisper();
+      warmStopGate(); // small model for the stop-confirm gate — so the "…done?" check is instant
+    }
   }, [active]);
 
   const toggle = React.useCallback((next: boolean) => {
