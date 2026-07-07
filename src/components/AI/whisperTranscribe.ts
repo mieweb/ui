@@ -367,10 +367,11 @@ export async function transcribeGate(samples: Float32Array, sampleRate: number):
 }
 
 /** Peel a trailing "ozwell i'm done"-style stop phrase off the end of a transcript. Mirrors the
- *  standalone demo: handles Whisper's mishearings (Ozwell / As well / Also / Oswald / "I am done")
- *  including the bare word alone. Bare "as well" is NOT stripped (too common) unless joined to "i'm done". */
+ *  standalone demo: handles Whisper's mishearings (Ozwell / As well / All('s/was) well / Also / Oswald /
+ *  "I am done") including the bare word alone. Bare "as well" is NOT stripped (too common) unless joined
+ *  to "i'm done". */
 export function stripStopPhrase(text: string): string {
-  const tail = /(?:\b(?:oz\s*well|all['’]?s?\s*well|as\s*well|also|oswald)\b\s*,?\s*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all['’]?s\s*well|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
+  const tail = /(?:\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|as\s*well|also|oswald)\b\s*,?\s*i(?:['’]?m|\s+am)\s+done\b|\b(?:oz\s*well|all(?:['’]?s|\s+was)?\s*well|oswald)\b|\bi(?:['’]?m|\s+am)\s+done\b|\b(?:that\s+was\s+|was\s+)?well\s+done\b|\bthat['’]?s?\s+(?:was\s+)?all\b|\bthank(?:s|\s+you)(?:\s+for\s+watching)?\b|\bbye\b)[\s.,!?-]*$/i;
   let prev: string | null = null;
   let t = text;
   while (t !== prev && t) { prev = t; t = t.replace(tail, '').replace(/[\s.,!?-]+$/, ''); }
