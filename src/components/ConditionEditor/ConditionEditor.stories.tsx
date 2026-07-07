@@ -5,6 +5,13 @@ import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { CodeLookup } from '../CodeLookup';
 import { DataVisNitroGrid, DataVisNitroSource } from '../DataVisNITRO';
+import { RowActionToolbar, RowIconButton } from '../RowActionToolbar';
+import {
+  StickyNoteIcon,
+  PencilIcon,
+  RefreshIcon,
+  LinkIcon,
+} from '../Icons';
 import {
   ConditionEditor,
   type ConditionAssertionDraft,
@@ -445,11 +452,15 @@ function formatConditionCell(
 // =============================================================================
 
 const TODAY = '2026-07-04';
-const ROW_OPS: ConditionEditorMode[] = [
-  'observe',
-  'refine',
-  'revise',
-  'relate',
+const ROW_OPS: {
+  mode: ConditionEditorMode;
+  label: string;
+  icon: React.ComponentType<{ size?: number | string }>;
+}[] = [
+  { mode: 'observe', label: 'Observe (progress note)', icon: StickyNoteIcon },
+  { mode: 'refine', label: 'Refine (more specific)', icon: PencilIcon },
+  { mode: 'revise', label: 'Revise (prior was wrong)', icon: RefreshIcon },
+  { mode: 'relate', label: 'Relate to another problem', icon: LinkIcon },
 ];
 
 let seq = 0;
@@ -477,6 +488,10 @@ function Template() {
         header: '',
         sortable: false,
         filterable: false,
+        // Right-stick the cell inside the grid's horizontal scroller so the
+        // toolbar is reachable without side-scrolling to the last column.
+        // The cell is transparent; the toolbar carries its own card chrome.
+        className: 'sticky right-0 z-[1]',
       },
     ],
     []
@@ -490,19 +505,20 @@ function Template() {
     ): React.ReactNode => {
       if (column.field === 'actions' && typeof value === 'string' && value) {
         return (
-          <span className="flex gap-0.5">
-            {ROW_OPS.map((m) => (
-              <Button
-                key={m}
-                variant="ghost"
+          <RowActionToolbar
+            label={`Actions for ${String(row.problem ?? value)}`}
+            group="grid"
+          >
+            {ROW_OPS.map(({ mode, label, icon }) => (
+              <RowIconButton
+                key={mode}
+                label={label}
+                icon={icon}
                 size="sm"
-                className="h-6 px-1.5 text-[11px] capitalize"
-                onClick={() => setEditor({ mode: m, concernId: value })}
-              >
-                {m}
-              </Button>
+                onClick={() => setEditor({ mode, concernId: value })}
+              />
             ))}
-          </span>
+          </RowActionToolbar>
         );
       }
       return formatConditionCell(value, row, column);

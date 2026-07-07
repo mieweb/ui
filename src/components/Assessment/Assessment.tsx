@@ -24,9 +24,9 @@ import {
   TrashIcon,
 } from '../Icons';
 import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
+import { RowActionToolbar, RowIconButton } from '../RowActionToolbar';
 import {
   CodingChips,
-  toolbarKeyNav,
   type ConditionAssertion,
   type ConditionConcern,
 } from '../ProblemList';
@@ -432,7 +432,7 @@ function OrderRow({
       }
       {...(editing ? {} : drag.rowProps(order))}
       className={cn(
-        'group/order flex items-center gap-1.5 py-1',
+        'group/order relative flex items-center gap-1.5 py-1',
         'focus-visible:ring-ring rounded focus-visible:ring-2 focus-visible:outline-none',
         drag.enabled && !editing && 'cursor-grab active:cursor-grabbing',
         drag.draggingId === order.orderId && 'opacity-40',
@@ -520,86 +520,86 @@ function OrderRow({
         <>
           <OrderContent order={order} />
           {interactive && (
-            <span className="pointer-coarse:opacity-100 ml-auto opacity-40 transition-opacity group-hover/order:opacity-100 focus-within:opacity-100">
-              <Dropdown
-                open={menuOpen}
-                onOpenChange={setMenuOpen}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`Actions for ${order.display}`}
-                    className="h-6 w-6"
-                  >
-                    <MoreVerticalIcon size={13} />
-                  </Button>
-                }
-                placement="bottom-end"
-              >
-                {canEdit && (
-                  <DropdownItem
-                    icon={<PencilIcon size={14} />}
-                    onClick={pick(beginEdit)}
-                  >
-                    Edit
-                  </DropdownItem>
-                )}
-                {controls?.moveWithin && (
-                  <>
-                    {canEdit && <DropdownSeparator />}
-                    <DropdownItem
-                      icon={<ChevronUpIcon size={14} />}
-                      onClick={pick(() => controls.moveWithin?.(order, -1))}
-                    >
-                      Move up
-                    </DropdownItem>
-                    <DropdownItem
-                      icon={<ChevronDownIcon size={14} />}
-                      onClick={pick(() => controls.moveWithin?.(order, 1))}
-                    >
-                      Move down
-                    </DropdownItem>
-                  </>
-                )}
-                {controls?.moveToProblem &&
+            <RowActionToolbar
+              label={`Actions for ${order.display}`}
+              group="order"
+            >
+              {canEdit && (
+                <RowIconButton
+                  label="Edit"
+                  icon={PencilIcon}
+                  size="sm"
+                  onClick={beginEdit}
+                />
+              )}
+              {(controls?.moveWithin ||
+                (controls?.moveToProblem &&
                   controls.targets.some(
                     (t) => t.concernId !== order.concernId
-                  ) && (
+                  ))) && (
+                <Dropdown
+                  open={menuOpen}
+                  onOpenChange={setMenuOpen}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Move ${order.display}`}
+                      className="h-7 w-7 shrink-0"
+                    >
+                      <MoreVerticalIcon size={14} />
+                    </Button>
+                  }
+                  placement="bottom-end"
+                >
+                  {controls?.moveWithin && (
                     <>
-                      {(controls.moveWithin || canEdit) && (
-                        <DropdownSeparator />
-                      )}
-                      {controls.targets
-                        .filter((t) => t.concernId !== order.concernId)
-                        .map((t) => (
-                          <DropdownItem
-                            key={t.concernId}
-                            icon={<LinkIcon size={14} />}
-                            onClick={pick(() =>
-                              controls.moveToProblem?.(order, t.concernId)
-                            )}
-                          >
-                            Move to: {t.label}
-                          </DropdownItem>
-                        ))}
+                      <DropdownItem
+                        icon={<ChevronUpIcon size={14} />}
+                        onClick={pick(() => controls.moveWithin?.(order, -1))}
+                      >
+                        Move up
+                      </DropdownItem>
+                      <DropdownItem
+                        icon={<ChevronDownIcon size={14} />}
+                        onClick={pick(() => controls.moveWithin?.(order, 1))}
+                      >
+                        Move down
+                      </DropdownItem>
                     </>
                   )}
-                {controls?.remove && (
-                  <>
-                    {(canEdit ||
-                      controls.moveWithin ||
-                      controls.moveToProblem) && <DropdownSeparator />}
-                    <DropdownItem
-                      variant="danger"
-                      icon={<TrashIcon size={14} />}
-                      onClick={pick(() => controls.remove?.(order))}
-                    >
-                      Remove
-                    </DropdownItem>
-                  </>
-                )}
-              </Dropdown>
-            </span>
+                  {controls?.moveToProblem &&
+                    controls.targets.some(
+                      (t) => t.concernId !== order.concernId
+                    ) && (
+                      <>
+                        {controls.moveWithin && <DropdownSeparator />}
+                        {controls.targets
+                          .filter((t) => t.concernId !== order.concernId)
+                          .map((t) => (
+                            <DropdownItem
+                              key={t.concernId}
+                              icon={<LinkIcon size={14} />}
+                              onClick={pick(() =>
+                                controls.moveToProblem?.(order, t.concernId)
+                              )}
+                            >
+                              Move to: {t.label}
+                            </DropdownItem>
+                          ))}
+                      </>
+                    )}
+                </Dropdown>
+              )}
+              {controls?.remove && (
+                <RowIconButton
+                  label="Remove"
+                  icon={TrashIcon}
+                  size="sm"
+                  onClick={() => controls.remove?.(order)}
+                />
+              )}
+            </RowActionToolbar>
           )}
         </>
       )}
@@ -1123,26 +1123,13 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                     <CodingChips coding={assertion.coding} />
 
                     {!readOnly && (
-                      <div
-                        role="toolbar"
-                        aria-label={`Actions for ${assertion.text}`}
-                        onKeyDown={toolbarKeyNav}
-                        className={cn(
-                          'z-10 ml-auto flex items-center gap-0.5 transition-opacity',
-                          // Hover-capable (fine pointer) devices: floating
-                          // overlay, hidden until hover or keyboard focus.
-                          // Touch devices can't hover, so the toolbar stays
-                          // in flow and always visible.
-                          'pointer-fine:bg-card pointer-fine:border-border pointer-fine:absolute pointer-fine:top-1.5 pointer-fine:right-1.5 pointer-fine:rounded-md pointer-fine:border pointer-fine:p-0.5 pointer-fine:shadow-sm',
-                          'pointer-fine:pointer-events-none pointer-fine:opacity-0',
-                          'group-hover:pointer-events-auto group-hover:opacity-100',
-                          'focus-within:pointer-events-auto focus-within:opacity-100'
-                        )}
+                      <RowActionToolbar
+                        label={`Actions for ${assertion.text}`}
+                        align="top"
                       >
                         {(Object.keys(ACTION_META) as AssessmentAction[]).map(
                           (action) => {
                             const meta = ACTION_META[action];
-                            const Icon = meta.icon;
                             if (
                               action === 'add-order' &&
                               !onAddOrder &&
@@ -1150,31 +1137,27 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                             )
                               return null;
                             return (
-                              <Tooltip key={action} content={meta.label}>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label={meta.label}
-                                  onClick={() => {
-                                    if (action === 'add-order' && onAddOrder) {
-                                      setAddingFor((prev) =>
-                                        prev === item.concernId
-                                          ? null
-                                          : item.concernId
-                                      );
-                                    } else {
-                                      onAction?.(item, action);
-                                    }
-                                  }}
-                                  className="h-7 w-7 shrink-0"
-                                >
-                                  <Icon size={14} />
-                                </Button>
-                              </Tooltip>
+                              <RowIconButton
+                                key={action}
+                                label={meta.label}
+                                icon={meta.icon}
+                                size="sm"
+                                onClick={() => {
+                                  if (action === 'add-order' && onAddOrder) {
+                                    setAddingFor((prev) =>
+                                      prev === item.concernId
+                                        ? null
+                                        : item.concernId
+                                    );
+                                  } else {
+                                    onAction?.(item, action);
+                                  }
+                                }}
+                              />
                             );
                           }
                         )}
-                      </div>
+                      </RowActionToolbar>
                     )}
                   </div>
 

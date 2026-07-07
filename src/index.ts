@@ -128,6 +128,7 @@ export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
 export * from './components/RichTextEditor';
+export * from './components/RowActionToolbar';
 export * from './components/ScheduleCalendar';
 export * from './components/SchedulePicker';
 export * from './components/ScrollArea';

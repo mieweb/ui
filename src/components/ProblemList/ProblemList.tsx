@@ -25,7 +25,16 @@ import {
   dragIndicatorClasses,
   type UseDragReorderReturn,
 } from '../../hooks/useDragReorder';
+import {
+  RowActionToolbar,
+  RowIconButton,
+  toolbarKeyNav,
+} from '../RowActionToolbar';
 import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
+
+// Re-exported for backwards compatibility — the implementation moved to
+// RowActionToolbar alongside the toolbar it serves.
+export { toolbarKeyNav };
 
 // =============================================================================
 // Types — shared condition (concern/assertion) model
@@ -305,33 +314,6 @@ export function currentAssertion(
   return concern.assertions[concern.assertions.length - 1];
 }
 
-/**
- * Toolbar / group arrow-key navigation (WAI-ARIA toolbar pattern).
- * Attach to a container's onKeyDown: ←/→ move focus between enabled
- * buttons, Home/End jump to first/last.
- */
-export function toolbarKeyNav(e: React.KeyboardEvent<HTMLElement>) {
-  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
-  const buttons = Array.from(
-    e.currentTarget.querySelectorAll<HTMLButtonElement>(
-      'button:not([disabled])'
-    )
-  );
-  const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
-  if (i === -1 || buttons.length === 0) return;
-  e.preventDefault();
-  e.stopPropagation();
-  const next =
-    e.key === 'ArrowLeft'
-      ? (i - 1 + buttons.length) % buttons.length
-      : e.key === 'ArrowRight'
-        ? (i + 1) % buttons.length
-        : e.key === 'Home'
-          ? 0
-          : buttons.length - 1;
-  buttons[next]?.focus();
-}
-
 const UNCERTAIN_FIELD_LABELS: Record<UncertainConditionField, string> = {
   coding: 'Coding',
   onset: 'Onset',
@@ -358,33 +340,6 @@ function describeFieldUncertainty(
 // =============================================================================
 // Sub-components
 // =============================================================================
-
-function RowIconButton({
-  label,
-  icon: Icon,
-  onClick,
-}: {
-  label: string;
-  icon: React.ComponentType<{ size?: number | string }>;
-  onClick: () => void;
-}) {
-  return (
-    <Tooltip content={label}>
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label={label}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        className="h-8 w-8 shrink-0"
-      >
-        <Icon size={16} />
-      </Button>
-    </Tooltip>
-  );
-}
 
 /**
  * Parenthetical coding display. Clinicians don't need chip noise: inline we
@@ -671,22 +626,7 @@ function ConcernRow({
         )}
 
         {!readOnly && (
-          <div
-            role="toolbar"
-            aria-label={`Actions for ${current.text}`}
-            onKeyDown={toolbarKeyNav}
-            className={cn(
-              'z-10 ml-auto flex items-center gap-0.5 transition-opacity',
-              // Hover-capable (fine pointer) devices: floating overlay, hidden
-              // until hover or keyboard focus. Touch devices can't hover, so
-              // the toolbar stays in flow and always visible.
-              'pointer-fine:bg-card pointer-fine:border-border pointer-fine:absolute pointer-fine:top-2 pointer-fine:right-0 pointer-fine:rounded-md pointer-fine:border pointer-fine:p-0.5 pointer-fine:shadow-sm',
-              'pointer-fine:pointer-events-none pointer-fine:opacity-0',
-              'group-hover:pointer-events-auto group-hover:opacity-100',
-              'group-focus-within:pointer-events-auto group-focus-within:opacity-100',
-              'group-focus:pointer-events-auto group-focus:opacity-100'
-            )}
-          >
+          <RowActionToolbar label={`Actions for ${current.text}`} align="top">
             {visibleActions.map((action) => (
               <RowIconButton
                 key={action}
@@ -695,7 +635,7 @@ function ConcernRow({
                 onClick={() => onAction?.(concern, action)}
               />
             ))}
-          </div>
+          </RowActionToolbar>
         )}
       </div>
 

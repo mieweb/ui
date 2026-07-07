@@ -4,9 +4,9 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { Badge } from '../Badge/Badge';
 import { Button } from '../Button';
-import { Tooltip } from '../Tooltip';
 import { Card, CardHeader, CardContent } from '../Card/Card';
 import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
+import { RowActionToolbar, RowIconButton } from '../RowActionToolbar';
 import {
   useDragReorder,
   dragIndicatorClasses,
@@ -154,33 +154,6 @@ const ACTION_META: Record<
 // Sub-components
 // =============================================================================
 
-function RowIconButton({
-  label,
-  icon: Icon,
-  onClick,
-}: {
-  label: string;
-  icon: React.ComponentType<{ size?: number | string }>;
-  onClick: () => void;
-}) {
-  return (
-    <Tooltip content={label}>
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label={label}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        className="h-8 w-8 shrink-0"
-      >
-        <Icon size={16} />
-      </Button>
-    </Tooltip>
-  );
-}
-
 function AllergyRow({
   allergy,
   actions,
@@ -298,20 +271,7 @@ function AllergyRow({
       )}
 
       {!readOnly && actions.length > 0 && (
-        <div
-          role="toolbar"
-          aria-label={`Actions for ${allergy.allergen}`}
-          className={cn(
-            'z-10 ml-auto flex items-center gap-0.5 transition-opacity',
-            // Hover-capable (fine pointer) devices: floating overlay, hidden
-            // until hover or keyboard focus. Touch devices can't hover, so the
-            // toolbar stays in flow and always visible.
-            'pointer-fine:bg-card pointer-fine:border-border pointer-fine:absolute pointer-fine:top-1/2 pointer-fine:right-0 pointer-fine:-translate-y-1/2 pointer-fine:rounded-md pointer-fine:border pointer-fine:p-0.5 pointer-fine:shadow-sm',
-            'pointer-fine:pointer-events-none pointer-fine:opacity-0',
-            'group-hover:pointer-events-auto group-hover:opacity-100',
-            'focus-within:pointer-events-auto focus-within:opacity-100'
-          )}
-        >
+        <RowActionToolbar label={`Actions for ${allergy.allergen}`}>
           {actions.map((action) => (
             <RowIconButton
               key={action}
@@ -320,7 +280,7 @@ function AllergyRow({
               onClick={() => onAction?.(allergy, action)}
             />
           ))}
-        </div>
+        </RowActionToolbar>
       )}
     </li>
   );
