@@ -28,13 +28,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     if (!root) return;
 
     const applySelectLabel = () => {
-      root
-        .querySelectorAll('select.codejar-select')
-        .forEach((element) => {
-          if (!element.getAttribute('aria-label')) {
-            element.setAttribute('aria-label', 'Code editor language');
-          }
-        });
+      root.querySelectorAll('select.codejar-select').forEach((element) => {
+        if (!element.getAttribute('aria-label')) {
+          element.setAttribute('aria-label', 'Code editor language');
+        }
+      });
     };
 
     applySelectLabel();

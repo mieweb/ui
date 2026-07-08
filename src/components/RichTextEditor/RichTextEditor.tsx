@@ -551,7 +551,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
               'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
               'prose prose-sm max-w-none',
               disabled &&
-                'bg-muted/20 text-neutral-700 dark:text-neutral-300 cursor-not-allowed'
+                'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300'
             )}
             suppressContentEditableWarning
           />

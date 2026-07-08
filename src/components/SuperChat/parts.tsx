@@ -99,7 +99,9 @@ function parseHexColor(value: string): [number, number, number] | null {
     hex.length === 4
       ? '#' + [...hex.slice(1)].map((char) => char + char).join('')
       : hex;
-  return [1, 3, 5].map((start) => parseInt(normalized.slice(start, start + 2), 16)) as [number, number, number];
+  return [1, 3, 5].map((start) =>
+    parseInt(normalized.slice(start, start + 2), 16)
+  ) as [number, number, number];
 }
 
 function relativeLuminanceChannel(channel: number): number {
@@ -129,7 +131,10 @@ function contrastRatio(foreground: string, background: string): number | null {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-function minimumContrastRatio(value: string, backgrounds: string[]): number | null {
+function minimumContrastRatio(
+  value: string,
+  backgrounds: string[]
+): number | null {
   const contrasts = backgrounds
     .map((background) => contrastRatio(value, background))
     .filter((contrast): contrast is number => contrast !== null);
@@ -139,8 +144,7 @@ function minimumContrastRatio(value: string, backgrounds: string[]): number | nu
 
 function accessibleAccentTextColor(value?: string): string | undefined {
   if (!value) return undefined;
-  const contrast =
-    minimumContrastRatio(value, ['#f5f5f5', '#262626']);
+  const contrast = minimumContrastRatio(value, ['#f5f5f5', '#262626']);
   return contrast !== null && contrast < 4.5 ? undefined : value;
 }
 

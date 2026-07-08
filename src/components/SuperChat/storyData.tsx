@@ -297,7 +297,9 @@ export function KpiCard({
         {data.value}
       </span>
       {data.trend && (
-        <span className="text-xs text-green-700 dark:text-green-400">{data.trend}</span>
+        <span className="text-xs text-green-700 dark:text-green-400">
+          {data.trend}
+        </span>
       )}
     </div>
   );

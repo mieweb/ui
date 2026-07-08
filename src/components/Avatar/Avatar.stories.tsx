@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Avatar, AvatarGroup } from './Avatar';
 
-function avatarDataUri(label: string, background = '#dbeafe', foreground = '#1d4ed8'): string {
+function avatarDataUri(
+  label: string,
+  background = '#dbeafe',
+  foreground = '#1d4ed8'
+): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="${background}"/><text x="50" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="${foreground}">${label}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
@@ -167,8 +171,14 @@ export const GroupWithImages: Story = {
   render: () => (
     <AvatarGroup max={4}>
       <Avatar src={avatarDataUri('JD')} name="John Doe" />
-      <Avatar src={avatarDataUri('JS', '#fde68a', '#92400e')} name="Jane Smith" />
-      <Avatar src={avatarDataUri('BW', '#dcfce7', '#166534')} name="Bob Wilson" />
+      <Avatar
+        src={avatarDataUri('JS', '#fde68a', '#92400e')}
+        name="Jane Smith"
+      />
+      <Avatar
+        src={avatarDataUri('BW', '#dcfce7', '#166534')}
+        name="Bob Wilson"
+      />
       <Avatar name="Alice Brown" />
       <Avatar name="Charlie Davis" />
     </AvatarGroup>
