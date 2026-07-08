@@ -331,7 +331,7 @@ function SourcesAndGuardsDemo() {
           key={f.name}
           className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700"
         >
-          <h3 className="text-primary-700 dark:text-primary-300 mb-3 text-sm font-semibold tracking-wide">
+          <h3 className="text-primary-800 dark:text-primary-300 mb-3 text-sm font-semibold tracking-wide">
             {f.name}
           </h3>
 

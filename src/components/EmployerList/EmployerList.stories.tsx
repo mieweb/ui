@@ -1,6 +1,27 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { EmployerList } from './EmployerList';
 
+function placeholderLogo(label: string): string {
+  const escapeXml = (value: string) =>
+    value.replace(
+      /[&<>"']/g,
+      (ch) =>
+        (
+          ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+          }) as Record<string, string>
+        )[ch] ?? ch
+    );
+
+  const safeLabel = escapeXml(label);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#dbeafe"/><text x="20" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#2563eb">${safeLabel}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 const meta: Meta<typeof EmployerList> = {
   title: 'Product/Provider/EmployerList',
   component: EmployerList,
@@ -104,10 +125,7 @@ export const WithLogos: Story = {
   args: {
     employers: mockEmployers.map((emp, i) => ({
       ...emp,
-      logoUrl:
-        i % 2 === 0
-          ? `https://via.placeholder.com/40x40?text=${emp.name.charAt(0)}`
-          : undefined,
+      logoUrl: i % 2 === 0 ? placeholderLogo(emp.name.charAt(0)) : undefined,
     })),
     onEmployerClick: (employer) => console.log('Clicked:', employer),
   },

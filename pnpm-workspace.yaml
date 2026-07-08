@@ -19,4 +19,4 @@ peerDependencyRules:
   # @mieweb/datavis bundles a published @mieweb/ui dev snapshot whose peer pins
   # an older datavis; allow the version this repo actually depends on.
   allowedVersions:
-    "@mieweb/ui>@mieweb/datavis": "1.1.0-PRE.1"
+    "@mieweb/ui>@mieweb/datavis": "1.2.0"
