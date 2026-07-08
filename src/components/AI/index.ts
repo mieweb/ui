@@ -64,7 +64,6 @@ export { HeyOzwell, type HeyOzwellProps } from './HeyOzwell/HeyOzwell';
 export {
   OzwellSettingsMenu,
   type OzwellSettingsMenuProps,
-  type OzwellSettingToggle,
 } from './HeyOzwell/OzwellSettingsMenu';
 export {
   useHeyOzwell,

@@ -18,11 +18,10 @@ const meta: Meta = {
           'Composition of the voice primitives — wake-word + on-device speaker verify + on-device ' +
           'dictation + AIChat. Say **“hey ozwell”** to start dictating, **“ozwell I’m done”** to send. ' +
           'One shared mic. **Configuration is props-first** — the **Controls panel below is a live props ' +
-          'editor** (doctor-only gate, transcription mode, auto-dictate), which is exactly how a host ' +
-          'configures it when it mounts the component. **Transcribe on server** records the clip and ' +
-          'POSTs it to the server ASR model instead of transcribing on-device. Turn on **Built-in ' +
-          'settings menu** to also get the runtime octopus menu (long-press for those toggles + *Your ' +
-          'voice* enrollment) — off by default, since the runtime control UX is the host’s call.',
+          'editor** (doctor-only gate, transcription mode, conversation mode, auto-dictate). These are ' +
+          'deployment config the host sets at mount, not end-user controls, so they’re NOT in the octopus ' +
+          'menu. **Long-press / right-click the octopus** opens the end-user settings menu — *Your voice* ' +
+          '(enrollment) + a read-only *Models & versions* readout — the same behavior as the drop-in.',
       },
     },
   },
@@ -40,8 +39,6 @@ interface HandsFreeArgs {
   liveTranscript: boolean;
   /** Diarize the clip on "done" and send a speaker-labeled transcript (who said what). */
   conversationMode: boolean;
-  /** Opt in to the runtime octopus menu (toggles + Your-voice enrollment). Off by default. */
-  showSettingsMenu: boolean;
 }
 
 /** Say "hey ozwell" to dictate, "ozwell I'm done" to send. Use the Controls panel to configure it. */
@@ -52,7 +49,6 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
     autoDictateOnWake: true,
     liveTranscript: false,
     conversationMode: false,
-    showSettingsMenu: false,
   },
   argTypes: {
     requireDoctor: {
@@ -88,13 +84,6 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
         'On “done”, diarize the clip and send a speaker-labeled transcript ("Dr. Jane: … / Patient: …") ' +
         'so the assistant knows who said what in a multi-person room. On-device; overrides server transcription.',
     },
-    showSettingsMenu: {
-      name: 'Built-in settings menu',
-      control: 'boolean',
-      description:
-        'Opt in to the runtime octopus menu (long-press for the toggles above + Your-voice enrollment, ' +
-        'left-click to turn Ozwell off/on). Off by default — the host owns the runtime control UX.',
-    },
   },
   render: (args) => (
     <HandsFreeChat
@@ -105,7 +94,6 @@ export const HandsFree: StoryObj<HandsFreeArgs> = {
       autoDictateOnWake={args.autoDictateOnWake}
       liveTranscript={args.liveTranscript}
       conversationMode={args.conversationMode}
-      showSettingsMenu={args.showSettingsMenu}
     />
   ),
 };

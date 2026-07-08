@@ -6,19 +6,19 @@
  * inline AIChat with the octopus in its header and the composer's mic button wired to the same
  * shared-stream dictation.
  *
- * Configuration is **props-first**: the host sets `requireDoctor`, `transcription`, `liveTranscript`,
- * `autoDictateOnWake` when it mounts the component (this is what the Storybook Controls panel edits —
- * those knobs are just a live props editor). How an end-user flips them at *runtime* is the host's
- * call, so the built-in long-press settings menu is **opt-in** via `showSettingsMenu` (off by default).
- * With it off, the octopus is a plain listening indicator and the host owns any settings UI — every
- * piece of state is also available from `useHeyOzwell` if they'd rather wire their own chrome.
+ * Configuration is **props-first**: `requireDoctor`, `transcription`, `liveTranscript`, `conversationMode`
+ * and `autoDictateOnWake` are set by the host at mount (the Storybook Controls panel is just a live props
+ * editor for them). They are deployment config, not clinician-facing runtime toggles, so they are NOT in
+ * the octopus menu. The octopus behaves exactly like the <HeyOzwell> drop-in — click toggles Ozwell
+ * on/off, long-press / right-click opens the end-user settings menu ("Your voice" enrollment + a
+ * read-only "Models & versions" readout).
  */
 import * as React from 'react';
 import { AIChat } from '../AIChat';
 import { RecordButton } from '../../RecordButton';
 import { Modal, ModalHeader, ModalTitle, ModalClose, ModalBody } from '../../Modal';
 import { HeyOzwellToggle } from './HeyOzwellToggle';
-import { OzwellSettingsMenu, type OzwellSettingToggle } from './OzwellSettingsMenu';
+import { OzwellSettingsMenu } from './OzwellSettingsMenu';
 import { VoiceManager } from './VoiceManager';
 import { useHeyOzwell } from './useHeyOzwell';
 import type { AISuggestedAction } from '../types';
@@ -32,27 +32,18 @@ export interface HandsFreeChatProps {
   userName?: string;
   /** Octopus logo source, forwarded to the toggle + the enrollment screen. */
   logoSrc?: string;
-  /** Transcription mode — on-device (default, PHI-safe) or POST the recorded clip to the server ASR
-   *  model. Initial value; the settings menu (if shown) can flip it live. */
+  /** Transcription mode — on-device (default, PHI-safe) or POST the recorded clip to the server ASR model. */
   transcription?: 'browser' | 'server';
-  /** Doctor-only gate — only the enrolled voice(s) act. Default true. Initial value; menu can flip it. */
+  /** Doctor-only gate — only the enrolled voice(s) act. Default true. */
   requireDoctor?: boolean;
-  /** Live caption — fill the message box with recognized words as you dictate (on-device only). Initial value. */
+  /** Live caption — fill the message box with recognized words as you dictate (on-device only). Default false. */
   liveTranscript?: boolean;
   /** Conversation mode — on "done", diarize the clip and send a speaker-labeled transcript ("Dr. Jane: … /
-   *  Patient: …") so the assistant knows who said what in a multi-person room. On-device; slower than plain
-   *  transcription and overrides server transcription. Initial value; menu can flip it. Default false. */
+   *  Patient: …") so the assistant knows who said what in a multi-person room. On-device; overrides server
+   *  transcription. Default false. */
   conversationMode?: boolean;
-  /** Auto-dictate — "hey ozwell" starts dictating hands-free. Default true. Initial value. */
+  /** Auto-dictate — "hey ozwell" starts dictating hands-free. Default true. */
   autoDictateOnWake?: boolean;
-  /**
-   * Opt in to the built-in runtime settings menu: long-press / right-click the octopus for "Your voice"
-   * (enroll / manage, in a modal) + live switches for the gate, live caption, auto-dictate and server
-   * transcription, plus left-click to turn Ozwell off/on. Off by default — how (or whether) an end-user
-   * toggles these at runtime is a product decision that belongs to the host. With it off, the octopus is
-   * a plain listening indicator; wire your own controls via `useHeyOzwell` if you want them elsewhere.
-   */
-  showSettingsMenu?: boolean;
 }
 
 /** Say "hey ozwell" to dictate, "ozwell I'm done" to send — wake + speaker-verify + dictation + AIChat. */
@@ -61,78 +52,25 @@ export function HandsFreeChat({
   suggestions,
   userName,
   logoSrc,
-  transcription: transcriptionProp = 'browser',
-  requireDoctor: requireDoctorProp = true,
-  liveTranscript: liveTranscriptProp = false,
-  conversationMode: conversationModeProp = false,
-  autoDictateOnWake: autoDictateProp = true,
-  showSettingsMenu = false,
+  transcription = 'browser',
+  requireDoctor = true,
+  liveTranscript = false,
+  conversationMode = false,
+  autoDictateOnWake = true,
 }: HandsFreeChatProps) {
-  // Props seed the configuration; the opt-in settings menu flips these at runtime (when shown). These
-  // stay in sync with the props: if the host (or the Storybook Controls panel) changes a prop, the effect
-  // below adopts it — the menu still overrides in between prop changes. So the props remain a live source
-  // of truth, not a mount-only snapshot.
-  const [transcription, setTranscription] = React.useState(transcriptionProp);
-  const [requireDoctor, setRequireDoctor] = React.useState(requireDoctorProp);
-  const [autoDictate, setAutoDictate] = React.useState(autoDictateProp);
-  const [live, setLive] = React.useState(liveTranscriptProp);
-  const [conversation, setConversation] = React.useState(conversationModeProp);
-  const [voicesOpen, setVoicesOpen] = React.useState(false);
-  React.useEffect(() => setTranscription(transcriptionProp), [transcriptionProp]);
-  React.useEffect(() => setRequireDoctor(requireDoctorProp), [requireDoctorProp]);
-  React.useEffect(() => setAutoDictate(autoDictateProp), [autoDictateProp]);
-  React.useEffect(() => setLive(liveTranscriptProp), [liveTranscriptProp]);
-  React.useEffect(() => setConversation(conversationModeProp), [conversationModeProp]);
-
+  // Props flow straight through — the host (or the Storybook Controls panel) drives them live; there's no
+  // runtime toggle UI for them, since they're deployment config, not end-user controls.
   const oz = useHeyOzwell({
     autoStart: true, // always listening while mounted
-    autoDictateOnWake: autoDictate,
+    autoDictateOnWake,
     requireDoctor,
     transcription,
-    liveTranscript: live,
-    conversationMode: conversation,
+    liveTranscript,
+    conversationMode,
   });
   const { phase, ready, error, locked } = oz;
 
-  const toggles: OzwellSettingToggle[] = [
-    {
-      id: 'doctor',
-      label: 'Your voice only',
-      sub: 'Only enrolled voices trigger Ozwell',
-      checked: requireDoctor,
-      onChange: setRequireDoctor,
-    },
-    {
-      id: 'conversation',
-      label: 'Conversation mode',
-      sub: 'Label who said what — send a speaker-tagged transcript for a multi-person room',
-      checked: conversation,
-      onChange: setConversation,
-    },
-    {
-      id: 'server',
-      label: 'Transcribe on server',
-      sub: 'Send the audio to the server ASR model instead of on-device',
-      checked: transcription === 'server',
-      disabled: conversation, // conversation mode diarizes on-device, overriding server transcription
-      onChange: (c) => setTranscription(c ? 'server' : 'browser'),
-    },
-    {
-      id: 'live',
-      label: 'Live caption',
-      sub: 'Fill the box with words as you speak (on-device dictation only)',
-      checked: live,
-      disabled: transcription === 'server', // preview runs on the on-device model
-      onChange: setLive,
-    },
-    {
-      id: 'auto',
-      label: 'Auto-dictate on “hey ozwell”',
-      sub: 'Wake starts dictation hands-free (off: it just focuses the chat)',
-      checked: autoDictate,
-      onChange: setAutoDictate,
-    },
-  ];
+  const [voicesOpen, setVoicesOpen] = React.useState(false);
 
   // Composer placeholder: our own listening/off banner while idle; the hook's placeholder while
   // dictating/transcribing (it carries the live caption text + server-vs-device wording).
@@ -146,37 +84,21 @@ export function HandsFreeChat({
           : '… loading models'
       : oz.chatProps.inputPlaceholder;
 
-  // The octopus. With the menu on it's the interactive trigger (on/off + long-press settings); with it
-  // off it's a plain listening indicator (pulses with room volume, shows model loading) — no controls.
-  const octopus = showSettingsMenu ? (
-    <OzwellSettingsMenu
-      trigger={<HeyOzwellToggle {...oz.toggleProps} logoSrc={logoSrc} size={34} />}
-      open={oz.settingsOpen}
-      onOpenChange={oz.setSettingsOpen}
-      modelStatus={oz.modelStatus}
-      onManageVoices={() => setVoicesOpen(true)}
-      toggles={toggles}
-    />
-  ) : (
-    <HeyOzwellToggle
-      active={oz.toggleProps.active}
-      level={oz.toggleProps.level}
-      loading={oz.toggleProps.loading}
-      loadProgress={oz.toggleProps.loadProgress}
-      warmActive={oz.toggleProps.warmActive}
-      warmProgress={oz.toggleProps.warmProgress}
-      loadLabel={oz.toggleProps.loadLabel}
-      logoSrc={logoSrc}
-      size={34}
-    />
-  );
-
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
-        {/* Octopus in the chat header's top-right. AIChat has no header-action slot, so it's a
-            positioned overlay. */}
-        <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>{octopus}</div>
+        {/* Octopus in the chat header's top-right — same behavior as the <HeyOzwell> drop-in: click toggles
+            on/off, long-press / right-click opens the end-user settings menu. AIChat has no header-action
+            slot, so it's a positioned overlay. */}
+        <div style={{ position: 'absolute', top: 11, right: 16, zIndex: 10 }}>
+          <OzwellSettingsMenu
+            trigger={<HeyOzwellToggle {...oz.toggleProps} logoSrc={logoSrc} size={34} />}
+            open={oz.settingsOpen}
+            onOpenChange={oz.setSettingsOpen}
+            modelStatus={oz.modelStatus}
+            onManageVoices={() => setVoicesOpen(true)}
+          />
+        </div>
         <AIChat
           messages={oz.messages}
           height="100%"
@@ -214,19 +136,17 @@ export function HandsFreeChat({
         />
       </div>
 
-      {/* "Your voice" — the central enrollment / manage page, opened from the settings menu (so only when
-          that's shown). Set up, add, rename, remove authorized voices. */}
-      {showSettingsMenu && (
-        <Modal open={voicesOpen} onOpenChange={setVoicesOpen} size="lg">
-          <ModalHeader>
-            <ModalTitle>Your voice</ModalTitle>
-            <ModalClose />
-          </ModalHeader>
-          <ModalBody>
-            <VoiceManager logoSrc={logoSrc} />
-          </ModalBody>
-        </Modal>
-      )}
+      {/* "Your voice" — the central enrollment / manage page, opened from the settings menu. Set up, add,
+          rename, remove authorized voices. */}
+      <Modal open={voicesOpen} onOpenChange={setVoicesOpen} size="lg">
+        <ModalHeader>
+          <ModalTitle>Your voice</ModalTitle>
+          <ModalClose />
+        </ModalHeader>
+        <ModalBody>
+          <VoiceManager logoSrc={logoSrc} />
+        </ModalBody>
+      </Modal>
     </div>
   );
 }

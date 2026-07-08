@@ -16,19 +16,7 @@ import {
   type DropdownProps,
 } from '../../Dropdown';
 import { ModelInfoList } from './ModelInfoList';
-import { switchTrackVariants, switchThumbVariants } from '../../Switch';
 import type { ModelStatus, ModelStatusKey } from './modelManifest';
-
-/** A live on/off setting rendered as a switch row inside the menu (e.g. doctor-only, live caption,
- *  server transcription). Flipping it keeps the menu open — it's a persistent control, not a one-shot action. */
-export interface OzwellSettingToggle {
-  id: string;
-  label: string;
-  sub?: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled?: boolean;
-}
 
 export interface OzwellSettingsMenuProps {
   /** The trigger element — usually the <HeyOzwellToggle>. The Dropdown anchors the menu to it. */
@@ -41,9 +29,6 @@ export interface OzwellSettingsMenuProps {
   modelStatus?: Partial<Record<ModelStatusKey, ModelStatus>>;
   /** Open the central voice page (set up / add / rename / remove authorized voices). Item hidden when omitted. */
   onManageVoices?: () => void;
-  /** Live on/off settings rendered as switch rows (doctor-only, live caption, server transcription, …).
-   *  Omit for a plain menu (the <HeyOzwell> drop-in does). */
-  toggles?: OzwellSettingToggle[];
 }
 
 /** A two-line label (title + muted sub) shared by the items. */
@@ -72,7 +57,6 @@ export function OzwellSettingsMenu({
   onOpenChange,
   modelStatus,
   onManageVoices,
-  toggles,
 }: OzwellSettingsMenuProps) {
   const [modelsOpen, setModelsOpen] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -113,34 +97,6 @@ export function OzwellSettingsMenu({
           <ItemLabel label="Your voice" sub="Set up, add, or manage authorized voices" />
         </DropdownItem>
       )}
-      {/* Live settings — switch rows (doctor-only, live caption, server transcription, …). The whole row
-          is the toggle target (role=menuitemcheckbox); the Switch is decorative so there's one click
-          target and no double-fire. Flipping does NOT close the menu — these are persistent controls. */}
-      {toggles?.map((t) => (
-        <button
-          key={t.id}
-          type="button"
-          role="menuitemcheckbox"
-          aria-checked={t.checked}
-          disabled={t.disabled}
-          onClick={() => t.onChange(!t.checked)}
-          className={cn(itemClasses, t.disabled && 'cursor-not-allowed opacity-50')}
-        >
-          <ItemLabel label={t.label} sub={t.sub ?? ''} />
-          {/* Decorative switch (the whole row IS the button, so this can't be one too) — rendered from the
-              shared Switch variants so it matches the design system exactly. */}
-          <span
-            aria-hidden="true"
-            data-state={t.checked ? 'checked' : 'unchecked'}
-            className={cn(switchTrackVariants({ size: 'sm' }), 'items-center')}
-          >
-            <span
-              data-state={t.checked ? 'checked' : 'unchecked'}
-              className={switchThumbVariants({ size: 'sm' })}
-            />
-          </span>
-        </button>
-      ))}
       {/* Models & versions — collapsible readout of what's running, per model (Doug). A custom row
           (not DropdownItem) so the chevron can right-align; kept open on click so expanding it
           doesn't dismiss the whole menu. */}
