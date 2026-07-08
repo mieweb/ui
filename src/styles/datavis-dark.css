@@ -205,10 +205,12 @@
  * can scope these overrides to the graph without leaking into the page.
  * ---------------------------------------------------------------------- */
 
-/* Outer card container */
+/* Outer container — mirrors the grid's `.wcdv-grid` background so the
+ * raised `.wcdv-title-bar` (styled by the global rule above as
+ * `--color-card`) reads with the same header/body contrast. */
 .dark .wcdv-graph section,
 [data-theme='dark'] .wcdv-graph section {
-  background-color: var(--color-card) !important;
+  background-color: var(--color-background) !important;
   border-color: var(--color-border) !important;
   color: var(--color-foreground) !important;
 }
@@ -219,12 +221,9 @@
   border-color: var(--color-border) !important;
 }
 
-/* Title bar background — GraphView tags this row with the same
- * `.wcdv-title-bar` marker class the grid uses. */
-.dark .wcdv-graph .wcdv-title-bar,
-[data-theme='dark'] .wcdv-graph .wcdv-title-bar {
-  background-color: var(--color-muted) !important;
-}
+/* Note: the graph title bar carries the `.wcdv-title-bar` marker class,
+ * so it inherits the global dark-mode rule (`--color-card`) — no
+ * graph-specific override needed. */
 
 /* Text: title, control labels, stacked toggle, empty state */
 .dark .wcdv-graph .text-gray-800,
@@ -271,9 +270,9 @@
   color: var(--color-foreground) !important;
 }
 
+/* Only the label follows the theme; each item keeps its inline
+ * per-series color so tooltip rows stay mapped to their series. */
 .dark .wcdv-graph .recharts-tooltip-label,
-.dark .wcdv-graph .recharts-tooltip-item,
-[data-theme='dark'] .wcdv-graph .recharts-tooltip-label,
-[data-theme='dark'] .wcdv-graph .recharts-tooltip-item {
+[data-theme='dark'] .wcdv-graph .recharts-tooltip-label {
   color: var(--color-foreground) !important;
 }
