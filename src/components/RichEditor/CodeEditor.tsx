@@ -24,6 +24,26 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   onChangeRef.current = onChange;
 
   useEffect(() => {
+    const root = editorRef.current;
+    if (!root) return;
+
+    const applySelectLabel = () => {
+      root
+        .querySelectorAll('select.codejar-select')
+        .forEach((element) => {
+          if (!element.getAttribute('aria-label')) {
+            element.setAttribute('aria-label', 'Code editor language');
+          }
+        });
+    };
+
+    applySelectLabel();
+    const observer = new MutationObserver(() => applySelectLabel());
+    observer.observe(root, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     if (!editorRef.current) return;
 
     // Initialize the editor
