@@ -84,6 +84,15 @@ export function useDragReorder({
       if (!enabled) return {};
       return {
         draggable: true,
+        // WebKit (iPadOS Safari, incl. remote-pointer sessions) starts a text
+        // selection instead of a drag when the drag source contains selectable
+        // text — suppress selection and explicitly mark the row as the drag
+        // element so press-drag reliably initiates drag-and-drop.
+        style: {
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitUserDrag: 'element',
+        } as React.CSSProperties,
         onDragStart: (e) => {
           e.dataTransfer.effectAllowed = 'move';
           e.dataTransfer.setData('text/plain', id);
