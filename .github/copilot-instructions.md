@@ -48,9 +48,9 @@
 - If the dev server isn't running, start it once; don't kill-and-restart on every edit
 
 ## HTML & CSS Guidelines
-- **Semantic Naming**: Every `<div>` and other structural element must use a meaningful, semantic class name that clearly indicates its purpose or role within the layout.
-- **CSS Simplicity**: Styles should avoid global resets or overrides that affect unrelated components or default browser behavior. Keep changes scoped and minimal.
-- **SASS-First Approach**: All styles should be written in SASS (SCSS) whenever possible. Each component should have its own dedicated SASS file to promote modularity and maintainability.
+- **Tailwind-first**: Prefer Tailwind utility classes and existing design tokens for component styling.
+- **Scoped overrides**: Avoid global resets/overrides; keep styles component-scoped and minimal.
+- **Tailwind consumers**: If components emit new class strings, update `miewebUISafelist` (TW3) or document Tailwind 4 `@source` usage.
 
 ## Accessibility (ARIA Labeling)
 
